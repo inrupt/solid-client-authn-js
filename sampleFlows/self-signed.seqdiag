@@ -1,0 +1,49 @@
+title: Self Issued Flow
+
+note left of RP: AUTHENTICATION
+note over RP: 1. Alice uses the Decentphotos App
+note over OP: 2. Alice has a self-signed app installed 
+note over OP: It knows Alice's private key
+note over Alice's WebID: 3. issuer: selfissued.me
+note over Alice's WebID: Knows Alice's pub cert
+note over RP: 4. Alice selects her OP or WebID
+RP->Alice's WebID: 4.1 Gets WebID
+Alice's WebID->RP:
+RP->OP: 5. Requests OP configuration
+OP->RP:
+RP->OP: 6. Requests OP JWKS
+OP->RP:
+note over RP: 7. Generates Private/Public key pair
+note over RP: 8. Generates PKCE nonce
+note over RP: 9. Saves both to local storage
+RP->OP: 10. Authorization Request
+OP->Decentphotos WebID: 11. Retrieves WebID
+Decentphotos WebID->OP:
+note over OP: 11. Validates redirect protocol with WebID
+note over OP: 12. Gets Alice's consent
+note over OP: 13. Generates an access_code
+OP->RP: 12. Sends code to redirect protocol
+RP->OP: 13. Token requst with code and nonce proof
+note over OP: 14. Validates nonce proof
+OP->RP: 15. Sends access_token
+
+note left of RP: SENDING REQUEST
+note over RP: 1. Creates a pop_token
+RP->Bob's Pod (RS): 2. Request sent
+note over Bob's Pod (RS): 3. Checks pop_token Audience
+note over Bob's Pod (RS): 4. Checks client signature
+Bob's Pod (RS)->Alice's WebID: 5. Retrieves Profile
+Alice's WebID->Bob's Pod (RS):
+note over Bob's Pod (RS): 6. Checks that access_token cert matches WebID
+Bob's Pod (RS)->OP: 7. Retrieves OP configuration
+OP->Bob's Pod (RS):
+Bob's Pod (RS)->OP: 8. Requests JWKS
+OP->Bob's Pod (RS):
+note over Bob's Pod (RS): 9. Performs Authentication
+note over Bob's Pod (RS): 10. Performs Authorization
+Bob's Pod (RS)->RP: 11. Returns Result
+
+note left of RP: REFRESH TOKEN
+Bob's Pod (RS)->RP: 1. 401: token expired
+RP->OP: 2. Refresh token auth request
+OP->RP: 3. Return updated token

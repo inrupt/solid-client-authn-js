@@ -1,0 +1,43 @@
+title: Legacy Implicit Flow
+
+note left of RP: AUTHORIZATION
+note over RP: 1. Alice navigates to decentphotos.example
+note over RP: 2. Alice selets her OP or WebID
+RP->Alice's Pod (RS): 2.1 Retrieve Profile
+Alice's Pod (RS)->RP:
+RP->Alice's OP: 3. Requests OP configuration
+Alice's OP->RP: 4. Returns OP configuration
+RP->Alice's OP: 5. Requests OP JWKS
+Alice's OP->RP: 6. Returns OP JWKS
+note over RP: 7. Generates Private/Public key pair
+note over RP: 8. Saves Private/Public key pair to local storage
+RP->Alice's OP: 9. Authorization Request
+Alice's OP->Decentphotos WebID: 10. Retrieves WebID
+Decentphotos WebID->Alice's OP:
+note over Alice's OP: 11. Validates redirect_url with WebID
+note over Alice's OP: 12. Gets Alice's consent
+note over Alice's OP: 13. Generates an access_token
+Alice's OP->RP: 12. Returns to redirect_url
+
+note left of RP: SENDING REQUEST
+note over RP: 1. Creates a pop_token
+RP->Bob's Pod (RS): 2. Request sent
+note over Bob's Pod (RS): 3. Checks pop_token Audience
+note over Bob's Pod (RS): 4. Checks client signature
+Bob's Pod (RS)->Alice's Pod (RS): 5. Retrieves Profile
+Alice's Pod (RS)->Bob's Pod (RS):
+note over Bob's Pod (RS): 6. Checks Issuer
+Bob's Pod (RS)->Alice's OP: 7. Retrieves OP configuration
+Alice's OP->Bob's Pod (RS):
+Bob's Pod (RS)->Alice's OP: 8. Requests JWKS
+Alice's OP->Bob's Pod (RS):
+note over Bob's Pod (RS): 9. Performs Authentication
+note over Bob's Pod (RS): 10. Performs Authorization
+Bob's Pod (RS)->RP: 11. Returns Result
+
+note left of RP: SILENT REFRESH
+Bob's Pod (RS)->RP: 1. 401: token expired
+note over RP: 2. Opens iFrame to OP
+RP->Alice's OP: 3. Authorization Request with prompt=none
+Alice's OP->RP: 4. Return updated token
+
