@@ -1,3 +1,18 @@
-const meaningOfLife = 42;
+import 'reflect-metadata'
+import { container } from 'tsyringe'
 
-export default meaningOfLife;
+function createDependencyGraph () {
+
+}
+
+export default function authenticator () {
+  
+}
+
+export function authenticatedFetch () {
+
+}
+
+export function login () {
+
+}
