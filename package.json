@@ -1,9 +1,15 @@
 {
-  "name": "root",
+  "name": "solid-authenticator-root",
   "private": true,
+  "scripts": {
+    "start": "lerna run start",
+    "bootstrap": "lerna bootstrap --hoist",
+    "clean": "lerna run clean",
+    "build": "lerna run build",
+    "pub": "lerna publish"
+  },
   "devDependencies": {
-    "@types/node": "^12.12.17",
-    "lerna": "^3.19.0",
-    "typescript": "^3.7.3"
+    "lerna": "~3.14.0",
+    "typescript": "~3.4.5"
   }
 }

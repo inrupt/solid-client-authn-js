@@ -1,27 +1,18 @@
 {
   "name": "@solid/authenticator-core",
   "version": "0.0.0",
-  "description": "Core library for solid authenticators",
-  "author": "jaxoncreed <jaxoncreed@gmail.com>",
-  "homepage": "https://github.com/inrupt/solid-auth-client-rewrite#readme",
-  "license": "MIT",
-  "main": "lib/authenticator-core.js",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
+  "main": "dist/index",
+  "types": "dist/index",
   "files": [
-    "lib"
+    "dist"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/inrupt/solid-auth-client-rewrite.git"
-  },
   "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "build": "npm run clean && npm run compile",
+    "clean": "rm -rf ./dist",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build"
   },
-  "bugs": {
-    "url": "https://github.com/inrupt/solid-auth-client-rewrite/issues"
+  "devDependencies": {
+    "typescript": "~3.4.5"
   }
 }
