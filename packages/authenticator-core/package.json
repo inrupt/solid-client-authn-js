@@ -10,9 +10,13 @@
     "build": "npm run clean && npm run compile",
     "clean": "rm -rf ./dist",
     "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "lint": "tslint -t stylish --project \"tsconfig.json\""
   },
   "devDependencies": {
     "typescript": "~3.4.5"
+  },
+  "dependencies": {
+    "tsyringe": "^4.0.1"
   }
 }
