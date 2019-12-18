@@ -1,12 +1,10 @@
 import 'reflect-metadata'
 import { container } from 'tsyringe'
+import Authenticator from './authenticator/Authenticator'
 
-function createDependencyGraph () {
-  // TODO: Implement
-}
-
-export default function authenticator () {
-  // TODO: implement
+export default function authenticator (): Authenticator {
+  const authenticatorContainer = container.createChildContainer()
+  return authenticatorContainer.resolve(Authenticator)
 }
 
 export function authenticatedFetch () {
