@@ -1,4 +1,6 @@
+import IResponseInfo from './IResponseInfo'
+import IRequestInfo from './IRequestInfo'
+import IHandleable from '../util/handlerPattern/IHandleable'
 
-export default interface IAuthenticatedFetcher {
-
-}
+type IAuthenticatedFetcher = IHandleable<[IRequestInfo], IResponseInfo>
+export default IAuthenticatedFetcher
