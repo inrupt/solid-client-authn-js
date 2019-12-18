@@ -5,25 +5,30 @@ import IStorage from './IStorage'
 import IRequestInfo from '../authenticatedFetch/IRequestInfo'
 import IResponseInfo from '../authenticatedFetch/IResponseInfo'
 import IAuthenticatedFetcher from '../authenticatedFetch/IAuthenticatedFetcher'
+import { URL } from 'url'
+import ILoginHandler from '../login/ILoginHandler'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
 
   constructor (
     @inject('storage') private storage: IStorage,
-    @inject('authenticatedFetcher') private authenticatedFetcher: IAuthenticatedFetcher
+    @inject('authenticatedFetcher') private authenticatedFetcher: IAuthenticatedFetcher,
+    @inject('loginHandler') private loginHandler: ILoginHandler
   ) {
     super()
   }
 
-  trackSession (callback: (session?: SolidSession) => any): void {
+  trackSession (callback: (session?: ISolidSession) => any): void {
     this.on('session', callback)
   }
 
-  fetch (requestInfo: IRequestInfo): IResponseInfo {
+  async fetch (requestInfo: IRequestInfo): Promise<IResponseInfo> {
     const authToken = this.storage.get('authToken')
-    this.authenticatedFetcher.fetch(authToken)
+    return this.authenticatedFetcher.handle(authToken)
   }
 
-  getDPoPTokens
+  async login (identityProvider: string | URL, options: Object): Promise<void> {
+    await this.loginHandler.handle(identityProvider)
+  }
 }
