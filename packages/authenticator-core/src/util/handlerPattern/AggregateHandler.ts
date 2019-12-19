@@ -2,8 +2,7 @@ import IHandleable from './IHandleable'
 
 export default class AggregateHandler<P extends Array<any>, R> implements IHandleable<P, R> {
   constructor (
-    private handleables: IHandleable<P, R>[],
-    private defaultHandler?: IHandleable<P, R>
+    private handleables: IHandleable<P, R>[]
   ) {}
 
   /**
@@ -18,13 +17,6 @@ export default class AggregateHandler<P extends Array<any>, R> implements IHandl
       this.handleables.forEach(async (handleable: IHandleable<P, R>, index: number) => {
         resolvedValues[index] = await handleable.canHandle(...params)
         numberResolved++
-
-        // If all resolved then return default
-        if (numberResolved >= this.handleables.length) {
-          resolve(this.defaultHandler || null)
-        }
-
-        // See if there is a resolved true handler in the right order
         let curResolvedValueIndex = 0
         while (
           resolvedValues[curResolvedValueIndex] !== null ||
