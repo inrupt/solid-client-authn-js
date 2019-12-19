@@ -8,12 +8,14 @@
   ],
   "scripts": {
     "build": "npm run clean && npm run compile",
+    "build-watch": "tsc-watch --preserveWatchOutput -p tsconfig.build.json",
     "clean": "rm -rf ./dist",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
     "lint": "tslint -t stylish --project \"tsconfig.json\""
   },
   "devDependencies": {
+    "tsc-watch": "^4.0.0",
     "typescript": "^3.6.4"
   },
   "dependencies": {

@@ -1,10 +1,11 @@
 import AuthenticatorCore from '@solid/authenticator-core'
-
-console.log(AuthenticatorCore)
+import InMemoryStorage from './storage/InMemoryStorage'
 
 export default function authenticator () {
   // TODO implement
-  return AuthenticatorCore()
+  return AuthenticatorCore({
+    storage: new InMemoryStorage()
+  })
 }
 
 export function authenticatedFetch () {
