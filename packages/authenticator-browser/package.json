@@ -1,0 +1,33 @@
+{
+  "name": "@solid/authenticator-browser",
+  "version": "0.0.0",
+  "main": "dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "npm run clean && npm run compile",
+    "clean": "rm -rf ./dist",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build",
+    "test": "npm run lint && npm run jest",
+    "lint": "tslint -t stylish --project \"tsconfig.json\"",
+    "jest": "jest --coverage --verbose",
+    "jest-watch": "jest --watch --coverage"
+  },
+  "dependencies": {
+    "@solid/authenticator-core": "^0.0.0",
+    "tsyringe": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "jest": "^24.9.0",
+    "testcafe": "^1.7.1",
+    "ts-jest": "^24.2.0",
+    "tslint": "^5.20.0",
+    "tslint-config-standard": "^8.0.1",
+    "typescript": "^3.6.4"
+  }
+}
