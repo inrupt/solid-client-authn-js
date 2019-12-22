@@ -4,7 +4,7 @@ import IResponseInfo from '../IResponseInfo'
 
 export default class DPoPAuthenticatedFetcher implements IAuthenticatedFetcher {
   async canHandle (requestInfo: IRequestInfo): Promise<boolean> {
-    return false
+    return true
   }
 
   async handle (requestInfo: IRequestInfo): Promise<IResponseInfo> {
