@@ -2,6 +2,7 @@
   "name": "@solid/authenticator-browser",
   "version": "0.0.0",
   "main": "dist/index",
+  "browser": "browserDist/index",
   "types": "dist/index",
   "files": [
     "dist"
@@ -11,6 +12,7 @@
     "browser-test": "",
     "browser-test-watch": "",
     "build": "npm run clean && npm run compile",
+    "bundle": "webpack",
     "clean": "rm -rf ./dist",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
@@ -26,13 +28,19 @@
   "devDependencies": {
     "@types/express": "^4.17.2",
     "@types/jest": "^24.0.23",
+    "awesome-typescript-loader": "^5.2.1",
+    "declaration-bundler-webpack-plugin": "^1.0.3",
     "express": "^4.17.1",
     "jest": "^24.9.0",
     "testcafe": "^1.7.1",
     "ts-jest": "^24.2.0",
+    "ts-loader": "^6.2.1",
     "ts-node": "^8.5.4",
     "tslint": "^5.20.0",
     "tslint-config-standard": "^8.0.1",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "typescript-bundle": "^1.0.16",
+    "webpack": "^4.41.4",
+    "webpack-cli": "^3.3.10"
   }
 }
