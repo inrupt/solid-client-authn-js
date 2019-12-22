@@ -11,24 +11,34 @@ export default class AggregateHandler<P extends Array<any>, R> implements IHandl
    * @param params Paramerters to feed to the handler
    */
   private async getProperHandler (params: P): Promise<IHandleable<P, R> | null> {
-    return new Promise<IHandleable<P, R> | null>((resolve, reject) => {
-      const resolvedValues: Array<boolean | null> = Array(this.handleables.length).map(() => null)
-      let numberResolved = 0
-      this.handleables.forEach(async (handleable: IHandleable<P, R>, index: number) => {
-        resolvedValues[index] = await handleable.canHandle(...params)
-        numberResolved++
-        let curResolvedValueIndex = 0
-        while (
-          resolvedValues[curResolvedValueIndex] !== null ||
-          resolvedValues[curResolvedValueIndex] !== undefined
-        ) {
-          if (resolvedValues[curResolvedValueIndex]) {
-            resolve(this.handleables[curResolvedValueIndex])
-          }
-          curResolvedValueIndex++
-        }
-      })
-    })
+    // TODO : This function doesn't currently operate as described. Tests need to be written
+
+    // return new Promise<IHandleable<P, R> | null>((resolve, reject) => {
+    //  const resolvedValues: Array<boolean | null> = Array(this.handleables.length).map(() => null)
+    //   let numberResolved = 0
+    //   this.handleables.forEach(async (handleable: IHandleable<P, R>, index: number) => {
+    //     resolvedValues[index] = await handleable.canHandle(...params)
+    //     numberResolved++
+    //     let curResolvedValueIndex = 0
+    //     while (
+    //       resolvedValues[curResolvedValueIndex] !== null ||
+    //       resolvedValues[curResolvedValueIndex] !== undefined
+    //     ) {
+    //       if (resolvedValues[curResolvedValueIndex]) {
+    //         resolve(this.handleables[curResolvedValueIndex])
+    //       }
+    //       curResolvedValueIndex++
+    //     }
+    //   })
+    // })
+
+    let rightOne: IHandleable<P, R> | null = null
+    await Promise.all(this.handleables.map(async (handleable) => {
+      if (await handleable.canHandle(...params)) {
+        rightOne = handleable
+      }
+    }))
+    return rightOne
   }
 
   async canHandle (...params: P): Promise<boolean> {
@@ -38,7 +48,7 @@ export default class AggregateHandler<P extends Array<any>, R> implements IHandl
   async handle (...params: P): Promise<R> {
     const handler = await this.getProperHandler(params)
     if (handler) {
-      return this.handle(...params)
+      return handler.handle(...params)
     } else {
       // TODO: more specific error naming
       throw new Error('Cannot Handle')
