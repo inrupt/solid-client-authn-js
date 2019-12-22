@@ -7,7 +7,9 @@
     "dist"
   ],
   "scripts": {
-    "start": "node dist/index.js",
+    "browser-dev": "ts-node ./test/testServer/server.ts --project ./test/testServer/tsconfig.json",
+    "browser-test": "",
+    "browser-test-watch": "",
     "build": "npm run clean && npm run compile",
     "clean": "rm -rf ./dist",
     "compile": "tsc -p tsconfig.build.json",
@@ -22,10 +24,13 @@
     "tsyringe": "^4.0.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.2",
     "@types/jest": "^24.0.23",
+    "express": "^4.17.1",
     "jest": "^24.9.0",
     "testcafe": "^1.7.1",
     "ts-jest": "^24.2.0",
+    "ts-node": "^8.5.4",
     "tslint": "^5.20.0",
     "tslint-config-standard": "^8.0.1",
     "typescript": "^3.6.4"
