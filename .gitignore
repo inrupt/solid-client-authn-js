@@ -10,6 +10,7 @@ yarn-error.log*
 
 # TypeScript build result
 dist
+browserDist
 
 # Runtime data
 pids
