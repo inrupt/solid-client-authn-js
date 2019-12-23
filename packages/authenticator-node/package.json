@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "clean": "rm -rf ./dist",
-    "build": "npm run clean && npm run compile",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "test": "npm run lint && npm run node-unit-test && npm run node-acceptance-test",
     "unit-test": "npm run node-unit-test",
