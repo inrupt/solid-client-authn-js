@@ -7,15 +7,16 @@
     "dist"
   ],
   "scripts": {
-    "start": "node dist/index.js",
-    "build": "npm run clean && npm run compile",
     "clean": "rm -rf ./dist",
-    "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build",
-    "test": "npm run lint && npm run jest",
+    "build": "npm run clean && npm run compile",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
-    "jest": "jest --coverage --verbose",
-    "jest-watch": "jest --watch --coverage"
+    "test": "npm run lint && npm run node-unit-test && npm run node-acceptance-test",
+    "unit-test": "npm run node-unit-test",
+    "acceptance-test": "npm run node-acceptance-test",
+    "node-test": "npm run test",
+    "node-unit-test": "jest --coverage --verbose -c jest.unit.config.js",
+    "node-acceptance-test": "jest --coverage --verbose -c jest.acceptance.config.js",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@solid/authenticator-core": "^0.0.0",

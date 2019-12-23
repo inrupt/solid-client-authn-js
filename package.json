@@ -9,6 +9,7 @@
     "lint": "lerna run lint",
     "test": "lerna run build-core && lerna run test",
     "unit-test": "lerna run build-core && lerna run unit-test",
+    "acceptance-test": "lerna run build-core && lerna run acceptance-test",
     "core-test": "lerna run core-test",
     "core-unit-test": "lerna run core-unit-test",
     "browser-dev": "",
