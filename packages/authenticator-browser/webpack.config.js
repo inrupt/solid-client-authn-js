@@ -1,28 +1,8 @@
-const path = require('path');
+const webpackMerge = require('webpack-merge')
 
-module.exports = {
-  entry: './src/index.browser.ts',
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: [
-          {
-            loader: 'ts-loader',
-            options: {
-              configFile: "tsconfig.browser.json"
-            }
-          }
-        ],
-        exclude: /node_modules/
-      },
-    ],
-  },
-  resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ],
-  },
-  output: {
-    filename: 'solid-authenticator.bundle.js',
-    path: path.resolve(__dirname, 'browserDist'),
-  }
-};
+const commonConfig = require('./webpack.common.js')
+
+module.exports = ({ env, addon }) => {
+  const envConfig = require(`./webpack.${env}.js`);
+  return webpackMerge(commonConfig, envConfig)
+}

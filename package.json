@@ -2,12 +2,23 @@
   "name": "solid-authenticator-root",
   "private": true,
   "scripts": {
-    "start": "lerna run start",
     "bootstrap": "lerna bootstrap --hoist",
     "clean": "lerna run clean",
     "build": "lerna run build",
     "pub": "lerna publish",
-    "lint": "lerna run lint"
+    "lint": "lerna run lint",
+    "test": "lerna run build-core && lerna run test",
+    "unit-test": "lerna run build-core && lerna run unit-test",
+    "core-test": "lerna run core-test",
+    "core-unit-test": "lerna run core-unit-test",
+    "browser-dev": "",
+    "browser-test": "",
+    "browser-unit-test": "",
+    "browser-acceptance-test": "",
+    "node-test": "",
+    "node-unit-test": "",
+    "node-acceptance-test": ""
+
   },
   "devDependencies": {
     "@types/jest": "^24.0.23",
