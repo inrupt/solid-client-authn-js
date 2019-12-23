@@ -7,15 +7,23 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run clean && npm run compile",
-    "build-watch": "tsc-watch --preserveWatchOutput -p tsconfig.build.json",
     "clean": "rm -rf ./dist",
-    "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build",
-    "lint": "tslint -t stylish --project \"tsconfig.json\""
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build-core": "npm run build",
+    "build-core-watch": "tsc-watch --preserveWatchOutput -p tsconfig.build.json",
+    "lint": "tslint -t stylish --project \"tsconfig.json\"",
+    "test": "npm run lint && npm run unit-test",
+    "unit-test": "npm run core-unit-test",
+    "core-test": "npm run test",
+    "core-unit-test": "jest --coverage --verbose",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.24",
+    "jest": "^24.9.0",
     "tsc-watch": "^4.0.0",
+    "tslint": "^5.20.1",
+    "tslint-config-standard": "^9.0.0",
     "typescript": "^3.6.4"
   },
   "dependencies": {
