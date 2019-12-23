@@ -12,17 +12,17 @@
     "acceptance-test": "lerna run build-core && lerna run acceptance-test",
     "core-test": "lerna run core-test",
     "core-unit-test": "lerna run core-unit-test",
-    "browser-dev": "",
-    "browser-test": "",
-    "browser-unit-test": "",
-    "browser-acceptance-test": "",
-    "node-test": "",
-    "node-unit-test": "",
-    "node-acceptance-test": ""
-
+    "browser-dev": "concurrently \"lerna run build-core-watch\" \"lerna run browser-dev\"",
+    "browser-test": "lerna run build-core && lerna run browser-test",
+    "browser-unit-test": "lerna run build-core && lerna run browser-unit-test",
+    "browser-acceptance-test": "lerna run build-core && lerna run browser-acceptance-test",
+    "node-test": "lerna run build-core && lerna run node-test",
+    "node-unit-test": "lerna run build-core && lerna run node-unit-test",
+    "node-acceptance-test": "learna run build-core && lerna run node-acceptance-test"
   },
   "devDependencies": {
     "@types/jest": "^24.0.23",
+    "concurrently": "^5.0.2",
     "jest": "^24.9.0",
     "lerna": "~3.14.0",
     "tslint": "^5.20.0",
