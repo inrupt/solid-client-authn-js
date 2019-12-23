@@ -21,7 +21,7 @@
     "browser-dev": "webpack-dev-server --config webpack.config.js --env.env=dev",
     "browser-test": "npm run browser-unit-test && npm run browser-acceptance-test",
     "browser-unit-test": "jest --coverage --verbose",
-    "browser-acceptance-test": "npm run build-browser && echo \"TODO: include testCafe\"",
+    "browser-acceptance-test": "npm run build-browser && testcafe chrome,firefox __tests__/acceptance/ --app 'npm run browser-dev'",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
