@@ -8,18 +8,20 @@
     "dist"
   ],
   "scripts": {
-    "browser-dev": "ts-node ./test/testServer/server.ts --project ./test/testServer/tsconfig.json",
-    "browser-test": "",
-    "browser-test-watch": "",
-    "build": "npm run clean && npm run compile",
-    "bundle": "webpack",
-    "clean": "rm -rf ./dist",
-    "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build",
-    "test": "npm run lint && npm run jest",
+    "clean": "npm run clean-browser && npm run clean-module",
+    "clean-browser": "rm -rf ./browserDist",
+    "clean-module": "rm -rf ./dist",
+    "build": "npm run build-browser && npm run build-module",
+    "build-browser": "npm run clean-browser && webpack --config webpack.config.js --env.env=prod",
+    "build-module": "npm run clean-module && tsc -p tsconfig.build.json",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
-    "jest": "jest --coverage --verbose",
-    "jest-watch": "jest --watch --coverage"
+    "test": "npm run lint && npm run unit-test && npm run browser-acceptance-test",
+    "unit-test": "npm run browser-unit-test",
+    "browser-dev": "webpack-dev-server --config webpack.config.js --env.env=dev",
+    "browser-test": "npm run browser-unit-test && npm run browser-acceptance-test",
+    "browser-unit-test": "jest --coverage --verbose",
+    "browser-acceptance-test": "npm run build-browser && echo \"TODO: include testCafe\"",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@solid/authenticator-core": "^0.0.0",
@@ -28,19 +30,18 @@
   "devDependencies": {
     "@types/express": "^4.17.2",
     "@types/jest": "^24.0.23",
-    "awesome-typescript-loader": "^5.2.1",
-    "declaration-bundler-webpack-plugin": "^1.0.3",
     "express": "^4.17.1",
+    "html-webpack-plugin": "^3.2.0",
     "jest": "^24.9.0",
     "testcafe": "^1.7.1",
     "ts-jest": "^24.2.0",
     "ts-loader": "^6.2.1",
-    "ts-node": "^8.5.4",
     "tslint": "^5.20.0",
     "tslint-config-standard": "^8.0.1",
     "typescript": "^3.6.4",
-    "typescript-bundle": "^1.0.16",
     "webpack": "^4.41.4",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1",
+    "webpack-merge": "^4.2.2"
   }
 }
