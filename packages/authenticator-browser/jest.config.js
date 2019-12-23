@@ -1,6 +1,6 @@
 module.exports = {
   "roots": [
-    "<rootDir>/src"
+    "<rootDir>"
   ],
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",
