@@ -15,7 +15,7 @@
     "acceptance-test": "npm run node-acceptance-test",
     "node-test": "npm run test",
     "node-unit-test": "jest --coverage --verbose -c jest.unit.config.js",
-    "node-acceptance-test": "jest --coverage --verbose -c jest.acceptance.config.js",
+    "node-acceptance-test": "jest --verbose -c jest.acceptance.config.js",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
