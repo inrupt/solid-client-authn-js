@@ -7,6 +7,8 @@ import IResponseInfo from '../authenticatedFetch/IResponseInfo'
 import IAuthenticatedFetcher from '../authenticatedFetch/IAuthenticatedFetcher'
 import { URL } from 'url'
 import ILoginHandler from '../login/ILoginHandler'
+import ILoginOptions from '../login/ILoginOptions'
+import NotImplementedError from '../util/NotImplementedError'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
@@ -24,11 +26,13 @@ export default class Authenticator extends EventEmitter {
   }
 
   async fetch (requestInfo: IRequestInfo): Promise<IResponseInfo> {
-    const authToken = this.storage.get('authToken')
-    return this.authenticatedFetcher.handle(authToken)
+    // TODO: implement
+    // const authToken = this.storage.get('requestCredentials')
+    // return this.authenticatedFetcher.handle(authToken)
+    throw new NotImplementedError('authenticator.fetch')
   }
 
-  async login (identityProvider: string | URL, options: Object): Promise<void> {
-    await this.loginHandler.handle(identityProvider)
+  async login (loginOptions: ILoginOptions): Promise<void> {
+    await this.loginHandler.handle(loginOptions)
   }
 }
