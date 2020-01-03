@@ -2,11 +2,12 @@ import AggregateHandler from '../util/handlerPattern/AggregateHandler'
 import IAuthenticatedFetcher from './IAuthenticatedFetcher'
 import IRequestInfo from './IRequestInfo'
 import IResponseInfo from './IResponseInfo'
-import { inject, injectable, injectAll } from 'tsyringe'
+import { injectable, injectAll } from 'tsyringe'
+import IRequestCredentials from './IRequestCredentials'
 
 @injectable()
 export default class AggregateAuthenticatedFetcher
-  extends AggregateHandler<[IRequestInfo], IResponseInfo>
+  extends AggregateHandler<[IRequestCredentials, IRequestInfo], IResponseInfo>
   implements IAuthenticatedFetcher {
 
   constructor (
