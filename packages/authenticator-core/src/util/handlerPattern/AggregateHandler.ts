@@ -1,4 +1,5 @@
 import IHandleable from './IHandleable'
+import HandlerNotFoundError from '../errors/HandlerNotFoundError'
 
 export default class AggregateHandler<P extends Array<any>, R> implements IHandleable<P, R> {
   constructor (
@@ -50,8 +51,8 @@ export default class AggregateHandler<P extends Array<any>, R> implements IHandl
     if (handler) {
       return handler.handle(...params)
     } else {
-      // TODO: more specific error naming
-      throw new Error('Cannot Handle')
+      console.log(params)
+      throw new HandlerNotFoundError(this.constructor.name, params)
     }
   }
 }

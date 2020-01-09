@@ -8,7 +8,7 @@ import IAuthenticatedFetcher from '../authenticatedFetch/IAuthenticatedFetcher'
 import { URL } from 'url'
 import ILoginHandler from '../login/ILoginHandler'
 import ILoginOptions from '../login/ILoginOptions'
-import NotImplementedError from '../util/NotImplementedError'
+import NotImplementedError from '../util/errors/NotImplementedError'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
