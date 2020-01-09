@@ -1,9 +1,18 @@
 <html>
   <head>
     <title>Solid Authenticator Test Page</title>
-    <script src="solid-authenticator.bundle.js"></script> 
+    <script src="solid-authenticator.bundle.js"></script>
+    <script>
+      function loginUser() {
+        console.log(solidAuthenticator)
+        solidAuthenticator.login({
+          oidcIssuer: new URL('https://example.com')
+        })
+      }
+    </script>
   </head>
   <body>
     <h1>Solid Authenticator Test Page</h1>
+    <button onclick="loginUser()">Log In</button>
   </body>
 </html>

@@ -27,6 +27,8 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.5.4",
+    "node-fetch": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.0.1"
   }
