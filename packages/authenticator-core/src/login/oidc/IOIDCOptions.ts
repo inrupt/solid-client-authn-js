@@ -1,4 +1,4 @@
-import { URL } from 'url'
+import URL from 'url-parse'
 import IIssuerConfig from './IIssuerConfig'
 
 export default interface IOIDCOptions {
