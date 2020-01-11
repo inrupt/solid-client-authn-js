@@ -1,4 +1,4 @@
-import { URL } from 'url'
+import URL from 'url-parse'
 
 export default interface ILoginOptions {
   oidcIssuer?: URL

@@ -17,6 +17,13 @@ import PrimaryDeviceOIDCHandler from './login/oidc/device/PrimaryDeviceOIDCHandl
 import SecondaryDeviceOIDCHandler from './login/oidc/device/SecondaryDeviceOIDCHandler'
 import LegacyImplicitFlowOIDCHandler from './login/oidc/implicit/LegacyImplicitFlowOIDCHandler'
 import RefreshTokenOIDCHandler from './login/oidc/refreshToken/RefreshTokenOIDCHandler'
+import Fetcher, { IFetcher } from './util/Fetcher'
+import IssuerConfigFetcher, { IIssuerConfigFetcher } from './login/oidc/IssuerConfigFetcher'
+
+// Util
+container.register<IFetcher>('fetcher', {
+  useClass: Fetcher
+})
 
 // Authenticated Fetcher
 container.register<IAuthenticatedFetcher>('authenticatedFetcher', {
@@ -58,6 +65,11 @@ container.register<IOIDCHandler>('oidcHandlers', {
 })
 container.register<IOIDCHandler>('oidcHandlers', {
   useClass: LegacyImplicitFlowOIDCHandler
+})
+
+// Login/OIDC/Issuer
+container.register<IIssuerConfigFetcher>('issuerConfigFetcher', {
+  useClass: IssuerConfigFetcher
 })
 
 export default function authenticator (dependencies: {

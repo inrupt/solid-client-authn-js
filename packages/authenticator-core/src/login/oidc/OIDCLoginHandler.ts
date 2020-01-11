@@ -4,7 +4,7 @@ import ILoginOptions from '../ILoginOptions'
 import IOIDCHandler from './IOIDCHandler'
 import IOIDCOptions from './IOIDCOptions'
 import ConfigurationError from '../../util/errors/ConfigurationError'
-import { IIssuerConfigFetcher } from './IssuerConfigConfigFetcher'
+import { IIssuerConfigFetcher } from './IssuerConfigFetcher'
 import IIssuerConfig from './IIssuerConfig'
 
 @injectable()
