@@ -19,6 +19,8 @@ import LegacyImplicitFlowOIDCHandler from './login/oidc/implicit/LegacyImplicitF
 import RefreshTokenOIDCHandler from './login/oidc/refreshToken/RefreshTokenOIDCHandler'
 import Fetcher, { IFetcher } from './util/Fetcher'
 import IssuerConfigFetcher, { IIssuerConfigFetcher } from './login/oidc/IssuerConfigFetcher'
+import DPoPTokenGenerator, { IDPoPTokenGenerator } from './authenticatedFetch/dPoP/DPoPTokenGenerator'
+import BearerAuthenticatedFetcher from './authenticatedFetch/bearer/BearerAuthenticatedFetcher'
 
 // Util
 container.register<IFetcher>('fetcher', {
@@ -31,6 +33,14 @@ container.register<IAuthenticatedFetcher>('authenticatedFetcher', {
 })
 container.register<IAuthenticatedFetcher>('authenticatedFetchers', {
   useClass: DPoPAuthenticatedFetcher
+})
+container.register<IAuthenticatedFetcher>('authenticatedFetchers', {
+  useClass: BearerAuthenticatedFetcher
+})
+
+// Authenticated Fetcher / DPoP
+container.register<IDPoPTokenGenerator>('dPoPTokenGenerator', {
+  useClass: DPoPTokenGenerator
 })
 
 // Login

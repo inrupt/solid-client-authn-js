@@ -51,7 +51,6 @@ export default class AggregateHandler<P extends Array<any>, R> implements IHandl
     if (handler) {
       return handler.handle(...params)
     } else {
-      console.log(params)
       throw new HandlerNotFoundError(this.constructor.name, params)
     }
   }
