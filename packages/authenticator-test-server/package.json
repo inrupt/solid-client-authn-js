@@ -1,0 +1,28 @@
+{
+  "name": "@solid/authenticator-test-server",
+  "version": "0.0.0",
+  "main": "dist/test-server",
+  "types": "dist/test-server",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "lint": "tslint -t stylish --project \"tsconfig.json\"",
+    "test-server": "ts-node src/test-server.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.6",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "jose": "^1.18.2"
+  },
+  "devDependencies": {
+    "ts-node": "^8.6.1",
+    "tslint": "^5.20.0",
+    "tslint-config-standard": "^8.0.1",
+    "typescript": "^3.6.4"
+  }
+}

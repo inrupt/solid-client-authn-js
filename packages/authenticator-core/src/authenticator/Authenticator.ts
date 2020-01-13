@@ -6,8 +6,8 @@ import IAuthenticatedFetcher from '../authenticatedFetch/IAuthenticatedFetcher'
 import URL from 'url-parse'
 import ILoginHandler from '../login/ILoginHandler'
 import ILoginOptions from '../login/ILoginOptions'
-import NotImplementedError from '../util/errors/NotImplementedError'
 import IDPoPRequestCredentials from '../authenticatedFetch/dPoP/IDPoPRequestCredentials'
+import { IFetcher } from '../util/Fetcher'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
@@ -15,7 +15,9 @@ export default class Authenticator extends EventEmitter {
   constructor (
     @inject('storage') private storage: IStorage,
     @inject('authenticatedFetcher') private authenticatedFetcher: IAuthenticatedFetcher,
-    @inject('loginHandler') private loginHandler: ILoginHandler
+    @inject('loginHandler') private loginHandler: ILoginHandler,
+    // TODO: remove this after temporary use
+    @inject('fetcher') private fetcher: IFetcher
   ) {
     super()
   }
@@ -25,6 +27,9 @@ export default class Authenticator extends EventEmitter {
   }
 
   async tempGenDPoPCredentials (): Promise<IDPoPRequestCredentials> {
+    // Get Auth Token
+    const authToken: string = await (await this.fetcher.fetch('http://localhost:9001/token')).text()
+    console.log(authToken)
     return {
       type: 'dpop',
       clientKey: {},
