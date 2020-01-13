@@ -1,7 +1,6 @@
-import IResponseInfo from './IResponseInfo'
-import IRequestInfo from './IRequestInfo'
 import IHandleable from '../util/handlerPattern/IHandleable'
 import IRequestCredentials from './IRequestCredentials'
+import URL from 'url-parse'
 
-type IAuthenticatedFetcher = IHandleable<[IRequestCredentials, IRequestInfo], IResponseInfo>
+type IAuthenticatedFetcher = IHandleable<[IRequestCredentials, URL, RequestInit?], Response>
 export default IAuthenticatedFetcher

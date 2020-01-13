@@ -4,15 +4,18 @@
     <script src="solid-authenticator.bundle.js"></script>
     <script>
       function loginUser() {
-        console.log(solidAuthenticator)
         solidAuthenticator.login({
           oidcIssuer: new URL('https://solid.community')
         })
+      }
+      function fetch() {
+        solidAuthenticator.fetch('https://jackson.solid.community/cool/stuff', {})
       }
     </script>
   </head>
   <body>
     <h1>Solid Authenticator Test Page</h1>
     <button onclick="loginUser()">Log In</button>
+    <button onclick="fetch()">Fetch</button>
   </body>
 </html>

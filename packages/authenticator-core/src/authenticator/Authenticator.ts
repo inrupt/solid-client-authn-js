@@ -2,13 +2,12 @@ import { EventEmitter } from 'events'
 import ISolidSession from './ISolidSession'
 import { injectable, inject } from 'tsyringe'
 import IStorage from './IStorage'
-import IRequestInfo from '../authenticatedFetch/IRequestInfo'
-import IResponseInfo from '../authenticatedFetch/IResponseInfo'
 import IAuthenticatedFetcher from '../authenticatedFetch/IAuthenticatedFetcher'
-import { URL } from 'url'
+import URL from 'url-parse'
 import ILoginHandler from '../login/ILoginHandler'
 import ILoginOptions from '../login/ILoginOptions'
 import NotImplementedError from '../util/errors/NotImplementedError'
+import IDPoPRequestCredentials from '../authenticatedFetch/dPoP/IDPoPRequestCredentials'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
@@ -25,11 +24,18 @@ export default class Authenticator extends EventEmitter {
     this.on('session', callback)
   }
 
-  async fetch (requestInfo: IRequestInfo): Promise<IResponseInfo> {
-    // TODO: implement
-    // const authToken = this.storage.get('requestCredentials')
-    // return this.authenticatedFetcher.handle(authToken)
-    throw new NotImplementedError('authenticator.fetch')
+  async tempGenDPoPCredentials (): Promise<IDPoPRequestCredentials> {
+    return {
+      type: 'dpop',
+      clientKey: {},
+      authToken: {}
+    }
+  }
+
+  async fetch (requestInfo: RequestInfo, requestInit?: RequestInit): Promise<Response> {
+    // TODO: Get the auth token in a good way
+    return this.authenticatedFetcher
+      .handle(await this.tempGenDPoPCredentials(), new URL(requestInfo.toString()), requestInit)
   }
 
   async login (loginOptions: ILoginOptions): Promise<void> {
