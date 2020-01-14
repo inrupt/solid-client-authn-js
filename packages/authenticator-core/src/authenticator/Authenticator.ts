@@ -6,7 +6,7 @@ import IAuthenticatedFetcher from '../authenticatedFetch/IAuthenticatedFetcher'
 import URL from 'url-parse'
 import ILoginHandler from '../login/ILoginHandler'
 import ILoginOptions from '../login/ILoginOptions'
-import IDPoPRequestCredentials from '../authenticatedFetch/dPoP/IDPoPRequestCredentials'
+import IDPoPRequestCredentials from '../util/dpop/IDPoPRequestCredentials'
 import { IFetcher } from '../util/Fetcher'
 import NotImplementedError from '../util/errors/NotImplementedError'
 

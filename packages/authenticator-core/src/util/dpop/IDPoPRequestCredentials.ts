@@ -1,4 +1,4 @@
-import IRequestCredentials from '../IRequestCredentials'
+import IRequestCredentials from '../../authenticatedFetch/IRequestCredentials'
 
 export default interface IDPoPRequestCredentials extends IRequestCredentials {
   type: 'dpop',
