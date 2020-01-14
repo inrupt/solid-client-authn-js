@@ -1,17 +1,17 @@
 import IStorage from '@solid/authenticator-core/dist/authenticator/IStorage'
+import { get, set, remove } from 'local-storage'
 
 export default class InMemoryStorage implements IStorage {
-  private map: { [key: string]: string } = {}
 
   async get (key: string): Promise<string | undefined> {
-    return this.map[key]
+    return get(key)
   }
 
   async set (key: string, value: string): Promise<void> {
-    this.map[key] = value
+    set(key, value)
   }
 
   async delete (key: string): Promise<void> {
-    delete this.map[key]
+    remove(key)
   }
 }
