@@ -29,7 +29,9 @@
   "dependencies": {
     "@types/url-parse": "^1.4.3",
     "ajv": "^6.10.2",
+    "body-parser": "^1.19.0",
     "cross-fetch": "^3.0.4",
+    "jose": "^1.19.0",
     "node-fetch": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.0.1",

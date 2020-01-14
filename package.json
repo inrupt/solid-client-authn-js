@@ -18,7 +18,7 @@
     "browser-acceptance-test": "lerna run build-core --stream && lerna run browser-acceptance-test --stream",
     "node-test": "lerna run build-core --stream && lerna run node-test --stream",
     "node-unit-test": "lerna run build-core --stream && lerna run node-unit-test --stream",
-    "node-acceptance-test": "learna run build-core --stream && lerna run node-acceptance-test --stream"
+    "node-acceptance-test": "concurrently \"lerna run test-server --stream\" \"lerna run build-core --stream && lerna run node-acceptance-test --stream\""
   },
   "devDependencies": {
     "@types/jest": "^24.0.23",
