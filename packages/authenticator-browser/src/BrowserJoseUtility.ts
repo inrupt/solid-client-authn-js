@@ -9,17 +9,20 @@ import {
   JWT,
   JSONWebKey
 } from 'jose'
+import {
+  JWK
+} from 'node-jose'
 import IJoseUtility from '@solid/authenticator-core/dist/authenticator/IJoseUtility'
 import NotImplementedError from '@solid/authenticator-core/dist/util/errors/NotImplementedError'
 
 export default class BrowserJoseUtility implements IJoseUtility {
-  generateJWK (
+  async generateJWK (
     kty: 'EC' | 'OKP' | 'RSA' | 'oct',
     crvBitlength?: ECCurve | OKPCurve | number,
     parameters?: BasicParameters,
     isPrivate?: boolean
   ): Promise<JSONWebKey> {
-    throw new NotImplementedError('browserGenerateJWK')
+    return (await JWK.createKey(kty, crvBitlength, parameters)) as JSONWebKey
   }
   signJWT (
     payload: Object,
