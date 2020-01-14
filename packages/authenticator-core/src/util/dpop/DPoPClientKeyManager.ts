@@ -9,7 +9,7 @@ import IStorage from '../../authenticator/IStorage'
 
 export interface IDPoPClientKeyManager {
   generateClientKeyIfNotAlready (oidcOptions: IOIDCOptions): Promise<void>
-  getClientKey (issuer: URL): Promise<JSONWebKey | null>
+  getClientKey (): Promise<JSONWebKey | null>
 }
 
 @injectable()
@@ -20,13 +20,13 @@ export default class DPoPClientKeyManager implements IDPoPClientKeyManager {
     @inject('storage') private storage: IStorage
   ) {}
 
-  getLocalStorageKey (issuer: URL) {
-    return `clientKey:${issuer.toString()}`
+  getLocalStorageKey () {
+    return `clientKey`
   }
 
   async generateClientKeyIfNotAlready (oidcOptions: IOIDCOptions): Promise<void> {
     let jwk: JSONWebKey = (await this.storageRetriever.retrieve(
-      this.getLocalStorageKey(oidcOptions.issuer),
+      this.getLocalStorageKey(),
       jwkSchema
     )) as JSONWebKey
 
@@ -36,13 +36,13 @@ export default class DPoPClientKeyManager implements IDPoPClientKeyManager {
         alg: 'RSA',
         use: 'sig'
       })
-      await this.storage.set(this.getLocalStorageKey(oidcOptions.issuer), JSON.stringify(jwk))
+      await this.storage.set(this.getLocalStorageKey(), JSON.stringify(jwk))
     }
   }
 
-  async getClientKey (issuer: URL): Promise<JSONWebKey | null> {
+  async getClientKey (): Promise<JSONWebKey | null> {
     return (await this.storageRetriever.retrieve(
-      this.getLocalStorageKey(issuer),
+      this.getLocalStorageKey(),
       jwkSchema
     )) as JSONWebKey
   }
