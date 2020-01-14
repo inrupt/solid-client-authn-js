@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@solid/authenticator-core": "^0.0.0",
+    "jose": "^1.19.0",
     "tsyringe": "^4.0.1"
   },
   "devDependencies": {

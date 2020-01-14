@@ -1,12 +1,9 @@
 import {
-  JWKECKey,
   ECCurve,
   BasicParameters,
   OKPCurve,
-  JWKOKPKey,
-  JWKRSAKey,
-  JWKOctKey,
-  JWT
+  JWT,
+  JSONWebKey
 } from 'jose'
 
 export default interface IJoseUtility {
@@ -15,27 +12,27 @@ export default interface IJoseUtility {
     crv?: ECCurve,
     parameters?: BasicParameters,
     isPrivate?: boolean
-  ): Promise<JWKECKey>
+  ): Promise<JSONWebKey>
   generateJWK (
     kty: 'OKP',
     crv?: OKPCurve,
     parameters?: BasicParameters,
     isPrivate?: boolean
-  ): Promise<JWKOKPKey>
+  ): Promise<JSONWebKey>
   generateJWK (
     kty: 'RSA',
     bitlength?: number,
     parameters?: BasicParameters,
     isPrivate?: boolean
-  ): Promise<JWKRSAKey>
+  ): Promise<JSONWebKey>
   generateJWK (
     kty: 'oct',
     bitlength?: number,
     parameters?: BasicParameters
-  ): Promise<JWKOctKey>
+  ): Promise<JSONWebKey>
   signJWT (
     payload: Object,
-    key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
+    key: JSONWebKey,
     options?: JWT.SignOptions
   ): Promise<string>
 }
