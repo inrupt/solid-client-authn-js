@@ -4,7 +4,7 @@ import NotImplementedError from '../../../util/errors/NotImplementedError'
 
 export default class AuthorizationCodeWithPKCEOIDCHandler implements IOIDCHandler {
   async canHandle (oidcLoginOptions: IOIDCOptions): Promise<boolean> {
-    return true
+    return false
   }
 
   async handle (oidcLoginOptions: IOIDCOptions): Promise<void> {

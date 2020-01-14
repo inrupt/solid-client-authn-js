@@ -11,21 +11,32 @@ import IJoseUtility from './authenticator/IJoseUtility'
 import OIDCLoginHandler from './login/oidc/OIDCLoginHandler'
 import IOIDCHandler from './login/oidc/IOIDCHandler'
 import AggregateOIDCHandler from './login/oidc/AggregateOIDCHandler'
-import AuthorizationCodeOIDCHandler from './login/oidc/authCode/AuthorizationCodeOIDCHandler'
-import AuthorizationCodeWithPKCEOIDCHandler from './login/oidc/authCode/AuthorizationCodeWithPKCEOIDCHandler'
-import ClientCredentialsOIDCHandler from './login/oidc/clientCredentials/ClientCredentialsOIDCHandler'
-import PrimaryDeviceOIDCHandler from './login/oidc/device/PrimaryDeviceOIDCHandler'
-import SecondaryDeviceOIDCHandler from './login/oidc/device/SecondaryDeviceOIDCHandler'
-import LegacyImplicitFlowOIDCHandler from './login/oidc/implicit/LegacyImplicitFlowOIDCHandler'
-import RefreshTokenOIDCHandler from './login/oidc/refreshToken/RefreshTokenOIDCHandler'
+import AuthorizationCodeOIDCHandler from './login/oidc/oidcHandlers/AuthorizationCodeOIDCHandler'
+import AuthorizationCodeWithPKCEOIDCHandler from './login/oidc/oidcHandlers/AuthorizationCodeWithPKCEOIDCHandler'
+import ClientCredentialsOIDCHandler from './login/oidc/oidcHandlers/ClientCredentialsOIDCHandler'
+import PrimaryDeviceOIDCHandler from './login/oidc/oidcHandlers/PrimaryDeviceOIDCHandler'
+import SecondaryDeviceOIDCHandler from './login/oidc/oidcHandlers/SecondaryDeviceOIDCHandler'
+import LegacyImplicitFlowOIDCHandler from './login/oidc/oidcHandlers/LegacyImplicitFlowOIDCHandler'
+import RefreshTokenOIDCHandler from './login/oidc/oidcHandlers/RefreshTokenOIDCHandler'
 import Fetcher, { IFetcher } from './util/Fetcher'
 import IssuerConfigFetcher, { IIssuerConfigFetcher } from './login/oidc/IssuerConfigFetcher'
-import DPoPTokenGenerator, { IDPoPTokenGenerator } from './authenticatedFetch/dPoP/DPoPTokenGenerator'
+import DPoPTokenGenerator, { IDPoPTokenGenerator } from './util/dpop/DPoPTokenGenerator'
 import BearerAuthenticatedFetcher from './authenticatedFetch/bearer/BearerAuthenticatedFetcher'
+import DPoPHeaderCreator, { IDPoPHeaderCreator } from './util/dpop/DPoPHeaderCreator'
+import DPoPClientKeyGenerator, { IDPoPClientKeyGenerator } from './util/dpop/DPoPClientKeyGenerator'
 
 // Util
 container.register<IFetcher>('fetcher', {
   useClass: Fetcher
+})
+container.register<IDPoPHeaderCreator>('dPoPHeaderCreator', {
+  useClass: DPoPHeaderCreator
+})
+container.register<IDPoPTokenGenerator>('dPoPTokenGenerator', {
+  useClass: DPoPTokenGenerator
+})
+container.register<IDPoPClientKeyGenerator>('dPoPClientKeyGenerator', {
+  useClass: DPoPClientKeyGenerator
 })
 
 // Authenticated Fetcher
@@ -37,11 +48,6 @@ container.register<IAuthenticatedFetcher>('authenticatedFetchers', {
 })
 container.register<IAuthenticatedFetcher>('authenticatedFetchers', {
   useClass: BearerAuthenticatedFetcher
-})
-
-// Authenticated Fetcher / DPoP
-container.register<IDPoPTokenGenerator>('dPoPTokenGenerator', {
-  useClass: DPoPTokenGenerator
 })
 
 // Login

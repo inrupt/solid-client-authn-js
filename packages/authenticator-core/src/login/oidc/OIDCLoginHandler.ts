@@ -6,12 +6,15 @@ import IOIDCOptions from './IOIDCOptions'
 import ConfigurationError from '../../util/errors/ConfigurationError'
 import { IIssuerConfigFetcher } from './IssuerConfigFetcher'
 import IIssuerConfig from './IIssuerConfig'
+import { IDPoPClientKeyGenerator } from '../../util/dpop/DPoPClientKeyGenerator'
+import URL from 'url-parse'
 
 @injectable()
 export default class OIDCLoginHandler implements ILoginHandler {
   constructor (
     @inject('oidcHandler') private oidcHandler: IOIDCHandler,
-    @inject('issuerConfigFetcher') private issuerConfigFetcher: IIssuerConfigFetcher
+    @inject('issuerConfigFetcher') private issuerConfigFetcher: IIssuerConfigFetcher,
+    @inject('dPoPClientKeyGenerator') private dPoPClientKeyGenerator: IDPoPClientKeyGenerator
   ) {}
 
   checkOptions (options: ILoginOptions): Error | null {
@@ -39,7 +42,16 @@ export default class OIDCLoginHandler implements ILoginHandler {
     // Construct OIDC Options
     const OIDCOptions: IOIDCOptions = {
       issuer: options.oidcIssuer,
+      // TODO: differentiate if DPoP should be true
+      dpop: true,
+      // TODO: This constrains this library to browsers. Figure out what to do with redirect
+      redirectUrl: new URL(window.location.href),
       issuerConfiguration: issuerConfig
+    }
+
+    // Generate DPoP Key if needed
+    if (OIDCOptions.dpop) {
+      await this.dPoPClientKeyGenerator.generateClientKeyIfNotAlready(OIDCOptions)
     }
 
     // Call proper OIDC Handler

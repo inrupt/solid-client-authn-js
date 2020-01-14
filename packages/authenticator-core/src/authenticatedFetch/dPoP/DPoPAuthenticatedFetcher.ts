@@ -1,9 +1,9 @@
 import IAuthenticatedFetcher from '../IAuthenticatedFetcher'
 import IRequestCredentials from '../IRequestCredentials'
 import ConfigurationError from '../../util/errors/ConfigurationError'
-import IDPoPRequestCredentials from './IDPoPRequestCredentials'
+import IDPoPRequestCredentials from '../../util/dpop/IDPoPRequestCredentials'
 import { injectable, inject } from 'tsyringe'
-import { IDPoPTokenGenerator } from './DPoPTokenGenerator'
+import { IDPoPTokenGenerator } from '../../util/dpop/DPoPTokenGenerator'
 import URL from 'url-parse'
 import { IFetcher } from '../../util/Fetcher'
 
