@@ -6,7 +6,7 @@ import IOIDCOptions from './IOIDCOptions'
 import ConfigurationError from '../../util/errors/ConfigurationError'
 import { IIssuerConfigFetcher } from './IssuerConfigFetcher'
 import IIssuerConfig from './IIssuerConfig'
-import { IDPoPClientKeyGenerator } from '../../util/dpop/DPoPClientKeyGenerator'
+import { IDPoPClientKeyManager } from '../../util/dpop/DPoPClientKeyManager'
 import URL from 'url-parse'
 
 @injectable()
@@ -14,7 +14,7 @@ export default class OIDCLoginHandler implements ILoginHandler {
   constructor (
     @inject('oidcHandler') private oidcHandler: IOIDCHandler,
     @inject('issuerConfigFetcher') private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject('dPoPClientKeyGenerator') private dPoPClientKeyGenerator: IDPoPClientKeyGenerator
+    @inject('dPoPClientKeyManager') private dPoPClientKeyManager: IDPoPClientKeyManager
   ) {}
 
   checkOptions (options: ILoginOptions): Error | null {
@@ -51,7 +51,7 @@ export default class OIDCLoginHandler implements ILoginHandler {
 
     // Generate DPoP Key if needed
     if (OIDCOptions.dpop) {
-      await this.dPoPClientKeyGenerator.generateClientKeyIfNotAlready(OIDCOptions)
+      await this.dPoPClientKeyManager.generateClientKeyIfNotAlready(OIDCOptions)
     }
 
     // Call proper OIDC Handler

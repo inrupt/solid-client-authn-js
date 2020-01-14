@@ -2,10 +2,10 @@ import IIssuerConfig from './IIssuerConfig'
 import URL from 'url-parse'
 import { injectable, inject } from 'tsyringe'
 import { IFetcher } from '../../util/Fetcher'
-import IStorage from '../../authenticator/IStorage'
-import validateSchema from '../../util/validateSchema'
 import issuerConfigSchema from './issuerConfigSchema'
 import ConfigurationError from '../../util/errors/ConfigurationError'
+import { IStorageRetriever } from '../../util/StorageRetriever'
+import IStorage from '../../authenticator/IStorage'
 
 export interface IIssuerConfigFetcher {
   fetchConfig (issuer: URL): Promise<IIssuerConfig>
@@ -16,6 +16,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
 
   constructor (
     @inject('fetcher') private fetcher: IFetcher,
+    @inject('storageRetriever') private storageRetriever: IStorageRetriever,
     @inject('storage') private storage: IStorage
   ) {}
 
@@ -23,8 +24,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     return `issuerConfig:${issuer.toString()}`
   }
 
-  parseConfig (config: { [key: string]: any }): IIssuerConfig {
-    validateSchema(issuerConfigSchema, config, true)
+  processConfig (config: { [key: string]: any }): IIssuerConfig {
     return {
       ...config,
       issuer: new URL(config.issuer),
@@ -37,19 +37,11 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   }
 
   async fetchConfig (issuer: URL): Promise<IIssuerConfig> {
-    let issuerConfig: IIssuerConfig
-    // Check if config is stored locally
-    const locallyStoredConfig: string | null =
-      await this.storage.get(this.getLocalStorageKey(issuer))
-
-    // If it is stored locally, check the validity of the value
-    if (locallyStoredConfig) {
-      try {
-        issuerConfig = this.parseConfig(JSON.parse(locallyStoredConfig))
-      } catch (err) {
-        await this.storage.delete(this.getLocalStorageKey(issuer))
-      }
-    }
+    let issuerConfig: IIssuerConfig = (await this.storageRetriever.retrieve(
+      this.getLocalStorageKey(issuer),
+      issuerConfigSchema,
+      this.processConfig
+    )) as IIssuerConfig
 
     // If it is not stored locally, fetch it
     if (!issuerConfig) {
@@ -58,7 +50,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl)
       // Check the validity of the fetched config
       try {
-        issuerConfig = this.parseConfig(await issuerConfigRequestBody.json())
+        issuerConfig = this.processConfig(await issuerConfigRequestBody.json())
       } catch (err) {
         throw new ConfigurationError(`${issuer.toString()} has an invalid configuration: ${err.message}`)
       }
