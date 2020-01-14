@@ -4,6 +4,7 @@ import NotImplementedError from '../../../util/errors/NotImplementedError'
 
 export default class LegacyImplicitFlowOIDCHandler implements IOIDCHandler {
   async canHandle (oidcLoginOptions: IOIDCOptions): Promise<boolean> {
+    console.log(oidcLoginOptions)
     return false
   }
 

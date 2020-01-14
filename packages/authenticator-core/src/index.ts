@@ -7,6 +7,7 @@ import DPoPAuthenticatedFetcher from './authenticatedFetch/dPoP/DPoPAuthenticate
 import ILoginHandler from './login/ILoginHandler'
 import AggregateLoginHandler from './login/AggregateLoginHandler'
 import IStorage from './authenticator/IStorage'
+import IJoseUtility from './authenticator/IJoseUtility'
 import OIDCLoginHandler from './login/oidc/OIDCLoginHandler'
 import IOIDCHandler from './login/oidc/IOIDCHandler'
 import AggregateOIDCHandler from './login/oidc/AggregateOIDCHandler'
@@ -83,10 +84,14 @@ container.register<IIssuerConfigFetcher>('issuerConfigFetcher', {
 })
 
 export default function authenticator (dependencies: {
-  storage: IStorage
+  storage: IStorage,
+  joseUtility: IJoseUtility
 }): Authenticator {
   const authenticatorContainer = container.createChildContainer()
   authenticatorContainer.register<IStorage>('storage', { useValue: dependencies.storage })
+  authenticatorContainer.register<IJoseUtility>('joseUtility', {
+    useValue: dependencies.joseUtility
+  })
   return authenticatorContainer.resolve(Authenticator)
 }
 

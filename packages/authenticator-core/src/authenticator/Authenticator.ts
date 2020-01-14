@@ -8,6 +8,7 @@ import ILoginHandler from '../login/ILoginHandler'
 import ILoginOptions from '../login/ILoginOptions'
 import IDPoPRequestCredentials from '../authenticatedFetch/dPoP/IDPoPRequestCredentials'
 import { IFetcher } from '../util/Fetcher'
+import NotImplementedError from '../util/errors/NotImplementedError'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
@@ -26,21 +27,11 @@ export default class Authenticator extends EventEmitter {
     this.on('session', callback)
   }
 
-  async tempGenDPoPCredentials (): Promise<IDPoPRequestCredentials> {
-    // Get Auth Token
-    const authToken: string = await (await this.fetcher.fetch('http://localhost:9001/token')).text()
-    console.log(authToken)
-    return {
-      type: 'dpop',
-      clientKey: {},
-      authToken: {}
-    }
-  }
-
   async fetch (requestInfo: RequestInfo, requestInit?: RequestInit): Promise<Response> {
     // TODO: Get the auth token in a good way
-    return this.authenticatedFetcher
-      .handle(await this.tempGenDPoPCredentials(), new URL(requestInfo.toString()), requestInit)
+    // return this.authenticatedFetcher
+    //   .handle(await this.tempGenDPoPCredentials(), new URL(requestInfo.toString()), requestInit)
+    throw new NotImplementedError('authenticator.fetch')
   }
 
   async login (loginOptions: ILoginOptions): Promise<void> {
