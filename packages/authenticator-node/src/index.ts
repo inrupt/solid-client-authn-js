@@ -1,10 +1,12 @@
 import AuthenticatorCore from '@solid/authenticator-core'
 import InMemoryStorage from './storage/InMemoryStorage'
+import NodeJoseUtility from './NodeJoseUtility'
 
 export default function authenticator () {
   // TODO implement
   return AuthenticatorCore({
-    storage: new InMemoryStorage()
+    storage: new InMemoryStorage(),
+    joseUtility: new NodeJoseUtility()
   })
 }
 
