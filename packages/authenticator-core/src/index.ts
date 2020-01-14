@@ -23,7 +23,8 @@ import IssuerConfigFetcher, { IIssuerConfigFetcher } from './login/oidc/IssuerCo
 import DPoPTokenGenerator, { IDPoPTokenGenerator } from './util/dpop/DPoPTokenGenerator'
 import BearerAuthenticatedFetcher from './authenticatedFetch/bearer/BearerAuthenticatedFetcher'
 import DPoPHeaderCreator, { IDPoPHeaderCreator } from './util/dpop/DPoPHeaderCreator'
-import DPoPClientKeyGenerator, { IDPoPClientKeyGenerator } from './util/dpop/DPoPClientKeyGenerator'
+import DPoPClientKeyManager, { IDPoPClientKeyManager } from './util/dpop/DPoPClientKeyManager'
+import StorageRetriever, { IStorageRetriever } from './util/StorageRetriever'
 
 // Util
 container.register<IFetcher>('fetcher', {
@@ -35,8 +36,11 @@ container.register<IDPoPHeaderCreator>('dPoPHeaderCreator', {
 container.register<IDPoPTokenGenerator>('dPoPTokenGenerator', {
   useClass: DPoPTokenGenerator
 })
-container.register<IDPoPClientKeyGenerator>('dPoPClientKeyGenerator', {
-  useClass: DPoPClientKeyGenerator
+container.register<IDPoPClientKeyManager>('dPoPClientKeyManager', {
+  useClass: DPoPClientKeyManager
+})
+container.register<IStorageRetriever>('storageRetriever', {
+  useClass: StorageRetriever
 })
 
 // Authenticated Fetcher
