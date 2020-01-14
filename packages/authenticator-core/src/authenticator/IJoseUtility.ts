@@ -30,6 +30,9 @@ export default interface IJoseUtility {
     bitlength?: number,
     parameters?: BasicParameters
   ): Promise<JSONWebKey>
+  privateJWKToPublicJWK (
+    jwk: JSONWebKey
+  ): Promise<JSONWebKey>
   signJWT (
     payload: Object,
     key: JSONWebKey,
