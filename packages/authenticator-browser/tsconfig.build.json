@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.build.json",
 
   "compilerOptions": {
+    "lib": ["es5", "es6", "dom"],
     "outDir": "./dist"
   },
 

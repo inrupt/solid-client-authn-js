@@ -1,5 +1,6 @@
+import { JSONWebKey } from 'jose'
 
-const keystore = {
+const keystore: { keys: JSONWebKey[] } = {
   'keys': [
     {
       'alg': 'RS256',

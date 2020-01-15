@@ -21,16 +21,21 @@ export default class LegacyImplicitFlowOIDCHandler implements IOIDCHandler {
     const requestUrl =
       new URL(oidcLoginOptions.issuerConfiguration.authorization_endpoint.toString())
     // TODO: include client_id, state, and nonce
-    requestUrl.set('query', {
+    const query: { [key: string]: any } = {
       response_type: 'id_token token',
       redirect_url: oidcLoginOptions.redirectUrl.toString(),
       scope: 'openid id_vc'
-    })
-    await this.fetcher.fetch(requestUrl, {
-      headers: {
-        DPoP: oidcLoginOptions.dpop ?
-          await this.dPoPHeaderCreator.createHeaderToken(oidcLoginOptions.issuer, 'GET') : undefined
-      }
-    })
+    }
+    if (oidcLoginOptions.dpop) {
+      query.dpop = await this.dPoPHeaderCreator.createHeaderToken(oidcLoginOptions.issuer, 'GET')
+    }
+    requestUrl.set('query', query)
+
+    // TODO: A lot of this seems to be sharable between different flows. Consider making sharable
+    // code
+    // TODO: This is browser specific. Figure out the right way to do this outside the browser
+    window.location.href = requestUrl.toString()
+    // TODO: Handle if redirect is not the case
+    console.error('BAD LOCATION')
   }
 }
