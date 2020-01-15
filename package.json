@@ -12,7 +12,7 @@
     "acceptance-test": "lerna run build-core --stream && lerna run acceptance-test --stream",
     "core-test": "lerna run core-test --stream",
     "core-unit-test": "lerna run core-unit-test --stream",
-    "browser-dev": "concurrently \"lerna run test-server --stream\" \"lerna run build-core-watch --stream\" \"lerna run browser-dev --stream\"",
+    "browser-dev": "concurrently \"lerna run test-server-dev --stream\" \"lerna run build-core-watch --stream\" \"lerna run browser-dev --stream\"",
     "browser-test": "lerna run build-core --stream && lerna run browser-test --stream",
     "browser-unit-test": "lerna run build-core --stream && lerna run browser-unit-test --stream",
     "browser-acceptance-test": "lerna run build-core --stream && lerna run browser-acceptance-test --stream",

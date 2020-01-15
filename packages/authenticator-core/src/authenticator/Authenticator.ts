@@ -27,6 +27,14 @@ export default class Authenticator extends EventEmitter {
     this.on('session', callback)
   }
 
+  async applyTokens (options: { accessToken?: string, idToken?: string }): Promise<void> {
+    // TODO Handle ID_Token
+    if (options.accessToken) {
+      // TODO: Validate Access token
+      await this.storage.set('access_token', options.accessToken)
+    }
+  }
+
   async fetch (requestInfo: RequestInfo, requestInit?: RequestInit): Promise<Response> {
     // TODO: Get the auth token in a good way
     // return this.authenticatedFetcher
