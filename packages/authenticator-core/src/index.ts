@@ -20,7 +20,6 @@ import LegacyImplicitFlowOIDCHandler from './login/oidc/oidcHandlers/LegacyImpli
 import RefreshTokenOIDCHandler from './login/oidc/oidcHandlers/RefreshTokenOIDCHandler'
 import Fetcher, { IFetcher } from './util/Fetcher'
 import IssuerConfigFetcher, { IIssuerConfigFetcher } from './login/oidc/IssuerConfigFetcher'
-import DPoPTokenGenerator, { IDPoPTokenGenerator } from './util/dpop/DPoPTokenGenerator'
 import BearerAuthenticatedFetcher from './authenticatedFetch/bearer/BearerAuthenticatedFetcher'
 import DPoPHeaderCreator, { IDPoPHeaderCreator } from './util/dpop/DPoPHeaderCreator'
 import DPoPClientKeyManager, { IDPoPClientKeyManager } from './util/dpop/DPoPClientKeyManager'
@@ -32,9 +31,6 @@ container.register<IFetcher>('fetcher', {
 })
 container.register<IDPoPHeaderCreator>('dPoPHeaderCreator', {
   useClass: DPoPHeaderCreator
-})
-container.register<IDPoPTokenGenerator>('dPoPTokenGenerator', {
-  useClass: DPoPTokenGenerator
 })
 container.register<IDPoPClientKeyManager>('dPoPClientKeyManager', {
   useClass: DPoPClientKeyManager

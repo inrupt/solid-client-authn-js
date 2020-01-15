@@ -4,11 +4,16 @@ import URL from 'url-parse'
 const authenticator = Authenticator()
 
 const checkIfRedirect = async () => {
-  const curUrl = new URL(window.location.href, true)
-  if (curUrl.query['access_token']) {
+  const curQuery = new URL(window.location.href, true).query
+  if (curQuery['access_token']) {
     await authenticator.applyTokens({
-      accessToken: curUrl.query['access_token']
+      accessToken: curQuery['access_token']
     })
+    delete curQuery['access_token']
+    delete curQuery['id_token']
+    const newUrl = new URL(window.location.href, true)
+    newUrl.set('query', curQuery)
+    window.location.href = newUrl.toString()
   }
 }
 checkIfRedirect()

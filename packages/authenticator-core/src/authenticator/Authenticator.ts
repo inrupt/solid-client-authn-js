@@ -31,15 +31,19 @@ export default class Authenticator extends EventEmitter {
     // TODO Handle ID_Token
     if (options.accessToken) {
       // TODO: Validate Access token
-      await this.storage.set('access_token', options.accessToken)
+      await this.storage.set('accessToken', options.accessToken)
     }
   }
 
   async fetch (requestInfo: RequestInfo, requestInit?: RequestInit): Promise<Response> {
-    // TODO: Get the auth token in a good way
-    // return this.authenticatedFetcher
-    //   .handle(await this.tempGenDPoPCredentials(), new URL(requestInfo.toString()), requestInit)
-    throw new NotImplementedError('authenticator.fetch')
+    // TODO: fetching access token should be done elsewhere
+    const credentials: IDPoPRequestCredentials = {
+      type: 'dpop',
+      authToken: await this.storage.get('accessToken'),
+      clientKey: await this.storage.get('clientKey')
+    }
+    return this.authenticatedFetcher
+      .handle(credentials, new URL(requestInfo.toString()), requestInit)
   }
 
   async login (loginOptions: ILoginOptions): Promise<void> {

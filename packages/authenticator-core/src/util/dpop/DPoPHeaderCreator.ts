@@ -32,7 +32,8 @@ export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
         header: {
           jwk: await this.joseUtility.privateJWKToPublicJWK(clientKey),
           typ: 'dpop+jwt'
-        }
+        },
+        expiresIn: '1 hour'
       }
     )
   }
