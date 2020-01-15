@@ -3,14 +3,14 @@ import IRequestCredentials from '../IRequestCredentials'
 import ConfigurationError from '../../util/errors/ConfigurationError'
 import IDPoPRequestCredentials from '../../util/dpop/IDPoPRequestCredentials'
 import { injectable, inject } from 'tsyringe'
-import { IDPoPTokenGenerator } from '../../util/dpop/DPoPTokenGenerator'
 import URL from 'url-parse'
 import { IFetcher } from '../../util/Fetcher'
+import { IDPoPHeaderCreator } from '../../util/dpop/DPoPHeaderCreator'
 
 @injectable()
 export default class DPoPAuthenticatedFetcher implements IAuthenticatedFetcher {
   constructor (
-    @inject('dPoPTokenGenerator') private dPoPTokenGenerator: IDPoPTokenGenerator,
+    @inject('dPoPHeaderCreator') private dPoPHeaderCreator: IDPoPHeaderCreator,
     @inject('fetcher') private fetcher: IFetcher
   ) {}
 
@@ -31,14 +31,19 @@ export default class DPoPAuthenticatedFetcher implements IAuthenticatedFetcher {
     if (!this.canHandle(requestCredentials, url, requestInit)) {
       throw new ConfigurationError(`DPoP Authenticated Fetcher Cannot handle ${requestCredentials}`)
     }
-    const dPoPToken: string = await this.dPoPTokenGenerator
-      .generateToken(requestCredentials as IDPoPRequestCredentials, new URL(url.origin))
+    const dPoPRequestCredentials: IDPoPRequestCredentials =
+      requestCredentials as IDPoPRequestCredentials
     // TODO: this should clone requestInit before addint the authorization header
+    console.log({
+      authorization: `DPOP ${dPoPRequestCredentials.authToken}`,
+      dpop: await this.dPoPHeaderCreator.createHeaderToken(url, requestInit.method || 'GET')
+    })
     return this.fetcher.fetch(url, {
       ...requestInit,
       headers: {
         ...requestInit.headers,
-        Authorization: dPoPToken
+        authorization: `DPOP ${dPoPRequestCredentials.authToken}`,
+        dpop: await this.dPoPHeaderCreator.createHeaderToken(url, requestInit.method || 'GET')
       }
     })
   }

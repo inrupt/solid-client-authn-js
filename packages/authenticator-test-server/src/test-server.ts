@@ -76,7 +76,9 @@ app.post('/login', (req, res) => {
           typ: 'JWT'
         },
         algorithm: 'RS256',
-        subject: user.webID
+        subject: user.webID,
+        issuer: ISSUER,
+        expiresIn: '1 hour'
       }
     )
     const redirectUrl = new URL(req.session.authData.redirect_url)

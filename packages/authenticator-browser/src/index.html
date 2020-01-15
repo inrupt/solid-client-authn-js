@@ -9,7 +9,13 @@
         })
       }
       function fetch() {
-        solidAuthenticator.fetch('https://jackson.solid.community/cool/stuff', {})
+        solidAuthenticator.fetch('http://localhost:10100/', {})
+          .then((result) => {
+            console.log(result)
+          })
+          .catch((err) => {
+            console.error(err)
+          })
       }
     </script>
   </head>
