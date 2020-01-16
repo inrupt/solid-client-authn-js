@@ -64,11 +64,13 @@ app.post('/login', (req, res) => {
     const dpopToken = JWT.decode(req.session.authData.dpop, {
       complete: true
     })
-    const cnf = (dpopToken.header as { [key: string]: any }).jwk
+    const jwk = (dpopToken.header as { [key: string]: any }).jwk
 
     const token: string = JWT.sign(
       {
-        cnf
+        cnf: {
+          jwk
+        }
       },
       keystore.keys[0],
       {
