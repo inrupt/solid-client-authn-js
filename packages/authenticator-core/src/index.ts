@@ -24,6 +24,7 @@ import BearerAuthenticatedFetcher from './authenticatedFetch/bearer/BearerAuthen
 import DPoPHeaderCreator, { IDPoPHeaderCreator } from './util/dpop/DPoPHeaderCreator'
 import DPoPClientKeyManager, { IDPoPClientKeyManager } from './util/dpop/DPoPClientKeyManager'
 import StorageRetriever, { IStorageRetriever } from './util/StorageRetriever'
+import UUIDGenerator, { IUUIDGenerator } from './util/UUIDGenerator'
 
 // Util
 container.register<IFetcher>('fetcher', {
@@ -37,6 +38,9 @@ container.register<IDPoPClientKeyManager>('dPoPClientKeyManager', {
 })
 container.register<IStorageRetriever>('storageRetriever', {
   useClass: StorageRetriever
+})
+container.register<IUUIDGenerator>('uuidGenerator', {
+  useClass: UUIDGenerator
 })
 
 // Authenticated Fetcher

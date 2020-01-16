@@ -59,9 +59,6 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     // Update store with fetched config
     await this.storage.set(this.getLocalStorageKey(issuer), JSON.stringify(issuerConfig))
 
-    console.log('ISSUER CONFIG')
-    console.log(issuerConfig)
-
     return issuerConfig
   }
 }
