@@ -23,7 +23,8 @@ export default class BrowserJoseUtility implements IJoseUtility {
     parameters?: BasicParameters,
     isPrivate?: boolean
   ): Promise<JSONWebKey> {
-    return (await JWK.createKey(kty, crvBitlength, parameters)) as JSONWebKey
+    const key = await JWK.createKey(kty, crvBitlength, parameters)
+    return key.toJSON(true) as JSONWebKey
   }
 
   async signJWT (
@@ -31,7 +32,8 @@ export default class BrowserJoseUtility implements IJoseUtility {
     key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
     options?: JoseJWT.SignOptions
   ): Promise<string> {
-    const convertedKey: string = (await JWK.asKey(key, 'pem')).toPEM()
+    const parsedKey = await JWK.asKey(key)
+    const convertedKey: string = parsedKey.toPEM(true)
     const signed = JWT.sign(payload, convertedKey, {
       ...options as JWT.SignOptions
     })

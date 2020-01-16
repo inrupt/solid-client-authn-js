@@ -2,6 +2,7 @@ import URL from 'url-parse'
 import { inject, injectable } from 'tsyringe'
 import IJoseUtility from '../../authenticator/IJoseUtility'
 import { IDPoPClientKeyManager } from './DPoPClientKeyManager'
+import { IUUIDGenerator } from '../UUIDGenerator'
 
 export interface IDPoPHeaderCreator {
   createHeaderToken (
@@ -14,7 +15,8 @@ export interface IDPoPHeaderCreator {
 export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
   constructor (
     @inject('joseUtility') private joseUtility: IJoseUtility,
-    @inject('dPoPClientKeyManager') private dPoPClientKeyManager: IDPoPClientKeyManager
+    @inject('dPoPClientKeyManager') private dPoPClientKeyManager: IDPoPClientKeyManager,
+    @inject('uuidGenerator') private uuidGenerator: IUUIDGenerator
   ) {}
 
   async createHeaderToken (
@@ -25,7 +27,8 @@ export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
     return this.joseUtility.signJWT(
       {
         htu: audience.toString(),
-        htm: method
+        htm: method,
+        jti: this.uuidGenerator.v4()
       },
       clientKey,
       {
@@ -33,7 +36,8 @@ export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
           jwk: await this.joseUtility.privateJWKToPublicJWK(clientKey),
           typ: 'dpop+jwt'
         },
-        expiresIn: '1 hour'
+        expiresIn: '1 hour',
+        algorithm: 'RS256'
       }
     )
   }
