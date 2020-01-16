@@ -32,7 +32,7 @@ export default class DPoPClientKeyManager implements IDPoPClientKeyManager {
 
     if (!jwk) {
       // TODO: differentiate between what a server supports instead of hard coding rsa?
-      jwk = await this.joseUtility.generateJWK('RSA', 256, {
+      jwk = await this.joseUtility.generateJWK('RSA', 512, {
         alg: 'RSA',
         use: 'sig'
       })
