@@ -7,8 +7,6 @@ import URL from 'url-parse'
 import ILoginHandler from '../login/ILoginHandler'
 import ILoginOptions from '../login/ILoginOptions'
 import IDPoPRequestCredentials from '../util/dpop/IDPoPRequestCredentials'
-import { IFetcher } from '../util/Fetcher'
-import NotImplementedError from '../util/errors/NotImplementedError'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
@@ -16,9 +14,7 @@ export default class Authenticator extends EventEmitter {
   constructor (
     @inject('storage') private storage: IStorage,
     @inject('authenticatedFetcher') private authenticatedFetcher: IAuthenticatedFetcher,
-    @inject('loginHandler') private loginHandler: ILoginHandler,
-    // TODO: remove this after temporary use
-    @inject('fetcher') private fetcher: IFetcher
+    @inject('loginHandler') private loginHandler: ILoginHandler
   ) {
     super()
   }
