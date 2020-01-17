@@ -21,6 +21,7 @@
   "devDependencies": {
     "@types/jest": "^24.0.24",
     "jest": "^24.9.0",
+    "jest-fetch-mock": "^3.0.1",
     "tsc-watch": "^4.0.0",
     "tslint": "^5.20.1",
     "tslint-config-standard": "^9.0.0",
