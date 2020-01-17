@@ -1,3 +1,6 @@
+/**
+ * Responsible for selecting the correct OIDCHandler to handle the provided OIDC Options
+ */
 import AggregateHandler from '../../util/handlerPattern/AggregateHandler'
 import { injectable, injectAll } from 'tsyringe'
 import IOIDCHandler from './IOIDCHandler'

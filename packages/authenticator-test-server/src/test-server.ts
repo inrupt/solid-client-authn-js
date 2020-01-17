@@ -1,3 +1,6 @@
+/**
+ * A server against which acceptance tests may be run
+ */
 import express, { response } from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'

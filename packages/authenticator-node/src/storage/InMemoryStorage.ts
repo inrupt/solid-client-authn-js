@@ -1,3 +1,6 @@
+/**
+ * In memory storage compatible with NodeJS
+ */
 import IStorage from '@solid/authenticator-core/dist/authenticator/IStorage'
 
 export default class InMemoryStorage implements IStorage {

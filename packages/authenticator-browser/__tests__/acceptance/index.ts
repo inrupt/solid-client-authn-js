@@ -1,3 +1,8 @@
+/**
+ * Acceptance test for the browser. Uses TestCafe to open up browser windows and go through auth
+ * and fetch flows
+ */
+
 import { Selector } from 'testcafe'
 
 fixture('Index').page('http://localhost:9000/')

@@ -1,3 +1,6 @@
+/**
+ * Handler for the Client Credentials Flow
+ */
 import IOIDCHandler from '../IOIDCHandler'
 import IOIDCOptions from '../IOIDCOptions'
 import NotImplementedError from '../../../util/errors/NotImplementedError'

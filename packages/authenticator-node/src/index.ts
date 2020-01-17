@@ -1,3 +1,6 @@
+/**
+ * Top Level document for authenticator-node
+ */
 import AuthenticatorCore from '@solid/authenticator-core'
 import InMemoryStorage from './storage/InMemoryStorage'
 import NodeJoseUtility from './NodeJoseUtility'

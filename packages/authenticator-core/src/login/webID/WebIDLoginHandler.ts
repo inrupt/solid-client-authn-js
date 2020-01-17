@@ -1,3 +1,6 @@
+/**
+ * Handles login if a user's webid was provided
+ */
 import ILoginHandler from '../ILoginHandler'
 import { URL } from 'url'
 import ILoginOptions from '../ILoginOptions'

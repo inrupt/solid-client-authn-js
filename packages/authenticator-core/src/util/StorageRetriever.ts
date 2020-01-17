@@ -1,8 +1,18 @@
+/**
+ * A helper class that will validate items taken from local storage
+ */
 import { injectable, inject } from 'tsyringe'
 import IStorage from '../authenticator/IStorage'
 import validateSchema from './validateSchema'
 
 export interface IStorageRetriever {
+  /**
+   * Retrieve from local storage
+   * @param key The key of the item
+   * @param schema The schema it should follow. If it does not follow this schema, it will be
+   * deleted
+   * @param postProcess A function that can be applied after the item is retrieved
+   */
   retrieve (
     key: string,
     schema?: Object,

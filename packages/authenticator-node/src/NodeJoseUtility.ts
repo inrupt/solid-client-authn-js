@@ -1,3 +1,6 @@
+/**
+ * File for NodeJS-compatible JOSE
+ */
 import {
   JWKECKey,
   ECCurve,
@@ -19,13 +22,16 @@ export default class NodeJoseUtility implements IJoseUtility {
     parameters?: BasicParameters,
     isPrivate?: boolean
   ): Promise<JSONWebKey> {
-    throw new NotImplementedError('browserGenerateJWK')
+    throw new NotImplementedError('nodeGenerateJWK')
+  }
+  privateJWKToPublicJWK (key: JSONWebKey): Promise<JSONWebKey> {
+    throw new NotImplementedError('nodePrivateJWKToPublicJWK')
   }
   signJWT (
     payload: Object,
     key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
     options?: JWT.SignOptions
   ): Promise<string> {
-    throw new NotImplementedError('browserSignJWT')
+    throw new NotImplementedError('nodeSignJWT')
   }
 }

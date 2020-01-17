@@ -1,3 +1,7 @@
+/**
+ * The top level file that is run within the web browser.
+ */
+
 import Authenticator from './index'
 import URL from 'url-parse'
 

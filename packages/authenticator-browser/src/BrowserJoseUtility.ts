@@ -1,3 +1,7 @@
+/**
+ * Jose utility compatible with the Web Browser
+ */
+
 import {
   JWKECKey,
   ECCurve,

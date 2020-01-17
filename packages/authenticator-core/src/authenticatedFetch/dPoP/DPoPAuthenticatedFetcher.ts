@@ -1,3 +1,6 @@
+/**
+ * Responsible for sending DPoP Enabled requests
+ */
 import IAuthenticatedFetcher from '../IAuthenticatedFetcher'
 import IRequestCredentials from '../IRequestCredentials'
 import ConfigurationError from '../../util/errors/ConfigurationError'

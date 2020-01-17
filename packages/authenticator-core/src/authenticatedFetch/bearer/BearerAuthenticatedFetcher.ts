@@ -1,3 +1,6 @@
+/**
+ * Responsible for sending fetch requests given a token that is not DPoP compatible
+ */
 import IAuthenticatedFetcher from '../IAuthenticatedFetcher'
 import URL from 'url-parse'
 import IRequestCredentials from '../IRequestCredentials'

@@ -1,3 +1,6 @@
+/**
+ * Handler for the Legacy Implicit Flow
+ */
 import IOIDCHandler from '../IOIDCHandler'
 import IOIDCOptions from '../IOIDCOptions'
 import URL from 'url-parse'

@@ -1,3 +1,7 @@
+/**
+ * An ajv schema defining the shape of an openid-configuration
+ */
+
 // TODO: there are many enums that are not filled out in this. They must be filled out
 // TODO: REQUIRED elements are not specified
 
