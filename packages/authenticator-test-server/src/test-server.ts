@@ -95,4 +95,9 @@ app.post('/login', (req, res) => {
   }
 })
 
+app.get('/storage', (req, res) => {
+  // TODO: inspect token
+  res.send('Success')
+})
+
 app.listen(PORT, () => console.log(`Test Server listening on port ${PORT}`))

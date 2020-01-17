@@ -9,9 +9,11 @@
         })
       }
       function fetch() {
-        solidAuthenticator.fetch('http://localhost:10100/', {})
+        solidAuthenticator.fetch('http://localhost:9001/storage', {})
           .then((result) => {
-            console.log(result)
+            result.text().then((text) => {
+              document.getElementById("fetchResult").value = text
+            })
           })
           .catch((err) => {
             console.error(err)
@@ -21,7 +23,11 @@
   </head>
   <body>
     <h1>Solid Authenticator Test Page</h1>
-    <button onclick="loginUser()">Log In</button>
-    <button onclick="fetch()">Fetch</button>
+    <button onclick="loginUser()" id="loginButton">Log In</button>
+    <br />
+    <br />
+    <button onclick="fetch()" id="fetchButton">Fetch</button>
+    <br />
+    <textarea id="fetchResult"></textarea>
   </body>
 </html>
