@@ -1,3 +1,6 @@
+/**
+ * Creates a DPoP JWT to be embedded in the header
+ */
 import URL from 'url-parse'
 import { inject, injectable } from 'tsyringe'
 import IJoseUtility from '../../authenticator/IJoseUtility'
@@ -5,6 +8,11 @@ import { IDPoPClientKeyManager } from './DPoPClientKeyManager'
 import { IUUIDGenerator } from '../UUIDGenerator'
 
 export interface IDPoPHeaderCreator {
+  /**
+   * Creates the DPoP Header token
+   * @param audience The URL of the RS
+   * @param method The HTTP method that is being used
+   */
   createHeaderToken (
     audience: URL,
     method: string

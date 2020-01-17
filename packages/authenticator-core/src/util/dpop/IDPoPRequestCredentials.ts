@@ -1,3 +1,6 @@
+/**
+ * A request credential specific to DPoP Requests
+ */
 import IRequestCredentials from '../../authenticatedFetch/IRequestCredentials'
 
 export default interface IDPoPRequestCredentials extends IRequestCredentials {

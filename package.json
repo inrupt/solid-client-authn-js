@@ -7,7 +7,7 @@
     "build": "lerna run build --stream",
     "pub": "lerna publish",
     "lint": "lerna run lint --stream",
-    "test": "lerna run build-core --stream && lerna run test --stream",
+    "test": "concurrently \"lerna run test-server --stream\" \"lerna run build-core --stream && lerna run test --stream\"",
     "unit-test": "lerna run build-core --stream && lerna run unit-test --stream",
     "acceptance-test": "concurrently \"lerna run test-server --stream\" \"lerna run build-core --stream && lerna run browser-acceptance-test --stream\"",
     "core-test": "lerna run core-test --stream",

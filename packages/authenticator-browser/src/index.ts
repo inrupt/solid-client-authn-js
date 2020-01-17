@@ -1,3 +1,6 @@
+/**
+ * Top level file for the authenticator-browser
+ */
 import AuthenticatorCore from '@solid/authenticator-core'
 import InMemoryStorage from './storage/InMemoryStorage'
 import BrowserJoseUtility from './BrowserJoseUtility'

@@ -1,3 +1,6 @@
+/**
+ * An implementation of storage that uses a browser's local storage
+ */
 import IStorage from '@solid/authenticator-core/dist/authenticator/IStorage'
 import { get, set, remove } from 'local-storage'
 

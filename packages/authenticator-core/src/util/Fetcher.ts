@@ -1,3 +1,6 @@
+/**
+ * A wrapper method to wrap the standard w3 fetch library
+ */
 import fetch from 'cross-fetch'
 import URL from 'url-parse'
 

@@ -1,3 +1,6 @@
+/**
+ * Top Level core document. Responsible for setting up the dependency graph
+ */
 import 'reflect-metadata'
 import { container } from 'tsyringe'
 import Authenticator from './authenticator/Authenticator'

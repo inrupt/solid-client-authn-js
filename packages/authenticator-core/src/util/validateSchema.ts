@@ -1,3 +1,6 @@
+/**
+ * A wrapper function for AJV schema validation
+ */
 import Ajv from 'ajv'
 
 export function compileTypeof (type: string) {

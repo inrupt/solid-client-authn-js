@@ -1,4 +1,6 @@
-
+/**
+ * Function to retieve the openid-configuration for the IDP
+ */
 export default function getOpenIdConfig (options: {
   issuer: string
 }): Object {

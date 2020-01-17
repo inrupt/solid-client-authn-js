@@ -1,3 +1,6 @@
+/**
+ * Test for DPoPAuthenticatedFetcher
+ */
 import 'reflect-metadata'
 import DPoPAuthenticatedFetcher from '../../../src/authenticatedFetch/dPoP/DPoPAuthenticatedFetcher'
 import { IDPoPHeaderCreator } from '../../../src/util/dpop/DPoPHeaderCreator'
@@ -5,7 +8,6 @@ import { IFetcher } from '../../../src/util/Fetcher'
 import URL from 'url-parse'
 import IRequestCredentials from '../../../src/authenticatedFetch/IRequestCredentials'
 import mFetch from 'jest-fetch-mock'
-import ConfigurationError from '../../../src/util/errors/ConfigurationError'
 const mockFetch = mFetch as any
 
 describe('DPoPAuthenticatedFetcher', () => {
@@ -33,9 +35,11 @@ describe('DPoPAuthenticatedFetcher', () => {
     // Fetcher
     FetcherResponse = mockFetch.mockResponse('someResponse')
 
-    FetcherMockFunction = jest.fn(async (creds: IRequestCredentials, url: URL, init: RequestInit) => {
-      return FetcherResponse
-    })
+    FetcherMockFunction = jest.fn(
+      async (creds: IRequestCredentials, url: URL, init: RequestInit) => {
+        return FetcherResponse
+      }
+    )
 
     const FetcherMock = jest.fn<IFetcher, any[]>(() => ({
       fetch: FetcherMockFunction as any
@@ -48,28 +52,29 @@ describe('DPoPAuthenticatedFetcher', () => {
   })
 
   describe('canHandle', () => {
-    it ('accepts configs with type dpop', async () => {
+    it('accepts configs with type dpop', async () => {
       expect(
-        await dPoPAuthenticatedFetcher.canHandle({ type: 'dpop' }, new URL('http://example.com'), {})
+        await dPoPAuthenticatedFetcher
+          .canHandle({ type: 'dpop' }, new URL('http://example.com'), {})
       ).toBe(true)
     })
 
-    it ('rejects configs without type dpop', async () => {
+    it('rejects configs without type dpop', async () => {
       expect(
-        await dPoPAuthenticatedFetcher.canHandle({ type: 'bearer' }, new URL('http://example.com'), {})
+        await dPoPAuthenticatedFetcher
+          .canHandle({ type: 'bearer' }, new URL('http://example.com'), {})
       ).toBe(false)
     })
   })
 
   describe('handle', () => {
-    it ('should throw an error on a bad config', () => {
-      expect(
-        dPoPAuthenticatedFetcher.handle(
-          { type: 'bad' },
-          new URL('https://bad.com'),
-          {}
-        )
-      ).rejects.toThrowError()
+    it('should throw an error on a bad config', () => {
+      /* tslint:disable */
+      expect(dPoPAuthenticatedFetcher.handle(
+        { type: 'bad' },
+        new URL('https://bad.com'),
+        {}
+      )).rejects.toThrowError()
     })
 
     it ('handles request properly', async () => {

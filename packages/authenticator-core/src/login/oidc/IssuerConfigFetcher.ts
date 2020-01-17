@@ -1,3 +1,6 @@
+/**
+ * Responsible for fetching an IDP configuration
+ */
 import IIssuerConfig from './IIssuerConfig'
 import URL from 'url-parse'
 import { injectable, inject } from 'tsyringe'
@@ -8,6 +11,10 @@ import { IStorageRetriever } from '../../util/StorageRetriever'
 import IStorage from '../../authenticator/IStorage'
 
 export interface IIssuerConfigFetcher {
+  /**
+   * Fetches the configuration
+   * @param issuer URL of the IDP
+   */
   fetchConfig (issuer: URL): Promise<IIssuerConfig>
 }
 

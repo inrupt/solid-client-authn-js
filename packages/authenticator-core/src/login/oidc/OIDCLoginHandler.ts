@@ -1,3 +1,7 @@
+/**
+ * Handles Common OIDC login functions (Like fetching the configuration)
+ */
+
 import { injectable, inject } from 'tsyringe'
 import ILoginHandler from '../ILoginHandler'
 import ILoginOptions from '../ILoginOptions'

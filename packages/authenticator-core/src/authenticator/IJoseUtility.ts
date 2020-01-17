@@ -1,3 +1,6 @@
+/**
+ * Interface defining how each environment should define its crypto system
+ */
 import {
   ECCurve,
   BasicParameters,
@@ -7,6 +10,13 @@ import {
 } from 'jose'
 
 export default interface IJoseUtility {
+  /**
+   * Generates a keystore
+   * @param kty Type of key
+   * @param crv A curve or bitlength
+   * @param parameters Parameters to generate the key
+   * @param isPrivate True if a private token should be generated
+   */
   generateJWK (
     kty: 'EC',
     crv?: ECCurve,
@@ -30,9 +40,19 @@ export default interface IJoseUtility {
     bitlength?: number,
     parameters?: BasicParameters
   ): Promise<JSONWebKey>
+  /**
+   * Converts a privake key to a public key
+   * @param jwk The given private key
+   */
   privateJWKToPublicJWK (
     jwk: JSONWebKey
   ): Promise<JSONWebKey>
+  /**
+   * Creates a JSON Web Token
+   * @param payload Custom fields to be included
+   * @param key Private JWK
+   * @param options Common fields on tokens
+   */
   signJWT (
     payload: Object,
     key: JSONWebKey,

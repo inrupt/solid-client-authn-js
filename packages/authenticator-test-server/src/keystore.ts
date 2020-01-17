@@ -1,3 +1,7 @@
+/**
+ * A Keystore for the test server
+ * DO NOT USE THIS KEYSTORE IN PRODUCTION!!!
+ */
 import { JSONWebKey } from 'jose'
 
 const keystore: { keys: JSONWebKey[] } = {

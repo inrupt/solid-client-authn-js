@@ -1,3 +1,6 @@
+/**
+ * A wrapper class for uuid
+ */
 import uuid from 'uuid'
 
 export interface IUUIDGenerator {

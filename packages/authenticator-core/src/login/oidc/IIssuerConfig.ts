@@ -1,3 +1,6 @@
+/**
+ * Interface to define the configuration that an identity provider can return
+ */
 import URL from 'url-parse'
 
 export default interface IIssuerConfig {

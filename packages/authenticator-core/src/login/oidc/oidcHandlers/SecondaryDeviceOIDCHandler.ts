@@ -1,3 +1,6 @@
+/**
+ * Handler for the Device Flow on the Secondary Device
+ */
 import IOIDCHandler from '../IOIDCHandler'
 import IOIDCOptions from '../IOIDCOptions'
 import NotImplementedError from '../../../util/errors/NotImplementedError'
