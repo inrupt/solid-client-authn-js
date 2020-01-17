@@ -28,7 +28,8 @@ export default class DPoPAuthenticatedFetcher implements IAuthenticatedFetcher {
     url: URL,
     requestInit?: RequestInit
   ): Promise<Response> {
-    if (!this.canHandle(requestCredentials, url, requestInit)) {
+    if (!await this.canHandle(requestCredentials, url, requestInit)) {
+      console.log(2)
       throw new ConfigurationError(`DPoP Authenticated Fetcher Cannot handle ${requestCredentials}`)
     }
     const dPoPRequestCredentials: IDPoPRequestCredentials =
