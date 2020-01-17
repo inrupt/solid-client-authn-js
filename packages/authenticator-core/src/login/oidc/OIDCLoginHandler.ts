@@ -50,6 +50,7 @@ export default class OIDCLoginHandler implements ILoginHandler {
     }
 
     // Generate DPoP Key if needed
+    // TODO: it might be a good idea to put DPoP related things outside of this file
     if (OIDCOptions.dpop) {
       await this.dPoPClientKeyManager.generateClientKeyIfNotAlready(OIDCOptions)
     }
