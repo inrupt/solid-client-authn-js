@@ -1,26 +1,23 @@
-// import IRequestCredentials from '../../src/authenticatedFetch/IRequestCredentials'
-// import { IFetcher } from '../../src/util/Fetcher'
-// const mockFetch = mFetch as any
-// import URL from 'url-parse'
+import { IStorageRetriever } from '../../src/util/StorageRetriever'
 
-// export default function StorageRetrieverMocks () {
-//   const StorageRetrieverResponse = {
-//     someObject: 'someObject'
-//   }
+export default function StorageRetrieverMocks () {
+  const StorageRetrieverMockResponse: Object = {
+    someKey: 'someString'
+  }
 
-//   const StorageRetrieverMockFunction = jest.fn(
-//     async (creds: IRequestCredentials, url: URL, init: RequestInit) => {
-//       return StorageRetrieverResponse
-//     }
-//   )
+  const StorageRetrieverMockFunction = jest.fn(
+    async (key: string) => {
+      return StorageRetrieverMockResponse
+    }
+  )
 
-//   const FetcherMock = jest.fn<IFetcher, any[]>(() => ({
-//     fetch: FetcherMockFunction as any
-//   }))
+  const StorageRetrieverMock: () => IStorageRetriever = jest.fn<IStorageRetriever, any[]>(() => ({
+    retrieve: StorageRetrieverMockFunction
+  }))
 
-//   return {
-//     FetcherResponse,
-//     FetcherMock,
-//     FetcherMockFunction
-//   }
-// }
+  return {
+    StorageRetrieverMockResponse,
+    StorageRetrieverMockFunction,
+    StorageRetrieverMock
+  }
+}
