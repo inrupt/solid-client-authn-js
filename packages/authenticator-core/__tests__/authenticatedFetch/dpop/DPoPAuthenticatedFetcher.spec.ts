@@ -3,12 +3,10 @@
  */
 import 'reflect-metadata'
 import DPoPAuthenticatedFetcher from '../../../src/authenticatedFetch/dPoP/DPoPAuthenticatedFetcher'
-import { IDPoPHeaderCreator } from '../../../src/util/dpop/DPoPHeaderCreator'
-import { IFetcher } from '../../../src/util/Fetcher'
 import URL from 'url-parse'
 import IRequestCredentials from '../../../src/authenticatedFetch/IRequestCredentials'
-import mFetch from 'jest-fetch-mock'
-const mockFetch = mFetch as any
+import DPoPHeaderCreatorMocks from '../../util/dpop/DPoPHeaderCrator.mock'
+import FetcherMocks from '../../util/Fetcher.mock'
 
 describe('DPoPAuthenticatedFetcher', () => {
 
@@ -22,32 +20,18 @@ describe('DPoPAuthenticatedFetcher', () => {
 
   beforeEach(() => {
     // DPoPHeaderCreator
-    DPoPHeaderCreatorResponse = 'someToken'
-
-    DPoPHeaderCreatorMockFunction = jest.fn(async (audience: URL, method: string) => {
-      return DPoPHeaderCreatorResponse
-    })
-
-    const DPoPHeaderCreatorMock = jest.fn<IDPoPHeaderCreator, any[]>(() => ({
-      createHeaderToken: DPoPHeaderCreatorMockFunction
-    }))
+    const dPoPHeaderCreatorMocks = DPoPHeaderCreatorMocks()
+    DPoPHeaderCreatorResponse = dPoPHeaderCreatorMocks.DPoPHeaderCreatorResponse
+    DPoPHeaderCreatorMockFunction = dPoPHeaderCreatorMocks.DPoPHeaderCreatorMockFunction
 
     // Fetcher
-    FetcherResponse = mockFetch.mockResponse('someResponse')
-
-    FetcherMockFunction = jest.fn(
-      async (creds: IRequestCredentials, url: URL, init: RequestInit) => {
-        return FetcherResponse
-      }
-    )
-
-    const FetcherMock = jest.fn<IFetcher, any[]>(() => ({
-      fetch: FetcherMockFunction as any
-    }))
+    const fetcherMocks = FetcherMocks()
+    FetcherResponse = fetcherMocks.FetcherResponse
+    FetcherMockFunction = fetcherMocks.FetcherMockFunction
 
     dPoPAuthenticatedFetcher = new DPoPAuthenticatedFetcher(
-      DPoPHeaderCreatorMock(),
-      FetcherMock()
+      dPoPHeaderCreatorMocks.DPoPHeaderCreatorMock(),
+      fetcherMocks.FetcherMock()
     )
   })
 
