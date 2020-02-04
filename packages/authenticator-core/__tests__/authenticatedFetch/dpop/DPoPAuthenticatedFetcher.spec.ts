@@ -4,48 +4,37 @@
 import 'reflect-metadata'
 import DPoPAuthenticatedFetcher from '../../../src/authenticatedFetch/dPoP/DPoPAuthenticatedFetcher'
 import URL from 'url-parse'
-import IRequestCredentials from '../../../src/authenticatedFetch/IRequestCredentials'
 import DPoPHeaderCreatorMocks from '../../util/dpop/DPoPHeaderCrator.mock'
 import FetcherMocks from '../../util/Fetcher.mock'
 
 describe('DPoPAuthenticatedFetcher', () => {
 
-  let DPoPHeaderCreatorResponse: string
-  let DPoPHeaderCreatorMockFunction: jest.Mock<Promise<string>, [URL, string]>
-
-  let FetcherResponse: any
-  let FetcherMockFunction: jest.Mock<Promise<Response>, [IRequestCredentials, URL, RequestInit]>
-
-  let dPoPAuthenticatedFetcher: DPoPAuthenticatedFetcher
-
-  beforeEach(() => {
-    // DPoPHeaderCreator
+  function mockLibrary () {
     const dPoPHeaderCreatorMocks = DPoPHeaderCreatorMocks()
-    DPoPHeaderCreatorResponse = dPoPHeaderCreatorMocks.DPoPHeaderCreatorResponse
-    DPoPHeaderCreatorMockFunction = dPoPHeaderCreatorMocks.DPoPHeaderCreatorMockFunction
-
-    // Fetcher
     const fetcherMocks = FetcherMocks()
-    FetcherResponse = fetcherMocks.FetcherResponse
-    FetcherMockFunction = fetcherMocks.FetcherMockFunction
-
-    dPoPAuthenticatedFetcher = new DPoPAuthenticatedFetcher(
-      dPoPHeaderCreatorMocks.DPoPHeaderCreatorMock(),
-      fetcherMocks.FetcherMock()
-    )
-  })
+    return {
+      ...dPoPHeaderCreatorMocks,
+      ...fetcherMocks,
+      dPoPAuthenticatedFetcher: new DPoPAuthenticatedFetcher(
+        dPoPHeaderCreatorMocks.DPoPHeaderCreatorMock(),
+        fetcherMocks.FetcherMock()
+      )
+    }
+  }
 
   describe('canHandle', () => {
     it('accepts configs with type dpop', async () => {
+      const mocks = mockLibrary()
       expect(
-        await dPoPAuthenticatedFetcher
+        await mocks.dPoPAuthenticatedFetcher
           .canHandle({ type: 'dpop' }, new URL('http://example.com'), {})
       ).toBe(true)
     })
 
     it('rejects configs without type dpop', async () => {
+      const mocks = mockLibrary()
       expect(
-        await dPoPAuthenticatedFetcher
+        await mocks.dPoPAuthenticatedFetcher
           .canHandle({ type: 'bearer' }, new URL('http://example.com'), {})
       ).toBe(false)
     })
@@ -53,8 +42,9 @@ describe('DPoPAuthenticatedFetcher', () => {
 
   describe('handle', () => {
     it('should throw an error on a bad config', () => {
+      const mocks = mockLibrary()
       /* tslint:disable */
-      expect(dPoPAuthenticatedFetcher.handle(
+      expect(mocks.dPoPAuthenticatedFetcher.handle(
         { type: 'bad' },
         new URL('https://bad.com'),
         {}
@@ -62,25 +52,26 @@ describe('DPoPAuthenticatedFetcher', () => {
     })
 
     it ('handles request properly', async () => {
+      const mocks = mockLibrary()
       const url = new URL('https://example.com')
       const requestCredentials = {
         type: 'dpop',
         authToken: 'someAuthToken'
       }
       const init = {}
-      const response = await dPoPAuthenticatedFetcher.handle(
+      const response = await mocks.dPoPAuthenticatedFetcher.handle(
         requestCredentials,
         url,
         init
       )
-      expect(DPoPHeaderCreatorMockFunction).toHaveBeenCalledWith(url, 'GET')
-      expect(FetcherMockFunction).toHaveBeenCalledWith(url, {
+      expect(mocks.DPoPHeaderCreatorMockFunction).toHaveBeenCalledWith(url, 'GET')
+      expect(mocks.FetcherMockFunction).toHaveBeenCalledWith(url, {
         headers: {
           authorization: `DPOP ${requestCredentials.authToken}`,
-          dpop: DPoPHeaderCreatorResponse
+          dpop: mocks.DPoPHeaderCreatorResponse
         }
       })
-      expect(response).toBe(FetcherResponse)
+      expect(response).toBe(mocks.FetcherResponse)
     })
   })
 

@@ -16,8 +16,8 @@ export default class LegacyImplicitFlowOIDCHandler implements IOIDCHandler {
   ) {}
 
   async canHandle (oidcLoginOptions: IOIDCOptions): Promise<boolean> {
-    return oidcLoginOptions.issuerConfiguration.grant_types_supported &&
-      oidcLoginOptions.issuerConfiguration.grant_types_supported.indexOf('implicit') > -1
+    return !!(oidcLoginOptions.issuerConfiguration.grant_types_supported &&
+      oidcLoginOptions.issuerConfiguration.grant_types_supported.indexOf('implicit') > -1)
   }
 
   async handle (oidcLoginOptions: IOIDCOptions): Promise<void> {

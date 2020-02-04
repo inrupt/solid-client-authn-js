@@ -9,9 +9,10 @@ export default function DPoPHeaderCreatorMocks () {
     return DPoPHeaderCreatorResponse
   })
 
-  const DPoPHeaderCreatorMock = jest.fn<IDPoPHeaderCreator, any[]>(() => ({
-    createHeaderToken: DPoPHeaderCreatorMockFunction
-  }))
+  const DPoPHeaderCreatorMock: () => IDPoPHeaderCreator =
+    jest.fn<IDPoPHeaderCreator, any[]>(() => ({
+      createHeaderToken: DPoPHeaderCreatorMockFunction
+    }))
 
   return {
     DPoPHeaderCreatorResponse,
