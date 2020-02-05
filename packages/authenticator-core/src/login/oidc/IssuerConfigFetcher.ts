@@ -27,11 +27,11 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     @inject('storage') private storage: IStorage
   ) {}
 
-  getLocalStorageKey (issuer: URL) {
+  private getLocalStorageKey (issuer: URL) {
     return `issuerConfig:${issuer.toString()}`
   }
 
-  processConfig (config: { [key: string]: any }): IIssuerConfig {
+  private processConfig (config: { [key: string]: any }): IIssuerConfig {
     return {
       ...config,
       issuer: new URL(config.issuer),
