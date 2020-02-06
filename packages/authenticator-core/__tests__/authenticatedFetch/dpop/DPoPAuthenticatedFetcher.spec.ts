@@ -4,7 +4,7 @@
 import 'reflect-metadata'
 import DPoPAuthenticatedFetcher from '../../../src/authenticatedFetch/dPoP/DPoPAuthenticatedFetcher'
 import URL from 'url-parse'
-import DPoPHeaderCreatorMocks from '../../util/dpop/DPoPHeaderCrator.mock'
+import DPoPHeaderCreatorMocks from '../../util/dpop/DPoPHeaderCreator.mock'
 import FetcherMocks from '../../util/Fetcher.mock'
 
 describe('DPoPAuthenticatedFetcher', () => {
@@ -43,7 +43,7 @@ describe('DPoPAuthenticatedFetcher', () => {
   describe('handle', () => {
     it('should throw an error on a bad config', () => {
       const mocks = mockLibrary()
-      /* tslint:disable */
+      // tslint:disable-next-line
       expect(mocks.dPoPAuthenticatedFetcher.handle(
         { type: 'bad' },
         new URL('https://bad.com'),
@@ -51,7 +51,7 @@ describe('DPoPAuthenticatedFetcher', () => {
       )).rejects.toThrowError()
     })
 
-    it ('handles request properly', async () => {
+    it('handles request properly', async () => {
       const mocks = mockLibrary()
       const url = new URL('https://example.com')
       const requestCredentials = {

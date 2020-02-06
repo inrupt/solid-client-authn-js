@@ -5,7 +5,7 @@ import 'reflect-metadata'
 import IRequestCredentials from '../../../../src/authenticatedFetch/IRequestCredentials'
 import URL from 'url-parse'
 import LegacyImplicitFlowOIDCHandler from '../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOIDCHandler'
-import DPoPHeaderCreatorMocks from '../../../util/dpop/DPoPHeaderCrator.mock'
+import DPoPHeaderCreatorMocks from '../../../util/dpop/DPoPHeaderCreator.mock'
 import FetcherMocks from '../../../util/Fetcher.mock'
 import canHandleTests from './OIDCHandlerCanHandleTests'
 

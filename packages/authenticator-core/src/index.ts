@@ -108,10 +108,10 @@ export default function authenticator (dependencies: {
   return authenticatorContainer.resolve(Authenticator)
 }
 
-export function authenticatedFetch () {
-  // TODO: implement
-}
+// export function authenticatedFetch () {
+//   // TODO: implement
+// }
 
-export function login () {
-  // TODO: Implement
-}
+// export function login () {
+//   // TODO: Implement
+// }

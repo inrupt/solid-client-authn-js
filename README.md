@@ -14,7 +14,7 @@ This is a monorepo that contains projects related to solid authenticator:
 Let's first see how we can initiate a login.
 
 ```typescript
-import { login, getUser } from 'solid-authenticator'
+import { login, getUser } from 'solid-authenticator-browser'
 
 // Get User will return a user object or nothing if no user is logged in
 const user = await getUser()
@@ -30,7 +30,7 @@ if (!user) {
 Using `getUser` to determine if a user is logged in is fine, but it's always better to be alerted once a user has logged in. For this, you can use `onUser`. Then you can use that user to fetch.
 
 ```typescript
-import { onUser } from 'solid-authenticator'
+import { onUser } from 'solid-authenticator-browser'
 
 onUser((user) => {
   console.log(user.webId)
@@ -41,7 +41,7 @@ onUser((user) => {
 It is also possible to fetch without the "user" object. Keep in mind that doing so will not make an authenticated fetch if a user is not logged in.
 
 ```typescript
-import { fetch } from 'solid-authenticator'
+import { fetch } from 'solid-authenticator-browser'
 
 fetch('https://example.com/resource', {
   method: 'post',
@@ -52,7 +52,7 @@ fetch('https://example.com/resource', {
 There may be some cases where you want to manage multiple users logged in at once. For this we can use the `loginUniqueUser` function.
 
 ```typescript
-import { login, getUsers } from 'solid-authenticator'
+import { login, getUsers } from 'solid-authenticator-browser'
 
 const myWebId = 'https://example.com/profile/card#me'
 const users = await getUsers()
@@ -73,8 +73,8 @@ import express from 'express'
 import session from 'express-session'
 import {
   login,
-  userFromRedirectUrl
-} from 'solid-authenticator'
+  handleServerRedirect
+} from 'solid-authenticator-node'
 
 const app = expess()
 
@@ -87,11 +87,11 @@ app.post('/login', (req, res) => {
   if (req.session.user) {
     res.status(400).send('already logged in')
   }
-  const redirectLocation = await login({ 
+  await login({ 
     webId: req.query.webid, // This assumes your front-end has passed the webId into the url query
-    redirectUri: 'https://mysite:3000/redirect'
+    redirectUri: 'https://mysite:3000/redirect',
+    request: req
   })
-  res.redirect(redirectLocation)
 })
 
 app.get('/redirect', async (req, res) => {
@@ -109,3 +109,8 @@ app.get('/solidresource', async (req, res) => {
 
 app.listen(3000)
 ```
+
+### Injecting your custom functionality
+
+Any part of `solid-authenticator` can be modified without the need to commit to the source library. All you need to do is change the dependency tree.
+
