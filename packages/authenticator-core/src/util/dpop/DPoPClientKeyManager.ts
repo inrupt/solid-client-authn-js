@@ -29,7 +29,7 @@ export default class DPoPClientKeyManager implements IDPoPClientKeyManager {
     @inject('storage') private storage: IStorage
   ) {}
 
-  getLocalStorageKey () {
+  private getLocalStorageKey () {
     return `clientKey`
   }
 

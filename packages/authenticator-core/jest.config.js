@@ -8,4 +8,9 @@ module.exports = {
   "transform": {
     "^.+\\.(ts|tsx)?$": "ts-jest"
   },
+  "collectCoverageFrom": [
+    "**/src/**/*.ts",
+    "!**/node_modules/**",
+    "!**/__tests__/**"
+  ]
 }

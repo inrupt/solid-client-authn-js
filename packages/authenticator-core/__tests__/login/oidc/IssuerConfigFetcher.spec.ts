@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import FetcherMocks from '../../util/Fetcher.mock'
 import StorageRetrieverMocks from '../../util/StorageRetriever.mock'
-import StorageMocks from '../../util/Storage.mock'
+import StorageMocks from '../../authenticator/Storage.mock'
 import IssuerConfigFetcher from '../../../src/login/oidc/IssuerConfigFetcher'
 
 /**
@@ -24,6 +24,10 @@ describe('IssuerConfigFetcher', () => {
       )
     }
   }
+
+  it('trivial', () => {
+    expect(true).toBe(true)
+  })
 
   // describe ('fetchConfig', () => {
   //   it ('uses a valid locally stored configuration instead of fetching one', () => {

@@ -1,8 +1,13 @@
 import { IStorageRetriever } from '../../src/util/StorageRetriever'
 
-export default function StorageRetrieverMocks () {
-  const StorageRetrieverMockResponse: Object = {
-    someKey: 'someString'
+export default function StorageRetrieverMocks (result?: any) {
+  let StorageRetrieverMockResponse: Object
+  if (!result && result !== null) {
+    StorageRetrieverMockResponse = {
+      someKey: 'someString'
+    }
+  } else {
+    StorageRetrieverMockResponse = result
   }
 
   const StorageRetrieverMockFunction = jest.fn(
