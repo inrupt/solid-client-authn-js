@@ -36,6 +36,8 @@ export default function validateSchema (
   })
   if (!ajv.validate(schema, item)) {
     let message = `${schema.title ? schema.title : 'schema'} is invalid`
+    // istanbul ignore else: AJV's docs say this should always be set when validation fails,
+    //                       so we cannot test it.
     if (ajv.errors) {
       message += ':'
       message += ajv.errors.map(err => `\n${err.dataPath} ${err.message}`)
