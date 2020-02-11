@@ -40,7 +40,7 @@ export default class StorageRetriever implements IStorageRetriever {
       try {
         const parsedObject = JSON.parse(locallyStored)
         if (schema) {
-          validateSchema(schema, parsedObject, true)
+          validateSchema(schema, parsedObject, { throwError: true })
         }
         if (postProcess) {
           return postProcess(parsedObject)
