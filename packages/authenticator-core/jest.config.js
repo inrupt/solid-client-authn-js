@@ -2,6 +2,7 @@ module.exports = {
   "roots": [
     "<rootDir>"
   ],
+  "clearMocks": true,
   testMatch: [
     "**/__tests__/**/?(*.)+(spec|test).+(ts|tsx|js)"
   ],
