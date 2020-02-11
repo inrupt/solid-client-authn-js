@@ -7,15 +7,15 @@ import URL from 'url-parse'
 export default function FetcherMocks () {
   const FetcherResponse = mockFetch.mockResponse('someResponse')
 
-  const FetcherMockFunction: jest.Mock<Promise<Response>, [IRequestCredentials, URL, RequestInit]> =
+  const FetcherMockFunction =
     jest.fn(
       async (creds: IRequestCredentials, url: URL, init: RequestInit) => {
         return FetcherResponse
       }
     )
 
-  const FetcherMock: () => IFetcher = jest.fn<IFetcher, any[]>(() => ({
-    fetch: FetcherMockFunction as any
+  const FetcherMock = jest.fn(() => ({
+    fetch: FetcherMockFunction
   }))
 
   return {

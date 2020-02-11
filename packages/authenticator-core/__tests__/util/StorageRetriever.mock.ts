@@ -16,7 +16,7 @@ export default function StorageRetrieverMocks (result?: any) {
     }
   )
 
-  const StorageRetrieverMock: () => IStorageRetriever = jest.fn<IStorageRetriever, any[]>(() => ({
+  const StorageRetrieverMock = jest.fn(() => ({
     retrieve: StorageRetrieverMockFunction
   }))
 
