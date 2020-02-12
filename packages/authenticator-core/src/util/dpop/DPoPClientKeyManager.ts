@@ -36,7 +36,7 @@ export default class DPoPClientKeyManager implements IDPoPClientKeyManager {
   async generateClientKeyIfNotAlready (oidcOptions: IOIDCOptions): Promise<void> {
     let jwk: JSONWebKey = (await this.storageRetriever.retrieve(
       this.getLocalStorageKey(),
-      jwkSchema
+      { schema: jwkSchema }
     )) as JSONWebKey
 
     if (!jwk) {
@@ -52,7 +52,7 @@ export default class DPoPClientKeyManager implements IDPoPClientKeyManager {
   async getClientKey (): Promise<JSONWebKey | null> {
     return (await this.storageRetriever.retrieve(
       this.getLocalStorageKey(),
-      jwkSchema
+      { schema: jwkSchema }
     )) as JSONWebKey
   }
 }
