@@ -33,6 +33,11 @@ export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
   ): Promise<string> {
     // TODO: update for multiple signing abilities
     const clientKey = await this.dPoPClientKeyManager.getClientKey()
+
+    if (clientKey === null) {
+      throw new Error('Could not obtain the key to sign the token with.')
+    }
+
     return this.joseUtility.signJWT(
       {
         htu: audience.toString(),
