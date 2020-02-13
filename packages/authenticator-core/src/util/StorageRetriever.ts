@@ -17,7 +17,7 @@ export interface IStorageRetriever {
     key: string,
     schema?: Object,
     postProcess?: (retrievedObject: Object) => Object
-  ): Promise<Object>
+  ): Promise<Object | null>
 }
 
 @injectable()
@@ -32,7 +32,7 @@ export default class StorageRetriever implements IStorageRetriever {
     postProcess?: (retrievedObject: Object) => Object
   ): Promise<Object | null> {
     // Check if key is stored locally
-    const locallyStored: string | null =
+    const locallyStored: string | undefined =
       await this.storage.get(key)
 
     // If it is stored locally, check the validity of the value
