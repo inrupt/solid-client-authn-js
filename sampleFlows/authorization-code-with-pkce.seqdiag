@@ -17,11 +17,12 @@ Alice's OP->Decentphotos WebID: 11. Retrieves WebID
 Decentphotos WebID->Alice's OP:
 note over Alice's OP: 11. Validates redirect protocol with WebID
 note over Alice's OP: 12. Gets Alice's consent
-note over Alice's OP: 13. Generates an access_code
+note over Alice's OP: 13. Generates an id_vc
 Alice's OP->RP: 12. Sends code to redirect protocol
 RP->Alice's OP: 13. Token requst with code and nonce proof
 note over Alice's OP: 14. Validates nonce proof
-Alice's OP->RP: 15. Sends access_token
+Alice's OP->RP: 15. Sends id_vc inside id_token
+
 
 note left of RP: SENDING REQUEST
 note over RP: 1. Creates a pop_token
