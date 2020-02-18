@@ -24,7 +24,7 @@ export default function validateSchema (
   schema: { title?: string, [key: string]: any },
   item: any,
   options: Partial<{
-    throwError: boolean,
+    throwError: boolean
   }> = {}
 ): boolean {
   const ajv = new Ajv()

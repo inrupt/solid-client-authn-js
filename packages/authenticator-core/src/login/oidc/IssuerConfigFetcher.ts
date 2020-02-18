@@ -48,8 +48,8 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       this.getLocalStorageKey(issuer),
       {
         schema: issuerConfigSchema,
-        postProcess: this.processConfig,
-      },
+        postProcess: this.processConfig
+      }
     )) as IIssuerConfig
 
     // If it is not stored locally, fetch it

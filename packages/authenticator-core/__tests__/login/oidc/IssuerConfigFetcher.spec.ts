@@ -12,18 +12,19 @@ describe('IssuerConfigFetcher', () => {
   const defaultMocks = {
     fetchResponse: {} as object,
     storageRetriever: StorageRetrieverMocks().StorageRetrieverMock(),
-    storage: StorageMocks().StorageMock(),
-  };
-  function getMockConfigFetcher(mocks: Partial<typeof defaultMocks> = defaultMocks) {
-    const fetcherMock = FetcherMocks().FetcherMock();
+    storage: StorageMocks().StorageMock()
+  }
+  function getMockConfigFetcher (mocks: Partial<typeof defaultMocks> = defaultMocks) {
+    const fetcherMock = FetcherMocks().FetcherMock()
     fetcherMock.fetch.mockReturnValue(Promise.resolve({
-      json: jest.fn().mockReturnValue(Promise.resolve(mocks.fetchResponse ?? defaultMocks.fetchResponse))
+      json: jest.fn()
+        .mockReturnValue(Promise.resolve(mocks.fetchResponse ?? defaultMocks.fetchResponse))
     }))
     return new IssuerConfigFetcher(
       fetcherMock as any,
       mocks.storageRetriever ?? defaultMocks.storageRetriever,
-      mocks.storage ?? defaultMocks.storage,
-    );
+      mocks.storage ?? defaultMocks.storage
+    )
   }
 
   it('should return the config stored in the storage', async () => {
@@ -38,11 +39,12 @@ describe('IssuerConfigFetcher', () => {
 
   it('should return the fetched config if none was stored in the storage', async () => {
     const storageMock = defaultMocks.storageRetriever
+    // @ts-ignore: Ignore because this mock function should be able to return null
     storageMock.retrieve.mockReturnValueOnce(null)
     const fetchResponse = { some: 'config' }
     const configFetcher = getMockConfigFetcher({
       storageRetriever: storageMock,
-      fetchResponse: fetchResponse,
+      fetchResponse: fetchResponse
     })
 
     const fetchedConfig = await configFetcher.fetchConfig(new URL('https://arbitrary.url'))
@@ -52,6 +54,7 @@ describe('IssuerConfigFetcher', () => {
 
   it('should wrap URLs in url-parse\'s URL object', async () => {
     const storageMock = defaultMocks.storageRetriever
+    // @ts-ignore: Ignore because this mock function should be able to return null
     storageMock.retrieve.mockReturnValueOnce(null)
     const fetchResponse = {
       issuer: 'https://issuer.url',
@@ -59,11 +62,11 @@ describe('IssuerConfigFetcher', () => {
       token_endpoint: 'https://token_endpoint.url',
       userinfo_endpoint: 'https://userinfo_endpoint.url',
       jwks_uri: 'https://jwks_uri.url',
-      registration_endpoint: 'https://registration_endpoint.url',
+      registration_endpoint: 'https://registration_endpoint.url'
     }
     const configFetcher = getMockConfigFetcher({
       storageRetriever: storageMock,
-      fetchResponse: fetchResponse,
+      fetchResponse: fetchResponse
     })
 
     const fetchedConfig = await configFetcher.fetchConfig(new URL('https://arbitrary.url'))
@@ -73,16 +76,22 @@ describe('IssuerConfigFetcher', () => {
     expect(fetchedConfig.token_endpoint).toEqual(new URL('https://token_endpoint.url'))
     expect(fetchedConfig.userinfo_endpoint).toEqual(new URL('https://userinfo_endpoint.url'))
     expect(fetchedConfig.jwks_uri).toEqual(new URL('https://jwks_uri.url'))
-    expect(fetchedConfig.registration_endpoint).toEqual(new URL('https://registration_endpoint.url'))
+    expect(fetchedConfig.registration_endpoint)
+      .toEqual(new URL('https://registration_endpoint.url'))
   })
 
   it('should throw an error if the fetched config could not be converted to JSON', async () => {
     const storageMock = defaultMocks.storageRetriever
+    // @ts-ignore: Ignore because this mock function should be able to return null
     storageMock.retrieve.mockReturnValueOnce(null)
     const mockFetcher = {
-      fetch: () => Promise.resolve({ json: () => { throw new Error('Some error') } }),
+      fetch: () => Promise.resolve({ json: () => { throw new Error('Some error') } })
     }
-    const configFetcher = new IssuerConfigFetcher(mockFetcher as any, storageMock, defaultMocks.storage)
+    const configFetcher = new IssuerConfigFetcher(
+      mockFetcher as any,
+      storageMock,
+      defaultMocks.storage
+    )
 
     await expect(configFetcher.fetchConfig(new URL('https://some.url')))
       .rejects.toThrowError('https://some.url has an invalid configuration: Some error')

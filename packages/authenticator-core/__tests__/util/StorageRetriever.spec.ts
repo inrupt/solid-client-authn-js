@@ -7,7 +7,7 @@ import StorageRetriever from '../../src/util/StorageRetriever'
 describe('StorageRetriever', () => {
   const mockStorage = {
     get: jest.fn(() => Promise.resolve('{"arbitrary": "json"}')),
-    delete: jest.fn(() => Promise.resolve()),
+    delete: jest.fn(() => Promise.resolve())
   }
 
   it('should correctly retrieve valid data from the given storage', async () => {
@@ -28,6 +28,7 @@ describe('StorageRetriever', () => {
   })
 
   it('should return null if data could not be found in the given storage', async () => {
+    // @ts-ignore: Ignore because this mock function should be able to return null
     mockStorage.get.mockReturnValueOnce(Promise.resolve(null))
     const retriever = new StorageRetriever(mockStorage as any)
 
@@ -37,7 +38,7 @@ describe('StorageRetriever', () => {
   })
 
   it('should validate the data from the storage if passed a schema', async () => {
-    const validateSchema: jest.Mock = require.requireMock('../../src/util/validateSchema').default
+    const validateSchema: jest.Mock = jest.requireMock('../../src/util/validateSchema').default
     mockStorage.get.mockReturnValueOnce(Promise.resolve(JSON.stringify({ some: 'data' })))
     const retriever = new StorageRetriever(mockStorage as any)
 
@@ -49,7 +50,7 @@ describe('StorageRetriever', () => {
   })
 
   it('should not validate the data from the storage if not passed a schema', async () => {
-    const validateSchema: jest.Mock = require.requireMock('../../src/util/validateSchema').default
+    const validateSchema: jest.Mock = jest.requireMock('../../src/util/validateSchema').default
     const retriever = new StorageRetriever(mockStorage as any)
 
     await retriever.retrieve('arbitrary key')
@@ -58,14 +59,14 @@ describe('StorageRetriever', () => {
   })
 
   it('should delete data from the storage if it does not pass validation', async () => {
-    const validateSchema: jest.Mock = require.requireMock('../../src/util/validateSchema').default
+    const validateSchema: jest.Mock = jest.requireMock('../../src/util/validateSchema').default
     validateSchema.mockImplementationOnce(() => { throw new Error('Arbitrary error') })
     const retriever = new StorageRetriever(mockStorage as any)
 
     const retrieved = await retriever.retrieve('some key', { schema: { arbitrary: 'schema' } })
 
     expect(mockStorage.delete.mock.calls).toEqual([
-      ['some key'],
+      ['some key']
     ])
     expect(retrieved).toBeNull()
   })
@@ -84,6 +85,7 @@ describe('StorageRetriever', () => {
   })
 
   it('should not run a given postprocessor if the data could not be found', async () => {
+    // @ts-ignore: Ignore because this mock function should be able to return null
     mockStorage.get.mockReturnValueOnce(Promise.resolve(null))
     const retriever = new StorageRetriever(mockStorage as any)
     const postProcessor = jest.fn()
