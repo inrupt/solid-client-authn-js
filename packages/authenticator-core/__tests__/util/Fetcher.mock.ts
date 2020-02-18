@@ -15,7 +15,7 @@ export default function FetcherMocks () {
     )
 
   const FetcherMock = jest.fn(() => ({
-    fetch: FetcherMockFunction
+    fetch: FetcherMockFunction as any
   }))
 
   return {

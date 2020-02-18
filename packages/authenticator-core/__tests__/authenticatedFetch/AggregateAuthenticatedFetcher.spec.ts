@@ -8,10 +8,11 @@ import AggregateHandler from '../../src/util/handlerPattern/AggregateHandler'
 
 describe('AggregateAuthenticatedFetcher', () => {
   it('should pass injected fetchers to its superclass', () => {
+    // tslint:disable-next-line
     new AggregateAuthenticatedFetcher(['Some fetcher'] as any as IAuthenticatedFetcher[])
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
-      [ ['Some fetcher'] ],
+      [ ['Some fetcher'] ]
     ])
   })
 })
