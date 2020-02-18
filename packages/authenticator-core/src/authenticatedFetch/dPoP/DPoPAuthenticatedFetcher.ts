@@ -36,13 +36,17 @@ export default class DPoPAuthenticatedFetcher implements IAuthenticatedFetcher {
     }
     const dPoPRequestCredentials: IDPoPRequestCredentials =
       requestCredentials as IDPoPRequestCredentials
-    // TODO: this should clone requestInit before addint the authorization header
+    const requestInitiWithDefaults = {
+      headers: {},
+      method: 'GET',
+      ...requestInit
+    }
     return this.fetcher.fetch(url, {
       ...requestInit,
       headers: {
-        ...requestInit.headers,
+        ...requestInitiWithDefaults.headers,
         authorization: `DPOP ${dPoPRequestCredentials.authToken}`,
-        dpop: await this.dPoPHeaderCreator.createHeaderToken(url, requestInit.method || 'GET')
+        dpop: await this.dPoPHeaderCreator.createHeaderToken(url, requestInitiWithDefaults.method)
       }
     })
   }
