@@ -46,7 +46,9 @@ app.get('/jwks', (req, res) => {
 })
 
 app.get('/authorize', (req, res) => {
-  req.session.authData = req.query
+  if (req.session) {
+    req.session.authData = req.query
+  }
 
   res.redirect(`${ISSUER}/login`)
 })
@@ -60,10 +62,10 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
-  const user: IUser = USERS.find((user) => {
+  const user: IUser | undefined = USERS.find((user) => {
     return user.username === req.body.username && user.password === req.body.password
   })
-  if (user) {
+  if (user && req.session) {
     const dpopToken = JWT.decode(req.session.authData.dpop, {
       complete: true
     })

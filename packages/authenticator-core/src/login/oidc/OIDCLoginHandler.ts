@@ -34,7 +34,7 @@ export default class OIDCLoginHandler implements ILoginHandler {
 
   async handle (options: ILoginOptions): Promise<void> {
     // Check to ensure the login options are correct
-    const optionsError: Error = this.checkOptions(options)
+    const optionsError: Error | null = this.checkOptions(options)
     if (optionsError) {
       throw optionsError
     }

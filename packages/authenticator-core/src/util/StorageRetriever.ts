@@ -9,14 +9,16 @@ export interface IStorageRetriever {
   /**
    * Retrieve from local storage
    * @param key The key of the item
-   * @param schema The schema it should follow. If it does not follow this schema, it will be
+   * @param options.schema The schema it should follow. If it does not follow this schema, it will be
    * deleted
-   * @param postProcess A function that can be applied after the item is retrieved
+   * @param options.postProcess A function that can be applied after the item is retrieved
    */
   retrieve (
     key: string,
-    schema?: Object,
-    postProcess?: (retrievedObject: Object) => Object
+    options?: Partial<{
+      schema?: Object,
+      postProcess?: (retrievedObject: Object) => Object
+    }>,
   ): Promise<Object>
 }
 
@@ -28,22 +30,24 @@ export default class StorageRetriever implements IStorageRetriever {
 
   async retrieve (
     key: string,
-    schema?: Object,
-    postProcess?: (retrievedObject: Object) => Object
+    options: Partial<{
+      schema: Object,
+      postProcess: (retrievedObject: Object) => Object
+    }> = {},
   ): Promise<Object | null> {
     // Check if key is stored locally
-    const locallyStored: string | null =
+    const locallyStored: string | undefined =
       await this.storage.get(key)
 
     // If it is stored locally, check the validity of the value
     if (locallyStored) {
       try {
         const parsedObject = JSON.parse(locallyStored)
-        if (schema) {
-          validateSchema(schema, parsedObject, { throwError: true })
+        if (options.schema) {
+          validateSchema(options.schema, parsedObject, true)
         }
-        if (postProcess) {
-          return postProcess(parsedObject)
+        if (options.postProcess) {
+          return options.postProcess(parsedObject)
         }
         return parsedObject
       } catch (err) {

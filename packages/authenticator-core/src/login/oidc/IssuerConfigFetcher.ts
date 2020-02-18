@@ -46,8 +46,10 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   async fetchConfig (issuer: URL): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig = (await this.storageRetriever.retrieve(
       this.getLocalStorageKey(issuer),
-      issuerConfigSchema,
-      this.processConfig
+      {
+        schema: issuerConfigSchema,
+        postProcess: this.processConfig,
+      },
     )) as IIssuerConfig
 
     // If it is not stored locally, fetch it
