@@ -18,7 +18,7 @@ export default function StorageMocks (response?: string | null) {
     async (key: string) => { /* void */ }
   )
 
-  const StorageMock: () => IStorage = jest.fn<IStorage, any[]>(() => ({
+  const StorageMock = jest.fn(() => ({
     get: StorageMockGetFunction,
     set: StorageMockSetFunction,
     delete: StorageMockDeleteFunction
