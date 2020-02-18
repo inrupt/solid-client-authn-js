@@ -1,0 +1,36 @@
+title: Legacy Implicit Flow
+
+note left of RP: AUTHORIZATION
+note over RP: 1. Alice navigates to badguys.com
+note over RP: 2. Alice selects her OP or WebID
+RP->Alice's WebId: 2.1 Retrieve Profile
+Alice's WebId->RP:
+RP->Alice's OP: 3. Get OP configuration
+Alice's OP->RP:
+RP->Alice's OP: 4. Get OP JWKS
+Alice's OP->RP:
+note over RP: 5. Generates Private/Public key pair
+note over RP: 6. Saves Private/Public key pair to local storage
+RP->Alice's OP: 7. Authorization Request
+Alice's OP->badguys.com WebId: 8. Retrieves WebID
+badguys.com WebId->Alice's OP:
+note over Alice's OP: 9. Validates redirect_url with WebID
+note over Alice's OP: 10. Gets Alice's consent
+note over Alice's OP: 11. Generates an access_token
+Alice's OP->RP: 12. Returns to redirect_url
+
+note left of RP: SENDING REQUEST
+note over RP: 1. Creates a pop_token
+RP->Bob's Pod (RS): 2. Request sent
+note over Bob's Pod (RS): 3. Checks pop_token Audience
+note over Bob's Pod (RS): 4. Checks client signature
+Bob's Pod (RS)->Alice's WebId: 5. Retrieves Subject Profile
+Alice's WebId->Bob's Pod (RS):
+note over Bob's Pod (RS): 6. Checks Issuer
+Bob's Pod (RS)->Alice's OP: 7. Retrieves OP configuration
+Alice's OP->Bob's Pod (RS):
+Bob's Pod (RS)->Alice's OP: 8. Requests JWKS
+Alice's OP->Bob's Pod (RS):
+note over Bob's Pod (RS): 9. Performs Authentication
+note over Bob's Pod (RS): 10. Performs Authorization
+Bob's Pod (RS)->RP: 11. Returns Result
