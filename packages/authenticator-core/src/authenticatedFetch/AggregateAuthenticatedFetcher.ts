@@ -12,10 +12,7 @@ import URL from 'url-parse'
 export default class AggregateAuthenticatedFetcher
   extends AggregateHandler<[IRequestCredentials, URL, RequestInit], Response>
   implements IAuthenticatedFetcher {
-
-  constructor (
-    @injectAll('authenticatedFetchers') authenticatedFetchers: IAuthenticatedFetcher[]
-  ) {
+  constructor (@injectAll('authenticatedFetchers') authenticatedFetchers: IAuthenticatedFetcher[]) {
     super(authenticatedFetchers)
   }
 }

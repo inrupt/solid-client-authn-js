@@ -5,13 +5,13 @@ import Ajv from 'ajv'
 
 export function compileTypeof (type: string) {
   return (data: any) => {
-    return typeof data === type
+    return typeof data === type // eslint-disable-line valid-typeof
   }
 }
 
 export function compileJoinedStringOf (strings: string[]) {
   return (data: string) => {
-    return !data.split(' ').some(value => strings.indexOf(value) === -1)
+    return !data.split(' ').some(value => strings.includes(value))
   }
 }
 
@@ -40,7 +40,7 @@ export default function validateSchema (
     //                       so we cannot test it.
     if (ajv.errors) {
       message += ':'
-      message += ajv.errors.map(err => `\n${err.dataPath} ${err.message}`)
+      message += ajv.errors.map(err => `\n${err.dataPath} ${err.message}`).toString()
     }
     if (options.throwError) {
       throw new Error(message)

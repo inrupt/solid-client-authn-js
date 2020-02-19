@@ -65,7 +65,6 @@ describe('AggregateHandler', () => {
         { canHandle: false, executeTime: 0, toReturn: '' },
         { canHandle: false, executeTime: 0, toReturn: '' }
       ])
-      // tslint:disable-next-line
       expect(await mocks.aggregateMockHandler.canHandle('something')).toBe(false)
     })
   })
