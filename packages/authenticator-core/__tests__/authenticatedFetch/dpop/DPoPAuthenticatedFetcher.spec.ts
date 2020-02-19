@@ -43,7 +43,6 @@ describe('DPoPAuthenticatedFetcher', () => {
   describe('handle', () => {
     it('should throw an error on a bad config', () => {
       const mocks = mockLibrary()
-      // tslint:disable-next-line
       expect(mocks.dPoPAuthenticatedFetcher.handle(
         { type: 'bad' },
         new URL('https://bad.com'),

@@ -160,7 +160,7 @@ describe('validateSchema', () => {
       )).toBe(false)
     })
 
-    // This test fails (i.e. a subset of the given words validates) not sure yet if it should:
+    // This test fails (i.e. a subset of the given words validates); not sure yet if it should:
     it.skip('should not validate if the checked string includes not all the given words', () => {
       const schema = {
         type: 'object',

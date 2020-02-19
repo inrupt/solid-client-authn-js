@@ -13,11 +13,10 @@ import IDPoPRequestCredentials from '../util/dpop/IDPoPRequestCredentials'
 
 @injectable()
 export default class Authenticator extends EventEmitter {
-
   constructor (
-    @inject('storage') private storage: IStorage,
-    @inject('authenticatedFetcher') private authenticatedFetcher: IAuthenticatedFetcher,
-    @inject('loginHandler') private loginHandler: ILoginHandler
+    @inject('storage') private readonly storage: IStorage,
+    @inject('authenticatedFetcher') private readonly authenticatedFetcher: IAuthenticatedFetcher,
+    @inject('loginHandler') private readonly loginHandler: ILoginHandler
   ) {
     super()
   }
