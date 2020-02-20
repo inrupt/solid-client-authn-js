@@ -11,6 +11,7 @@
         "sourceType": "module"
     },
     "rules": {
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "@typescript-eslint/interface-name-prefix": ["error", "always"]
     }
 }

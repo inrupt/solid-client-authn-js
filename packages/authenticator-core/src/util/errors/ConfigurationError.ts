@@ -7,7 +7,7 @@
 // The workaround is to put istanbul ignore on the constructor
 export default class ConfigurationError extends Error {
   /* istanbul ignore next */
-  constructor (message: string) {
-    super(message)
+  constructor(message: string) {
+    super(message);
   }
 }

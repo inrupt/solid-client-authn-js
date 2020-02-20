@@ -11,6 +11,7 @@
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "test": "npm run lint && npm run node-unit-test && npm run node-acceptance-test",
     "lint": "eslint src/**/*.ts && eslint __tests__/**/*.ts",
+    "lint-fix": "prettier --check \"src/**/*.ts\"",
     "unit-test": "npm run node-unit-test",
     "acceptance-test": "npm run node-acceptance-test",
     "node-test": "npm run test",

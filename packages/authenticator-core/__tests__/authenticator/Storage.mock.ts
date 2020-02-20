@@ -1,28 +1,25 @@
-import { IStorageRetriever } from '../../src/util/StorageRetriever'
-import IStorage from '../../src/authenticator/IStorage'
+import { IStorageRetriever } from "../../src/util/StorageRetriever";
+import IStorage from "../../src/authenticator/IStorage";
 
-export default function StorageMocks (response?: string | null) {
+export default function StorageMocks(response?: string | null) {
+  const StorageMockGetResponse: string = response || '{ "cool": "string" }';
 
-  const StorageMockGetResponse: string = response || '{ "cool": "string" }'
+  const StorageMockGetFunction = jest.fn(async (key: string) => {
+    return StorageMockGetResponse;
+  });
 
-  const StorageMockGetFunction = jest.fn(
-    async (key: string) => {
-      return StorageMockGetResponse
-    }
-  )
-
-  const StorageMockSetFunction = jest.fn(
-    async (key: string, value: string) => { /* void */ }
-  )
-  const StorageMockDeleteFunction = jest.fn(
-    async (key: string) => { /* void */ }
-  )
+  const StorageMockSetFunction = jest.fn(async (key: string, value: string) => {
+    /* void */
+  });
+  const StorageMockDeleteFunction = jest.fn(async (key: string) => {
+    /* void */
+  });
 
   const StorageMock = jest.fn(() => ({
     get: StorageMockGetFunction,
     set: StorageMockSetFunction,
     delete: StorageMockDeleteFunction
-  }))
+  }));
 
   return {
     StorageMockGetResponse,
@@ -30,5 +27,5 @@ export default function StorageMocks (response?: string | null) {
     StorageMockSetFunction,
     StorageMockDeleteFunction,
     StorageMock
-  }
+  };
 }
