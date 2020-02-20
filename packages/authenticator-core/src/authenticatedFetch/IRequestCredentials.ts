@@ -4,5 +4,5 @@
  * @type A string denoting the type of credentials these are
  */
 export default interface IRequestCredentials {
-  type: string
+  type: string;
 }

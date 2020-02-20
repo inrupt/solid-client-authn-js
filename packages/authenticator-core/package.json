@@ -12,6 +12,7 @@
     "build-core": "npm run build",
     "build-core-watch": "tsc-watch --preserveWatchOutput -p tsconfig.build.json",
     "lint": "eslint src/**/*.ts && eslint __tests__/**/*.ts",
+    "lint-fix": "prettier \"src/**/*.ts\" && prettier \"__tests__/**/*.ts\"",
     "test": "npm run lint && npm run unit-test",
     "unit-test": "npm run core-unit-test",
     "core-test": "npm run test",

@@ -1,37 +1,36 @@
 /**
  * Responsible for fetching an IDP configuration
  */
-import IIssuerConfig from './IIssuerConfig'
-import URL from 'url-parse'
-import { injectable, inject } from 'tsyringe'
-import { IFetcher } from '../../util/Fetcher'
-import issuerConfigSchema from './issuerConfigSchema'
-import ConfigurationError from '../../util/errors/ConfigurationError'
-import { IStorageRetriever } from '../../util/StorageRetriever'
-import IStorage from '../../authenticator/IStorage'
+import IIssuerConfig from "./IIssuerConfig";
+import URL from "url-parse";
+import { injectable, inject } from "tsyringe";
+import { IFetcher } from "../../util/Fetcher";
+import issuerConfigSchema from "./issuerConfigSchema";
+import ConfigurationError from "../../util/errors/ConfigurationError";
+import { IStorageRetriever } from "../../util/StorageRetriever";
+import IStorage from "../../authenticator/IStorage";
 
 export interface IIssuerConfigFetcher {
   /**
    * Fetches the configuration
    * @param issuer URL of the IDP
    */
-  fetchConfig (issuer: URL): Promise<IIssuerConfig>
+  fetchConfig(issuer: URL): Promise<IIssuerConfig>;
 }
 
 @injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
-
-  constructor (
-    @inject('fetcher') private fetcher: IFetcher,
-    @inject('storageRetriever') private storageRetriever: IStorageRetriever,
-    @inject('storage') private storage: IStorage
+  constructor(
+    @inject("fetcher") private fetcher: IFetcher,
+    @inject("storageRetriever") private storageRetriever: IStorageRetriever,
+    @inject("storage") private storage: IStorage
   ) {}
 
-  private getLocalStorageKey (issuer: URL) {
-    return `issuerConfig:${issuer.toString()}`
+  private getLocalStorageKey(issuer: URL) {
+    return `issuerConfig:${issuer.toString()}`;
   }
 
-  private processConfig (config: { [key: string]: any }): IIssuerConfig {
+  private processConfig(config: { [key: string]: any }): IIssuerConfig {
     return {
       ...config,
       issuer: new URL(config.issuer),
@@ -40,34 +39,39 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       userinfo_endpoint: new URL(config.userinfo_endpoint),
       jwks_uri: new URL(config.jwks_uri),
       registration_endpoint: new URL(config.registration_endpoint)
-    } as IIssuerConfig
+    } as IIssuerConfig;
   }
 
-  async fetchConfig (issuer: URL): Promise<IIssuerConfig> {
+  async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig = (await this.storageRetriever.retrieve(
       this.getLocalStorageKey(issuer),
       {
         schema: issuerConfigSchema,
         postProcess: this.processConfig
       }
-    )) as IIssuerConfig
+    )) as IIssuerConfig;
 
     // If it is not stored locally, fetch it
     if (!issuerConfig) {
-      const wellKnownUrl = new URL(issuer.toString())
-      wellKnownUrl.set('pathname', '/.well-known/openid-configuration')
-      const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl)
+      const wellKnownUrl = new URL(issuer.toString());
+      wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
+      const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
       // Check the validity of the fetched config
       try {
-        issuerConfig = this.processConfig(await issuerConfigRequestBody.json())
+        issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
       } catch (err) {
-        throw new ConfigurationError(`${issuer.toString()} has an invalid configuration: ${err.message}`)
+        throw new ConfigurationError(
+          `${issuer.toString()} has an invalid configuration: ${err.message}`
+        );
       }
     }
 
     // Update store with fetched config
-    await this.storage.set(this.getLocalStorageKey(issuer), JSON.stringify(issuerConfig))
+    await this.storage.set(
+      this.getLocalStorageKey(issuer),
+      JSON.stringify(issuerConfig)
+    );
 
-    return issuerConfig
+    return issuerConfig;
   }
 }

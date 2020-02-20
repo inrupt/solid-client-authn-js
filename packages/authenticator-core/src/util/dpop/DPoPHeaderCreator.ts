@@ -1,11 +1,11 @@
 /**
  * Creates a DPoP JWT to be embedded in the header
  */
-import URL from 'url-parse'
-import { inject, injectable } from 'tsyringe'
-import IJoseUtility from '../../authenticator/IJoseUtility'
-import { IDPoPClientKeyManager } from './DPoPClientKeyManager'
-import { IUUIDGenerator } from '../UUIDGenerator'
+import URL from "url-parse";
+import { inject, injectable } from "tsyringe";
+import IJoseUtility from "../../authenticator/IJoseUtility";
+import { IDPoPClientKeyManager } from "./DPoPClientKeyManager";
+import { IUUIDGenerator } from "../UUIDGenerator";
 
 export interface IDPoPHeaderCreator {
   /**
@@ -13,29 +13,24 @@ export interface IDPoPHeaderCreator {
    * @param audience The URL of the RS
    * @param method The HTTP method that is being used
    */
-  createHeaderToken (
-    audience: URL,
-    method: string
-  ): Promise<string>
+  createHeaderToken(audience: URL, method: string): Promise<string>;
 }
 
 @injectable()
 export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
-  constructor (
-    @inject('joseUtility') private joseUtility: IJoseUtility,
-    @inject('dPoPClientKeyManager') private dPoPClientKeyManager: IDPoPClientKeyManager,
-    @inject('uuidGenerator') private uuidGenerator: IUUIDGenerator
+  constructor(
+    @inject("joseUtility") private joseUtility: IJoseUtility,
+    @inject("dPoPClientKeyManager")
+    private dPoPClientKeyManager: IDPoPClientKeyManager,
+    @inject("uuidGenerator") private uuidGenerator: IUUIDGenerator
   ) {}
 
-  async createHeaderToken (
-    audience: URL,
-    method: string
-  ): Promise<string> {
+  async createHeaderToken(audience: URL, method: string): Promise<string> {
     // TODO: update for multiple signing abilities
-    const clientKey = await this.dPoPClientKeyManager.getClientKey()
+    const clientKey = await this.dPoPClientKeyManager.getClientKey();
 
     if (clientKey === null) {
-      throw new Error('Could not obtain the key to sign the token with.')
+      throw new Error("Could not obtain the key to sign the token with.");
     }
 
     return this.joseUtility.signJWT(
@@ -48,11 +43,11 @@ export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
       {
         header: {
           jwk: await this.joseUtility.privateJWKToPublicJWK(clientKey),
-          typ: 'dpop+jwt'
+          typ: "dpop+jwt"
         },
-        expiresIn: '1 hour',
-        algorithm: 'RS256'
+        expiresIn: "1 hour",
+        algorithm: "RS256"
       }
-    )
+    );
   }
 }
