@@ -1,6 +1,7 @@
 import IJoseUtility from "../../src/authenticator/IJoseUtility";
 import { BasicParameters, ECCurve, OKPCurve, JSONWebKey, JWT } from "jose";
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function JoseUtilityMocks() {
   const JoseUtilityMockGenerateJWKResponse: JSONWebKey = {
     kty: "RSA",
@@ -35,7 +36,7 @@ export default function JoseUtilityMocks() {
 
   const JoseUtilityMockSignJWTFunction = jest.fn(
     async (
-      payload: Record<string, any>,
+      payload: Record<string, unknown>,
       key: JSONWebKey,
       options?: JWT.SignOptions
     ) => {
@@ -43,7 +44,7 @@ export default function JoseUtilityMocks() {
     }
   );
 
-  const JoseUtilityMock: () => IJoseUtility = jest.fn<IJoseUtility, any[]>(
+  const JoseUtilityMock: () => IJoseUtility = jest.fn<IJoseUtility, unknown[]>(
     () => ({
       generateJWK: JoseUtilityMockGenerateJWKFunction,
       privateJWKToPublicJWK: JoseUtilityMockPrivateJWKToPublicJWKFunction,

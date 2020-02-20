@@ -8,8 +8,8 @@ import NotImplementedError from "../../../src/util/errors/NotImplementedError";
 describe("errors", () => {
   const errors: {
     name: string;
-    class: any;
-    params: any[];
+    class: new (...args: unknown[]) => Error;
+    params: unknown[];
     message: string;
   }[] = [
     {

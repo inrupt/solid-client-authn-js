@@ -46,6 +46,7 @@ export default interface IJoseUtility {
    * @param options Common fields on tokens
    */
   signJWT(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     payload: Record<string, any>,
     key: JSONWebKey,
     options?: JWT.SignOptions

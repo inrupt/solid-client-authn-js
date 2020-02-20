@@ -8,7 +8,7 @@ import AggregateHandler from "../../src/util/handlerPattern/AggregateHandler";
 
 describe("AggregateLoginHandler", () => {
   it("should pass injected handlers to its superclass", () => {
-    new AggregateLoginHandler((["Some handler"] as any) as ILoginHandler[]);
+    new AggregateLoginHandler((["Some handler"] as unknown) as ILoginHandler[]);
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
       [["Some handler"]]

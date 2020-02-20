@@ -1,6 +1,7 @@
 import { IDPoPHeaderCreator } from "../../../src/util/dpop/DPoPHeaderCreator";
 import URL from "url-parse";
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function DPoPHeaderCreatorMocks() {
   // DPoPHeaderCreator
   const DPoPHeaderCreatorResponse = "someToken";
@@ -13,7 +14,7 @@ export default function DPoPHeaderCreatorMocks() {
 
   const DPoPHeaderCreatorMock: () => IDPoPHeaderCreator = jest.fn<
     IDPoPHeaderCreator,
-    any[]
+    unknown[]
   >(() => ({
     createHeaderToken: DPoPHeaderCreatorMockFunction
   }));

@@ -5,6 +5,8 @@
 // TODO: there are many enums that are not filled out in this. They must be filled out
 // TODO: REQUIRED elements are not specified
 
+// Disable camelcase linter because issuers must have snake-case
+/* eslint-disable @typescript-eslint/camelcase */
 const issuerConfigSchema = {
   type: "object",
   properties: {

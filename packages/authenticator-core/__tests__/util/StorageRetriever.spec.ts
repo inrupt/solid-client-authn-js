@@ -3,6 +3,9 @@ jest.mock("../../src/util/validateSchema");
 // Required by TSyringe:
 import "reflect-metadata";
 import StorageRetriever from "../../src/util/StorageRetriever";
+import IStorage from "../../src/authenticator/IStorage";
+
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("StorageRetriever", () => {
   const mockStorage = {
@@ -14,7 +17,9 @@ describe("StorageRetriever", () => {
     mockStorage.get.mockReturnValueOnce(
       Promise.resolve(JSON.stringify({ some: "data" }))
     );
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
 
     await expect(retriever.retrieve("arbitrary key")).resolves.toEqual({
       some: "data"
@@ -22,7 +27,9 @@ describe("StorageRetriever", () => {
   });
 
   it("should fetch data using the given key", async () => {
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
 
     await retriever.retrieve("some key");
 
@@ -32,7 +39,9 @@ describe("StorageRetriever", () => {
   it("should return null if data could not be found in the given storage", async () => {
     // @ts-ignore: Ignore because this mock function should be able to return null
     mockStorage.get.mockReturnValueOnce(Promise.resolve(null));
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
 
     const retrieved = await retriever.retrieve("arbitrary key");
 
@@ -46,7 +55,9 @@ describe("StorageRetriever", () => {
     mockStorage.get.mockReturnValueOnce(
       Promise.resolve(JSON.stringify({ some: "data" }))
     );
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
 
     await retriever.retrieve("arbitrary key", { schema: { some: "schema" } });
 
@@ -59,7 +70,9 @@ describe("StorageRetriever", () => {
     const validateSchema: jest.Mock = jest.requireMock(
       "../../src/util/validateSchema"
     ).default;
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
 
     await retriever.retrieve("arbitrary key");
 
@@ -73,7 +86,9 @@ describe("StorageRetriever", () => {
     validateSchema.mockImplementationOnce(() => {
       throw new Error("Arbitrary error");
     });
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
 
     const retrieved = await retriever.retrieve("some key", {
       schema: { arbitrary: "schema" }
@@ -87,7 +102,9 @@ describe("StorageRetriever", () => {
     mockStorage.get.mockReturnValueOnce(
       Promise.resolve(JSON.stringify({ some: "data" }))
     );
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
     const postProcessor = jest.fn(() => "postprocessed data");
 
     const retrieved = await retriever.retrieve("arbitrary key", {
@@ -101,7 +118,9 @@ describe("StorageRetriever", () => {
   it("should not run a given postprocessor if the data could not be found", async () => {
     // @ts-ignore: Ignore because this mock function should be able to return null
     mockStorage.get.mockReturnValueOnce(Promise.resolve(null));
-    const retriever = new StorageRetriever(mockStorage as any);
+    const retriever = new StorageRetriever(
+      (mockStorage as unknown) as IStorage
+    );
     const postProcessor = jest.fn();
 
     await retriever.retrieve("arbitrary key", { postProcess: postProcessor });

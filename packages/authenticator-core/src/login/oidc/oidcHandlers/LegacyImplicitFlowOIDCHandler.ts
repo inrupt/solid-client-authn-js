@@ -29,11 +29,14 @@ export default class LegacyImplicitFlowOIDCHandler implements IOIDCHandler {
       oidcLoginOptions.issuerConfiguration.authorization_endpoint.toString()
     );
     // TODO: include client_id, state, and nonce
-    const query: { [key: string]: any } = {
+    // Disable camel case rule because this query requires camel case
+    /* eslint-disable @typescript-eslint/camelcase */
+    const query: { [key: string]: string } = {
       response_type: "id_token token",
       redirect_url: oidcLoginOptions.redirectUrl.toString(),
       scope: "openid id_vc"
     };
+    /* eslint-enable @typescript-eslint/camelcase */
     if (oidcLoginOptions.dpop) {
       query.dpop = await this.dPoPHeaderCreator.createHeaderToken(
         oidcLoginOptions.issuer,

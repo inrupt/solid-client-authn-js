@@ -8,7 +8,7 @@ import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler"
 
 describe("AggregateOIDCHandler", () => {
   it("should pass injected handlers to its superclass", () => {
-    new AggregateOIDCHandler((["Some handler"] as any) as IOIDCHandler[]);
+    new AggregateOIDCHandler((["Some handler"] as unknown) as IOIDCHandler[]);
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
       [["Some handler"]]

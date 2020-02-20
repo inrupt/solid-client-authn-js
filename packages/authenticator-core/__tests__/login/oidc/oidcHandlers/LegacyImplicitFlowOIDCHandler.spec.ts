@@ -10,6 +10,7 @@ import FetcherMocks from "../../../util/Fetcher.mock";
 import canHandleTests from "./OIDCHandlerCanHandleTests";
 
 describe("LegacyImplicitFlowOIDCHandler", () => {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function initMocks() {
     const dPoPHeaderCreatorMocks = DPoPHeaderCreatorMocks();
     const fetcherMocks = FetcherMocks();
