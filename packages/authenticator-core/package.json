@@ -31,6 +31,7 @@
     "jest": "^24.9.0",
     "jest-fetch-mock": "^3.0.1",
     "prettier": "^1.19.1",
+    "ts-jest": "^25.2.1",
     "tsc-watch": "^4.0.0",
     "typescript": "^3.6.4"
   },

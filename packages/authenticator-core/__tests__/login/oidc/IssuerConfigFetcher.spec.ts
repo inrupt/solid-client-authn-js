@@ -57,7 +57,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("should return the fetched config if none was stored in the storage", async () => {
     const storageMock = defaultMocks.storageRetriever;
-    storageMock.retrieve.mockReturnValueOnce(null);
+    storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = { some: "config" };
     const configFetcher = getMockConfigFetcher({
       storageRetriever: storageMock,
@@ -73,7 +73,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("should wrap URLs in url-parse's URL object", async () => {
     const storageMock = defaultMocks.storageRetriever;
-    storageMock.retrieve.mockReturnValueOnce(null);
+    storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = {
       issuer: "https://issuer.url",
       authorization_endpoint: "https://authorization_endpoint.url",

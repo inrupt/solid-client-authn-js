@@ -12,7 +12,7 @@ export function compileTypeof(type: string) {
 
 export function compileJoinedStringOf(strings: string[]) {
   return (data: string): boolean => {
-    return !data.split(" ").some(value => strings.includes(value));
+    return !data.split(" ").some(value => !strings.includes(value));
   };
 }
 
