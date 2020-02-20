@@ -2,11 +2,11 @@
  * An aggregate AuthenticatedFetcher responsible for selecting the correct AuthenticatedFetcher
  * for a given set of credentials and request parameters
  */
+import { injectable, injectAll } from "tsyringe";
+import URL from "url-parse";
 import AggregateHandler from "../util/handlerPattern/AggregateHandler";
 import IAuthenticatedFetcher from "./IAuthenticatedFetcher";
-import { injectable, injectAll } from "tsyringe";
 import IRequestCredentials from "./IRequestCredentials";
-import URL from "url-parse";
 
 @injectable()
 export default class AggregateAuthenticatedFetcher

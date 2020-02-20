@@ -1,7 +1,12 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import OIDCLoginHandler from "../../../src/login/oidc/OIDCLoginHandler";
+import IOIDCHandler from "../../../src/login/oidc/IOIDCHandler";
 import URL from "url-parse";
+import { IIssuerConfigFetcher } from "../../../src/login/oidc/IssuerConfigFetcher";
+import { IDPoPClientKeyManager } from "../../../src/util/dpop/DPoPClientKeyManager";
+
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("OIDCLoginHandler", () => {
   const defaultMocks = {
@@ -15,11 +20,14 @@ describe("OIDCLoginHandler", () => {
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
-  ) {
+  ): OIDCLoginHandler {
     return new OIDCLoginHandler(
-      mocks.oidcHandler ?? (defaultMocks.oidcHandler as any),
-      mocks.issuerConfigFetcher ?? (defaultMocks.issuerConfigFetcher as any),
-      mocks.dPoPClientKeyManager ?? (defaultMocks.dPoPClientKeyManager as any)
+      (mocks.oidcHandler ??
+        (defaultMocks.oidcHandler as unknown)) as IOIDCHandler,
+      (mocks.issuerConfigFetcher ??
+        (defaultMocks.issuerConfigFetcher as unknown)) as IIssuerConfigFetcher,
+      (mocks.dPoPClientKeyManager ??
+        (defaultMocks.dPoPClientKeyManager as unknown)) as IDPoPClientKeyManager
     );
   }
 

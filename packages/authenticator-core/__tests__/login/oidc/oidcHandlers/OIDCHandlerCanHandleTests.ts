@@ -1,10 +1,14 @@
 import IOIDCOptions from "../../../../src/login/oidc/IOIDCOptions";
 import URL from "url-parse";
 
+// This will be fixed in another pull request
+/* eslint-disable @typescript-eslint/camelcase */
+
 const standardOIDCOptions: IOIDCOptions = {
   issuer: new URL("https://example.com"),
   dpop: true,
   redirectUrl: new URL("https://app.example.com"),
+  // This will be fixed in a different pull request
   issuerConfiguration: {
     issuer: new URL("https://example.com"),
     authorization_endpoint: new URL("https://example.com/auth"),

@@ -9,6 +9,7 @@ import DPoPHeaderCreator from "../../../src/util/dpop/DPoPHeaderCreator";
 import URL from "url-parse";
 
 describe("DPoPHeaderCreator", () => {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function initMocks() {
     const joseUtilityMocks = JoseUtilityMocks();
     const dPoPClientKeyManagerMocks = DPoPClientKeyManagerMocks();

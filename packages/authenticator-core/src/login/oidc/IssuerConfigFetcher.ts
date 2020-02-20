@@ -26,20 +26,25 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     @inject("storage") private storage: IStorage
   ) {}
 
-  private getLocalStorageKey(issuer: URL) {
+  private getLocalStorageKey(issuer: URL): string {
     return `issuerConfig:${issuer.toString()}`;
   }
 
-  private processConfig(config: { [key: string]: any }): IIssuerConfig {
+  private processConfig(
+    config: Record<string, string | string[]>
+  ): IIssuerConfig {
+    // TODO: replace this with a system that converts to the right format
+    /* eslint-disable @typescript-eslint/camelcase */
     return {
       ...config,
-      issuer: new URL(config.issuer),
-      authorization_endpoint: new URL(config.authorization_endpoint),
-      token_endpoint: new URL(config.token_endpoint),
-      userinfo_endpoint: new URL(config.userinfo_endpoint),
-      jwks_uri: new URL(config.jwks_uri),
-      registration_endpoint: new URL(config.registration_endpoint)
+      issuer: new URL(config.issuer as string),
+      authorization_endpoint: new URL(config.authorization_endpoint as string),
+      token_endpoint: new URL(config.token_endpoint as string),
+      userinfo_endpoint: new URL(config.userinfo_endpoint as string),
+      jwks_uri: new URL(config.jwks_uri as string),
+      registration_endpoint: new URL(config.registration_endpoint as string)
     } as IIssuerConfig;
+    /* eslint-enable @typescript-eslint/camelcase */
   }
 
   async fetchConfig(issuer: URL): Promise<IIssuerConfig> {

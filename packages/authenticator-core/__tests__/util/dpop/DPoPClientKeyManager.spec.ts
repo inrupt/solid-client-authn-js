@@ -10,7 +10,8 @@ import IOIDCOptions from "../../../src/login/oidc/IOIDCOptions";
 import OIDCHandlerCanHandleTests from "../../login/oidc/oidcHandlers/OIDCHandlerCanHandleTests";
 
 describe("DPoPClientKeyManager", () => {
-  function initMocks(storageResponse: any) {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  function initMocks(storageResponse: unknown) {
     const storageRetrieverMocks = StorageRetrieverMocks(storageResponse);
     const joseMocks = JoseMocks();
     const storageMocks = StorageMocks();

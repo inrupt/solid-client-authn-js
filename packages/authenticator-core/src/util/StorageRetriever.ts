@@ -13,15 +13,16 @@ export interface IStorageRetriever {
    * be deleted
    * @param options.postProcess A function that can be applied after the item is retrieved
    */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   retrieve(
     key: string,
     options?: Partial<{
+      //
       schema?: Record<string, any>;
-      postProcess?: (
-        retrievedObject: Record<string, any>
-      ) => Record<string, any>;
+      postProcess?: (retrievedObject: any) => any;
     }>
-  ): Promise<Record<string, any> | null>;
+  ): Promise<any | null>;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 @injectable()
@@ -30,13 +31,13 @@ export default class StorageRetriever implements IStorageRetriever {
 
   async retrieve(
     key: string,
-    options: Partial<{
+    options: {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       schema?: Record<string, any>;
-      postProcess?: (
-        retrievedObject: Record<string, any>
-      ) => Record<string, any>;
-    }> = {}
-  ): Promise<Record<string, any> | null> {
+      postProcess?: (retrievedObject: any) => any;
+    } = {}
+  ): Promise<any | null> {
+    /* eslint-enable @typescript-eslint/no-explicit-any */
     // Check if key is stored locally
     const locallyStored: string | undefined = await this.storage.get(key);
 

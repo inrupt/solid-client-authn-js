@@ -9,7 +9,7 @@ describe("AggregateAuthenticatedFetcher", () => {
   it("should pass injected fetchers to its superclass", () => {
     new AggregateAuthenticatedFetcher(([
       "Some fetcher"
-    ] as any) as IAuthenticatedFetcher[]);
+    ] as unknown) as IAuthenticatedFetcher[]);
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
       [["Some fetcher"]]

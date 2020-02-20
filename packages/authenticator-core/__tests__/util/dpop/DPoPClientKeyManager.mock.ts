@@ -3,6 +3,7 @@ import URL from "url-parse";
 import { JSONWebKey } from "jose";
 import IOIDCOptions from "../../../src/login/oidc/IOIDCOptions";
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function DPoPClientKeyManagerMocks() {
   const DPoPClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction = jest.fn(
     async (oidcOptions: IOIDCOptions) => {
@@ -22,7 +23,7 @@ export default function DPoPClientKeyManagerMocks() {
 
   const DPoPClientKeyManagerMock: () => IDPoPClientKeyManager = jest.fn<
     IDPoPClientKeyManager,
-    any[]
+    unknown[]
   >(() => ({
     generateClientKeyIfNotAlready: DPoPClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction,
     getClientKey: DPoPClientKeyManagerMockGetClientKeyFunction

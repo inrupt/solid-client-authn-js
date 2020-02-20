@@ -4,6 +4,11 @@ import FetcherMocks from "../../util/Fetcher.mock";
 import StorageRetrieverMocks from "../../util/StorageRetriever.mock";
 import StorageMocks from "../../authenticator/Storage.mock";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
+import { IFetcher } from "../../../src/util/Fetcher";
+
+// This will be fixed in another pull request
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 /**
  * Test for IssuerConfigFetcher
@@ -16,7 +21,7 @@ describe("IssuerConfigFetcher", () => {
   };
   function getMockConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
-  ) {
+  ): IssuerConfigFetcher {
     const fetcherMock = FetcherMocks().FetcherMock();
     fetcherMock.fetch.mockReturnValue(
       Promise.resolve({
@@ -28,7 +33,7 @@ describe("IssuerConfigFetcher", () => {
       })
     );
     return new IssuerConfigFetcher(
-      fetcherMock as any,
+      fetcherMock as IFetcher,
       mocks.storageRetriever ?? defaultMocks.storageRetriever,
       mocks.storage ?? defaultMocks.storage
     );
@@ -36,7 +41,9 @@ describe("IssuerConfigFetcher", () => {
 
   it("should return the config stored in the storage", async () => {
     const storageMock = defaultMocks.storageRetriever;
-    storageMock.retrieve.mockReturnValueOnce({ some: "config" } as any);
+    storageMock.retrieve.mockReturnValueOnce(
+      Promise.resolve({ some: "config" })
+    );
     const configFetcher = getMockConfigFetcher({
       storageRetriever: storageMock
     });
@@ -50,7 +57,6 @@ describe("IssuerConfigFetcher", () => {
 
   it("should return the fetched config if none was stored in the storage", async () => {
     const storageMock = defaultMocks.storageRetriever;
-    // @ts-ignore: Ignore because this mock function should be able to return null
     storageMock.retrieve.mockReturnValueOnce(null);
     const fetchResponse = { some: "config" };
     const configFetcher = getMockConfigFetcher({
@@ -67,7 +73,6 @@ describe("IssuerConfigFetcher", () => {
 
   it("should wrap URLs in url-parse's URL object", async () => {
     const storageMock = defaultMocks.storageRetriever;
-    // @ts-ignore: Ignore because this mock function should be able to return null
     storageMock.retrieve.mockReturnValueOnce(null);
     const fetchResponse = {
       issuer: "https://issuer.url",
@@ -107,15 +112,15 @@ describe("IssuerConfigFetcher", () => {
     // @ts-ignore: Ignore because this mock function should be able to return null
     storageMock.retrieve.mockReturnValueOnce(null);
     const mockFetcher = {
-      fetch: () =>
-        Promise.resolve({
+      fetch: (): Promise<Response> =>
+        Promise.resolve(({
           json: () => {
             throw new Error("Some error");
           }
-        })
+        } as unknown) as Response)
     };
     const configFetcher = new IssuerConfigFetcher(
-      mockFetcher as any,
+      mockFetcher as IFetcher,
       storageMock,
       defaultMocks.storage
     );

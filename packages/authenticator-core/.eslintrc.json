@@ -12,6 +12,8 @@
     },
     "rules": {
         "prettier/prettier": "error",
-        "@typescript-eslint/interface-name-prefix": ["error", "always"]
+        "@typescript-eslint/interface-name-prefix": ["error", "always"],
+        "@typescript-eslint/no-unused-vars": 0,
+        "import/no-unresolved": 0
     }
 }

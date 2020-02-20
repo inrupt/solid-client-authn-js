@@ -8,6 +8,7 @@ import DPoPHeaderCreatorMocks from "../../util/dpop/DPoPHeaderCreator.mock";
 import FetcherMocks from "../../util/Fetcher.mock";
 
 describe("DPoPAuthenticatedFetcher", () => {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function mockLibrary() {
     const dPoPHeaderCreatorMocks = DPoPHeaderCreatorMocks();
     const fetcherMocks = FetcherMocks();
