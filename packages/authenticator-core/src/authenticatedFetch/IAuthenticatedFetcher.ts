@@ -5,9 +5,12 @@
  * @URL The URL of the request
  * @RequestInit The fetch init params to define the request
  */
-import IHandleable from '../util/handlerPattern/IHandleable'
-import IRequestCredentials from './IRequestCredentials'
-import URL from 'url-parse'
+import IHandleable from "../util/handlerPattern/IHandleable";
+import IRequestCredentials from "./IRequestCredentials";
+import URL from "url-parse";
 
-type IAuthenticatedFetcher = IHandleable<[IRequestCredentials, URL, RequestInit?], Response>
-export default IAuthenticatedFetcher
+type IAuthenticatedFetcher = IHandleable<
+  [IRequestCredentials, URL, RequestInit?],
+  Response
+>;
+export default IAuthenticatedFetcher;

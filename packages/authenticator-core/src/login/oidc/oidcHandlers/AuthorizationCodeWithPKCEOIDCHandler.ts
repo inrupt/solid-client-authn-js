@@ -1,16 +1,19 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
-import IOIDCHandler from '../IOIDCHandler'
-import IOIDCOptions from '../IOIDCOptions'
-import NotImplementedError from '../../../util/errors/NotImplementedError'
+import IOidcHandler from "../IOidcHandler";
+import IOidcOptions from "../IOidcOptions";
+import NotImplementedError from "../../../util/errors/NotImplementedError";
 
-export default class AuthorizationCodeWithPKCEOIDCHandler implements IOIDCHandler {
-  async canHandle (oidcLoginOptions: IOIDCOptions): Promise<boolean> {
-    return false
+export default class AuthorizationCodeWithPkceOidcHandler
+  implements IOidcHandler {
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
+    return false;
   }
 
-  async handle (oidcLoginOptions: IOIDCOptions): Promise<void> {
-    throw new NotImplementedError('AuthorizationCodeWithPKCEOIDCHandler handle')
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+    throw new NotImplementedError(
+      "AuthorizationCodeWithPkceOidcHandler handle"
+    );
   }
 }

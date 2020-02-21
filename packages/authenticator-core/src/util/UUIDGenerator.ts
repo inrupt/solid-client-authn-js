@@ -1,14 +1,14 @@
 /**
  * A wrapper class for uuid
  */
-import uuid from 'uuid'
+import uuid from "uuid";
 
-export interface IUUIDGenerator {
-  v4 (): string
+export interface IUuidGenerator {
+  v4(): string;
 }
 
-export default class UUIDGenerator {
-  v4 (): string {
-    return uuid.v4()
+export default class UuidGenerator {
+  v4(): string {
+    return uuid.v4();
   }
 }

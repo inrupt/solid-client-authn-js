@@ -1,26 +1,27 @@
-import IRequestCredentials from '../../src/authenticatedFetch/IRequestCredentials'
-import { IFetcher } from '../../src/util/Fetcher'
-import mFetch from 'jest-fetch-mock'
-const mockFetch = mFetch as any
-import URL from 'url-parse'
+import IRequestCredentials from "../../src/authenticatedFetch/IRequestCredentials";
+import mFetch from "jest-fetch-mock";
 
-export default function FetcherMocks () {
-  const FetcherResponse = mockFetch.mockResponse('someResponse')
+import URL from "url-parse";
 
-  const FetcherMockFunction =
-    jest.fn(
-      async (creds: IRequestCredentials, url: URL, init: RequestInit) => {
-        return FetcherResponse
-      }
-    )
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const mockFetch = mFetch as any;
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export default function FetcherMocks() {
+  const FetcherResponse = mockFetch.mockResponse("someResponse");
+
+  const FetcherMockFunction = jest.fn(
+    async (creds: IRequestCredentials, url: URL, init: RequestInit) => {
+      return FetcherResponse;
+    }
+  );
 
   const FetcherMock = jest.fn(() => ({
-    fetch: FetcherMockFunction
-  }))
+    fetch: FetcherMockFunction as any
+  }));
 
   return {
     FetcherResponse,
     FetcherMock,
     FetcherMockFunction
-  }
+  };
 }

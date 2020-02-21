@@ -9,8 +9,9 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc -p tsconfig.build.json",
-    "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "test": "npm run lint && npm run node-unit-test && npm run node-acceptance-test",
+    "lint": "eslint src/**/*.ts && eslint __tests__/**/*.ts",
+    "lint-fix": "prettier --check \"src/**/*.ts\"",
     "unit-test": "npm run node-unit-test",
     "acceptance-test": "npm run node-acceptance-test",
     "node-test": "npm run test",
@@ -27,8 +28,6 @@
     "@types/jest": "^24.0.23",
     "jest": "^24.9.0",
     "ts-jest": "^24.2.0",
-    "tslint": "^5.20.0",
-    "tslint-config-standard": "^8.0.1",
     "typescript": "^3.6.4"
   }
 }

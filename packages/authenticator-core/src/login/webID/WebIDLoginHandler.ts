@@ -1,13 +1,13 @@
 /**
  * Handles login if a user's webid was provided
  */
-import ILoginHandler from '../ILoginHandler'
-import { URL } from 'url'
-import ILoginOptions from '../ILoginOptions'
+import ILoginHandler from "../ILoginHandler";
+import { URL } from "url";
+import ILoginOptions from "../ILoginOptions";
 
 export default class WebIDLoginHandler implements ILoginHandler {
-  async canHandle (loginOptions: ILoginOptions): Promise<boolean> {
-    return false
+  async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
+    return false;
   }
 
   /**
@@ -16,7 +16,7 @@ export default class WebIDLoginHandler implements ILoginHandler {
    * 'oidcIssuer' triple, it will create login credentials to match that
    * @param loginOptions
    */
-  async handle (loginOptions: ILoginOptions): Promise<void> {
+  async handle(loginOptions: ILoginOptions): Promise<void> {
     // TODO: implement
   }
 }

@@ -9,7 +9,6 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc -p tsconfig.build.json",
-    "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "test-server": "ts-node src/test-server.ts",
     "test-server-dev": "ts-node-dev src/test-server.ts",
     "prepublishOnly": "npm run build"
@@ -27,8 +26,6 @@
   "devDependencies": {
     "ts-node": "^8.6.1",
     "ts-node-dev": "^1.0.0-pre.44",
-    "tslint": "^5.20.0",
-    "tslint-config-standard": "^8.0.1",
     "typescript": "^3.6.4"
   }
 }
