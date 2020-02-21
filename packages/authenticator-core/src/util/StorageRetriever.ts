@@ -44,10 +44,10 @@ export default class StorageRetriever implements IStorageRetriever {
     if (locallyStored) {
       try {
         const parsedObject = JSON.parse(locallyStored);
-        if (options && options.schema) {
+        if (options.schema) {
           validateSchema(options.schema, parsedObject, { throwError: true });
         }
-        if (options && options.postProcess) {
+        if (options.postProcess) {
           return options.postProcess(parsedObject);
         }
         return parsedObject;
