@@ -1,5 +1,5 @@
 /**
- * Test for DPoPAuthenticatedFetcher
+ * Test for DpopAuthenticatedFetcher
  */
 import "reflect-metadata";
 import DpopAuthenticatedFetcher from "../../../src/authenticatedFetch/dpop/DpopAuthenticatedFetcher";
