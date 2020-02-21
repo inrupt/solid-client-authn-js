@@ -1,37 +1,37 @@
 // Required by TSyringe:
 import "reflect-metadata";
-import OIDCLoginHandler from "../../../src/login/oidc/OIDCLoginHandler";
-import IOIDCHandler from "../../../src/login/oidc/IOIDCHandler";
+import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
+import IOidcHandler from "../../../src/login/oidc/IOidcHandler";
 import URL from "url-parse";
 import { IIssuerConfigFetcher } from "../../../src/login/oidc/IssuerConfigFetcher";
-import { IDPoPClientKeyManager } from "../../../src/util/dpop/DPoPClientKeyManager";
+import { IDpopClientKeyManager } from "../../../src/util/dpop/DpopClientKeyManager";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
-describe("OIDCLoginHandler", () => {
+describe("OidcLoginHandler", () => {
   const defaultMocks = {
     oidcHandler: { handle: jest.fn(() => Promise.resolve()) },
     issuerConfigFetcher: {
       fetchConfig: jest.fn(() => Promise.resolve({ arbitrary: "config" }))
     },
-    dPoPClientKeyManager: {
+    dpopClientKeyManager: {
       generateClientKeyIfNotAlready: jest.fn(() => Promise.resolve())
     }
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
-  ): OIDCLoginHandler {
-    return new OIDCLoginHandler(
+  ): OidcLoginHandler {
+    return new OidcLoginHandler(
       (mocks.oidcHandler ??
-        (defaultMocks.oidcHandler as unknown)) as IOIDCHandler,
+        (defaultMocks.oidcHandler as unknown)) as IOidcHandler,
       (mocks.issuerConfigFetcher ??
         (defaultMocks.issuerConfigFetcher as unknown)) as IIssuerConfigFetcher,
-      (mocks.dPoPClientKeyManager ??
-        (defaultMocks.dPoPClientKeyManager as unknown)) as IDPoPClientKeyManager
+      (mocks.dpopClientKeyManager ??
+        (defaultMocks.dpopClientKeyManager as unknown)) as IDpopClientKeyManager
     );
   }
 
-  it("should call the actual handler when an OIDC Issuer is provided", async () => {
+  it("should call the actual handler when an Oidc Issuer is provided", async () => {
     const actualHandler = defaultMocks.oidcHandler;
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
     await handler.handle({ oidcIssuer: new URL("https://arbitrary.url") });
@@ -44,7 +44,7 @@ describe("OIDCLoginHandler", () => {
     // TS Ignore because bad input is purposely given here for the purpose of testing
     // @ts-ignore
     await expect(handler.handle({})).rejects.toThrowError(
-      "OIDCLoginHandler requires an oidcIssuer"
+      "OidcLoginHandler requires an oidcIssuer"
     );
   });
 

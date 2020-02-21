@@ -10,7 +10,7 @@ import IIssuerConfig from "./IIssuerConfig";
  * @redirectUrl The URL to which the user should be redirected after authorizing
  * @issuerConfiguration The openid-configuration of the issuer
  */
-export default interface IOIDCOptions {
+export default interface IOidcOptions {
   issuer: URL;
   dpop: boolean;
   redirectUrl: URL;

@@ -1,21 +1,21 @@
 /**
  * Handler for the Legacy Implicit Flow
  */
-import IOIDCHandler from "../IOIDCHandler";
-import IOIDCOptions from "../IOIDCOptions";
+import IOidcHandler from "../IOidcHandler";
+import IOidcOptions from "../IOidcOptions";
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
-import { IDPoPHeaderCreator } from "../../../util/dpop/DPoPHeaderCreator";
+import { IDpopHeaderCreator } from "../../../util/dpop/DpopHeaderCreator";
 
 @injectable()
-export default class LegacyImplicitFlowOIDCHandler implements IOIDCHandler {
+export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("dPoPHeaderCreator") private dPoPHeaderCreator: IDPoPHeaderCreator
+    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
   ) {}
 
-  async canHandle(oidcLoginOptions: IOIDCOptions): Promise<boolean> {
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return !!(
       oidcLoginOptions.issuerConfiguration.grant_types_supported &&
       oidcLoginOptions.issuerConfiguration.grant_types_supported.indexOf(
@@ -24,7 +24,7 @@ export default class LegacyImplicitFlowOIDCHandler implements IOIDCHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOIDCOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorization_endpoint.toString()
     );
@@ -38,7 +38,7 @@ export default class LegacyImplicitFlowOIDCHandler implements IOIDCHandler {
     };
     /* eslint-enable @typescript-eslint/camelcase */
     if (oidcLoginOptions.dpop) {
-      query.dpop = await this.dPoPHeaderCreator.createHeaderToken(
+      query.dpop = await this.dpopHeaderCreator.createHeaderToken(
         oidcLoginOptions.issuer,
         "GET"
       );
