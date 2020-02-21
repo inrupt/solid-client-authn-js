@@ -1,16 +1,16 @@
 /**
  * Handler for the Authorization Code Flow
  */
-import IOIDCHandler from '../IOIDCHandler'
-import IOIDCOptions from '../IOIDCOptions'
-import NotImplementedError from '../../../util/errors/NotImplementedError'
+import IOidcHandler from "../IOidcHandler";
+import IOidcOptions from "../IOidcOptions";
+import NotImplementedError from "../../../util/errors/NotImplementedError";
 
-export default class AuthorizationCodeOIDCHandler implements IOIDCHandler {
-  async canHandle (oidcLoginOptions: IOIDCOptions): Promise<boolean> {
-    return false
+export default class AuthorizationCodeOidcHandler implements IOidcHandler {
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
+    return false;
   }
 
-  async handle (oidcLoginOptions: IOIDCOptions): Promise<void> {
-    throw new NotImplementedError('AuthorizationCodeOIDCHandler handle')
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+    throw new NotImplementedError("AuthorizationCodeOidcHandler handle");
   }
 }

@@ -1,28 +1,29 @@
-import { IStorageRetriever } from '../../src/util/StorageRetriever'
-
-export default function StorageRetrieverMocks (result?: any) {
-  let StorageRetrieverMockResponse: Object
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-explicit-any
+export default function StorageRetrieverMocks(result?: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let StorageRetrieverMockResponse: Record<string, any>;
   if (!result && result !== null) {
     StorageRetrieverMockResponse = {
-      someKey: 'someString'
-    }
+      someKey: "someString"
+    };
   } else {
-    StorageRetrieverMockResponse = result
+    StorageRetrieverMockResponse = result;
   }
 
   const StorageRetrieverMockFunction = jest.fn(
-    async (key: string) => {
-      return StorageRetrieverMockResponse
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (key: string): Promise<Record<string, any> | null> => {
+      return StorageRetrieverMockResponse;
     }
-  )
+  );
 
   const StorageRetrieverMock = jest.fn(() => ({
     retrieve: StorageRetrieverMockFunction
-  }))
+  }));
 
   return {
     StorageRetrieverMockResponse,
     StorageRetrieverMockFunction,
     StorageRetrieverMock
-  }
+  };
 }

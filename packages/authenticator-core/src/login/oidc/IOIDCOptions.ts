@@ -1,8 +1,8 @@
 /**
  * Defines how OIDC login should proceed
  */
-import URL from 'url-parse'
-import IIssuerConfig from './IIssuerConfig'
+import URL from "url-parse";
+import IIssuerConfig from "./IIssuerConfig";
 
 /**
  * @issuer The URL of the IDP
@@ -10,9 +10,9 @@ import IIssuerConfig from './IIssuerConfig'
  * @redirectUrl The URL to which the user should be redirected after authorizing
  * @issuerConfiguration The openid-configuration of the issuer
  */
-export default interface IOIDCOptions {
-  issuer: URL
-  dpop: boolean
-  redirectUrl: URL
-  issuerConfiguration: IIssuerConfig
+export default interface IOidcOptions {
+  issuer: URL;
+  dpop: boolean;
+  redirectUrl: URL;
+  issuerConfiguration: IIssuerConfig;
 }

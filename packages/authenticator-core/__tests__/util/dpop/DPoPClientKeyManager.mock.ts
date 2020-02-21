@@ -1,35 +1,38 @@
-import { IDPoPClientKeyManager } from '../../../src/util/dpop/DPoPClientKeyManager'
-import URL from 'url-parse'
-import { JSONWebKey } from 'jose'
-import IOIDCOptions from '../../../src/login/oidc/IOIDCOptions'
+import { IDpopClientKeyManager } from "../../../src/util/dpop/DpopClientKeyManager";
+import URL from "url-parse";
+import { JSONWebKey } from "jose";
+import IOidcOptions from "../../../src/login/oidc/IOidcOptions";
 
-export default function DPoPClientKeyManagerMocks () {
-  const DPoPClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction = jest.fn(
-    async (oidcOptions: IOIDCOptions) => { /* void */ }
-  )
-
-  const DPoPClientKeyManagerMockGetClientKeyResponse: JSONWebKey = {
-    kty: 'RSA',
-    e: 'abcd',
-    n: '1234'
-  }
-
-  const DPoPClientKeyManagerMockGetClientKeyFunction = jest.fn(
-    async () => {
-      return DPoPClientKeyManagerMockGetClientKeyResponse
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export default function DpopClientKeyManagerMocks() {
+  const DpopClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction = jest.fn(
+    async (oidcOptions: IOidcOptions) => {
+      /* void */
     }
-  )
+  );
 
-  const DPoPClientKeyManagerMock: () => IDPoPClientKeyManager =
-    jest.fn<IDPoPClientKeyManager, any[]>(() => ({
-      generateClientKeyIfNotAlready: DPoPClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction,
-      getClientKey: DPoPClientKeyManagerMockGetClientKeyFunction
-    }))
+  const DpopClientKeyManagerMockGetClientKeyResponse: JSONWebKey = {
+    kty: "RSA",
+    e: "abcd",
+    n: "1234"
+  };
+
+  const DpopClientKeyManagerMockGetClientKeyFunction = jest.fn(async () => {
+    return DpopClientKeyManagerMockGetClientKeyResponse;
+  });
+
+  const DpopClientKeyManagerMock: () => IDpopClientKeyManager = jest.fn<
+    IDpopClientKeyManager,
+    unknown[]
+  >(() => ({
+    generateClientKeyIfNotAlready: DpopClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction,
+    getClientKey: DpopClientKeyManagerMockGetClientKeyFunction
+  }));
 
   return {
-    DPoPClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction,
-    DPoPClientKeyManagerMockGetClientKeyResponse,
-    DPoPClientKeyManagerMockGetClientKeyFunction,
-    DPoPClientKeyManagerMock
-  }
+    DpopClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction,
+    DpopClientKeyManagerMockGetClientKeyResponse,
+    DpopClientKeyManagerMockGetClientKeyFunction,
+    DpopClientKeyManagerMock
+  };
 }

@@ -1,21 +1,23 @@
-import { IUUIDGenerator } from '../../src/util/UUIDGenerator'
+import { IUuidGenerator } from "../../src/util/UuidGenerator";
 
-export default function UUIDGeneratorMocks () {
-  const UUIDGeneratorMockResponse: string = 'fee3fa53-a6a9-475c-a0da-b1343a4fff76'
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export default function UuidGeneratorMocks() {
+  const UuidGeneratorMockResponse = "fee3fa53-a6a9-475c-a0da-b1343a4fff76";
 
-  const UUIDGeneratorMockFunction = jest.fn(
-    () => {
-      return UUIDGeneratorMockResponse
-    }
-  )
+  const UuidGeneratorMockFunction = jest.fn(() => {
+    return UuidGeneratorMockResponse;
+  });
 
-  const UUIDGeneratorMock: () => IUUIDGenerator = jest.fn<IUUIDGenerator, any[]>(() => ({
-    v4: UUIDGeneratorMockFunction
-  }))
+  const UuidGeneratorMock: () => IUuidGenerator = jest.fn<
+    IUuidGenerator,
+    unknown[]
+  >(() => ({
+    v4: UuidGeneratorMockFunction
+  }));
 
   return {
-    UUIDGeneratorMockFunction,
-    UUIDGeneratorMockResponse,
-    UUIDGeneratorMock
-  }
+    UuidGeneratorMockFunction,
+    UuidGeneratorMockResponse,
+    UuidGeneratorMock
+  };
 }

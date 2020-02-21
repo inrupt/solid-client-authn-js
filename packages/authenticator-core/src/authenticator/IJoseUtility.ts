@@ -1,13 +1,7 @@
 /**
  * Interface defining how each environment should define its crypto system
  */
-import {
-  ECCurve,
-  BasicParameters,
-  OKPCurve,
-  JWT,
-  JSONWebKey
-} from 'jose'
+import { ECCurve, BasicParameters, OKPCurve, JWT, JSONWebKey } from "jose";
 
 export default interface IJoseUtility {
   /**
@@ -17,45 +11,44 @@ export default interface IJoseUtility {
    * @param parameters Parameters to generate the key
    * @param isPrivate True if a private token should be generated
    */
-  generateJWK (
-    kty: 'EC',
+  generateJWK(
+    kty: "EC",
     crv?: ECCurve,
     parameters?: BasicParameters,
     isPrivate?: boolean
-  ): Promise<JSONWebKey>
-  generateJWK (
-    kty: 'OKP',
+  ): Promise<JSONWebKey>;
+  generateJWK(
+    kty: "OKP",
     crv?: OKPCurve,
     parameters?: BasicParameters,
     isPrivate?: boolean
-  ): Promise<JSONWebKey>
-  generateJWK (
-    kty: 'RSA',
+  ): Promise<JSONWebKey>;
+  generateJWK(
+    kty: "RSA",
     bitlength?: number,
     parameters?: BasicParameters,
     isPrivate?: boolean
-  ): Promise<JSONWebKey>
-  generateJWK (
-    kty: 'oct',
+  ): Promise<JSONWebKey>;
+  generateJWK(
+    kty: "oct",
     bitlength?: number,
     parameters?: BasicParameters
-  ): Promise<JSONWebKey>
+  ): Promise<JSONWebKey>;
   /**
    * Converts a privake key to a public key
    * @param jwk The given private key
    */
-  privateJWKToPublicJWK (
-    jwk: JSONWebKey
-  ): Promise<JSONWebKey>
+  privateJWKToPublicJWK(jwk: JSONWebKey): Promise<JSONWebKey>;
   /**
    * Creates a JSON Web Token
    * @param payload Custom fields to be included
    * @param key Private JWK
    * @param options Common fields on tokens
    */
-  signJWT (
-    payload: Object,
+  signJWT(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload: Record<string, any>,
     key: JSONWebKey,
     options?: JWT.SignOptions
-  ): Promise<string>
+  ): Promise<string>;
 }

@@ -1,53 +1,57 @@
 /**
  * Responsible for sending DPoP Enabled requests
  */
-import IAuthenticatedFetcher from '../IAuthenticatedFetcher'
-import IRequestCredentials from '../IRequestCredentials'
-import ConfigurationError from '../../util/errors/ConfigurationError'
-import IDPoPRequestCredentials from '../../util/dpop/IDPoPRequestCredentials'
-import { injectable, inject } from 'tsyringe'
-import URL from 'url-parse'
-import { IFetcher } from '../../util/Fetcher'
-import { IDPoPHeaderCreator } from '../../util/dpop/DPoPHeaderCreator'
+import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
+import IRequestCredentials from "../IRequestCredentials";
+import ConfigurationError from "../../util/errors/ConfigurationError";
+import IDpopRequestCredentials from "../../util/dpop/IDpopRequestCredentials";
+import { injectable, inject } from "tsyringe";
+import URL from "url-parse";
+import { IFetcher } from "../../util/Fetcher";
+import { IDpopHeaderCreator } from "../../util/dpop/DpopHeaderCreator";
 
 @injectable()
-export default class DPoPAuthenticatedFetcher implements IAuthenticatedFetcher {
-  constructor (
-    @inject('dPoPHeaderCreator') private dPoPHeaderCreator: IDPoPHeaderCreator,
-    @inject('fetcher') private fetcher: IFetcher
+export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
+  constructor(
+    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
+    @inject("fetcher") private fetcher: IFetcher
   ) {}
 
-  async canHandle (
+  async canHandle(
     requestCredentials: IRequestCredentials,
     url: URL,
     requestInit?: RequestInit
   ): Promise<boolean> {
     // TODO include a schema check for the submitted data
-    return requestCredentials.type === 'dpop'
+    return requestCredentials.type === "dpop";
   }
 
-  async handle (
+  async handle(
     requestCredentials: IRequestCredentials,
     url: URL,
     requestInit?: RequestInit
   ): Promise<Response> {
-    if (!await this.canHandle(requestCredentials, url, requestInit)) {
-      throw new ConfigurationError(`DPoP Authenticated Fetcher Cannot handle ${requestCredentials}`)
+    if (!(await this.canHandle(requestCredentials, url, requestInit))) {
+      throw new ConfigurationError(
+        `Dpop Authenticated Fetcher Cannot handle ${requestCredentials}`
+      );
     }
-    const dPoPRequestCredentials: IDPoPRequestCredentials =
-      requestCredentials as IDPoPRequestCredentials
+    const dpopRequestCredentials: IDpopRequestCredentials = requestCredentials as IDpopRequestCredentials;
     const requestInitiWithDefaults = {
       headers: {},
-      method: 'GET',
+      method: "GET",
       ...requestInit
-    }
+    };
     return this.fetcher.fetch(url, {
       ...requestInit,
       headers: {
         ...requestInitiWithDefaults.headers,
-        authorization: `DPOP ${dPoPRequestCredentials.authToken}`,
-        dpop: await this.dPoPHeaderCreator.createHeaderToken(url, requestInitiWithDefaults.method)
+        authorization: `DPOP ${dpopRequestCredentials.authToken}`,
+        dpop: await this.dpopHeaderCreator.createHeaderToken(
+          url,
+          requestInitiWithDefaults.method
+        )
       }
-    })
+    });
   }
 }

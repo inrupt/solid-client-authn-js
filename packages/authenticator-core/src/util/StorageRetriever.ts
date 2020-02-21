@@ -1,9 +1,9 @@
 /**
  * A helper class that will validate items taken from local storage
  */
-import { injectable, inject } from 'tsyringe'
-import IStorage from '../authenticator/IStorage'
-import validateSchema from './validateSchema'
+import { injectable, inject } from "tsyringe";
+import IStorage from "../authenticator/IStorage";
+import validateSchema from "./validateSchema";
 
 export interface IStorageRetriever {
   /**
@@ -13,47 +13,49 @@ export interface IStorageRetriever {
    * be deleted
    * @param options.postProcess A function that can be applied after the item is retrieved
    */
-  retrieve (
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  retrieve(
     key: string,
     options?: Partial<{
-      schema?: Object,
-      postProcess?: (retrievedObject: Object) => Object
+      //
+      schema?: Record<string, any>;
+      postProcess?: (retrievedObject: any) => any;
     }>
-  ): Promise<Object | null>
+  ): Promise<any | null>;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 @injectable()
 export default class StorageRetriever implements IStorageRetriever {
-  constructor (
-    @inject('storage') private storage: IStorage
-  ) {}
+  constructor(@inject("storage") private storage: IStorage) {}
 
-  async retrieve (
+  async retrieve(
     key: string,
-    options: Partial<{
-      schema?: Object,
-      postProcess?: (retrievedObject: Object) => Object
-    }> = {}
-  ): Promise<Object | null> {
+    options: {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      schema?: Record<string, any>;
+      postProcess?: (retrievedObject: any) => any;
+    } = {}
+  ): Promise<any | null> {
+    /* eslint-enable @typescript-eslint/no-explicit-any */
     // Check if key is stored locally
-    const locallyStored: string | undefined =
-      await this.storage.get(key)
+    const locallyStored: string | undefined = await this.storage.get(key);
 
     // If it is stored locally, check the validity of the value
     if (locallyStored) {
       try {
-        const parsedObject = JSON.parse(locallyStored)
+        const parsedObject = JSON.parse(locallyStored);
         if (options && options.schema) {
-          validateSchema(options.schema, parsedObject, { throwError: true })
+          validateSchema(options.schema, parsedObject, { throwError: true });
         }
         if (options && options.postProcess) {
-          return options.postProcess(parsedObject)
+          return options.postProcess(parsedObject);
         }
-        return parsedObject
+        return parsedObject;
       } catch (err) {
-        await this.storage.delete(key)
+        await this.storage.delete(key);
       }
     }
-    return null
+    return null;
   }
 }
