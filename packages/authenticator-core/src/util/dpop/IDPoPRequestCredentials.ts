@@ -1,11 +1,11 @@
 /**
- * A request credential specific to DPoP Requests
+ * A request credential specific to Dpop Requests
  */
 import IRequestCredentials from "../../authenticatedFetch/IRequestCredentials";
 
-export default interface IDPoPRequestCredentials extends IRequestCredentials {
+export default interface IDpopRequestCredentials extends IRequestCredentials {
   type: "dpop";
   // TODO: actually fill in key and token
-  clientKey: any;
-  authToken: any;
+  clientKey: string;
+  authToken: string;
 }

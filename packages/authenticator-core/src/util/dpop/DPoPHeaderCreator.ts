@@ -4,12 +4,12 @@
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import IJoseUtility from "../../authenticator/IJoseUtility";
-import { IDPoPClientKeyManager } from "./DPoPClientKeyManager";
-import { IUUIDGenerator } from "../UUIDGenerator";
+import { IDpopClientKeyManager } from "./DpopClientKeyManager";
+import { IUuidGenerator } from "../UuidGenerator";
 
-export interface IDPoPHeaderCreator {
+export interface IDpopHeaderCreator {
   /**
-   * Creates the DPoP Header token
+   * Creates the Dpop Header token
    * @param audience The URL of the RS
    * @param method The HTTP method that is being used
    */
@@ -17,17 +17,17 @@ export interface IDPoPHeaderCreator {
 }
 
 @injectable()
-export default class DPoPHeaderCreator implements IDPoPHeaderCreator {
+export default class DpopHeaderCreator implements IDpopHeaderCreator {
   constructor(
     @inject("joseUtility") private joseUtility: IJoseUtility,
-    @inject("dPoPClientKeyManager")
-    private dPoPClientKeyManager: IDPoPClientKeyManager,
-    @inject("uuidGenerator") private uuidGenerator: IUUIDGenerator
+    @inject("dpopClientKeyManager")
+    private dpopClientKeyManager: IDpopClientKeyManager,
+    @inject("uuidGenerator") private uuidGenerator: IUuidGenerator
   ) {}
 
   async createHeaderToken(audience: URL, method: string): Promise<string> {
     // TODO: update for multiple signing abilities
-    const clientKey = await this.dPoPClientKeyManager.getClientKey();
+    const clientKey = await this.dpopClientKeyManager.getClientKey();
 
     if (clientKey === null) {
       throw new Error("Could not obtain the key to sign the token with.");

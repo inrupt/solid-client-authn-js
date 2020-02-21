@@ -9,7 +9,7 @@ import IAuthenticatedFetcher from "../authenticatedFetch/IAuthenticatedFetcher";
 import URL from "url-parse";
 import ILoginHandler from "../login/ILoginHandler";
 import ILoginOptions from "../login/ILoginOptions";
-import IDPoPRequestCredentials from "../util/dpop/IDPoPRequestCredentials";
+import IDpopRequestCredentials from "../util/dpop/IDpopRequestCredentials";
 
 @injectable()
 export default class Authenticator extends EventEmitter {
@@ -26,7 +26,7 @@ export default class Authenticator extends EventEmitter {
    * Allows a callback to be inserted
    * @param callback Function to callback
    */
-  trackSession(callback: (session?: ISolidSession) => any): void {
+  trackSession(callback: (session?: ISolidSession) => void): void {
     this.on("session", callback);
   }
 
@@ -55,10 +55,16 @@ export default class Authenticator extends EventEmitter {
     requestInit?: RequestInit
   ): Promise<Response> {
     // TODO: fetching access token should be done elsewhere
-    const credentials: IDPoPRequestCredentials = {
+    const authToken = await this.storage.get("accessToken");
+    const clientKey = await this.storage.get("clientKey");
+    if (!authToken || !clientKey) {
+      // TODO: If we ever get here, it should kick off a login process
+      throw new Error("Auth Token or client key not specified");
+    }
+    const credentials: IDpopRequestCredentials = {
       type: "dpop",
-      authToken: await this.storage.get("accessToken"),
-      clientKey: await this.storage.get("clientKey")
+      authToken,
+      clientKey
     };
     return this.authenticatedFetcher.handle(
       credentials,

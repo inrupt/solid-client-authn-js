@@ -1,20 +1,20 @@
 /**
  * Generates a Client Key to be stored and used for DPoP Requests
  */
-import IOIDCOptions from "../../login/oidc/IOIDCOptions";
+import IOidcOptions from "../../login/oidc/IOidcOptions";
 import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
 import { IStorageRetriever } from "../StorageRetriever";
-import jwkSchema from "./JWKSchema";
+import jwkSchema from "./JwkSchema";
 import IJoseUtility from "../../authenticator/IJoseUtility";
 import IStorage from "../../authenticator/IStorage";
 
-export interface IDPoPClientKeyManager {
+export interface IDpopClientKeyManager {
   /**
    * Generates the client key and stores it in local storage
    * @param oidcOptions Issuer options to ensure the key uses a compatible algorithm
    */
-  generateClientKeyIfNotAlready(oidcOptions: IOIDCOptions): Promise<void>;
+  generateClientKeyIfNotAlready(oidcOptions: IOidcOptions): Promise<void>;
   /**
    * Retreives the client key from local storage
    */
@@ -22,19 +22,19 @@ export interface IDPoPClientKeyManager {
 }
 
 @injectable()
-export default class DPoPClientKeyManager implements IDPoPClientKeyManager {
+export default class DpopClientKeyManager implements IDpopClientKeyManager {
   constructor(
     @inject("storageRetriever") private storageRetriever: IStorageRetriever,
     @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storage") private storage: IStorage
   ) {}
 
-  private getLocalStorageKey() {
+  private getLocalStorageKey(): string {
     return `clientKey`;
   }
 
   async generateClientKeyIfNotAlready(
-    oidcOptions: IOIDCOptions
+    oidcOptions: IOidcOptions
   ): Promise<void> {
     let jwk: JSONWebKey = (await this.storageRetriever.retrieve(
       this.getLocalStorageKey(),

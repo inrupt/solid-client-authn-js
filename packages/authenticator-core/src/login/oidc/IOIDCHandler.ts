@@ -1,8 +1,8 @@
 /**
- * OIDCHandlers handle the login process for a given IDP (as defined by the OIDC Options)
+ * OidcHandlers handle the login process for a given IDP (as defined by the OIDC Options)
  */
 import IHandleable from "../../util/handlerPattern/IHandleable";
-import IOIDCOptions from "./IOIDCOptions";
+import IOidcOptions from "./IOidcOptions";
 
-type IOIDCHandler = IHandleable<[IOIDCOptions], void>;
-export default IOIDCHandler;
+type IOidcHandler = IHandleable<[IOidcOptions], void>;
+export default IOidcHandler;

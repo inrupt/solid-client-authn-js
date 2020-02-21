@@ -12,6 +12,7 @@ describe("AggregateHandler", () => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function initMocks(
     configs: { canHandle: boolean; executeTime: number; toReturn: string }[]
   ) {
@@ -30,7 +31,7 @@ describe("AggregateHandler", () => {
           });
         }
       );
-      const mock: () => MockHandler = jest.fn<MockHandler, any[]>(() => ({
+      const mock: () => MockHandler = jest.fn<MockHandler, unknown[]>(() => ({
         canHandle: canHandleFunction,
         handle: handleFunction
       }));

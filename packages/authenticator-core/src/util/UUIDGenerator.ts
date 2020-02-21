@@ -3,11 +3,11 @@
  */
 import uuid from "uuid";
 
-export interface IUUIDGenerator {
+export interface IUuidGenerator {
   v4(): string;
 }
 
-export default class UUIDGenerator {
+export default class UuidGenerator {
   v4(): string {
     return uuid.v4();
   }

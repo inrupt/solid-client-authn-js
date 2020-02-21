@@ -1,9 +1,11 @@
 import IRequestCredentials from "../../src/authenticatedFetch/IRequestCredentials";
-import { IFetcher } from "../../src/util/Fetcher";
 import mFetch from "jest-fetch-mock";
-const mockFetch = mFetch as any;
+
 import URL from "url-parse";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const mockFetch = mFetch as any;
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function FetcherMocks() {
   const FetcherResponse = mockFetch.mockResponse("someResponse");
 

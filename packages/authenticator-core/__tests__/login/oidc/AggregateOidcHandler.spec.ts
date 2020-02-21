@@ -2,13 +2,13 @@ jest.mock("../../../src/util/handlerPattern/AggregateHandler");
 
 // Required by TSyringe:
 import "reflect-metadata";
-import AggregateOIDCHandler from "../../../src/login/oidc/AggregateOIDCHandler";
-import IOIDCHandler from "../../../src/login/oidc/IOIDCHandler";
+import AggregateOidcHandler from "../../../src/login/oidc/AggregateOidcHandler";
+import IOidcHandler from "../../../src/login/oidc/IOidcHandler";
 import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
 
-describe("AggregateOIDCHandler", () => {
+describe("AggregateOidcHandler", () => {
   it("should pass injected handlers to its superclass", () => {
-    new AggregateOIDCHandler((["Some handler"] as any) as IOIDCHandler[]);
+    new AggregateOidcHandler((["Some handler"] as unknown) as IOidcHandler[]);
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
       [["Some handler"]]

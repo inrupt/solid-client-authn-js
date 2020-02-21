@@ -4,14 +4,15 @@
 import Ajv from "ajv";
 
 export function compileTypeof(type: string) {
-  return (data: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data: any): boolean => {
     return typeof data === type; // eslint-disable-line valid-typeof
   };
 }
 
 export function compileJoinedStringOf(strings: string[]) {
-  return (data: string) => {
-    return !data.split(" ").some(value => strings.includes(value));
+  return (data: string): boolean => {
+    return !data.split(" ").some(value => !strings.includes(value));
   };
 }
 
@@ -21,7 +22,9 @@ export function compileJoinedStringOf(strings: string[]) {
  * @param item The item to validate
  */
 export default function validateSchema(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: { title?: string; [key: string]: any },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   item: any,
   options: Partial<{
     throwError: boolean;

@@ -8,8 +8,9 @@ import NotImplementedError from "../../../src/util/errors/NotImplementedError";
 describe("errors", () => {
   const errors: {
     name: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     class: any;
-    params: any[];
+    params: unknown[];
     message: string;
   }[] = [
     {
