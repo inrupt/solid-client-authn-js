@@ -3,34 +3,34 @@
  */
 import "reflect-metadata";
 import JoseUtilityMocks from "../../authenticator/JoseUtitlity.mock";
-import DPoPClientKeyManagerMocks from "./DPoPClientKeyManager.mock";
-import UUIDGeneratorMocks from "../UUIDGenerator.mock";
-import DPoPHeaderCreator from "../../../src/util/dpop/DPoPHeaderCreator";
+import DpopClientKeyManagerMocks from "./DpopClientKeyManager.mock";
+import UuidGeneratorMocks from "../UuidGenerator.mock";
+import DpopHeaderCreator from "../../../src/util/dpop/DpopHeaderCreator";
 import URL from "url-parse";
 
-describe("DPoPHeaderCreator", () => {
+describe("DpopHeaderCreator", () => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function initMocks() {
     const joseUtilityMocks = JoseUtilityMocks();
-    const dPoPClientKeyManagerMocks = DPoPClientKeyManagerMocks();
-    const uuidGeneratorMocks = UUIDGeneratorMocks();
-    const dPoPHeaderCreator = new DPoPHeaderCreator(
+    const dpopClientKeyManagerMocks = DpopClientKeyManagerMocks();
+    const uuidGeneratorMocks = UuidGeneratorMocks();
+    const dpopHeaderCreator = new DpopHeaderCreator(
       joseUtilityMocks.JoseUtilityMock(),
-      dPoPClientKeyManagerMocks.DPoPClientKeyManagerMock(),
-      uuidGeneratorMocks.UUIDGeneratorMock()
+      dpopClientKeyManagerMocks.DpopClientKeyManagerMock(),
+      uuidGeneratorMocks.UuidGeneratorMock()
     );
     return {
       ...joseUtilityMocks,
-      ...dPoPClientKeyManagerMocks,
+      ...dpopClientKeyManagerMocks,
       ...uuidGeneratorMocks,
-      dPoPHeaderCreator
+      dpopHeaderCreator
     };
   }
 
   describe("createHeaderToken", () => {
     it("Properly builds a token", async () => {
       const mocks = initMocks();
-      const token = await mocks.dPoPHeaderCreator.createHeaderToken(
+      const token = await mocks.dpopHeaderCreator.createHeaderToken(
         new URL("https://audience.com"),
         "post"
       );

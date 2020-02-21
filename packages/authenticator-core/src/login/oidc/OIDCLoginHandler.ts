@@ -1,31 +1,31 @@
 /**
- * Handles Common OIDC login functions (Like fetching the configuration)
+ * Handles Common Oidc login functions (Like fetching the configuration)
  */
 
 import { injectable, inject } from "tsyringe";
 import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
-import IOIDCHandler from "./IOIDCHandler";
-import IOIDCOptions from "./IOIDCOptions";
+import IOidcHandler from "./IOidcHandler";
+import IOidcOptions from "./IOidcOptions";
 import ConfigurationError from "../../util/errors/ConfigurationError";
 import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import IIssuerConfig from "./IIssuerConfig";
-import { IDPoPClientKeyManager } from "../../util/dpop/DPoPClientKeyManager";
+import { IDpopClientKeyManager } from "../../util/dpop/DpopClientKeyManager";
 import URL from "url-parse";
 
 @injectable()
-export default class OIDCLoginHandler implements ILoginHandler {
+export default class OidcLoginHandler implements ILoginHandler {
   constructor(
-    @inject("oidcHandler") private oidcHandler: IOIDCHandler,
+    @inject("oidcHandler") private oidcHandler: IOidcHandler,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("dPoPClientKeyManager")
-    private dPoPClientKeyManager: IDPoPClientKeyManager
+    @inject("dpopClientKeyManager")
+    private dpopClientKeyManager: IDpopClientKeyManager
   ) {}
 
   checkOptions(options: ILoginOptions): Error | null {
     if (!options.oidcIssuer) {
-      return new ConfigurationError("OIDCLoginHandler requires an oidcIssuer");
+      return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
     }
     return null;
   }
@@ -47,7 +47,7 @@ export default class OIDCLoginHandler implements ILoginHandler {
     );
 
     // Construct OIDC Options
-    const OIDCOptions: IOIDCOptions = {
+    const OidcOptions: IOidcOptions = {
       issuer: options.oidcIssuer,
       // TODO: differentiate if DPoP should be true
       dpop: true,
@@ -58,13 +58,13 @@ export default class OIDCLoginHandler implements ILoginHandler {
 
     // Generate DPoP Key if needed
     // TODO: it might be a good idea to put DPoP related things outside of this file
-    if (OIDCOptions.dpop) {
-      await this.dPoPClientKeyManager.generateClientKeyIfNotAlready(
-        OIDCOptions
+    if (OidcOptions.dpop) {
+      await this.dpopClientKeyManager.generateClientKeyIfNotAlready(
+        OidcOptions
       );
     }
 
     // Call proper OIDC Handler
-    await this.oidcHandler.handle(OIDCOptions);
+    await this.oidcHandler.handle(OidcOptions);
   }
 }

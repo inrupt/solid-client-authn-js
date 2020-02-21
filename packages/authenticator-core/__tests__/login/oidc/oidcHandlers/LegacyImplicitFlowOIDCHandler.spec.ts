@@ -1,34 +1,34 @@
 /**
- * Test for LegacyImplicitFlowOIDCHandler
+ * Test for LegacyImplicitFlowOidcHandler
  */
 import "reflect-metadata";
 import IRequestCredentials from "../../../../src/authenticatedFetch/IRequestCredentials";
 import URL from "url-parse";
-import LegacyImplicitFlowOIDCHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOIDCHandler";
-import DPoPHeaderCreatorMocks from "../../../util/dpop/DPoPHeaderCreator.mock";
+import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
+import DpopHeaderCreatorMocks from "../../../util/dpop/DpopHeaderCreator.mock";
 import FetcherMocks from "../../../util/Fetcher.mock";
-import canHandleTests from "./OIDCHandlerCanHandleTests";
+import canHandleTests from "./OidcHandlerCanHandleTests";
 
-describe("LegacyImplicitFlowOIDCHandler", () => {
+describe("LegacyImplicitFlowOidcHandler", () => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function initMocks() {
-    const dPoPHeaderCreatorMocks = DPoPHeaderCreatorMocks();
+    const dpopHeaderCreatorMocks = DpopHeaderCreatorMocks();
     const fetcherMocks = FetcherMocks();
     return {
-      ...dPoPHeaderCreatorMocks,
+      ...dpopHeaderCreatorMocks,
       ...fetcherMocks,
-      legacyImplicitFlowOIDCHandler: new LegacyImplicitFlowOIDCHandler(
+      legacyImplicitFlowOidcHandler: new LegacyImplicitFlowOidcHandler(
         fetcherMocks.FetcherMock(),
-        dPoPHeaderCreatorMocks.DPoPHeaderCreatorMock()
+        dpopHeaderCreatorMocks.DpopHeaderCreatorMock()
       )
     };
   }
 
   describe("canHandle", () => {
     const mocks = initMocks();
-    canHandleTests["legacyImplicitFlowOIDCHandler"].forEach(testConfig => {
+    canHandleTests["legacyImplicitFlowOidcHandler"].forEach(testConfig => {
       it(testConfig.message, async () => {
-        const value = await mocks.legacyImplicitFlowOIDCHandler.canHandle(
+        const value = await mocks.legacyImplicitFlowOidcHandler.canHandle(
           testConfig.oidcOptions
         );
         expect(value).toBe(testConfig.shouldPass);

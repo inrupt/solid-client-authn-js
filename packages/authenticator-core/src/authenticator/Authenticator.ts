@@ -9,7 +9,7 @@ import IAuthenticatedFetcher from "../authenticatedFetch/IAuthenticatedFetcher";
 import URL from "url-parse";
 import ILoginHandler from "../login/ILoginHandler";
 import ILoginOptions from "../login/ILoginOptions";
-import IDPoPRequestCredentials from "../util/dpop/IDPoPRequestCredentials";
+import IDpopRequestCredentials from "../util/dpop/IDpopRequestCredentials";
 
 @injectable()
 export default class Authenticator extends EventEmitter {
@@ -61,7 +61,7 @@ export default class Authenticator extends EventEmitter {
       // TODO: If we ever get here, it should kick off a login process
       throw new Error("Auth Token or client key not specified");
     }
-    const credentials: IDPoPRequestCredentials = {
+    const credentials: IDpopRequestCredentials = {
       type: "dpop",
       authToken,
       clientKey

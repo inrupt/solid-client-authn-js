@@ -1,27 +1,27 @@
-import { IDPoPHeaderCreator } from "../../../src/util/dpop/DPoPHeaderCreator";
+import { IDpopHeaderCreator } from "../../../src/util/dpop/DpopHeaderCreator";
 import URL from "url-parse";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function DPoPHeaderCreatorMocks() {
+export default function DpopHeaderCreatorMocks() {
   // DPoPHeaderCreator
-  const DPoPHeaderCreatorResponse = "someToken";
+  const DpopHeaderCreatorResponse = "someToken";
 
-  const DPoPHeaderCreatorMockFunction = jest.fn(
+  const DpopHeaderCreatorMockFunction = jest.fn(
     async (audience: URL, method: string) => {
-      return DPoPHeaderCreatorResponse;
+      return DpopHeaderCreatorResponse;
     }
   );
 
-  const DPoPHeaderCreatorMock: () => IDPoPHeaderCreator = jest.fn<
-    IDPoPHeaderCreator,
+  const DpopHeaderCreatorMock: () => IDpopHeaderCreator = jest.fn<
+    IDpopHeaderCreator,
     unknown[]
   >(() => ({
-    createHeaderToken: DPoPHeaderCreatorMockFunction
+    createHeaderToken: DpopHeaderCreatorMockFunction
   }));
 
   return {
-    DPoPHeaderCreatorResponse,
-    DPoPHeaderCreatorMockFunction,
-    DPoPHeaderCreatorMock
+    DpopHeaderCreatorResponse,
+    DpopHeaderCreatorMockFunction,
+    DpopHeaderCreatorMock
   };
 }
