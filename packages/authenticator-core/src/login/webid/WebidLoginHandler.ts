@@ -2,10 +2,9 @@
  * Handles login if a user's webid was provided
  */
 import ILoginHandler from "../ILoginHandler";
-import { URL } from "url";
 import ILoginOptions from "../ILoginOptions";
 
-export default class WebIDLoginHandler implements ILoginHandler {
+export default class WebidLoginHandler implements ILoginHandler {
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
     return false;
   }
