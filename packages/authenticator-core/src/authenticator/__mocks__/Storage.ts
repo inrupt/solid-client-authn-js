@@ -1,3 +1,5 @@
+import IStorage from "../IStorage";
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function StorageMocks(response?: string | null) {
   const StorageMockGetResponse: string = response || '{ "cool": "string" }';
@@ -13,11 +15,11 @@ export default function StorageMocks(response?: string | null) {
     /* void */
   });
 
-  const StorageMock = jest.fn(() => ({
+  const StorageMock: jest.Mocked<IStorage> = {
     get: StorageMockGetFunction,
     set: StorageMockSetFunction,
     delete: StorageMockDeleteFunction
-  }));
+  };
 
   return {
     StorageMockGetResponse,
