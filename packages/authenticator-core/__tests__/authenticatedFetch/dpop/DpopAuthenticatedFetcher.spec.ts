@@ -4,8 +4,8 @@
 import "reflect-metadata";
 import DpopAuthenticatedFetcher from "../../../src/authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import URL from "url-parse";
-import DpopHeaderCreatorMocks from "../../util/dpop/DpopHeaderCreator.mock";
-import FetcherMocks from "../../util/Fetcher.mock";
+import DpopHeaderCreatorMocks from "../../../src/util/dpop/__mocks__/DpopHeaderCreator";
+import FetcherMocks from "../../../src/util/__mocks__/Fetcher";
 
 describe("DpopAuthenticatedFetcher", () => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

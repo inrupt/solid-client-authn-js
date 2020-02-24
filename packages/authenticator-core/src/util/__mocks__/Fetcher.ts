@@ -1,4 +1,4 @@
-import IRequestCredentials from "../../src/authenticatedFetch/IRequestCredentials";
+import IRequestCredentials from "../../authenticatedFetch/IRequestCredentials";
 import mFetch from "jest-fetch-mock";
 
 import URL from "url-parse";

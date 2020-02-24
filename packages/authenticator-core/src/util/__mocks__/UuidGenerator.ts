@@ -1,4 +1,4 @@
-import { IUuidGenerator } from "../../src/util/UuidGenerator";
+import { IUuidGenerator } from "../UuidGenerator";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function UuidGeneratorMocks() {

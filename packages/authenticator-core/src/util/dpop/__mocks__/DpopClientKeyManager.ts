@@ -1,7 +1,7 @@
-import { IDpopClientKeyManager } from "../../../src/util/dpop/DpopClientKeyManager";
+import { IDpopClientKeyManager } from "../DpopClientKeyManager";
 import URL from "url-parse";
 import { JSONWebKey } from "jose";
-import IOidcOptions from "../../../src/login/oidc/IOidcOptions";
+import IOidcOptions from "../../../login/oidc/IOidcOptions";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function DpopClientKeyManagerMocks() {

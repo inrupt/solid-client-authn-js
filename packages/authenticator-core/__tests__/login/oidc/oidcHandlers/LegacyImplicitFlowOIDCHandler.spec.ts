@@ -5,8 +5,8 @@ import "reflect-metadata";
 import IRequestCredentials from "../../../../src/authenticatedFetch/IRequestCredentials";
 import URL from "url-parse";
 import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
-import DpopHeaderCreatorMocks from "../../../util/dpop/DpopHeaderCreator.mock";
-import FetcherMocks from "../../../util/Fetcher.mock";
+import DpopHeaderCreatorMocks from "../../../../src/util/dpop/__mocks__/DpopHeaderCreator";
+import FetcherMocks from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 
 describe("LegacyImplicitFlowOidcHandler", () => {
