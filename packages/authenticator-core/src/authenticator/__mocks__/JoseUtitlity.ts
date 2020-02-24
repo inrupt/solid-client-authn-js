@@ -1,4 +1,4 @@
-import IJoseUtility from "../../src/authenticator/IJoseUtility";
+import IJoseUtility from "../IJoseUtility";
 import { BasicParameters, ECCurve, OKPCurve, JSONWebKey, JWT } from "jose";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

@@ -2,9 +2,9 @@
  * Test for DPoPClientKeyManager
  */
 import "reflect-metadata";
-import StorageRetrieverMocks from "../StorageRetriever.mock";
-import JoseMocks from "../../authenticator/JoseUtitlity.mock";
-import StorageMocks from "../../authenticator/Storage.mock";
+import StorageRetrieverMocks from "../../../src/util/__mocks__/StorageRetriever";
+import JoseMocks from "../../../src/authenticator/__mocks__/JoseUtitlity";
+import StorageMocks from "../../../src/authenticator/__mocks__/Storage";
 import DpopClientKeyManager from "../../../src/util/dpop/DpopClientKeyManager";
 import IOidcOptions from "../../../src/login/oidc/IOidcOptions";
 import OidcHandlerCanHandleTests from "../../login/oidc/oidcHandlers/OidcHandlerCanHandleTests";

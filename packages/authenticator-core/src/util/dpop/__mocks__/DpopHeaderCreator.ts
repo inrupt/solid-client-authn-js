@@ -1,4 +1,4 @@
-import { IDpopHeaderCreator } from "../../../src/util/dpop/DpopHeaderCreator";
+import { IDpopHeaderCreator } from "../DpopHeaderCreator";
 import URL from "url-parse";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

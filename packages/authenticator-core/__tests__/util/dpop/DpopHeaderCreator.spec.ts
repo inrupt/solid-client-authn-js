@@ -2,9 +2,9 @@
  * Test for DPoPHeaderCreator
  */
 import "reflect-metadata";
-import JoseUtilityMocks from "../../authenticator/JoseUtitlity.mock";
-import DpopClientKeyManagerMocks from "./DpopClientKeyManager.mock";
-import UuidGeneratorMocks from "../UuidGenerator.mock";
+import JoseUtilityMocks from "../../../src/authenticator/__mocks__/JoseUtitlity";
+import DpopClientKeyManagerMocks from "../../../src/util/dpop/__mocks__/DpopClientKeyManager";
+import UuidGeneratorMocks from "../../../src/util/__mocks__/UuidGenerator";
 import DpopHeaderCreator from "../../../src/util/dpop/DpopHeaderCreator";
 import URL from "url-parse";
 

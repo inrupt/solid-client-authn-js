@@ -1,8 +1,8 @@
 import "reflect-metadata";
 import URL from "url-parse";
-import FetcherMocks from "../../util/Fetcher.mock";
-import StorageRetrieverMocks from "../../util/StorageRetriever.mock";
-import StorageMocks from "../../authenticator/Storage.mock";
+import FetcherMocks from "../../../src/util/__mocks__/Fetcher";
+import StorageRetrieverMocks from "../../../src/util/__mocks__/StorageRetriever";
+import StorageMocks from "../../../src/authenticator/__mocks__/Storage";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
 
