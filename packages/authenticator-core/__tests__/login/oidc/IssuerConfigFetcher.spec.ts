@@ -58,7 +58,11 @@ describe("IssuerConfigFetcher", () => {
   it("should return the fetched config if none was stored in the storage", async () => {
     const storageMock = defaultMocks.storageRetriever;
     storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
-    const fetchResponse = { some: "config" };
+    const fetchResponse = {
+      issuer: "https://example.com",
+      claim_types_supported: "oidc",
+      bleepBloop: "Meep Moop"
+    };
     const configFetcher = getMockConfigFetcher({
       storageRetriever: storageMock,
       fetchResponse: fetchResponse
@@ -67,8 +71,13 @@ describe("IssuerConfigFetcher", () => {
     const fetchedConfig = await configFetcher.fetchConfig(
       new URL("https://arbitrary.url")
     );
-
-    expect(fetchedConfig.some).toBe("config");
+    expect(fetchedConfig.issuer.protocol).toBe("https:");
+    expect(fetchedConfig.issuer.toString()).toBe("https://example.com");
+    // @ts-ignore
+    expect(fetchedConfig.claim_types_supported).toBeUndefined();
+    expect(fetchedConfig.claimTypesSupported).toBe("oidc");
+    // @ts-ignore
+    expect(fetchedConfig.bleepBloop).toBeUndefined();
   });
 
   it("should wrap URLs in url-parse's URL object", async () => {
@@ -92,17 +101,17 @@ describe("IssuerConfigFetcher", () => {
     );
 
     expect(fetchedConfig.issuer).toEqual(new URL("https://issuer.url"));
-    expect(fetchedConfig.authorization_endpoint).toEqual(
+    expect(fetchedConfig.authorizationEndpoint).toEqual(
       new URL("https://authorization_endpoint.url")
     );
-    expect(fetchedConfig.token_endpoint).toEqual(
+    expect(fetchedConfig.tokenEndpoint).toEqual(
       new URL("https://token_endpoint.url")
     );
-    expect(fetchedConfig.userinfo_endpoint).toEqual(
+    expect(fetchedConfig.userinfoEndpoint).toEqual(
       new URL("https://userinfo_endpoint.url")
     );
-    expect(fetchedConfig.jwks_uri).toEqual(new URL("https://jwks_uri.url"));
-    expect(fetchedConfig.registration_endpoint).toEqual(
+    expect(fetchedConfig.jwksUri).toEqual(new URL("https://jwks_uri.url"));
+    expect(fetchedConfig.registrationEndpoint).toEqual(
       new URL("https://registration_endpoint.url")
     );
   });
