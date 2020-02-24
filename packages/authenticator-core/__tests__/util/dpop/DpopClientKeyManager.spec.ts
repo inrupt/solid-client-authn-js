@@ -18,7 +18,7 @@ describe("DpopClientKeyManager", () => {
     const dpopClientKeyManager = new DpopClientKeyManager(
       storageRetrieverMocks.StorageRetrieverMock(),
       joseMocks.JoseUtilityMock(),
-      storageMocks.StorageMock()
+      storageMocks.StorageMock
     );
     return {
       ...storageRetrieverMocks,

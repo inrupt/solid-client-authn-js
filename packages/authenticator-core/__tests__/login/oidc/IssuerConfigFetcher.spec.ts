@@ -17,7 +17,7 @@ describe("IssuerConfigFetcher", () => {
   const defaultMocks = {
     fetchResponse: {} as object,
     storageRetriever: StorageRetrieverMocks().StorageRetrieverMock(),
-    storage: StorageMocks().StorageMock()
+    storage: StorageMocks().StorageMock
   };
   function getMockConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
