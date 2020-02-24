@@ -16,7 +16,7 @@ describe("DpopHeaderCreator", () => {
     const uuidGeneratorMocks = UuidGeneratorMocks();
     const dpopHeaderCreator = new DpopHeaderCreator(
       joseUtilityMocks.JoseUtilityMock(),
-      dpopClientKeyManagerMocks.DpopClientKeyManagerMock(),
+      dpopClientKeyManagerMocks.DpopClientKeyManagerMock,
       uuidGeneratorMocks.UuidGeneratorMock()
     );
     return {

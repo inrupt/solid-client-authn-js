@@ -21,13 +21,10 @@ export default function DpopClientKeyManagerMocks() {
     return DpopClientKeyManagerMockGetClientKeyResponse;
   });
 
-  const DpopClientKeyManagerMock: () => IDpopClientKeyManager = jest.fn<
-    IDpopClientKeyManager,
-    unknown[]
-  >(() => ({
+  const DpopClientKeyManagerMock: jest.Mocked<IDpopClientKeyManager> = {
     generateClientKeyIfNotAlready: DpopClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction,
     getClientKey: DpopClientKeyManagerMockGetClientKeyFunction
-  }));
+  };
 
   return {
     DpopClientKeyManagerMockGenerateClientKeyIfNotAlreadyFunction,
