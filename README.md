@@ -1,116 +1,119 @@
 # Solid Authenticator
 
+__WARNING: The API in this library is a work in progress. Expecrt breaking changes in the future__
+
 This is a monorepo that contains projects related to solid authenticator:
 
- - @solid/authenticator: A nodejs implementation of Solid Authenticator
+ - @solid/authenticator-node: A nodejs implementation of Solid Authenticator
+ - @solid/authenticator-browser: A browser implementation of the Solid Authenticator
  - @solid/authenticator-core: The core libraries used by various implementations of Solid Authenticator
- - @solid/authenticator-react-native: Solid Authenticator for react native
- - @solid/authenticator-spa: Solid Authenticator for single page applications
 
-## Examples
+## Running in the Web Browser
 
-### For Use in the Web Browser
+Currently this library only supports logging in via the web browser.
 
-Let's first see how we can initiate a login.
+### Running via the Script tag
 
-```typescript
-import { login, getUser } from 'solid-authenticator-browser'
+If you wish to use the script tag to include authenticator as a dependency, you can use the global variable `solidAuthenticator` as seen below:
 
-// Get User will return a user object or nothing if no user is logged in
-const user = await getUser()
-if (!user) {
-  await login({
-    webId: 'https://example.com/profile/card#me', // You could either provide a "webId" field or an "issuer" field if you know what your user's OIDC issuer is. If none are provided, a pop-up will ask the user to provide one.
-    popUp: false // Note that when popup is false, the browser will redirect the current page thus topping the flow of this (default is false)
-    redirect: 'https://mysite.com/redirect'
+```html
+<html>
+  <head>
+    <title>Solid Authenticator Test Page</title>
+    <script src="solid-authenticator.bundle.js"></script>
+    <script>
+      function loginUser() {
+        solidAuthenticator.login({
+          oidcIssuer: new URL('http://localhost:9001')
+        })
+      }
+      function fetch() {
+        solidAuthenticator.fetch('http://localhost:9001/storage', {})
+          .then((result) => {
+            result.text().then((text) => {
+              document.getElementById("fetchResult").value = text
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Solid Authenticator Test Page</h1>
+    <button onclick="loginUser()" id="loginButton">Log In</button>
+    <br />
+    <br />
+    <button onclick="fetch()" id="fetchButton">Fetch</button>
+    <br />
+    <textarea id="fetchResult"></textarea>
+  </body>
+</html>
+```
+
+### Running via Import
+
+```js
+import Authenticator from '@solid/authenticator-browser';
+
+// Create a new instance of the Authenticator
+const authenticator = Authenticator()
+
+function loginUser() {
+  // Kick off the login process
+  authenticator.login({
+    oidcIssuer: new URL('http://localhost:9001')
   })
+}
+function fetch() {
+  // Once you're logged in, make a request
+  authenticator.fetch('http://localhost:9001/storage', {})
+    .then((result) => {
+      result.text().then((text) => {
+        document.getElementById("fetchResult").value = text
+      })
+    })
+    .catch((err) => {
+      console.error(err)
+    })
 }
 ```
 
-Using `getUser` to determine if a user is logged in is fine, but it's always better to be alerted once a user has logged in. For this, you can use `onUser`. Then you can use that user to fetch.
+## Development
 
-```typescript
-import { onUser } from 'solid-authenticator-browser'
-
-onUser((user) => {
-  console.log(user.webId)
-  user.fetch('https://example.com/resource')
-})
+Clone the repo here:
+```bash
+git clone https://github.com/inrupt/solid-auth-client-rewrite/
 ```
 
-It is also possible to fetch without the "user" object. Keep in mind that doing so will not make an authenticated fetch if a user is not logged in.
-
-```typescript
-import { fetch } from 'solid-authenticator-browser'
-
-fetch('https://example.com/resource', {
-  method: 'post',
-  body: 'Sweet body, bro'
-})
+Using lerna, install the dependencies
+```bash
+npm i
+npm run bootstrap
 ```
 
-There may be some cases where you want to manage multiple users logged in at once. For this we can use the `loginUniqueUser` function.
-
-```typescript
-import { login, getUsers } from 'solid-authenticator-browser'
-
-const myWebId = 'https://example.com/profile/card#me'
-const users = await getUsers()
-if (users.some((user) => user.webId === myWebId)) { // If my webId hasn't been logged in yet
-  await login({
-    webId: myWebId,
-    unique: true // Unique should be set to true for this special use case. Keep in mind that users logged in using the "unique" field can only use the fetch function in their own User object and cannot use the global "fetch" function
-  })
-}
+You can test various aspects of the code by running one of these commands
+```bash
+npm run test # Runs all tests
+npm run unit-test # Runs only unit tests in all packages
+npm run acceptance-test # Runs only acceptance tests in all packages
+npm run core-test # Runs all unit tests in the core library
+npm run core-unit-test # Runs only unit tests in the core library
+npm run browser-test # Runs all tests in the browser library
+npm run browser-unit-test # Runs only the unit tests in the browser library
+npm run browser-acceptance-test # Runs only the acceptance tests in the browser library
+npm run node-test # Runs all tests in the node library
+npm run node-unit-test # Runs only the unit tests in the node library
+npm run node-acceptance-test # Runs only the acceptance tests in the node library
 ```
 
-### For Use on the Server
-
-Unlike on the browser, servers often need to deal with multiple users, so the server API has been configured to deal with that by default:
-
-```typescript
-import express from 'express'
-import session from 'express-session'
-import {
-  login,
-  handleServerRedirect
-} from 'solid-authenticator-node'
-
-const app = expess()
-
-app.use(session({
-  secret: 'I let Kevin\'s son beat me in foosball',
-  cookie: { secure: true }
-}))
-
-app.post('/login', (req, res) => {
-  if (req.session.user) {
-    res.status(400).send('already logged in')
-  }
-  await login({ 
-    webId: req.query.webid, // This assumes your front-end has passed the webId into the url query
-    redirectUri: 'https://mysite:3000/redirect',
-    request: req
-  })
-})
-
-app.get('/redirect', async (req, res) => {
-  req.session.user = await userFromRedirectUrl(req.query)
-})
-
-app.get('/solidresource', async (req, res) => {
-  if (req.session.user) {
-    const response = await req.session.user.fetch('https://example.com/resource')
-    res.send(response.body)
-  } else {
-    res.status(401).send()
-  }
-})
-
-app.listen(3000)
+To make development easier, you can stand up the dev server for the browser implementation:
+```bash
+npm run browser-dev
 ```
 
-### Injecting your custom functionality
+## Architecture
 
-Any part of `solid-authenticator` can be modified without the need to commit to the source library. All you need to do is change the dependency tree.
-
+This package follows the following architecture:
+![solid authenticator architecture](/sampleFlows/SolidAuthClientArchitecture.png)
