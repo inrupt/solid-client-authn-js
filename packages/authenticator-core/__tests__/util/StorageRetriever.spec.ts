@@ -2,14 +2,13 @@ jest.mock("../../src/util/validateSchema");
 
 // Required by TSyringe:
 import "reflect-metadata";
-import StorageMocks from "../../src/authenticator/__mocks__/Storage";
+import { StorageMock } from "../../src/authenticator/__mocks__/Storage";
 import StorageRetriever from "../../src/util/StorageRetriever";
-import IStorage from "../../src/authenticator/IStorage";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("StorageRetriever", () => {
-  const mockStorage = StorageMocks().StorageMock;
+  const mockStorage = StorageMock;
 
   it("should correctly retrieve valid data from the given storage", async () => {
     mockStorage.get.mockReturnValueOnce(

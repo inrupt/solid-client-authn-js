@@ -4,29 +4,34 @@
 import "reflect-metadata";
 import DpopAuthenticatedFetcher from "../../../src/authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import URL from "url-parse";
-import DpopHeaderCreatorMocks from "../../../src/util/dpop/__mocks__/DpopHeaderCreator";
-import FetcherMocks from "../../../src/util/__mocks__/Fetcher";
+import {
+  DpopHeaderCreatorMock,
+  DpopHeaderCreatorResponse
+} from "../../../src/util/dpop/__mocks__/DpopHeaderCreator";
+import {
+  FetcherMock,
+  FetcherMockResponse
+} from "../../../src/util/__mocks__/Fetcher";
 
 describe("DpopAuthenticatedFetcher", () => {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  function mockLibrary() {
-    const dpopHeaderCreatorMocks = DpopHeaderCreatorMocks();
-    const fetcherMocks = FetcherMocks();
-    return {
-      ...dpopHeaderCreatorMocks,
-      ...fetcherMocks,
-      dpopAuthenticatedFetcher: new DpopAuthenticatedFetcher(
-        dpopHeaderCreatorMocks.DpopHeaderCreatorMock(),
-        fetcherMocks.FetcherMock()
-      )
-    };
+  const defaultMocks = {
+    fetcher: FetcherMock,
+    dpopHeaderCreator: DpopHeaderCreatorMock
+  };
+  function getDpopAuthenticatedFetcher(
+    mocks: Partial<typeof defaultMocks> = defaultMocks
+  ): DpopAuthenticatedFetcher {
+    return new DpopAuthenticatedFetcher(
+      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
+      mocks.fetcher ?? defaultMocks.fetcher
+    );
   }
 
   describe("canHandle", () => {
     it("accepts configs with type dpop", async () => {
-      const mocks = mockLibrary();
+      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
       expect(
-        await mocks.dpopAuthenticatedFetcher.canHandle(
+        await dpopAuthenticatedFetcher.canHandle(
           { type: "dpop" },
           new URL("http://example.com"),
           {}
@@ -35,9 +40,9 @@ describe("DpopAuthenticatedFetcher", () => {
     });
 
     it("rejects configs without type dpop", async () => {
-      const mocks = mockLibrary();
+      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
       expect(
-        await mocks.dpopAuthenticatedFetcher.canHandle(
+        await dpopAuthenticatedFetcher.canHandle(
           { type: "bearer" },
           new URL("http://example.com"),
           {}
@@ -48,9 +53,9 @@ describe("DpopAuthenticatedFetcher", () => {
 
   describe("handle", () => {
     it("should throw an error on a bad config", () => {
-      const mocks = mockLibrary();
+      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
       expect(
-        mocks.dpopAuthenticatedFetcher.handle(
+        dpopAuthenticatedFetcher.handle(
           { type: "bad" },
           new URL("https://bad.com"),
           {}
@@ -59,29 +64,34 @@ describe("DpopAuthenticatedFetcher", () => {
     });
 
     it("handles request properly", async () => {
-      const mocks = mockLibrary();
+      const dpopHeaderCreator = DpopHeaderCreatorMock;
+      const fetcher = FetcherMock;
+      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher({
+        dpopHeaderCreator: dpopHeaderCreator,
+        fetcher: fetcher
+      });
       const url = new URL("https://example.com");
       const requestCredentials = {
         type: "dpop",
         authToken: "someAuthToken"
       };
       const init = {};
-      const response = await mocks.dpopAuthenticatedFetcher.handle(
+      const response = await dpopAuthenticatedFetcher.handle(
         requestCredentials,
         url,
         init
       );
-      expect(mocks.DpopHeaderCreatorMockFunction).toHaveBeenCalledWith(
+      expect(dpopHeaderCreator.createHeaderToken).toHaveBeenCalledWith(
         url,
         "GET"
       );
-      expect(mocks.FetcherMockFunction).toHaveBeenCalledWith(url, {
+      expect(fetcher.fetch).toHaveBeenCalledWith(url, {
         headers: {
           authorization: `DPOP ${requestCredentials.authToken}`,
-          dpop: mocks.DpopHeaderCreatorResponse
+          dpop: DpopHeaderCreatorResponse
         }
       });
-      expect(response).toBe(mocks.FetcherResponse);
+      expect(response).toBe(FetcherMockResponse);
     });
   });
 

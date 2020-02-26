@@ -1,29 +1,12 @@
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-explicit-any
-export default function StorageRetrieverMocks(result?: any) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let StorageRetrieverMockResponse: Record<string, any>;
-  if (!result && result !== null) {
-    StorageRetrieverMockResponse = {
-      someKey: "someString"
-    };
-  } else {
-    StorageRetrieverMockResponse = result;
-  }
+import { IStorageRetriever } from "../StorageRetriever";
 
-  const StorageRetrieverMockFunction = jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async (key: string): Promise<Record<string, any> | null> => {
-      return StorageRetrieverMockResponse;
-    }
-  );
+type PromiseValue<T> = T extends Promise<infer U> ? U : T;
+export const StorageRetrieverMockResponse: PromiseValue<ReturnType<
+  IStorageRetriever["retrieve"]
+>> = {
+  someKey: "someString"
+};
 
-  const StorageRetrieverMock = jest.fn(() => ({
-    retrieve: StorageRetrieverMockFunction
-  }));
-
-  return {
-    StorageRetrieverMockResponse,
-    StorageRetrieverMockFunction,
-    StorageRetrieverMock
-  };
-}
+export const StorageRetrieverMock: jest.Mocked<IStorageRetriever> = {
+  retrieve: jest.fn(async _key => StorageRetrieverMockResponse)
+};

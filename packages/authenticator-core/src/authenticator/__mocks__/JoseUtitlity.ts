@@ -1,64 +1,32 @@
 import IJoseUtility from "../IJoseUtility";
 import { BasicParameters, ECCurve, OKPCurve, JSONWebKey, JWT } from "jose";
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function JoseUtilityMocks() {
-  const JoseUtilityMockGenerateJWKResponse: JSONWebKey = {
-    kty: "RSA",
-    e: "abcd",
-    n: "1234"
-  };
+export const JoseUtilityMockGenerateJWKResponse: JSONWebKey = {
+  kty: "RSA",
+  e: "abcd",
+  n: "1234"
+};
 
-  const JoseUtilityMockGenerateJWKFunction = jest.fn(
-    async (
-      kty: "EC" | "OKP" | "RSA" | "oct",
-      crvBitlength?: ECCurve | OKPCurve | number,
-      parameters?: BasicParameters,
-      isPrivate?: boolean
-    ) => {
-      return JoseUtilityMockGenerateJWKResponse;
-    }
-  );
+export const JoseUtilityMockPrivateJWKToPublicJWKResponse: JSONWebKey = {
+  kty: "RSA",
+  e: "publicabcd",
+  n: "public1234"
+};
 
-  const JoseUtilityMockPrivateJWKToPublicJWKResponse: JSONWebKey = {
-    kty: "RSA",
-    e: "publicabcd",
-    n: "public1234"
-  };
+export const JoseUtilityMockSignJWTResponse = "thisIsAKey";
 
-  const JoseUtilityMockPrivateJWKToPublicJWKFunction = jest.fn(
-    async (key: JSONWebKey) => {
-      return JoseUtilityMockPrivateJWKToPublicJWKResponse;
-    }
-  );
-
-  const JoseUtilityMockSignJWTResponse = "thisIsAKey";
-
-  const JoseUtilityMockSignJWTFunction = jest.fn(
-    async (
-      payload: Record<string, unknown>,
-      key: JSONWebKey,
-      options?: JWT.SignOptions
-    ) => {
-      return JoseUtilityMockSignJWTResponse;
-    }
-  );
-
-  const JoseUtilityMock: () => IJoseUtility = jest.fn<IJoseUtility, unknown[]>(
-    () => ({
-      generateJWK: JoseUtilityMockGenerateJWKFunction,
-      privateJWKToPublicJWK: JoseUtilityMockPrivateJWKToPublicJWKFunction,
-      signJWT: JoseUtilityMockSignJWTFunction
-    })
-  );
-
-  return {
-    JoseUtilityMock,
-    JoseUtilityMockGenerateJWKFunction,
-    JoseUtilityMockGenerateJWKResponse,
-    JoseUtilityMockPrivateJWKToPublicJWKFunction,
-    JoseUtilityMockPrivateJWKToPublicJWKResponse,
-    JoseUtilityMockSignJWTFunction,
-    JoseUtilityMockSignJWTResponse
-  };
-}
+export const JoseUtilityMock: jest.Mocked<IJoseUtility> = {
+  // There's an `as any` cast here because the overload with different parameter lengths of
+  // generateJWK is tripping up TypeScript. Not sure how to fix, but it doesn't seem like that's
+  // worth the time investment.
+  generateJWK: jest.fn(
+    async (_kty, _crvBitLength, _parameters, _isPrivate) =>
+      JoseUtilityMockGenerateJWKResponse
+  ) as any,
+  privateJWKToPublicJWK: jest.fn(
+    async _key => JoseUtilityMockPrivateJWKToPublicJWKResponse
+  ),
+  signJWT: jest.fn(
+    async (_payload, _key, _options) => JoseUtilityMockSignJWTResponse
+  )
+};
