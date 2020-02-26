@@ -1,27 +1,9 @@
 import { IDpopHeaderCreator } from "../DpopHeaderCreator";
-import URL from "url-parse";
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function DpopHeaderCreatorMocks() {
-  // DPoPHeaderCreator
-  const DpopHeaderCreatorResponse = "someToken";
+export const DpopHeaderCreatorResponse = "someToken";
 
-  const DpopHeaderCreatorMockFunction = jest.fn(
-    async (audience: URL, method: string) => {
-      return DpopHeaderCreatorResponse;
-    }
-  );
-
-  const DpopHeaderCreatorMock: () => IDpopHeaderCreator = jest.fn<
-    IDpopHeaderCreator,
-    unknown[]
-  >(() => ({
-    createHeaderToken: DpopHeaderCreatorMockFunction
-  }));
-
-  return {
-    DpopHeaderCreatorResponse,
-    DpopHeaderCreatorMockFunction,
-    DpopHeaderCreatorMock
-  };
-}
+export const DpopHeaderCreatorMock: jest.Mocked<IDpopHeaderCreator> = {
+  createHeaderToken: jest.fn(
+    async (_audience, _method) => DpopHeaderCreatorResponse
+  )
+};

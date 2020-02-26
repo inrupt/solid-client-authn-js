@@ -7,7 +7,7 @@ import IOidcHandler from "../../../src/login/oidc/IOidcHandler";
 import URL from "url-parse";
 import { IIssuerConfigFetcher } from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IDpopClientKeyManager } from "../../../src/util/dpop/DpopClientKeyManager";
-import DpopClientKeyManagerMocks from "../../../src/util/dpop/__mocks__/DpopClientKeyManager";
+import { DpopClientKeyManagerMock } from "../../../src/util/dpop/__mocks__/DpopClientKeyManager";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
@@ -15,7 +15,7 @@ describe("OidcLoginHandler", () => {
   const defaultMocks = {
     oidcHandler: MockOidcHandler,
     issuerConfigFetcher: MockIssuerConfigFetcher,
-    dpopClientKeyManager: DpopClientKeyManagerMocks().DpopClientKeyManagerMock
+    dpopClientKeyManager: DpopClientKeyManagerMock
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks

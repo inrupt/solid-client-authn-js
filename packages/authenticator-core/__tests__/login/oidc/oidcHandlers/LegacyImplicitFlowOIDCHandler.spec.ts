@@ -2,33 +2,30 @@
  * Test for LegacyImplicitFlowOidcHandler
  */
 import "reflect-metadata";
-import IRequestCredentials from "../../../../src/authenticatedFetch/IRequestCredentials";
-import URL from "url-parse";
 import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
-import DpopHeaderCreatorMocks from "../../../../src/util/dpop/__mocks__/DpopHeaderCreator";
-import FetcherMocks from "../../../../src/util/__mocks__/Fetcher";
+import { DpopHeaderCreatorMock } from "../../../../src/util/dpop/__mocks__/DpopHeaderCreator";
+import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 
 describe("LegacyImplicitFlowOidcHandler", () => {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  function initMocks() {
-    const dpopHeaderCreatorMocks = DpopHeaderCreatorMocks();
-    const fetcherMocks = FetcherMocks();
-    return {
-      ...dpopHeaderCreatorMocks,
-      ...fetcherMocks,
-      legacyImplicitFlowOidcHandler: new LegacyImplicitFlowOidcHandler(
-        fetcherMocks.FetcherMock(),
-        dpopHeaderCreatorMocks.DpopHeaderCreatorMock()
-      )
-    };
+  const defaultMocks = {
+    fetcher: FetcherMock,
+    dpopHeaderCreator: DpopHeaderCreatorMock
+  };
+  function getLegacyImplicitFlowOidcHandler(
+    mocks: Partial<typeof defaultMocks> = defaultMocks
+  ): LegacyImplicitFlowOidcHandler {
+    return new LegacyImplicitFlowOidcHandler(
+      mocks.fetcher ?? defaultMocks.fetcher,
+      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator
+    );
   }
 
   describe("canHandle", () => {
-    const mocks = initMocks();
+    const legacyImplicitFlowOidcHandler = getLegacyImplicitFlowOidcHandler();
     canHandleTests["legacyImplicitFlowOidcHandler"].forEach(testConfig => {
       it(testConfig.message, async () => {
-        const value = await mocks.legacyImplicitFlowOidcHandler.canHandle(
+        const value = await legacyImplicitFlowOidcHandler.canHandle(
           testConfig.oidcOptions
         );
         expect(value).toBe(testConfig.shouldPass);
