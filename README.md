@@ -1,8 +1,8 @@
-# Solid Authenticator
+# Solid Auth Fetcher
 
 __WARNING: The API in this library is a work in progress. Expecrt breaking changes in the future__
 
-This is a monorepo that contains projects related to solid authenticator:
+This is a monorepo that contains projects related to solid auth fetcher:
 
  - @solid/authenticator-node: A nodejs implementation of Solid Authenticator
  - @solid/authenticator-browser: A browser implementation of the Solid Authenticator
@@ -14,12 +14,12 @@ Currently this library only supports logging in via the web browser.
 
 ### Running via the Script tag
 
-If you wish to use the script tag to include authenticator as a dependency, you can use the global variable `solidAuthenticator` as seen below:
+If you wish to use the script tag to include auth fetcher as a dependency, you can use the global variable `solidAuthenticator` as seen below:
 
 ```html
 <html>
   <head>
-    <title>Solid Authenticator Test Page</title>
+    <title>Solid Auth Fetcher Test Page</title>
     <script src="solid-authenticator.bundle.js"></script>
     <script>
       function loginUser() {
@@ -41,7 +41,7 @@ If you wish to use the script tag to include authenticator as a dependency, you 
     </script>
   </head>
   <body>
-    <h1>Solid Authenticator Test Page</h1>
+    <h1>Solid Auth Fetcher Test Page</h1>
     <button onclick="loginUser()" id="loginButton">Log In</button>
     <br />
     <br />
@@ -84,7 +84,7 @@ function fetch() {
 
 Clone the repo here:
 ```bash
-git clone https://github.com/inrupt/solid-auth-client-rewrite/
+git clone https://github.com/inrupt/solid-auth-fetcher/
 ```
 
 Using lerna, install the dependencies
