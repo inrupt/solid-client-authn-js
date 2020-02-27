@@ -39,9 +39,13 @@ app.use(
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 
-app.get("/.well-known/openid-configuration", (req, res) => {
-  res.send(getOpenIdConfig({ issuer: ISSUER }));
-});
+app.get('/', (req, res) => {
+  res.send('Test Server')
+})
+
+app.get('/.well-known/openid-configuration', (req, res) => {
+  res.send(getOpenIdConfig({ issuer: ISSUER }))
+})
 
 app.get("/jwks", (req, res) => {
   res.send(keystore);
