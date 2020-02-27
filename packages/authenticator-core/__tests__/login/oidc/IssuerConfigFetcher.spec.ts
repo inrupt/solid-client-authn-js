@@ -55,7 +55,7 @@ describe("IssuerConfigFetcher", () => {
     expect(fetchedConfig).toEqual({ some: "config" });
   });
 
-  it("should return the fetched config if none was stored in the storage", async () => {
+  it("should return a config based on the fetched config if none was stored in the storage", async () => {
     const storageMock = defaultMocks.storageRetriever;
     storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = {
