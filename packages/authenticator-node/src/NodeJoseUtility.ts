@@ -11,27 +11,27 @@ import {
   JWKOctKey,
   JWT,
   JSONWebKey
-} from 'jose'
-import IJoseUtility from '@solid/authenticator-core/dist/authenticator/IJoseUtility'
-import NotImplementedError from '@solid/authenticator-core/dist/util/errors/NotImplementedError'
+} from "jose";
+import IJoseUtility from "@solid/authenticator-core/dist/authenticator/IJoseUtility";
+import NotImplementedError from "@solid/authenticator-core/dist/util/errors/NotImplementedError";
 
 export default class NodeJoseUtility implements IJoseUtility {
-  generateJWK (
-    kty: 'EC' | 'OKP' | 'RSA' | 'oct',
+  generateJWK(
+    kty: "EC" | "OKP" | "RSA" | "oct",
     crvBitlength?: ECCurve | OKPCurve | number,
     parameters?: BasicParameters,
     isPrivate?: boolean
   ): Promise<JSONWebKey> {
-    throw new NotImplementedError('nodeGenerateJWK')
+    throw new NotImplementedError("nodeGenerateJWK");
   }
-  privateJWKToPublicJWK (key: JSONWebKey): Promise<JSONWebKey> {
-    throw new NotImplementedError('nodePrivateJWKToPublicJWK')
+  privateJWKToPublicJWK(key: JSONWebKey): Promise<JSONWebKey> {
+    throw new NotImplementedError("nodePrivateJWKToPublicJWK");
   }
-  signJWT (
+  signJWT(
     payload: Object,
     key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
     options?: JWT.SignOptions
   ): Promise<string> {
-    throw new NotImplementedError('nodeSignJWT')
+    throw new NotImplementedError("nodeSignJWT");
   }
 }
