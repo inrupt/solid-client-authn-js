@@ -48,10 +48,17 @@ describe("IssuerConfigFetcher", () => {
     expect(fetchedConfig).toEqual({ some: "config" });
   });
 
-  it("should return the fetched config if none was stored in the storage", async () => {
+  it("should return a config based on the fetched config if none was stored in the storage", async () => {
     const storageMock = defaultMocks.storageRetriever;
     storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
-    const fetchResponse = new Response(JSON.stringify({ some: "config" }));
+    const fetchResponse = new Response(
+      JSON.stringify({
+        issuer: "https://example.com",
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        claim_types_supported: "oidc",
+        bleepBloop: "Meep Moop"
+      })
+    );
     const configFetcher = getIssuerConfigFetcher({
       storageRetriever: storageMock,
       fetchResponse: fetchResponse
@@ -60,14 +67,20 @@ describe("IssuerConfigFetcher", () => {
     const fetchedConfig = await configFetcher.fetchConfig(
       new URL("https://arbitrary.url")
     );
-
-    expect(fetchedConfig.some).toBe("config");
+    expect(fetchedConfig.issuer.protocol).toBe("https:");
+    expect(fetchedConfig.issuer.toString()).toBe("https://example.com");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((fetchedConfig as any).claim_types_supported).toBeUndefined();
+    expect(fetchedConfig.claimTypesSupported).toBe("oidc");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((fetchedConfig as any).bleepBloop).toBeUndefined();
   });
 
   it("should wrap URLs in url-parse's URL object", async () => {
     const storageMock = defaultMocks.storageRetriever;
     storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = new Response(
+      /* eslint-disable @typescript-eslint/camelcase */
       JSON.stringify({
         issuer: "https://issuer.url",
         authorization_endpoint: "https://authorization_endpoint.url",
@@ -76,6 +89,7 @@ describe("IssuerConfigFetcher", () => {
         jwks_uri: "https://jwks_uri.url",
         registration_endpoint: "https://registration_endpoint.url"
       })
+      /* eslint-enable @typescript-eslint/camelcase */
     );
     const configFetcher = getIssuerConfigFetcher({
       storageRetriever: storageMock,
@@ -87,25 +101,24 @@ describe("IssuerConfigFetcher", () => {
     );
 
     expect(fetchedConfig.issuer).toEqual(new URL("https://issuer.url"));
-    expect(fetchedConfig.authorization_endpoint).toEqual(
+    expect(fetchedConfig.authorizationEndpoint).toEqual(
       new URL("https://authorization_endpoint.url")
     );
-    expect(fetchedConfig.token_endpoint).toEqual(
+    expect(fetchedConfig.tokenEndpoint).toEqual(
       new URL("https://token_endpoint.url")
     );
-    expect(fetchedConfig.userinfo_endpoint).toEqual(
+    expect(fetchedConfig.userinfoEndpoint).toEqual(
       new URL("https://userinfo_endpoint.url")
     );
-    expect(fetchedConfig.jwks_uri).toEqual(new URL("https://jwks_uri.url"));
-    expect(fetchedConfig.registration_endpoint).toEqual(
+    expect(fetchedConfig.jwksUri).toEqual(new URL("https://jwks_uri.url"));
+    expect(fetchedConfig.registrationEndpoint).toEqual(
       new URL("https://registration_endpoint.url")
     );
   });
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
     const storageMock = defaultMocks.storageRetriever;
-    // @ts-ignore: Ignore because this mock function should be able to return null
-    storageMock.retrieve.mockReturnValueOnce(null);
+    storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
     const mockFetcher = {
       fetch: (): Promise<Response> =>
         Promise.resolve(({

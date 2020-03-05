@@ -4,11 +4,7 @@
 import IStorage from "@solid/authenticator-core/dist/authenticator/IStorage";
 
 export default class InMemoryStorage implements IStorage {
-<<<<<<< HEAD
-  private map: { [key: string]: string };
-=======
   private map: { [key: string]: string } = {};
->>>>>>> 4547d76... Aggregate tests work again
 
   async get(key: string): Promise<string | undefined> {
     return this.map[key];

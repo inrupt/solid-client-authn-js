@@ -11,11 +11,11 @@ const standardOidcOptions: IOidcOptions = {
   // This will be fixed in a different pull request
   issuerConfiguration: {
     issuer: new URL("https://example.com"),
-    authorization_endpoint: new URL("https://example.com/auth"),
-    token_endpoint: new URL("https://example.com/token"),
-    jwks_uri: new URL("https://example.com/jwks"),
-    subject_types_supported: [],
-    claims_supported: []
+    authorizationEndpoint: new URL("https://example.com/auth"),
+    tokenEndpoint: new URL("https://example.com/token"),
+    jwksUri: new URL("https://example.com/jwks"),
+    subjectTypesSupported: [],
+    claimsSupported: []
   }
 };
 
@@ -35,7 +35,7 @@ const canHandleTests: {
         ...standardOidcOptions,
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
-          grant_types_supported: ["authorization_code", "implicit", "device"]
+          grantTypesSupported: ["authorization_code", "implicit", "device"]
         }
       }
     },
@@ -47,7 +47,7 @@ const canHandleTests: {
         ...standardOidcOptions,
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
-          grant_types_supported: ["implicit"]
+          grantTypesSupported: ["implicit"]
         }
       }
     },
@@ -59,7 +59,7 @@ const canHandleTests: {
         ...standardOidcOptions,
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
-          grant_types_supported: ["authorization_code", "device"]
+          grantTypesSupported: ["authorization_code", "device"]
         }
       }
     },

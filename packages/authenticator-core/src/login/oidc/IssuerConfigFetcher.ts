@@ -18,6 +18,95 @@ export interface IIssuerConfigFetcher {
   fetchConfig(issuer: URL): Promise<IIssuerConfig>;
 }
 
+/* eslint-disable @typescript-eslint/camelcase */
+const issuerConfigKeyMap: Record<
+  string,
+  { toKey: string; convertToUrl?: boolean }
+> = {
+  issuer: {
+    toKey: "issuer",
+    convertToUrl: true
+  },
+  authorization_endpoint: {
+    toKey: "authorizationEndpoint",
+    convertToUrl: true
+  },
+  token_endpoint: {
+    toKey: "tokenEndpoint",
+    convertToUrl: true
+  },
+  userinfo_endpoint: {
+    toKey: "userinfoEndpoint",
+    convertToUrl: true
+  },
+  jwks_uri: {
+    toKey: "jwksUri",
+    convertToUrl: true
+  },
+  registration_endpoint: {
+    toKey: "registrationEndpoint",
+    convertToUrl: true
+  },
+  scopes_supported: { toKey: "scopesSupported" },
+  response_types_supported: { toKey: "responseTypesSupported" },
+  response_modes_supported: { toKey: "responseModesSupported" },
+  grant_types_supported: { toKey: "grantTypesSupported" },
+  acr_values_supported: { toKey: "acrValuesSupported" },
+  subject_types_supported: { toKey: "subjectTypesSupported" },
+  id_token_signing_alg_values_supported: {
+    toKey: "idTokenSigningAlgValuesSupported"
+  },
+  id_token_encryption_alg_values_supported: {
+    toKey: "idTokenEncryptionAlgValuesSupported"
+  },
+  id_token_encryption_enc_values_supported: {
+    toKey: "idTokenEncryptionEncValuesSupported"
+  },
+  userinfo_signing_alg_values_supported: {
+    toKey: "userinfoSigningAlgValuesSupported"
+  },
+  userinfo_encryption_alg_values_supported: {
+    toKey: "userinfoEncryptionAlgValuesSupported"
+  },
+  userinfo_encryption_enc_values_supported: {
+    toKey: "userinfoEncryptionEncValuesSupported"
+  },
+  request_object_signing_alg_values_supported: {
+    toKey: "requestObjectSigningAlgValuesSupported"
+  },
+  request_object_encryption_alg_values_supported: {
+    toKey: "requestObjectEncryptionAlgValuesSupported"
+  },
+  request_object_encryption_enc_values_supported: {
+    toKey: "requestObjectEncryptionEncValuesSupported"
+  },
+  token_endpoint_auth_methods_supported: {
+    toKey: "tokenEndpointAuthMethodsSupported"
+  },
+  token_endpoint_auth_signing_alg_values_supported: {
+    toKey: "tokenEndpointAuthSigningAlgValuesSupported"
+  },
+  display_values_supported: { toKey: "displayValuesSupported" },
+  claim_types_supported: { toKey: "claimTypesSupported" },
+  claims_supported: { toKey: "claimsSupported" },
+  service_documentation: { toKey: "serviceDocumentation" },
+  claims_locales_supported: { toKey: "claimsLocalesSupported" },
+  ui_locales_supported: { toKey: "uiLocalesSupported" },
+  claims_parameter_supported: { toKey: "claimsParameterSupported" },
+  request_parameter_supported: { toKey: "requestParameterSupported" },
+  request_uri_parameter_supported: { toKey: "requestUriParameterSupported" },
+  require_request_uri_registration: { toKey: "requireRequestUriRegistration" },
+  op_policy_uri: {
+    toKey: "opPolicyUri",
+    convertToUrl: true
+  },
+  op_tos_uri: {
+    toKey: "opTosUri",
+    convertToUrl: true
+  }
+};
+/* eslint-enable @typescript-eslint/camelcase */
+
 @injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   constructor(
@@ -33,18 +122,16 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   private processConfig(
     config: Record<string, string | string[]>
   ): IIssuerConfig {
-    // TODO: replace this with a system that converts to the right format
-    /* eslint-disable @typescript-eslint/camelcase */
-    return {
-      ...config,
-      issuer: new URL(config.issuer as string),
-      authorization_endpoint: new URL(config.authorization_endpoint as string),
-      token_endpoint: new URL(config.token_endpoint as string),
-      userinfo_endpoint: new URL(config.userinfo_endpoint as string),
-      jwks_uri: new URL(config.jwks_uri as string),
-      registration_endpoint: new URL(config.registration_endpoint as string)
-    } as IIssuerConfig;
-    /* eslint-enable @typescript-eslint/camelcase */
+    const parsedConfig: Record<string, string | string[] | URL> = {};
+    Object.keys(config).forEach(key => {
+      if (issuerConfigKeyMap[key]) {
+        parsedConfig[issuerConfigKeyMap[key].toKey] = issuerConfigKeyMap[key]
+          .convertToUrl
+          ? new URL(config[key] as string)
+          : config[key];
+      }
+    });
+    return (parsedConfig as unknown) as IIssuerConfig;
   }
 
   async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
