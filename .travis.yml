@@ -6,17 +6,15 @@ script:
 
 sudo: required
 
+services:
+  - xvfb
+
 addons:
-  firefox: latest
-  apt:
-    sources:
-     - google-chrome
-    packages:
-     - google-chrome-stable fluxbox
+  firefox: latest-beta
+  chrome: beta
 
 before_script:
   - npm run bootstrap
   - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
   - sleep 3
   - fluxbox >/dev/null 2>&1 &

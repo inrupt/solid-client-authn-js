@@ -1,39 +1,32 @@
 import "reflect-metadata";
 import URL from "url-parse";
-import FetcherMocks from "../../util/Fetcher.mock";
-import StorageRetrieverMocks from "../../util/StorageRetriever.mock";
-import StorageMocks from "../../authenticator/Storage.mock";
+import { Response } from "cross-fetch";
+import {
+  FetcherMock,
+  FetcherMockResponse
+} from "../../../src/util/__mocks__/Fetcher";
+import { StorageRetrieverMock } from "../../../src/util/__mocks__/StorageRetriever";
+import { StorageMock } from "../../../src/authenticator/__mocks__/Storage";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
-
-// This will be fixed in another pull request
-/* eslint-disable @typescript-eslint/camelcase */
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 /**
  * Test for IssuerConfigFetcher
  */
 describe("IssuerConfigFetcher", () => {
   const defaultMocks = {
-    fetchResponse: {} as object,
-    storageRetriever: StorageRetrieverMocks().StorageRetrieverMock(),
-    storage: StorageMocks().StorageMock()
+    fetchResponse: FetcherMockResponse,
+    storageRetriever: StorageRetrieverMock,
+    storage: StorageMock
   };
-  function getMockConfigFetcher(
+  function getIssuerConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): IssuerConfigFetcher {
-    const fetcherMock = FetcherMocks().FetcherMock();
-    fetcherMock.fetch.mockReturnValue(
-      Promise.resolve({
-        json: jest
-          .fn()
-          .mockReturnValue(
-            Promise.resolve(mocks.fetchResponse ?? defaultMocks.fetchResponse)
-          )
-      })
+    FetcherMock.fetch.mockReturnValue(
+      Promise.resolve(mocks.fetchResponse ?? defaultMocks.fetchResponse)
     );
     return new IssuerConfigFetcher(
-      fetcherMock as IFetcher,
+      FetcherMock,
       mocks.storageRetriever ?? defaultMocks.storageRetriever,
       mocks.storage ?? defaultMocks.storage
     );
@@ -44,7 +37,7 @@ describe("IssuerConfigFetcher", () => {
     storageMock.retrieve.mockReturnValueOnce(
       Promise.resolve({ some: "config" })
     );
-    const configFetcher = getMockConfigFetcher({
+    const configFetcher = getIssuerConfigFetcher({
       storageRetriever: storageMock
     });
 
@@ -58,12 +51,15 @@ describe("IssuerConfigFetcher", () => {
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
     const storageMock = defaultMocks.storageRetriever;
     storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
-    const fetchResponse = {
-      issuer: "https://example.com",
-      claim_types_supported: "oidc",
-      bleepBloop: "Meep Moop"
-    };
-    const configFetcher = getMockConfigFetcher({
+    const fetchResponse = new Response(
+      JSON.stringify({
+        issuer: "https://example.com",
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        claim_types_supported: "oidc",
+        bleepBloop: "Meep Moop"
+      })
+    );
+    const configFetcher = getIssuerConfigFetcher({
       storageRetriever: storageMock,
       fetchResponse: fetchResponse
     });
@@ -73,25 +69,29 @@ describe("IssuerConfigFetcher", () => {
     );
     expect(fetchedConfig.issuer.protocol).toBe("https:");
     expect(fetchedConfig.issuer.toString()).toBe("https://example.com");
-    // @ts-ignore
-    expect(fetchedConfig.claim_types_supported).toBeUndefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((fetchedConfig as any).claim_types_supported).toBeUndefined();
     expect(fetchedConfig.claimTypesSupported).toBe("oidc");
-    // @ts-ignore
-    expect(fetchedConfig.bleepBloop).toBeUndefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((fetchedConfig as any).bleepBloop).toBeUndefined();
   });
 
   it("should wrap URLs in url-parse's URL object", async () => {
     const storageMock = defaultMocks.storageRetriever;
     storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
-    const fetchResponse = {
-      issuer: "https://issuer.url",
-      authorization_endpoint: "https://authorization_endpoint.url",
-      token_endpoint: "https://token_endpoint.url",
-      userinfo_endpoint: "https://userinfo_endpoint.url",
-      jwks_uri: "https://jwks_uri.url",
-      registration_endpoint: "https://registration_endpoint.url"
-    };
-    const configFetcher = getMockConfigFetcher({
+    const fetchResponse = new Response(
+      /* eslint-disable @typescript-eslint/camelcase */
+      JSON.stringify({
+        issuer: "https://issuer.url",
+        authorization_endpoint: "https://authorization_endpoint.url",
+        token_endpoint: "https://token_endpoint.url",
+        userinfo_endpoint: "https://userinfo_endpoint.url",
+        jwks_uri: "https://jwks_uri.url",
+        registration_endpoint: "https://registration_endpoint.url"
+      })
+      /* eslint-enable @typescript-eslint/camelcase */
+    );
+    const configFetcher = getIssuerConfigFetcher({
       storageRetriever: storageMock,
       fetchResponse: fetchResponse
     });
@@ -118,8 +118,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
     const storageMock = defaultMocks.storageRetriever;
-    // @ts-ignore: Ignore because this mock function should be able to return null
-    storageMock.retrieve.mockReturnValueOnce(null);
+    storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
     const mockFetcher = {
       fetch: (): Promise<Response> =>
         Promise.resolve(({
@@ -143,7 +142,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("should store the config under a key specific to the config source", async () => {
     const storage = defaultMocks.storage;
-    const configFetcher = getMockConfigFetcher({ storage: storage });
+    const configFetcher = getIssuerConfigFetcher({ storage: storage });
 
     await configFetcher.fetchConfig(new URL("https://arbitrary.url"));
 

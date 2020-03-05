@@ -17,8 +17,8 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return !!(
-      oidcLoginOptions.issuerConfiguration.grant_types_supported &&
-      oidcLoginOptions.issuerConfiguration.grant_types_supported.indexOf(
+      oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
+      oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "implicit"
       ) > -1
     );
@@ -26,7 +26,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     const requestUrl = new URL(
-      oidcLoginOptions.issuerConfiguration.authorization_endpoint.toString()
+      oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
     // TODO: include client_id, state, and nonce
     // Disable camel case rule because this query requires camel case

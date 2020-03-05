@@ -1,9 +1,9 @@
 /**
  * Test for InMemoryStorage (Storage compoenet for the browser)
  */
-
-describe('InMemoryStorage', () => {
-  it('is trivial', () => {
-    expect(true).toBe(true)
-  })
-})
+// This file is here temporarily
+describe("InMemoryStorage", () => {
+  it("is trivial", () => {
+    expect(true).toBe(true);
+  });
+});

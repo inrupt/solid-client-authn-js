@@ -7,7 +7,7 @@
     "build": "lerna run build --stream",
     "pub": "lerna publish",
     "lint": "lerna run lint --stream",
-    "test": "concurrently \"lerna run test-server --stream\" \"lerna run build-core --stream && lerna run test --stream\"",
+    "test": "start-server-and-test 'lerna run test-server' 9001 'lerna run build-core --stream && lerna run test --stream'",
     "unit-test": "lerna run build-core --stream && lerna run unit-test --stream",
     "acceptance-test": "concurrently \"lerna run test-server --stream\" \"lerna run build-core --stream && lerna run browser-acceptance-test --stream\"",
     "core-test": "lerna run core-test --stream",
@@ -32,9 +32,22 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
+    "husky": "^4.2.3",
     "jest": "^24.9.0",
     "lerna": "~3.14.0",
+    "lint-staged": "^10.0.8",
     "prettier": "^1.19.1",
+    "start-server-and-test": "^1.10.8",
     "typescript": "^3.6.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js,css,json}": [
+      "prettier --write"
+    ]
   }
 }
