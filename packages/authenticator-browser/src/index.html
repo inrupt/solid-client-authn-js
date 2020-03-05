@@ -1,9 +1,34 @@
+<!--HTML file for testing and dev purposes. The browser code will be bundled and accessed by this file-->
 <html>
   <head>
     <title>Solid Authenticator Test Page</title>
-    <script src="solid-authenticator.bundle.js"></script> 
+    <script src="solid-authenticator.bundle.js"></script>
+    <script>
+      function loginUser() {
+        solidAuthenticator.login({
+          oidcIssuer: new URL('http://localhost:9001')
+        })
+      }
+      function fetch() {
+        solidAuthenticator.fetch('http://localhost:9001/storage', {})
+          .then((result) => {
+            result.text().then((text) => {
+              document.getElementById("fetchResult").value = text
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    </script>
   </head>
   <body>
     <h1>Solid Authenticator Test Page</h1>
+    <button onclick="loginUser()" id="loginButton">Log In</button>
+    <br />
+    <br />
+    <button onclick="fetch()" id="fetchButton">Fetch</button>
+    <br />
+    <textarea id="fetchResult"></textarea>
   </body>
 </html>

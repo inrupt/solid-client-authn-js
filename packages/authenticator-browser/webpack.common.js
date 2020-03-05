@@ -24,5 +24,7 @@ module.exports = {
   output: {
     filename: 'solid-authenticator.bundle.js',
     path: path.resolve(__dirname, 'browserDist'),
+    libraryTarget: 'var',
+    library: 'solidAuthenticator'
   }
 };

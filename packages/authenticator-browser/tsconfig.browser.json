@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "declaration": false
+    "declaration": false,
+    "lib": ["es5", "es6", "dom"]
   }
 }

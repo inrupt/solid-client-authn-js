@@ -1,9 +1,20 @@
-import { Selector } from 'testcafe'
+/**
+ * Acceptance test for the browser. Uses TestCafe to open up browser windows and go through auth
+ * and fetch flows
+ */
 
-fixture('Index').page('http://localhost:9000/')
+import { Selector } from "testcafe";
 
-test('The hero section is visible.', async (t) => {
-  const title = Selector('h1')
+fixture("Index").page("http://localhost:9000/");
 
-  await t.expect(title.exists).ok()
-})
+test("The hero section is visible.", async t => {
+  await t
+    .click("#loginButton")
+    .expect(Selector("#loginPageHeader").innerText)
+    .eql("Log In");
+  await t.click("#loginSubmit");
+  await t
+    .click("#fetchButton")
+    .expect(Selector("#fetchResult").value)
+    .eql("Success");
+});

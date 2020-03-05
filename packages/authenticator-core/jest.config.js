@@ -2,11 +2,16 @@ module.exports = {
   "roots": [
     "<rootDir>"
   ],
+  "clearMocks": true,
   testMatch: [
-    "**/__tests__/**/*.+(ts|tsx|js)",
-    "**/?(*.)+(spec|test).+(ts|tsx|js)"
+    "**/__tests__/**/?(*.)+(spec|test).+(ts|tsx|js)"
   ],
   "transform": {
     "^.+\\.(ts|tsx)?$": "ts-jest"
   },
+  "collectCoverageFrom": [
+    "**/src/**/*.ts",
+    "!**/node_modules/**",
+    "!**/__tests__/**"
+  ]
 }

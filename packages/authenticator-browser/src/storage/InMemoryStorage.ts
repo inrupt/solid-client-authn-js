@@ -1,17 +1,19 @@
-import IStorage from '@solid/authenticator-core/dist/authenticator/IStorage'
+/**
+ * An implementation of storage that uses a browser's local storage
+ */
+import IStorage from "@solid/authenticator-core/dist/authenticator/IStorage";
+import { get, set, remove } from "local-storage";
 
 export default class InMemoryStorage implements IStorage {
-  private map: { [key: string]: string } = {}
-
-  async get (key: string): Promise<string | undefined> {
-    return this.map[key]
+  async get(key: string): Promise<string | undefined> {
+    return get(key);
   }
 
-  async set (key: string, value: string): Promise<void> {
-    this.map[key] = value
+  async set(key: string, value: string): Promise<void> {
+    set(key, value);
   }
 
-  async delete (key: string): Promise<void> {
-    delete this.map[key]
+  async delete(key: string): Promise<void> {
+    remove(key);
   }
 }
