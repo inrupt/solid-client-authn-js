@@ -6,13 +6,17 @@ import IOidcOptions from "../IOidcOptions";
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
-import { IDpopHeaderCreator } from "../../../util/dpop/DpopHeaderCreator";
+import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
+import INeededRedirectAction from "../../../solidSession/INeededRedirectAction";
+import ISolidSession from "../../../solidSession/ISolidSession";
+import { ISessionCreator } from "../../../solidSession/SessionCreator";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
+    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
+    @inject("sessionCreator") private sessionCreator: ISessionCreator
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -24,7 +28,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
@@ -45,13 +49,12 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     }
     requestUrl.set("query", query);
 
-    // TODO: A lot of this seems to be sharable between different flows. Consider making sharable
-    // code
-    // TODO: This is browser specific. Figure out the right way to do this outside the browser
-    // eslint-disable-next-line
-    // @ts-ignore
-    window.location.href = requestUrl.toString();
-    // TODO: Handle if redirect is not the case
-    console.error("BAD LOCATION");
+    return this.sessionCreator.create({
+      neededAction: {
+        actionType: "redirect",
+        redirectUrl: requestUrl.toString()
+      } as INeededRedirectAction,
+      loggedIn: false
+    });
   }
 }
