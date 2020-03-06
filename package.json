@@ -1,9 +1,9 @@
 {
   "name": "solid-auth-fetcher",
   "version": "0.0.0",
-  "main": "dist/experiment",
+  "main": "dist/index",
   "browser": "browserDist/solid-auth-fetcher.bundle.js",
-  "types": "dist/experiment",
+  "types": "dist/index",
   "files": [
     "dist"
   ],
