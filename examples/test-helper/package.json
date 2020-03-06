@@ -9,8 +9,8 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc -p tsconfig.build.json",
-    "test-server": "ts-node src/test-server.ts",
-    "test-server-dev": "ts-node-dev src/test-server.ts",
+    "start": "ts-node src/test-server.ts",
+    "dev": "ts-node-dev src/test-server.ts",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
