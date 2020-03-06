@@ -3,14 +3,14 @@
  */
 import "reflect-metadata";
 import { container } from "tsyringe";
-import Authenticator from "./authenticator/Authenticator";
+import AuthFetcher from "./AuthFetcher";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import ILoginHandler from "./login/ILoginHandler";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
-import IStorage from "./authenticator/IStorage";
-import IJoseUtility from "./authenticator/IJoseUtility";
+import IStorage from "./localStorage/IStorage";
+import IJoseUtility from "./jose/IJoseUtility";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import IOidcHandler from "./login/oidc/IOidcHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
@@ -28,11 +28,13 @@ import IssuerConfigFetcher, {
 import BearerAuthenticatedFetcher from "./authenticatedFetch/bearer/BearerAuthenticatedFetcher";
 import DpopHeaderCreator, {
   IDpopHeaderCreator
-} from "./util/dpop/DpopHeaderCreator";
+} from "./dpop/DpopHeaderCreator";
 import DpopClientKeyManager, {
   IDpopClientKeyManager
-} from "./util/dpop/DpopClientKeyManager";
-import StorageRetriever, { IStorageRetriever } from "./util/StorageRetriever";
+} from "./dpop/DpopClientKeyManager";
+import StorageRetriever, {
+  IStorageRetriever
+} from "./localStorage/StorageRetriever";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
 
 // Util
@@ -104,22 +106,10 @@ container.register<IIssuerConfigFetcher>("issuerConfigFetcher", {
 
 export default function authenticator(dependencies: {
   storage: IStorage;
-  joseUtility: IJoseUtility;
-}): Authenticator {
+}): AuthFetcher {
   const authenticatorContainer = container.createChildContainer();
   authenticatorContainer.register<IStorage>("storage", {
     useValue: dependencies.storage
   });
-  authenticatorContainer.register<IJoseUtility>("joseUtility", {
-    useValue: dependencies.joseUtility
-  });
-  return authenticatorContainer.resolve(Authenticator);
+  return authenticatorContainer.resolve(AuthFetcher);
 }
-
-// export function authenticatedFetch () {
-//   // TODO: implement
-// }
-
-// export function login () {
-//   // TODO: Implement
-// }

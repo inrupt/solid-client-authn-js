@@ -5,7 +5,7 @@ import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import URL from "url-parse";
 import { RequestInit, Response } from "node-fetch";
 import IRequestCredentials from "../IRequestCredentials";
-import NotImplementedError from "../../util/errors/NotImplementedError";
+import NotImplementedError from "../../errors/NotImplementedError";
 
 export default class BearerAuthenticatedFetcher
   implements IAuthenticatedFetcher {
@@ -22,6 +22,7 @@ export default class BearerAuthenticatedFetcher
     url: URL,
     requestInit?: RequestInit
   ): Promise<Response> {
+    "";
     throw new NotImplementedError("BearerAuthenticatedFetcher");
   }
 }

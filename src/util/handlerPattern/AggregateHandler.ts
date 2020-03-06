@@ -2,7 +2,7 @@
  * An abstract class that will select the first handler that can handle certain parameters
  */
 import IHandleable from "./IHandleable";
-import HandlerNotFoundError from "../errors/HandlerNotFoundError";
+import HandlerNotFoundError from "../../errors/HandlerNotFoundError";
 
 export default class AggregateHandler<P extends Array<unknown>, R>
   implements IHandleable<P, R> {

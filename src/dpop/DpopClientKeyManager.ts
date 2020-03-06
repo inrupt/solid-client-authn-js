@@ -1,13 +1,13 @@
 /**
  * Generates a Client Key to be stored and used for DPoP Requests
  */
-import IOidcOptions from "../../login/oidc/IOidcOptions";
+import IOidcOptions from "../login/oidc/IOidcOptions";
 import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
-import { IStorageRetriever } from "../StorageRetriever";
+import { IStorageRetriever } from "../localStorage/StorageRetriever";
 import jwkSchema from "./JwkSchema";
-import IJoseUtility from "../../authenticator/IJoseUtility";
-import IStorage from "../../authenticator/IStorage";
+import IJoseUtility from "../jose/IJoseUtility";
+import IStorage from "../localStorage/IStorage";
 
 export interface IDpopClientKeyManager {
   /**

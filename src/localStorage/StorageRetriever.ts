@@ -2,8 +2,8 @@
  * A helper class that will validate items taken from local storage
  */
 import { injectable, inject } from "tsyringe";
-import IStorage from "../authenticator/IStorage";
-import validateSchema from "./validateSchema";
+import IStorage from "../localStorage/IStorage";
+import validateSchema from "../util/validateSchema";
 
 export interface IStorageRetriever {
   /**

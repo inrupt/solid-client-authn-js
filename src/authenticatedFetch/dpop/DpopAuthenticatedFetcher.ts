@@ -4,12 +4,12 @@
 import { RequestInit, Response } from "node-fetch";
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
-import ConfigurationError from "../../util/errors/ConfigurationError";
-import IDpopRequestCredentials from "../../util/dpop/IDpopRequestCredentials";
+import ConfigurationError from "../../errors/ConfigurationError";
+import IDpopRequestCredentials from "../../dpop/IDpopRequestCredentials";
 import { injectable, inject } from "tsyringe";
 import URL from "url-parse";
 import { IFetcher } from "../../util/Fetcher";
-import { IDpopHeaderCreator } from "../../util/dpop/DpopHeaderCreator";
+import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {

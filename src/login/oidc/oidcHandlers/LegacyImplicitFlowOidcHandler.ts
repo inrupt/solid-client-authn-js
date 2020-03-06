@@ -6,7 +6,7 @@ import IOidcOptions from "../IOidcOptions";
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
-import { IDpopHeaderCreator } from "../../../util/dpop/DpopHeaderCreator";
+import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
