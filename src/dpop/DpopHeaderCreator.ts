@@ -3,9 +3,9 @@
  */
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
-import IJoseUtility from "../../authenticator/IJoseUtility";
+import IJoseUtility from "../jose/IJoseUtility";
 import { IDpopClientKeyManager } from "./DpopClientKeyManager";
-import { IUuidGenerator } from "../UuidGenerator";
+import { IUuidGenerator } from "../util/UuidGenerator";
 
 export interface IDpopHeaderCreator {
   /**

@@ -7,10 +7,10 @@ import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
 import IOidcHandler from "./IOidcHandler";
 import IOidcOptions from "./IOidcOptions";
-import ConfigurationError from "../../util/errors/ConfigurationError";
+import ConfigurationError from "../../errors/ConfigurationError";
 import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import IIssuerConfig from "./IIssuerConfig";
-import { IDpopClientKeyManager } from "../../util/dpop/DpopClientKeyManager";
+import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
 
 @injectable()

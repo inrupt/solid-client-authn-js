@@ -6,9 +6,9 @@ import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import issuerConfigSchema from "./issuerConfigSchema";
-import ConfigurationError from "../../util/errors/ConfigurationError";
-import { IStorageRetriever } from "../../util/StorageRetriever";
-import IStorage from "../../authenticator/IStorage";
+import ConfigurationError from "../../errors/ConfigurationError";
+import { IStorageRetriever } from "../../localStorage/StorageRetriever";
+import IStorage from "../../localStorage/IStorage";
 
 export interface IIssuerConfigFetcher {
   /**

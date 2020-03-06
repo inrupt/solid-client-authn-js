@@ -3,7 +3,7 @@
  */
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
-import NotImplementedError from "../../../util/errors/NotImplementedError";
+import NotImplementedError from "../../../errors/NotImplementedError";
 
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
