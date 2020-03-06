@@ -1,0 +1,16 @@
+<html>
+  <head>
+    <script src="/solid-auth-fetcher.bundle.js"></script>
+    <script>
+      solidAuthFetcher().then(instance => {
+        instance.getToken().then((token) => {
+          document.getElementById('tokenContainer').innerHTML = `token ${token}`
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Solid Auth Fetcher Script Tag Tester</h1>
+    <p id="tokenContainer"></p>
+  </body>
+</html>
