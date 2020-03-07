@@ -1,8 +1,11 @@
 import { RequestInfo, RequestInit, Response } from "node-fetch";
 import ILoginOptions from "./login/ILoginOptions";
 import ISolidSession from "./ISolidSession";
+import ILoginInputOptions from "./ILoginInputOptions";
+import AuthFetcher from "./AuthFetcher";
+import getAuthFetcherWithDependencies from "./dependencies";
 
-export async function login(options: ILoginOptions): Promise<string> {
+export async function login(options: ILoginInputOptions): Promise<string> {
   throw new Error("Not Implemented");
 }
 
