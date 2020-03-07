@@ -104,7 +104,7 @@ container.register<IIssuerConfigFetcher>("issuerConfigFetcher", {
   useClass: IssuerConfigFetcher
 });
 
-export default function authenticator(dependencies: {
+export default function getAuthFetcherWithDependencies(dependencies: {
   storage: IStorage;
 }): AuthFetcher {
   const authenticatorContainer = container.createChildContainer();
