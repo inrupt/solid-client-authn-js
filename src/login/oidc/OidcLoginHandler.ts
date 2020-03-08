@@ -43,12 +43,14 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Fetch OpenId Config
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      options.oidcIssuer
+      // TODO: fix this with interface
+      options.oidcIssuer || new URL("https://random.com")
     );
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
-      issuer: options.oidcIssuer,
+      // TODO: fix this
+      issuer: options.oidcIssuer || new URL("https://random.com"),
       // TODO: differentiate if DPoP should be true
       dpop: true,
       // TODO: This constrains this library to browsers. Figure out what to do with redirect

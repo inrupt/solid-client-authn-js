@@ -4,9 +4,22 @@ import ISolidSession from "./ISolidSession";
 import ILoginInputOptions from "./ILoginInputOptions";
 import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
+import validateSchema from "./util/validateSchema";
 
-export async function login(options: ILoginInputOptions): Promise<string> {
-  throw new Error("Not Implemented");
+export async function login(options: { redirect: string }): Promise<any> {
+  return validateSchema(
+    {
+      type: "object",
+      properties: {
+        redirect: {
+          type: "string",
+          shouldConvertToUrl: true
+        }
+      }
+    },
+    options,
+    { throwError: true }
+  );
 }
 
 export async function fetch(
