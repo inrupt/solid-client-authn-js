@@ -4,5 +4,5 @@
 import IHandleable from "../../util/handlerPattern/IHandleable";
 import IOidcOptions from "./IOidcOptions";
 
-type IOidcHandler = IHandleable<[IOidcOptions], void>;
+type IOidcHandler = IHandleable<[IOidcOptions], string>;
 export default IOidcHandler;

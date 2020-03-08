@@ -4,5 +4,5 @@
 import IHandleable from "../util/handlerPattern/IHandleable";
 import ILoginOptions from "./ILoginOptions";
 
-type ILoginHandler = IHandleable<[ILoginOptions], void>;
+type ILoginHandler = IHandleable<[ILoginOptions], string>;
 export default ILoginHandler;

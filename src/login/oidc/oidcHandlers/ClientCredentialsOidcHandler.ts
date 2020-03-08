@@ -10,7 +10,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     return false;
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<string> {
     throw new NotImplementedError("ClientCredentialsOidcHandler handle");
   }
 }

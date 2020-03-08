@@ -24,7 +24,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<string> {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
@@ -47,11 +47,6 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
 
     // TODO: A lot of this seems to be sharable between different flows. Consider making sharable
     // code
-    // TODO: This is browser specific. Figure out the right way to do this outside the browser
-    // eslint-disable-next-line
-    // @ts-ignore
-    window.location.href = requestUrl.toString();
-    // TODO: Handle if redirect is not the case
-    console.error("BAD LOCATION");
+    return requestUrl.toString();
   }
 }
