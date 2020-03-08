@@ -1,10 +1,9 @@
 import URL from "url-parse";
 
 export default interface ILoginInputOptions {
-  oidcIssuer?: string | URL;
-  webId?: string | URL;
-  redirect: string | URL;
-  clientId: string | URL;
+  oidcIssuer?: string;
+  webId?: string;
+  redirect: string;
   popUp?: boolean;
   state?: string;
 }

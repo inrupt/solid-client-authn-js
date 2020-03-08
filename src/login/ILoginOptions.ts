@@ -7,7 +7,6 @@ export default interface ILoginOptions {
   oidcIssuer?: URL;
   webId?: URL;
   redirect: URL;
-  clientId: string | URL;
   popUp?: boolean;
   state?: string;
 }
