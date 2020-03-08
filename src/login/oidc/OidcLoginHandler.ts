@@ -34,7 +34,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     return !this.checkOptions(options);
   }
 
-  async handle(options: ILoginOptions): Promise<void> {
+  async handle(options: ILoginOptions): Promise<string> {
     // Check to ensure the login options are correct
     const optionsError: Error | null = this.checkOptions(options);
     if (optionsError) {
@@ -69,6 +69,6 @@ export default class OidcLoginHandler implements ILoginHandler {
     }
 
     // Call proper OIDC Handler
-    await this.oidcHandler.handle(OidcOptions);
+    return await this.oidcHandler.handle(OidcOptions);
   }
 }

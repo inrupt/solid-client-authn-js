@@ -8,7 +8,7 @@ import IOidcOptions from "./IOidcOptions";
 
 @injectable()
 export default class AggregateOidcHandler
-  extends AggregateHandler<[IOidcOptions], void>
+  extends AggregateHandler<[IOidcOptions], string>
   implements IOidcHandler {
   constructor(@injectAll("oidcHandlers") oidcLoginHandlers: IOidcHandler[]) {
     super(oidcLoginHandlers);

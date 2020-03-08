@@ -8,7 +8,7 @@ import ILoginOptions from "./ILoginOptions";
 
 @injectable()
 export default class AggregateLoginHandler
-  extends AggregateHandler<[ILoginOptions], void>
+  extends AggregateHandler<[ILoginOptions], string>
   implements ILoginHandler {
   constructor(@injectAll("loginHandlers") loginHandlers: ILoginHandler[]) {
     super(loginHandlers);

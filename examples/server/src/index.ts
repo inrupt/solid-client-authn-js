@@ -19,10 +19,9 @@ app.get("/", (req: Request, res: Response) => {
 app.post("/login", async (req: Request, res: Response) => {
   const webId: string = req.body.webid;
   const redirect: string = await uniqueLogin({
-    webId,
+    oidcIssuer: webId,
     redirect: `${BASE_URL}/redirect`
   });
-  console.log(redirect);
   res.redirect(redirect);
 });
 

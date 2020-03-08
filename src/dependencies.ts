@@ -11,6 +11,7 @@ import ILoginHandler from "./login/ILoginHandler";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 import IStorage from "./localStorage/IStorage";
 import IJoseUtility from "./jose/IJoseUtility";
+import IsomorphicJoseUtility from "./jose/IsomorphicJoseUtility";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import IOidcHandler from "./login/oidc/IOidcHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
@@ -53,6 +54,9 @@ container.register<IStorageRetriever>("storageRetriever", {
 });
 container.register<IUuidGenerator>("uuidGenerator", {
   useClass: UuidGenerator
+});
+container.register<IJoseUtility>("joseUtility", {
+  useClass: IsomorphicJoseUtility
 });
 
 // Authenticated Fetcher

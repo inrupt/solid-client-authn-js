@@ -15,7 +15,8 @@ export default class WebidLoginHandler implements ILoginHandler {
    * 'oidcIssuer' triple, it will create login credentials to match that
    * @param loginOptions
    */
-  async handle(loginOptions: ILoginOptions): Promise<void> {
+  async handle(loginOptions: ILoginOptions): Promise<string> {
     // TODO: implement
+    throw new Error("Not Implemented");
   }
 }
