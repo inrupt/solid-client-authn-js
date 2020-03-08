@@ -6,20 +6,10 @@ import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
 import validateSchema from "./util/validateSchema";
 
-export async function login(options: { redirect: string }): Promise<any> {
-  return validateSchema(
-    {
-      type: "object",
-      properties: {
-        redirect: {
-          type: "string",
-          shouldConvertToUrl: true
-        }
-      }
-    },
-    options,
-    { throwError: true }
-  );
+const authFetcher = getAuthFetcherWithDependencies({});
+
+export async function login(options: ILoginInputOptions): Promise<string> {
+  throw new Error("Not Implemented");
 }
 
 export async function fetch(
@@ -37,7 +27,9 @@ export async function getSession(): Promise<ISolidSession> {
   throw new Error("Not Implemented");
 }
 
-export async function uniqueLogin(options: ILoginOptions): Promise<void> {
+export async function uniqueLogin(
+  options: ILoginInputOptions
+): Promise<string> {
   throw new Error("Not Implemented");
 }
 

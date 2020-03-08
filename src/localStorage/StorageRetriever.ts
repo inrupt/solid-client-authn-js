@@ -39,7 +39,7 @@ export default class StorageRetriever implements IStorageRetriever {
   ): Promise<any | null> {
     /* eslint-enable @typescript-eslint/no-explicit-any */
     // Check if key is stored locally
-    const locallyStored: string | undefined = await this.storage.get(key);
+    const locallyStored: string | null = await this.storage.get(key);
 
     // If it is stored locally, check the validity of the value
     if (locallyStored) {
