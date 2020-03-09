@@ -56,7 +56,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       // TODO: This constrains this library to browsers. Figure out what to do with redirect
       // eslint-disable-next-line
       // @ts-ignore
-      redirectUrl: new URL(window.location.href),
+      redirectUrl: options.redirect,
       issuerConfiguration: issuerConfig
     };
 

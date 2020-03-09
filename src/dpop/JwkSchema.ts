@@ -4,7 +4,8 @@
 
 // TODO: make an actual jwk schema
 const jwkSchema = {
-  type: "object"
+  type: "object",
+  additionalProperties: true
 };
 
 export default jwkSchema;

@@ -3,7 +3,7 @@
     "src/**/*"
   ],
   "compilerOptions": {
-    "paths": { "*": ["external-types/*"] },
+    "paths": { "*": ["src/external-types/*"] },
     "baseUrl": ".",
     "module": "commonjs",
     "strict": true,

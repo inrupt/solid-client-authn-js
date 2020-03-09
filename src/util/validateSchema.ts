@@ -26,11 +26,15 @@ export function traverseObject(
 ): void {
   if (schema.type === "object") {
     Object.keys(data).forEach((key: string) => {
-      traverseObject(data[key], schema.properties[key], data, key);
+      if (schema.properties && schema.properties[key]) {
+        traverseObject(data[key], schema.properties[key], data, key);
+      }
     });
   } else if (schema.type === "array") {
     data.forEach((item: any, index: number) => {
-      traverseObject(item, schema.items, data, index);
+      if (schema.items) {
+        traverseObject(item, schema.items, data, index);
+      }
     });
   } else {
     // Set custom rules here
