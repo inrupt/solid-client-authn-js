@@ -37,7 +37,7 @@ import StorageRetriever, {
   IStorageRetriever
 } from "./localStorage/StorageRetriever";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
-import IsomorphicStorage from "./localStorage/IsomorphicStorage";
+import NodeStorage from "./localStorage/NodeStorage";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -112,7 +112,7 @@ container.register<IIssuerConfigFetcher>("issuerConfigFetcher", {
 export default function getAuthFetcherWithDependencies(dependencies: {
   storage?: IStorage;
 }): AuthFetcher {
-  const storage = dependencies.storage || new IsomorphicStorage();
+  const storage = dependencies.storage || new NodeStorage();
   const authenticatorContainer = container.createChildContainer();
   authenticatorContainer.register<IStorage>("storage", {
     useValue: storage

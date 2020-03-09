@@ -35,6 +35,7 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
   ): Promise<string> {
     const parsedKey = await JWK.asKey(key);
     const convertedKey: string = parsedKey.toPEM(true);
+    console.log(options);
     const signed = JWT.sign(payload, convertedKey, {
       ...(options as JWT.SignOptions)
     });
@@ -42,6 +43,6 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
   }
 
   async privateJWKToPublicJWK(key: JSONWebKey): Promise<JSONWebKey> {
-    throw new Error("Not Implemented");
+    return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
   }
 }
