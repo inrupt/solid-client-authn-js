@@ -98,7 +98,8 @@ app.post("/login", (req, res) => {
     );
     const redirectUrl = new URL(req.session.authData.redirect_url);
     redirectUrl.set("query", {
-      access_token: token
+      access_token: token,
+      id_token: token
     });
 
     res.redirect(redirectUrl.toString());

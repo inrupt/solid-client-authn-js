@@ -35,11 +35,17 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
   ): Promise<string> {
     const parsedKey = await JWK.asKey(key);
     const convertedKey: string = parsedKey.toPEM(true);
-    console.log(options);
     const signed = JWT.sign(payload, convertedKey, {
       ...(options as JWT.SignOptions)
     });
     return signed;
+  }
+
+  // TODO: also should have functionality to validate the token
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async decodeJWT(token: string): Promise<Record<string, any>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return JWT.decode(token) as Promise<Record<string, any>>;
   }
 
   async privateJWKToPublicJWK(key: JSONWebKey): Promise<JSONWebKey> {

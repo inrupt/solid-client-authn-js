@@ -39,6 +39,13 @@ export default interface IJoseUtility {
    * @param jwk The given private key
    */
   privateJWKToPublicJWK(jwk: JSONWebKey): Promise<JSONWebKey>;
+
+  /**
+   * Decodes a JSON Web Token
+   * @param token The encoded token
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  decodeJWT(token: string): Promise<Record<string, any>>;
   /**
    * Creates a JSON Web Token
    * @param payload Custom fields to be included

@@ -38,6 +38,8 @@ import StorageRetriever, {
 } from "./localStorage/StorageRetriever";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
 import NodeStorage from "./localStorage/NodeStorage";
+import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
+import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -102,6 +104,11 @@ container.register<IOidcHandler>("oidcHandlers", {
 });
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: LegacyImplicitFlowOidcHandler
+});
+
+// Login/OIDC/redirectHandler
+container.register<IRedirectHandler>("redirectHandler", {
+  useClass: GeneralRedirectHandler
 });
 
 // Login/OIDC/Issuer

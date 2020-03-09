@@ -7,10 +7,14 @@ import { injectable, inject } from "tsyringe";
 import ILoginHandler from "./login/ILoginHandler";
 import ILoginOptions from "./login/ILoginOptions";
 import validateSchema from "./util/validateSchema";
+import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 
 @injectable()
 export default class AuthFetcher {
-  constructor(@inject("loginHandler") private loginHandler: ILoginHandler) {}
+  constructor(
+    @inject("loginHandler") private loginHandler: ILoginHandler,
+    @inject("redirectHandler") private redirectHandler: IRedirectHandler
+  ) {}
 
   async login(options: ILoginInputOptions): Promise<string> {
     throw new Error("Not Implemented");
@@ -39,8 +43,8 @@ export default class AuthFetcher {
     throw new Error("Not Implemented");
   }
 
-  async handleRedirect(url: string): Promise<void> {
-    throw new Error("Not Implemented");
+  async handleRedirect(url: string): Promise<ISolidSession> {
+    return this.redirectHandler.handle(url);
   }
 
   customAuthFetcher(options: {}): unknown {
