@@ -33,9 +33,7 @@ import DpopHeaderCreator, {
 import DpopClientKeyManager, {
   IDpopClientKeyManager
 } from "./dpop/DpopClientKeyManager";
-import StorageRetriever, {
-  IStorageRetriever
-} from "./localStorage/StorageRetriever";
+import StorageUtility, { IStorageUtility } from "./localStorage/StorageUtility";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
 import NodeStorage from "./localStorage/NodeStorage";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
@@ -51,8 +49,8 @@ container.register<IDpopHeaderCreator>("dpopHeaderCreator", {
 container.register<IDpopClientKeyManager>("dpopClientKeyManager", {
   useClass: DpopClientKeyManager
 });
-container.register<IStorageRetriever>("storageRetriever", {
-  useClass: StorageRetriever
+container.register<IStorageUtility>("storageUtility", {
+  useClass: StorageUtility
 });
 container.register<IUuidGenerator>("uuidGenerator", {
   useClass: UuidGenerator

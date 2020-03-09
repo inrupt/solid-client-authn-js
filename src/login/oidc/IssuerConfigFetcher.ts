@@ -7,8 +7,7 @@ import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import issuerConfigSchema from "./issuerConfigSchema";
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IStorageRetriever } from "../../localStorage/StorageRetriever";
-import IStorage from "../../localStorage/IStorage";
+import { IStorageUtility } from "../../localStorage/StorageUtility";
 
 export interface IIssuerConfigFetcher {
   /**
@@ -111,8 +110,7 @@ const issuerConfigKeyMap: Record<
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("storageRetriever") private storageRetriever: IStorageRetriever,
-    @inject("storage") private storage: IStorage
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   private getLocalStorageKey(issuer: URL): string {
@@ -135,7 +133,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   }
 
   async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
-    let issuerConfig: IIssuerConfig = (await this.storageRetriever.retrieve(
+    let issuerConfig: IIssuerConfig = (await this.storageUtility.safeGet(
       this.getLocalStorageKey(issuer),
       {
         schema: issuerConfigSchema,
@@ -159,7 +157,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     }
 
     // Update store with fetched config
-    await this.storage.set(
+    await this.storageUtility.set(
       this.getLocalStorageKey(issuer),
       JSON.stringify(issuerConfig)
     );
