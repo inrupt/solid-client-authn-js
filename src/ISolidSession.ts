@@ -6,6 +6,6 @@ import { RequestInfo, RequestInit, Response } from "node-fetch";
 export default interface ISolidSession {
   webId: string;
   state?: string;
-  logout: () => void;
+  logout: () => Promise<void>;
   fetch: (url: RequestInfo, init: RequestInit) => Promise<Response>;
 }

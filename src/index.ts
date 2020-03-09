@@ -38,7 +38,7 @@ export function onSession(callback: (session: ISolidSession) => unknown): void {
   return authFetcher.onSession(callback);
 }
 
-export async function handleRedirect(url: string): Promise<void> {
+export async function handleRedirect(url: string): Promise<ISolidSession> {
   return authFetcher.handleRedirect(url);
 }
 
