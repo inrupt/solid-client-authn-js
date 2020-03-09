@@ -8,12 +8,15 @@ import ILoginHandler from "./login/ILoginHandler";
 import ILoginOptions from "./login/ILoginOptions";
 import validateSchema from "./util/validateSchema";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
+import ILogoutHandler from "./logout/ILogoutHandler";
 
 @injectable()
 export default class AuthFetcher {
+  private globalUserName = "global";
   constructor(
     @inject("loginHandler") private loginHandler: ILoginHandler,
-    @inject("redirectHandler") private redirectHandler: IRedirectHandler
+    @inject("redirectHandler") private redirectHandler: IRedirectHandler,
+    @inject("logoutHandler") private logoutHandler: ILogoutHandler
   ) {}
 
   async login(options: ILoginInputOptions): Promise<string> {
@@ -25,7 +28,7 @@ export default class AuthFetcher {
   }
 
   async logout(): Promise<void> {
-    throw new Error("Not Implemented");
+    await this.logoutHandler.handle(this.globalUserName);
   }
 
   async getSession(): Promise<ISolidSession> {

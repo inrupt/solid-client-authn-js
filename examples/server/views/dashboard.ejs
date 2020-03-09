@@ -5,6 +5,12 @@
   <body>
     <h1>Solid Auth Fetcher NodeJS Tester Dashboard</h1>
     <p>Your WebId is: <%= webId %></p>
+    <form method="POST" action="/fetch">
+      <input type="submit" value="Do Authenticated Fetch" />
+      <pre>
+        <%= fetchResult %>
+      </pre>
+    </form>
     <form method="POST" action="/logout">
       <input type="submit" value="Log Out" />
     </form>

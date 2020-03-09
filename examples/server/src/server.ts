@@ -2,6 +2,8 @@ import { uniqueLogin, handleRedirect } from "solid-auth-fetcher";
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
+import fetch from "node-fetch";
+import ISolidSession from "solid-auth-fetcher/dist/ISolidSession";
 
 const PORT = 3001;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -39,20 +41,35 @@ app.get("/redirect", async (req: Request, res: Response) => {
   const session = await handleRedirect(req.url);
   if (req.session) {
     req.session.user = session;
+    console.log("before");
+    console.log(req.session.user);
   }
   res.redirect("/dashboard");
 });
 
 app.get("/dashboard", (req: Request, res: Response) => {
   if (req.session && req.session.user) {
-    res.render("dashboard", { webId: req.session.user.webId });
+    console.log(req.session.user);
+    res.render("dashboard", { webId: req.session.user.webId, fetchResult: "" });
   } else {
     res.status(401).send("You are not logged in");
   }
 });
 
-app.get("/fetch", (req: Request, res: Response) => {
-  // Do nothing
+app.post("/fetch", async (req: Request, res: Response) => {
+  if (req.session && req.session.user) {
+    console.log(req.session.user);
+    const result = await (req.session.user as ISolidSession).fetch(
+      "http://localhost:9001/storage",
+      {}
+    );
+    res.render("dashboard", {
+      webId: req.session.user.webId,
+      fetchResult: result.body
+    });
+  } else {
+    res.status(401).send("You are not logged in");
+  }
 });
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

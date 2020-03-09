@@ -4,10 +4,9 @@
 import IOidcOptions from "../login/oidc/IOidcOptions";
 import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
-import { IStorageRetriever } from "../localStorage/StorageRetriever";
 import jwkSchema from "./JwkSchema";
 import IJoseUtility from "../jose/IJoseUtility";
-import IStorage from "../localStorage/IStorage";
+import { IStorageUtility } from "../localStorage/StorageUtility";
 
 export interface IDpopClientKeyManager {
   /**
@@ -24,9 +23,8 @@ export interface IDpopClientKeyManager {
 @injectable()
 export default class DpopClientKeyManager implements IDpopClientKeyManager {
   constructor(
-    @inject("storageRetriever") private storageRetriever: IStorageRetriever,
-    @inject("joseUtility") private joseUtility: IJoseUtility,
-    @inject("storage") private storage: IStorage
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("joseUtility") private joseUtility: IJoseUtility
   ) {}
 
   private getLocalStorageKey(): string {
@@ -36,7 +34,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
   async generateClientKeyIfNotAlready(
     oidcOptions: IOidcOptions
   ): Promise<void> {
-    let jwk: JSONWebKey = (await this.storageRetriever.retrieve(
+    let jwk: JSONWebKey = (await this.storageUtility.safeGet(
       this.getLocalStorageKey(),
       { schema: jwkSchema }
     )) as JSONWebKey;
@@ -47,12 +45,15 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
         alg: "RSA",
         use: "sig"
       });
-      await this.storage.set(this.getLocalStorageKey(), JSON.stringify(jwk));
+      await this.storageUtility.set(
+        this.getLocalStorageKey(),
+        JSON.stringify(jwk)
+      );
     }
   }
 
   async getClientKey(): Promise<JSONWebKey | null> {
-    return (await this.storageRetriever.retrieve(this.getLocalStorageKey(), {
+    return (await this.storageUtility.safeGet(this.getLocalStorageKey(), {
       schema: jwkSchema
     })) as JSONWebKey;
   }
