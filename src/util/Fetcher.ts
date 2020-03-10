@@ -5,6 +5,8 @@ import URL from "url-parse";
 import { RequestInfo, RequestInit, Response } from "node-fetch";
 import _fetch from "isomorphic-fetch";
 
+// TODO convert back to cross fetch
+
 export interface IFetcher {
   fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
