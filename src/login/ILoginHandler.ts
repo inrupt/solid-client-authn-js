@@ -3,6 +3,7 @@
  */
 import IHandleable from "../util/handlerPattern/IHandleable";
 import ILoginOptions from "./ILoginOptions";
+import INeededAction from "../neededAction/INeededAction";
 
-type ILoginHandler = IHandleable<[ILoginOptions], string>;
+type ILoginHandler = IHandleable<[ILoginOptions], INeededAction>;
 export default ILoginHandler;
