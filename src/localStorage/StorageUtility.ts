@@ -99,6 +99,7 @@ export default class StorageUtility implements IStorageUtility {
     options: {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       schema?: Record<string, any>;
+      // TODO: Remove post process because we take care of this in validator
       postProcess?: (retrievedObject: any) => any;
       userId?: string;
     } = {}
