@@ -38,6 +38,9 @@ import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
 import NodeStorage from "./localStorage/NodeStorage";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
+import EnvironmentDetector, {
+  IEnvironmentDetector
+} from "./util/EnvironmentDetector";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -57,6 +60,9 @@ container.register<IUuidGenerator>("uuidGenerator", {
 });
 container.register<IJoseUtility>("joseUtility", {
   useClass: IsomorphicJoseUtility
+});
+container.register<IEnvironmentDetector>("environmentDetector", {
+  useClass: EnvironmentDetector
 });
 
 // Authenticated Fetcher

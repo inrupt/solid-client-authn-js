@@ -6,10 +6,11 @@ import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
 import validateSchema from "./util/validateSchema";
 import IStorage from "./localStorage/IStorage";
+import INeededAction from "./neededAction/INeededAction";
 
 const authFetcher = getAuthFetcherWithDependencies({});
 
-export async function login(options: ILoginInputOptions): Promise<string> {
+export async function login(options: ILoginInputOptions): Promise<INeededAction> {
   return authFetcher.login(options);
 }
 
@@ -30,12 +31,16 @@ export async function getSession(): Promise<ISolidSession> {
 
 export async function uniqueLogin(
   options: ILoginInputOptions
-): Promise<string> {
+): Promise<INeededAction> {
   return authFetcher.uniqueLogin(options);
 }
 
 export function onSession(callback: (session: ISolidSession) => unknown): void {
   return authFetcher.onSession(callback);
+}
+
+export function onLogout(callback: (session: ISolidSession) => unknown): void {
+  return authFetcher.onLogout(callback);
 }
 
 export async function handleRedirect(url: string): Promise<ISolidSession> {

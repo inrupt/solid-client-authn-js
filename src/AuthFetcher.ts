@@ -9,6 +9,7 @@ import ILoginOptions from "./login/ILoginOptions";
 import validateSchema from "./util/validateSchema";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import ILogoutHandler from "./logout/ILogoutHandler";
+import INeededAction from "./neededAction/INeededAction";
 
 @injectable()
 export default class AuthFetcher {
@@ -19,7 +20,7 @@ export default class AuthFetcher {
     @inject("logoutHandler") private logoutHandler: ILogoutHandler
   ) {}
 
-  async login(options: ILoginInputOptions): Promise<string> {
+  async login(options: ILoginInputOptions): Promise<INeededAction> {
     throw new Error("Not Implemented");
   }
 
@@ -35,7 +36,7 @@ export default class AuthFetcher {
     throw new Error("Not Implemented");
   }
 
-  async uniqueLogin(options: ILoginInputOptions): Promise<string> {
+  async uniqueLogin(options: ILoginInputOptions): Promise<INeededAction> {
     // TODO: this should be improved. It mutates the input
     validateSchema(loginInputOptionsSchema, options, { throwError: true });
     // TODO: this type conversion is really bad
@@ -43,6 +44,10 @@ export default class AuthFetcher {
   }
 
   onSession(callback: (session: ISolidSession) => unknown): void {
+    throw new Error("Not Implemented");
+  }
+
+  onLogout(callback: (session: ISolidSession) => unknown): void {
     throw new Error("Not Implemented");
   }
 

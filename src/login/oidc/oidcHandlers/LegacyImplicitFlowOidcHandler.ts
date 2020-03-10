@@ -7,6 +7,8 @@ import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
+import INeededAction from "../../../neededAction/INeededAction";
+import INeededRedirectAction from "../../../neededAction/INeededRedirectAction";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
@@ -24,7 +26,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<string> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<INeededAction> {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
@@ -47,6 +49,9 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
 
     // TODO: A lot of this seems to be sharable between different flows. Consider making sharable
     // code
-    return requestUrl.toString();
+    return {
+      actionType: "redirect",
+      redirectUrl: requestUrl.toString()
+    } as INeededRedirectAction;
   }
 }

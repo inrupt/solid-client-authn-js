@@ -3,6 +3,7 @@
  */
 import IHandleable from "../../util/handlerPattern/IHandleable";
 import IOidcOptions from "./IOidcOptions";
+import INeededAction from "../../neededAction/INeededAction";
 
-type IOidcHandler = IHandleable<[IOidcOptions], string>;
+type IOidcHandler = IHandleable<[IOidcOptions], INeededAction>;
 export default IOidcHandler;
