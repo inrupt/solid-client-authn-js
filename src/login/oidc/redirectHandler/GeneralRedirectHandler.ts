@@ -1,4 +1,4 @@
-import ISolidSession from "../../../ISolidSession";
+import ISolidSession from "../../../solidSession/ISolidSession";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
@@ -7,13 +7,18 @@ import { inject, injectable } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
 import { IUuidGenerator } from "../../../util/UuidGenerator";
+import IAuthenticatedFetcher from "../../../authenticatedFetch/IAuthenticatedFetcher";
+import ILogoutHandler from "../../../logout/ILogoutHandler";
 
 @injectable()
 export default class GeneralRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("uuidGenerator") private uuidGenerator: IUuidGenerator
+    @inject("uuidGenerator") private uuidGenerator: IUuidGenerator,
+    @inject("authenticatedFetcher")
+    private authenticatedFetcher: IAuthenticatedFetcher,
+    @inject("logoutHandler") private logoutHandler: ILogoutHandler
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -48,10 +53,18 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
       webId: decoded.sub,
       state: url.query.state,
       logout: async (): Promise<void> => {
-        console.log("Logging Out");
+        this.logoutHandler.handle(localUserId);
       },
       fetch: async (url: RequestInfo, init: RequestInit): Promise<Response> => {
-        throw new Error("Not Implemented");
+        return this.authenticatedFetcher.handle(
+          {
+            localUserId,
+            type: "dpop"
+          },
+          // TODO: this isn't fully type safe
+          new URL(url as string),
+          init
+        );
       }
     };
   }

@@ -7,14 +7,17 @@ import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import INeededAction from "../../../neededAction/INeededAction";
-import INeededRedirectAction from "../../../neededAction/INeededRedirectAction";
+import INeededRedirectAction from "../../../solidSession/INeededRedirectAction";
+import ISolidSession from "../../../solidSession/ISolidSession";
+import { IUuidGenerator } from "../../../util/UuidGenerator";
+import { Response } from "node-fetch";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
+    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
+    @inject("uuidGenerator") private uuidGenerator: IUuidGenerator
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -26,7 +29,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<INeededAction> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
@@ -47,11 +50,19 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     }
     requestUrl.set("query", query);
 
-    // TODO: A lot of this seems to be sharable between different flows. Consider making sharable
-    // code
+    // TODO: This is shared in multiple places. Perhaps abstract it out
     return {
-      actionType: "redirect",
-      redirectUrl: requestUrl.toString()
-    } as INeededRedirectAction;
+      localUserId: this.uuidGenerator.v4(),
+      neededAction: {
+        actionType: "redirect",
+        redirectUrl: requestUrl.toString()
+      } as INeededRedirectAction,
+      logout: (): Promise<void> => {
+        return Promise.resolve();
+      },
+      fetch: (): Promise<Response> => {
+        throw new Error("not implemented");
+      }
+    };
   }
 }

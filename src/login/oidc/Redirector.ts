@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
-import INeededAction from "../../neededAction/INeededAction";
-import INeededInactionAction from "../../neededAction/INeededInactionAction";
+import INeededAction from "../../solidSession/INeededAction";
+import INeededInactionAction from "../../solidSession/INeededInactionAction";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 
 export interface IRedirector {

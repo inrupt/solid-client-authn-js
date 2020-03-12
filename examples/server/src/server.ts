@@ -3,10 +3,13 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
 import fetch from "node-fetch";
-import ISolidSession from "solid-auth-fetcher/dist/ISolidSession";
+import ISolidSession from "solid-auth-fetcher/dist/solidSession/ISolidSession";
+import INeedeRedirectAction from "solid-auth-fetcher/dist/neededAction/INeededRedirectAction";
 
 const PORT = 3001;
 const BASE_URL = `http://localhost:${PORT}`;
+
+const sessions: Record<string, ISolidSession> = {};
 
 const app = express();
 
@@ -26,50 +29,82 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.post("/login", async (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
+  if (req.session && req.session.localUserId) {
     res.status(400).send("already logged in");
   }
   const webId: string = req.body.webid;
-  const redirect: string = await uniqueLogin({
+  const session = await uniqueLogin({
     oidcIssuer: webId,
     redirect: `${BASE_URL}/redirect`
   });
-  res.redirect(redirect);
+  if (req.session) {
+    req.session.localUserId = session.localUserId;
+    sessions[session.localUserId] = session;
+    if (
+      session.neededAction &&
+      session.neededAction.actionType === "redirect"
+    ) {
+      res.redirect((session.neededAction as INeedeRedirectAction).redirectUrl);
+    }
+  }
 });
 
 app.get("/redirect", async (req: Request, res: Response) => {
   const session = await handleRedirect(req.url);
   if (req.session) {
-    req.session.user = session;
-    console.log("before");
-    console.log(req.session.user);
+    req.session.localUserId = session.localUserId;
+    sessions[session.localUserId] = session;
   }
   res.redirect("/dashboard");
 });
 
 app.get("/dashboard", (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
-    console.log(req.session.user);
-    res.render("dashboard", { webId: req.session.user.webId, fetchResult: "" });
+  if (
+    req.session &&
+    req.session.localUserId &&
+    sessions[req.session.localUserId] &&
+    sessions[req.session.localUserId].webId
+  ) {
+    res.render("dashboard", {
+      webId: sessions[req.session.localUserId].webId,
+      fetchResult: ""
+    });
   } else {
     res.status(401).send("You are not logged in");
   }
 });
 
 app.post("/fetch", async (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
-    console.log(req.session.user);
-    const result = await (req.session.user as ISolidSession).fetch(
-      "http://localhost:9001/storage",
-      {}
-    );
+  if (
+    req.session &&
+    req.session.localUserId &&
+    sessions[req.session.localUserId] &&
+    sessions[req.session.localUserId].webId
+  ) {
+    const result = await (sessions[
+      req.session.localUserId
+    ] as ISolidSession).fetch("http://localhost:9001/storage", {});
     res.render("dashboard", {
-      webId: req.session.user.webId,
-      fetchResult: result.body
+      webId: sessions[req.session.localUserId].webId,
+      fetchResult: JSON.stringify(await result.text(), null, 2)
     });
   } else {
     res.status(401).send("You are not logged in");
   }
 });
+
+app.post("/logout", async (req: Request, res: Response) => {
+  if (
+    req.session &&
+    req.session.localUserId &&
+    sessions[req.session.localUserId] &&
+    sessions[req.session.localUserId].webId
+  ) {
+    await sessions[req.session.localUserId].logout();
+    delete sessions[req.session.localUserId];
+    delete req.session.localUserId;
+    res.redirect("/");
+  }
+})
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

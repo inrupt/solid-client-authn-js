@@ -1,5 +1,5 @@
 import { RequestInfo, RequestInit, Response } from "node-fetch";
-import ISolidSession from "./ISolidSession";
+import ISolidSession from "./solidSession/ISolidSession";
 import ILoginInputOptions, {
   loginInputOptionsSchema
 } from "./ILoginInputOptions";
@@ -9,7 +9,6 @@ import ILoginOptions from "./login/ILoginOptions";
 import validateSchema from "./util/validateSchema";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import ILogoutHandler from "./logout/ILogoutHandler";
-import INeededAction from "./neededAction/INeededAction";
 
 @injectable()
 export default class AuthFetcher {
@@ -20,7 +19,7 @@ export default class AuthFetcher {
     @inject("logoutHandler") private logoutHandler: ILogoutHandler
   ) {}
 
-  async login(options: ILoginInputOptions): Promise<INeededAction> {
+  async login(options: ILoginInputOptions): Promise<ISolidSession> {
     throw new Error("Not Implemented");
   }
 
@@ -36,7 +35,7 @@ export default class AuthFetcher {
     throw new Error("Not Implemented");
   }
 
-  async uniqueLogin(options: ILoginInputOptions): Promise<INeededAction> {
+  async uniqueLogin(options: ILoginInputOptions): Promise<ISolidSession> {
     // TODO: this should be improved. It mutates the input
     validateSchema(loginInputOptionsSchema, options, { throwError: true });
     // TODO: this type conversion is really bad
