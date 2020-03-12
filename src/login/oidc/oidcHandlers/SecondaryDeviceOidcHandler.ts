@@ -4,14 +4,14 @@
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import NotImplementedError from "../../../errors/NotImplementedError";
-import INeededAction from "../../../neededAction/INeededAction";
+import ISolidSession from "../../../solidSession/ISolidSession";
 
 export default class SecondaryDeviceOidcHandler implements IOidcHandler {
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return false;
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<INeededAction> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
     throw new NotImplementedError("SecondaryDeviceOidcHandler handle");
   }
 }

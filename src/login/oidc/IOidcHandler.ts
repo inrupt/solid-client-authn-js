@@ -3,7 +3,7 @@
  */
 import IHandleable from "../../util/handlerPattern/IHandleable";
 import IOidcOptions from "./IOidcOptions";
-import INeededAction from "../../neededAction/INeededAction";
+import ISolidSession from "../../solidSession/ISolidSession";
 
-type IOidcHandler = IHandleable<[IOidcOptions], INeededAction>;
+type IOidcHandler = IHandleable<[IOidcOptions], ISolidSession>;
 export default IOidcHandler;

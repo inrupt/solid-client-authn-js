@@ -41,6 +41,8 @@ import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirect
 import EnvironmentDetector, {
   IEnvironmentDetector
 } from "./util/EnvironmentDetector";
+import ILogoutHandler from "./logout/ILogoutHandler";
+import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -118,6 +120,11 @@ container.register<IRedirectHandler>("redirectHandler", {
 // Login/OIDC/Issuer
 container.register<IIssuerConfigFetcher>("issuerConfigFetcher", {
   useClass: IssuerConfigFetcher
+});
+
+// Logout
+container.register<ILogoutHandler>("logoutHandler", {
+  useClass: GeneralLogoutHandler
 });
 
 export default function getAuthFetcherWithDependencies(dependencies: {

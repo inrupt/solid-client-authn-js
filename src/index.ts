@@ -1,16 +1,15 @@
 import { RequestInfo, RequestInit, Response } from "node-fetch";
-import ILoginOptions from "./login/ILoginOptions";
-import ISolidSession from "./ISolidSession";
+import ISolidSession from "./solidSession/ISolidSession";
 import ILoginInputOptions from "./ILoginInputOptions";
 import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
-import validateSchema from "./util/validateSchema";
 import IStorage from "./localStorage/IStorage";
-import INeededAction from "./neededAction/INeededAction";
 
 const authFetcher = getAuthFetcherWithDependencies({});
 
-export async function login(options: ILoginInputOptions): Promise<INeededAction> {
+export async function login(
+  options: ILoginInputOptions
+): Promise<ISolidSession> {
   return authFetcher.login(options);
 }
 
@@ -31,7 +30,7 @@ export async function getSession(): Promise<ISolidSession> {
 
 export async function uniqueLogin(
   options: ILoginInputOptions
-): Promise<INeededAction> {
+): Promise<ISolidSession> {
   return authFetcher.uniqueLogin(options);
 }
 

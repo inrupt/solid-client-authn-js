@@ -12,7 +12,7 @@ import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import IIssuerConfig from "./IIssuerConfig";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
-import INeededAction from "../../neededAction/INeededAction";
+import ISolidSession from "../../solidSession/ISolidSession";
 
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
@@ -35,7 +35,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     return !this.checkOptions(options);
   }
 
-  async handle(options: ILoginOptions): Promise<INeededAction> {
+  async handle(options: ILoginOptions): Promise<ISolidSession> {
     // Check to ensure the login options are correct
     const optionsError: Error | null = this.checkOptions(options);
     if (optionsError) {
