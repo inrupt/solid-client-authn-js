@@ -13,6 +13,7 @@ import IIssuerConfig from "./IIssuerConfig";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
 import ISolidSession from "../../solidSession/ISolidSession";
+import { IStorageUtility } from "../../localStorage/StorageUtility";
 
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
@@ -21,11 +22,12 @@ export default class OidcLoginHandler implements ILoginHandler {
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("dpopClientKeyManager")
-    private dpopClientKeyManager: IDpopClientKeyManager
+    private dpopClientKeyManager: IDpopClientKeyManager,
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   checkOptions(options: ILoginOptions): Error | null {
-    if (!options.oidcIssuer) {
+    if (!options.oidcIssuer || !options.clientId) {
       return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
     }
     return null;
@@ -58,7 +60,8 @@ export default class OidcLoginHandler implements ILoginHandler {
       // eslint-disable-next-line
       // @ts-ignore
       redirectUrl: options.redirect,
-      issuerConfiguration: issuerConfig
+      issuerConfiguration: issuerConfig,
+      clientId: options.clientId as string
     };
 
     // Generate DPoP Key if needed
