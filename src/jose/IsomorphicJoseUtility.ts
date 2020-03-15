@@ -15,6 +15,9 @@ import {
 import { JWK, JWS } from "node-jose";
 import JWT from "jsonwebtoken";
 import IJoseUtility from "./IJoseUtility";
+import randomString from "crypto-random-string";
+import { sha256 } from "js-sha256";
+import crypto from "crypto";
 
 export default class IsomorphicJoseUtility implements IJoseUtility {
   async generateJWK(
@@ -50,5 +53,20 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
 
   async privateJWKToPublicJWK(key: JSONWebKey): Promise<JSONWebKey> {
     return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
+  }
+
+  async generateCodeVerifier(): Promise<string> {
+    return randomString({ length: 10, type: "base64" });
+  }
+
+  async generateCodeChallenge(verifier: string): Promise<string> {
+    const hash = crypto.createHash("sha256");
+    hash.update(verifier);
+    return hash
+      .digest()
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
   }
 }

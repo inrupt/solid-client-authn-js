@@ -6,6 +6,7 @@ export default interface ILoginInputOptions {
   redirect: string;
   popUp?: boolean;
   state?: string;
+  clientId?: string;
 }
 
 export const loginInputOptionsSchema = {
@@ -15,7 +16,8 @@ export const loginInputOptionsSchema = {
     webId: { type: "string", format: "uri", shouldConvertToUrl: true },
     redirect: { type: "string", format: "uri", shouldConvertToUrl: true },
     popUp: { type: "boolean" },
-    state: { type: "string" }
+    state: { type: "string" },
+    clientId: { type: "string" }
   },
   required: ["redirect"],
   oneOf: [{ required: ["oidcIssuer"] }, { required: ["webId"] }]

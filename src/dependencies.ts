@@ -47,6 +47,8 @@ import UrlRepresenationConverter, {
   IUrlRepresentationConverter
 } from "./util/UrlRepresenationConverter";
 import SessionCreator, { ISessionCreator } from "./solidSession/SessionCreator";
+import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
+import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -126,6 +128,12 @@ container.register<IOidcHandler>("oidcHandlers", {
 
 // Login/OIDC/redirectHandler
 container.register<IRedirectHandler>("redirectHandler", {
+  useClass: AggregateRedirectHandler
+});
+container.register<IRedirectHandler>("redirectHandlers", {
+  useClass: AuthCodeRedirectHandler
+});
+container.register<IRedirectHandler>("redirectHandlers", {
   useClass: GeneralRedirectHandler
 });
 

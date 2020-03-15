@@ -15,4 +15,5 @@ export default interface IOidcOptions {
   dpop: boolean;
   redirectUrl: URL;
   issuerConfiguration: IIssuerConfig;
+  clientId: string;
 }
