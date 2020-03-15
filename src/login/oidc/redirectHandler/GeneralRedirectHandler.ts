@@ -2,23 +2,18 @@ import ISolidSession from "../../../solidSession/ISolidSession";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
-import { Response, RequestInfo, RequestInit } from "node-fetch";
 import { inject, injectable } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
-import { IUuidGenerator } from "../../../util/UuidGenerator";
-import IAuthenticatedFetcher from "../../../authenticatedFetch/IAuthenticatedFetcher";
-import ILogoutHandler from "../../../logout/ILogoutHandler";
+import { ISessionCreator } from "../../../solidSession/SessionCreator";
+import INeededInactionAction from "../../../solidSession/INeededInactionAction";
 
 @injectable()
 export default class GeneralRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("uuidGenerator") private uuidGenerator: IUuidGenerator,
-    @inject("authenticatedFetcher")
-    private authenticatedFetcher: IAuthenticatedFetcher,
-    @inject("logoutHandler") private logoutHandler: ILogoutHandler
+    @inject("sessionCreator") private sessionCreator: ISessionCreator
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -29,43 +24,31 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
     }
-    const localUserId = this.uuidGenerator.v4();
     const url = new URL(redirectUrl, true);
     const decoded = await this.joseUtility.decodeJWT(
       url.query.id_token as string
     );
     // TODO validate decoded token
+    // TODO extract the localUserId from state and put it in the session
+    const session = this.sessionCreator.create({
+      webId: decoded.sub,
+      neededAction: {
+        actionType: "inaction"
+      } as INeededInactionAction
+    });
     await Promise.all([
       this.storageUtility.setForUser(
-        localUserId,
+        session.localUserId,
         "accessToken",
         url.query.access_token as string
       ),
       this.storageUtility.setForUser(
-        localUserId,
+        session.localUserId,
         "idToken",
         url.query.id_token as string
       ),
-      this.storageUtility.setForUser(localUserId, "webId", decoded.sub)
+      this.storageUtility.setForUser(session.localUserId, "webId", decoded.sub)
     ]);
-    return {
-      localUserId,
-      webId: decoded.sub,
-      state: url.query.state,
-      logout: async (): Promise<void> => {
-        this.logoutHandler.handle(localUserId);
-      },
-      fetch: async (url: RequestInfo, init: RequestInit): Promise<Response> => {
-        return this.authenticatedFetcher.handle(
-          {
-            localUserId,
-            type: "dpop"
-          },
-          // TODO: this isn't fully type safe
-          new URL(url as string),
-          init
-        );
-      }
-    };
+    return session;
   }
 }

@@ -1,26 +1,28 @@
 /**
  * Responsible for sending DPoP Enabled requests
  */
-import { RequestInit, Response } from "node-fetch";
+import { RequestInit, Response, RequestInfo } from "node-fetch";
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
 import ConfigurationError from "../../errors/ConfigurationError";
 import IDpopRequestCredentials from "../../dpop/IDpopRequestCredentials";
 import { injectable, inject } from "tsyringe";
-import URL from "url-parse";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
+import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
   constructor(
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("fetcher") private fetcher: IFetcher
+    @inject("fetcher") private fetcher: IFetcher,
+    @inject("urlRepresentationConverter")
+    private urlRepresentationConverter: IUrlRepresentationConverter
   ) {}
 
   async canHandle(
     requestCredentials: IRequestCredentials,
-    url: URL,
+    url: RequestInfo,
     requestInit?: RequestInit
   ): Promise<boolean> {
     // TODO include a schema check for the submitted data
@@ -29,7 +31,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
 
   async handle(
     requestCredentials: IRequestCredentials,
-    url: URL,
+    url: RequestInfo,
     requestInit?: RequestInit
   ): Promise<Response> {
     if (!(await this.canHandle(requestCredentials, url, requestInit))) {
@@ -49,7 +51,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
         ...requestInitiWithDefaults.headers,
         authorization: `DPOP ${dpopRequestCredentials.authToken}`,
         dpop: await this.dpopHeaderCreator.createHeaderToken(
-          url,
+          this.urlRepresentationConverter.requestInfoToUrl(url),
           requestInitiWithDefaults.method
         )
       }
