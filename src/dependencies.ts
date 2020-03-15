@@ -43,6 +43,10 @@ import EnvironmentDetector, {
 } from "./util/EnvironmentDetector";
 import ILogoutHandler from "./logout/ILogoutHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
+import UrlRepresenationConverter, {
+  IUrlRepresentationConverter
+} from "./util/UrlRepresenationConverter";
+import SessionCreator, { ISessionCreator } from "./solidSession/SessionCreator";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -65,6 +69,14 @@ container.register<IJoseUtility>("joseUtility", {
 });
 container.register<IEnvironmentDetector>("environmentDetector", {
   useClass: EnvironmentDetector
+});
+container.register<IUrlRepresentationConverter>("urlRepresentationConverter", {
+  useClass: UrlRepresenationConverter
+});
+
+// Session
+container.register<ISessionCreator>("sessionCreator", {
+  useClass: SessionCreator
 });
 
 // Authenticated Fetcher

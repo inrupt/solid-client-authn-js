@@ -9,15 +9,14 @@ import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import INeededRedirectAction from "../../../solidSession/INeededRedirectAction";
 import ISolidSession from "../../../solidSession/ISolidSession";
-import { IUuidGenerator } from "../../../util/UuidGenerator";
-import { Response } from "node-fetch";
+import { ISessionCreator } from "../../../solidSession/SessionCreator";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("uuidGenerator") private uuidGenerator: IUuidGenerator
+    @inject("sessionCreator") private sessionCreator: ISessionCreator
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -50,19 +49,11 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     }
     requestUrl.set("query", query);
 
-    // TODO: This is shared in multiple places. Perhaps abstract it out
-    return {
-      localUserId: this.uuidGenerator.v4(),
+    return this.sessionCreator.create({
       neededAction: {
         actionType: "redirect",
         redirectUrl: requestUrl.toString()
-      } as INeededRedirectAction,
-      logout: (): Promise<void> => {
-        return Promise.resolve();
-      },
-      fetch: (): Promise<Response> => {
-        throw new Error("not implemented");
-      }
-    };
+      } as INeededRedirectAction
+    });
   }
 }
