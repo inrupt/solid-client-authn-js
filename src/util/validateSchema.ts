@@ -51,6 +51,7 @@ export function traverseObject(
  * @param schema The schema to validate against
  * @param item The item to validate
  */
+// TODO: This function mutates input. We want to avoid that
 export default function validateSchema(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: { title?: string; [key: string]: any },
