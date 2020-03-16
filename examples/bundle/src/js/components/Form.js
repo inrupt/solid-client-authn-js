@@ -4,7 +4,9 @@ import "regenerator-runtime/runtime";
 import fetcher, {
   login,
   getSession,
-  handleRedirect
+  handleRedirect,
+  logout,
+  fetch
 } from "../../../../../dist/index";
 
 class Form extends Component {
@@ -12,9 +14,13 @@ class Form extends Component {
     super(props);
     this.state = {
       status: "loading",
-      loginIssuer: "http://localhost:8080/"
+      loginIssuer: "http://localhost:8080/",
+      fetchBody: "",
+      session: null
     };
     this.handleLogin = this.handleLogin.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
+    this.handleFetch = this.handleFetch.bind(this);
   }
 
   async componentDidMount() {
@@ -26,6 +32,8 @@ class Form extends Component {
       } else {
         const session = await handleRedirect(window.location.href);
         this.setState({ status: "dashboard", session });
+        console.log(new URL(window.location.href).origin);
+        window.location.replace(new URL(window.location.href).origin);
       }
     } else {
       this.setState({ status: "dashboard", session });
@@ -34,6 +42,7 @@ class Form extends Component {
 
   async handleLogin(e) {
     e.preventDefault();
+    this.setState({ status: "loading" });
     const session = await login({
       clientId: "coolApp",
       redirect: "http://localhost:3001/",
@@ -45,6 +54,22 @@ class Form extends Component {
     ) {
       window.location.href = session.neededAction.redirectUrl;
     }
+  }
+
+  async handleLogout(e) {
+    e.preventDefault();
+    this.setState({ status: "loading" });
+    await logout();
+    this.setState({ status: "login", session: null });
+  }
+
+  async handleFetch(e) {
+    e.preventDefault();
+    this.setState({ status: "loading", fetchBody: "" });
+    const response = await (
+      await fetch("http://localhost:9001/storage", {})
+    ).text();
+    this.setState({ status: "dashboard", fetchBody: response });
   }
 
   render() {
@@ -65,9 +90,17 @@ class Form extends Component {
         );
       case "dashboard":
         return (
-          <form>
+          <div>
             <h1>Solid Auth Fetcher Demo Dashboad</h1>
-          </form>
+            <p>WebId: {this.state.session.webId}</p>
+            <form>
+              <button onClick={this.handleFetch}>Fetch</button>
+              <pre>{this.state.fetchBody}</pre>
+            </form>
+            <form>
+              <button onClick={this.handleLogout}>Log Out</button>
+            </form>
+          </div>
         );
     }
   }

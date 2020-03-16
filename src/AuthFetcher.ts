@@ -10,6 +10,7 @@ import validateSchema from "./util/validateSchema";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import ILogoutHandler from "./logout/ILogoutHandler";
 import { ISessionCreator } from "./solidSession/SessionCreator";
+import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 
 @injectable()
 export default class AuthFetcher {
@@ -18,7 +19,9 @@ export default class AuthFetcher {
     @inject("loginHandler") private loginHandler: ILoginHandler,
     @inject("redirectHandler") private redirectHandler: IRedirectHandler,
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
+    @inject("sessionCreator") private sessionCreator: ISessionCreator,
+    @inject("authenticatedFetcher")
+    private authenticatedFetcher: IAuthenticatedFetcher
   ) {}
 
   async login(options: ILoginInputOptions): Promise<ISolidSession> {
@@ -32,7 +35,14 @@ export default class AuthFetcher {
   }
 
   async fetch(url: RequestInfo, init: RequestInit): Promise<Response> {
-    throw new Error("Not Implemented");
+    return this.authenticatedFetcher.handle(
+      {
+        localUserId: "global",
+        type: "dpop"
+      },
+      url,
+      init
+    );
   }
 
   async logout(): Promise<void> {
