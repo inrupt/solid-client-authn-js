@@ -9,5 +9,5 @@ export default interface ILoginOptions {
   redirect: URL;
   popUp?: boolean;
   state?: string;
-  clientId?: string;
+  clientId?: "global" | string;
 }
