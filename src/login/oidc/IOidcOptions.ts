@@ -16,4 +16,5 @@ export default interface IOidcOptions {
   redirectUrl: URL;
   issuerConfiguration: IIssuerConfig;
   clientId: string;
+  localUserId?: string;
 }

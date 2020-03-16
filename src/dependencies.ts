@@ -49,6 +49,7 @@ import UrlRepresenationConverter, {
 import SessionCreator, { ISessionCreator } from "./solidSession/SessionCreator";
 import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
+import BrowserStorage from "./localStorage/BrowserStorage";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -150,7 +151,16 @@ container.register<ILogoutHandler>("logoutHandler", {
 export default function getAuthFetcherWithDependencies(dependencies: {
   storage?: IStorage;
 }): AuthFetcher {
-  const storage = dependencies.storage || new NodeStorage();
+  let storage: IStorage;
+  if (dependencies.storage) {
+    storage = dependencies.storage;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+  } else if (typeof document != "undefined") {
+    storage = new BrowserStorage();
+  } else {
+    storage = new NodeStorage();
+  }
   const authenticatorContainer = container.createChildContainer();
   authenticatorContainer.register<IStorage>("storage", {
     useValue: storage

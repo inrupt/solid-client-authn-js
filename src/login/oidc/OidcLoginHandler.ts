@@ -61,7 +61,8 @@ export default class OidcLoginHandler implements ILoginHandler {
       // @ts-ignore
       redirectUrl: options.redirect,
       issuerConfiguration: issuerConfig,
-      clientId: options.clientId as string
+      clientId: options.clientId as string,
+      localUserId: options.localUserId
     };
 
     // Generate DPoP Key if needed

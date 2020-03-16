@@ -5,6 +5,7 @@ import { IUuidGenerator } from "../util/UuidGenerator";
 import { RequestInfo, RequestInit, Response } from "node-fetch";
 import IAuthenticatedFetcher from "../authenticatedFetch/IAuthenticatedFetcher";
 import ILogoutHandler from "../logout/ILogoutHandler";
+import { IStorageUtility } from "../localStorage/StorageUtility";
 
 export interface ISessionCreatorOptions {
   localUserId?: string;
@@ -15,6 +16,7 @@ export interface ISessionCreatorOptions {
 
 export interface ISessionCreator {
   create(options: ISessionCreatorOptions): ISolidSession;
+  getSession(localUserId: string): Promise<ISolidSession | null>;
 }
 
 @injectable()
@@ -23,7 +25,8 @@ export default class SessionCreator implements ISessionCreator {
     @inject("uuidGenerator") private uuidGenerator: IUuidGenerator,
     @inject("authenticatedFetcher")
     private authenticatedFetcher: IAuthenticatedFetcher,
-    @inject("logoutHandler") private logoutHandler: ILogoutHandler
+    @inject("logoutHandler") private logoutHandler: ILogoutHandler,
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   create(options: ISessionCreatorOptions): ISolidSession {
@@ -49,5 +52,16 @@ export default class SessionCreator implements ISessionCreator {
         );
       }
     };
+  }
+
+  async getSession(localUserId: string): Promise<ISolidSession | null> {
+    const webId = await this.storageUtility.getForUser(localUserId, "webId");
+    if (webId) {
+      return this.create({
+        localUserId,
+        webId: webId
+      });
+    }
+    return null;
   }
 }

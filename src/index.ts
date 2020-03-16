@@ -24,7 +24,7 @@ export async function logout(): Promise<void> {
   return authFetcher.logout();
 }
 
-export async function getSession(): Promise<ISolidSession> {
+export async function getSession(): Promise<ISolidSession | null> {
   return authFetcher.getSession();
 }
 

@@ -86,19 +86,21 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         actionType: "inaction"
       } as INeededInactionAction
     });
-    await Promise.all([
-      this.storageUtility.setForUser(
-        session.localUserId,
-        "accessToken",
-        url.query.access_token as string
-      ),
-      this.storageUtility.setForUser(
-        session.localUserId,
-        "idToken",
-        url.query.id_token as string
-      ),
-      this.storageUtility.setForUser(session.localUserId, "webId", decoded.sub)
-    ]);
+    await this.storageUtility.setForUser(
+      session.localUserId,
+      "accessToken",
+      url.query.access_token as string
+    );
+    await this.storageUtility.setForUser(
+      session.localUserId,
+      "idToken",
+      url.query.id_token as string
+    );
+    await this.storageUtility.setForUser(
+      session.localUserId,
+      "webId",
+      decoded.sub
+    );
     return session;
   }
 }
