@@ -36,13 +36,13 @@ export default class AggregateHandler<P extends Array<unknown>, R>
     // })
 
     let rightOne: IHandleable<P, R> | null = null;
-    await Promise.all(
-      this.handleables.map(async handleable => {
-        if (await handleable.canHandle(...params)) {
-          rightOne = handleable;
-        }
-      })
-    );
+    for (let i = 0; i < this.handleables.length; i++) {
+      const canHandle = await this.handleables[i].canHandle(...params);
+      if (canHandle) {
+        rightOne = this.handleables[i];
+        break;
+      }
+    }
     return rightOne;
   }
 

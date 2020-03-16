@@ -20,22 +20,12 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
-<<<<<<< HEAD
     return !!(
       oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "implicit"
       ) > -1
     );
-=======
-    // return !!(
-    //   oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
-    //   oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
-    //     "implicit"
-    //   ) > -1
-    // );
-    return false;
->>>>>>> c189b9b... Can log in with ESS
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
