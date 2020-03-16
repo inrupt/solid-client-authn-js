@@ -72,7 +72,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     ).json();
 
     /**
-     * TODO: This code will be repeated in other places. Should be factored out ====================
+     * TODO: This code will be repeated in other places. Should be factored out
      */
     const decoded = await this.joseUtility.decodeJWT(
       // TODO this should actually be the id_vc of the token
