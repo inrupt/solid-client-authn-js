@@ -22,7 +22,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
-    const a = !!(
+    const a = (
       oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "authorization_code"
