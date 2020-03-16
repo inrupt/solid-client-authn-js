@@ -4,11 +4,11 @@
 import URL from "url-parse";
 
 export default interface ILoginOptions {
-  localUserId?: string;
+  localUserId?: "global" | string;
   oidcIssuer?: URL;
   webId?: URL;
   redirect: URL;
   popUp?: boolean;
   state?: string;
-  clientId?: "global" | string;
+  clientId?: string;
 }
