@@ -58,4 +58,8 @@ export default interface IJoseUtility {
     key: JSONWebKey,
     options?: JWT.SignOptions
   ): Promise<string>;
+
+  generateCodeVerifier(): Promise<string>;
+
+  generateCodeChallenge(verifier: string): Promise<string>;
 }

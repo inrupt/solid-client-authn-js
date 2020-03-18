@@ -35,7 +35,8 @@ app.post("/login", async (req: Request, res: Response) => {
   const webId: string = req.body.webid;
   const session = await uniqueLogin({
     oidcIssuer: webId,
-    redirect: `${BASE_URL}/redirect`
+    redirect: `${BASE_URL}/redirect`,
+    clientId: "coolApp"
   });
   if (req.session) {
     req.session.localUserId = session.localUserId;
@@ -83,7 +84,7 @@ app.post("/fetch", async (req: Request, res: Response) => {
   ) {
     const result = await (sessions[
       req.session.localUserId
-    ] as ISolidSession).fetch("http://localhost:9001/storage", {});
+    ] as ISolidSession).fetch("http://localhost:10100/", {});
     res.render("dashboard", {
       webId: sessions[req.session.localUserId].webId,
       fetchResult: JSON.stringify(await result.text(), null, 2)
@@ -105,6 +106,6 @@ app.post("/logout", async (req: Request, res: Response) => {
     delete req.session.localUserId;
     res.redirect("/");
   }
-})
+});
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
