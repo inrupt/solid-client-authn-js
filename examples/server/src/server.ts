@@ -84,7 +84,7 @@ app.post("/fetch", async (req: Request, res: Response) => {
   ) {
     const result = await (sessions[
       req.session.localUserId
-    ] as ISolidSession).fetch("http://localhost:9001/storage", {});
+    ] as ISolidSession).fetch("http://localhost:10100/", {});
     res.render("dashboard", {
       webId: sessions[req.session.localUserId].webId,
       fetchResult: JSON.stringify(await result.text(), null, 2)

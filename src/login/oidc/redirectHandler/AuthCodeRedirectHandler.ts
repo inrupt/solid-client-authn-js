@@ -1,7 +1,6 @@
 import ISolidSession from "../../../solidSession/ISolidSession";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
-import { URLSearchParams } from "url";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
@@ -12,6 +11,7 @@ import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import INeededInactionAction from "../../../solidSession/INeededInactionAction";
+import formurlencoded from "form-urlencoded";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
@@ -51,12 +51,6 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       new URL(issuer)
     )) as IIssuerConfig;
 
-    const requestParams = new URLSearchParams();
-    requestParams.append("client_id", clientId as string);
-    requestParams.append("grant_type", "authorization_code");
-    requestParams.append("code_verifier", codeVerifier);
-    requestParams.append("code", url.query.code as string);
-    requestParams.append("redirect_uri", redirectUri as string);
     const tokenResponse = await (
       await this.fetcher.fetch(issuerConfig.tokenEndpoint, {
         method: "POST",
@@ -67,7 +61,15 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
           ),
           "content-type": "application/x-www-form-urlencoded"
         },
-        body: requestParams
+        /* eslint-disable @typescript-eslint/camelcase */
+        body: formurlencoded({
+          client_id: clientId as string,
+          grant_type: "authorization_code",
+          code_verifier: codeVerifier as string,
+          code: url.query.code as string,
+          redirect_uri: redirectUri as string
+        })
+        /* eslint-enable @typescript-eslint/camelcase */
       })
     ).json();
 
@@ -81,24 +83,27 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     // TODO validate decoded token
     // TODO extract the localUserId from state and put it in the session
     const session = this.sessionCreator.create({
+      localUserId,
       webId: decoded.sub,
       neededAction: {
         actionType: "inaction"
       } as INeededInactionAction
     });
-    await Promise.all([
-      this.storageUtility.setForUser(
-        session.localUserId,
-        "accessToken",
-        url.query.access_token as string
-      ),
-      this.storageUtility.setForUser(
-        session.localUserId,
-        "idToken",
-        url.query.id_token as string
-      ),
-      this.storageUtility.setForUser(session.localUserId, "webId", decoded.sub)
-    ]);
+    await this.storageUtility.setForUser(
+      session.localUserId,
+      "accessToken",
+      url.query.access_token as string
+    );
+    await this.storageUtility.setForUser(
+      session.localUserId,
+      "idToken",
+      url.query.id_token as string
+    );
+    await this.storageUtility.setForUser(
+      session.localUserId,
+      "webId",
+      decoded.sub
+    );
     return session;
   }
 }
