@@ -24,18 +24,27 @@ export default class AuthFetcher {
     private authenticatedFetcher: IAuthenticatedFetcher
   ) {}
 
+  private async loginHelper(
+    options: ILoginInputOptions,
+    localUserId?: string
+  ): Promise<ISolidSession> {
+    const internalOptions: ILoginOptions = validateSchema(
+      loginInputOptionsSchema,
+      options
+    );
+    if (localUserId) {
+      internalOptions.localUserId = localUserId;
+    }
+    return this.loginHandler.handle(internalOptions);
+  }
+
   async login(options: ILoginInputOptions): Promise<ISolidSession> {
-    // TODO: this should be improved. It mutates the input
-    validateSchema(loginInputOptionsSchema, options, { throwError: true });
-    // TODO: this type conversion is really bad
-    return this.loginHandler.handle(({
-      ...options,
-      localUserId: "global"
-    } as unknown) as ILoginOptions);
+    return this.loginHelper(options, "global");
   }
 
   async fetch(url: RequestInfo, init: RequestInit): Promise<Response> {
     return this.authenticatedFetcher.handle(
+      // TODO: generate request credentials separately
       {
         localUserId: "global",
         type: "dpop"
@@ -54,11 +63,7 @@ export default class AuthFetcher {
   }
 
   async uniqueLogin(options: ILoginInputOptions): Promise<ISolidSession> {
-    // TODO: This code repreats login should be factored out
-    // TODO: this should be improved. It mutates the input
-    validateSchema(loginInputOptionsSchema, options, { throwError: true });
-    // TODO: this type conversion is really bad
-    return this.loginHandler.handle((options as unknown) as ILoginOptions);
+    return this.loginHelper(options);
   }
 
   onSession(callback: (session: ISolidSession) => unknown): void {
