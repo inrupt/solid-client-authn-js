@@ -3,6 +3,8 @@
  *
  * @type A string denoting the type of credentials these are
  */
+
+// TODO: this should be an "OR" of all possible request credentials
 export default interface IRequestCredentials {
   type: string;
   localUserId: string;

@@ -25,7 +25,6 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
     url: RequestInfo,
     requestInit?: RequestInit
   ): Promise<boolean> {
-    // TODO include a schema check for the submitted data
     return requestCredentials.type === "dpop";
   }
 

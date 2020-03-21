@@ -3,6 +3,7 @@
  */
 import Ajv from "ajv";
 import URL from "url-parse";
+import { cloneDeep } from "lodash";
 
 export function compileTypeof(type: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,16 +52,13 @@ export function traverseObject(
  * @param schema The schema to validate against
  * @param item The item to validate
  */
-// TODO: This function mutates input. We want to avoid that
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export default function validateSchema(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: { title?: string; [key: string]: any },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  item: any,
-  options: Partial<{
-    throwError: boolean;
-  }> = {}
-): boolean {
+  inputItem: any
+): any {
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+  const item = cloneDeep(inputItem);
   const ajv = new Ajv();
   ajv.addKeyword("typeof", {
     compile: compileTypeof
@@ -78,14 +76,11 @@ export default function validateSchema(
         .map(err => `\n${err.dataPath} ${err.message}`)
         .toString();
     }
-    if (options.throwError) {
-      throw new Error(message);
-    }
-    return false;
+    throw new Error(message);
   }
 
   // If all is true, apply modifications
   traverseObject(item, schema);
 
-  return true;
+  return item;
 }

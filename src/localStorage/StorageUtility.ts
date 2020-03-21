@@ -34,7 +34,7 @@ export interface IStorageUtility {
   /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
-// TODO: this does not handle all possible bad inputs for example what if it's not proper JSON
+// TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 @injectable()
 export default class StorageUtility implements IStorageUtility {
   constructor(@inject("storage") private storage: IStorage) {}
@@ -98,7 +98,6 @@ export default class StorageUtility implements IStorageUtility {
     key: string,
     options: {
       schema?: Record<string, unknown>;
-      postProcess?: (retrievedObject: any) => any;
       userId?: string;
     } = {}
   ): Promise<unknown | null> {
@@ -112,10 +111,7 @@ export default class StorageUtility implements IStorageUtility {
       try {
         const parsedObject = JSON.parse(locallyStored);
         if (options.schema) {
-          validateSchema(options.schema, parsedObject, { throwError: true });
-        }
-        if (options.postProcess) {
-          return options.postProcess(parsedObject);
+          validateSchema(options.schema, parsedObject);
         }
         return parsedObject;
       } catch (err) {
