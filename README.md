@@ -131,7 +131,9 @@ if (sessions.some((user) => user.webId === myWebId)) {
 }
 ```
 
-### In the Browser using the Script Tag
+### For Use in the Browser using the Script Tag
+
+TBD
 
 ### For Use on the Server
 
