@@ -286,7 +286,7 @@ import { getSession } from 'solid-auth-fetcher';
 await getSession().then((session) => {})
 ```
 
-#### getSessions(): Session[]
+#### getSessions(): [Session](#session)[]
 Retrieve all sessions currently registered with authFetcher
 
 ```typescript=
