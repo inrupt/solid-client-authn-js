@@ -203,7 +203,7 @@ app.listen(3000)
 
 ### General Usage
 
-#### login(options): Session
+#### login(options): [Session](#session)
 Kick off the login process for a global user:
 
 ```typescript=
