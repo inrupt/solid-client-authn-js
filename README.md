@@ -306,6 +306,8 @@ onSession((session) => {
 })
 ```
 
+The callback receives a [`Session`](#session) object as its sole parameter.
+
 #### onLogout(callback)
 Register a callback function to be called when a session is logged out:
 
