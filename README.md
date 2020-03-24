@@ -277,7 +277,7 @@ import { logout } from 'solid-auth-fetcher';
 logout().then(() => {})
 ```
 
-#### getSession(): Session
+#### getSession(): [Session](#session)
 Retrieve the session for the global user:
 
 ```typescript=
