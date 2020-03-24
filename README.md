@@ -10,10 +10,10 @@ npm install solid-auth-fetcher
 
 ## Examples Usage
 
- - [On the server](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/server)
- - [In the web browser with your own bundler](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/bundle)
- - [In the web browser with a script tag](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/script)
- - [In React Native (iOS and Andorid)](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/react-native)
+ - [On the server](./examples/server)
+ - [In the web browser with your own bundler](./examples/bundle)
+ - [In the web browser with a script tag](./examples/script)
+ - [In React Native (iOS and Andorid)](./examples/react-native)
 
 ## Importing
 
