@@ -70,7 +70,7 @@ import { login, getSession } from 'solid-auth-fetcher'
 // Get User will return a user object, or nothing if no user is logged in.
 const session = await getSession()
 if (!session) {
-  await login({
+  login({
     // You could provide either a "webId" field, or an "oidcIssuer" field if
     // you know who the user's OIDC issuer is. If neither are provided, a
     // pop-up will ask the user to provide one.
