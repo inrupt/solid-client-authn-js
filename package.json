@@ -24,13 +24,13 @@
     "dev-android": "concurrently \"npm run dev\" \"npm run dev-test-helper\" \"cd examples/native && npm run dev-android\"",
     "dev-test-helper": "cd examples/test-helper && npm run dev",
     "test": "npm run lint && npm run test-unit && npm run test-acceptance",
-    "test-unit": "",
+    "test-unit": "jest --coverage --verbose",
     "test-acceptance": "npm run test-acceptance-server && npm run test-acceptance-script && npm run test-acceptance-bundle && npm run test-acceptance-ios && npm run test-acceptance-android",
     "test-acceptance-server": "",
     "test-acceptance-script": "",
     "test-acceptance-bundle": "",
-    "test-acceptance-ios": "",
-    "test-acceptance-android": "",
+    "test-acceptance-ios": "echo \"Not Implemented\" && exit 1",
+    "test-acceptance-android": "echo \"Not Implemented\" && exit 1",
     "bootstrap-examples": "./bootstrap-examples.bash"
   },
   "devDependencies": {
