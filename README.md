@@ -73,7 +73,8 @@ if (!session) {
   login({
     // You could provide either a "webId" field, or an "oidcIssuer" field if
     // you know who the user's OIDC issuer is. If neither are provided, a
-    // pop-up will ask the user to provide one.
+    // pop-up will ask the user to provide one. If it is running on the server
+    // the popup parameter will be ingored.
     oidcIssuer: 'https://example.com/profile/card#me', 
 
     // Note that when 'popUp' is false, the browser will redirect the
@@ -83,7 +84,8 @@ if (!session) {
     // The page that that should be queried once login is complete
     redirectUrl: 'https://mysite.com/redirect',
     
-    // TEMPORARY: The registered Id for your client.
+    // TEMPORARY: The registered Id for your client. The only reason this is
+    // here is that some solid servers are not spec compliant and require it.
     clientId: 'coolClient'
   })
 }
@@ -109,7 +111,7 @@ import { fetch } from 'solid-auth-fetcher'
 
 fetch('https://example.com/resource', {
   method: 'post',
-  body: 'Sweet body, bro'
+  body: 'What a cool string!'
 })
 ```
 
@@ -152,7 +154,7 @@ const app = express();
 app.use(
   session({
     secret: "I let Kevin's son beat me in foosball",
-    cookie: { secure: false }
+    cookie: { secure: true }
   })
 );
 
@@ -331,7 +333,7 @@ interface Session {
 ```
 
 #### handleRedirect(url): Session
-Handle redirects as a part of the OIDC process. This has required usage in servers, but is done automatically on web and mobile.
+Handle redirects as a part of the OIDC process. Servers using solid-auth-fetcher must manually call this method on redirect, but is done automatically on web and mobile.
 
 ```typescript=
 import { handleRedirect } from 'solid-auth-fetcher'
