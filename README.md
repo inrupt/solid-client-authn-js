@@ -5,7 +5,7 @@ A client tool to login and make authenticated requests to Solid compliant server
 ## Installation
 
 ```bash
-npm i solid-auth-fetcher
+npm install solid-auth-fetcher
 ```
 
 ## Examples Usage
