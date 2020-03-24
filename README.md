@@ -238,7 +238,7 @@ Options:
 | `state`    | No                                                 | String        | The state will be provided with the User's Session object once they have logged in                                  | undefined |
 | `clientId`    | Yes (for now)                                                 | String        | The Id of the application registered with the Identity Provider  | undefined |
 
-#### uniqueLogin(options): Session
+#### uniqueLogin(options): [Session](#session)
 Kick off the login process for a unique user. This allows you to log in multiple users with solid-auth-fetcher. It's a useful feature for apps that wish to support multiple users being logged into the same client, or for servers that work with multiple clients.
 
 ```typescript=
