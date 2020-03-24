@@ -7,23 +7,27 @@ import URL from "url-parse";
 import {
   DpopHeaderCreatorMock,
   DpopHeaderCreatorResponse
-} from "../../../src/util/dpop/__mocks__/DpopHeaderCreator";
+} from "../../../src/dpop/__mocks__/DpopHeaderCreator";
 import {
   FetcherMock,
   FetcherMockResponse
 } from "../../../src/util/__mocks__/Fetcher";
+import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlRepresentationConverter";
 
 describe("DpopAuthenticatedFetcher", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
-    dpopHeaderCreator: DpopHeaderCreatorMock
+    dpopHeaderCreator: DpopHeaderCreatorMock,
+    urlRepresentationConverter: UrlRepresentationConverterMock
   };
   function getDpopAuthenticatedFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): DpopAuthenticatedFetcher {
     return new DpopAuthenticatedFetcher(
       mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
-      mocks.fetcher ?? defaultMocks.fetcher
+      mocks.fetcher ?? defaultMocks.fetcher,
+      mocks.urlRepresentationConverter ??
+        defaultMocks.urlRepresentationConverter
     );
   }
 
@@ -32,7 +36,7 @@ describe("DpopAuthenticatedFetcher", () => {
       const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
       expect(
         await dpopAuthenticatedFetcher.canHandle(
-          { type: "dpop" },
+          { type: "dpop", localUserId: "global" },
           new URL("http://example.com"),
           {}
         )
@@ -43,7 +47,7 @@ describe("DpopAuthenticatedFetcher", () => {
       const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
       expect(
         await dpopAuthenticatedFetcher.canHandle(
-          { type: "bearer" },
+          { type: "bearer", localUserId: "global" },
           new URL("http://example.com"),
           {}
         )
@@ -56,7 +60,7 @@ describe("DpopAuthenticatedFetcher", () => {
       const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
       expect(
         dpopAuthenticatedFetcher.handle(
-          { type: "bad" },
+          { type: "bad", localUserId: "global" },
           new URL("https://bad.com"),
           {}
         )
@@ -73,7 +77,8 @@ describe("DpopAuthenticatedFetcher", () => {
       const url = new URL("https://example.com");
       const requestCredentials = {
         type: "dpop",
-        authToken: "someAuthToken"
+        authToken: "someAuthToken",
+        localUserId: "global"
       };
       const init = {};
       const response = await dpopAuthenticatedFetcher.handle(
