@@ -10,7 +10,7 @@ describe("BearerAuthenticatedFetcher", () => {
 
       expect(
         await fetcher.canHandle(
-          { type: "bearer" },
+          { type: "bearer", localUserId: "global" },
           new URL("http://example.com")
         )
       ).toBe(true);
@@ -20,7 +20,10 @@ describe("BearerAuthenticatedFetcher", () => {
       const fetcher = new BearerAuthenticatedFetcher();
 
       expect(
-        await fetcher.canHandle({ type: "dpop" }, new URL("http://example.com"))
+        await fetcher.canHandle(
+          { type: "dpop", localUserId: "global" },
+          new URL("http://example.com")
+        )
       ).toBe(false);
     });
   });
