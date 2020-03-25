@@ -84,7 +84,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     // TODO extract the localUserId from state and put it in the session
     const session = this.sessionCreator.create({
       localUserId,
-      webId: decoded.sub,
+      webId: decoded.sub as string,
       neededAction: {
         actionType: "inaction"
       } as INeededInactionAction
@@ -102,7 +102,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     await this.storageUtility.setForUser(
       session.localUserId,
       "webId",
-      decoded.sub
+      decoded.sub as string
     );
     return session;
   }

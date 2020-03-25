@@ -44,8 +44,7 @@ export default interface IJoseUtility {
    * Decodes a JSON Web Token
    * @param token The encoded token
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  decodeJWT(token: string): Promise<Record<string, any>>;
+  decodeJWT(token: string): Promise<Record<string, unknown>>;
   /**
    * Creates a JSON Web Token
    * @param payload Custom fields to be included

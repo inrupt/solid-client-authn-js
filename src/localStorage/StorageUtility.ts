@@ -98,12 +98,12 @@ export default class StorageUtility implements IStorageUtility {
     key: string,
     options: {
       /* eslint-disable @typescript-eslint/no-explicit-any */
-      schema?: Record<string, any>;
+      schema?: Record<string, unknown>;
       // TODO: Remove post process because we take care of this in validator
       postProcess?: (retrievedObject: any) => any;
       userId?: string;
     } = {}
-  ): Promise<any | null> {
+  ): Promise<unknown | null> {
     /* eslint-enable @typescript-eslint/no-explicit-any */
     // Check if key is stored locally
     const locallyStored: string | null = options.userId
