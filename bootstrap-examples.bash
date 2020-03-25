@@ -2,6 +2,6 @@
 
 for d in examples/* ; do
     cd $d
-    npm i
+    npm install
     cd ../../
 done
