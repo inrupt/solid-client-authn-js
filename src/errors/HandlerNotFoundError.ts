@@ -4,6 +4,7 @@
 export default class HandlerNotFoundError extends Error {
   public params: string[];
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(handlerName: string, params: any[]) {
     super(
