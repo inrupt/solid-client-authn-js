@@ -8,6 +8,7 @@ module.exports = {
   collectCoverageFrom: [
     "src/**/*.ts",
     "!**/node_modules/**",
-    "!**/__tests__/**"
+    "!**/__tests__/**",
+    "!src/external-types/**"
   ]
 };

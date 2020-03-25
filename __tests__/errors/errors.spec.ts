@@ -1,9 +1,9 @@
 /**
  * Test for all custom errors
  */
-import ConfigurationError from "../../../src/util/errors/ConfigurationError";
-import HandlerNotFoundError from "../../../src/util/errors/HandlerNotFoundError";
-import NotImplementedError from "../../../src/util/errors/NotImplementedError";
+import ConfigurationError from "../../src/errors/ConfigurationError";
+import HandlerNotFoundError from "../../src/errors/HandlerNotFoundError";
+import NotImplementedError from "../../src/errors/NotImplementedError";
 
 describe("errors", () => {
   const errors: {
