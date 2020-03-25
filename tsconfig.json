@@ -1,10 +1,22 @@
 {
-  "extends": "./tsconfig.build.json",
-
+  "include": ["src/**/*"],
   "compilerOptions": {
+    "paths": { "*": ["src/external-types/*"] },
     "baseUrl": ".",
-    "paths": {
-      "@solid/*": ["packages/*/src"]
-    }
-  }
+    "module": "commonjs",
+    "strict": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "noLib": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "target": "es2018",
+    "sourceMap": true,
+    "lib": ["es2018"],
+    "moduleResolution": "node",
+    "outDir": "./dist"
+  },
+  "exclude": ["node_modules", "dist"]
 }
