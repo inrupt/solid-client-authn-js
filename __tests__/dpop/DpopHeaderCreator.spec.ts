@@ -4,11 +4,11 @@
 import "reflect-metadata";
 import {
   JoseUtilityMock,
-  JoseUtilityMockSignJWTResponse
-} from "../../../src/authenticator/__mocks__/JoseUtitlity";
-import { DpopClientKeyManagerMock } from "../../../src/util/dpop/__mocks__/DpopClientKeyManager";
-import { UuidGeneratorMock } from "../../../src/util/__mocks__/UuidGenerator";
-import DpopHeaderCreator from "../../../src/util/dpop/DpopHeaderCreator";
+  JoseUtilitySignJWTResponse
+} from "../../src/jose/__mocks__/JoseUtility";
+import { DpopClientKeyManagerMock } from "../../src/dpop/__mocks__/DpopClientKeyManager";
+import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
+import DpopHeaderCreator from "../../src/dpop/DpopHeaderCreator";
 import URL from "url-parse";
 
 describe("DpopHeaderCreator", () => {
@@ -35,7 +35,23 @@ describe("DpopHeaderCreator", () => {
         new URL("https://audience.com"),
         "post"
       );
-      expect(token).toBe(JoseUtilityMockSignJWTResponse);
+      expect(token).toBe(JoseUtilitySignJWTResponse);
+    });
+
+    it("Fails if no client key is provided", async () => {
+      const dpopClientKeyManagerMock = DpopClientKeyManagerMock;
+      dpopClientKeyManagerMock.getClientKey.mockReturnValueOnce(
+        Promise.resolve(null)
+      );
+      const dpopHeaderCreator = getDpopHeaderCreator({
+        dpopClientKeyManager: dpopClientKeyManagerMock
+      });
+      expect(
+        dpopHeaderCreator.createHeaderToken(
+          new URL("https://audience.com"),
+          "post"
+        )
+      ).resolves.toThrowError();
     });
   });
 });

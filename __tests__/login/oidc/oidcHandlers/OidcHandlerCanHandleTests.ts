@@ -16,7 +16,8 @@ const standardOidcOptions: IOidcOptions = {
     jwksUri: new URL("https://example.com/jwks"),
     subjectTypesSupported: [],
     claimsSupported: []
-  }
+  },
+  clientId: "coolApp"
 };
 
 const canHandleTests: {
