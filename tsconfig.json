@@ -1,7 +1,5 @@
 {
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "compilerOptions": {
     "paths": { "*": ["src/external-types/*"] },
     "baseUrl": ".",
@@ -14,11 +12,9 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "target": "es5",
+    "target": "es2018",
     "sourceMap": true,
-    "lib": [
-      "es2018"
-    ],
+    "lib": ["es2018"],
     "moduleResolution": "node",
     "outDir": "./dist"
   },

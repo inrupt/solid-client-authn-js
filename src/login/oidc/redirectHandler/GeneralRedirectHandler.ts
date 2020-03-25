@@ -31,7 +31,7 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
     // TODO validate decoded token
     // TODO extract the localUserId from state and put it in the session
     const session = this.sessionCreator.create({
-      webId: decoded.sub,
+      webId: decoded.sub as string,
       neededAction: {
         actionType: "inaction"
       } as INeededInactionAction
@@ -47,7 +47,11 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
         "idToken",
         url.query.id_token as string
       ),
-      this.storageUtility.setForUser(session.localUserId, "webId", decoded.sub)
+      this.storageUtility.setForUser(
+        session.localUserId,
+        "webId",
+        decoded.sub as string
+      )
     ]);
     return session;
   }
