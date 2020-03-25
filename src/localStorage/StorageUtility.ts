@@ -97,12 +97,10 @@ export default class StorageUtility implements IStorageUtility {
   async safeGet(
     key: string,
     options: {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      schema?: Record<string, any>;
+      schema?: Record<string, unknown>;
       userId?: string;
     } = {}
-  ): Promise<any | null> {
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+  ): Promise<unknown | null> {
     // Check if key is stored locally
     const locallyStored: string | null = options.userId
       ? await this.getForUser(options.userId, key)

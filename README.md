@@ -5,15 +5,15 @@ A client tool to login and make authenticated requests to Solid compliant server
 ## Installation
 
 ```bash
-npm i solid-auth-fetcher
+npm install solid-auth-fetcher
 ```
 
 ## Examples Usage
 
- - [On the server](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/server)
- - [In the web browser with your own bundler](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/bundle)
- - [In the web browser with a script tag](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/script)
- - [In React Native (iOS and Andorid)](https://github.com/inrupt/solid-auth-fetcher/tree/master/examples/react-native)
+ - [On the server](./examples/server)
+ - [In the web browser with your own bundler](./examples/bundle)
+ - [In the web browser with a script tag](./examples/script)
+ - [In React Native (iOS and Andorid)](./examples/react-native)
 
 ## Importing
 
@@ -70,10 +70,11 @@ import { login, getSession } from 'solid-auth-fetcher'
 // Get User will return a user object, or nothing if no user is logged in.
 const session = await getSession()
 if (!session) {
-  await login({
+  login({
     // You could provide either a "webId" field, or an "oidcIssuer" field if
     // you know who the user's OIDC issuer is. If neither are provided, a
-    // pop-up will ask the user to provide one.
+    // pop-up will ask the user to provide one. If it is running on the server
+    // the popup parameter will be ingored.
     oidcIssuer: 'https://example.com/profile/card#me', 
 
     // Note that when 'popUp' is false, the browser will redirect the
@@ -83,7 +84,8 @@ if (!session) {
     // The page that that should be queried once login is complete
     redirectUrl: 'https://mysite.com/redirect',
     
-    // TEMPORARY: The registered Id for your client.
+    // TEMPORARY: The registered Id for your client. The only reason this is
+    // here is that some solid servers are not spec compliant and require it.
     clientId: 'coolClient'
   })
 }
@@ -109,7 +111,7 @@ import { fetch } from 'solid-auth-fetcher'
 
 fetch('https://example.com/resource', {
   method: 'post',
-  body: 'Sweet body, bro'
+  body: 'What a cool string!'
 })
 ```
 
@@ -131,7 +133,9 @@ if (sessions.some((user) => user.webId === myWebId)) {
 }
 ```
 
-### In the Browser using the Script Tag
+### For Use in the Browser using the Script Tag
+
+TBD
 
 ### For Use on the Server
 
@@ -150,7 +154,7 @@ const app = express();
 app.use(
   session({
     secret: "I let Kevin's son beat me in foosball",
-    cookie: { secure: false }
+    cookie: { secure: true }
   })
 );
 
@@ -199,7 +203,7 @@ app.listen(3000)
 
 ### General Usage
 
-#### login(options): Session
+#### login(options): [Session](#session)
 Kick off the login process for a global user:
 
 ```typescript=
@@ -234,7 +238,7 @@ Options:
 | `state`    | No                                                 | String        | The state will be provided with the User's Session object once they have logged in                                  | undefined |
 | `clientId`    | Yes (for now)                                                 | String        | The Id of the application registered with the Identity Provider  | undefined |
 
-#### uniqueLogin(options): Session
+#### uniqueLogin(options): [Session](#session)
 Kick off the login process for a unique user. This allows you to log in multiple users with solid-auth-fetcher. It's a useful feature for apps that wish to support multiple users being logged into the same client, or for servers that work with multiple clients.
 
 ```typescript=
@@ -273,7 +277,7 @@ import { logout } from 'solid-auth-fetcher';
 logout().then(() => {})
 ```
 
-#### getSession(): Session
+#### getSession(): [Session](#session)
 Retrieve the session for the global user:
 
 ```typescript=
@@ -282,7 +286,7 @@ import { getSession } from 'solid-auth-fetcher';
 await getSession().then((session) => {})
 ```
 
-#### getSessions(): Session[]
+#### getSessions(): [Session](#session)[]
 Retrieve all sessions currently registered with authFetcher
 
 ```typescript=
@@ -301,6 +305,8 @@ onSession((session) => {
   console.log(session.webId)
 })
 ```
+
+The callback receives a [`Session`](#session) object as its sole parameter.
 
 #### onLogout(callback)
 Register a callback function to be called when a session is logged out:
@@ -329,7 +335,7 @@ interface Session {
 ```
 
 #### handleRedirect(url): Session
-Handle redirects as a part of the OIDC process. This has required usage in servers, but is done automatically on web and mobile.
+Handle redirects as a part of the OIDC process. Servers using solid-auth-fetcher must manually call this method on redirect, but is done automatically on web and mobile.
 
 ```typescript=
 import { handleRedirect } from 'solid-auth-fetcher'

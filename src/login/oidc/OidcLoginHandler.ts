@@ -57,8 +57,6 @@ export default class OidcLoginHandler implements ILoginHandler {
       // TODO: differentiate if DPoP should be true
       dpop: true,
       // TODO: This constrains this library to browsers. Figure out what to do with redirect
-      // eslint-disable-next-line
-      // @ts-ignore
       redirectUrl: options.redirect,
       issuerConfiguration: issuerConfig,
       clientId: options.clientId as string,
