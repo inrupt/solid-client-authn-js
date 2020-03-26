@@ -1,12 +1,11 @@
 import "reflect-metadata";
 import URL from "url-parse";
-import { Response } from "cross-fetch";
+import { Response } from "node-fetch";
 import {
   FetcherMock,
   FetcherMockResponse
 } from "../../../src/util/__mocks__/Fetcher";
-import { StorageRetrieverMock } from "../../../src/util/__mocks__/StorageRetriever";
-import { StorageMock } from "../../../src/authenticator/__mocks__/Storage";
+import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
 
@@ -16,8 +15,7 @@ import { IFetcher } from "../../../src/util/Fetcher";
 describe("IssuerConfigFetcher", () => {
   const defaultMocks = {
     fetchResponse: FetcherMockResponse,
-    storageRetriever: StorageRetrieverMock,
-    storage: StorageMock
+    storageUtility: StorageUtilityMock
   };
   function getIssuerConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -27,18 +25,17 @@ describe("IssuerConfigFetcher", () => {
     );
     return new IssuerConfigFetcher(
       FetcherMock,
-      mocks.storageRetriever ?? defaultMocks.storageRetriever,
-      mocks.storage ?? defaultMocks.storage
+      mocks.storageUtility ?? defaultMocks.storageUtility
     );
   }
 
   it("should return the config stored in the storage", async () => {
-    const storageMock = defaultMocks.storageRetriever;
-    storageMock.retrieve.mockReturnValueOnce(
+    const storageMock = defaultMocks.storageUtility;
+    storageMock.safeGet.mockReturnValueOnce(
       Promise.resolve({ some: "config" })
     );
     const configFetcher = getIssuerConfigFetcher({
-      storageRetriever: storageMock
+      storageUtility: storageMock
     });
 
     const fetchedConfig = await configFetcher.fetchConfig(
@@ -49,8 +46,8 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    const storageMock = defaultMocks.storageRetriever;
-    storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
+    const storageMock = defaultMocks.storageUtility;
+    storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = new Response(
       JSON.stringify({
         issuer: "https://example.com",
@@ -60,7 +57,7 @@ describe("IssuerConfigFetcher", () => {
       })
     );
     const configFetcher = getIssuerConfigFetcher({
-      storageRetriever: storageMock,
+      storageUtility: storageMock,
       fetchResponse: fetchResponse
     });
 
@@ -77,8 +74,8 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should wrap URLs in url-parse's URL object", async () => {
-    const storageMock = defaultMocks.storageRetriever;
-    storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
+    const storageMock = defaultMocks.storageUtility;
+    storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = new Response(
       /* eslint-disable @typescript-eslint/camelcase */
       JSON.stringify({
@@ -92,7 +89,7 @@ describe("IssuerConfigFetcher", () => {
       /* eslint-enable @typescript-eslint/camelcase */
     );
     const configFetcher = getIssuerConfigFetcher({
-      storageRetriever: storageMock,
+      storageUtility: storageMock,
       fetchResponse: fetchResponse
     });
 
@@ -117,8 +114,8 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
-    const storageMock = defaultMocks.storageRetriever;
-    storageMock.retrieve.mockReturnValueOnce(Promise.resolve(null));
+    const storageMock = defaultMocks.storageUtility;
+    storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
     const mockFetcher = {
       fetch: (): Promise<Response> =>
         Promise.resolve(({
@@ -129,8 +126,7 @@ describe("IssuerConfigFetcher", () => {
     };
     const configFetcher = new IssuerConfigFetcher(
       mockFetcher as IFetcher,
-      storageMock,
-      defaultMocks.storage
+      storageMock
     );
 
     await expect(
@@ -141,13 +137,13 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should store the config under a key specific to the config source", async () => {
-    const storage = defaultMocks.storage;
-    const configFetcher = getIssuerConfigFetcher({ storage: storage });
+    const storageUtility = defaultMocks.storageUtility;
+    const configFetcher = getIssuerConfigFetcher({ storageUtility });
 
     await configFetcher.fetchConfig(new URL("https://arbitrary.url"));
 
-    expect(storage.set.mock.calls.length).toBe(1);
-    expect(storage.set.mock.calls[0][0]).toBe(
+    expect(storageUtility.set.mock.calls.length).toBe(1);
+    expect(storageUtility.set.mock.calls[0][0]).toBe(
       "issuerConfig:https://arbitrary.url"
     );
   });
