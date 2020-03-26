@@ -24,7 +24,7 @@ describe("validateSchema", () => {
   });
 
   it("should mark anything as valid when there is no schema to validate against", () => {
-    expect(validateSchema({}, {})).not.toThrow();
+    expect(() => validateSchema({}, {})).not.toThrow();
   });
 
   it("should return false by default if the given data does not match the given schema", () => {
