@@ -1,21 +1,21 @@
 // Required by TSyringe:
 import "reflect-metadata";
-import { MockOidcHandler } from "../../../src/login/oidc/__mocks__/IOidcHandler";
+import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import { MockIssuerConfigFetcher } from "../../../src/login/oidc/__mocks__/IIssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import IOidcHandler from "../../../src/login/oidc/IOidcHandler";
 import URL from "url-parse";
-import { IIssuerConfigFetcher } from "../../../src/login/oidc/IssuerConfigFetcher";
-import { IDpopClientKeyManager } from "../../../src/util/dpop/DpopClientKeyManager";
-import { DpopClientKeyManagerMock } from "../../../src/util/dpop/__mocks__/DpopClientKeyManager";
+import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
+import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
-    oidcHandler: MockOidcHandler,
+    oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: MockIssuerConfigFetcher,
-    dpopClientKeyManager: DpopClientKeyManagerMock
+    dpopClientKeyManager: DpopClientKeyManagerMock,
+    storageUtility: StorageUtilityMock
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -23,14 +23,19 @@ describe("OidcLoginHandler", () => {
     return new OidcLoginHandler(
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-      mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager
+      mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
+      mocks.storageUtility ?? defaultMocks.storageUtility
     );
   }
 
   it("should call the actual handler when an Oidc Issuer is provided", async () => {
     const actualHandler = defaultMocks.oidcHandler;
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
-    await handler.handle({ oidcIssuer: new URL("https://arbitrary.url") });
+    await handler.handle({
+      oidcIssuer: new URL("https://arbitrary.url"),
+      redirect: new URL("https://app.com/redirect"),
+      clientId: "coolApp"
+    });
 
     expect(actualHandler.handle.mock.calls.length).toBe(1);
   });
@@ -48,14 +53,17 @@ describe("OidcLoginHandler", () => {
     const handler = getInitialisedHandler();
 
     await expect(
-      handler.canHandle({ oidcIssuer: new URL("https://arbitrary.url") })
+      handler.canHandle({
+        oidcIssuer: new URL("https://arbitrary.url"),
+        redirect: new URL("https://app.com/redirect"),
+        clientId: "coolApp"
+      })
     ).resolves.toBe(true);
   });
 
   it("should indicate it cannot handle logins without an issuer", async () => {
     const handler = getInitialisedHandler();
-    // TS Ignore because bad input is purposely given here for the purpose of testing
-    // @ts-ignore
-    await expect(handler.canHandle({})).resolves.toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await expect(handler.canHandle({} as any)).resolves.toBe(false);
   });
 });
