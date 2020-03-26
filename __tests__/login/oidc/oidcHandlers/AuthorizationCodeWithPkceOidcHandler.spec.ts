@@ -54,7 +54,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       const session: ISolidSession = await authorizationCodeWithPkceOidcHandler.handle(
         oidcOptions
       );
-      expect(session.neededAction).toBe({
+      expect({ ...session.neededAction }).toMatchObject({
         actionType: "redirect",
         redirectUrl:
           "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global"
