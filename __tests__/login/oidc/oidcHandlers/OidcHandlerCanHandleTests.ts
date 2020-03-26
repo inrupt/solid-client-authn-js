@@ -1,24 +1,8 @@
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
-import URL from "url-parse";
+import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 
 // This will be fixed in another pull request
 /* eslint-disable @typescript-eslint/camelcase */
-
-const standardOidcOptions: IOidcOptions = {
-  issuer: new URL("https://example.com"),
-  dpop: true,
-  redirectUrl: new URL("https://app.example.com"),
-  // This will be fixed in a different pull request
-  issuerConfiguration: {
-    issuer: new URL("https://example.com"),
-    authorizationEndpoint: new URL("https://example.com/auth"),
-    tokenEndpoint: new URL("https://example.com/token"),
-    jwksUri: new URL("https://example.com/jwks"),
-    subjectTypesSupported: [],
-    claimsSupported: []
-  },
-  clientId: "coolApp"
-};
 
 const canHandleTests: {
   [key: string]: {
@@ -61,6 +45,50 @@ const canHandleTests: {
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
           grantTypesSupported: ["authorization_code", "device"]
+        }
+      }
+    },
+    {
+      message:
+        "shouldn't accept a configuration that does not include grant types",
+      shouldPass: false,
+      oidcOptions: standardOidcOptions
+    }
+  ],
+  authorizationCodeWithPkceOidcHandler: [
+    {
+      message:
+        "should accept a configuration with many grant types including authorization code",
+      shouldPass: true,
+      oidcOptions: {
+        ...standardOidcOptions,
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["authorization_code", "implicit", "device"]
+        }
+      }
+    },
+    {
+      message:
+        "should accept a configuration with only the authorization code grant type",
+      shouldPass: true,
+      oidcOptions: {
+        ...standardOidcOptions,
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["authorization_code"]
+        }
+      }
+    },
+    {
+      message:
+        "shouldn't accept a configuration that has many grant types not including authorization code",
+      shouldPass: false,
+      oidcOptions: {
+        ...standardOidcOptions,
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["implicit", "device"]
         }
       }
     },
