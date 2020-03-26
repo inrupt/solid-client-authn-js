@@ -9,7 +9,7 @@ describe("validateSchema", () => {
       }
     };
 
-    expect(validateSchema(schema, { foo: 42 })).toBe(true);
+    expect(() => validateSchema(schema, { foo: 42 })).not.toThrow();
   });
 
   it("should not throw an error if the given data matches the given schema", () => {
@@ -20,13 +20,11 @@ describe("validateSchema", () => {
       }
     };
 
-    expect(() =>
-      validateSchema(schema, { foo: 42 }, { throwError: true })
-    ).not.toThrow();
+    expect(() => validateSchema(schema, { foo: 42 })).not.toThrow();
   });
 
   it("should mark anything as valid when there is no schema to validate against", () => {
-    expect(validateSchema({}, {})).toBe(true);
+    expect(validateSchema({}, {})).not.toThrow();
   });
 
   it("should return false by default if the given data does not match the given schema", () => {
@@ -37,23 +35,7 @@ describe("validateSchema", () => {
       }
     };
 
-    expect(validateSchema(schema, { foo: "Not a number" })).toBe(false);
-  });
-
-  it("should return false when told not to throw errors if the given data does not match the given schema", () => {
-    const schema = {
-      type: "object",
-      properties: {
-        foo: { type: "number" }
-      }
-    };
-
-    expect(
-      validateSchema(schema, { foo: "Not a number" }, { throwError: false })
-    ).toBe(false);
-    expect(() =>
-      validateSchema(schema, { foo: "Not a number" }, { throwError: false })
-    ).not.toThrow();
+    expect(() => validateSchema(schema, { foo: "Not a number" })).toThrow();
   });
 
   it("should throw an error when told to if the given data does not match the given schema", () => {
@@ -64,9 +46,9 @@ describe("validateSchema", () => {
       }
     };
 
-    expect(() =>
-      validateSchema(schema, { foo: "Not a number" }, { throwError: true })
-    ).toThrowError("schema is invalid:\n.foo should be number");
+    expect(() => validateSchema(schema, { foo: "Not a number" })).toThrowError(
+      "schema is invalid:\n.foo should be number"
+    );
   });
 
   it("should log the failing schema's title if known", () => {
@@ -78,9 +60,9 @@ describe("validateSchema", () => {
       }
     };
 
-    expect(() =>
-      validateSchema(schema, { foo: "Not a number" }, { throwError: true })
-    ).toThrowError("Some schema is invalid:\n.foo should be number");
+    expect(() => validateSchema(schema, { foo: "Not a number" })).toThrowError(
+      "Some schema is invalid:\n.foo should be number"
+    );
   });
 
   describe("with our custom `typeof` keyword", () => {
@@ -92,7 +74,7 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(validateSchema(schema, { foo: 42 })).toBe(true);
+      expect(() => validateSchema(schema, { foo: 42 })).not.toThrow();
     });
 
     it("should not validate if the given type does not match the one mentioned in the schema", () => {
@@ -103,7 +85,7 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(validateSchema(schema, { foo: "Not a number" })).toBe(false);
+      expect(() => validateSchema(schema, { foo: "Not a number" })).toThrow();
     });
     it("should properly validate non-JSON types as well", () => {
       const schema = {
@@ -113,7 +95,7 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(validateSchema(schema, { foo: () => 1337 })).toBe(true);
+      expect(() => validateSchema(schema, { foo: () => 1337 })).not.toThrow();
     });
 
     it("should not validate if the given type does not match a requested non-JSON type", () => {
@@ -124,7 +106,7 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(validateSchema(schema, { foo: 42 })).toBe(false);
+      expect(() => validateSchema(schema, { foo: 42 })).toThrow();
     });
 
     it("should not validate if the given non-JSON type does not match the requested type", () => {
@@ -135,7 +117,9 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(validateSchema(schema, { foo: () => "A function" })).toBe(false);
+      expect(() =>
+        validateSchema(schema, { foo: () => "A function" })
+      ).toThrow();
     });
   });
 
@@ -158,11 +142,11 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(
+      expect(() =>
         validateSchema(schema, {
           foo: "not necessarily some words in this order"
         })
-      ).toBe(true);
+      ).not.toThrow();
     });
 
     it("should not validate if the checked string includes more than the given words", () => {
@@ -183,12 +167,12 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(
+      expect(() =>
         validateSchema(schema, {
           foo:
             "some words in this order but not necessarily with just those words "
         })
-      ).toBe(false);
+      ).toThrow();
     });
 
     // This test fails (i.e. a subset of the given words validates); not sure yet if it should:
@@ -210,7 +194,76 @@ describe("validateSchema", () => {
         }
       };
 
-      expect(validateSchema(schema, { foo: "some words" })).toBe(false);
+      expect(validateSchema(schema, { foo: "some words" })).toThrow();
+    });
+  });
+
+  describe("applying custom url conversion", () => {
+    it("converts urls in a simple object", () => {
+      const newObj = validateSchema(
+        {
+          type: "object",
+          properties: {
+            foo: { type: "string", shouldConvertToUrl: true }
+          }
+        },
+        {
+          foo: "https://cool.com/nice"
+        }
+      );
+      expect(newObj.foo.origin).toBe("https://cool.com");
+    });
+
+    it("converts urls in a complex object", () => {
+      const newObj = validateSchema(
+        {
+          type: "object",
+          properties: {
+            arr: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  url: { type: "string", shouldConvertToUrl: true }
+                }
+              }
+            }
+          }
+        },
+        {
+          arr: [
+            { url: "https://cool.com/nice" },
+            { url: "https://lame.com/mean" }
+          ]
+        }
+      );
+      expect(newObj.arr[0].url.origin).toBe("https://cool.com");
+      expect(newObj.arr[1].url.origin).toBe("https://lame.com");
+    });
+
+    it("is not tripped up by weird schema traversal", () => {
+      expect(() =>
+        validateSchema(
+          {
+            type: "object",
+            properties: {
+              arr: {
+                type: "array"
+              },
+              obj: {
+                type: "object"
+              }
+            }
+          },
+          {
+            arr: [1, "cool"],
+            obj: {
+              foo: "foo",
+              bar: "bar"
+            }
+          }
+        )
+      ).not.toThrowError();
     });
   });
 });
