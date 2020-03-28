@@ -51,7 +51,7 @@ describe("DpopHeaderCreator", () => {
           new URL("https://audience.com"),
           "post"
         )
-      ).resolves.toThrowError();
+      ).rejects.toThrowError();
     });
   });
 });
