@@ -56,9 +56,9 @@ describe("DpopAuthenticatedFetcher", () => {
   });
 
   describe("handle", () => {
-    it("should throw an error on a bad config", () => {
+    it("should throw an error on a bad config", async () => {
       const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
-      expect(
+      await expect(
         dpopAuthenticatedFetcher.handle(
           { type: "bad", localUserId: "global" },
           new URL("https://bad.com"),

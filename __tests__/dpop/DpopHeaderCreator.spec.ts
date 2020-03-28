@@ -46,7 +46,7 @@ describe("DpopHeaderCreator", () => {
       const dpopHeaderCreator = getDpopHeaderCreator({
         dpopClientKeyManager: dpopClientKeyManagerMock
       });
-      expect(
+      await expect(
         dpopHeaderCreator.createHeaderToken(
           new URL("https://audience.com"),
           "post"

@@ -48,7 +48,11 @@ export default class StorageUtility implements IStorageUtility {
     if (stored === null) {
       return {};
     }
-    return JSON.parse(stored);
+    try {
+      return JSON.parse(stored);
+    } catch (err) {
+      return {};
+    }
   }
 
   private async setUserData(
@@ -111,7 +115,8 @@ export default class StorageUtility implements IStorageUtility {
       try {
         const parsedObject = JSON.parse(locallyStored);
         if (options.schema) {
-          validateSchema(options.schema, parsedObject);
+          const val = validateSchema(options.schema, parsedObject);
+          return val;
         }
         return parsedObject;
       } catch (err) {
