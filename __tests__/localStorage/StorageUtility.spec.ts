@@ -1,111 +1,271 @@
-jest.mock("../../src/util/validateSchema");
-
 // Required by TSyringe:
 import "reflect-metadata";
-import { StorageMock } from "../../src/authenticator/__mocks__/Storage";
-import StorageRetriever from "../../src/util/StorageRetriever";
+import { StorageMock } from "../../src/localStorage/__mocks__/Storage";
+import StorageUtility from "../../src/localStorage/StorageUtility";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
-describe("StorageRetriever", () => {
-  const mockStorage = StorageMock;
+describe("StorageUtility", () => {
+  const defaultMocks = {
+    storage: StorageMock
+  };
+  function getStorageUtility(
+    mocks: Partial<typeof defaultMocks> = defaultMocks
+  ): StorageUtility {
+    return new StorageUtility(mocks.storage ?? defaultMocks.storage);
+  }
 
-  it("should correctly retrieve valid data from the given storage", async () => {
-    mockStorage.get.mockReturnValueOnce(
-      Promise.resolve(JSON.stringify({ some: "data" }))
-    );
-    const retriever = new StorageRetriever(mockStorage);
+  describe("get", () => {
+    it("gets an item from storage", async () => {
+      const storageMock = defaultMocks.storage;
+      storageMock.get.mockReturnValueOnce(Promise.resolve("cool"));
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.get("key");
+      expect(storageMock.get).toHaveBeenCalledWith("key");
+      expect(value).toBe("cool");
+    });
 
-    await expect(retriever.retrieve("arbitrary key")).resolves.toEqual({
-      some: "data"
+    it("returns null if the item is not in storage", async () => {
+      const storageMock = defaultMocks.storage;
+      storageMock.get.mockReturnValueOnce(Promise.resolve(null));
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.get("key");
+      expect(storageMock.get).toHaveBeenCalledWith("key");
+      expect(value).toBeNull();
     });
   });
 
-  it("should fetch data using the given key", async () => {
-    const retriever = new StorageRetriever(mockStorage);
-
-    await retriever.retrieve("some key");
-
-    expect(mockStorage.get.mock.calls).toEqual([["some key"]]);
-  });
-
-  it("should return null if data could not be found in the given storage", async () => {
-    // @ts-ignore: Ignore because this mock function should be able to return null
-    mockStorage.get.mockReturnValueOnce(Promise.resolve(null));
-    const retriever = new StorageRetriever(mockStorage);
-
-    const retrieved = await retriever.retrieve("arbitrary key");
-
-    expect(retrieved).toBeNull();
-  });
-
-  it("should validate the data from the storage if passed a schema", async () => {
-    const validateSchema: jest.Mock = jest.requireMock(
-      "../../src/util/validateSchema"
-    ).default;
-    mockStorage.get.mockReturnValueOnce(
-      Promise.resolve(JSON.stringify({ some: "data" }))
-    );
-    const retriever = new StorageRetriever(mockStorage);
-
-    await retriever.retrieve("arbitrary key", { schema: { some: "schema" } });
-
-    expect(validateSchema.mock.calls.length).toBe(1);
-    expect(validateSchema.mock.calls[0][0]).toEqual({ some: "schema" });
-    expect(validateSchema.mock.calls[0][1]).toEqual({ some: "data" });
-  });
-
-  it("should not validate the data from the storage if not passed a schema", async () => {
-    const validateSchema: jest.Mock = jest.requireMock(
-      "../../src/util/validateSchema"
-    ).default;
-    const retriever = new StorageRetriever(mockStorage);
-
-    await retriever.retrieve("arbitrary key");
-
-    expect(validateSchema.mock.calls.length).toBe(0);
-  });
-
-  it("should delete data from the storage if it does not pass validation", async () => {
-    const validateSchema: jest.Mock = jest.requireMock(
-      "../../src/util/validateSchema"
-    ).default;
-    validateSchema.mockImplementationOnce(() => {
-      throw new Error("Arbitrary error");
+  describe("set", () => {
+    it("sets an item in storage", async () => {
+      const storageUtility = getStorageUtility();
+      const value = await storageUtility.set("key", "value");
+      expect(defaultMocks.storage.set).toHaveBeenCalledWith("key", "value");
     });
-    const retriever = new StorageRetriever(mockStorage);
+  });
 
-    const retrieved = await retriever.retrieve("some key", {
-      schema: { arbitrary: "schema" }
+  describe("delete", () => {
+    it("deletes an item", async () => {
+      const storageUtility = getStorageUtility();
+      const value = await storageUtility.delete("key");
+      expect(defaultMocks.storage.delete).toHaveBeenCalledWith("key");
+    });
+  });
+
+  describe("getForUser", () => {
+    it("gets an item from storage for a user", async () => {
+      const storageMock = defaultMocks.storage;
+      const userData = {
+        jackie: "The Cat",
+        sledge: "The Dog"
+      };
+      storageMock.get.mockReturnValueOnce(
+        Promise.resolve(JSON.stringify(userData))
+      );
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.getForUser("animals", "jackie");
+      expect(storageMock.get).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals"
+      );
+      expect(value).toBe("The Cat");
     });
 
-    expect(mockStorage.delete.mock.calls).toEqual([["some key"]]);
-    expect(retrieved).toBeNull();
-  });
-
-  it("should run a postprocessor on the retrieved data if given", async () => {
-    mockStorage.get.mockReturnValueOnce(
-      Promise.resolve(JSON.stringify({ some: "data" }))
-    );
-    const retriever = new StorageRetriever(mockStorage);
-    const postProcessor = jest.fn(() => "postprocessed data");
-
-    const retrieved = await retriever.retrieve("arbitrary key", {
-      postProcess: postProcessor
+    it("returns null if no item is in storage", async () => {
+      const storageMock = defaultMocks.storage;
+      storageMock.get.mockReturnValueOnce(Promise.resolve(null));
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.getForUser("animals", "jackie");
+      expect(storageMock.get).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals"
+      );
+      expect(value).toBeNull();
     });
 
-    expect(postProcessor.mock.calls).toEqual([[{ some: "data" }]]);
-    expect(retrieved).toBe("postprocessed data");
+    it("returns null if the item in storage is corrupted", async () => {
+      const storageMock = defaultMocks.storage;
+      const userData = {
+        jackie: "The Cat",
+        sledge: "The Dog"
+      };
+      storageMock.get.mockReturnValueOnce(
+        Promise.resolve('{ cool: "bleep bloop not parsable')
+      );
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.getForUser("animals", "jackie");
+      expect(storageMock.get).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals"
+      );
+      expect(value).toBe(null);
+    });
   });
 
-  it("should not run a given postprocessor if the data could not be found", async () => {
-    // @ts-ignore: Ignore because this mock function should be able to return null
-    mockStorage.get.mockReturnValueOnce(Promise.resolve(null));
-    const retriever = new StorageRetriever(mockStorage);
-    const postProcessor = jest.fn();
+  describe("setForUser", () => {
+    it("sets a value for a user", async () => {
+      const storageMock = defaultMocks.storage;
+      const userData = {
+        jackie: "The Cat",
+        sledge: "The Dog"
+      };
+      storageMock.get.mockReturnValueOnce(
+        Promise.resolve(JSON.stringify(userData))
+      );
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.setForUser(
+        "animals",
+        "jackie",
+        "The Pretty Kitty"
+      );
+      expect(storageMock.get).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals"
+      );
+      expect(storageMock.set).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals",
+        JSON.stringify({
+          jackie: "The Pretty Kitty",
+          sledge: "The Dog"
+        })
+      );
+    });
 
-    await retriever.retrieve("arbitrary key", { postProcess: postProcessor });
+    it("sets a value for a user if the original data was corrupted", async () => {
+      const storageMock = defaultMocks.storage;
+      storageMock.get.mockReturnValueOnce(
+        Promise.resolve('{ cool: "bleep bloop not parsable')
+      );
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.setForUser(
+        "animals",
+        "jackie",
+        "The Pretty Kitty"
+      );
+      expect(storageMock.get).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals"
+      );
+      expect(storageMock.set).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals",
+        JSON.stringify({
+          jackie: "The Pretty Kitty"
+        })
+      );
+    });
+  });
 
-    expect(postProcessor.mock.calls).toEqual([]);
+  describe("deleteForUser", () => {
+    it("deletes a value for a user", async () => {
+      const storageMock = defaultMocks.storage;
+      const userData = {
+        jackie: "The Cat",
+        sledge: "The Dog"
+      };
+      storageMock.get.mockReturnValueOnce(
+        Promise.resolve(JSON.stringify(userData))
+      );
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.deleteForUser("animals", "jackie");
+      expect(storageMock.get).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals"
+      );
+      expect(storageMock.set).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals",
+        JSON.stringify({
+          sledge: "The Dog"
+        })
+      );
+    });
+  });
+
+  describe("deleteAllUserData", () => {
+    it("deletes all data for a particular user", async () => {
+      const storageMock = defaultMocks.storage;
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      const value = await storageUtility.deleteAllUserData("animals");
+      expect(storageMock.delete).toHaveBeenCalledWith(
+        "solidAuthFetcherUser:animals"
+      );
+    });
+  });
+
+  describe("safeGet", () => {
+    it("should correctly retrieve valid data from the given storage", async () => {
+      defaultMocks.storage.get.mockReturnValueOnce(
+        Promise.resolve(JSON.stringify({ some: "data" }))
+      );
+      const storageUtility = getStorageUtility();
+      await expect(storageUtility.safeGet("key")).resolves.toEqual({
+        some: "data"
+      });
+    });
+
+    it("should fetch data using the given key", async () => {
+      const storageUtility = getStorageUtility();
+      await storageUtility.safeGet("some key");
+      expect(defaultMocks.storage.get.mock.calls).toEqual([["some key"]]);
+    });
+
+    it("should return null if data could not be found in the given storage", async () => {
+      defaultMocks.storage.get.mockReturnValueOnce(Promise.resolve(null));
+      const storageUtility = getStorageUtility();
+      const retrieved = await storageUtility.safeGet("arbitrary key");
+      expect(retrieved).toBeNull();
+    });
+
+    it("should validate the data from the storage if passed a schema", async () => {
+      defaultMocks.storage.get.mockReturnValueOnce(
+        Promise.resolve(JSON.stringify({ some: "data" }))
+      );
+      const schema = {
+        type: "object",
+        properties: {
+          some: { type: "string" }
+        }
+      };
+      const storageUtility = getStorageUtility();
+      expect(
+        await storageUtility.safeGet("arbitrary key", {
+          schema
+        })
+      ).toMatchObject({ some: "data" });
+    });
+
+    it("should invalidate bad data from the storage if passed a schema and remove it from stroage", async () => {
+      defaultMocks.storage.get.mockReturnValueOnce(
+        Promise.resolve(JSON.stringify({ some: 1 }))
+      );
+      const schema = {
+        type: "object",
+        properties: {
+          some: { type: "string" }
+        }
+      };
+      const storageUtility = getStorageUtility();
+      expect(
+        await storageUtility.safeGet("arbitrary key", {
+          schema
+        })
+      ).toBeNull();
+      expect(defaultMocks.storage.delete).toHaveBeenCalledWith("arbitrary key");
+    });
+
+    it("gets an item for a user if a user id is passed in", async () => {
+      defaultMocks.storage.get.mockReturnValueOnce(
+        Promise.resolve(JSON.stringify({ key: '{ "some": "data" }' }))
+      );
+      const storageUtility = getStorageUtility();
+      await expect(
+        storageUtility.safeGet("key", { userId: "global" })
+      ).resolves.toMatchObject({ some: "data" });
+    });
+
+    it("should reject and delete for corrupted user specific values", async () => {
+      defaultMocks.storage.get.mockReturnValueOnce(
+        Promise.resolve(
+          JSON.stringify({
+            key: '{ "some": "notice this does not have a closing quote }'
+          })
+        )
+      );
+      const storageUtility = getStorageUtility();
+      const val = await storageUtility.safeGet("key", { userId: "global" });
+      expect(val).toBeNull();
+    });
   });
 });
