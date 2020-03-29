@@ -10,5 +10,5 @@ export default interface ISolidSession {
   state?: string;
   neededAction?: INeededAction;
   logout: () => Promise<void>;
-  fetch: (url: RequestInfo, init: RequestInit) => Promise<Response>;
+  fetch: (url: RequestInfo, init?: RequestInit) => Promise<Response>;
 }

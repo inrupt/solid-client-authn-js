@@ -40,7 +40,7 @@ export default class SessionCreator implements ISessionCreator {
         // TODO: handle if webid isn't here
         return this.logoutHandler.handle(localUserId);
       },
-      fetch: (url: RequestInfo, init: RequestInit): Promise<Response> => {
+      fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> => {
         // TODO: handle if webid isn't here
         return this.authenticatedFetcher.handle(
           {
