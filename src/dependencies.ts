@@ -50,6 +50,9 @@ import SessionCreator, { ISessionCreator } from "./solidSession/SessionCreator";
 import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./localStorage/BrowserStorage";
+import TokenSaver, {
+  ITokenSaver
+} from "./login/oidc/redirectHandler/TokenSaver";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -136,6 +139,9 @@ container.register<IRedirectHandler>("redirectHandlers", {
 });
 container.register<IRedirectHandler>("redirectHandlers", {
   useClass: GeneralRedirectHandler
+});
+container.register<ITokenSaver>("tokenSaver", {
+  useClass: TokenSaver
 });
 
 // Login/OIDC/Issuer
