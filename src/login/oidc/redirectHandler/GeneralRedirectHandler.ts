@@ -3,18 +3,11 @@ import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
-import IJoseUtility from "../../../jose/IJoseUtility";
-import { IStorageUtility } from "../../../localStorage/StorageUtility";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
-import INeededInactionAction from "../../../solidSession/INeededInactionAction";
+import { ITokenSaver } from "./TokenSaver";
 
 @injectable()
 export default class GeneralRedirectHandler implements IRedirectHandler {
-  constructor(
-    @inject("joseUtility") private joseUtility: IJoseUtility,
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
-  ) {}
+  constructor(@inject("tokenServer") private tokenServer: ITokenSaver) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
     const url = new URL(redirectUrl, true);
@@ -25,34 +18,11 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
       throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
     }
     const url = new URL(redirectUrl, true);
-    const decoded = await this.joseUtility.decodeJWT(
-      url.query.id_token as string
+
+    return this.tokenServer.saveTokenAndGetSession(
+      url.query.state as string,
+      url.query.id_token as string,
+      url.query.access_token
     );
-    // TODO validate decoded token
-    // TODO extract the localUserId from state and put it in the session
-    const session = this.sessionCreator.create({
-      webId: decoded.sub as string,
-      neededAction: {
-        actionType: "inaction"
-      } as INeededInactionAction
-    });
-    await Promise.all([
-      this.storageUtility.setForUser(
-        session.localUserId,
-        "accessToken",
-        url.query.access_token as string
-      ),
-      this.storageUtility.setForUser(
-        session.localUserId,
-        "idToken",
-        url.query.id_token as string
-      ),
-      this.storageUtility.setForUser(
-        session.localUserId,
-        "webId",
-        decoded.sub as string
-      )
-    ]);
-    return session;
   }
 }

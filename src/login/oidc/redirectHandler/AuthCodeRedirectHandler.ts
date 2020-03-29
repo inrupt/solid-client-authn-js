@@ -4,25 +4,22 @@ import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
 import { IIssuerConfigFetcher } from "../IssuerConfigFetcher";
 import IIssuerConfig from "../IIssuerConfig";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import IJoseUtility from "../../../jose/IJoseUtility";
-import INeededInactionAction from "../../../solidSession/INeededInactionAction";
 import formurlencoded from "form-urlencoded";
+import { ITokenSaver } from "./TokenSaver";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("fetcher") private fetcher: IFetcher,
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("joseUtility") private joseUtility: IJoseUtility
+    @inject("tokenSaver") private tokenSaver: ITokenSaver
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -73,37 +70,10 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       })
     ).json();
 
-    /**
-     * TODO: This code will be repeated in other places. Should be factored out
-     */
-    const decoded = await this.joseUtility.decodeJWT(
-      // TODO this should actually be the id_vc of the token
-      tokenResponse.access_token as string
-    );
-    // TODO validate decoded token
-    // TODO extract the localUserId from state and put it in the session
-    const session = this.sessionCreator.create({
+    return await this.tokenSaver.saveTokenAndGetSession(
       localUserId,
-      webId: decoded.sub as string,
-      neededAction: {
-        actionType: "inaction"
-      } as INeededInactionAction
-    });
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "accessToken",
-      url.query.access_token as string
+      tokenResponse.id_token,
+      tokenResponse.access_token
     );
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "idToken",
-      url.query.id_token as string
-    );
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "webId",
-      decoded.sub as string
-    );
-    return session;
   }
 }
