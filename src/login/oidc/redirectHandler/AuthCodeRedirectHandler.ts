@@ -70,6 +70,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       })
     ).json();
 
+    // TODO: should handle error if the token response is something strange
+
     return await this.tokenSaver.saveTokenAndGetSession(
       localUserId,
       tokenResponse.id_token,

@@ -39,14 +39,14 @@ export default class AuthFetcher {
   }
 
   async login(options: ILoginInputOptions): Promise<ISolidSession> {
-    return this.loginHelper(options, "global");
+    return this.loginHelper(options, this.globalUserName);
   }
 
-  async fetch(url: RequestInfo, init: RequestInit): Promise<Response> {
+  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
     return this.authenticatedFetcher.handle(
       // TODO: generate request credentials separately
       {
-        localUserId: "global",
+        localUserId: this.globalUserName,
         type: "dpop"
       },
       url,
@@ -59,7 +59,7 @@ export default class AuthFetcher {
   }
 
   async getSession(): Promise<ISolidSession | null> {
-    return this.sessionCreator.getSession("global");
+    return this.sessionCreator.getSession(this.globalUserName);
   }
 
   async uniqueLogin(options: ILoginInputOptions): Promise<ISolidSession> {

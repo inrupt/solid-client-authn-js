@@ -1,7 +1,7 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
-import { MockIssuerConfigFetcher } from "../../../src/login/oidc/__mocks__/IIssuerConfigFetcher";
+import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import IOidcHandler from "../../../src/login/oidc/IOidcHandler";
 import URL from "url-parse";
@@ -13,7 +13,7 @@ import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClient
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
     oidcHandler: OidcHandlerMock,
-    issuerConfigFetcher: MockIssuerConfigFetcher,
+    issuerConfigFetcher: IssuerConfigFetcherMock,
     dpopClientKeyManager: DpopClientKeyManagerMock,
     storageUtility: StorageUtilityMock
   };
