@@ -11,7 +11,7 @@ import IRequestCredentials from "./IRequestCredentials";
 @injectable()
 export default class AggregateAuthenticatedFetcher
   extends AggregateHandler<
-    [IRequestCredentials, RequestInfo, RequestInit],
+    [IRequestCredentials, RequestInfo, RequestInit?],
     Response
   >
   implements IAuthenticatedFetcher {

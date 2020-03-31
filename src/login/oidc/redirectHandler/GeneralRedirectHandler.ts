@@ -7,11 +7,16 @@ import { ITokenSaver } from "./TokenSaver";
 
 @injectable()
 export default class GeneralRedirectHandler implements IRedirectHandler {
-  constructor(@inject("tokenServer") private tokenServer: ITokenSaver) {}
+  constructor(@inject("tokenSaver") private tokenSaver: ITokenSaver) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
     const url = new URL(redirectUrl, true);
-    return !!(url.query && url.query.id_token && url.query.access_token);
+    return !!(
+      url.query &&
+      url.query.id_token &&
+      url.query.access_token &&
+      url.query.state
+    );
   }
   async handle(redirectUrl: string): Promise<ISolidSession> {
     if (!(await this.canHandle(redirectUrl))) {
@@ -19,7 +24,7 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
     }
     const url = new URL(redirectUrl, true);
 
-    return this.tokenServer.saveTokenAndGetSession(
+    return this.tokenSaver.saveTokenAndGetSession(
       url.query.state as string,
       url.query.id_token as string,
       url.query.access_token

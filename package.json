@@ -23,7 +23,7 @@
     "dev-ios": "concurrently \"npm run dev\" \"npm run dev-test-helper\" \"cd examples/native && npm run dev-ios\"",
     "dev-android": "concurrently \"npm run dev\" \"npm run dev-test-helper\" \"cd examples/native && npm run dev-android\"",
     "dev-test-helper": "cd examples/test-helper && npm run dev",
-    "test": "npm run lint && npm run test-unit && npm run test-acceptance",
+    "test": "npm run lint && npm run test-unit",
     "test-unit": "jest --coverage --verbose",
     "test-acceptance": "npm run test-acceptance-server && npm run test-acceptance-script && npm run test-acceptance-bundle && npm run test-acceptance-ios && npm run test-acceptance-android",
     "test-acceptance-server": "",

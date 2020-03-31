@@ -27,7 +27,7 @@ export default class OidcLoginHandler implements ILoginHandler {
   ) {}
 
   checkOptions(options: ILoginOptions): Error | null {
-    if (!options.oidcIssuer || !options.clientId) {
+    if (!options.oidcIssuer || !options.clientId || !options.redirect) {
       return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
     }
     return null;
@@ -52,7 +52,6 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
-      // TODO: fix this
       issuer: options.oidcIssuer as URL,
       // TODO: differentiate if DPoP should be true
       dpop: true,

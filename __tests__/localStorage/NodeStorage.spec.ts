@@ -3,7 +3,7 @@ import NodeStorage from "../../src/localStorage/NodeStorage";
 describe("NodeStorage", () => {
   const nodeStorage = new NodeStorage();
   it("can set an item", async () => {
-    expect(nodeStorage.set("a", "A")).rejects.not.toBeNull();
+    expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
   });
   it("can get an item", async () => {
     expect(await nodeStorage.get("a")).toEqual("A");
