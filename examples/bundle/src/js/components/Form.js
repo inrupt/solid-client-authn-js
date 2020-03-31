@@ -32,7 +32,6 @@ class Form extends Component {
       } else {
         const session = await handleRedirect(window.location.href);
         this.setState({ status: "dashboard", session });
-        console.log(new URL(window.location.href).origin);
         window.location.replace(new URL(window.location.href).origin);
       }
     } else {
