@@ -1,6 +1,6 @@
 # Solid Auth Fetcher
 
-A client tool to login and make authenticated requests to Solid compliant servers.
+A client tool for logging into Solid Pods, and for making authenticated (if necessary) requests to data in Pods.
 
 ## Installation
 
@@ -60,6 +60,24 @@ solidAuthFetcher.getSession().then((session) => {
 })
 ```
 
+### Two options for logging into a Solid Pod
+
+In general, we can use two very distinct options to log into a Solid Pod:
+
+1) By specifying the IRI of the Identity Provider (IdP) initially choosen
+to create the Solid identity. If using a user interface, perhaps the user
+is presented with a pre-populated selection of well-known providers (e.g.
+possibly a collection of buttons, or provider icons (e.g. to login using
+Google, Facebook, etc.), or a drop-down listbox of providers, etc.).
+Regardless of how the IRI of the IdP is chosen, it needs to be passed
+into the `login()` function using the `oidcIssuer` field.
+
+2) By specifying the WebID (which is an IRI). In this case, the WebID needs
+to be passed into the `login()` function using the `webId` option.
+In this case we'll attempt to retrieve a profile document from that WebID
+IRI, and we'll expect to find the `oidcIssuser` value we need to perform
+the actual login from within that profile document.
+
 ### For Use in the Web Browser
 
 Let's first see how we can initiate a login.
@@ -67,25 +85,26 @@ Let's first see how we can initiate a login.
 ```typescript
 import { login, getSession } from 'solid-auth-fetcher'
 
-// Get User will return a user object, or nothing if no user is logged in.
+// This will return a session object, or nothing if no user is logged in.
 const session = await getSession()
 if (!session) {
   login({
-    // You could provide either a "webId" field, or an "oidcIssuer" field if
+    // You can provide either a "webId" field, or an "oidcIssuer" field if
     // you know who the user's OIDC issuer is. If neither are provided, a
-    // pop-up will ask the user to provide one. If it is running on the server
-    // the popup parameter will be ingored.
+    // pop-up will ask the user to provide one. If running on a server the
+    // popup parameter will be ignored.
     oidcIssuer: 'https://example.com/profile/card#me', 
 
     // Note that when 'popUp' is false, the browser will redirect the
-    // current page thus stopping the current flow (default is false).
+    // current page, thus stopping the current flow (default is false).
     popUp: false,
     
-    // The page that that should be queried once login is complete
+    // The page that should be redirected to once login is complete.
     redirectUrl: 'https://mysite.com/redirect',
     
-    // TEMPORARY: The registered Id for your client. The only reason this is
-    // here is that some solid servers are not spec compliant and require it.
+    // TEMPORARY: The registered ID for your client. The only reason this is
+    // here is that some Solid servers are not spec-compliant, and they
+    // may require this value.
     clientId: 'coolClient'
   })
 }
