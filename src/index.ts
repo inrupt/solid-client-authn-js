@@ -1,4 +1,3 @@
-import { RequestInfo, RequestInit, Response } from "node-fetch";
 import ISolidSession from "./solidSession/ISolidSession";
 import ILoginInputOptions from "./ILoginInputOptions";
 import AuthFetcher from "./AuthFetcher";
@@ -6,6 +5,7 @@ import getAuthFetcherWithDependencies from "./dependencies";
 import IStorage from "./localStorage/IStorage";
 
 const authFetcher = getAuthFetcherWithDependencies({});
+authFetcher.automaticallyHandleRedirect();
 
 export async function login(
   options: ILoginInputOptions
@@ -46,6 +46,8 @@ export async function handleRedirect(url: string): Promise<ISolidSession> {
   return authFetcher.handleRedirect(url);
 }
 
-export function customAuthFetcher(options: { storage: IStorage }): AuthFetcher {
+export function customAuthFetcher(options: {
+  storage?: IStorage;
+}): AuthFetcher {
   return getAuthFetcherWithDependencies({ storage: options.storage });
 }

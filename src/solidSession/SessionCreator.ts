@@ -2,7 +2,6 @@ import { inject, injectable } from "tsyringe";
 import INeededAction from "./INeededAction";
 import ISolidSession from "./ISolidSession";
 import { IUuidGenerator } from "../util/UuidGenerator";
-import { RequestInfo, RequestInit, Response } from "node-fetch";
 import IAuthenticatedFetcher from "../authenticatedFetch/IAuthenticatedFetcher";
 import ILogoutHandler from "../logout/ILogoutHandler";
 import { IStorageUtility } from "../localStorage/StorageUtility";

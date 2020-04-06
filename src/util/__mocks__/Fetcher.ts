@@ -1,4 +1,3 @@
-import { Response } from "node-fetch";
 import { IFetcher } from "../Fetcher";
 
 export const FetcherMockResponse: Response = new Response(

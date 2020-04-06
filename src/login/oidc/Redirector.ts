@@ -2,9 +2,10 @@ import { inject, injectable } from "tsyringe";
 import INeededAction from "../../solidSession/INeededAction";
 import INeededInactionAction from "../../solidSession/INeededInactionAction";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
+import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
 
 export interface IRedirector {
-  redirect(): INeededAction;
+  redirect(redirectUrl: string): INeededAction;
 }
 
 @injectable()
@@ -14,9 +15,19 @@ export default class Redirector implements IRedirector {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  redirect(): INeededAction {
-    return {
-      actionType: "inaction"
-    } as INeededInactionAction;
+  redirect(redirectUrl: string): INeededAction {
+    if (this.environmentDetector.detect() === "browser") {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      window.location.href = redirectUrl;
+      return {
+        actionType: "inaction"
+      } as INeededInactionAction;
+    } else {
+      return {
+        actionType: "redirect",
+        redirectUrl
+      } as INeededRedirectAction;
+    }
   }
 }

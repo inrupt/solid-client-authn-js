@@ -1,4 +1,3 @@
-import { RequestInfo, RequestInit, Response } from "node-fetch";
 import ISolidSession from "./solidSession/ISolidSession";
 import ILoginInputOptions, {
   loginInputOptionsSchema
@@ -11,6 +10,7 @@ import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import ILogoutHandler from "./logout/ILogoutHandler";
 import { ISessionCreator } from "./solidSession/SessionCreator";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
+import { IEnvironmentDetector } from "./util/EnvironmentDetector";
 
 @injectable()
 export default class AuthFetcher {
@@ -21,7 +21,9 @@ export default class AuthFetcher {
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionCreator") private sessionCreator: ISessionCreator,
     @inject("authenticatedFetcher")
-    private authenticatedFetcher: IAuthenticatedFetcher
+    private authenticatedFetcher: IAuthenticatedFetcher,
+    @inject("environmentDetector")
+    private environmentDetector: IEnvironmentDetector
   ) {}
 
   private async loginHelper(
@@ -76,6 +78,14 @@ export default class AuthFetcher {
 
   async handleRedirect(url: string): Promise<ISolidSession> {
     return this.redirectHandler.handle(url);
+  }
+
+  async automaticallyHandleRedirect(): Promise<void> {
+    if (this.environmentDetector.detect() === "browser") {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      await this.handleRedirect(window.location.href);
+    }
   }
 
   customAuthFetcher(options: {}): unknown {

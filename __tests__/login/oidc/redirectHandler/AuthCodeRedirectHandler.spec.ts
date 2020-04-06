@@ -14,7 +14,6 @@ import {
   DpopHeaderCreatorResponse
 } from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
-import { Response } from "node-fetch";
 
 describe("AuthCodeRedirectHandler", () => {
   const defaultMocks = {

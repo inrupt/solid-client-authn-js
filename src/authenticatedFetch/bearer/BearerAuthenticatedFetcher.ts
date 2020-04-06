@@ -2,7 +2,6 @@
  * Responsible for sending fetch requests given a token that is not DPoP compatible
  */
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
-import { RequestInit, Response, RequestInfo } from "node-fetch";
 import IRequestCredentials from "../IRequestCredentials";
 import NotImplementedError from "../../errors/NotImplementedError";
 

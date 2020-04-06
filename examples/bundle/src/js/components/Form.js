@@ -15,6 +15,7 @@ class Form extends Component {
     this.state = {
       status: "loading",
       loginIssuer: "http://localhost:8080/",
+      fetchRoute: "http://localhost:10100",
       fetchBody: "",
       session: null
     };
@@ -39,13 +40,14 @@ class Form extends Component {
     }
   }
 
-  async handleLogin(e) {
+  async handleLogin(e, isPopup = false) {
     e.preventDefault();
     this.setState({ status: "loading" });
     const session = await login({
       clientId: "coolApp",
       redirect: "http://localhost:3001/",
-      oidcIssuer: this.state.loginIssuer
+      oidcIssuer: this.state.loginIssuer,
+      popUp: isPopup
     });
     if (
       session.neededAction &&
@@ -65,9 +67,7 @@ class Form extends Component {
   async handleFetch(e) {
     e.preventDefault();
     this.setState({ status: "loading", fetchBody: "" });
-    const response = await (
-      await fetch("http://localhost:9001/storage", {})
-    ).text();
+    const response = await (await fetch(this.state.fetchRoute, {})).text();
     this.setState({ status: "dashboard", fetchBody: response });
   }
 
@@ -85,6 +85,9 @@ class Form extends Component {
               onChange={e => this.setState({ loginIssuer: e.target.value })}
             />
             <button onClick={this.handleLogin}>Log In</button>
+            <button onClick={e => this.handleLogin(e, true)}>
+              Log In with Popup
+            </button>
           </form>
         );
       case "dashboard":
@@ -93,6 +96,11 @@ class Form extends Component {
             <h1>Solid Auth Fetcher Demo Dashboad</h1>
             <p>WebId: {this.state.session.webId}</p>
             <form>
+              <input
+                type="text"
+                value={this.state.fetchRoute}
+                onChange={e => this.setState({ fetchRoute: e.target.value })}
+              />
               <button onClick={this.handleFetch}>Fetch</button>
               <pre>{this.state.fetchBody}</pre>
             </form>

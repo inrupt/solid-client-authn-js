@@ -1,6 +1,5 @@
 import { ISessionCreator, ISessionCreatorOptions } from "../SessionCreator";
 import ISolidSession from "../ISolidSession";
-import { RequestInfo, RequestInit, Response } from "node-fetch";
 
 export const SessionCreatorCreateResponse: ISolidSession = {
   localUserId: "global",

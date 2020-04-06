@@ -1,4 +1,3 @@
-import { RequestInfo, RequestInit, Response } from "node-fetch";
 import INeededAction from "./INeededAction";
 
 /**
