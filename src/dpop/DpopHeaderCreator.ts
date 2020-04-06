@@ -35,6 +35,7 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
 
     return this.joseUtility.signJWT(
       {
+        // TODO: should add a slash at the end if none is present
         htu: audience.toString(),
         htm: method,
         jti: this.uuidGenerator.v4()

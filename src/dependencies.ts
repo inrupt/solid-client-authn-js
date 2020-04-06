@@ -55,6 +55,8 @@ import TokenSaver, {
 } from "./login/oidc/redirectHandler/TokenSaver";
 import Redirector, { IRedirector } from "./login/oidc/Redirector";
 import InactionRedirectHandler from "./login/oidc/redirectHandler/InactionRedirectHandler";
+import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
+import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -103,6 +105,16 @@ container.register<ILoginHandler>("loginHandler", {
   useClass: AggregateLoginHandler
 });
 container.register<ILoginHandler>("loginHandlers", {
+  useClass: PopUpLoginHandler
+});
+container.register<ILoginHandler>("loginHandlers", {
+  useClass: OidcLoginHandler
+});
+
+container.register<ILoginHandler>("postPopUpLoginHandler", {
+  useClass: AggregatePostPopUpLoginHandler
+});
+container.register<ILoginHandler>("postPopUpLoginHandlers", {
   useClass: OidcLoginHandler
 });
 
