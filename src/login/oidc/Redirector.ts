@@ -4,8 +4,15 @@ import INeededInactionAction from "../../solidSession/INeededInactionAction";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
 
+export interface IRedirectorOptions {
+  doNotAutoRedirect?: boolean;
+}
+
 export interface IRedirector {
-  redirect(redirectUrl: string): INeededAction;
+  redirect(
+    redirectUrl: string,
+    redirectorOptions: IRedirectorOptions
+  ): INeededAction;
 }
 
 @injectable()
@@ -15,10 +22,11 @@ export default class Redirector implements IRedirector {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  redirect(redirectUrl: string): INeededAction {
-    if (this.environmentDetector.detect() === "browser") {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore
+  redirect(redirectUrl: string, options?: IRedirectorOptions): INeededAction {
+    if (
+      this.environmentDetector.detect() === "browser" &&
+      !options?.doNotAutoRedirect
+    ) {
       window.location.href = redirectUrl;
       return {
         actionType: "inaction"

@@ -59,7 +59,8 @@ export default class OidcLoginHandler implements ILoginHandler {
       redirectUrl: options.redirect,
       issuerConfiguration: issuerConfig,
       clientId: options.clientId as string,
-      localUserId: options.localUserId
+      localUserId: options.localUserId,
+      doNotAutoRedirect: options.doNotAutoRedirect
     };
 
     // Generate DPoP Key if needed

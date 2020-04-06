@@ -15,7 +15,7 @@ class Form extends Component {
     this.state = {
       status: "loading",
       loginIssuer: "http://localhost:8080/",
-      fetchRoute: "http://localhost:10100",
+      fetchRoute: "http://localhost:10100/",
       fetchBody: "",
       session: null
     };
@@ -47,7 +47,8 @@ class Form extends Component {
       clientId: "coolApp",
       redirect: "http://localhost:3001/",
       oidcIssuer: this.state.loginIssuer,
-      popUp: isPopup
+      popUp: isPopup,
+      popUpRedirect: "/popup"
     });
     if (
       session.neededAction &&
@@ -72,6 +73,10 @@ class Form extends Component {
   }
 
   render() {
+    if (window.location.pathname === "/popup") {
+      console.log("popup");
+      return;
+    }
     switch (this.state.status) {
       case "loading":
         return <h1>Loading</h1>;

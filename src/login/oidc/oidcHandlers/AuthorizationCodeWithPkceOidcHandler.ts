@@ -55,7 +55,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
     requestUrl.set("query", query);
 
     // TODO: This is inefficent, there should be a bulk
-    console.log("SETTING MY GUYS");
     await this.storageUtility.setForUser(
       session.localUserId,
       "codeVerifier",
@@ -77,7 +76,9 @@ export default class AuthorizationCodeWithPkceOidcHandler
       oidcLoginOptions.redirectUrl.toString()
     );
 
-    session.neededAction = this.redirector.redirect(requestUrl.toString());
+    session.neededAction = this.redirector.redirect(requestUrl.toString(), {
+      doNotAutoRedirect: !!oidcLoginOptions.doNotAutoRedirect
+    });
 
     return session;
   }

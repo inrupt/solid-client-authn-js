@@ -7,7 +7,6 @@ export default class BrowserStorage implements IStorage {
     return window.localStorage.getItem(key);
   }
   async set(key: string, value: string): Promise<void> {
-    console.log("SETTING STORAGE");
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     window.localStorage.setItem(key, value);

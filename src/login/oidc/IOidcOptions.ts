@@ -17,4 +17,5 @@ export default interface IOidcOptions {
   issuerConfiguration: IIssuerConfig;
   clientId: string;
   localUserId?: "global" | string;
+  doNotAutoRedirect?: boolean;
 }
