@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import URL from "url-parse";
-import { Response } from "node-fetch";
 import {
   FetcherMock,
   FetcherMockResponse

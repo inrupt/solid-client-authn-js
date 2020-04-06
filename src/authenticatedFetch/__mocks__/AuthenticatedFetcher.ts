@@ -1,6 +1,5 @@
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
-import { RequestInfo, RequestInit } from "node-fetch";
 import { FetcherMockResponse } from "../../util/__mocks__/Fetcher";
 
 export const AuthenticatedFetcherResponse = FetcherMockResponse;

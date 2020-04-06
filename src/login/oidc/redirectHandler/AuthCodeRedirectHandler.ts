@@ -10,6 +10,7 @@ import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import formurlencoded from "form-urlencoded";
 import { ITokenSaver } from "./TokenSaver";
+import { IRedirector } from "../Redirector";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
@@ -19,7 +20,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("fetcher") private fetcher: IFetcher,
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("tokenSaver") private tokenSaver: ITokenSaver
+    @inject("tokenSaver") private tokenSaver: ITokenSaver,
+    @inject("redirector") private redirector: IRedirector
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -39,6 +41,10 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       await this.storageUtility.getForUser(localUserId, "clientId"),
       await this.storageUtility.getForUser(localUserId, "redirectUri")
     ]);
+    console.log(codeVerifier);
+    console.log(issuer);
+    console.log(clientId);
+    console.log(redirectUri);
     // TODO: better error handling
     if (!codeVerifier || !issuer || !clientId || !redirectUri) {
       throw new Error("Code or issuer or clientId verifier not found.");
@@ -72,10 +78,16 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
     // TODO: should handle error if the token response is something strange
 
-    return await this.tokenSaver.saveTokenAndGetSession(
+    const session = await this.tokenSaver.saveTokenAndGetSession(
       localUserId,
       tokenResponse.id_token,
       tokenResponse.access_token
     );
+
+    delete url.query.code;
+    delete url.query.state;
+    session.neededAction = this.redirector.redirect(url.toString());
+
+    return session;
   }
 }

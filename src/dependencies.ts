@@ -53,6 +53,8 @@ import BrowserStorage from "./localStorage/BrowserStorage";
 import TokenSaver, {
   ITokenSaver
 } from "./login/oidc/redirectHandler/TokenSaver";
+import Redirector, { IRedirector } from "./login/oidc/Redirector";
+import InactionRedirectHandler from "./login/oidc/redirectHandler/InactionRedirectHandler";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -129,6 +131,9 @@ container.register<IOidcHandler>("oidcHandlers", {
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: LegacyImplicitFlowOidcHandler
 });
+container.register<IRedirector>("redirector", {
+  useClass: Redirector
+});
 
 // Login/OIDC/redirectHandler
 container.register<IRedirectHandler>("redirectHandler", {
@@ -139,6 +144,9 @@ container.register<IRedirectHandler>("redirectHandlers", {
 });
 container.register<IRedirectHandler>("redirectHandlers", {
   useClass: GeneralRedirectHandler
+});
+container.register<IRedirectHandler>("redirectHandlers", {
+  useClass: InactionRedirectHandler
 });
 container.register<ITokenSaver>("tokenSaver", {
   useClass: TokenSaver

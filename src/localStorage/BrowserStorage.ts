@@ -1,14 +1,20 @@
-import { get, set, remove } from "local-storage";
 import IStorage from "./IStorage";
 
 export default class BrowserStorage implements IStorage {
   async get(key: string): Promise<string | null> {
-    return get(key);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    return window.localStorage.getItem(key);
   }
   async set(key: string, value: string): Promise<void> {
-    set(key, value);
+    console.log("SETTING STORAGE");
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    window.localStorage.setItem(key, value);
   }
   async delete(key: string): Promise<void> {
-    remove(key);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    window.localStorage.removeItem(key);
   }
 }

@@ -1,7 +1,6 @@
 /**
  * Responsible for sending DPoP Enabled requests
  */
-import { RequestInit, Response, RequestInfo } from "node-fetch";
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
 import ConfigurationError from "../../errors/ConfigurationError";
