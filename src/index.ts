@@ -4,50 +4,101 @@ import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
 import IStorage from "./localStorage/IStorage";
 
-const authFetcher = getAuthFetcherWithDependencies({});
-authFetcher.automaticallyHandleRedirect();
+export interface ICustomAuthFetcherOptions {
+  storage?: IStorage;
+  doNotAutoHandleRedirect?: boolean;
+}
+
+let redirectHandlerPromise: Promise<void>;
+let redirectHandlerPromiseIsResolved = false;
+export async function customAuthFetcher(
+  options?: ICustomAuthFetcherOptions
+): Promise<AuthFetcher> {
+  const authFetcher = getAuthFetcherWithDependencies({
+    storage: options?.storage
+  });
+  if (!options?.doNotAutoHandleRedirect) {
+    if (!redirectHandlerPromise) {
+      redirectHandlerPromise = authFetcher.automaticallyHandleRedirect();
+      await redirectHandlerPromise;
+      redirectHandlerPromiseIsResolved = true;
+    } else if (!redirectHandlerPromiseIsResolved) {
+      await redirectHandlerPromise;
+    }
+  }
+  return authFetcher;
+}
+
+let globalAuthFetcher: AuthFetcher;
+async function getGlobalAuthFetcher(
+  options?: ICustomAuthFetcherOptions
+): Promise<AuthFetcher> {
+  if (globalAuthFetcher) {
+    return globalAuthFetcher;
+  }
+  globalAuthFetcher = await customAuthFetcher(options);
+  return globalAuthFetcher;
+}
 
 export async function login(
-  options: ILoginInputOptions
+  options: ILoginInputOptions,
+  authFetcherOptions?: ICustomAuthFetcherOptions
 ): Promise<ISolidSession> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.login(options);
 }
 
 export async function fetch(
   url: RequestInfo,
-  init: RequestInit
+  init: RequestInit,
+  authFetcherOptions?: ICustomAuthFetcherOptions
 ): Promise<Response> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.fetch(url, init);
 }
 
-export async function logout(): Promise<void> {
+export async function logout(
+  authFetcherOptions?: ICustomAuthFetcherOptions
+): Promise<void> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.logout();
 }
 
-export async function getSession(): Promise<ISolidSession | null> {
+export async function getSession(
+  authFetcherOptions?: ICustomAuthFetcherOptions
+): Promise<ISolidSession | null> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.getSession();
 }
 
 export async function uniqueLogin(
-  options: ILoginInputOptions
+  options: ILoginInputOptions,
+  authFetcherOptions?: ICustomAuthFetcherOptions
 ): Promise<ISolidSession> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.uniqueLogin(options);
 }
 
-export function onSession(callback: (session: ISolidSession) => unknown): void {
+export async function onSession(
+  callback: (session: ISolidSession) => unknown,
+  authFetcherOptions?: ICustomAuthFetcherOptions
+): Promise<void> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.onSession(callback);
 }
 
-export function onLogout(callback: (session: ISolidSession) => unknown): void {
+export async function onLogout(
+  callback: (session: ISolidSession) => unknown,
+  authFetcherOptions?: ICustomAuthFetcherOptions
+): Promise<void> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.onLogout(callback);
 }
 
-export async function handleRedirect(url: string): Promise<ISolidSession> {
+export async function handleRedirect(
+  url: string,
+  authFetcherOptions?: ICustomAuthFetcherOptions
+): Promise<ISolidSession> {
+  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
   return authFetcher.handleRedirect(url);
-}
-
-export function customAuthFetcher(options: {
-  storage?: IStorage;
-}): AuthFetcher {
-  return getAuthFetcherWithDependencies({ storage: options.storage });
 }

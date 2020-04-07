@@ -6,6 +6,7 @@ import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
 
 export interface IRedirectorOptions {
   doNotAutoRedirect?: boolean;
+  redirectByReplacingState?: boolean;
 }
 
 export interface IRedirector {
@@ -27,7 +28,11 @@ export default class Redirector implements IRedirector {
       this.environmentDetector.detect() === "browser" &&
       !options?.doNotAutoRedirect
     ) {
-      window.location.href = redirectUrl;
+      if (!options?.redirectByReplacingState) {
+        window.location.href = redirectUrl;
+      } else {
+        window.history.replaceState({}, "", redirectUrl);
+      }
       return {
         actionType: "inaction"
       } as INeededInactionAction;

@@ -82,7 +82,9 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
     delete url.query.code;
     delete url.query.state;
-    session.neededAction = this.redirector.redirect(url.toString(), {});
+    session.neededAction = this.redirector.redirect(url.toString(), {
+      redirectByReplacingState: true
+    });
 
     return session;
   }
