@@ -31,7 +31,7 @@ class Form extends Component {
     const session = await getSession();
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
-      window.parent.postMessage("Cool Stuff", "*");
+      setTimeout(() => window.close(), 2000);
     } else if (!session) {
       const authCode = new URL(window.location.href).searchParams.get("code");
       if (!authCode) {
@@ -66,7 +66,11 @@ class Form extends Component {
     e.preventDefault();
     this.setState({ status: "loading" });
     await logout();
-    this.setState({ status: "login", session: null });
+    this.setState({
+      status: "login",
+      fetchBody: "",
+      session: null
+    });
   }
 
   async handleFetch(e) {
