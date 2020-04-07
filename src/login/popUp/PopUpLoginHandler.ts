@@ -8,13 +8,15 @@ import { injectable, inject } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
 import URL from "url-parse";
+import { ISessionCreator } from "../../solidSession/SessionCreator";
 
 @injectable()
 export default class PopUpLoginHandler implements ILoginHandler {
   constructor(
     @inject("environmentDetector")
     private environmentDetector: IEnvironmentDetector,
-    @inject("postPopUpLoginHandler") private loginHandler: ILoginHandler
+    @inject("postPopUpLoginHandler") private loginHandler: ILoginHandler,
+    @inject("sessionCreator") private sessionCreator: ISessionCreator
   ) {}
 
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
@@ -34,7 +36,23 @@ export default class PopUpLoginHandler implements ILoginHandler {
       doNotAutoRedirect: true
     });
     // TODO: handle if session doesn't have redirect
-    window.open((session.neededAction as INeededRedirectAction).redirectUrl);
-    return session;
+    const popupWindow = window.open(
+      (session.neededAction as INeededRedirectAction).redirectUrl,
+      "Log In",
+      "resizable,scrollbars,width=500,height=500,"
+    );
+    return new Promise((res, rej) => {
+      const interval = setInterval(async () => {
+        if (popupWindow?.closed) {
+          clearInterval(interval);
+          res(
+            // TODO: handle if this fails
+            (await this.sessionCreator.getSession(
+              loginOptions.localUserId || "global"
+            )) as ISolidSession
+          );
+        }
+      }, 500);
+    });
   }
 }

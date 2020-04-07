@@ -41,10 +41,6 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       await this.storageUtility.getForUser(localUserId, "clientId"),
       await this.storageUtility.getForUser(localUserId, "redirectUri")
     ]);
-    console.log(codeVerifier);
-    console.log(issuer);
-    console.log(clientId);
-    console.log(redirectUri);
     // TODO: better error handling
     if (!codeVerifier || !issuer || !clientId || !redirectUri) {
       throw new Error("Code or issuer or clientId verifier not found.");

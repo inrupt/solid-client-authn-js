@@ -82,8 +82,6 @@ export default class AuthFetcher {
 
   async automaticallyHandleRedirect(): Promise<void> {
     if (this.environmentDetector.detect() === "browser") {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore
       await this.handleRedirect(window.location.href);
     }
   }
