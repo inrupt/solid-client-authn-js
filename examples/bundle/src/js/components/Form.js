@@ -19,6 +19,9 @@ class Form extends Component {
       fetchBody: "",
       session: null
     };
+    if (window.location.pathname === "/popup") {
+      this.state.status = "popup";
+    }
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.handleFetch = this.handleFetch.bind(this);
@@ -26,14 +29,13 @@ class Form extends Component {
 
   async componentDidMount() {
     const session = await getSession();
-    if (!session) {
+    if (window.location.pathname === "/popup") {
+      this.state.status = "popup";
+      window.parent.postMessage("Cool Stuff", "*");
+    } else if (!session) {
       const authCode = new URL(window.location.href).searchParams.get("code");
       if (!authCode) {
         this.setState({ status: "login" });
-      } else {
-        const session = await handleRedirect(window.location.href);
-        this.setState({ status: "dashboard", session });
-        window.location.replace(new URL(window.location.href).origin);
       }
     } else {
       this.setState({ status: "dashboard", session });
@@ -48,13 +50,15 @@ class Form extends Component {
       redirect: "http://localhost:3001/",
       oidcIssuer: this.state.loginIssuer,
       popUp: isPopup,
-      popUpRedirect: "/popup"
+      popUpRedirectPath: "/popup"
     });
     if (
       session.neededAction &&
       session.neededAction.actionType === "redirect"
     ) {
       window.location.href = session.neededAction.redirectUrl;
+    } else if (session) {
+      this.setState({ status: "dashboard", session });
     }
   }
 
@@ -73,11 +77,9 @@ class Form extends Component {
   }
 
   render() {
-    if (window.location.pathname === "/popup") {
-      console.log("popup");
-      return;
-    }
     switch (this.state.status) {
+      case "popup":
+        return <h1>Popup Redirected</h1>;
       case "loading":
         return <h1>Loading</h1>;
       case "login":
