@@ -1,3 +1,4 @@
+// Consider redoing this file as it contains code outside of the dependency injection framework
 import ISolidSession from "./solidSession/ISolidSession";
 import ILoginInputOptions from "./ILoginInputOptions";
 import AuthFetcher from "./AuthFetcher";

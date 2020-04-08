@@ -13,7 +13,10 @@ import {
   FetcherMockResponse
 } from "../../../src/util/__mocks__/Fetcher";
 import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlRepresentationConverter";
-import { StorageUtilityMock, StorageUtilityGetResponse } from "../../../src/localStorage/__mocks__/StorageUtility";
+import {
+  StorageUtilityMock,
+  StorageUtilityGetResponse
+} from "../../../src/localStorage/__mocks__/StorageUtility";
 
 describe("DpopAuthenticatedFetcher", () => {
   const defaultMocks = {
@@ -99,6 +102,17 @@ describe("DpopAuthenticatedFetcher", () => {
         }
       });
       expect(response).toBe(FetcherMockResponse);
+    });
+
+    it("Throws an error if the token isn't available", async () => {
+      defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
+      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
+      expect(
+        dpopAuthenticatedFetcher.handle(
+          { type: "dpop", localUserId: "global" },
+          "http://someurl.com"
+        )
+      ).rejects.toThrowError();
     });
   });
 
