@@ -56,7 +56,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       // TODO: differentiate if DPoP should be true
       dpop: true,
       // TODO: This constrains this library to browsers. Figure out what to do with redirect
-      redirectUrl: options.redirect,
+      redirectUrl: options.redirect as URL,
       issuerConfiguration: issuerConfig,
       clientId: options.clientId as string,
       localUserId: options.localUserId,
