@@ -9,7 +9,7 @@ export default interface ILoginOptions {
   webId?: URL;
   redirect: URL;
   popUp?: boolean;
-  popUpRedirectPath: string;
+  popUpRedirectPath?: string;
   state?: string;
   clientId?: string;
   doNotAutoRedirect?: boolean;

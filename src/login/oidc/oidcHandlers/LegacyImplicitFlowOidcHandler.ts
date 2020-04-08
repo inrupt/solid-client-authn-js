@@ -53,7 +53,8 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       neededAction: {
         actionType: "redirect",
         redirectUrl: requestUrl.toString()
-      } as INeededRedirectAction
+      } as INeededRedirectAction,
+      loggedIn: false
     });
   }
 }

@@ -17,6 +17,7 @@ import {
   AuthenticatedFetcherMock,
   AuthenticatedFetcherResponse
 } from "../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
+import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import AuthFetcher from "../src/AuthFetcher";
 import URL from "url-parse";
 
@@ -26,7 +27,8 @@ describe("AuthFetcher", () => {
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
     sessionCreator: SessionCreatorMock,
-    authenticatedFetcher: AuthenticatedFetcherMock
+    authenticatedFetcher: AuthenticatedFetcherMock,
+    environmentDetector: EnvironmentDetectorMock
   };
   function getAuthFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -36,7 +38,8 @@ describe("AuthFetcher", () => {
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
       mocks.sessionCreator ?? defaultMocks.sessionCreator,
-      mocks.authenticatedFetcher ?? defaultMocks.authenticatedFetcher
+      mocks.authenticatedFetcher ?? defaultMocks.authenticatedFetcher,
+      mocks.environmentDetector ?? defaultMocks.environmentDetector
     );
   }
 

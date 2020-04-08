@@ -13,12 +13,14 @@ import {
   FetcherMockResponse
 } from "../../../src/util/__mocks__/Fetcher";
 import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlRepresentationConverter";
+import { StorageUtilityMock, StorageUtilityGetResponse } from "../../../src/localStorage/__mocks__/StorageUtility";
 
 describe("DpopAuthenticatedFetcher", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
     dpopHeaderCreator: DpopHeaderCreatorMock,
-    urlRepresentationConverter: UrlRepresentationConverterMock
+    urlRepresentationConverter: UrlRepresentationConverterMock,
+    storageUtility: StorageUtilityMock
   };
   function getDpopAuthenticatedFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -27,7 +29,8 @@ describe("DpopAuthenticatedFetcher", () => {
       mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
       mocks.fetcher ?? defaultMocks.fetcher,
       mocks.urlRepresentationConverter ??
-        defaultMocks.urlRepresentationConverter
+        defaultMocks.urlRepresentationConverter,
+      mocks.storageUtility ?? defaultMocks.storageUtility
     );
   }
 
@@ -37,7 +40,7 @@ describe("DpopAuthenticatedFetcher", () => {
       expect(
         await dpopAuthenticatedFetcher.canHandle(
           { type: "dpop", localUserId: "global" },
-          new URL("http://example.com"),
+          "http://example.com",
           {}
         )
       ).toBe(true);
@@ -48,7 +51,7 @@ describe("DpopAuthenticatedFetcher", () => {
       expect(
         await dpopAuthenticatedFetcher.canHandle(
           { type: "bearer", localUserId: "global" },
-          new URL("http://example.com"),
+          "http://example.com",
           {}
         )
       ).toBe(false);
@@ -61,7 +64,7 @@ describe("DpopAuthenticatedFetcher", () => {
       await expect(
         dpopAuthenticatedFetcher.handle(
           { type: "bad", localUserId: "global" },
-          new URL("https://bad.com"),
+          "https://bad.com",
           {}
         )
       ).rejects.toThrowError();
@@ -77,22 +80,21 @@ describe("DpopAuthenticatedFetcher", () => {
       const url = new URL("https://example.com");
       const requestCredentials = {
         type: "dpop",
-        authToken: "someAuthToken",
         localUserId: "global"
       };
       const init = {};
       const response = await dpopAuthenticatedFetcher.handle(
         requestCredentials,
-        url,
+        url.toString(),
         init
       );
       expect(dpopHeaderCreator.createHeaderToken).toHaveBeenCalledWith(
         url,
         "GET"
       );
-      expect(fetcher.fetch).toHaveBeenCalledWith(url, {
+      expect(fetcher.fetch).toHaveBeenCalledWith(url.toString(), {
         headers: {
-          authorization: `DPOP ${requestCredentials.authToken}`,
+          authorization: `DPOP ${StorageUtilityGetResponse}`,
           dpop: DpopHeaderCreatorResponse
         }
       });

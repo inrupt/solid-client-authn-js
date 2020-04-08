@@ -14,6 +14,8 @@ import {
   DpopHeaderCreatorResponse
 } from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
+import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
+import { Response as NodeResponse } from "node-fetch";
 
 describe("AuthCodeRedirectHandler", () => {
   const defaultMocks = {
@@ -21,7 +23,8 @@ describe("AuthCodeRedirectHandler", () => {
     issuerConfigFetcher: IssuerConfigFetcherMock,
     fetcher: FetcherMock,
     dpopHeaderCreator: DpopHeaderCreatorMock,
-    tokenSaver: TokenSaverMock
+    tokenSaver: TokenSaverMock,
+    redirector: RedirectorMock
   };
   function getAuthCodeRedirectHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -31,7 +34,8 @@ describe("AuthCodeRedirectHandler", () => {
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.fetcher ?? defaultMocks.fetcher,
       mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
-      mocks.tokenSaver ?? defaultMocks.tokenSaver
+      mocks.tokenSaver ?? defaultMocks.tokenSaver,
+      mocks.redirector ?? defaultMocks.redirector
     );
   }
 
@@ -92,12 +96,12 @@ describe("AuthCodeRedirectHandler", () => {
         .mockResolvedValueOnce("d");
       defaultMocks.fetcher.fetch.mockResolvedValueOnce(
         /* eslint-disable @typescript-eslint/camelcase */
-        new Response(
+        (new NodeResponse(
           JSON.stringify({
             id_token: "idToken",
             access_token: "accessToken"
           })
-        )
+        ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();

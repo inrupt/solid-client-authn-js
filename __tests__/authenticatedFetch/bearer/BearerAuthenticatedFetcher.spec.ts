@@ -11,7 +11,7 @@ describe("BearerAuthenticatedFetcher", () => {
       expect(
         await fetcher.canHandle(
           { type: "bearer", localUserId: "global" },
-          new URL("http://example.com")
+          "http://example.com"
         )
       ).toBe(true);
     });
@@ -22,7 +22,7 @@ describe("BearerAuthenticatedFetcher", () => {
       expect(
         await fetcher.canHandle(
           { type: "dpop", localUserId: "global" },
-          new URL("http://example.com")
+          "http://example.com"
         )
       ).toBe(false);
     });
