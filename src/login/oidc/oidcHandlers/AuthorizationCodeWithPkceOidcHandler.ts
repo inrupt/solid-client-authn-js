@@ -36,7 +36,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
     const codeVerifier = await this.joseUtility.generateCodeVerifier();
     const session = this.sessionCreator.create({
-      localUserId: oidcLoginOptions.localUserId
+      localUserId: oidcLoginOptions.localUserId,
+      loggedIn: false
     });
     // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */

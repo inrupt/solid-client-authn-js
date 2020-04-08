@@ -7,6 +7,7 @@ import {
 import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
+import { Response as NodeResponse } from "node-fetch";
 
 /**
  * Test for IssuerConfigFetcher
@@ -47,14 +48,14 @@ describe("IssuerConfigFetcher", () => {
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
     const storageMock = defaultMocks.storageUtility;
     storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
-    const fetchResponse = new Response(
+    const fetchResponse = (new NodeResponse(
       JSON.stringify({
         issuer: "https://example.com",
         // eslint-disable-next-line @typescript-eslint/camelcase
         claim_types_supported: "oidc",
         bleepBloop: "Meep Moop"
       })
-    );
+    ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: storageMock,
       fetchResponse: fetchResponse
@@ -75,7 +76,7 @@ describe("IssuerConfigFetcher", () => {
   it("should wrap URLs in url-parse's URL object", async () => {
     const storageMock = defaultMocks.storageUtility;
     storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
-    const fetchResponse = new Response(
+    const fetchResponse = (new NodeResponse(
       /* eslint-disable @typescript-eslint/camelcase */
       JSON.stringify({
         issuer: "https://issuer.url",
@@ -86,7 +87,7 @@ describe("IssuerConfigFetcher", () => {
         registration_endpoint: "https://registration_endpoint.url"
       })
       /* eslint-enable @typescript-eslint/camelcase */
-    );
+    ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: storageMock,
       fetchResponse: fetchResponse

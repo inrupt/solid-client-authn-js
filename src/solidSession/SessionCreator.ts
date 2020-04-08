@@ -8,6 +8,7 @@ import { IStorageUtility } from "../localStorage/StorageUtility";
 
 export interface ISessionCreatorOptions {
   localUserId?: string;
+  loggedIn: boolean;
   webId?: string;
   state?: string;
   neededAction?: INeededAction;
@@ -32,6 +33,7 @@ export default class SessionCreator implements ISessionCreator {
     const localUserId: string = options.localUserId || this.uuidGenerator.v4();
     return {
       localUserId,
+      loggedIn: options.loggedIn,
       webId: options.webId,
       neededAction: options.neededAction,
       state: options.state,
@@ -55,10 +57,15 @@ export default class SessionCreator implements ISessionCreator {
 
   async getSession(localUserId: string): Promise<ISolidSession | null> {
     const webId = await this.storageUtility.getForUser(localUserId, "webId");
+    const accessToken = await this.storageUtility.getForUser(
+      localUserId,
+      "accessToken"
+    );
     if (webId) {
       return this.create({
         localUserId,
-        webId: webId
+        webId: webId,
+        loggedIn: !!accessToken
       });
     }
     return null;
