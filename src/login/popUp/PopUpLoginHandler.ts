@@ -20,14 +20,14 @@ export default class PopUpLoginHandler implements ILoginHandler {
   ) {}
 
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
-    return !!(loginOptions.popUp && loginOptions.popUpRedirectPath);
+    return !!(
+      loginOptions.popUp &&
+      loginOptions.popUpRedirectPath &&
+      this.environmentDetector.detect() === "browser"
+    );
   }
 
   async handle(loginOptions: ILoginOptions): Promise<ISolidSession> {
-    // If we're not in the browser just login normally
-    if (this.environmentDetector.detect() !== "browser") {
-      return this.loginHandler.handle({ ...loginOptions });
-    }
     const curUrl = new URL(window.location.href);
     curUrl.set("pathname", loginOptions.popUpRedirectPath);
     const session = await this.loginHandler.handle({
@@ -43,7 +43,7 @@ export default class PopUpLoginHandler implements ILoginHandler {
     );
     return new Promise((res, rej) => {
       const interval = setInterval(async () => {
-        if (popupWindow?.closed) {
+        if (!popupWindow || popupWindow.closed) {
           clearInterval(interval);
           res(
             // TODO: handle if this fails

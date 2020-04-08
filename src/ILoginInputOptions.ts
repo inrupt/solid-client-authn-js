@@ -3,7 +3,7 @@ import URL from "url-parse";
 export default interface ILoginInputOptions {
   oidcIssuer?: string;
   webId?: string;
-  redirect: string;
+  redirect?: string;
   popUp?: boolean;
   popUpRedirectPath?: string;
   state?: string;
@@ -23,6 +23,5 @@ export const loginInputOptionsSchema = {
     clientId: { type: "string" },
     doNotAutoRedirect: { type: "string" }
   },
-  required: ["redirect"],
   oneOf: [{ required: ["oidcIssuer"] }, { required: ["webId"] }]
 };
