@@ -41,64 +41,52 @@ async function getGlobalAuthFetcher(
 }
 
 export async function login(
-  options: ILoginInputOptions,
-  authFetcherOptions?: ICustomAuthFetcherOptions
+  options: ILoginInputOptions
 ): Promise<ISolidSession> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.login(options);
 }
 
 export async function fetch(
   url: RequestInfo,
-  init: RequestInit,
-  authFetcherOptions?: ICustomAuthFetcherOptions
+  init: RequestInit
 ): Promise<Response> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.fetch(url, init);
 }
 
-export async function logout(
-  authFetcherOptions?: ICustomAuthFetcherOptions
-): Promise<void> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+export async function logout(): Promise<void> {
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.logout();
 }
 
-export async function getSession(
-  authFetcherOptions?: ICustomAuthFetcherOptions
-): Promise<ISolidSession | null> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+export async function getSession(): Promise<ISolidSession | null> {
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.getSession();
 }
 
 export async function uniqueLogin(
-  options: ILoginInputOptions,
-  authFetcherOptions?: ICustomAuthFetcherOptions
+  options: ILoginInputOptions
 ): Promise<ISolidSession> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.uniqueLogin(options);
 }
 
 export async function onSession(
-  callback: (session: ISolidSession) => unknown,
-  authFetcherOptions?: ICustomAuthFetcherOptions
+  callback: (session: ISolidSession) => unknown
 ): Promise<void> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.onSession(callback);
 }
 
 export async function onLogout(
-  callback: (session: ISolidSession) => unknown,
-  authFetcherOptions?: ICustomAuthFetcherOptions
+  callback: (session: ISolidSession) => unknown
 ): Promise<void> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.onLogout(callback);
 }
 
-export async function handleRedirect(
-  url: string,
-  authFetcherOptions?: ICustomAuthFetcherOptions
-): Promise<ISolidSession> {
-  const authFetcher = await getGlobalAuthFetcher(authFetcherOptions);
+export async function handleRedirect(url: string): Promise<ISolidSession> {
+  const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.handleRedirect(url);
 }

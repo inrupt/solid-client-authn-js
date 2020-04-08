@@ -5,8 +5,8 @@ import INeededAction from "./INeededAction";
  */
 export default interface ISolidSession {
   localUserId: string;
+  loggedIn: boolean;
   webId?: string;
-  state?: string;
   neededAction?: INeededAction;
   logout: () => Promise<void>;
   fetch: (url: RequestInfo, init?: RequestInit) => Promise<Response>;
