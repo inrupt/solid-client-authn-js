@@ -7,7 +7,7 @@ export default interface ILoginOptions {
   localUserId?: "global" | string;
   oidcIssuer?: URL;
   webId?: URL;
-  redirect: URL;
+  redirect?: URL;
   popUp?: boolean;
   popUpRedirectPath?: string;
   state?: string;
