@@ -80,7 +80,6 @@ export default class AuthFetcher extends EventEmitter {
     if (curSeession) {
       callback(curSeession);
     }
-    console.log("On session");
     this.on("session", callback);
   }
 

@@ -9,6 +9,7 @@ module.exports = {
     "src/**/*.ts",
     "!**/node_modules/**",
     "!**/__tests__/**",
-    "!src/external-types/**"
+    "!src/external-types/**",
+    "!src/index.ts"
   ]
 };
