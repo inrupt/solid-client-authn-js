@@ -28,10 +28,10 @@ export default class Redirector implements IRedirector {
       this.environmentDetector.detect() === "browser" &&
       !options?.doNotAutoRedirect
     ) {
-      if (!options?.redirectByReplacingState) {
-        window.location.href = redirectUrl;
-      } else {
+      if (options && options.redirectByReplacingState) {
         window.history.replaceState({}, "", redirectUrl);
+      } else {
+        window.location.href = redirectUrl;
       }
       return {
         actionType: "inaction"
