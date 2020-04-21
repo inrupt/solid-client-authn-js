@@ -75,7 +75,8 @@
     "react-native-jose": "git+https://github.com/hellojoko/react-native-jose.git",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.1.0",
-    "url-parse": "^1.4.7"
+    "url-parse": "^1.4.7",
+    "uuid": "^7.0.3"
   },
   "husky": {
     "hooks": {
