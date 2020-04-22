@@ -74,20 +74,6 @@ describe("AuthCodeRedirectHandler", () => {
       ).rejects.toThrowError();
     });
 
-    it("Throws an error if any locally saved data is not present", async () => {
-      defaultMocks.storageUtility.getForUser
-        .mockResolvedValueOnce("a")
-        .mockResolvedValueOnce("b")
-        .mockResolvedValueOnce("c")
-        .mockResolvedValueOnce(null);
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
-      await expect(
-        authCodeRedirectHandler.handle(
-          "https://coolsite.com/?code=someCode&state=userId"
-        )
-      ).rejects.toThrowError();
-    });
-
     it("Makes a code request to the correct place", async () => {
       defaultMocks.storageUtility.getForUser
         .mockResolvedValueOnce("a")

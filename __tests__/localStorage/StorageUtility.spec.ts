@@ -33,6 +33,15 @@ describe("StorageUtility", () => {
       expect(storageMock.get).toHaveBeenCalledWith("key");
       expect(value).toBeNull();
     });
+
+    it("throws an error if the item is not in storage and errorOnNull is true", async () => {
+      const storageMock = defaultMocks.storage;
+      storageMock.get.mockReturnValueOnce(Promise.resolve(null));
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      await expect(storageUtility.get("key", true)).rejects.toThrowError(
+        "key is not stored"
+      );
+    });
   });
 
   describe("set", () => {
@@ -95,6 +104,15 @@ describe("StorageUtility", () => {
         "solidAuthFetcherUser:animals"
       );
       expect(value).toBe(null);
+    });
+
+    it("throws an error if the item is not in storage and errorOnNull is true", async () => {
+      const storageMock = defaultMocks.storage;
+      storageMock.get.mockReturnValueOnce(Promise.resolve(null));
+      const storageUtility = getStorageUtility({ storage: storageMock });
+      await expect(
+        storageUtility.getForUser("animals", "jackie", true)
+      ).rejects.toThrowError("Field jackie for user animals is not stored");
     });
   });
 

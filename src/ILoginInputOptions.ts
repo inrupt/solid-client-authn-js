@@ -1,14 +1,23 @@
 import URL from "url-parse";
 
-export default interface ILoginInputOptions {
-  oidcIssuer?: string;
-  webId?: string;
+type ILoginInputOptions = IIssuerLoginInputOptions | IWebIdLoginInputOptions;
+export default ILoginInputOptions;
+
+export interface ICoreLoginInuptOptions {
   redirect?: string;
   popUp?: boolean;
   popUpRedirectPath?: string;
   state?: string;
   clientId?: string;
   doNotAutoRedirect?: boolean;
+}
+
+export interface IIssuerLoginInputOptions extends ICoreLoginInuptOptions {
+  webId: string;
+}
+
+export interface IWebIdLoginInputOptions extends ICoreLoginInuptOptions {
+  oidcIssuer: string;
 }
 
 export const loginInputOptionsSchema = {
@@ -21,7 +30,7 @@ export const loginInputOptionsSchema = {
     popUpRedirectPath: { type: "string" },
     state: { type: "string" },
     clientId: { type: "string" },
-    doNotAutoRedirect: { type: "string" }
+    doNotAutoRedirect: { type: "boolean" }
   },
   oneOf: [{ required: ["oidcIssuer"] }, { required: ["webId"] }]
 };

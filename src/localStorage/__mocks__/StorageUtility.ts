@@ -6,7 +6,9 @@ export const StorageUtilitySafeGetResponse = {
 };
 
 export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
-  get: jest.fn(async (key: string) => StorageUtilityGetResponse),
+  get: jest.fn(
+    async (key: string, errorIfNull?: true) => StorageUtilityGetResponse
+  ),
   set: jest.fn(async (key: string, value: string) => {
     /* do nothing */
   }),
@@ -14,7 +16,8 @@ export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
     /* do nothing */
   }),
   getForUser: jest.fn(
-    async (userId: string, key: string) => StorageUtilityGetResponse
+    async (userId: string, key: string, errorIfNull?: true) =>
+      StorageUtilityGetResponse
   ),
   setForUser: jest.fn(async (userId: string, key: string, value: string) => {
     /* do nothing */
