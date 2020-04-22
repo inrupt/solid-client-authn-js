@@ -14,7 +14,7 @@ export interface ICoreSolidSession {
 export interface ILoggedInSolidSession extends ICoreSolidSession {
   loggedIn: true;
   webId: string;
-  state: string;
+  state?: string;
   logout: () => Promise<void>;
   fetch: (url: RequestInfo, init?: RequestInit) => Promise<Response>;
 }

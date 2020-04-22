@@ -31,28 +31,36 @@ export default class SessionCreator implements ISessionCreator {
 
   create(options: ISessionCreatorOptions): ISolidSession {
     const localUserId: string = options.localUserId || this.uuidGenerator.v4();
-    return {
-      localUserId,
-      loggedIn: options.loggedIn,
-      webId: options.webId,
-      neededAction: options.neededAction,
-      state: options.state,
-      logout: async (): Promise<void> => {
-        // TODO: handle if webid isn't here
-        return this.logoutHandler.handle(localUserId);
-      },
-      fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-        // TODO: handle if webid isn't here
-        return this.authenticatedFetcher.handle(
-          {
-            localUserId,
-            type: "dpop"
-          },
-          url,
-          init
-        );
-      }
-    };
+    if (options.loggedIn) {
+      return {
+        localUserId,
+        loggedIn: true,
+        webId: options.webId as string,
+        neededAction: options.neededAction || { actionType: "inaction" },
+        state: options.state,
+        logout: async (): Promise<void> => {
+          // TODO: handle if webid isn't here
+          return this.logoutHandler.handle(localUserId);
+        },
+        fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> => {
+          // TODO: handle if webid isn't here
+          return this.authenticatedFetcher.handle(
+            {
+              localUserId,
+              type: "dpop"
+            },
+            url,
+            init
+          );
+        }
+      };
+    } else {
+      return {
+        localUserId,
+        loggedIn: false,
+        neededAction: options.neededAction || { actionType: "inaction" }
+      };
+    }
   }
 
   async getSession(localUserId: string): Promise<ISolidSession | null> {
