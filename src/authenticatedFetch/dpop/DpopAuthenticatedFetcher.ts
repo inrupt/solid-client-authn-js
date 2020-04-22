@@ -36,7 +36,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
   ): Promise<Response> {
     if (!(await this.canHandle(requestCredentials, url, requestInit))) {
       throw new ConfigurationError(
-        `Dpop Authenticated Fetcher Cannot handle ${requestCredentials}`
+        `Dpop Authenticated Fetcher cannot handle ${JSON.stringify(requestCredentials)}`
       );
     }
     const authToken = await this.storageUtility.getForUser(

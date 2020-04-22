@@ -51,7 +51,9 @@ describe("DpopHeaderCreator", () => {
           new URL("https://audience.com"),
           "post"
         )
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(
+        "Could not obtain the key to sign the token with."
+      );
     });
   });
 

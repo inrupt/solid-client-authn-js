@@ -37,7 +37,7 @@ describe("Redirector", () => {
       window.history.replaceState = replaceState;
     });
 
-    it("Does not redirect if the environment is now browser", () => {
+    it("does not redirect if the environment is now browser", () => {
       defaultMocks.environmentDetector.detect.mockReturnValueOnce("server");
       const redirector = getRedirector();
       const neededAction = redirector.redirect("https://someUrl.com/redirect");
@@ -49,7 +49,7 @@ describe("Redirector", () => {
       });
     });
 
-    it("Redirects using href", () => {
+    it("redirects using href", () => {
       const redirector = getRedirector();
       const neededAction = redirector.redirect("https://someUrl.com/redirect");
       expect(window.history.replaceState).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe("Redirector", () => {
       });
     });
 
-    it("Redirects using replaceState", () => {
+    it("redirects using replaceState", () => {
       const redirector = getRedirector();
       const neededAction = redirector.redirect("https://someUrl.com/redirect", {
         redirectByReplacingState: true
