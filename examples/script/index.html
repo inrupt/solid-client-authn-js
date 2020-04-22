@@ -1,8 +1,11 @@
+<!-- This file is a work in progress. It should be fixed -->
 <html>
   <head>
     <script src="/solid-auth-fetcher.bundle.js"></script>
     <script>
-      solidAuthFetcher().then(instance => {
+      solidAuthFetcher.login({
+        
+      }).then(instance => {
         instance.getToken().then((token) => {
           document.getElementById('tokenContainer').innerHTML = `token ${token}`
         });

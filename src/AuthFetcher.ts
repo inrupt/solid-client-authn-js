@@ -88,7 +88,7 @@ export default class AuthFetcher extends EventEmitter {
   }
 
   async handleRedirect(url: string): Promise<ISolidSession> {
-    const session = this.redirectHandler.handle(url);
+    const session = await this.redirectHandler.handle(url);
     this.emit("session", session);
     return session;
   }
