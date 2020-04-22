@@ -37,16 +37,20 @@ describe("SessionCreator", () => {
     it("creates a session with a given user", async () => {
       const sessionCreator = getSessionCreator();
       const session = sessionCreator.create({
-        localUserId: "Commander Cool"
+        localUserId: "Commander Cool",
+        loggedIn: true
       });
       expect(session).toMatchObject({
-        localUserId: "Commander Cool"
+        localUserId: "Commander Cool",
+        loggedIn: true
       });
     });
 
     it("creates a session without a given user", async () => {
       const sessionCreator = getSessionCreator();
-      const session = sessionCreator.create({});
+      const session = sessionCreator.create({
+        loggedIn: false
+      });
       expect(session).toMatchObject({
         localUserId: UuidGeneratorMockResponse
       });
@@ -56,7 +60,8 @@ describe("SessionCreator", () => {
       it("triggers logout for a user", async () => {
         const sessionCreator = getSessionCreator();
         const session = sessionCreator.create({
-          localUserId: "Commander Cool"
+          localUserId: "Commander Cool",
+          loggedIn: true
         });
         await session.logout();
         expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
@@ -69,7 +74,8 @@ describe("SessionCreator", () => {
       it("triggers fetch for a user", async () => {
         const sessionCreator = getSessionCreator();
         const session = sessionCreator.create({
-          localUserId: "Commander Cool"
+          localUserId: "Commander Cool",
+          loggedIn: true
         });
         const response = await session.fetch("https://zoomies.com", {});
         expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(

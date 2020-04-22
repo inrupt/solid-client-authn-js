@@ -36,15 +36,27 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     const url = new URL(redirectUrl, true);
     const localUserId = url.query.state as string;
     const [codeVerifier, issuer, clientId, redirectUri] = await Promise.all([
-      await this.storageUtility.getForUser(localUserId, "codeVerifier"),
-      await this.storageUtility.getForUser(localUserId, "issuer"),
-      await this.storageUtility.getForUser(localUserId, "clientId"),
-      await this.storageUtility.getForUser(localUserId, "redirectUri")
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "codeVerifier",
+        true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "issuer",
+        true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "clientId",
+        true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "redirectUri",
+        true
+      )) as string
     ]);
-    // TODO: better error handling
-    if (!codeVerifier || !issuer || !clientId || !redirectUri) {
-      throw new Error("Code or issuer or clientId verifier not found.");
-    }
 
     const issuerConfig = (await this.issuerConfigFetcher.fetchConfig(
       new URL(issuer)

@@ -71,7 +71,7 @@ Let's first see how we can initiate a login.
 ```typescript
 import { login, getSession } from 'solid-auth-fetcher'
 
-// Get User will return a session object
+// getSession will return a session object
 getSession().then(async (session) => {
   if (!session) {
     const session = await login({
@@ -144,7 +144,7 @@ use `onSession()`. Then you can use that user to fetch.
 import { onSession } from 'solid-auth-fetcher'
 
 onSession((session) => {
-  if (sessino.loggedIn) {
+  if (session.loggedIn) {
     console.log(user.webId)
     session.fetch('https://example.com/resource')
   }
@@ -334,8 +334,6 @@ app.get("/fetch", async (req, res) => {
 app.listen(3000)
 ```
 
-#### Configuring with custom storage
-
 ### General Usage
 
 #### login(options): [Session](#session)
@@ -369,9 +367,9 @@ Options:
 | `redirect` | Yes                                                | String or URL | The URI within this application that the user should be redirected to after successful login. This can be either a web URL or a mobile URL scheme | undefined |
 | `clientId` | In the current spec, no, in the upcoming spec, yes | String or URL | The app's WebID                                                                                                     | undefined |
 | `popUp`    | No                                                 | Boolean       | If true, the login process will initiate via a popup. This only works on web clients.                               | false     |
-| `popUpRedirectPath`    | No                                                 | String       | The path to which a popup window should redirect   | undefined     |
+| `popUpRedirectPath`    | No                                                 | String       | The path to which a popup window should redirect after the user is logged in   | undefined     |
 | `state`    | No                                                 | String        | The state will be provided with the User's Session object once they have logged in                                  | undefined |
-| `doNotAutoRedirect`    | No                                                 | Boolean        | If true, the browser will not auto redirect. Note that auto redirect only happens if Solid-Auth-Client is running in the browser | false |
+| `doNotAutoRedirect`    | No                                                 | Boolean        | If true, the browser will not auto redirect. Note that auto redirect only happens if Solid-Auth-Fetcher is running in the browser | false |
 
 #### uniqueLogin(options): [Session](#session)
 Kick off the login process for a unique user. This allows you to log in multiple users with solid-auth-fetcher. It's a useful feature for apps that wish to support multiple users being logged into the same client, or for servers that work with multiple clients.
