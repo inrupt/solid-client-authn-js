@@ -14,7 +14,8 @@ import {
   DpopHeaderCreatorResponse
 } from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
-import { Response } from "node-fetch";
+import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
+import { Response as NodeResponse } from "node-fetch";
 
 describe("AuthCodeRedirectHandler", () => {
   const defaultMocks = {
@@ -22,7 +23,8 @@ describe("AuthCodeRedirectHandler", () => {
     issuerConfigFetcher: IssuerConfigFetcherMock,
     fetcher: FetcherMock,
     dpopHeaderCreator: DpopHeaderCreatorMock,
-    tokenSaver: TokenSaverMock
+    tokenSaver: TokenSaverMock,
+    redirector: RedirectorMock
   };
   function getAuthCodeRedirectHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -32,7 +34,8 @@ describe("AuthCodeRedirectHandler", () => {
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.fetcher ?? defaultMocks.fetcher,
       mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
-      mocks.tokenSaver ?? defaultMocks.tokenSaver
+      mocks.tokenSaver ?? defaultMocks.tokenSaver,
+      mocks.redirector ?? defaultMocks.redirector
     );
   }
 
@@ -68,21 +71,7 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle("Bad Input")
-      ).rejects.toThrowError();
-    });
-
-    it("Throws an error if any locally saved data is not present", async () => {
-      defaultMocks.storageUtility.getForUser
-        .mockResolvedValueOnce("a")
-        .mockResolvedValueOnce("b")
-        .mockResolvedValueOnce("c")
-        .mockResolvedValueOnce(null);
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
-      await expect(
-        authCodeRedirectHandler.handle(
-          "https://coolsite.com/?code=someCode&state=userId"
-        )
-      ).rejects.toThrowError();
+      ).rejects.toThrowError("Cannot handle redirect url Bad Input");
     });
 
     it("Makes a code request to the correct place", async () => {
@@ -93,12 +82,12 @@ describe("AuthCodeRedirectHandler", () => {
         .mockResolvedValueOnce("d");
       defaultMocks.fetcher.fetch.mockResolvedValueOnce(
         /* eslint-disable @typescript-eslint/camelcase */
-        new Response(
+        (new NodeResponse(
           JSON.stringify({
             id_token: "idToken",
             access_token: "accessToken"
           })
-        )
+        ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();

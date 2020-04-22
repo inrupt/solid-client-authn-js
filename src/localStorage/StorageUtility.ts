@@ -6,10 +6,14 @@ import IStorage from "../localStorage/IStorage";
 import validateSchema from "../util/validateSchema";
 
 export interface IStorageUtility {
-  get(key: string): Promise<string | null>;
+  get(key: string, errorIfNull?: true): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
   delete(key: string): Promise<void>;
-  getForUser(userId: string, key: string): Promise<string | null>;
+  getForUser(
+    userId: string,
+    key: string,
+    errorIfNull?: true
+  ): Promise<string | null>;
   setForUser(userId: string, key: string, value: string): Promise<void>;
   deleteForUser(userId: string, key: string): Promise<void>;
   deleteAllUserData(userId: string): Promise<void>;
@@ -62,8 +66,12 @@ export default class StorageUtility implements IStorageUtility {
     await this.storage.set(this.getKey(userId), JSON.stringify(data));
   }
 
-  async get(key: string): Promise<string | null> {
-    return this.storage.get(key);
+  async get(key: string, errorIfNull?: true): Promise<string | null> {
+    const value = await this.storage.get(key);
+    if (value == null && errorIfNull) {
+      throw new Error(`${key} is not stored`);
+    }
+    return value;
   }
 
   async set(key: string, value: string): Promise<void> {
@@ -74,12 +82,21 @@ export default class StorageUtility implements IStorageUtility {
     return this.storage.delete(key);
   }
 
-  async getForUser(userId: string, key: string): Promise<string | null> {
+  async getForUser(
+    userId: string,
+    key: string,
+    errorIfNull?: true
+  ): Promise<string | null> {
     const userData = await this.getUserData(userId);
+    let value;
     if (!userData[key]) {
-      return null;
+      value = null;
     }
-    return userData[key];
+    value = userData[key];
+    if (value == null && errorIfNull) {
+      throw new Error(`Field ${key} for user ${userId} is not stored`);
+    }
+    return value || null;
   }
 
   async setForUser(userId: string, key: string, value: string): Promise<void> {

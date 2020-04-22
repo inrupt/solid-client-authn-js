@@ -37,7 +37,8 @@ export default class TokenSaver implements ITokenSaver {
       webId: decoded.sub as string,
       neededAction: {
         actionType: "inaction"
-      } as INeededInactionAction
+      } as INeededInactionAction,
+      loggedIn: true
     });
     await this.storageUtility.setForUser(
       session.localUserId,

@@ -3,7 +3,6 @@
  * for a given set of credentials and request parameters
  */
 import { injectable, injectAll } from "tsyringe";
-import { RequestInit, Response, RequestInfo } from "node-fetch";
 import AggregateHandler from "../util/handlerPattern/AggregateHandler";
 import IAuthenticatedFetcher from "./IAuthenticatedFetcher";
 import IRequestCredentials from "./IRequestCredentials";

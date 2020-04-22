@@ -1,4 +1,3 @@
-import { RequestInfo, RequestInit, Response } from "node-fetch";
 import ISolidSession from "./solidSession/ISolidSession";
 import ILoginInputOptions, {
   loginInputOptionsSchema
@@ -11,9 +10,11 @@ import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import ILogoutHandler from "./logout/ILogoutHandler";
 import { ISessionCreator } from "./solidSession/SessionCreator";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
+import { IEnvironmentDetector } from "./util/EnvironmentDetector";
+import { EventEmitter } from "events";
 
 @injectable()
-export default class AuthFetcher {
+export default class AuthFetcher extends EventEmitter {
   private globalUserName = "global";
   constructor(
     @inject("loginHandler") private loginHandler: ILoginHandler,
@@ -21,8 +22,12 @@ export default class AuthFetcher {
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionCreator") private sessionCreator: ISessionCreator,
     @inject("authenticatedFetcher")
-    private authenticatedFetcher: IAuthenticatedFetcher
-  ) {}
+    private authenticatedFetcher: IAuthenticatedFetcher,
+    @inject("environmentDetector")
+    private environmentDetector: IEnvironmentDetector
+  ) {
+    super();
+  }
 
   private async loginHelper(
     options: ILoginInputOptions,
@@ -66,8 +71,15 @@ export default class AuthFetcher {
     return this.loginHelper(options);
   }
 
-  onSession(callback: (session: ISolidSession) => unknown): void {
-    throw new Error("Not Implemented");
+  async onSession(
+    callback: (session: ISolidSession) => unknown
+  ): Promise<void> {
+    // TODO: this should be updated to handle non global as well
+    const currentSession = await this.getSession();
+    if (currentSession) {
+      callback(currentSession);
+    }
+    this.on("session", callback);
   }
 
   onLogout(callback: (session: ISolidSession) => unknown): void {
@@ -75,7 +87,15 @@ export default class AuthFetcher {
   }
 
   async handleRedirect(url: string): Promise<ISolidSession> {
-    return this.redirectHandler.handle(url);
+    const session = await this.redirectHandler.handle(url);
+    this.emit("session", session);
+    return session;
+  }
+
+  async automaticallyHandleRedirect(): Promise<void> {
+    if (this.environmentDetector.detect() === "browser") {
+      await this.handleRedirect(window.location.href);
+    }
   }
 
   customAuthFetcher(options: {}): unknown {

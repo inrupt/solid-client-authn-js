@@ -13,6 +13,7 @@ import {
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { StorageUtilityMock } from "../../src/localStorage/__mocks__/StorageUtility";
 import SessionCreator from "../../src/solidSession/SessionCreator";
+import { ILoggedInSolidSession } from "../../src/solidSession/ISolidSession";
 
 describe("SessionCreator", () => {
   const defaultMocks = {
@@ -37,16 +38,20 @@ describe("SessionCreator", () => {
     it("creates a session with a given user", async () => {
       const sessionCreator = getSessionCreator();
       const session = sessionCreator.create({
-        localUserId: "Commander Cool"
+        localUserId: "Commander Cool",
+        loggedIn: true
       });
       expect(session).toMatchObject({
-        localUserId: "Commander Cool"
+        localUserId: "Commander Cool",
+        loggedIn: true
       });
     });
 
     it("creates a session without a given user", async () => {
       const sessionCreator = getSessionCreator();
-      const session = sessionCreator.create({});
+      const session = sessionCreator.create({
+        loggedIn: false
+      });
       expect(session).toMatchObject({
         localUserId: UuidGeneratorMockResponse
       });
@@ -56,8 +61,9 @@ describe("SessionCreator", () => {
       it("triggers logout for a user", async () => {
         const sessionCreator = getSessionCreator();
         const session = sessionCreator.create({
-          localUserId: "Commander Cool"
-        });
+          localUserId: "Commander Cool",
+          loggedIn: true
+        }) as ILoggedInSolidSession;
         await session.logout();
         expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
           "Commander Cool"
@@ -69,8 +75,9 @@ describe("SessionCreator", () => {
       it("triggers fetch for a user", async () => {
         const sessionCreator = getSessionCreator();
         const session = sessionCreator.create({
-          localUserId: "Commander Cool"
-        });
+          localUserId: "Commander Cool",
+          loggedIn: true
+        }) as ILoggedInSolidSession;
         const response = await session.fetch("https://zoomies.com", {});
         expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
           { localUserId: "Commander Cool", type: "dpop" },

@@ -17,6 +17,7 @@ import {
   AuthenticatedFetcherMock,
   AuthenticatedFetcherResponse
 } from "../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
+import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import AuthFetcher from "../src/AuthFetcher";
 import URL from "url-parse";
 
@@ -26,7 +27,8 @@ describe("AuthFetcher", () => {
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
     sessionCreator: SessionCreatorMock,
-    authenticatedFetcher: AuthenticatedFetcherMock
+    authenticatedFetcher: AuthenticatedFetcherMock,
+    environmentDetector: EnvironmentDetectorMock
   };
   function getAuthFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -36,7 +38,8 @@ describe("AuthFetcher", () => {
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
       mocks.sessionCreator ?? defaultMocks.sessionCreator,
-      mocks.authenticatedFetcher ?? defaultMocks.authenticatedFetcher
+      mocks.authenticatedFetcher ?? defaultMocks.authenticatedFetcher,
+      mocks.environmentDetector ?? defaultMocks.environmentDetector
     );
   }
 
@@ -111,11 +114,31 @@ describe("AuthFetcher", () => {
   });
 
   describe("onSession", () => {
-    /* Add test once implemented */
+    it("Automatically calls the callback if the session is present", async () => {
+      const authFetcher = getAuthFetcher();
+      const callback = jest.fn();
+      await authFetcher.onSession(callback);
+      expect(callback).toHaveBeenCalledWith(SessionCreatorCreateResponse);
+    });
+
+    it("Does not automatically call the callback if the session is not present", async () => {
+      defaultMocks.sessionCreator.getSession.mockResolvedValueOnce(null);
+      const authFetcher = getAuthFetcher();
+      const callback = jest.fn();
+      await authFetcher.onSession(callback);
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 
   describe("onLogout", () => {
-    /* Add test once implemented */
+    it("Temp throws an error", () => {
+      const authFetcher = getAuthFetcher();
+      expect(() =>
+        authFetcher.onLogout(() => {
+          /* do nothing */
+        })
+      ).toThrowError("Not Implemented");
+    });
   });
 
   describe("handleRedirect", () => {
@@ -129,7 +152,27 @@ describe("AuthFetcher", () => {
     });
   });
 
+  describe("automaticallyHandleRedirect", () => {
+    it("handles redirect when in the browser", async () => {
+      const authFetcher = getAuthFetcher();
+      await authFetcher.automaticallyHandleRedirect();
+      expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
+        "http://localhost/"
+      );
+    });
+
+    it("does not handle redirect when not in the browser", async () => {
+      defaultMocks.environmentDetector.detect.mockReturnValueOnce("server");
+      const authFetcher = getAuthFetcher();
+      await authFetcher.automaticallyHandleRedirect();
+      expect(defaultMocks.redirectHandler.handle).not.toHaveBeenCalled();
+    });
+  });
+
   describe("customAuthFetcher", () => {
-    /* Add test once implemented */
+    it("Temp throws an error", () => {
+      const authFetcher = getAuthFetcher();
+      expect(() => authFetcher.customAuthFetcher({})).toThrowError();
+    });
   });
 });

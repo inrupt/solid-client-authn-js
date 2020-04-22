@@ -51,7 +51,55 @@ describe("DpopHeaderCreator", () => {
           new URL("https://audience.com"),
           "post"
         )
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(
+        "Could not obtain the key to sign the token with."
+      );
+    });
+  });
+
+  describe("normalizeHtu", () => {
+    const normalizationTest = [
+      {
+        it: "should add a slash to the end of URLs",
+        url: new URL("https://audience.com"),
+        expected: "https://audience.com/"
+      },
+      {
+        it: "should not add additional slashes to the end of URLs",
+        url: new URL("https://audience.com/"),
+        expected: "https://audience.com/"
+      },
+      {
+        it: "should not include queries",
+        url: new URL("https://audience.com?cool=stuff&dope=things"),
+        expected: "https://audience.com/"
+      },
+      {
+        it: "should not include hash",
+        url: new URL("https://audience.com#throwBackThursday"),
+        expected: "https://audience.com/"
+      },
+      {
+        it: "should include the path",
+        url: new URL("https://audience.com/path"),
+        expected: "https://audience.com/path/"
+      },
+      {
+        it: "should not include the username and password",
+        url: new URL("https://jackson:badpassword@audience.com"),
+        expected: "https://audience.com/"
+      },
+      {
+        it: "should include ports",
+        url: new URL("https://localhost:8080/path"),
+        expected: "https://localhost:8080/path/"
+      }
+    ].forEach(test => {
+      it(test.it, () => {
+        const dpopHeaderCreator = getDpopHeaderCreator();
+        const htu = dpopHeaderCreator.normalizeHtu(test.url);
+        expect(htu).toBe(test.expected);
+      });
     });
   });
 });

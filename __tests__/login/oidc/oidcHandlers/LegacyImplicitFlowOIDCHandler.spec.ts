@@ -49,6 +49,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
         oidcOptions
       );
       expect(defaultMocks.sessionCreator.create).toHaveBeenCalledWith({
+        loggedIn: false,
         neededAction: {
           actionType: "redirect",
           redirectUrl:
@@ -67,6 +68,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
         oidcOptions
       );
       expect(defaultMocks.sessionCreator.create).toHaveBeenCalledWith({
+        loggedIn: false,
         neededAction: {
           actionType: "redirect",
           redirectUrl:

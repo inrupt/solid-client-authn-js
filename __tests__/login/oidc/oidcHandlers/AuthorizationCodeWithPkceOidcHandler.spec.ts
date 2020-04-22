@@ -10,12 +10,17 @@ import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/Sessi
 import ISolidSession from "../../../../src/solidSession/ISolidSession";
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
+import {
+  RedirectorMock,
+  RedirectorResponse
+} from "../../../../src/login/oidc/__mocks__/Redirector";
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
     sessionCreator: SessionCreatorMock,
     joseUtility: JoseUtilityMock,
-    storageUtility: StorageUtilityMock
+    storageUtility: StorageUtilityMock,
+    redirector: RedirectorMock
   };
   function getAuthorizationCodeWithPkceOidcHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -23,7 +28,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
     return new AuthorizationCodeWithPkceOidcHandler(
       mocks.sessionCreator ?? defaultMocks.sessionCreator,
       mocks.joseUtility ?? defaultMocks.joseUtility,
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility,
+      mocks.redirector ?? defaultMocks.redirector
     );
   }
 
@@ -54,11 +60,13 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       const session: ISolidSession = await authorizationCodeWithPkceOidcHandler.handle(
         oidcOptions
       );
-      expect({ ...session.neededAction }).toMatchObject({
-        actionType: "redirect",
-        redirectUrl:
-          "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global"
-      });
+      expect(
+        defaultMocks.redirector.redirect
+      ).toHaveBeenCalledWith(
+        "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global",
+        { doNotAutoRedirect: false }
+      );
+      expect(session.neededAction).toMatchObject(RedirectorResponse);
     });
   });
 });

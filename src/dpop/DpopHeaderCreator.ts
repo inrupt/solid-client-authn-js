@@ -25,6 +25,13 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
     @inject("uuidGenerator") private uuidGenerator: IUuidGenerator
   ) {}
 
+  public normalizeHtu(audience: URL): string {
+    const urlString = `${audience.origin}${audience.pathname}`;
+    return urlString.charAt(urlString.length - 1) === "/"
+      ? urlString
+      : `${urlString}/`;
+  }
+
   async createHeaderToken(audience: URL, method: string): Promise<string> {
     // TODO: update for multiple signing abilities
     const clientKey = await this.dpopClientKeyManager.getClientKey();
@@ -35,7 +42,8 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
 
     return this.joseUtility.signJWT(
       {
-        htu: audience.toString(),
+        // TODO: should add a slash at the end if none is present
+        htu: this.normalizeHtu(audience),
         htm: method,
         jti: this.uuidGenerator.v4()
       },
