@@ -1,18 +1,16 @@
 import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
-import ISolidSession from "../../solidSession/ISolidSession";
+import { ILoggedOutSolidSession } from "../../solidSession/ISolidSession";
 import { SessionCreatorCreateResponse } from "../../solidSession/__mocks__/SessionCreator";
 import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
 
-export const LoginHandlerResponse: ISolidSession = {
-  loggedIn: true,
+export const LoginHandlerResponse: ILoggedOutSolidSession = {
+  loggedIn: false,
   localUserId: "global",
   neededAction: {
     actionType: "redirect",
     redirectUrl: "http://coolSite.com/redirect"
-  } as INeededRedirectAction,
-  logout: SessionCreatorCreateResponse.logout,
-  fetch: SessionCreatorCreateResponse.fetch
+  } as INeededRedirectAction
 };
 
 export const LoginHandlerMock: jest.Mocked<ILoginHandler> = {

@@ -28,11 +28,11 @@ export default class PopUpLoginHandler implements ILoginHandler {
   }
 
   async handle(loginOptions: ILoginOptions): Promise<ISolidSession> {
-    const curUrl = new URL(window.location.href);
-    curUrl.set("pathname", loginOptions.popUpRedirectPath);
+    const currentUrl = new URL(window.location.href);
+    currentUrl.set("pathname", loginOptions.popUpRedirectPath);
     const session = await this.loginHandler.handle({
       ...loginOptions,
-      redirect: curUrl,
+      redirect: currentUrl,
       doNotAutoRedirect: true
     });
     // TODO: handle if session doesn't have redirect
@@ -41,11 +41,11 @@ export default class PopUpLoginHandler implements ILoginHandler {
       "Log In",
       "resizable,scrollbars,width=500,height=500,"
     );
-    return new Promise((res, rej) => {
+    return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
         if (!popupWindow || popupWindow.closed) {
           clearInterval(interval);
-          res(
+          resolve(
             // TODO: handle if this fails
             (await this.sessionCreator.getSession(
               loginOptions.localUserId || "global"

@@ -1,11 +1,11 @@
 import { ISessionCreator, ISessionCreatorOptions } from "../SessionCreator";
-import ISolidSession from "../ISolidSession";
+import ISolidSession, { ILoggedInSolidSession } from "../ISolidSession";
 
-export const SessionCreatorCreateResponse: ISolidSession = {
+export const SessionCreatorCreateResponse: ILoggedInSolidSession = {
   localUserId: "global",
   loggedIn: true,
   webId: "https://pod.com/profile/card#me",
-  neededAction: undefined,
+  neededAction: { actionType: "inaction" },
   logout: async (): Promise<void> => {
     /* do nothing */
   },

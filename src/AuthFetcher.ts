@@ -75,7 +75,6 @@ export default class AuthFetcher extends EventEmitter {
     callback: (session: ISolidSession) => unknown
   ): Promise<void> {
     // TODO: this should be updated to handle non global as well
-    // TODO: this cast is badthis.emit("session", session);
     const currentSession = await this.getSession();
     if (currentSession) {
       callback(currentSession);

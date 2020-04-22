@@ -13,6 +13,7 @@ import {
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { StorageUtilityMock } from "../../src/localStorage/__mocks__/StorageUtility";
 import SessionCreator from "../../src/solidSession/SessionCreator";
+import { ILoggedInSolidSession } from "../../src/solidSession/ISolidSession";
 
 describe("SessionCreator", () => {
   const defaultMocks = {
@@ -62,7 +63,7 @@ describe("SessionCreator", () => {
         const session = sessionCreator.create({
           localUserId: "Commander Cool",
           loggedIn: true
-        });
+        }) as ILoggedInSolidSession;
         await session.logout();
         expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
           "Commander Cool"
@@ -76,7 +77,7 @@ describe("SessionCreator", () => {
         const session = sessionCreator.create({
           localUserId: "Commander Cool",
           loggedIn: true
-        });
+        }) as ILoggedInSolidSession;
         const response = await session.fetch("https://zoomies.com", {});
         expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
           { localUserId: "Commander Cool", type: "dpop" },
