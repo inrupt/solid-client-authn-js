@@ -4,6 +4,7 @@
   "description": "An example application for solid-auth-fetcher",
   "main": "./dist/server.js",
   "scripts": {
+    "clean": "rm -rf ./dist",
     "start": "ts-node src/server.ts",
     "dev": "ts-node-dev src/server.ts",
     "build": "rm -rf dist && tsc -p tsconfig.json",
