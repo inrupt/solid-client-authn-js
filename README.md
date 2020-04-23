@@ -12,10 +12,27 @@ npm install solid-auth-fetcher
 
 ## Examples Usage
 
- - [On the server](./examples/server)
  - [In the web browser with your own bundler](./examples/bundle)
  - [In the web browser with a script tag](./examples/script)
+ - [On the server](./examples/server)
  - [In React Native (iOS and Andorid)](./examples/react-native)
+
+### Setting up the examples
+
+```bash
+git clone https://github.com/inrupt/solid-auth-fetcher.git
+cd solid-auth-fetcher
+npm i
+npm run bootstrap-examples
+# Run each example
+npm run dev-bundle
+npm run dev-script
+npm run dev-server
+npm run dev-ios
+npm run dev-android
+```
+
+At this point, a test application will be running on port `3001` and a test solid server will be running on port `9001`
 
 ## Importing
 
