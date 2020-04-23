@@ -8,7 +8,7 @@ export default class LogoutHandler implements ILogoutHandler {
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
-  async canHandle(userId: string): Promise<boolean> {
+  async canHandle(): Promise<boolean> {
     return true;
   }
 

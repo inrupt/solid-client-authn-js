@@ -1,10 +1,10 @@
 import URL from "url-parse";
 
 type ILoginInputOptions =
-  (IIssuerLoginInputOptions & IRedirectLoginInputOptions) |
-  (IIssuerLoginInputOptions & IPopupLoginInputOptions) |
-  (IWebIdLoginInputOptions & IRedirectLoginInputOptions) |
-  (IWebIdLoginInputOptions & IPopupLoginInputOptions);
+  | (IIssuerLoginInputOptions & IRedirectLoginInputOptions)
+  | (IIssuerLoginInputOptions & IPopupLoginInputOptions)
+  | (IWebIdLoginInputOptions & IRedirectLoginInputOptions)
+  | (IWebIdLoginInputOptions & IPopupLoginInputOptions);
 export default ILoginInputOptions;
 
 export interface ICoreLoginInuptOptions {

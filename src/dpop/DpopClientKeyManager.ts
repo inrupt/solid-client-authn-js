@@ -32,6 +32,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
   }
 
   async generateClientKeyIfNotAlready(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     oidcOptions: IOidcOptions
   ): Promise<void> {
     let jwk: JSONWebKey = (await this.storageUtility.safeGet(
