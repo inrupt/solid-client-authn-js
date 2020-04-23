@@ -12,19 +12,17 @@ import {
   JWT as JoseJWT,
   JSONWebKey
 } from "jose";
-import { JWK, JWS } from "node-jose";
+import { JWK } from "node-jose";
 import JWT from "jsonwebtoken";
 import IJoseUtility from "./IJoseUtility";
 import randomString from "crypto-random-string";
-import { sha256 } from "js-sha256";
 import crypto from "crypto";
 
 export default class IsomorphicJoseUtility implements IJoseUtility {
   async generateJWK(
     kty: "EC" | "OKP" | "RSA" | "oct",
     crvBitlength?: ECCurve | OKPCurve | number,
-    parameters?: BasicParameters,
-    isPrivate?: boolean
+    parameters?: BasicParameters
   ): Promise<JSONWebKey> {
     const key = await JWK.createKey(kty, crvBitlength, parameters);
     return key.toJSON(true) as JSONWebKey;

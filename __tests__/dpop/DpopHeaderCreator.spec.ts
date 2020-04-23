@@ -58,7 +58,7 @@ describe("DpopHeaderCreator", () => {
   });
 
   describe("normalizeHtu", () => {
-    const normalizationTest = [
+    [
       {
         it: "should add a slash to the end of URLs",
         url: new URL("https://audience.com"),
