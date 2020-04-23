@@ -136,8 +136,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     let issuerConfig: IIssuerConfig = (await this.storageUtility.safeGet(
       this.getLocalStorageKey(issuer),
       {
-        schema: issuerConfigSchema,
-        postProcess: this.processConfig
+        schema: issuerConfigSchema
       }
     )) as IIssuerConfig;
 

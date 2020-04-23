@@ -6,10 +6,14 @@ import IStorage from "../localStorage/IStorage";
 import validateSchema from "../util/validateSchema";
 
 export interface IStorageUtility {
-  get(key: string): Promise<string | null>;
+  get(key: string, errorIfNull?: true): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
   delete(key: string): Promise<void>;
-  getForUser(userId: string, key: string): Promise<string | null>;
+  getForUser(
+    userId: string,
+    key: string,
+    errorIfNull?: true
+  ): Promise<string | null>;
   setForUser(userId: string, key: string, value: string): Promise<void>;
   deleteForUser(userId: string, key: string): Promise<void>;
   deleteAllUserData(userId: string): Promise<void>;
@@ -34,7 +38,7 @@ export interface IStorageUtility {
   /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
-// TODO: this does not handle all possible bad inputs for example what if it's not proper JSON
+// TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 @injectable()
 export default class StorageUtility implements IStorageUtility {
   constructor(@inject("storage") private storage: IStorage) {}
@@ -48,7 +52,11 @@ export default class StorageUtility implements IStorageUtility {
     if (stored === null) {
       return {};
     }
-    return JSON.parse(stored);
+    try {
+      return JSON.parse(stored);
+    } catch (err) {
+      return {};
+    }
   }
 
   private async setUserData(
@@ -58,8 +66,12 @@ export default class StorageUtility implements IStorageUtility {
     await this.storage.set(this.getKey(userId), JSON.stringify(data));
   }
 
-  async get(key: string): Promise<string | null> {
-    return this.storage.get(key);
+  async get(key: string, errorIfNull?: true): Promise<string | null> {
+    const value = await this.storage.get(key);
+    if (value == null && errorIfNull) {
+      throw new Error(`${key} is not stored`);
+    }
+    return value;
   }
 
   async set(key: string, value: string): Promise<void> {
@@ -70,12 +82,21 @@ export default class StorageUtility implements IStorageUtility {
     return this.storage.delete(key);
   }
 
-  async getForUser(userId: string, key: string): Promise<string | null> {
+  async getForUser(
+    userId: string,
+    key: string,
+    errorIfNull?: true
+  ): Promise<string | null> {
     const userData = await this.getUserData(userId);
+    let value;
     if (!userData[key]) {
-      return null;
+      value = null;
     }
-    return userData[key];
+    value = userData[key];
+    if (value == null && errorIfNull) {
+      throw new Error(`Field ${key} for user ${userId} is not stored`);
+    }
+    return value || null;
   }
 
   async setForUser(userId: string, key: string, value: string): Promise<void> {
@@ -97,14 +118,10 @@ export default class StorageUtility implements IStorageUtility {
   async safeGet(
     key: string,
     options: {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
       schema?: Record<string, unknown>;
-      // TODO: Remove post process because we take care of this in validator
-      postProcess?: (retrievedObject: any) => any;
       userId?: string;
     } = {}
   ): Promise<unknown | null> {
-    /* eslint-enable @typescript-eslint/no-explicit-any */
     // Check if key is stored locally
     const locallyStored: string | null = options.userId
       ? await this.getForUser(options.userId, key)
@@ -115,10 +132,8 @@ export default class StorageUtility implements IStorageUtility {
       try {
         const parsedObject = JSON.parse(locallyStored);
         if (options.schema) {
-          validateSchema(options.schema, parsedObject, { throwError: true });
-        }
-        if (options.postProcess) {
-          return options.postProcess(parsedObject);
+          const val = validateSchema(options.schema, parsedObject);
+          return val;
         }
         return parsedObject;
       } catch (err) {

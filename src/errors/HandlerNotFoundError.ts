@@ -4,11 +4,18 @@
 export default class HandlerNotFoundError extends Error {
   public params: string[];
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(handlerName: string, params: any[]) {
     super(
       `${handlerName} cannot find a suitable handler for: ${params
-        .map(e => e.toString())
+        .map(e => {
+          try {
+            return JSON.stringify(e);
+          } catch (err) {
+            return e.toString();
+          }
+        })
         .join(", ")}`
     );
     this.params = params;

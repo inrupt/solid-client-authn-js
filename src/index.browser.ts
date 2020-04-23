@@ -1,3 +1,3 @@
-import { login } from "./index";
+import * as solidAuthFetcher from "./index";
 
-module.exports.login = login;
+module.exports = solidAuthFetcher;

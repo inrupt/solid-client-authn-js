@@ -1,5 +1,4 @@
 import URL from "url-parse";
-import { RequestInfo } from "node-fetch";
 
 export interface IUrlRepresentationConverter {
   requestInfoToUrl(requestInfo: RequestInfo): URL;

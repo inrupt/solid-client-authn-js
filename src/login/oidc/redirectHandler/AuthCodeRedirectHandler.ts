@@ -4,25 +4,24 @@ import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
 import { IIssuerConfigFetcher } from "../IssuerConfigFetcher";
 import IIssuerConfig from "../IIssuerConfig";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import IJoseUtility from "../../../jose/IJoseUtility";
-import INeededInactionAction from "../../../solidSession/INeededInactionAction";
 import formurlencoded from "form-urlencoded";
+import { ITokenSaver } from "./TokenSaver";
+import { IRedirector } from "../Redirector";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("fetcher") private fetcher: IFetcher,
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("joseUtility") private joseUtility: IJoseUtility
+    @inject("tokenSaver") private tokenSaver: ITokenSaver,
+    @inject("redirector") private redirector: IRedirector
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -37,15 +36,27 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     const url = new URL(redirectUrl, true);
     const localUserId = url.query.state as string;
     const [codeVerifier, issuer, clientId, redirectUri] = await Promise.all([
-      await this.storageUtility.getForUser(localUserId, "codeVerifier"),
-      await this.storageUtility.getForUser(localUserId, "issuer"),
-      await this.storageUtility.getForUser(localUserId, "clientId"),
-      await this.storageUtility.getForUser(localUserId, "redirectUri")
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "codeVerifier",
+        true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "issuer",
+        true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "clientId",
+        true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "redirectUri",
+        true
+      )) as string
     ]);
-    // TODO: better error handling
-    if (!codeVerifier || !issuer || !clientId || !redirectUri) {
-      throw new Error("Code or issuer or clientId verifier not found.");
-    }
 
     const issuerConfig = (await this.issuerConfigFetcher.fetchConfig(
       new URL(issuer)
@@ -73,37 +84,20 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       })
     ).json();
 
-    /**
-     * TODO: This code will be repeated in other places. Should be factored out
-     */
-    const decoded = await this.joseUtility.decodeJWT(
-      // TODO this should actually be the id_vc of the token
-      tokenResponse.access_token as string
-    );
-    // TODO validate decoded token
-    // TODO extract the localUserId from state and put it in the session
-    const session = this.sessionCreator.create({
+    // TODO: should handle error if the token response is something strange
+
+    const session = await this.tokenSaver.saveTokenAndGetSession(
       localUserId,
-      webId: decoded.sub as string,
-      neededAction: {
-        actionType: "inaction"
-      } as INeededInactionAction
+      tokenResponse.id_token,
+      tokenResponse.access_token
+    );
+
+    delete url.query.code;
+    delete url.query.state;
+    session.neededAction = this.redirector.redirect(url.toString(), {
+      redirectByReplacingState: true
     });
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "accessToken",
-      url.query.access_token as string
-    );
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "idToken",
-      url.query.id_token as string
-    );
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "webId",
-      decoded.sub as string
-    );
+
     return session;
   }
 }

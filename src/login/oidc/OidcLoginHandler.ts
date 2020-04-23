@@ -27,7 +27,7 @@ export default class OidcLoginHandler implements ILoginHandler {
   ) {}
 
   checkOptions(options: ILoginOptions): Error | null {
-    if (!options.oidcIssuer || !options.clientId) {
+    if (!options.oidcIssuer || !options.clientId || !options.redirect) {
       return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
     }
     return null;
@@ -47,29 +47,25 @@ export default class OidcLoginHandler implements ILoginHandler {
     // Fetch OpenId Config
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
       // TODO: fix this with interface
-      options.oidcIssuer || new URL("https://random.com")
+      options.oidcIssuer as URL
     );
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
-      // TODO: fix this
-      issuer: options.oidcIssuer || new URL("https://random.com"),
+      issuer: options.oidcIssuer as URL,
       // TODO: differentiate if DPoP should be true
       dpop: true,
       // TODO: This constrains this library to browsers. Figure out what to do with redirect
-      redirectUrl: options.redirect,
+      redirectUrl: options.redirect as URL,
       issuerConfiguration: issuerConfig,
       clientId: options.clientId as string,
-      localUserId: options.localUserId
+      localUserId: options.localUserId,
+      doNotAutoRedirect: options.doNotAutoRedirect
     };
 
     // Generate DPoP Key if needed
-    // TODO: it might be a good idea to put DPoP related things outside of this file
-    if (OidcOptions.dpop) {
-      await this.dpopClientKeyManager.generateClientKeyIfNotAlready(
-        OidcOptions
-      );
-    }
+    // TODO: should be a conditional if DPoP is needed or not
+    await this.dpopClientKeyManager.generateClientKeyIfNotAlready(OidcOptions);
 
     // Call proper OIDC Handler
     return await this.oidcHandler.handle(OidcOptions);

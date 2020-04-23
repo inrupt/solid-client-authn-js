@@ -46,7 +46,6 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
 
   // TODO: also should have functionality to validate the token
   async decodeJWT(token: string): Promise<Record<string, unknown>> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return JWT.decode(token) as Promise<Record<string, unknown>>;
   }
 

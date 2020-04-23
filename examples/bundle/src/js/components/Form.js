@@ -15,9 +15,13 @@ class Form extends Component {
     this.state = {
       status: "loading",
       loginIssuer: "http://localhost:8080/",
+      fetchRoute: "http://localhost:10100/",
       fetchBody: "",
       session: null
     };
+    if (window.location.pathname === "/popup") {
+      this.state.status = "popup";
+    }
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.handleFetch = this.handleFetch.bind(this);
@@ -25,34 +29,36 @@ class Form extends Component {
 
   async componentDidMount() {
     const session = await getSession();
-    if (!session) {
+    if (window.location.pathname === "/popup") {
+      this.state.status = "popup";
+      setTimeout(() => window.close(), 2000);
+    } else if (!session) {
       const authCode = new URL(window.location.href).searchParams.get("code");
       if (!authCode) {
         this.setState({ status: "login" });
-      } else {
-        const session = await handleRedirect(window.location.href);
-        this.setState({ status: "dashboard", session });
-        console.log(new URL(window.location.href).origin);
-        window.location.replace(new URL(window.location.href).origin);
       }
     } else {
       this.setState({ status: "dashboard", session });
     }
   }
 
-  async handleLogin(e) {
+  async handleLogin(e, isPopup = false) {
     e.preventDefault();
     this.setState({ status: "loading" });
     const session = await login({
       clientId: "coolApp",
       redirect: "http://localhost:3001/",
-      oidcIssuer: this.state.loginIssuer
+      oidcIssuer: this.state.loginIssuer,
+      popUp: isPopup,
+      popUpRedirectPath: "/popup"
     });
     if (
       session.neededAction &&
       session.neededAction.actionType === "redirect"
     ) {
       window.location.href = session.neededAction.redirectUrl;
+    } else if (session) {
+      this.setState({ status: "dashboard", session });
     }
   }
 
@@ -60,20 +66,24 @@ class Form extends Component {
     e.preventDefault();
     this.setState({ status: "loading" });
     await logout();
-    this.setState({ status: "login", session: null });
+    this.setState({
+      status: "login",
+      fetchBody: "",
+      session: null
+    });
   }
 
   async handleFetch(e) {
     e.preventDefault();
     this.setState({ status: "loading", fetchBody: "" });
-    const response = await (
-      await fetch("http://localhost:9001/storage", {})
-    ).text();
+    const response = await (await fetch(this.state.fetchRoute, {})).text();
     this.setState({ status: "dashboard", fetchBody: response });
   }
 
   render() {
     switch (this.state.status) {
+      case "popup":
+        return <h1>Popup Redirected</h1>;
       case "loading":
         return <h1>Loading</h1>;
       case "login":
@@ -86,6 +96,9 @@ class Form extends Component {
               onChange={e => this.setState({ loginIssuer: e.target.value })}
             />
             <button onClick={this.handleLogin}>Log In</button>
+            <button onClick={e => this.handleLogin(e, true)}>
+              Log In with Popup
+            </button>
           </form>
         );
       case "dashboard":
@@ -94,6 +107,11 @@ class Form extends Component {
             <h1>Solid Auth Fetcher Demo Dashboad</h1>
             <p>WebId: {this.state.session.webId}</p>
             <form>
+              <input
+                type="text"
+                value={this.state.fetchRoute}
+                onChange={e => this.setState({ fetchRoute: e.target.value })}
+              />
               <button onClick={this.handleFetch}>Fetch</button>
               <pre>{this.state.fetchBody}</pre>
             </form>

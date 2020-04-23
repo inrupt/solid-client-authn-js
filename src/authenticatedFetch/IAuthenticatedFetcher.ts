@@ -5,7 +5,6 @@
  * @URL The URL of the request
  * @RequestInit The fetch init params to define the request
  */
-import { RequestInit, Response, RequestInfo } from "node-fetch";
 import IHandleable from "../util/handlerPattern/IHandleable";
 import IRequestCredentials from "./IRequestCredentials";
 

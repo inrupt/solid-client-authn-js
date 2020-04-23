@@ -1,7 +1,6 @@
 /**
  * Responsible for sending DPoP Enabled requests
  */
-import { RequestInit, Response, RequestInfo } from "node-fetch";
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
 import ConfigurationError from "../../errors/ConfigurationError";
@@ -10,6 +9,7 @@ import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
+import { IStorageUtility } from "../../localStorage/StorageUtility";
 
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
@@ -17,7 +17,8 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
     @inject("fetcher") private fetcher: IFetcher,
     @inject("urlRepresentationConverter")
-    private urlRepresentationConverter: IUrlRepresentationConverter
+    private urlRepresentationConverter: IUrlRepresentationConverter,
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   async canHandle(
@@ -25,7 +26,6 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
     url: RequestInfo,
     requestInit?: RequestInit
   ): Promise<boolean> {
-    // TODO include a schema check for the submitted data
     return requestCredentials.type === "dpop";
   }
 
@@ -36,10 +36,16 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
   ): Promise<Response> {
     if (!(await this.canHandle(requestCredentials, url, requestInit))) {
       throw new ConfigurationError(
-        `Dpop Authenticated Fetcher Cannot handle ${requestCredentials}`
+        `Dpop Authenticated Fetcher cannot handle ${JSON.stringify(requestCredentials)}`
       );
     }
-    const dpopRequestCredentials: IDpopRequestCredentials = requestCredentials as IDpopRequestCredentials;
+    const authToken = await this.storageUtility.getForUser(
+      requestCredentials.localUserId,
+      "accessToken"
+    );
+    if (!authToken) {
+      throw new Error("Auth token not available");
+    }
     const requestInitiWithDefaults = {
       headers: {},
       method: "GET",
@@ -49,7 +55,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
       ...requestInit,
       headers: {
         ...requestInitiWithDefaults.headers,
-        authorization: `DPOP ${dpopRequestCredentials.authToken}`,
+        authorization: `DPOP ${authToken}`,
         dpop: await this.dpopHeaderCreator.createHeaderToken(
           this.urlRepresentationConverter.requestInfoToUrl(url),
           requestInitiWithDefaults.method

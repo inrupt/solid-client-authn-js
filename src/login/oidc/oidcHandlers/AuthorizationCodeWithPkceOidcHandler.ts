@@ -7,10 +7,9 @@ import URL from "url-parse";
 import ISolidSession from "../../../solidSession/ISolidSession";
 import { injectable, inject } from "tsyringe";
 import { ISessionCreator } from "../../../solidSession/SessionCreator";
-import INeededRedirectAction from "../../../solidSession/INeededRedirectAction";
-import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
+import { IRedirector } from "../Redirector";
 
 @injectable()
 export default class AuthorizationCodeWithPkceOidcHandler
@@ -18,7 +17,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
   constructor(
     @inject("sessionCreator") private sessionCreator: ISessionCreator,
     @inject("joseUtility") private joseUtility: IJoseUtility,
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("redirector") private redirector: IRedirector
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -36,7 +36,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
     const codeVerifier = await this.joseUtility.generateCodeVerifier();
     const session = this.sessionCreator.create({
-      localUserId: oidcLoginOptions.localUserId
+      localUserId: oidcLoginOptions.localUserId,
+      loggedIn: false
     });
     // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */
@@ -54,12 +55,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     /* eslint-enable @typescript-eslint/camelcase */
     requestUrl.set("query", query);
 
-    session.neededAction = {
-      actionType: "redirect",
-      redirectUrl: requestUrl.toString()
-    } as INeededRedirectAction;
-
-    // TODO: This is inefficent, there should be a bulk add
+    // TODO: This is inefficent, there should be a bulk
     await this.storageUtility.setForUser(
       session.localUserId,
       "codeVerifier",
@@ -80,6 +76,10 @@ export default class AuthorizationCodeWithPkceOidcHandler
       "redirectUri",
       oidcLoginOptions.redirectUrl.toString()
     );
+
+    session.neededAction = this.redirector.redirect(requestUrl.toString(), {
+      doNotAutoRedirect: !!oidcLoginOptions.doNotAutoRedirect
+    });
 
     return session;
   }
