@@ -47,7 +47,7 @@ describe("StorageUtility", () => {
   describe("set", () => {
     it("sets an item in storage", async () => {
       const storageUtility = getStorageUtility();
-      const value = await storageUtility.set("key", "value");
+      await storageUtility.set("key", "value");
       expect(defaultMocks.storage.set).toHaveBeenCalledWith("key", "value");
     });
   });
@@ -55,7 +55,7 @@ describe("StorageUtility", () => {
   describe("delete", () => {
     it("deletes an item", async () => {
       const storageUtility = getStorageUtility();
-      const value = await storageUtility.delete("key");
+      await storageUtility.delete("key");
       expect(defaultMocks.storage.delete).toHaveBeenCalledWith("key");
     });
   });
@@ -91,10 +91,6 @@ describe("StorageUtility", () => {
 
     it("returns null if the item in storage is corrupted", async () => {
       const storageMock = defaultMocks.storage;
-      const userData = {
-        jackie: "The Cat",
-        sledge: "The Dog"
-      };
       storageMock.get.mockReturnValueOnce(
         Promise.resolve('{ cool: "bleep bloop not parsable')
       );
@@ -127,11 +123,7 @@ describe("StorageUtility", () => {
         Promise.resolve(JSON.stringify(userData))
       );
       const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.setForUser(
-        "animals",
-        "jackie",
-        "The Pretty Kitty"
-      );
+      await storageUtility.setForUser("animals", "jackie", "The Pretty Kitty");
       expect(storageMock.get).toHaveBeenCalledWith(
         "solidAuthFetcherUser:animals"
       );
@@ -150,11 +142,7 @@ describe("StorageUtility", () => {
         Promise.resolve('{ cool: "bleep bloop not parsable')
       );
       const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.setForUser(
-        "animals",
-        "jackie",
-        "The Pretty Kitty"
-      );
+      await storageUtility.setForUser("animals", "jackie", "The Pretty Kitty");
       expect(storageMock.get).toHaveBeenCalledWith(
         "solidAuthFetcherUser:animals"
       );
@@ -178,7 +166,7 @@ describe("StorageUtility", () => {
         Promise.resolve(JSON.stringify(userData))
       );
       const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.deleteForUser("animals", "jackie");
+      await storageUtility.deleteForUser("animals", "jackie");
       expect(storageMock.get).toHaveBeenCalledWith(
         "solidAuthFetcherUser:animals"
       );
@@ -195,7 +183,7 @@ describe("StorageUtility", () => {
     it("deletes all data for a particular user", async () => {
       const storageMock = defaultMocks.storage;
       const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.deleteAllUserData("animals");
+      await storageUtility.deleteAllUserData("animals");
       expect(storageMock.delete).toHaveBeenCalledWith(
         "solidAuthFetcherUser:animals"
       );
