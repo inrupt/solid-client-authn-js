@@ -1,7 +1,7 @@
 /**
  * A wrapper class for uuid
  */
-import uuid from "uuid";
+import { v4 } from "uuid";
 
 export interface IUuidGenerator {
   v4(): string;
@@ -9,6 +9,6 @@ export interface IUuidGenerator {
 
 export default class UuidGenerator {
   v4(): string {
-    return uuid.v4();
+    return v4();
   }
 }
