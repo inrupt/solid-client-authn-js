@@ -70,7 +70,9 @@ describe("DpopAuthenticatedFetcher", () => {
           "https://bad.com",
           {}
         )
-      ).rejects.toThrowError("Dpop Authenticated Fetcher cannot handle {\"type\":\"bad\",\"localUserId\":\"global\"}");
+      ).rejects.toThrowError(
+        'Dpop Authenticated Fetcher cannot handle {"type":"bad","localUserId":"global"}'
+      );
     });
 
     it("handles request properly", async () => {
@@ -104,15 +106,20 @@ describe("DpopAuthenticatedFetcher", () => {
       expect(response).toBe(FetcherMockResponse);
     });
 
-    it("Throws an error if the token isn't available", async () => {
+    it("Defaults to an unauthenticated request if the token isn't available", async () => {
       defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
-      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
-      await expect(
-        dpopAuthenticatedFetcher.handle(
-          { type: "dpop", localUserId: "global" },
-          "http://someurl.com"
-        )
-      ).rejects.toThrowError("Auth token not available");
+      const fetcher = FetcherMock;
+      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher({
+        fetcher: fetcher
+      });
+      const url = "http://someurl.com";
+      await dpopAuthenticatedFetcher.handle(
+        { type: "dpop", localUserId: "global" },
+        url
+      );
+      expect(fetcher.fetch).toHaveBeenCalledWith(url, {
+        headers: {}
+      });
     });
   });
 
