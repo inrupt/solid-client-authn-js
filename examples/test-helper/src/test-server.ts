@@ -1,18 +1,18 @@
 /**
  * A server against which acceptance tests may be run
  */
-import express, { response } from "express";
+import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import session from "express-session";
 import { JWT } from "jose";
 import keystore from "./keystore";
-import getOpenIdConfig from "./opeidConfig";
+import getOpenIdConfig from "./openIdConfig";
 import path from "path";
 import URL from "url-parse";
 
-const PORT: string = "9001";
-const ISSUER: string = "http://localhost:9001";
+const PORT = "9001";
+const ISSUER = "http://localhost:9001";
 interface IUser {
   webID: string;
   username: string;
@@ -77,7 +77,8 @@ app.post("/login", (req, res) => {
     const dpopToken = JWT.decode(req.session.authData.dpop, {
       complete: true
     });
-    const jwk = (dpopToken.header as { [key: string]: any }).jwk;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const jwk = (dpopToken.header as Record<string, any>).jwk;
 
     const token: string = JWT.sign(
       {
@@ -98,8 +99,10 @@ app.post("/login", (req, res) => {
     );
     const redirectUrl = new URL(req.session.authData.redirect_url);
     redirectUrl.set("query", {
+      /* eslint-disable @typescript-eslint/camelcase */
       access_token: token,
       id_token: token
+      /* eslint-enable @typescript-eslint/camelcase */
     });
 
     res.redirect(redirectUrl.toString());
