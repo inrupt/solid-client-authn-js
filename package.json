@@ -58,7 +58,7 @@
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.3.7",
-    "@types/lodash": "^4.14.149",
+    "@types/lodash": "^4.14.150",
     "@types/node": "^13.7.4",
     "@types/node-jose": "^1.1.2",
     "@types/url-parse": "^1.4.3",
