@@ -137,7 +137,7 @@ describe("AuthFetcher", () => {
         authFetcher.onLogout(() => {
           /* do nothing */
         })
-      ).toThrowError("Not Implemented");
+      ).rejects.toThrowError("Not Implemented");
     });
   });
 

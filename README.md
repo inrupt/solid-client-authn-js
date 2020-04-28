@@ -469,6 +469,17 @@ onLogout((session) => {
 })
 ```
 
+#### onRequest(callback)
+Register a callback function to be called whenever a request is made:
+
+```typescript
+import { onRequest } from 'solid-auth-fetcher'
+
+onRequest((url, requestOptions) => {
+  console.log(url)
+})
+```
+
 #### Session
 The session object contains information about the logged in user, as well as functions that can be executed as that user (e.g. `logout()`).
 

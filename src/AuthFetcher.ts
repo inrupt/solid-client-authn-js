@@ -48,6 +48,7 @@ export default class AuthFetcher extends EventEmitter {
   }
 
   async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
+    this.emit("request", url, init);
     return this.authenticatedFetcher.handle(
       // TODO: generate request credentials separately
       {
@@ -82,8 +83,14 @@ export default class AuthFetcher extends EventEmitter {
     this.on("session", callback);
   }
 
-  onLogout(callback: (session: ISolidSession) => unknown): void {
+  async onLogout(callback: (session: ISolidSession) => unknown): Promise<void> {
     throw new Error("Not Implemented");
+  }
+
+  async onRequest(
+    callback: (RequestInfo: RequestInfo, requestInit: RequestInit) => unknown
+  ): Promise<void> {
+    this.on("request", callback);
   }
 
   async handleRedirect(url: string): Promise<ISolidSession> {
