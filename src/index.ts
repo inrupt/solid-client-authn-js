@@ -87,6 +87,13 @@ export async function onLogout(
   return authFetcher.onLogout(callback);
 }
 
+export async function onRequest(
+  callback: (url: RequestInfo, requestInit: RequestInit) => unknown
+): Promise<void> {
+  const authFetcher = await getGlobalAuthFetcher();
+  return authFetcher.onRequest(callback);
+}
+
 export async function handleRedirect(url: string): Promise<ISolidSession> {
   const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.handleRedirect(url);
