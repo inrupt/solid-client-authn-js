@@ -41,7 +41,7 @@
     "bootstrap-examples": "./bootstrap-examples.bash"
   },
   "devDependencies": {
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^24.0.24",
     "@types/node-fetch": "^2.5.6",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
     "@typescript-eslint/parser": "^2.30.0",
