@@ -78,7 +78,7 @@
     "husky": "^4.2.3",
     "jose": "^1.26.1",
     "jsonwebtoken": "^8.5.1",
-    "lint-staged": "^10.0.9",
+    "lint-staged": "^10.2.1",
     "lodash": "^4.17.15",
     "react-native-jose": "git+https://github.com/hellojoko/react-native-jose.git",
     "reflect-metadata": "^0.1.13",
