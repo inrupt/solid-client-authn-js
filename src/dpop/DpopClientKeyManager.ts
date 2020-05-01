@@ -1,4 +1,12 @@
 /**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
+/**
  * Generates a Client Key to be stored and used for DPoP Requests
  */
 import IOidcOptions from "../login/oidc/IOidcOptions";

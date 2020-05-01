@@ -1,3 +1,11 @@
+/**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
 import NodeStorage from "../../src/localStorage/NodeStorage";
 
 describe("NodeStorage", () => {

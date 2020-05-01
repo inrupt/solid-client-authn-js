@@ -1,4 +1,12 @@
 /**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
+/**
  * An aggregate AuthenticatedFetcher responsible for selecting the correct AuthenticatedFetcher
  * for a given set of credentials and request parameters
  */

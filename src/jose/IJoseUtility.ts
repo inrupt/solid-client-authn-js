@@ -1,4 +1,12 @@
 /**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
+/**
  * Interface defining how each environment should define its crypto system
  */
 import { ECCurve, BasicParameters, OKPCurve, JWT, JSONWebKey } from "jose";

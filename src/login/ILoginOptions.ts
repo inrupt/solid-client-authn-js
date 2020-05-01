@@ -1,4 +1,12 @@
 /**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
+/**
  * Options dictating the kind of login needed
  */
 import URL from "url-parse";

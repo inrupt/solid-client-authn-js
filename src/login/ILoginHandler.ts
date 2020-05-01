@@ -1,4 +1,12 @@
 /**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
+/**
  * A Login Handler will log a user in if it is able to use the provided Login Parameters
  */
 import IHandleable from "../util/handlerPattern/IHandleable";

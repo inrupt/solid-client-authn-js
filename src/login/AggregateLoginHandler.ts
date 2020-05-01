@@ -1,4 +1,12 @@
 /**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
+/**
  * Responsible for decided which Login Handler should be used given the Login Options
  */
 import AggregateHandler from "../util/handlerPattern/AggregateHandler";

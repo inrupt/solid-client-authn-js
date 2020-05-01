@@ -1,3 +1,11 @@
+/**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
 import "reflect-metadata";
 import Redirector from "../../../src/login/oidc/Redirector";
 import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/EnvironmentDetector";

@@ -1,3 +1,11 @@
+/**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
 // Consider redoing this file as it contains code outside of the dependency injection framework
 import ISolidSession from "./solidSession/ISolidSession";
 import ILoginInputOptions from "./ILoginInputOptions";

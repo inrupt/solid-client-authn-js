@@ -1,4 +1,12 @@
 /**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
+/**
  * AuthenticatedFetchers are responsible for making requests based on provided credentials
  *
  * @IRequestCredentials A set of credentials that should be embedded in the request

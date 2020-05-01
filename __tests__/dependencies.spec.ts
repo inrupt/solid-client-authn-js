@@ -1,3 +1,11 @@
+/**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
 import getAuthFetcherWithDependencies from "../src/dependencies";
 import AuthFetcher from "../src/AuthFetcher";
 import { StorageMock } from "../src/localStorage/__mocks__/Storage";

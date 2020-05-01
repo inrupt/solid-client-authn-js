@@ -1,3 +1,11 @@
+/**
+ * Proprietary and Confidential
+ *
+ * Copyright 2020 Inrupt Inc. - all rights reserved.
+ *
+ * Do not use without explicit permission from Inrupt Inc.
+ */
+
 // Required by TSyringe:
 import "reflect-metadata";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
