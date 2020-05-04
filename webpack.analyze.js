@@ -1,7 +1,11 @@
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+const webpackMerge = require("webpack-merge");
 
-module.exports = {
-  mode: "production",
-  plugins: [new BundleAnalyzerPlugin()]
+const productionConfig = require("./webpack.prod.js");
+
+module.exports = () => {
+  return webpackMerge(productionConfig, {
+    plugins: [new BundleAnalyzerPlugin()]
+  });
 };
