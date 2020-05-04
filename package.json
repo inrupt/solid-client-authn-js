@@ -7,6 +7,7 @@
   "files": [
     "dist"
   ],
+  "license": "Proprietary",
   "scripts": {
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
     "clean-module": "rm -rf ./dist",
