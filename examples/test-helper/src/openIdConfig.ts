@@ -1,7 +1,12 @@
 /**
- * Function to retieve the openid-configuration for the IDP
+ * Function to retrieve the openid-configuration for the IDP
  */
-export default function getOpenIdConfig(options: { issuer: string }): Object {
+
+export default function getOpenIdConfig(options: {
+  issuer: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}): Record<string, any> {
+  /* eslint-disable @typescript-eslint/camelcase */
   return {
     issuer: options.issuer,
     authorization_endpoint: `${options.issuer}/authorize`,
@@ -39,4 +44,5 @@ export default function getOpenIdConfig(options: { issuer: string }): Object {
     check_session_iframe: `${options.issuer}/session`,
     end_session_endpoint: `${options.issuer}/logout`
   };
+  /* eslint-enable @typescript-eslint/camelcase */
 }
