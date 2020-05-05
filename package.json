@@ -78,7 +78,7 @@
     "jose": "^1.26.1",
     "node-jose": "^1.1.3",
     "jsonwebtoken": "^8.5.1",
-    "lint-staged": "^10.2.1",
+    "lint-staged": "^10.2.2",
     "lodash": "^4.17.15",
     "react-native-jose": "git+https://github.com/hellojoko/react-native-jose.git",
     "reflect-metadata": "^0.1.13",
