@@ -84,7 +84,7 @@
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.1.0",
     "url-parse": "^1.4.7",
-    "uuid": "^7.0.3"
+    "uuid": "^8.0.0"
   },
   "husky": {
     "hooks": {
