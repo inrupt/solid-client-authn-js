@@ -82,7 +82,7 @@
     "lodash": "^4.17.15",
     "react-native-jose": "git+https://github.com/hellojoko/react-native-jose.git",
     "reflect-metadata": "^0.1.13",
-    "tsyringe": "^4.1.0",
+    "tsyringe": "^4.2.0",
     "url-parse": "^1.4.7",
     "uuid": "^7.0.3"
   },
