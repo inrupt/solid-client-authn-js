@@ -60,39 +60,49 @@ describe("DpopHeaderCreator", () => {
   describe("normalizeHtu", () => {
     [
       {
-        it: "should add a slash to the end of URLs",
+        it: "should not change a url",
         url: new URL("https://audience.com"),
-        expected: "https://audience.com/"
+        expected: "https://audience.com"
       },
       {
-        it: "should not add additional slashes to the end of URLs",
+        it: "should not change a URL with a slash at the end",
         url: new URL("https://audience.com/"),
         expected: "https://audience.com/"
       },
       {
         it: "should not include queries",
         url: new URL("https://audience.com?cool=stuff&dope=things"),
+        expected: "https://audience.com"
+      },
+      {
+        it: "should not include queries but still include a slash",
+        url: new URL("https://audience.com/?cool=stuff&dope=things"),
         expected: "https://audience.com/"
       },
       {
         it: "should not include hash",
         url: new URL("https://audience.com#throwBackThursday"),
+        expected: "https://audience.com"
+      },
+      {
+        it: "should not include hash but include the slash",
+        url: new URL("https://audience.com/#throwBackThursday"),
         expected: "https://audience.com/"
       },
       {
         it: "should include the path",
         url: new URL("https://audience.com/path"),
-        expected: "https://audience.com/path/"
+        expected: "https://audience.com/path"
       },
       {
         it: "should not include the username and password",
         url: new URL("https://jackson:badpassword@audience.com"),
-        expected: "https://audience.com/"
+        expected: "https://audience.com"
       },
       {
         it: "should include ports",
         url: new URL("https://localhost:8080/path"),
-        expected: "https://localhost:8080/path/"
+        expected: "https://localhost:8080/path"
       }
     ].forEach(test => {
       it(test.it, () => {
