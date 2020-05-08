@@ -26,10 +26,7 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
   ) {}
 
   public normalizeHtu(audience: URL): string {
-    const urlString = `${audience.origin}${audience.pathname}`;
-    return urlString.charAt(urlString.length - 1) === "/"
-      ? urlString
-      : `${urlString}/`;
+    return `${audience.origin}${audience.pathname}`;
   }
 
   async createHeaderToken(audience: URL, method: string): Promise<string> {
