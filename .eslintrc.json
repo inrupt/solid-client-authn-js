@@ -1,6 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "prettier"],
+  "plugins": ["@typescript-eslint", "prettier", "license-header"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
@@ -13,6 +13,7 @@
   "rules": {
     "prettier/prettier": "error",
     "@typescript-eslint/interface-name-prefix": ["error", "always"],
-    "import/no-unresolved": 0
+    "import/no-unresolved": 0,
+    "license-header/header": ["error", "./resources/license-header.js"]
   }
 }
