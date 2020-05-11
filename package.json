@@ -1,11 +1,13 @@
 {
   "name": "solid-auth-fetcher",
   "version": "0.0.0",
+  "license": "MIT",
   "main": "dist/index",
   "browser": "browserDist/solid-auth-fetcher.bundle.js",
   "types": "dist/index",
   "files": [
-    "dist"
+    "dist",
+    "LICENSE-DEPENDENCIES"
   ],
   "scripts": {
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
@@ -23,7 +25,7 @@
     "analyze-bundle": "npm run clean-browser && webpack --config webpack.config.js --env.env=analyze",
     "lint": "eslint src/**/*.ts && eslint __tests__/**/*.ts",
     "lint-fix": "eslint --config .eslintrc.json --fix \"src/**\" && eslint --config .eslintrc.json --fix \"__tests__/**/*.ts\"",
-    "licenses": "license-checker --csv --out NOTICE --failOn GPL",
+    "licenses": "license-checker --csv --out LICENSE-DEPENDENCIES --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
     "dev": "tsc-watch --preserveWatchOutput --noClear",
     "dev-server": "concurrently \"npm run dev\" \"npm run dev-test-helper\" \"cd examples/server && npm run dev\"",
     "dev-script": "concurrently \"npm run dev\" \"npm run dev-test-helper\" \"cd examples/script && npm run dev\"",
