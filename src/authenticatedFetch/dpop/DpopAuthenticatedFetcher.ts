@@ -32,6 +32,17 @@ import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 import { IStorageUtility } from "../../localStorage/StorageUtility";
 
+function flattenHeaders(
+  headersToFlatten: Headers | string[][] | Record<string, string> | undefined
+): Record<string, string> {
+  const flatHeaders: Record<string, string> = {};
+  const iterableHeaders = new Headers(headersToFlatten);
+  iterableHeaders.forEach((value, key) => {
+    flatHeaders[key] = value;
+  });
+  return flatHeaders;
+}
+
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
   constructor(
@@ -75,16 +86,14 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
       // perform unauthenticated fetch
       return this.fetcher.fetch(url, {
         ...requestInit,
-        headers: {
-          ...requestInitiWithDefaults.headers
-        }
+        headers: flattenHeaders(requestInitiWithDefaults?.headers)
       });
     }
 
     return this.fetcher.fetch(url, {
       ...requestInit,
       headers: {
-        ...requestInitiWithDefaults.headers,
+        ...flattenHeaders(requestInitiWithDefaults?.headers),
         authorization: `DPOP ${authToken}`,
         dpop: await this.dpopHeaderCreator.createHeaderToken(
           this.urlRepresentationConverter.requestInfoToUrl(url),
