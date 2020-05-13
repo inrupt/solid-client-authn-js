@@ -32,7 +32,7 @@ import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 import { IStorageUtility } from "../../localStorage/StorageUtility";
 
-function flattenHeaders(
+export function flattenHeaders(
   headersToFlatten: Headers | string[][] | Record<string, string> | undefined
 ): Record<string, string> {
   const flatHeaders: Record<string, string> = {};

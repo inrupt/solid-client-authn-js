@@ -24,6 +24,7 @@
  */
 import "reflect-metadata";
 import DpopAuthenticatedFetcher from "../../../src/authenticatedFetch/dpop/DpopAuthenticatedFetcher";
+import { flattenHeaders } from "../../../src/authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import URL from "url-parse";
 import {
   DpopHeaderCreatorMock,
@@ -127,7 +128,7 @@ describe("DpopAuthenticatedFetcher", () => {
       expect(response).toBe(FetcherMockResponse);
     });
 
-    it("Defaults to an unauthenticated request if the token isn't available", async () => {
+    it("defaults to an unauthenticated request if the token isn't available", async () => {
       defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
       const fetcher = FetcherMock;
       const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher({
@@ -141,6 +142,21 @@ describe("DpopAuthenticatedFetcher", () => {
       expect(fetcher.fetch).toHaveBeenCalledWith(url, {
         headers: {}
       });
+    });
+  });
+
+  describe("Headers interoperability function", () => {
+    it("transforms an incoming Headers object into a flat headers structure", () => {
+      const myHeaders = new Headers();
+      myHeaders.append("accept", "application/json");
+      myHeaders.append("content-type", "text/turtle");
+      const flatHeaders = flattenHeaders(myHeaders);
+      expect(flatHeaders["accept"]).toEqual("application/json");
+      expect(flatHeaders["content-type"]).toEqual("text/turtle");
+      expect(Object.entries(flatHeaders)).toEqual([
+        ["accept", "application/json"],
+        ["content-type", "text/turtle"]
+      ]);
     });
   });
 
