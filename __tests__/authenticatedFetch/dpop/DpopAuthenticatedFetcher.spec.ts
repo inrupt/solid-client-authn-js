@@ -151,8 +151,6 @@ describe("DpopAuthenticatedFetcher", () => {
       myHeaders.append("accept", "application/json");
       myHeaders.append("content-type", "text/turtle");
       const flatHeaders = flattenHeaders(myHeaders);
-      expect(flatHeaders["accept"]).toEqual("application/json");
-      expect(flatHeaders["content-type"]).toEqual("text/turtle");
       expect(Object.entries(flatHeaders)).toEqual([
         ["accept", "application/json"],
         ["content-type", "text/turtle"]
