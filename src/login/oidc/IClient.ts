@@ -19,25 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * Defines how OIDC login should proceed
- */
-import URL from "url-parse";
-import IIssuerConfig from "./IIssuerConfig";
-import IClient from "./IClient";
-
-/**
- * @issuer The URL of the IDP
- * @dpop True if a dpop compatible auth_token should be fetched
- * @redirectUrl The URL to which the user should be redirected after authorizing
- * @issuerConfiguration The openid-configuration of the issuer
- */
-export default interface IOidcOptions {
-  issuer: URL;
-  dpop: boolean;
-  redirectUrl: URL;
-  issuerConfiguration: IIssuerConfig;
-  client: IClient;
-  localUserId?: "global" | string;
-  doNotAutoRedirect?: boolean;
+export default interface IClient {
+  clientId: string;
+  clientSecret?: string;
 }

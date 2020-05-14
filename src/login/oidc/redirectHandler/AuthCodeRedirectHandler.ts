@@ -32,6 +32,7 @@ import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import formurlencoded from "form-urlencoded";
 import { ITokenSaver } from "./TokenSaver";
 import { IRedirector } from "../Redirector";
+import btoa from "btoa";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
@@ -56,7 +57,13 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
     const url = new URL(redirectUrl, true);
     const localUserId = url.query.state as string;
-    const [codeVerifier, issuer, clientId, redirectUri] = await Promise.all([
+    const [
+      codeVerifier,
+      issuer,
+      clientId,
+      redirectUri,
+      clientSecret
+    ] = await Promise.all([
       (await this.storageUtility.getForUser(
         localUserId,
         "codeVerifier",
@@ -76,6 +83,10 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         localUserId,
         "redirectUri",
         true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        localUserId,
+        "clientSecret"
       )) as string
     ]);
 
@@ -83,26 +94,37 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       new URL(issuer)
     )) as IIssuerConfig;
 
-    const tokenResponse = await (
-      await this.fetcher.fetch(issuerConfig.tokenEndpoint, {
-        method: "POST",
-        headers: {
-          DPoP: await this.dpopHeaderCreator.createHeaderToken(
-            issuerConfig.tokenEndpoint,
-            "POST"
-          ),
-          "content-type": "application/x-www-form-urlencoded"
-        },
-        /* eslint-disable @typescript-eslint/camelcase */
-        body: formurlencoded({
-          client_id: clientId as string,
-          grant_type: "authorization_code",
-          code_verifier: codeVerifier as string,
-          code: url.query.code as string,
-          redirect_uri: redirectUri as string
-        })
-        /* eslint-enable @typescript-eslint/camelcase */
+    const tokenRequestInit: RequestInit = {
+      method: "POST",
+      headers: {
+        DPoP: await this.dpopHeaderCreator.createHeaderToken(
+          issuerConfig.tokenEndpoint,
+          "POST"
+        ),
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      /* eslint-disable @typescript-eslint/camelcase */
+      body: formurlencoded({
+        client_id: clientId as string,
+        grant_type: "authorization_code",
+        code_verifier: codeVerifier as string,
+        code: url.query.code as string,
+        redirect_uri: redirectUri as string
       })
+      /* eslint-enable @typescript-eslint/camelcase */
+    };
+
+    if (clientSecret) {
+      console.log(clientId);
+      console.log(clientSecret);
+      (tokenRequestInit.headers as Record<
+        string,
+        string
+      >).Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
+    }
+
+    const tokenResponse = await (
+      await this.fetcher.fetch(issuerConfig.tokenEndpoint, tokenRequestInit)
     ).json();
 
     // TODO: should handle error if the token response is something strange

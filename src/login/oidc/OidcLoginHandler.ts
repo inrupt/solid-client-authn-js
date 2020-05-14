@@ -35,6 +35,7 @@ import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
 import ISolidSession from "../../solidSession/ISolidSession";
 import { IStorageUtility } from "../../localStorage/StorageUtility";
+import { IClientRegistrar } from "./ClientRegistrar";
 
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
@@ -44,11 +45,12 @@ export default class OidcLoginHandler implements ILoginHandler {
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("dpopClientKeyManager")
     private dpopClientKeyManager: IDpopClientKeyManager,
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   checkOptions(options: ILoginOptions): Error | null {
-    if (!options.oidcIssuer || !options.clientId || !options.redirect) {
+    if (!options.oidcIssuer || !options.redirect) {
       return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
     }
     return null;
@@ -79,7 +81,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       // TODO: This constrains this library to browsers. Figure out what to do with redirect
       redirectUrl: options.redirect as URL,
       issuerConfiguration: issuerConfig,
-      clientId: options.clientId as string,
+      client: await this.clientRegistrar.getClient(options, issuerConfig),
       localUserId: options.localUserId,
       doNotAutoRedirect: options.doNotAutoRedirect
     };

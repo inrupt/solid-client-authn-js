@@ -78,6 +78,9 @@ import Redirector, { IRedirector } from "./login/oidc/Redirector";
 import InactionRedirectHandler from "./login/oidc/redirectHandler/InactionRedirectHandler";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
+import ClientRegistrar, {
+  IClientRegistrar
+} from "./login/oidc/ClientRegistrar";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -166,6 +169,9 @@ container.register<IOidcHandler>("oidcHandlers", {
 });
 container.register<IRedirector>("redirector", {
   useClass: Redirector
+});
+container.register<IClientRegistrar>("clientRegistrar", {
+  useClass: ClientRegistrar
 });
 
 // Login/OIDC/redirectHandler

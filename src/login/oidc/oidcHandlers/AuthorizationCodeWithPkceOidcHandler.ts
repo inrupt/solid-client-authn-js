@@ -66,7 +66,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       response_type: "id_token code",
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       scope: "openid profile",
-      client_id: oidcLoginOptions.clientId,
+      client_id: oidcLoginOptions.client.clientId,
       code_challenge_method: "S256",
       code_challenge: await this.joseUtility.generateCodeChallenge(
         codeVerifier
@@ -90,13 +90,20 @@ export default class AuthorizationCodeWithPkceOidcHandler
     await this.storageUtility.setForUser(
       session.localUserId,
       "clientId",
-      oidcLoginOptions.clientId
+      oidcLoginOptions.client.clientId
     );
     await this.storageUtility.setForUser(
       session.localUserId,
       "redirectUri",
       oidcLoginOptions.redirectUrl.toString()
     );
+    if (oidcLoginOptions.client.clientSecret) {
+      await this.storageUtility.setForUser(
+        session.localUserId,
+        "clientSecret",
+        oidcLoginOptions.client.clientSecret
+      );
+    }
 
     session.neededAction = this.redirector.redirect(requestUrl.toString(), {
       doNotAutoRedirect: !!oidcLoginOptions.doNotAutoRedirect
