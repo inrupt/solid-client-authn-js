@@ -90,13 +90,13 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(session.neededAction).toMatchObject(RedirectorResponse);
     });
 
-    it("Handles login when a client secret is present", async () => {
+    it("handles login when a client secret is present", async () => {
       const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
         client: {
           ...standardOidcOptions.client,
-          clientSecret: "I'm can't cook because I only drink Soylent"
+          clientSecret: "I can't cook because I only drink Soylent"
         },
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
