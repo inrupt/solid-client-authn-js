@@ -35,8 +35,8 @@ class Form extends Component {
     super(props);
     this.state = {
       status: "loading",
-      loginIssuer: "https://oidc.dev.solid.nhs.janeirodigital.net",
-      fetchRoute: "http://localhost:10100/",
+      loginIssuer: "http://inrupt.net",
+      fetchRoute: "http://jackson.inrupt.net/",
       fetchBody: "",
       session: null
     };
