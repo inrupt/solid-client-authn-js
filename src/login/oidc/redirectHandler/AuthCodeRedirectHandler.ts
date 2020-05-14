@@ -32,7 +32,6 @@ import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import formurlencoded from "form-urlencoded";
 import { ITokenSaver } from "./TokenSaver";
 import { IRedirector } from "../Redirector";
-import btoa from "btoa";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
@@ -118,7 +117,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       (tokenRequestInit.headers as Record<
         string,
         string
-      >).Authorization = `Basic ${btoa(`${clientId}:${clientSecret}`)}`;
+      >).Authorization = `Basic ${this.btoa(`${clientId}:${clientSecret}`)}`;
     }
 
     const tokenResponse = await (
@@ -140,5 +139,9 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     });
 
     return session;
+  }
+
+  private btoa(str: string): string {
+    return Buffer.from(str.toString(), "binary").toString("base64");
   }
 }
