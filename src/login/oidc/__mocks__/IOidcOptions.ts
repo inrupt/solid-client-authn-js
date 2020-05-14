@@ -35,5 +35,7 @@ export const standardOidcOptions: IOidcOptions = {
     subjectTypesSupported: [],
     claimsSupported: []
   },
-  clientId: "coolApp"
+  client: {
+    clientId: "coolApp"
+  }
 };

@@ -32,6 +32,7 @@ export interface ICoreLoginInuptOptions {
   state?: string;
   clientId?: string;
   doNotAutoRedirect?: boolean;
+  clientName?: string;
 }
 
 export interface IIssuerLoginInputOptions extends ICoreLoginInuptOptions {
@@ -61,7 +62,8 @@ export const loginInputOptionsSchema = {
     popUpRedirectPath: { type: "string" },
     state: { type: "string" },
     clientId: { type: "string" },
-    doNotAutoRedirect: { type: "boolean" }
+    doNotAutoRedirect: { type: "boolean" },
+    clientName: { type: "string" }
   },
   oneOf: [{ required: ["oidcIssuer"] }, { required: ["webId"] }]
 };

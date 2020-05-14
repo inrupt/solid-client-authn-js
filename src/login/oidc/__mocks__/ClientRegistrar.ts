@@ -19,23 +19,18 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ILoginHandler from "../ILoginHandler";
-import { ILoggedOutSolidSession } from "../../solidSession/ISolidSession";
-import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
-import ILoginOptions from "../ILoginOptions";
+import { IClientRegistrar } from "../ClientRegistrar";
+import IClient from "../IClient";
+import ILoginOptions from "../../ILoginOptions";
+import IIssuerConfig from "../IIssuerConfig";
 
-export const LoginHandlerResponse: ILoggedOutSolidSession = {
-  loggedIn: false,
-  localUserId: "global",
-  neededAction: {
-    actionType: "redirect",
-    redirectUrl: "http://coolSite.com/redirect"
-  } as INeededRedirectAction
+export const ClientRegistrarResponse: IClient = {
+  clientId: "abcde",
+  clientSecret: "12345"
 };
 
-export const LoginHandlerMock: jest.Mocked<ILoginHandler> = {
-  canHandle: jest.fn((options: ILoginOptions) => Promise.resolve(true)),
-  handle: jest.fn((options: ILoginOptions) =>
-    Promise.resolve(LoginHandlerResponse)
+export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
+  getClient: jest.fn((options: ILoginOptions, issuerConfig: IIssuerConfig) =>
+    Promise.resolve(ClientRegistrarResponse)
   )
 };

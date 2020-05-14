@@ -24,6 +24,7 @@
  */
 import URL from "url-parse";
 import IIssuerConfig from "./IIssuerConfig";
+import IClient from "./IClient";
 
 /**
  * @issuer The URL of the IDP
@@ -36,7 +37,7 @@ export default interface IOidcOptions {
   dpop: boolean;
   redirectUrl: URL;
   issuerConfiguration: IIssuerConfig;
-  clientId: string;
+  client: IClient;
   localUserId?: "global" | string;
   doNotAutoRedirect?: boolean;
 }

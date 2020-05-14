@@ -24,10 +24,10 @@ import "reflect-metadata";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
-import IOidcHandler from "../../../src/login/oidc/IOidcHandler";
 import URL from "url-parse";
 import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
+import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
@@ -36,7 +36,8 @@ describe("OidcLoginHandler", () => {
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
     dpopClientKeyManager: DpopClientKeyManagerMock,
-    storageUtility: StorageUtilityMock
+    storageUtility: StorageUtilityMock,
+    clientRegistrar: ClientRegistrarMock
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -45,7 +46,8 @@ describe("OidcLoginHandler", () => {
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility,
+      mocks.clientRegistrar ?? defaultMocks.clientRegistrar
     );
   }
 

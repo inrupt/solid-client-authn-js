@@ -34,4 +34,5 @@ export default interface ILoginOptions {
   state?: string;
   clientId?: string;
   doNotAutoRedirect?: boolean;
+  clientName?: string;
 }

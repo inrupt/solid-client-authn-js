@@ -98,7 +98,7 @@
 "is-regexp@1.0.0","MIT","https://github.com/sindresorhus/is-regexp"
 "is-stream@2.0.0","MIT","https://github.com/sindresorhus/is-stream"
 "isexe@2.0.0","ISC","https://github.com/isaacs/isexe"
-"jose@1.26.1","MIT","https://github.com/panva/jose"
+"jose@1.27.0","MIT","https://github.com/panva/jose"
 "js-tokens@4.0.0","MIT","https://github.com/lydell/js-tokens"
 "json-parse-better-errors@1.0.2","MIT","https://github.com/zkat/json-parse-better-errors"
 "jsonwebtoken@8.5.1","MIT","https://github.com/auth0/node-jsonwebtoken"
