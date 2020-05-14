@@ -129,5 +129,44 @@ describe("AuthCodeRedirectHandler", () => {
         defaultMocks.tokenSaver.saveTokenAndGetSession
       ).toHaveBeenCalledWith("userId", "idToken", "accessToken");
     });
+
+    it("makes a code request with a Basic authorization header if a secret is present", async () => {
+      defaultMocks.storageUtility.getForUser
+        .mockResolvedValueOnce("a")
+        .mockResolvedValueOnce("b")
+        .mockResolvedValueOnce("c")
+        .mockResolvedValueOnce("d")
+        .mockResolvedValueOnce("e");
+      defaultMocks.fetcher.fetch.mockResolvedValueOnce(
+        /* eslint-disable @typescript-eslint/camelcase */
+        (new NodeResponse(
+          JSON.stringify({
+            id_token: "idToken",
+            access_token: "accessToken"
+          })
+        ) as unknown) as Response
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+      await authCodeRedirectHandler.handle(
+        "https://coolsite.com/?code=someCode&state=userId"
+      );
+      expect(defaultMocks.fetcher.fetch).toBeCalledWith(
+        IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
+        {
+          method: "POST",
+          headers: {
+            DPoP: DpopHeaderCreatorResponse,
+            "content-type": "application/x-www-form-urlencoded",
+            Authorization: "Basic Yzpl"
+          },
+          body:
+            "client_id=c&grant_type=authorization_code&code_verifier=a&code=someCode&redirect_uri=d"
+        }
+      );
+      expect(
+        defaultMocks.tokenSaver.saveTokenAndGetSession
+      ).toHaveBeenCalledWith("userId", "idToken", "accessToken");
+    });
   });
 });

@@ -115,8 +115,6 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     };
 
     if (clientSecret) {
-      console.log(clientId);
-      console.log(clientSecret);
       (tokenRequestInit.headers as Record<
         string,
         string
