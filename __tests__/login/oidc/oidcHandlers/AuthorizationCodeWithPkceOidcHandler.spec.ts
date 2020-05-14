@@ -96,7 +96,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         ...standardOidcOptions,
         client: {
           ...standardOidcOptions.client,
-          clientSecret: "I'm can't cook because I only drink Soylent"
+          clientSecret: "I can't cook because I only drink Soylent"
         },
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
