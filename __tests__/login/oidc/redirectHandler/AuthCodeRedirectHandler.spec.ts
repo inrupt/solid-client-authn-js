@@ -20,10 +20,7 @@
  */
 
 import "reflect-metadata";
-import {
-  TokenSaverMock,
-  TokenSaverSaveTokenAndGetSessionResponse
-} from "../../../../src/login/oidc/redirectHandler/__mocks__/TokenSaver";
+import { TokenSaverMock } from "../../../../src/login/oidc/redirectHandler/__mocks__/TokenSaver";
 import { StorageUtilityMock } from "../../../../src/localStorage/__mocks__/StorageUtility";
 import {
   IssuerConfigFetcherMock,
@@ -100,7 +97,8 @@ describe("AuthCodeRedirectHandler", () => {
         .mockResolvedValueOnce("a")
         .mockResolvedValueOnce("b")
         .mockResolvedValueOnce("c")
-        .mockResolvedValueOnce("d");
+        .mockResolvedValueOnce("d")
+        .mockResolvedValueOnce(null);
       defaultMocks.fetcher.fetch.mockResolvedValueOnce(
         /* eslint-disable @typescript-eslint/camelcase */
         (new NodeResponse(
