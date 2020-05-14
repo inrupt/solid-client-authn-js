@@ -36,14 +36,6 @@ export interface IClientRegistrar {
 export default class ClientRegistrar implements IClientRegistrar {
   constructor(@inject("fetcher") private fetcher: IFetcher) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private clientResponseToClientObject(response: Record<string, any>): IClient {
-    return {
-      clientId: response.client_id,
-      clientSecret: response.client_secret
-    };
-  }
-
   private async performDynamicRegistration(
     options: ILoginOptions,
     issuerConfig: IIssuerConfig
@@ -76,7 +68,11 @@ export default class ClientRegistrar implements IClientRegistrar {
     if (!response.ok) {
       throw new Error(`Login Registration Error: ${await response.text()}`);
     }
-    return this.clientResponseToClientObject(await response.json());
+    const responseBody = await response.json();
+    return {
+      clientId: responseBody.client_id,
+      clientSecret: responseBody.client_secret
+    };
   }
 
   async getClient(
