@@ -23,7 +23,7 @@
  * Handler for the Authorization Code with PKCE Flow
  */
 import IOidcHandler from "../IOidcHandler";
-import IOidcOptions from "../IOidcOptions";
+import IOidcOptions, { IAccessTokenOidcOptions } from "../IOidcOptions";
 import URL from "url-parse";
 import ISolidSession from "../../../solidSession/ISolidSession";
 import { injectable, inject } from "tsyringe";
@@ -52,6 +52,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
+    oidcLoginOptions = oidcLoginOptions as IAccessTokenOidcOptions;
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
@@ -65,7 +66,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const query: { [key: string]: string } = {
       response_type: "id_token code",
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
-      scope: "openid profile",
+      scope: "openid profile offline_access",
       client_id: oidcLoginOptions.client.clientId,
       code_challenge_method: "S256",
       code_challenge: await this.joseUtility.generateCodeChallenge(
