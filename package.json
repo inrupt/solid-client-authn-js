@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-auth-fetcher",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "main": "dist/index",
   "browser": "browserDist/solid-auth-fetcher.bundle.js",
