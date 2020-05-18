@@ -31,12 +31,13 @@ import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 import { IStorageUtility } from "../../localStorage/StorageUtility";
+import { Headers as NodeHeaders } from "cross-fetch";
 
 export function flattenHeaders(
   headersToFlatten: Headers | string[][] | Record<string, string> | undefined
 ): Record<string, string> {
   const flatHeaders: Record<string, string> = {};
-  const iterableHeaders = new Headers(headersToFlatten);
+  const iterableHeaders = new NodeHeaders(headersToFlatten);
   iterableHeaders.forEach((value, key) => {
     flatHeaders[key] = value;
   });
