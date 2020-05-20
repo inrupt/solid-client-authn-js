@@ -25,7 +25,6 @@
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
 import ConfigurationError from "../../errors/ConfigurationError";
-import IDpopRequestCredentials from "../../dpop/IDpopRequestCredentials";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";

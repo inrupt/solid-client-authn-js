@@ -32,7 +32,7 @@ import IClient from "./IClient";
  * @redirectUrl The URL to which the user should be redirected after authorizing
  * @issuerConfiguration The openid-configuration of the issuer
  */
-type IOidcOptions = IAccessTokenOidcOptions | IRefreshTokenOidcOptions;
+type IOidcOptions = IAccessTokenOidcOptions;
 export default IOidcOptions;
 
 export interface ICoreOidcOptions {
@@ -46,8 +46,4 @@ export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
   doNotAutoRedirect?: boolean;
   dpop: boolean;
   redirectUrl: URL;
-}
-
-export interface IRefreshTokenOidcOptions extends ICoreOidcOptions {
-  refreshToken: string;
 }
