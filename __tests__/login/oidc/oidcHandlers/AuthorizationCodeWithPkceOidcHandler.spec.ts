@@ -84,7 +84,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
-        "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global",
+        "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile%20offline_access&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global",
         { doNotAutoRedirect: false }
       );
       expect(session.neededAction).toMatchObject(RedirectorResponse);
@@ -109,7 +109,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
-        "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global",
+        "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile%20offline_access&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global",
         { doNotAutoRedirect: false }
       );
       expect(session.neededAction).toMatchObject(RedirectorResponse);
