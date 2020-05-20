@@ -39,6 +39,7 @@ import {
   StorageUtilityMock,
   StorageUtilityGetResponse
 } from "../../../src/localStorage/__mocks__/StorageUtility";
+import { Headers as NodeHeaders } from "node-fetch";
 
 describe("DpopAuthenticatedFetcher", () => {
   const defaultMocks = {
@@ -147,9 +148,15 @@ describe("DpopAuthenticatedFetcher", () => {
 
   describe("Headers interoperability function", () => {
     it("transforms an incoming Headers object into a flat headers structure", () => {
-      const myHeaders = new Headers();
+      const myHeaders = new NodeHeaders();
       myHeaders.append("accept", "application/json");
       myHeaders.append("content-type", "text/turtle");
+      // The following needs to be ignored because `node-fetch::Headers` and
+      // `lib.dom.d.ts::Headers` don't align. It doesn't break the way we
+      // use them currently, but it's something that must be cleaned up
+      // at some point.
+      // eslint-disable-next-line
+      // @ts-ignore
       const flatHeaders = flattenHeaders(myHeaders);
       expect(Object.entries(flatHeaders)).toEqual([
         ["accept", "application/json"],

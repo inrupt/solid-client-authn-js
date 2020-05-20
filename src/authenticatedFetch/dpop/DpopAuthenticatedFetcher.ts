@@ -31,16 +31,84 @@ import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 import { IStorageUtility } from "../../localStorage/StorageUtility";
-import { Headers as NodeHeaders } from "cross-fetch";
 
+/**
+ * @internal
+ * This method is a temporary fix: as per the MDN spec (https://developer.mozilla.org/en-US/docs/Web/API/Headers),
+ * the Headers object should have a `.keys()` method. It turns out that some implementations
+ * do not implement this method, so this check is necessary to verify how to access
+ * the header's content.
+ * @param headers A header potentially of the type provided by LDflex-Comunica
+ */
+function hasKeys(
+  headers: Headers | string[][] | Record<string, string> | undefined | unknown
+): headers is Headers | string[][] {
+  return (
+    // eslint-disable-next-line
+    // @ts-ignore
+    headers !== undefined && headers.keys !== undefined
+  );
+}
+
+/**
+ * @internal
+ * This method is a temporary fix: we receive from LDflex-Comunica an object
+ * that is not conform to the Headers interface. This mitigates the issue
+ * until a cleaner fix is found. This method may be seen as a type guard for
+ * a LDflex-Comunica header.
+ * @param headers A header potentially of the type provided by LDflex-Comunica
+ */
+function hasRawGetter(
+  // The 'any' type here is needed because no type definition covers properly
+  // the headers object we want to check against here.
+  // eslint-disable-next-line
+  headers: any
+): boolean {
+  return (
+    // eslint-disable-next-line
+    // @ts-ignore
+    headers !== undefined && headers.raw !== undefined
+  );
+}
+
+/**
+ * @internal
+ * This function feels unnecessarily complicated, but is required in order to
+ * have Headers according to type definitions in both Node and browser environments.
+ * This might require a fix upstream to be cleaned up.
+ *
+ * @param headersToFlatten A structure containing headers potentially in several formats
+ */
 export function flattenHeaders(
   headersToFlatten: Headers | string[][] | Record<string, string> | undefined
 ): Record<string, string> {
+  if (headersToFlatten === undefined) {
+    return {};
+  }
   const flatHeaders: Record<string, string> = {};
-  const iterableHeaders = new NodeHeaders(headersToFlatten);
-  iterableHeaders.forEach((value, key) => {
-    flatHeaders[key] = value;
-  });
+  if (!hasKeys(headersToFlatten)) {
+    if (hasRawGetter(headersToFlatten)) {
+      // This is needed because the headers object passed by Comunica do not
+      // align with either `node-fetch::Headers` or `lib.dom.d.ts::Headers`,
+      // and gets mangled if passed as is to cross-fetch.
+      // eslint-disable-next-line
+      // @ts-ignore
+      return headersToFlatten.raw();
+    } else {
+      return headersToFlatten as Record<string, string>;
+    }
+  } else {
+    // headersToFlatten.keys() SHOULD be valid as per the Headers spec. This seems to be an issue
+    // in lib.dom.d.ts that will need some investigation and potentially a contrib upstream.
+    // eslint-disable-next-line
+    // @ts-ignore
+    for (const key of headersToFlatten.keys()) {
+      // Similar as the previous @ts-ignore
+      // eslint-disable-next-line
+      // @ts-ignore
+      flatHeaders[key] = headersToFlatten.get(key);
+    }
+  }
   return flatHeaders;
 }
 
