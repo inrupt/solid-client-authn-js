@@ -28,6 +28,7 @@ import AuthFetcher from "./AuthFetcher";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
+import UnauthenticatedFetcher from "./authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
 import ILoginHandler from "./login/ILoginHandler";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 import IStorage from "./localStorage/IStorage";
@@ -122,6 +123,9 @@ container.register<IAuthenticatedFetcher>("authenticatedFetchers", {
 });
 container.register<IAuthenticatedFetcher>("authenticatedFetchers", {
   useClass: BearerAuthenticatedFetcher
+});
+container.register<IAuthenticatedFetcher>("authenticatedFetchers", {
+  useClass: UnauthenticatedFetcher
 });
 
 // Login
