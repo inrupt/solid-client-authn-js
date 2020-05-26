@@ -56,7 +56,7 @@
     "node-fetch": "^2.6.0",
     "prettier": "^1.19.1",
     "ts-jest": "^25.5.1",
-    "ts-loader": "^7.0.4",
+    "ts-loader": "^7.0.5",
     "tsc-watch": "^4.2.8",
     "typescript": "^3.9.3",
     "webpack": "^4.41.6",
