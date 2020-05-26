@@ -124,7 +124,20 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       await this.fetcher.fetch(issuerConfig.tokenEndpoint, tokenRequestInit)
     ).json();
 
-    // TODO: should handle error if the token response is something strange
+    // Check the response
+    if (
+      !(
+        tokenResponse &&
+        tokenResponse.access_token &&
+        tokenResponse.id_token &&
+        typeof tokenResponse.access_token === "string" &&
+        typeof tokenResponse.id_token === "string" &&
+        (!tokenResponse.refresh_token ||
+          typeof tokenResponse.refresh_token === "string")
+      )
+    ) {
+      throw new Error("IDP /token route returned an invalid response.");
+    }
 
     const session = await this.tokenSaver.saveTokenAndGetSession(
       localUserId,

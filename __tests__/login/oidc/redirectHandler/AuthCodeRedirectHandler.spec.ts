@@ -130,6 +130,56 @@ describe("AuthCodeRedirectHandler", () => {
       ).toHaveBeenCalledWith("userId", "idToken", "accessToken", undefined);
     });
 
+    it("throws an error if the idp returns bad data", async () => {
+      defaultMocks.storageUtility.getForUser
+        .mockResolvedValueOnce("a")
+        .mockResolvedValueOnce("b")
+        .mockResolvedValueOnce("c")
+        .mockResolvedValueOnce("d")
+        .mockResolvedValueOnce(null);
+      defaultMocks.fetcher.fetch.mockResolvedValueOnce(
+        /* eslint-disable @typescript-eslint/camelcase */
+        (new NodeResponse(
+          JSON.stringify({
+            id_token: "onTheIdTokenIsHere"
+          })
+        ) as unknown) as Response
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://coolsite.com/?code=someCode&state=userId"
+        )
+      ).rejects.toThrowError("IDP /token route returned an invalid response.");
+    });
+
+    it("throws an error if the idp provides a refresh token that is not a string", async () => {
+      defaultMocks.storageUtility.getForUser
+        .mockResolvedValueOnce("a")
+        .mockResolvedValueOnce("b")
+        .mockResolvedValueOnce("c")
+        .mockResolvedValueOnce("d")
+        .mockResolvedValueOnce(null);
+      defaultMocks.fetcher.fetch.mockResolvedValueOnce(
+        /* eslint-disable @typescript-eslint/camelcase */
+        (new NodeResponse(
+          JSON.stringify({
+            id_token: "idToken",
+            access_token: "access_token",
+            refresh_token: { this: "is not a string" }
+          })
+        ) as unknown) as Response
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://coolsite.com/?code=someCode&state=userId"
+        )
+      ).rejects.toThrowError("IDP /token route returned an invalid response.");
+    });
+
     it("makes a code request with a Basic authorization header if a secret is present", async () => {
       defaultMocks.storageUtility.getForUser
         .mockResolvedValueOnce("a")
