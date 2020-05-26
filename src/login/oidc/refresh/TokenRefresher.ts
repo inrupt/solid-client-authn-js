@@ -26,7 +26,6 @@ import { IIssuerConfigFetcher } from "../IssuerConfigFetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import URL from "url-parse";
 import formurlencoded from "form-urlencoded";
-import { ITokenSaver } from "../redirectHandler/TokenSaver";
 
 export interface ITokenRefresher {
   refresh(localUserId: string): Promise<void>;
@@ -68,7 +67,9 @@ export default class TokenRefresher implements ITokenRefresher {
     }
 
     // Perform refresh token flow
-    const tokenRequestInit: RequestInit = {
+    const tokenRequestInit: RequestInit & {
+      headers: Record<string, string>;
+    } = {
       method: "POST",
       headers: {
         DPoP: await this.dpopHeaderCreator.createHeaderToken(
@@ -87,15 +88,29 @@ export default class TokenRefresher implements ITokenRefresher {
     };
 
     if (clientSecret) {
-      (tokenRequestInit.headers as Record<
-        string,
-        string
-      >).Authorization = `Basic ${this.btoa(`${clientId}:${clientSecret}`)}`;
+      tokenRequestInit.headers.Authorization = `Basic ${this.btoa(
+        `${clientId}:${clientSecret}`
+      )}`;
     }
 
     const tokenResponse = await (
       await this.fetcher.fetch(issuerConfig.tokenEndpoint, tokenRequestInit)
     ).json();
+
+    // Check the response
+    if (
+      !(
+        tokenResponse &&
+        tokenResponse.access_token &&
+        tokenResponse.id_token &&
+        typeof tokenResponse.access_token === "string" &&
+        typeof tokenResponse.id_token === "string" &&
+        (!tokenResponse.refresh_token ||
+          typeof tokenResponse.refresh_token === "string")
+      )
+    ) {
+      throw new Error("IDP /token route returned an invalid response.");
+    }
 
     await this.storageUtility.setForUser(
       localUserId,

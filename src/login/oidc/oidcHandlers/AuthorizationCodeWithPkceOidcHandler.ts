@@ -23,7 +23,7 @@
  * Handler for the Authorization Code with PKCE Flow
  */
 import IOidcHandler from "../IOidcHandler";
-import IOidcOptions, { IAccessTokenOidcOptions } from "../IOidcOptions";
+import IOidcOptions from "../IOidcOptions";
 import URL from "url-parse";
 import ISolidSession from "../../../solidSession/ISolidSession";
 import { injectable, inject } from "tsyringe";
@@ -52,7 +52,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
-    oidcLoginOptions = oidcLoginOptions as IAccessTokenOidcOptions;
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
