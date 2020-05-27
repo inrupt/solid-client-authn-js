@@ -20,40 +20,27 @@
  */
 
 import "reflect-metadata";
-import { TokenSaverMock } from "../../../../src/login/oidc/redirectHandler/__mocks__/TokenSaver";
 import { StorageUtilityMock } from "../../../../src/localStorage/__mocks__/StorageUtility";
-import {
-  IssuerConfigFetcherMock,
-  IssuerConfigFetcherFetchConfigResponse
-} from "../../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
-import {
-  DpopHeaderCreatorMock,
-  DpopHeaderCreatorResponse
-} from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
-import { Response as NodeResponse } from "node-fetch";
+import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
+import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
 
 describe("AuthCodeRedirectHandler", () => {
   const defaultMocks = {
     storageUtility: StorageUtilityMock,
-    issuerConfigFetcher: IssuerConfigFetcherMock,
-    fetcher: FetcherMock,
-    dpopHeaderCreator: DpopHeaderCreatorMock,
-    tokenSaver: TokenSaverMock,
-    redirector: RedirectorMock
+    redirector: RedirectorMock,
+    tokenRequester: TokenRequesterMock,
+    sessionCreator: SessionCreatorMock
   };
   function getAuthCodeRedirectHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): AuthCodeRedirectHandler {
     return new AuthCodeRedirectHandler(
       mocks.storageUtility ?? defaultMocks.storageUtility,
-      mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-      mocks.fetcher ?? defaultMocks.fetcher,
-      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
-      mocks.tokenSaver ?? defaultMocks.tokenSaver,
-      mocks.redirector ?? defaultMocks.redirector
+      mocks.redirector ?? defaultMocks.redirector,
+      mocks.tokenRequester ?? defaultMocks.tokenRequester,
+      mocks.sessionCreator ?? defaultMocks.sessionCreator
     );
   }
 
@@ -95,78 +82,41 @@ describe("AuthCodeRedirectHandler", () => {
     it("Makes a code request to the correct place", async () => {
       defaultMocks.storageUtility.getForUser
         .mockResolvedValueOnce("a")
-        .mockResolvedValueOnce("b")
-        .mockResolvedValueOnce("c")
-        .mockResolvedValueOnce("d")
-        .mockResolvedValueOnce(null);
-      defaultMocks.fetcher.fetch.mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
-        (new NodeResponse(
-          JSON.stringify({
-            id_token: "idToken",
-            access_token: "accessToken"
-          })
-        ) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
-      );
+        .mockResolvedValueOnce("b");
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=userId"
       );
-      expect(defaultMocks.fetcher.fetch).toBeCalledWith(
-        IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
+      expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith(
+        "userId",
+        /* eslint-disable @typescript-eslint/camelcase */
         {
-          method: "POST",
-          headers: {
-            DPoP: DpopHeaderCreatorResponse,
-            "content-type": "application/x-www-form-urlencoded"
-          },
-          body:
-            "client_id=c&grant_type=authorization_code&code_verifier=a&code=someCode&redirect_uri=d"
+          code: "someCode",
+          code_verifier: "a",
+          grant_type: "authorization_code",
+          redirect_uri: "b"
+        }
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
+        "https://coolsite.com/",
+        {
+          redirectByReplacingState: true
         }
       );
-      expect(
-        defaultMocks.tokenSaver.saveTokenAndGetSession
-      ).toHaveBeenCalledWith("userId", "idToken", "accessToken");
     });
 
-    it("makes a code request with a Basic authorization header if a secret is present", async () => {
+    it("Fails if a session was not retrieved", async () => {
       defaultMocks.storageUtility.getForUser
         .mockResolvedValueOnce("a")
-        .mockResolvedValueOnce("b")
-        .mockResolvedValueOnce("c")
-        .mockResolvedValueOnce("d")
-        .mockResolvedValueOnce("e");
-      defaultMocks.fetcher.fetch.mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
-        (new NodeResponse(
-          JSON.stringify({
-            id_token: "idToken",
-            access_token: "accessToken"
-          })
-        ) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
-      );
+        .mockResolvedValueOnce("b");
+      defaultMocks.sessionCreator.getSession.mockResolvedValueOnce(null);
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
-      await authCodeRedirectHandler.handle(
-        "https://coolsite.com/?code=someCode&state=userId"
-      );
-      expect(defaultMocks.fetcher.fetch).toBeCalledWith(
-        IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
-        {
-          method: "POST",
-          headers: {
-            DPoP: DpopHeaderCreatorResponse,
-            "content-type": "application/x-www-form-urlencoded",
-            Authorization: "Basic Yzpl"
-          },
-          body:
-            "client_id=c&grant_type=authorization_code&code_verifier=a&code=someCode&redirect_uri=d"
-        }
-      );
-      expect(
-        defaultMocks.tokenSaver.saveTokenAndGetSession
-      ).toHaveBeenCalledWith("userId", "idToken", "accessToken");
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://coolsite.com/?code=someCode&state=userId"
+        )
+      ).rejects.toThrowError("There was a problem creating a session.");
     });
   });
 });

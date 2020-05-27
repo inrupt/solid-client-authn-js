@@ -19,31 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * Defines how OIDC login should proceed
- */
-import URL from "url-parse";
-import IIssuerConfig from "./IIssuerConfig";
-import IClient from "./IClient";
+import { ITokenRequester } from "../TokenRequester";
 
-/**
- * @issuer The URL of the IDP
- * @dpop True if a dpop compatible auth_token should be fetched
- * @redirectUrl The URL to which the user should be redirected after authorizing
- * @issuerConfiguration The openid-configuration of the issuer
- */
-type IOidcOptions = IAccessTokenOidcOptions;
-export default IOidcOptions;
-
-export interface ICoreOidcOptions {
-  issuer: URL;
-  issuerConfiguration: IIssuerConfig;
-  client: IClient;
-  localUserId?: "global" | string;
-}
-
-export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
-  doNotAutoRedirect?: boolean;
-  dpop: boolean;
-  redirectUrl: URL;
-}
+export const TokenRequesterMock: jest.Mocked<ITokenRequester> = {
+  request: jest.fn((localUserId: string, body: Record<string, string>) => {
+    return Promise.resolve();
+  })
+};

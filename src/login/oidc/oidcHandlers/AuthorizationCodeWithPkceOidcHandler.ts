@@ -65,7 +65,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const query: { [key: string]: string } = {
       response_type: "id_token code",
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
-      scope: "openid profile",
+      scope: "openid profile offline_access",
       client_id: oidcLoginOptions.client.clientId,
       code_challenge_method: "S256",
       code_challenge: await this.joseUtility.generateCodeChallenge(

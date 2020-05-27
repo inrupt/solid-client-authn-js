@@ -19,31 +19,33 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * Defines how OIDC login should proceed
- */
-import URL from "url-parse";
-import IIssuerConfig from "./IIssuerConfig";
-import IClient from "./IClient";
+import { injectable, inject } from "tsyringe";
+import { IStorageUtility } from "../../../localStorage/StorageUtility";
+import { ITokenRequester } from "../TokenRequester";
 
-/**
- * @issuer The URL of the IDP
- * @dpop True if a dpop compatible auth_token should be fetched
- * @redirectUrl The URL to which the user should be redirected after authorizing
- * @issuerConfiguration The openid-configuration of the issuer
- */
-type IOidcOptions = IAccessTokenOidcOptions;
-export default IOidcOptions;
-
-export interface ICoreOidcOptions {
-  issuer: URL;
-  issuerConfiguration: IIssuerConfig;
-  client: IClient;
-  localUserId?: "global" | string;
+export interface ITokenRefresher {
+  refresh(localUserId: string): Promise<void>;
 }
 
-export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
-  doNotAutoRedirect?: boolean;
-  dpop: boolean;
-  redirectUrl: URL;
+@injectable()
+export default class TokenRefresher implements ITokenRefresher {
+  constructor(
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("tokenRequester") private tokenRequester: ITokenRequester
+  ) {}
+
+  async refresh(localUserId: string): Promise<void> {
+    // Get the refresh token and the issuer
+    const refreshToken = await this.storageUtility.getForUser(
+      localUserId,
+      "refreshToken",
+      true
+    );
+    /* eslint-disable @typescript-eslint/camelcase */
+    await this.tokenRequester.request(localUserId, {
+      grant_type: "refresh_token",
+      refresh_token: refreshToken as string // This cast can be safely made because getForUser will error if refreshToken is null
+    });
+    /* eslint-enable @typescript-eslint/camelcase */
+  }
 }
