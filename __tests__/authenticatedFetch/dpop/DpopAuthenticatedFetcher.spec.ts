@@ -24,7 +24,6 @@
  */
 import "reflect-metadata";
 import DpopAuthenticatedFetcher from "../../../src/authenticatedFetch/dpop/DpopAuthenticatedFetcher";
-import { flattenHeaders } from "../../../src/authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import URL from "url-parse";
 import {
   DpopHeaderCreatorMock,
@@ -127,35 +126,49 @@ describe("DpopAuthenticatedFetcher", () => {
       });
       expect(response).toBe(FetcherMockResponse);
     });
-
-    it("defaults to an unauthenticated request if the token isn't available", async () => {
-      defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
-      const fetcher = FetcherMock;
-      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher({
-        fetcher: fetcher
-      });
-      const url = "http://someurl.com";
-      await dpopAuthenticatedFetcher.handle(
-        { type: "dpop", localUserId: "global" },
-        url
-      );
-      expect(fetcher.fetch).toHaveBeenCalledWith(url, {
-        headers: {}
-      });
-    });
   });
 
-  describe("Headers interoperability function", () => {
-    it("transforms an incoming Headers object into a flat headers structure", () => {
-      const myHeaders = new Headers();
-      myHeaders.append("accept", "application/json");
-      myHeaders.append("content-type", "text/turtle");
-      const flatHeaders = flattenHeaders(myHeaders);
-      expect(Object.entries(flatHeaders)).toEqual([
-        ["accept", "application/json"],
-        ["content-type", "text/turtle"]
-      ]);
+  it("preserves the request headers", async () => {
+    const dpopHeaderCreator = DpopHeaderCreatorMock;
+    const fetcher = FetcherMock;
+    const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher({
+      dpopHeaderCreator: dpopHeaderCreator,
+      fetcher: fetcher
     });
+    const url = new URL("https://example.com");
+    const requestCredentials = {
+      type: "dpop",
+      localUserId: "global"
+    };
+    const init = { headers: { Accept: "text/turtle" } };
+    const response = await dpopAuthenticatedFetcher.handle(
+      requestCredentials,
+      url.toString(),
+      init
+    );
+    expect(dpopHeaderCreator.createHeaderToken).toHaveBeenCalledWith(
+      url,
+      "GET"
+    );
+    expect(fetcher.fetch).toHaveBeenCalledWith(url.toString(), {
+      headers: {
+        authorization: `DPOP ${StorageUtilityGetResponse}`,
+        dpop: DpopHeaderCreatorResponse,
+        Accept: "text/turtle"
+      }
+    });
+    expect(response).toBe(FetcherMockResponse);
+  });
+
+  it("Throws an error if the token isn't available", async () => {
+    defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
+    const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
+    await expect(
+      dpopAuthenticatedFetcher.handle(
+        { type: "dpop", localUserId: "global" },
+        "http://someurl.com"
+      )
+    ).rejects.toThrowError("cannot handle");
   });
 
   // TODO: Create a test Where no init is provided
