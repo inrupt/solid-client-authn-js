@@ -86,6 +86,7 @@ import TokenRefresher, {
   ITokenRefresher
 } from "./login/oidc/refresh/TokenRefresher";
 import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetcher";
+import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -183,6 +184,9 @@ container.register<IRedirector>("redirector", {
 });
 container.register<IClientRegistrar>("clientRegistrar", {
   useClass: ClientRegistrar
+});
+container.register<ITokenRequester>("tokenRequester", {
+  useClass: TokenRequester
 });
 
 // Login/OIDC/redirectHandler

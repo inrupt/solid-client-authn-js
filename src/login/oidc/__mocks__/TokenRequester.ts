@@ -19,33 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { injectable, inject } from "tsyringe";
-import { IStorageUtility } from "../../../localStorage/StorageUtility";
 import { ITokenRequester } from "../TokenRequester";
 
-export interface ITokenRefresher {
-  refresh(localUserId: string): Promise<void>;
-}
-
-@injectable()
-export default class TokenRefresher implements ITokenRefresher {
-  constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("tokenRequester") private tokenRequester: ITokenRequester
-  ) {}
-
-  async refresh(localUserId: string): Promise<void> {
-    // Get the refresh token and the issuer
-    const refreshToken = await this.storageUtility.getForUser(
-      localUserId,
-      "refreshToken",
-      true
-    );
-    /* eslint-disable @typescript-eslint/camelcase */
-    await this.tokenRequester.request(localUserId, {
-      grant_type: "refresh_token",
-      refresh_token: refreshToken as string // This cast can be safely made because getForUser will error if refreshToken is null
-    });
-    /* eslint-enable @typescript-eslint/camelcase */
-  }
-}
+export const TokenRequesterMock: jest.Mocked<ITokenRequester> = {
+  request: jest.fn((localUserId: string, body: Record<string, string>) => {
+    return Promise.resolve();
+  })
+};
