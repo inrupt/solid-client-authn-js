@@ -127,7 +127,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
       expect(
         defaultMocks.tokenSaver.saveTokenAndGetSession
-      ).toHaveBeenCalledWith("userId", "idToken", "accessToken");
+      ).toHaveBeenCalledWith("userId", "idToken", "accessToken", undefined);
     });
 
     it("makes a code request with a Basic authorization header if a secret is present", async () => {
@@ -166,7 +166,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
       expect(
         defaultMocks.tokenSaver.saveTokenAndGetSession
-      ).toHaveBeenCalledWith("userId", "idToken", "accessToken");
+      ).toHaveBeenCalledWith("userId", "idToken", "accessToken", undefined);
     });
   });
 });

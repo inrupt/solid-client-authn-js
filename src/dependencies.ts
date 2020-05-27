@@ -82,6 +82,10 @@ import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLogi
 import ClientRegistrar, {
   IClientRegistrar
 } from "./login/oidc/ClientRegistrar";
+import TokenRefresher, {
+  ITokenRefresher
+} from "./login/oidc/refresh/TokenRefresher";
+import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetcher";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -116,6 +120,9 @@ container.register<ISessionCreator>("sessionCreator", {
 
 // Authenticated Fetcher
 container.register<IAuthenticatedFetcher>("authenticatedFetcher", {
+  useClass: AutomaticRefreshFetcher
+});
+container.register<IAuthenticatedFetcher>("aggregateAuthenticatedFetcher", {
   useClass: AggregateAuthenticatedFetcher
 });
 container.register<IAuthenticatedFetcher>("authenticatedFetchers", {
@@ -198,6 +205,11 @@ container.register<ITokenSaver>("tokenSaver", {
 // Login/OIDC/Issuer
 container.register<IIssuerConfigFetcher>("issuerConfigFetcher", {
   useClass: IssuerConfigFetcher
+});
+
+// Login/OIDC/Refresh
+container.register<ITokenRefresher>("tokenRefresher", {
+  useClass: TokenRefresher
 });
 
 // Logout

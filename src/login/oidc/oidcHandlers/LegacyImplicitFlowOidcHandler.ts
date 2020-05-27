@@ -23,7 +23,7 @@
  * Handler for the Legacy Implicit Flow
  */
 import IOidcHandler from "../IOidcHandler";
-import IOidcOptions from "../IOidcOptions";
+import IOidcOptions, { IAccessTokenOidcOptions } from "../IOidcOptions";
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";

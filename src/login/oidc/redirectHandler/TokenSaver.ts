@@ -30,7 +30,8 @@ export interface ITokenSaver {
   saveTokenAndGetSession(
     localUserId: string,
     idToken: string,
-    accessToken?: string
+    accessToken?: string,
+    refreshToken?: string
   ): Promise<ISolidSession>;
 }
 
@@ -45,7 +46,8 @@ export default class TokenSaver implements ITokenSaver {
   async saveTokenAndGetSession(
     localUserId: string,
     idToken: string,
-    accessToken?: string
+    accessToken?: string,
+    refreshToken?: string
   ): Promise<ISolidSession> {
     const decoded = await this.joseUtility.decodeJWT(
       // TODO this should actually be the id_vc of the token
@@ -75,6 +77,11 @@ export default class TokenSaver implements ITokenSaver {
       session.localUserId,
       "webId",
       decoded.sub as string
+    );
+    await this.storageUtility.setForUser(
+      session.localUserId,
+      "refreshToken",
+      refreshToken as string
     );
     return session;
   }

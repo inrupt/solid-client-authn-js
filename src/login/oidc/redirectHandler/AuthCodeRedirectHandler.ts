@@ -129,7 +129,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     const session = await this.tokenSaver.saveTokenAndGetSession(
       localUserId,
       tokenResponse.id_token,
-      tokenResponse.access_token
+      tokenResponse.access_token,
+      tokenResponse.refresh_token
     );
 
     delete url.query.code;
