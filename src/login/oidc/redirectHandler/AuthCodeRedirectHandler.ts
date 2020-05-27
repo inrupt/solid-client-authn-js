@@ -83,8 +83,4 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
     return session;
   }
-
-  private btoa(str: string): string {
-    return Buffer.from(str.toString(), "binary").toString("base64");
-  }
 }
