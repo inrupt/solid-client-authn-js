@@ -24,7 +24,6 @@
  */
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
-import ConfigurationError from "../../errors/ConfigurationError";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
@@ -35,29 +34,32 @@ import { flattenHeaders } from "../headers/HeadersUtils";
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
   constructor(
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
     @inject("fetcher") private fetcher: IFetcher,
     @inject("urlRepresentationConverter")
     private urlRepresentationConverter: IUrlRepresentationConverter,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
+  /**
+   * The UnauthenticatedFetcher requires no particular condition to handle a fetch.
+   * It means that it should be registered last as a potential handler, so that
+   * more specific handlers may be found before this "catch-all" one.
+   *
+   * @param requestCredentials
+   * @param url
+   * @param requestInit
+   */
   async canHandle(
-    requestCredentials: IRequestCredentials,
     // This method being generic, it has arguments that are not used in this
     // specific context, which is why eslint needs to be disabled.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    requestCredentials: IRequestCredentials,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     url: RequestInfo,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     requestInit?: RequestInit
   ): Promise<boolean> {
-    return (
-      requestCredentials.type === "dpop" &&
-      (await this.storageUtility.getForUser(
-        requestCredentials.localUserId,
-        "accessToken"
-      )) !== null
-    );
+    return true;
   }
 
   async handle(
@@ -65,32 +67,10 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
     url: RequestInfo,
     requestInit?: RequestInit
   ): Promise<Response> {
-    if (!(await this.canHandle(requestCredentials, url, requestInit))) {
-      throw new ConfigurationError(
-        `Dpop Authenticated Fetcher cannot handle ${JSON.stringify(
-          requestCredentials
-        )}`
-      );
-    }
-    const authToken = await this.storageUtility.getForUser(
-      requestCredentials.localUserId,
-      "accessToken"
-    );
-    const requestInitiWithDefaults = {
-      headers: {},
-      method: "GET",
-      ...requestInit
-    };
     return this.fetcher.fetch(url, {
       ...requestInit,
-      headers: {
-        ...flattenHeaders(requestInitiWithDefaults.headers),
-        authorization: `DPOP ${authToken}`,
-        dpop: await this.dpopHeaderCreator.createHeaderToken(
-          this.urlRepresentationConverter.requestInfoToUrl(url),
-          requestInitiWithDefaults.method
-        )
-      }
+      method: requestInit?.method ?? "GET",
+      headers: flattenHeaders(requestInit?.headers)
     });
   }
 }
