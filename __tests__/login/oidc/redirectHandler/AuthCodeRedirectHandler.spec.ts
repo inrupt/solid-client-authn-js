@@ -20,20 +20,9 @@
  */
 
 import "reflect-metadata";
-import { TokenSaverMock } from "../../../../src/login/oidc/redirectHandler/__mocks__/TokenSaver";
 import { StorageUtilityMock } from "../../../../src/localStorage/__mocks__/StorageUtility";
-import {
-  IssuerConfigFetcherMock,
-  IssuerConfigFetcherFetchConfigResponse
-} from "../../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
-import {
-  DpopHeaderCreatorMock,
-  DpopHeaderCreatorResponse
-} from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
-import { Response as NodeResponse } from "node-fetch";
 import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
 import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
 
