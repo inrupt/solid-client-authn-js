@@ -25,24 +25,17 @@ import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
-import { IIssuerConfigFetcher } from "../IssuerConfigFetcher";
-import IIssuerConfig from "../IIssuerConfig";
-import { IFetcher } from "../../../util/Fetcher";
-import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import formurlencoded from "form-urlencoded";
-import { ITokenSaver } from "./TokenSaver";
 import { IRedirector } from "../Redirector";
+import { ITokenRequester } from "../TokenRequester";
+import { ISessionCreator } from "../../../solidSession/SessionCreator";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("issuerConfigFetcher")
-    private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("fetcher") private fetcher: IFetcher,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("tokenSaver") private tokenSaver: ITokenSaver,
-    @inject("redirector") private redirector: IRedirector
+    @inject("redirector") private redirector: IRedirector,
+    @inject("tokenRequester") private tokenRequester: ITokenRequester,
+    @inject("sessionCreator") private sessionCreator: ISessionCreator
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -56,13 +49,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
     const url = new URL(redirectUrl, true);
     const localUserId = url.query.state as string;
-    const [
-      codeVerifier,
-      issuer,
-      clientId,
-      redirectUri,
-      clientSecret
-    ] = await Promise.all([
+    const [codeVerifier, redirectUri] = await Promise.all([
       (await this.storageUtility.getForUser(
         localUserId,
         "codeVerifier",
@@ -70,84 +57,26 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       )) as string,
       (await this.storageUtility.getForUser(
         localUserId,
-        "issuer",
-        true
-      )) as string,
-      (await this.storageUtility.getForUser(
-        localUserId,
-        "clientId",
-        true
-      )) as string,
-      (await this.storageUtility.getForUser(
-        localUserId,
         "redirectUri",
         true
-      )) as string,
-      (await this.storageUtility.getForUser(
-        localUserId,
-        "clientSecret"
       )) as string
     ]);
 
-    const issuerConfig = (await this.issuerConfigFetcher.fetchConfig(
-      new URL(issuer)
-    )) as IIssuerConfig;
+    /* eslint-disable @typescript-eslint/camelcase */
+    await this.tokenRequester.request(localUserId, {
+      grant_type: "authorization_code",
+      code_verifier: codeVerifier as string,
+      code: url.query.code as string,
+      redirect_uri: redirectUri as string
+    });
+    /* eslint-enable @typescript-eslint/camelcase */
 
-    const tokenRequestInit: RequestInit = {
-      method: "POST",
-      headers: {
-        DPoP: await this.dpopHeaderCreator.createHeaderToken(
-          issuerConfig.tokenEndpoint,
-          "POST"
-        ),
-        "content-type": "application/x-www-form-urlencoded"
-      },
-      /* eslint-disable @typescript-eslint/camelcase */
-      body: formurlencoded({
-        client_id: clientId as string,
-        grant_type: "authorization_code",
-        code_verifier: codeVerifier as string,
-        code: url.query.code as string,
-        redirect_uri: redirectUri as string
-      })
-      /* eslint-enable @typescript-eslint/camelcase */
-    };
+    url.set("query", {});
 
-    if (clientSecret) {
-      (tokenRequestInit.headers as Record<
-        string,
-        string
-      >).Authorization = `Basic ${this.btoa(`${clientId}:${clientSecret}`)}`;
+    const session = await this.sessionCreator.getSession(localUserId);
+    if (!session) {
+      throw new Error("There was a problem creating a session.");
     }
-
-    const tokenResponse = await (
-      await this.fetcher.fetch(issuerConfig.tokenEndpoint, tokenRequestInit)
-    ).json();
-
-    // Check the response
-    if (
-      !(
-        tokenResponse &&
-        tokenResponse.access_token &&
-        tokenResponse.id_token &&
-        typeof tokenResponse.access_token === "string" &&
-        typeof tokenResponse.id_token === "string" &&
-        (!tokenResponse.refresh_token ||
-          typeof tokenResponse.refresh_token === "string")
-      )
-    ) {
-      throw new Error("IDP /token route returned an invalid response.");
-    }
-
-    const session = await this.tokenSaver.saveTokenAndGetSession(
-      localUserId,
-      tokenResponse.id_token,
-      tokenResponse.access_token,
-      tokenResponse.refresh_token
-    );
-
-    delete url.query.code;
-    delete url.query.state;
     session.neededAction = this.redirector.redirect(url.toString(), {
       redirectByReplacingState: true
     });

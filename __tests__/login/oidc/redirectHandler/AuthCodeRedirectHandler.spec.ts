@@ -151,7 +151,7 @@ describe("AuthCodeRedirectHandler", () => {
         authCodeRedirectHandler.handle(
           "https://coolsite.com/?code=someCode&state=userId"
         )
-      ).rejects.toThrowError("IDP /token route returned an invalid response.");
+      ).rejects.toThrowError("IDP token route returned an invalid response.");
     });
 
     it("throws an error if the idp provides a refresh token that is not a string", async () => {
@@ -177,7 +177,7 @@ describe("AuthCodeRedirectHandler", () => {
         authCodeRedirectHandler.handle(
           "https://coolsite.com/?code=someCode&state=userId"
         )
-      ).rejects.toThrowError("IDP /token route returned an invalid response.");
+      ).rejects.toThrowError("IDP token route returned an invalid response.");
     });
 
     it("makes a code request with a Basic authorization header if a secret is present", async () => {

@@ -20,12 +20,8 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import { IFetcher } from "../../../util/Fetcher";
 import { IStorageUtility } from "../../../localStorage/StorageUtility";
-import { IIssuerConfigFetcher } from "../IssuerConfigFetcher";
-import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import URL from "url-parse";
-import formurlencoded from "form-urlencoded";
+import { ITokenRequester } from "../TokenRequester";
 
 export interface ITokenRefresher {
   refresh(localUserId: string): Promise<void>;
@@ -34,102 +30,22 @@ export interface ITokenRefresher {
 @injectable()
 export default class TokenRefresher implements ITokenRefresher {
   constructor(
-    @inject("fetcher") private fetcher: IFetcher,
-    @inject("issuerConfigFetcher")
-    private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
+    @inject("tokenRequester") private tokenRequester: ITokenRequester
   ) {}
 
   async refresh(localUserId: string): Promise<void> {
     // Get the refresh token and the issuer
-    const [refreshToken, issuer, clientId, clientSecret] = await Promise.all([
-      this.storageUtility.getForUser(localUserId, "refreshToken", true),
-      this.storageUtility.getForUser(localUserId, "issuer", true),
-      this.storageUtility.getForUser(localUserId, "clientId", true),
-      this.storageUtility.getForUser(localUserId, "clientSecret")
-    ]);
-
-    // Get the issuer config to find the token url
-    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      new URL(issuer as string)
-    );
-    if (
-      !issuerConfig.grantTypesSupported ||
-      !issuerConfig.grantTypesSupported.includes("refresh_token")
-    ) {
-      throw new Error(
-        `The issuer ${issuer} does not support the refresh token grant`
-      );
-    }
-    if (!issuerConfig.tokenEndpoint) {
-      throw new Error(`This issuer ${issuer} does not have a token endpoint`);
-    }
-
-    // Perform refresh token flow
-    const tokenRequestInit: RequestInit & {
-      headers: Record<string, string>;
-    } = {
-      method: "POST",
-      headers: {
-        DPoP: await this.dpopHeaderCreator.createHeaderToken(
-          issuerConfig.tokenEndpoint,
-          "POST"
-        ),
-        "content-type": "application/x-www-form-urlencoded"
-      },
-      /* eslint-disable @typescript-eslint/camelcase */
-      body: formurlencoded({
-        client_id: clientId as string,
-        grant_type: "refresh_token",
-        refresh_token: refreshToken
-      })
-      /* eslint-enable @typescript-eslint/camelcase */
-    };
-
-    if (clientSecret) {
-      tokenRequestInit.headers.Authorization = `Basic ${this.btoa(
-        `${clientId}:${clientSecret}`
-      )}`;
-    }
-
-    const tokenResponse = await (
-      await this.fetcher.fetch(issuerConfig.tokenEndpoint, tokenRequestInit)
-    ).json();
-
-    // Check the response
-    if (
-      !(
-        tokenResponse &&
-        tokenResponse.access_token &&
-        tokenResponse.id_token &&
-        typeof tokenResponse.access_token === "string" &&
-        typeof tokenResponse.id_token === "string" &&
-        (!tokenResponse.refresh_token ||
-          typeof tokenResponse.refresh_token === "string")
-      )
-    ) {
-      throw new Error("IDP /token route returned an invalid response.");
-    }
-
-    await this.storageUtility.setForUser(
-      localUserId,
-      "accessToken",
-      tokenResponse.access_token as string
-    );
-    await this.storageUtility.setForUser(
-      localUserId,
-      "idToken",
-      tokenResponse.id_token as string
-    );
-    await this.storageUtility.setForUser(
+    const refreshToken = await this.storageUtility.getForUser(
       localUserId,
       "refreshToken",
-      tokenResponse.refresh_token as string
+      true
     );
-  }
-
-  private btoa(str: string): string {
-    return Buffer.from(str.toString(), "binary").toString("base64");
+    /* eslint-disable @typescript-eslint/camelcase */
+    await this.tokenRequester.request(localUserId, {
+      grant_type: "refresh_token",
+      refresh_token: refreshToken as string // This cast can be safely made because getForUser will error if refreshToken is null
+    });
+    /* eslint-enable @typescript-eslint/camelcase */
   }
 }

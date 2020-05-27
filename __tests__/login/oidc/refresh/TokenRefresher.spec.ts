@@ -153,7 +153,7 @@ describe("TokenRefresher", () => {
     });
     const TokenRefresher = getTokenRefresher();
     await expect(TokenRefresher.refresh("global")).rejects.toThrowError(
-      "IDP /token route returned an invalid response."
+      "IDP token route returned an invalid response."
     );
   });
 
