@@ -3,7 +3,8 @@ name: Whitesource Security Scan
 on:
   # The config is set up to verify compliance on pull requests, and to update the
   # whitesource inventory on push to the master branch.
-  pull_request:
+  # NOTE: Due to a bug in Whitesource, it is currently disabled for PRs.
+  # pull_request:
   push:
     branches:
       - master
