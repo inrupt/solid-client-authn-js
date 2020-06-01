@@ -1,8 +1,8 @@
 {
   "name": "@inrupt/solid-auth-fetcher",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
-  "main": "dist/index",
+  "main": "dist/index.js",
   "browser": "browserDist/solid-auth-fetcher.bundle.js",
   "types": "dist/index",
   "files": [
@@ -21,7 +21,7 @@
     "clean-test-helper": "cd examples/test-helper && npm run clean",
     "build": "npm run build-module && npm run build-browser",
     "build-module": "npm run clean-module && tsc -p tsconfig.json",
-    "build-browser": "npm run clean-browser && webpack --config webpack.config.js --env.env=prod",
+    "build-browser": "npm run clean-browser && webpack --config webpack.browser.js --env.env=prod",
     "analyze-bundle": "npm run clean-browser && webpack --config webpack.config.js --env.env=analyze",
     "lint": "eslint src/**/*.ts && eslint __tests__/**/*.ts",
     "lint-fix": "eslint --config .eslintrc.json --fix \"src/**\" && eslint --config .eslintrc.json --fix \"__tests__/**/*.ts\"",

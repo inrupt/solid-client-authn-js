@@ -24,7 +24,6 @@ module.exports = {
   output: {
     filename: "solid-auth-fetcher.bundle.js",
     path: path.resolve(__dirname, "browserDist"),
-    libraryTarget: "var",
-    library: "solidAuthFetcher"
+    libraryTarget: "commonjs"
   }
 };
