@@ -1,0 +1,28 @@
+name: CD-release
+
+on: [release]
+
+env:
+  CI: true
+jobs:
+  release-npm:
+    # On release, ${GITHUB_REF} contains the release tag
+    name: "Release ${GITHUB_REF} on NPM"
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2.1.0
+    - name: Prepare for publication to GitHub Packages
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+        registry-url: 'https://registry.npmjs.org'
+    - run: npm ci
+      # Last check before publishing to NPM 
+    - run: npm test
+    - run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: |
+        echo "Package published (${GITHUB_REF}). To install, run:"
+        echo ""
+        echo "    npm install @inrupt/solid-auth-fetcher"
