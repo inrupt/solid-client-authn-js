@@ -24,7 +24,7 @@
  */
 import Ajv from "ajv";
 import URL from "url-parse";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash.clonedeep";
 
 export function compileTypeof(type: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
