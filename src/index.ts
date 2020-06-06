@@ -71,7 +71,7 @@ export async function login(
 
 export async function fetch(
   url: RequestInfo,
-  init: RequestInit
+  init?: RequestInit
 ): Promise<Response> {
   const authFetcher = await getGlobalAuthFetcher();
   return authFetcher.fetch(url, init);
