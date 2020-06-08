@@ -19,42 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ILoginInputOptions from "./ILoginInputOptions";
-import Session from "./Session";
-
-export async function login(options: ILoginInputOptions): Promise<void> {
-  throw new Error("Not implemented.");
+/**
+ * Defines the data that should be persisted
+ */
+export default interface ISessionInfo {
+  isLoggedIn: boolean;
+  webId?: string;
+  sessionId: string;
 }
-
-export async function fetch(
-  url: RequestInfo,
-  init?: RequestInit
-): Promise<Response> {
-  throw new Error("Not implemented.");
-}
-
-export async function logout(): Promise<void> {
-  throw new Error("Not implemented.");
-}
-
-export async function getSession(): Promise<Session> {
-  throw new Error("Not implemented.");
-}
-
-export function onLogin(callback: (session: Session) => unknown): void {
-  throw new Error("Not implemented.");
-}
-
-export function onLogout(callback: (session: Session) => unknown): void {
-  throw new Error("Not implemented.");
-}
-
-export async function handleRedirect(url: string): Promise<void> {
-  throw new Error("Not implemented.");
-}
-
-// Multi User API
-export * from "./Session";
-export * from "./SessionManager";
-
-// Interfaces

@@ -19,42 +19,17 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ILoginInputOptions from "./ILoginInputOptions";
-import Session from "./Session";
+import IStorage from "./IStorage";
 
-export async function login(options: ILoginInputOptions): Promise<void> {
-  throw new Error("Not implemented.");
+export default class InMemoryStorage implements IStorage {
+  private map: Record<string, string> = {};
+  async get(key: string): Promise<string | null> {
+    return this.map[key] || null;
+  }
+  async set(key: string, value: string): Promise<void> {
+    this.map[key] = value;
+  }
+  async delete(key: string): Promise<void> {
+    delete this.map[key];
+  }
 }
-
-export async function fetch(
-  url: RequestInfo,
-  init?: RequestInit
-): Promise<Response> {
-  throw new Error("Not implemented.");
-}
-
-export async function logout(): Promise<void> {
-  throw new Error("Not implemented.");
-}
-
-export async function getSession(): Promise<Session> {
-  throw new Error("Not implemented.");
-}
-
-export function onLogin(callback: (session: Session) => unknown): void {
-  throw new Error("Not implemented.");
-}
-
-export function onLogout(callback: (session: Session) => unknown): void {
-  throw new Error("Not implemented.");
-}
-
-export async function handleRedirect(url: string): Promise<void> {
-  throw new Error("Not implemented.");
-}
-
-// Multi User API
-export * from "./Session";
-export * from "./SessionManager";
-
-// Interfaces

@@ -551,14 +551,14 @@ Options:
 | `clientId`  | No        | string | The client id of the application if it was statically registered | undefined |
 | `clientSecret`  | No        | string | The client secret of the application if it was statically registered  | undefined |
 
-#### getSessions() =>  Promise: [Session](#class-session)[]
+#### getSessions() =>  Promise:[Session](#class-session)[]
 Returns all sessions currently in the session manager.
 
 ```typescript
 sessionManager.getSessions().then(sessions => {})
 ```
 
-#### getSession(sessionId?) => Promise[Session](#class-session)
+#### getSession(sessionId?) => Promise:[Session](#class-session)
 Creates a new session and adds it to the session manager. If a session id is not provided, a random UUID will be assigned as the session id. If the session of the provided id already exists, that session will be returned.
 
 ```typescript
