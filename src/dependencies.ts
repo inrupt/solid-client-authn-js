@@ -31,7 +31,7 @@ import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticate
 import UnauthenticatedFetcher from "./authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
 import ILoginHandler from "./login/ILoginHandler";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
-import IStorage from "./localStorage/IStorage";
+import IStorage from "./storage/IStorage";
 import IJoseUtility from "./jose/IJoseUtility";
 import IsomorphicJoseUtility from "./jose/IsomorphicJoseUtility";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
@@ -55,23 +55,23 @@ import DpopHeaderCreator, {
 import DpopClientKeyManager, {
   IDpopClientKeyManager
 } from "./dpop/DpopClientKeyManager";
-import StorageUtility, { IStorageUtility } from "./localStorage/StorageUtility";
+import StorageUtility, { IStorageUtility } from "./storage/StorageUtility";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
-import NodeStorage from "./localStorage/NodeStorage";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
 import EnvironmentDetector, {
-  IEnvironmentDetector
+  IEnvironmentDetector,
+  detectEnvironment
 } from "./util/EnvironmentDetector";
 import ILogoutHandler from "./logout/ILogoutHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import UrlRepresenationConverter, {
   IUrlRepresentationConverter
 } from "./util/UrlRepresenationConverter";
-import SessionCreator, { ISessionCreator } from "./solidSession/SessionCreator";
+import SessionCreator, { ISessionCreator } from "./sessionInfo/SessionCreator";
 import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
-import BrowserStorage from "./localStorage/BrowserStorage";
+import BrowserStorage from "./storage/BrowserStorage";
 import TokenSaver, {
   ITokenSaver
 } from "./login/oidc/redirectHandler/TokenSaver";
@@ -87,6 +87,7 @@ import TokenRefresher, {
 } from "./login/oidc/refresh/TokenRefresher";
 import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetcher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
+import InMemoryStorage from "./storage/InMemoryStorage";
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -222,21 +223,28 @@ container.register<ILogoutHandler>("logoutHandler", {
 });
 
 export default function getAuthFetcherWithDependencies(dependencies: {
-  storage?: IStorage;
+  secureStorage?: IStorage;
+  insecureStorage?: IStorage;
 }): AuthFetcher {
-  let storage: IStorage;
-  if (dependencies.storage) {
-    storage = dependencies.storage;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    // @ts-ignore This must be ignored rather than cast to any because the ts compile will not accept an any cast for lib elements
-  } else if (typeof document != "undefined") {
-    storage = new BrowserStorage();
-  } else {
-    storage = new NodeStorage();
+  let secureStorage;
+  let insecureStorage;
+  switch (detectEnvironment()) {
+    case "browser":
+    case "react-native":
+      secureStorage = dependencies.secureStorage || new InMemoryStorage();
+      insecureStorage = dependencies.insecureStorage || new BrowserStorage();
+      break;
+    case "server":
+      secureStorage = dependencies.secureStorage || new InMemoryStorage();
+      insecureStorage = dependencies.insecureStorage || new InMemoryStorage();
+      break;
   }
   const authenticatorContainer = container.createChildContainer();
-  authenticatorContainer.register<IStorage>("storage", {
-    useValue: storage
+  authenticatorContainer.register<IStorage>("secureStorage", {
+    useValue: secureStorage
+  });
+  authenticatorContainer.register<IStorage>("insecureStorage", {
+    useValue: insecureStorage
   });
   return authenticatorContainer.resolve(AuthFetcher);
 }
