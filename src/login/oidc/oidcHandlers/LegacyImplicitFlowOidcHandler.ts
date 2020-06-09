@@ -28,9 +28,8 @@ import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import INeededRedirectAction from "../../../solidSession/INeededRedirectAction";
-import ISolidSession from "../../../solidSession/ISolidSession";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
+import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
@@ -49,33 +48,35 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
-    const requestUrl = new URL(
-      oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
-    );
-    // TODO: include client_id, state, and nonce
-    // Disable camel case rule because this query requires camel case
-    /* eslint-disable @typescript-eslint/camelcase */
-    const query: { [key: string]: string } = {
-      response_type: "id_token token",
-      redirect_url: oidcLoginOptions.redirectUrl.toString(),
-      scope: "openid id_vc"
-    };
-    /* eslint-enable @typescript-eslint/camelcase */
-    if (oidcLoginOptions.dpop) {
-      query.dpop = await this.dpopHeaderCreator.createHeaderToken(
-        oidcLoginOptions.issuer,
-        "GET"
-      );
-    }
-    requestUrl.set("query", query);
+  async handle(oidcLoginOptions: IOidcOptions): Promise<ISessionInfo> {
+    throw new Error("Not Implemented");
 
-    return this.sessionCreator.create({
-      neededAction: {
-        actionType: "redirect",
-        redirectUrl: requestUrl.toString()
-      } as INeededRedirectAction,
-      loggedIn: false
-    });
+    // const requestUrl = new URL(
+    //   oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
+    // );
+    // // TODO: include client_id, state, and nonce
+    // // Disable camel case rule because this query requires camel case
+    // /* eslint-disable @typescript-eslint/camelcase */
+    // const query: { [key: string]: string } = {
+    //   response_type: "id_token token",
+    //   redirect_url: oidcLoginOptions.redirectUrl.toString(),
+    //   scope: "openid id_vc"
+    // };
+    // /* eslint-enable @typescript-eslint/camelcase */
+    // if (oidcLoginOptions.dpop) {
+    //   query.dpop = await this.dpopHeaderCreator.createHeaderToken(
+    //     oidcLoginOptions.issuer,
+    //     "GET"
+    //   );
+    // }
+    // requestUrl.set("query", query);
+
+    // return this.sessionCreator.create({
+    //   neededAction: {
+    //     actionType: "redirect",
+    //     redirectUrl: requestUrl.toString()
+    //   },
+    //   loggedIn: false
+    // });
   }
 }

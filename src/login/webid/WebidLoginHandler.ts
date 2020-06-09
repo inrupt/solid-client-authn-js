@@ -24,7 +24,7 @@
  */
 import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
-import ISolidSession from "../../solidSession/ISolidSession";
+import ISessionInfo from "../../sessionInfo/ISessionInfo";
 
 export default class WebidLoginHandler implements ILoginHandler {
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
@@ -37,7 +37,7 @@ export default class WebidLoginHandler implements ILoginHandler {
    * 'oidcIssuer' triple, it will create login credentials to match that
    * @param loginOptions
    */
-  async handle(loginOptions: ILoginOptions): Promise<ISolidSession> {
+  async handle(loginOptions: ILoginOptions): Promise<ISessionInfo> {
     // TODO: implement
     throw new Error("Not Implemented");
   }

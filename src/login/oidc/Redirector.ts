@@ -20,10 +20,7 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import INeededAction from "../../solidSession/INeededAction";
-import INeededInactionAction from "../../solidSession/INeededInactionAction";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
-import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
 
 export interface IRedirectorOptions {
   doNotAutoRedirect?: boolean;
@@ -31,10 +28,7 @@ export interface IRedirectorOptions {
 }
 
 export interface IRedirector {
-  redirect(
-    redirectUrl: string,
-    redirectorOptions: IRedirectorOptions
-  ): INeededAction;
+  redirect(redirectUrl: string, redirectorOptions: IRedirectorOptions): void;
 }
 
 @injectable()
@@ -44,7 +38,7 @@ export default class Redirector implements IRedirector {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  redirect(redirectUrl: string, options?: IRedirectorOptions): INeededAction {
+  redirect(redirectUrl: string, options?: IRedirectorOptions): void {
     if (
       this.environmentDetector.detect() === "browser" &&
       !options?.doNotAutoRedirect
@@ -54,14 +48,6 @@ export default class Redirector implements IRedirector {
       } else {
         window.location.href = redirectUrl;
       }
-      return {
-        actionType: "inaction"
-      } as INeededInactionAction;
-    } else {
-      return {
-        actionType: "redirect",
-        redirectUrl
-      } as INeededRedirectAction;
     }
   }
 }

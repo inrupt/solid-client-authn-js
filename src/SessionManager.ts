@@ -25,8 +25,6 @@ import { EventEmitter } from "events";
 import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
 import { detectEnvironment } from "./util/EnvironmentDetector";
-import InMemoryStorage from "./storage/InMemoryStorage";
-import BrowserStorage from "./storage/BrowserStorage";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 
 export interface ISessionManagerOptions {

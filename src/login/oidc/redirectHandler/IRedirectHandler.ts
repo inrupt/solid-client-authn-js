@@ -20,7 +20,7 @@
  */
 
 import IHandleable from "../../../util/handlerPattern/IHandleable";
-import ISolidSession from "../../../solidSession/ISolidSession";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 
-type IRedirectHandler = IHandleable<[string], ISolidSession>;
+type IRedirectHandler = IHandleable<[string], ISessionInfo>;
 export default IRedirectHandler;

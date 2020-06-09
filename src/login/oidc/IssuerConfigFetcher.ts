@@ -28,7 +28,7 @@ import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import issuerConfigSchema from "./issuerConfigSchema";
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IStorageUtility } from "../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../storage/StorageUtility";
 
 export interface IIssuerConfigFetcher {
   /**

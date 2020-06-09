@@ -27,7 +27,7 @@ import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
 import jwkSchema from "./JwkSchema";
 import IJoseUtility from "../jose/IJoseUtility";
-import { IStorageUtility } from "../localStorage/StorageUtility";
+import { IStorageUtility } from "../storage/StorageUtility";
 
 export interface IDpopClientKeyManager {
   /**

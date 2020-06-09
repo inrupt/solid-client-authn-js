@@ -20,7 +20,7 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../storage/StorageUtility";
 import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import URL from "url-parse";
 import formurlencoded from "form-urlencoded";

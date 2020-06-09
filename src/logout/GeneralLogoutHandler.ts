@@ -21,7 +21,7 @@
 
 import ILogoutHandler from "./ILogoutHandler";
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../localStorage/StorageUtility";
+import { IStorageUtility } from "../storage/StorageUtility";
 
 @injectable()
 export default class LogoutHandler implements ILogoutHandler {

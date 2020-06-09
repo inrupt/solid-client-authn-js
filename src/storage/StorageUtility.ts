@@ -23,7 +23,7 @@
  * A helper class that will validate items taken from local storage
  */
 import { injectable, inject } from "tsyringe";
-import IStorage from "../localStorage/IStorage";
+import IStorage from "../storage/IStorage";
 import validateSchema from "../util/validateSchema";
 
 export interface IStorageUtility {
