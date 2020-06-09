@@ -59,7 +59,8 @@ export default class AuthFetcher {
   }
 
   async getSessionInfo(sessionId: string): Promise<ISessionInfo | undefined> {
-    throw new Error("Inner not implemented");
+    // TODO complete
+    return undefined;
   }
 
   async getAllSessionInfo(): Promise<ISessionInfo[]> {
