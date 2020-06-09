@@ -24,12 +24,12 @@
  */
 import AggregateHandler from "../../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
-import ISolidSession from "../../../solidSession/ISolidSession";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 
 @injectable()
 export default class AggregateRedirectHandler
-  extends AggregateHandler<[string], ISolidSession>
+  extends AggregateHandler<[string], ISessionInfo>
   implements IRedirectHandler {
   constructor(
     @injectAll("redirectHandlers") redirectHandlers: IRedirectHandler[]

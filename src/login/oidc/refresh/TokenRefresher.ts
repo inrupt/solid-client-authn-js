@@ -20,7 +20,7 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import { IStorageUtility } from "../../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ITokenRequester } from "../TokenRequester";
 
 export interface ITokenRefresher {
