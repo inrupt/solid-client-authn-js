@@ -28,8 +28,8 @@ class App extends Component {
     super(props);
     this.state = {
       status: "loading",
-      loginIssuer: "https://localhost:8443",
-      fetchRoute: "https://jackson.localhost:8443/private",
+      loginIssuer: "https://dev.inrupt.net",
+      fetchRoute: "https://jackson.dev.inrupt.net/private",
       fetchBody: "",
       session: null
     };
@@ -50,7 +50,7 @@ class App extends Component {
     if (session && session.loggedIn) {
       this.setState({ status: "dashboard", session });
     } else {
-      this.setState({ status: "login" });
+      this.setState({ status: "login", session });
     }
   }
 
