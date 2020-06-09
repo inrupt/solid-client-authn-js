@@ -21,65 +21,58 @@
 
 import React, { Component } from "react";
 import "regenerator-runtime/runtime";
-
-import { login, getSession, logout, fetch } from "../../../../dist/index";
+import { SessionManager } from "../../../../dist/index";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       status: "loading",
-      loginIssuer: "https://dev.inrupt.net",
-      fetchRoute: "https://jackson.dev.inrupt.net/private",
+      loginIssuer: "https://localhost:8443",
+      fetchRoute: "https://jackson.localhost:8443/private",
       fetchBody: "",
       session: null
     };
+    this.sessionManager = new SessionManager();
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
     }
+    this.sessionManager.onSessionLogin(session => {
+      this.setState({ status: "dashboard", session });
+    });
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.handleFetch = this.handleFetch.bind(this);
   }
 
   async componentDidMount() {
-    const session = await getSession();
-    if (window.location.pathname === "/popup") {
-      this.state.status = "popup";
-      setTimeout(() => window.close(), 2000);
-    } else if (!session) {
-      const authCode = new URL(window.location.href).searchParams.get("code");
-      if (!authCode) {
-        this.setState({ status: "login" });
-      }
-    } else {
+    const session = await this.sessionManager.getSession("default");
+    if (session && session.loggedIn) {
       this.setState({ status: "dashboard", session });
+    } else {
+      this.setState({ status: "login" });
     }
   }
 
   async handleLogin(e, isPopup = false) {
     e.preventDefault();
     this.setState({ status: "loading" });
-    const session = await login({
-      redirect: "http://localhost:3001/",
+    await this.state.session.login({
+      redirect: isPopup
+        ? "http://localhost:3001/popup"
+        : "http://localhost:3001/",
       oidcIssuer: this.state.loginIssuer,
       popUp: isPopup,
-      popUpRedirectPath: "/popup"
+      handleRedirect: redirectUrl => {
+        window.location.href = redirectUrl;
+      }
     });
-    if (
-      session.neededAction &&
-      session.neededAction.actionType === "redirect"
-    ) {
-      window.location.href = session.neededAction.redirectUrl;
-    } else if (session) {
-      this.setState({ status: "dashboard", session });
-    }
   }
 
   async handleLogout(e) {
     e.preventDefault();
     this.setState({ status: "loading" });
-    await logout();
+    await this.state.session.logout();
     this.setState({
       status: "login",
       fetchBody: "",
@@ -90,7 +83,9 @@ class App extends Component {
   async handleFetch(e) {
     e.preventDefault();
     this.setState({ status: "loading", fetchBody: "" });
-    const response = await (await fetch(this.state.fetchRoute, {})).text();
+    const response = await (
+      await this.state.session.fetch(this.state.fetchRoute, {})
+    ).text();
     this.setState({ status: "dashboard", fetchBody: response });
   }
 
