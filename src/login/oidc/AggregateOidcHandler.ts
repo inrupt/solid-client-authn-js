@@ -26,11 +26,11 @@ import AggregateHandler from "../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
 import IOidcHandler from "./IOidcHandler";
 import IOidcOptions from "./IOidcOptions";
-import ISolidSession from "../../solidSession/ISolidSession";
+import ISessionInfo from "../../sessionInfo/ISessionInfo";
 
 @injectable()
 export default class AggregateOidcHandler
-  extends AggregateHandler<[IOidcOptions], ISolidSession>
+  extends AggregateHandler<[IOidcOptions], ISessionInfo>
   implements IOidcHandler {
   constructor(@injectAll("oidcHandlers") oidcLoginHandlers: IOidcHandler[]) {
     super(oidcLoginHandlers);

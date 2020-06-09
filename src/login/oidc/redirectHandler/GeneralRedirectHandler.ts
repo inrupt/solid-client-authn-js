@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ISolidSession from "../../../solidSession/ISolidSession";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
@@ -39,7 +39,7 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
       url.query.state
     );
   }
-  async handle(redirectUrl: string): Promise<ISolidSession> {
+  async handle(redirectUrl: string): Promise<ISessionInfo> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
     }

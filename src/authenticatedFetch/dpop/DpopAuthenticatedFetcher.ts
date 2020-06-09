@@ -29,7 +29,7 @@ import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
-import { IStorageUtility } from "../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../storage/StorageUtility";
 import { flattenHeaders } from "../headers/HeadersUtils";
 
 @injectable()

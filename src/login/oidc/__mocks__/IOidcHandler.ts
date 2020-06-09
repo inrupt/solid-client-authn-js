@@ -21,8 +21,8 @@
 
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
-import ISolidSession from "../../../solidSession/ISolidSession";
-import { SessionCreatorGetSessionResponse } from "../../../solidSession/__mocks__/SessionCreator";
+import ISolidSession from "../../../sessionInfo/ISessionInfo";
+import { SessionCreatorGetSessionResponse } from "../../../sessionInfo/__mocks__/SessionCreator";
 
 export const OidcHandlerHandleResponse: ISolidSession = SessionCreatorGetSessionResponse;
 

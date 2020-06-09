@@ -19,12 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ISolidSession from "../../../solidSession/ISolidSession";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
-import URL from "url-parse";
-import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
+import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
 
 @injectable()
 export default class InactionRedirectHandler implements IRedirectHandler {
@@ -35,7 +33,7 @@ export default class InactionRedirectHandler implements IRedirectHandler {
   async canHandle(redirectUrl: string): Promise<boolean> {
     return true;
   }
-  async handle(redirectUrl: string): Promise<ISolidSession> {
+  async handle(redirectUrl: string): Promise<ISessionInfo> {
     return this.sessionCreator.create({
       loggedIn: false
     });

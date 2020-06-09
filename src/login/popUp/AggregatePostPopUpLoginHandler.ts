@@ -26,11 +26,11 @@ import AggregateHandler from "../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
 import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
-import ISolidSession from "../../solidSession/ISolidSession";
+import ISessionInfo from "../../sessionInfo/ISessionInfo";
 
 @injectable()
 export default class AggregatePostPopUpLoginHandler
-  extends AggregateHandler<[ILoginOptions], ISolidSession>
+  extends AggregateHandler<[ILoginOptions], ISessionInfo>
   implements ILoginHandler {
   constructor(
     @injectAll("postPopUpLoginHandlers") loginHandlers: ILoginHandler[]

@@ -19,15 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ISolidSession from "../../../solidSession/ISolidSession";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 import { ITokenRequester } from "../TokenRequester";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
+import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
@@ -43,44 +43,45 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     return !!(url.query && url.query.code && url.query.state);
   }
 
-  async handle(redirectUrl: string): Promise<ISolidSession> {
-    if (!(await this.canHandle(redirectUrl))) {
-      throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
-    }
-    const url = new URL(redirectUrl, true);
-    const localUserId = url.query.state as string;
-    const [codeVerifier, redirectUri] = await Promise.all([
-      (await this.storageUtility.getForUser(
-        localUserId,
-        "codeVerifier",
-        true
-      )) as string,
-      (await this.storageUtility.getForUser(
-        localUserId,
-        "redirectUri",
-        true
-      )) as string
-    ]);
+  async handle(redirectUrl: string): Promise<ISessionInfo> {
+    throw new Error("Not Implemented");
+    // if (!(await this.canHandle(redirectUrl))) {
+    //   throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
+    // }
+    // const url = new URL(redirectUrl, true);
+    // const localUserId = url.query.state as string;
+    // const [codeVerifier, redirectUri] = await Promise.all([
+    //   (await this.storageUtility.getForUser(
+    //     localUserId,
+    //     "codeVerifier",
+    //     true
+    //   )) as string,
+    //   (await this.storageUtility.getForUser(
+    //     localUserId,
+    //     "redirectUri",
+    //     true
+    //   )) as string
+    // ]);
 
-    /* eslint-disable @typescript-eslint/camelcase */
-    await this.tokenRequester.request(localUserId, {
-      grant_type: "authorization_code",
-      code_verifier: codeVerifier as string,
-      code: url.query.code as string,
-      redirect_uri: redirectUri as string
-    });
-    /* eslint-enable @typescript-eslint/camelcase */
+    // /* eslint-disable @typescript-eslint/camelcase */
+    // await this.tokenRequester.request(localUserId, {
+    //   grant_type: "authorization_code",
+    //   code_verifier: codeVerifier as string,
+    //   code: url.query.code as string,
+    //   redirect_uri: redirectUri as string
+    // });
+    // /* eslint-enable @typescript-eslint/camelcase */
 
-    url.set("query", {});
+    // url.set("query", {});
 
-    const session = await this.sessionCreator.getSession(localUserId);
-    if (!session) {
-      throw new Error("There was a problem creating a session.");
-    }
-    session.neededAction = this.redirector.redirect(url.toString(), {
-      redirectByReplacingState: true
-    });
+    // const session = await this.sessionCreator.getSession(localUserId);
+    // if (!session) {
+    //   throw new Error("There was a problem creating a session.");
+    // }
+    // session.neededAction = this.redirector.redirect(url.toString(), {
+    //   redirectByReplacingState: true
+    // });
 
-    return session;
+    // return session;
   }
 }
