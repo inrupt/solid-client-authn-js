@@ -41,7 +41,7 @@ export class SessionManager extends EventEmitter {
   private isInitialized = false;
   private handledIncomingRedirect = false;
 
-  constructor(options: ISessionManagerOptions) {
+  constructor(options: ISessionManagerOptions = {}) {
     super();
     this.authFetcher = getAuthFetcherWithDependencies({
       secureStorage: options.secureStorage,

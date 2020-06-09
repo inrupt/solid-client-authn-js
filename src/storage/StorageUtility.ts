@@ -62,14 +62,17 @@ export interface IStorageUtility {
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 @injectable()
 export default class StorageUtility implements IStorageUtility {
-  constructor(@inject("storage") private storage: IStorage) {}
+  constructor(
+    @inject("secureStorage") private secureStorage: IStorage,
+    @inject("insecureStorage") private insecureStorage: IStorage
+  ) {}
 
   private getKey(userId: string): string {
     return `solidAuthFetcherUser:${userId}`;
   }
 
   private async getUserData(userId: string): Promise<Record<string, string>> {
-    const stored = await this.storage.get(this.getKey(userId));
+    const stored = await this.secureStorage.get(this.getKey(userId));
     if (stored === null) {
       return {};
     }
@@ -84,11 +87,11 @@ export default class StorageUtility implements IStorageUtility {
     userId: string,
     data: Record<string, string>
   ): Promise<void> {
-    await this.storage.set(this.getKey(userId), JSON.stringify(data));
+    await this.secureStorage.set(this.getKey(userId), JSON.stringify(data));
   }
 
   async get(key: string, errorIfNull?: true): Promise<string | null> {
-    const value = await this.storage.get(key);
+    const value = await this.secureStorage.get(key);
     if (value == null && errorIfNull) {
       throw new Error(`${key} is not stored`);
     }
@@ -96,11 +99,11 @@ export default class StorageUtility implements IStorageUtility {
   }
 
   async set(key: string, value: string): Promise<void> {
-    return this.storage.set(key, value);
+    return this.secureStorage.set(key, value);
   }
 
   async delete(key: string): Promise<void> {
-    return this.storage.delete(key);
+    return this.secureStorage.delete(key);
   }
 
   async getForUser(
@@ -133,7 +136,7 @@ export default class StorageUtility implements IStorageUtility {
   }
 
   async deleteAllUserData(userId: string): Promise<void> {
-    await this.storage.delete(this.getKey(userId));
+    await this.secureStorage.delete(this.getKey(userId));
   }
 
   async safeGet(
