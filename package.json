@@ -67,7 +67,7 @@
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",
-    "@types/node": "^14.0.11",
+    "@types/node": "^14.0.12",
     "@types/node-jose": "^1.1.4",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/url-parse": "^1.4.3",
