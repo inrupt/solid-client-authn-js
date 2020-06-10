@@ -88,6 +88,6 @@ export default class AuthFetcher {
   }
 
   async handleIncomingRedirect(url: string): Promise<ISessionInfo> {
-    throw new Error("Inner not implemented");
+    return this.redirectHandler.handle(url);
   }
 }

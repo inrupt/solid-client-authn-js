@@ -44,45 +44,47 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
   }
 
   async handle(redirectUrl: string): Promise<ISessionInfo> {
-    console.log("Auth code redirect handler");
-    throw new Error("Not Implemented");
-    // if (!(await this.canHandle(redirectUrl))) {
-    //   throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
-    // }
-    // const url = new URL(redirectUrl, true);
-    // const localUserId = url.query.state as string;
-    // const [codeVerifier, redirectUri] = await Promise.all([
-    //   (await this.storageUtility.getForUser(
-    //     localUserId,
-    //     "codeVerifier",
-    //     true
-    //   )) as string,
-    //   (await this.storageUtility.getForUser(
-    //     localUserId,
-    //     "redirectUri",
-    //     true
-    //   )) as string
-    // ]);
+    if (!(await this.canHandle(redirectUrl))) {
+      throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
+    }
+    const url = new URL(redirectUrl, true);
+    const sessionId = url.query.state as string;
+    const [codeVerifier, redirectUri] = await Promise.all([
+      (await this.storageUtility.getForUser(
+        sessionId,
+        "codeVerifier",
+        true
+      )) as string,
+      (await this.storageUtility.getForUser(
+        sessionId,
+        "redirectUri",
+        true
+      )) as string
+    ]);
 
-    // /* eslint-disable @typescript-eslint/camelcase */
-    // await this.tokenRequester.request(localUserId, {
-    //   grant_type: "authorization_code",
-    //   code_verifier: codeVerifier as string,
-    //   code: url.query.code as string,
-    //   redirect_uri: redirectUri as string
-    // });
-    // /* eslint-enable @typescript-eslint/camelcase */
+    /* eslint-disable @typescript-eslint/camelcase */
+    await this.tokenRequester.request(sessionId, {
+      grant_type: "authorization_code",
+      code_verifier: codeVerifier as string,
+      code: url.query.code as string,
+      redirect_uri: redirectUri as string
+    });
+    /* eslint-enable @typescript-eslint/camelcase */
 
-    // url.set("query", {});
+    url.set("query", {});
 
-    // const session = await this.sessionCreator.getSession(localUserId);
-    // if (!session) {
-    //   throw new Error("There was a problem creating a session.");
-    // }
-    // session.neededAction = this.redirector.redirect(url.toString(), {
-    //   redirectByReplacingState: true
-    // });
+    const sessionInfo = await this.sessionCreator.getSession(sessionId);
+    if (!session) {
+      throw new Error("There was a problem creating a session.");
+    }
+    try {
+      this.redirector.redirect(url.toString(), {
+        redirectByReplacingState: true
+      });
+    } catch (err) {
+      // Do nothing
+    }
 
-    // return session;
+    return sessionInfo;
   }
 }
