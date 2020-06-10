@@ -51,7 +51,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISessionInfo> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     throw new Error("Not implemented");
     // const requestUrl = new URL(
     //   oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
