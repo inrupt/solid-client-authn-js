@@ -32,7 +32,7 @@ export default class PrimaryDeviceOidcHandler implements IOidcHandler {
     return false;
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISessionInfo> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     throw new NotImplementedError("PrimaryDeviceOidcHandler handle");
   }
 }

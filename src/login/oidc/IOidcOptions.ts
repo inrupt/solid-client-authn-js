@@ -39,11 +39,11 @@ export interface ICoreOidcOptions {
   issuer: URL;
   issuerConfiguration: IIssuerConfig;
   client: IClient;
-  localUserId?: "global" | string;
+  sessionId: string;
 }
 
 export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
-  doNotAutoRedirect?: boolean;
   dpop: boolean;
   redirectUrl: URL;
+  handleRedirect?: (url: string) => unknown;
 }

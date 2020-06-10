@@ -42,20 +42,18 @@ export default class PopUpLoginHandler implements ILoginHandler {
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
     return !!(
       loginOptions.popUp &&
-      loginOptions.popUpRedirectPath &&
+      loginOptions.redirectUrl &&
       this.environmentDetector.detect() === "browser"
     );
   }
 
-  async handle(loginOptions: ILoginOptions): Promise<ISessionInfo> {
+  async handle(loginOptions: ILoginOptions): Promise<void> {
     const currentUrl = new URL(window.location.href);
-    currentUrl.set("pathname", loginOptions.popUpRedirectPath);
-    const session = await this.loginHandler.handle({
+    currentUrl.set("pathname", loginOptions.redirectUrl);
+    await this.loginHandler.handle({
       ...loginOptions,
-      redirect: currentUrl,
-      doNotAutoRedirect: true
+      redirectUrl: currentUrl
     });
-    return session;
     // TODO: handle if session doesn't have redirect
     // const popupWindow = window.open(
     //   (session.neededAction as INeededRedirectAction).redirectUrl,

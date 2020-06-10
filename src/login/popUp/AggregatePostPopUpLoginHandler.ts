@@ -20,17 +20,16 @@
  */
 
 /**
- * Responsible for deciding which Login Handler should be used given within the popup
+ * Responsible for deciding which Login Handler should be used inside a popup window
  */
 import AggregateHandler from "../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
 import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
-import ISessionInfo from "../../sessionInfo/ISessionInfo";
 
 @injectable()
 export default class AggregatePostPopUpLoginHandler
-  extends AggregateHandler<[ILoginOptions], ISessionInfo>
+  extends AggregateHandler<[ILoginOptions], void>
   implements ILoginHandler {
   constructor(
     @injectAll("postPopUpLoginHandlers") loginHandlers: ILoginHandler[]

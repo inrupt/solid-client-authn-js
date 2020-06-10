@@ -24,7 +24,6 @@
  */
 import IHandleable from "../util/handlerPattern/IHandleable";
 import ILoginOptions from "./ILoginOptions";
-import ISessionInfo from "../sessionInfo/ISessionInfo";
 
-type ILoginHandler = IHandleable<[ILoginOptions], ISessionInfo>;
+type ILoginHandler = IHandleable<[ILoginOptions], void>;
 export default ILoginHandler;

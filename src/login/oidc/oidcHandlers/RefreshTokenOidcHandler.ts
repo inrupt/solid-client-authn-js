@@ -32,7 +32,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     return false;
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISessionInfo> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     throw new NotImplementedError("RefreshTokenOidcHandler handle");
   }
 }

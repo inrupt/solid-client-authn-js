@@ -25,14 +25,12 @@
 import URL from "url-parse";
 
 export default interface ILoginOptions {
-  localUserId?: "global" | string;
+  sessionId: string;
   oidcIssuer?: URL;
-  webId?: URL;
-  redirect?: URL;
-  popUp?: boolean;
-  popUpRedirectPath?: string;
-  state?: string;
+  redirectUrl?: URL;
   clientId?: string;
-  doNotAutoRedirect?: boolean;
+  clientSecret?: string;
   clientName?: string;
+  popUp?: boolean;
+  handleRedirect?: (redirectUrl: string) => unknown;
 }

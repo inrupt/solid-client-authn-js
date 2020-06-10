@@ -25,14 +25,13 @@
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import NotImplementedError from "../../../errors/NotImplementedError";
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return false;
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISessionInfo> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     throw new NotImplementedError("ClientCredentialsOidcHandler handle");
   }
 }
