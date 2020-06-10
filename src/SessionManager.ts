@@ -52,7 +52,7 @@ export class SessionManager extends EventEmitter {
   private async init(): Promise<void> {
     if (!this.isInitialized) {
       const env = detectEnvironment();
-      if (env === "server" || env === "react-native") {
+      if (env === "browser") {
         try {
           await this.handleIncomingRedirect(window.location.href);
         } catch (err) {

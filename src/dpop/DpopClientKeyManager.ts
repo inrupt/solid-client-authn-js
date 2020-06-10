@@ -63,8 +63,8 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
 
     if (!jwk) {
       // TODO: differentiate between what a server supports instead of hard coding rsa?
-      jwk = await this.joseUtility.generateJWK("RSA", 2048, {
-        alg: "RSA",
+      jwk = await this.joseUtility.generateJWK("EC", "P-521", {
+        alg: "EC",
         use: "sig"
       });
       await this.storageUtility.set(

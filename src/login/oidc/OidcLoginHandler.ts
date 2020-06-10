@@ -33,7 +33,6 @@ import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import IIssuerConfig from "./IIssuerConfig";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
-import ISessionInfo from "../../sessionInfo/ISessionInfo";
 import { IStorageUtility } from "../../storage/StorageUtility";
 import { IClientRegistrar } from "./ClientRegistrar";
 

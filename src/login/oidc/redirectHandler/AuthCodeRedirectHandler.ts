@@ -44,6 +44,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
   }
 
   async handle(redirectUrl: string): Promise<ISessionInfo> {
+    console.log("Auth code redirect handler");
     throw new Error("Not Implemented");
     // if (!(await this.canHandle(redirectUrl))) {
     //   throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
