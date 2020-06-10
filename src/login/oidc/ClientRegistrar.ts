@@ -44,7 +44,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       /* eslint-disable @typescript-eslint/camelcase */
       client_name: options.clientName,
       application_type: "web",
-      redirect_uris: [options.redirect?.toString()],
+      redirect_uris: [options.redirectUrl?.toString()],
       subject_type: "pairwise",
       token_endpoint_auth_method: "client_secret_basic",
       code_challenge_method: "S256"

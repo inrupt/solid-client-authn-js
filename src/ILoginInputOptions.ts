@@ -26,6 +26,7 @@ export default interface ILoginInputOptions {
   redirectUrl?: string | URL;
   clientId?: string;
   clientSecret?: string;
+  clientName?: string;
   popUp?: boolean;
   handleRedirect?: (redirectUrl: string) => unknown;
 }

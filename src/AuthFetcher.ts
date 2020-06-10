@@ -28,6 +28,7 @@ import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import { IEnvironmentDetector } from "./util/EnvironmentDetector";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 import ILoginInputOptions from "./ILoginInputOptions";
+import URL from "url-parse";
 
 @injectable()
 export default class AuthFetcher {
@@ -42,8 +43,27 @@ export default class AuthFetcher {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
+  private urlOptionToUrl(url?: URL | string): URL | undefined {
+    if (url) {
+      if (typeof url !== "string") {
+        return url;
+      }
+      return new URL(url);
+    }
+    return undefined;
+  }
+
   async login(sessionId: string, options: ILoginInputOptions): Promise<void> {
-    throw new Error("Inner not implemented");
+    return this.loginHandler.handle({
+      sessionId,
+      oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
+      redirectUrl: this.urlOptionToUrl(options.redirectUrl),
+      clientId: options.clientId,
+      clientSecret: options.clientSecret,
+      clientName: options.clientId,
+      popUp: options.popUp || false,
+      handleRedirect: options.handleRedirect
+    });
   }
 
   async fetch(

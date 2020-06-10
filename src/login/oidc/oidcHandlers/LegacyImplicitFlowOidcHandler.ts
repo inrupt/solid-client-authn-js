@@ -48,7 +48,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISessionInfo> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     throw new Error("Not Implemented");
 
     // const requestUrl = new URL(
