@@ -23,7 +23,7 @@ import { inject, injectable } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 
 export interface IRedirectorOptions {
-  doNotAutoRedirect?: boolean;
+  handleRedirect?: (url: string) => unknown;
   redirectByReplacingState?: boolean;
 }
 
@@ -39,15 +39,18 @@ export default class Redirector implements IRedirector {
   ) {}
 
   redirect(redirectUrl: string, options?: IRedirectorOptions): void {
-    if (
-      this.environmentDetector.detect() === "browser" &&
-      !options?.doNotAutoRedirect
-    ) {
+    if (options && options.handleRedirect) {
+      options.handleRedirect(redirectUrl);
+    } else if (this.environmentDetector.detect() === "browser") {
       if (options && options.redirectByReplacingState) {
         window.history.replaceState({}, "", redirectUrl);
       } else {
         window.location.href = redirectUrl;
       }
+    } else {
+      throw new Error(
+        "A redirectHandler must be provided in any environment other than the web browser"
+      );
     }
   }
 }

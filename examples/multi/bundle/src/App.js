@@ -58,7 +58,7 @@ class App extends Component {
     e.preventDefault();
     this.setState({ status: "loading" });
     await this.state.session.login({
-      redirect: isPopup
+      redirectUrl: isPopup
         ? "http://localhost:3001/popup"
         : "http://localhost:3001/",
       oidcIssuer: this.state.loginIssuer,

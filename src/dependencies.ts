@@ -231,7 +231,8 @@ export default function getAuthFetcherWithDependencies(dependencies: {
   switch (detectEnvironment()) {
     case "browser":
     case "react-native":
-      secureStorage = dependencies.secureStorage || new InMemoryStorage();
+      // TODO: change this to be secure
+      secureStorage = dependencies.secureStorage || new BrowserStorage();
       insecureStorage = dependencies.insecureStorage || new BrowserStorage();
       break;
     case "server":
