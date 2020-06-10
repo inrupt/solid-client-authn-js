@@ -52,61 +52,55 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
-    throw new Error("Not implemented");
-    // const requestUrl = new URL(
-    //   oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
-    // );
-    // const codeVerifier = await this.joseUtility.generateCodeVerifier();
-    // const session = this.sessionCreator.create({
-    //   localUserId: oidcLoginOptions.localUserId,
-    //   loggedIn: false
-    // });
-    // // Disable camel case rule because this query requires camel case
-    // /* eslint-disable @typescript-eslint/camelcase */
-    // const query: { [key: string]: string } = {
-    //   response_type: "id_token code",
-    //   redirect_uri: oidcLoginOptions.redirectUrl.toString(),
-    //   scope: "openid profile offline_access",
-    //   client_id: oidcLoginOptions.client.clientId,
-    //   code_challenge_method: "S256",
-    //   code_challenge: await this.joseUtility.generateCodeChallenge(
-    //     codeVerifier
-    //   ),
-    //   state: session.localUserId
-    // };
-    // /* eslint-enable @typescript-eslint/camelcase */
-    // requestUrl.set("query", query);
-    // // TODO: This is inefficent, there should be a bulk
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "codeVerifier",
-    //   codeVerifier
-    // );
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "issuer",
-    //   oidcLoginOptions.issuer.toString()
-    // );
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "clientId",
-    //   oidcLoginOptions.client.clientId
-    // );
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "redirectUri",
-    //   oidcLoginOptions.redirectUrl.toString()
-    // );
-    // if (oidcLoginOptions.client.clientSecret) {
-    //   await this.storageUtility.setForUser(
-    //     session.localUserId,
-    //     "clientSecret",
-    //     oidcLoginOptions.client.clientSecret
-    //   );
-    // }
-    // session.neededAction = this.redirector.redirect(requestUrl.toString(), {
-    //   doNotAutoRedirect: !!oidcLoginOptions.doNotAutoRedirect
-    // });
-    // return session;
+    const requestUrl = new URL(
+      oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
+    );
+    const codeVerifier = await this.joseUtility.generateCodeVerifier();
+    // Disable camel case rule because this query requires camel case
+    /* eslint-disable @typescript-eslint/camelcase */
+    const query: { [key: string]: string } = {
+      response_type: "id_token code",
+      redirect_uri: oidcLoginOptions.redirectUrl.toString(),
+      scope: "openid webid offline_access",
+      client_id: oidcLoginOptions.client.clientId,
+      code_challenge_method: "S256",
+      code_challenge: await this.joseUtility.generateCodeChallenge(
+        codeVerifier
+      ),
+      state: oidcLoginOptions.sessionId
+    };
+    /* eslint-enable @typescript-eslint/camelcase */
+    requestUrl.set("query", query);
+    // TODO: This is inefficent, there should be a bulk
+    await this.storageUtility.setForUser(
+      oidcLoginOptions.sessionId,
+      "codeVerifier",
+      codeVerifier
+    );
+    await this.storageUtility.setForUser(
+      oidcLoginOptions.sessionId,
+      "issuer",
+      oidcLoginOptions.issuer.toString()
+    );
+    await this.storageUtility.setForUser(
+      oidcLoginOptions.sessionId,
+      "clientId",
+      oidcLoginOptions.client.clientId
+    );
+    await this.storageUtility.setForUser(
+      oidcLoginOptions.sessionId,
+      "redirectUri",
+      oidcLoginOptions.redirectUrl.toString()
+    );
+    if (oidcLoginOptions.client.clientSecret) {
+      await this.storageUtility.setForUser(
+        oidcLoginOptions.sessionId,
+        "clientSecret",
+        oidcLoginOptions.client.clientSecret
+      );
+    }
+    this.redirector.redirect(requestUrl.toString(), {
+      handleRedirect: oidcLoginOptions.handleRedirect
+    });
   }
 }
