@@ -30,6 +30,7 @@ import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 import { IStorageUtility } from "../../localStorage/StorageUtility";
 import { flattenHeaders } from "../headers/HeadersUtils";
+import { Headers as NodeHeaders } from "node-fetch";
 
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
@@ -67,6 +68,9 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
     url: RequestInfo,
     requestInit?: RequestInit
   ): Promise<Response> {
+    if (requestInit?.headers) {
+      console.log("Received headers");
+    }
     return this.fetcher.fetch(url, {
       ...requestInit,
       method: requestInit?.method ?? "GET",
