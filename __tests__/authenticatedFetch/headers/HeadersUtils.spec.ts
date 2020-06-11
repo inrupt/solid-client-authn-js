@@ -39,4 +39,20 @@ describe("Headers interoperability function", () => {
       ["content-type", "text/turtle"]
     ]);
   });
+
+  it("supports non-iterable headers if they provide a reasonably standard way of browsing them", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const myHeaders: any = {};
+    myHeaders["forEach"] = (
+      callback: (value: string, key: string) => void
+    ): void => {
+      callback("application/json", "accept");
+      callback("text/turtle", "content-type");
+    };
+    const flatHeaders = flattenHeaders(myHeaders);
+    expect(Object.entries(flatHeaders)).toEqual([
+      ["accept", "application/json"],
+      ["content-type", "text/turtle"]
+    ]);
+  });
 });
