@@ -37,7 +37,7 @@ export function flattenHeaders(
 
   // If the headers are already a Record<string, string>,
   // they can directly be returned.
-  if (typeof headersToFlatten.forEach === "undefined") {
+  if (typeof headersToFlatten.forEach !== "function") {
     // @ts-ignore
     return headersToFlatten;
   }
