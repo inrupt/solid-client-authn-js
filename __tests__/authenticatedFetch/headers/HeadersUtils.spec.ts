@@ -40,18 +40,14 @@ describe("Headers interoperability function", () => {
     ]);
   });
 
-  it("supports Comunica-style headers structures", () => {
-    // This enables testing that an object similar to the prototypes passed by
-    // Comunica is supported.
+  it("supports non-iterable headers if they provide a reasonably standard way of browsing them", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const myHeaders: any = {};
-    myHeaders["accept"] = "application/json";
-    myHeaders["content-type"] = "text/turtle";
-    myHeaders["raw"] = (): Record<string, string> => {
-      return {
-        accept: "application/json",
-        "content-type": "text/turtle"
-      };
+    myHeaders["forEach"] = (
+      callback: (value: string, key: string) => void
+    ): void => {
+      callback("application/json", "accept");
+      callback("text/turtle", "content-type");
     };
     const flatHeaders = flattenHeaders(myHeaders);
     expect(Object.entries(flatHeaders)).toEqual([
