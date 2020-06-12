@@ -1,10 +1,10 @@
-import { uniqueLogin, handleRedirect } from "solid-auth-fetcher";
+import { uniqueLogin, handleRedirect } from "@solid/lit-auth";
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
 import fetch from "node-fetch";
-import ISolidSession from "solid-auth-fetcher/dist/solidSession/ISolidSession";
-import INeedeRedirectAction from "solid-auth-fetcher/dist/neededAction/INeededRedirectAction";
+import ISolidSession from "@solid/lit-auth/dist/solidSession/ISolidSession";
+import INeedeRedirectAction from "@solid/lit-auth/dist/neededAction/INeededRedirectAction";
 
 const PORT = 3001;
 const BASE_URL = `http://localhost:${PORT}`;

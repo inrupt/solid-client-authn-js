@@ -7,7 +7,7 @@ A client tool to login and make authenticated requests to Solid compliant server
 ## Installation
 
 ```bash
-npm install solid-auth-fetcher
+npm install @solid/lit-auth
 ```
 
 ## Examples Usage
@@ -20,8 +20,8 @@ npm install solid-auth-fetcher
 ### Setting up the examples
 
 ```bash
-git clone https://github.com/inrupt/solid-auth-fetcher.git
-cd solid-auth-fetcher
+git clone https://github.com/inrupt/@solid/lit-auth.git
+cd @solid/lit-auth
 npm i
 npm run bootstrap-examples
 # Run each example
@@ -54,28 +54,28 @@ In the browser via the `script` tag:
 Using `import`
 
 ```javascript
-import { getSession } from "solid-auth-fetcher"
+import { getSession } from "@solid/lit-auth";
 
 getSession().then((session) => {
-    if (!session.loggedIn) {
-        console.log("User is not logged in")
-    } else {
-        console.log("User is logged in")
-    }
+  if (!session.loggedIn) {
+    console.log("User is not logged in");
+  } else {
+    console.log("User is logged in");
+  }
 })
 ```
 
 Using `require`
 
 ```javascript
-const solidAuthFetcher = require("solid-auth-fetcher")
+const solidAuthFetcher = require("@solid/lit-auth");
 
 solidAuthFetcher.getSession().then((session) => {
-    if (!session.loggedIn) {
-        console.log("User is not logged in")
-    } else {
-        console.log("User is logged in")
-    }
+  if (!session.loggedIn) {
+    console.log("User is not logged in");
+  } else {
+    console.log("User is logged in");
+  }
 })
 ```
 
@@ -86,7 +86,7 @@ solidAuthFetcher.getSession().then((session) => {
 Let's first see how we can initiate a login.
 
 ```typescript
-import { login, getSession } from 'solid-auth-fetcher'
+import { login, getSession } from "@solid/lit-auth";
 
 // getSession will return a session object
 getSession().then(async (session) => {
@@ -96,21 +96,21 @@ getSession().then(async (session) => {
       // you know who the user's OIDC issuer is. If neither are provided, a
       // pop-up will ask the user to provide one. If it is running on the server
       // the popup parameter will be ingored.
-      oidcIssuer: 'https://identityProvider.com', 
+      oidcIssuer: "https://identityProvider.com",
 
-      // Note that when 'popUp' is false, the browser will redirect the
+      // Note that when "popUp" is false, the browser will redirect the
       // current page thus stopping the current flow (default is false).
       popUp: false,
       
       // The page that that should be queried once login is complete
-      redirectUrl: 'https://mysite.com/redirect',
+      redirectUrl: "https://mysite.com/redirect",
     })
     // Chances are that this session will not be logged in. Instead, your browser
-    // window will be redirected and you'll be able to get the logged in session
+    // window will be redirected and you"ll be able to get the logged in session
     // via `getSession` or `onSession` after the redirect.
     console.log(session);
   }
-})
+});
 ```
 
 #### Login with a PopUp Window
@@ -128,7 +128,7 @@ By default, the user is redirected to the login page within the same window, but
       oidcIssuer: "https://identityProvider.com",
       popUp: true,
       popUpRedirectPath: "/popup.html"
-    })
+    });
   }
 </script>
 <head>
@@ -145,7 +145,7 @@ By default, the user is redirected to the login page within the same window, but
 <head>
 <script src="/path/to/solidAuthFetcher.bundle.js"></script>
 <script>
-  solidAuthFetcher.handlePopUpRedirect()
+  solidAuthFetcher.handlePopUpRedirect();
 </script>
 <head>
 </html>
@@ -158,12 +158,12 @@ generally better to be alerted when a user has logged in. For this, you can
 use `onSession()`. Then you can use that user to fetch.
 
 ```typescript
-import { onSession } from 'solid-auth-fetcher'
+import { onSession } from "@solid/lit-auth";
 
 onSession((session) => {
   if (session.loggedIn) {
-    console.log(user.webId)
-    session.fetch('https://example.com/resource')
+    console.log(user.webId);
+    session.fetch("https://example.com/resource");
   }
 })
 ```
@@ -173,14 +173,14 @@ onSession((session) => {
 It is also possible to fetch without the "session" object. Keep in mind that doing so will not make an authenticated fetch if a user is not logged in.
 
 ```typescript
-import { fetch } from 'solid-auth-fetcher'
+import { fetch } from "@solid/lit-auth"
 
-fetch('https://example.com/resource', {
-  method: 'post',
-  body: 'What a cool string!'
+fetch("https://example.com/resource", {
+  method: "post",
+  body: "What a cool string!"
 }).then(async (response) => {
   console.log(await response.text());
-})
+});
 ```
 #### Logging in Multiple Users
 
@@ -188,26 +188,26 @@ There may be some cases where you want to manage multiple users logged in
 at once. For this we can use the `uniqueLogin` function.
 
 ```typescript
-import { uniqueLogin, getSessions } from 'solid-auth-fetcher'
+import { uniqueLogin, getSessions } from "@solid/lit-auth";
 
-const myWebId = 'https://example.com/profile/card#me'
+const myWebId = "https://example.com/profile/card#me";
 getSessions().then((sessions) => {
-  // If my WebID hasn't been logged in yet.
+  // If my WebID hasn"t been logged in yet.
   if (sessions.some((session) => session.webId === myWebId)) {
     await uniqueLogin({
       webId: myWebId,
       redirectUrl: "https://myapp.com/redirect"
-    })
+    });
   }
 })
 ```
 
 #### Custom Storage
 
-By default, Solid-Auth-Fetcher will use your browser's local storage. But, you may want to use your own implementation. To do so, you can use the `getCustomAuthFetcher` method and provide its own storage.
+By default, @solid/lit-auth will use your browser's local storage. But, you may want to use your own implementation. To do so, you can use the `getCustomAuthFetcher` method and provide its own storage.
 
 ```javascript
-import { getCustomAuthFetcher } from 'solid-auth-fetcher'
+import { getCustomAuthFetcher } from "@solid/lit-auth"
 
 getCustomAuthFetcher({
   storage: {
@@ -218,16 +218,16 @@ getCustomAuthFetcher({
     // Key is a string and a Promise<void> should be returned
     delete: (key) => {/* perform delete */}
   }
-}).then((authFetcher) => { /* Do something */ })
+}).then((authFetcher) => { /* Do something */ });
 ```
 
 
 #### Custom Redirect Handling
 
-By default, Solid-Auth-Fetcher redirects automatically upon login, and automatically handles a redirect back to the app when it is initialized. But, you may want to handle redirects manually. To do this you can use the `doNotAutoRedirect` and the `doNotAutoHandleRedirect` flags along with the `handleRedirect` method.
+By default, @solid/lit-auth redirects automatically upon login, and automatically handles a redirect back to the app when it is initialized. But, you may want to handle redirects manually. To do this you can use the `doNotAutoRedirect` and the `doNotAutoHandleRedirect` flags along with the `handleRedirect` method.
 
 ```javascript
-import { getCustomAuthFetcher } from 'solid-auth-fetcher'
+import { getCustomAuthFetcher } from "@solid/lit-auth"
 
 // Get the custom auth fetcher that will not trigger `handleRedirect` automatically
 getCustomAuthFetcher({
@@ -239,20 +239,21 @@ getCustomAuthFetcher({
     // Call the handleRedirect method with the current url
     await authFetcher.handleRedirect(window.location.href);
     // Once the redirect is handled we can return to the home page
-    window.history.replaceState({}, "", window.location.origin)
+    window.history.replaceState({}, "", window.location.origin);
 
 
   // If we are not at the redirect route we should trigger a log in or get
   //  the session
   } else {
-    const curSession = await getSession()
+    const curSession = await getSession();
+
     if (curSession.loggedIn) {
       console.log("The user is logged in");
     } else {
       // Log in if the user is not already
       const session = await authFetcher.login({
-        oidcIssuer: 'https://identityProvider.com', 
-        redirectUrl: 'https://mysite.com/redirect',
+        oidcIssuer: "https://identityProvider.com",
+        redirectUrl: "https://mysite.com/redirect",
         // Notice this flag the suppresses the auto redirect
         doNotAutoRedirect: true
       });
@@ -265,7 +266,7 @@ getCustomAuthFetcher({
         session.neededAction.actionType === "redirect"
       ) {
         // Perform the manual redirect
-        window.location.href = session.neededAction.redirectUrl
+        window.location.href = session.neededAction.redirectUrl;
       }
     }
   }
@@ -278,27 +279,29 @@ Unlike on the browser, servers often need to deal with multiple users, so
 the server API has been configured to deal with that by default:
 
 ```javascript
-import { getCustomAuthFetcher } from "solid-auth-fetcher";
+import { getCustomAuthFetcher } from "@solid/lit-auth";
 import express from "express";
 import expressSession from "express-session";
 
 // First we'll initialize an auth fetcher and hook it up to our own stroage
 let authFetcher;
-let authSessions = {}
+let authSessions = {};
+
 getCustomAuthFetcher({
   storage: {
     get: (key) => {/* perform get */}
     set: (key, value) => {/* perform set */}
     delete: (key) => {/* perform delete */}
   }
-}).then(async (af) => { 
+}).then(async (af) => {
   authFetcher = af
   // Initialize any sessions that are already in stroage
-  const curAuthSessions = await getSessions()
+  const curAuthSessions = await getSessions();
+
   curAuthSessions.forEach((curAuthSession) => {
     authSessions[curAuthSession.localUserId] = curAuthSession
-  })
- })
+  });
+});
 
 const app = express();
 
@@ -306,23 +309,25 @@ app.use(
   expressSession({
     secret: "I let Kevin's son beat me in foosball",
     cookie: { secure: true }
-  })
+  });
 );
 
 app.post("/login", async (req, res) => {
-    const authSession = await uniqueLogin({
-        oidcIssuer: req.body.webid,
-        redirect: "https://myapp.com/redirect",
-        clientId: "coolApp"
-    });
-    req.session.localUserId = authSession.localUserId;
-    authSessions[authSession.localUserId] = authSession;
-    if (
-        authSession.neededAction &&
-        authSession.neededAction.actionType === "redirect"
-    ) {
-        res.redirect(session.authSession.redirectUrl);
-    }
+  const authSession = await uniqueLogin({
+    oidcIssuer: req.body.webid,
+    redirect: "https://myapp.com/redirect",
+    clientId: "coolApp"
+  });
+
+  req.session.localUserId = authSession.localUserId;
+  authSessions[authSession.localUserId] = authSession;
+
+  if (
+    authSession.neededAction &&
+    authSession.neededAction.actionType === "redirect"
+  ) {
+    res.redirect(session.authSession.redirectUrl);
+  }
 });
 
 app.get("/redirect", async (req, res) => {
@@ -348,7 +353,7 @@ app.get("/fetch", async (req, res) => {
   }
 });
 
-app.listen(3000)
+app.listen(3000);
 ```
 
 ### General Usage
@@ -357,23 +362,23 @@ app.listen(3000)
 Kick off the login process for a global user:
 
 ```typescript
-import { login } from 'solid-auth-fetcher';
+import { login } from "@solid/lit-auth";
 
 
 login({
-    // You could provide either a "webId" field, or an "issuer"
-    // field if you know who the user's OIDC issuer is. If
-    // neither are provided, a pop-up will ask the user to
-    // provide one.
-    webId: 'https://example.com/profile/card#me', 
+  // You could provide either a "webId" field, or an "issuer"
+  // field if you know who the user's OIDC issuer is. If
+  // neither are provided, a pop-up will ask the user to
+  // provide one.
+  webId: "https://example.com/profile/card#me",
 
-    // Note that when 'popUp' is false, the browser will
-    // redirect the current page thus stopping the current
-    // flow (default is false).
-    popUp: false,
+  // Note that when "popUp" is false, the browser will
+  // redirect the current page thus stopping the current
+  // flow (default is false).
+  popUp: false,
 
-    redirect: 'https://mysite.com/redirect'
-}).then((session) => {})
+  redirect: "https://mysite.com/redirect"
+}).then((session) => {});
 ```
 
 Options:
@@ -386,19 +391,19 @@ Options:
 | `popUp`    | No                                                 | Boolean       | If true, the login process will initiate via a popup. This only works on web clients.                               | false     |
 | `popUpRedirectPath`    | No                                                 | String       | The path to which a popup window should redirect after the user is logged in   | undefined     |
 | `state`    | No                                                 | String        | The state will be provided with the User's Session object once they have logged in                                  | undefined |
-| `doNotAutoRedirect`    | No                                                 | Boolean        | If true, the browser will not auto redirect. Note that auto redirect only happens if Solid-Auth-Fetcher is running in the browser | false |
+| `doNotAutoRedirect`    | No                                                 | Boolean        | If true, the browser will not auto redirect. Note that auto redirect only happens if @solid/lit-auth is running in the browser | false |
 
 #### uniqueLogin(options): [Session](#session)
-Kick off the login process for a unique user. This allows you to log in multiple users with solid-auth-fetcher. It's a useful feature for apps that wish to support multiple users being logged into the same client, or for servers that work with multiple clients.
+Kick off the login process for a unique user. This allows you to log in multiple users with @solid/lit-auth. It's a useful feature for apps that wish to support multiple users being logged into the same client, or for servers that work with multiple clients.
 
 ```javascript
-import { uniqueLogin } from 'solid-auth-fetcher';
+import { uniqueLogin } from "@solid/lit-auth";
 
 uniqueLogin({
-    webId: 'https://example.com/profile/card#me',
-    popUp: false
-    redirect: 'https://mysite.com/redirect'
-}).then((session) => {})
+  webId: "https://example.com/profile/card#me",
+  popUp: false
+  redirect: "https://mysite.com/redirect"
+}).then((session) => {});
 ```
 
 The options for `uniqueLogin()` are identical to `login()`.
@@ -407,53 +412,53 @@ The options for `uniqueLogin()` are identical to `login()`.
 Send an HTTP request to a Solid Pod as the global user:
 
 ```typescript
-import { fetch } from 'solid-auth-fetcher';
+import { fetch } from "@solid/lit-auth";
 
-fetch('https://example.com/resource', {
-    method: 'POST',
-    headers: {
-        "Content-Type": "text/plain"
-    },
-    body: 'Sweet body, bro'
-}).then((result) => {})
+fetch("https://example.com/resource", {
+  method: "POST",
+  headers: {
+      "Content-Type": "text/plain"
+  },
+  body: "Sweet body, bro"
+}).then((result) => {});
 ```
 Fetch follows the [WHATWG Fetch Standard](https://github.github.io/fetch/).
 
 #### logout()
 Log the global user out:
 ```typescript
-import { logout } from 'solid-auth-fetcher';
+import { logout } from "@solid/lit-auth";
 
-logout().then(() => {})
+logout().then(() => {});
 ```
 
 #### getSession(): [Session](#session)
 Retrieve the session for the global user:
 
 ```typescript
-import { getSession } from 'solid-auth-fetcher';
+import { getSession } from "@solid/lit-auth";
 
-await getSession().then((session) => {})
+await getSession().then((session) => {});
 ```
 
 #### getSessions(): [Session](#session)[]
 Retrieve all sessions currently registered with authFetcher
 
 ```typescript
-import { getSessions } from 'solid-auth-fetcher';
+import { getSessions } from "@solid/lit-auth";
 
-await getSessions().then((sessions) => {})
+await getSessions().then((sessions) => {});
 ```
 
 #### onSession(callback)
 Register a callback function to be called when a new session is received after the user has logged in:
 
 ```typescript
-import { onSession } from 'solid-auth-fetcher'
+import { onSession } from "@solid/lit-auth";
 
 onSession((session) => {
-  console.log(session.webId)
-})
+  console.log(session.webId);
+});
 ```
 
 The callback receives a [`Session`](#session) object as its sole parameter.
@@ -462,22 +467,22 @@ The callback receives a [`Session`](#session) object as its sole parameter.
 Register a callback function to be called when a session is logged out:
 
 ```typescript
-import { onLogout } from 'solid-auth-fetcher'
+import { onLogout } from "@solid/lit-auth";
 
 onLogout((session) => {
-  console.log(session.webId)
-})
+  console.log(session.webId);
+});
 ```
 
 #### onRequest(callback)
 Register a callback function to be called whenever a request is made:
 
 ```typescript
-import { onRequest } from 'solid-auth-fetcher'
+import { onRequest } from "@solid/lit-auth"
 
 onRequest((url, requestOptions) => {
-  console.log(url)
-})
+  console.log(url);
+});
 ```
 
 #### Session
@@ -498,12 +503,12 @@ interface Session {
 ```
 
 #### handleRedirect(url): Session
-Handle redirects as a part of the OIDC process. Servers using solid-auth-fetcher must manually call this method on redirect, but is done automatically on web and mobile.
+Handle redirects as a part of the OIDC process. Servers using @solid/lit-auth must manually call this method on redirect, but is done automatically on web and mobile.
 
 ```typescript
-import { handleRedirect } from 'solid-auth-fetcher'
+import { handleRedirect } from "@solid/lit-auth";
 
-handleRedirect(window.location.href).then((session) => {})
+handleRedirect(window.location.href).then((session) => {});
 ```
 
 
@@ -511,21 +516,21 @@ handleRedirect(window.location.href).then((session) => {})
 Create an instance of `AuthFetcher` with configurable settings:
 
 ```typescript
-import customAuthFetcher from 'solid-auth-fetcher'
+import customAuthFetcher from "@solid/lit-auth";
 
 const authFetcher = customAuthFetcher({
-    // A custom implementation of how auth fetcher should persist its
-    // data.
-    storage: { 
-        get: (key: string) => Promise<any>
-        set: (key: string, value: any) => Promise<void>
-        delete: (key: string) => Promise<void>
-    },
-    
-    // If true, handleRedirect will automatically be triggered on web
-    // and mobile platforms. Default is true. 
-    shouldAutoHandleRedirect: boolean 
-})
+  // A custom implementation of how auth fetcher should persist its
+  // data.
+  storage: { 
+    get: (key: string) => Promise<any>
+    set: (key: string, value: any) => Promise<void>
+    delete: (key: string) => Promise<void>
+  },
+  
+  // If true, handleRedirect will automatically be triggered on web
+  // and mobile platforms. Default is true. 
+  shouldAutoHandleRedirect: boolean 
+});
 ```
 
 #### AuthFetcher
@@ -533,19 +538,19 @@ The primary object for logging in, and making authenticated fetches:
 
 ```typescript
 interface AuthFetcher {
-    login: (options: {}) => Promise<void>
-    fetch: (url: string | URL, options: {}) => Promise<Response>
-    logout: () => Promise<void>
-    getSession: () => Promise<Session>
-    getSessions: () => Promise<Session[]>
-    uniqueLogin: (options: {}) => Promise<void>
-    onSession: (callback: (session: Session) => any) => void
-    onLogout: (callback: (session: Session) => any) => void
-    handleRedirect:  (url: string | URL) => Promise<void>
+  login: (options: {}) => Promise<void>
+  fetch: (url: string | URL, options: {}) => Promise<Response>
+  logout: () => Promise<void>
+  getSession: () => Promise<Session>
+  getSessions: () => Promise<Session[]>
+  uniqueLogin: (options: {}) => Promise<void>
+  onSession: (callback: (session: Session) => any) => void
+  onLogout: (callback: (session: Session) => any) => void
+  handleRedirect:  (url: string | URL) => Promise<void>
 }
 ```
 
 ### Injecting your custom functionality
 
-Any part of `solid-auth-fetcher` can be modified without the need to 
-commit to the source library. All you need to do is build up a dependency injection heirarchy as seen in https://github.com/inrupt/solid-auth-fetcher/blob/refactor/src/dependencies.ts.
+Any part of `@solid/lit-auth` can be modified without the need to 
+commit to the source library. All you need to do is build up a dependency injection heirarchy as seen in https://github.com/inrupt/@solid/lit-auth/blob/refactor/src/dependencies.ts.

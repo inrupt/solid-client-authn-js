@@ -2,7 +2,7 @@
 "@babel/code-frame@7.8.3","MIT","https://github.com/babel/babel/tree/master/packages/babel-code-frame"
 "@babel/helper-validator-identifier@7.9.5","MIT","https://github.com/babel/babel/tree/master/packages/babel-helper-validator-identifier"
 "@babel/highlight@7.9.0","MIT","https://github.com/babel/babel/tree/master/packages/babel-highlight"
-"@inrupt/solid-auth-fetcher@0.0.4","MIT",""
+"@solid/lit-auth@0.0.7","MIT",""
 "@panva/asn1.js@1.0.0","MIT","https://github.com/panva/asn1.js"
 "@samverschueren/stream-to-observable@0.3.0","MIT","https://github.com/SamVerschueren/stream-to-observable"
 "@types/color-name@1.1.1","MIT","https://github.com/DefinitelyTyped/DefinitelyTyped"

@@ -7,11 +7,9 @@
 
 const path = require('path');
 const extraNodeModules = {
-  'solid-auth-fetcher': path.resolve(__dirname + '/../../'),
+  '@solid/lit-auth': path.resolve(__dirname + '/../../'),
 };
-const watchFolders = [
-  path.resolve(__dirname + '/../../')
-];
+const watchFolders = [path.resolve(__dirname + '/../../')];
 
 module.exports = {
   transformer: {
@@ -21,9 +19,9 @@ module.exports = {
         inlineRequires: false,
       },
     }),
-  }, 
+  },
   resolver: {
-    extraNodeModules
+    extraNodeModules,
   },
   watchFolders,
 };

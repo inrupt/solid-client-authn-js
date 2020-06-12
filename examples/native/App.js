@@ -6,7 +6,7 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -24,20 +24,19 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import experiment from 'solid-auth-fetcher/dist/experiment';
+import experiment from '@solid/lit-auth/dist/experiment';
 
 class App extends Component {
-
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
-      token: ''
-    }
+      token: '',
+    };
   }
 
   async componentDidMount() {
-    const token = await (await experiment()).getToken()
-    this.setState({ token })
+    const token = await (await experiment()).getToken();
+    this.setState({token});
   }
 
   render() {
@@ -53,10 +52,10 @@ class App extends Component {
             </View>
           </ScrollView>
         </SafeAreaView>
-      </> 
+      </>
     );
   }
-};
+}
 
 const styles = StyleSheet.create({
   scrollView: {
