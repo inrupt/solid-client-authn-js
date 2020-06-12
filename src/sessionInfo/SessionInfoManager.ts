@@ -20,35 +20,30 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import { IUuidGenerator } from "../util/UuidGenerator";
-import IAuthenticatedFetcher from "../authenticatedFetch/IAuthenticatedFetcher";
-import ILogoutHandler from "../logout/ILogoutHandler";
 import { IStorageUtility } from "../storage/StorageUtility";
 import ISessionInfo from "./ISessionInfo";
 
-export interface ISessionCreatorOptions {
-  localUserId?: string;
-  loggedIn: boolean;
+export interface ISessionInfoManagerOptions {
+  loggedIn?: boolean;
   webId?: string;
-  state?: string;
 }
 
-export interface ISessionCreator {
-  create(options: ISessionCreatorOptions): ISessionInfo;
-  getSession(localUserId: string): Promise<ISessionInfo | null>;
+export interface ISessionInfoManager {
+  update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
+  get(sessionId: string): Promise<ISessionInfo | undefined>;
+  getAll(): Promise<ISessionInfo[]>;
 }
 
 @injectable()
-export default class SessionCreator implements ISessionCreator {
+export default class SessionInfoManager implements ISessionInfoManager {
   constructor(
-    @inject("uuidGenerator") private uuidGenerator: IUuidGenerator,
-    @inject("authenticatedFetcher")
-    private authenticatedFetcher: IAuthenticatedFetcher,
-    @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
-  create(options: ISessionCreatorOptions): ISessionInfo {
+  update(
+    sessionId: string,
+    options: ISessionInfoManagerOptions
+  ): Promise<void> {
     // const localUserId: string = options.localUserId || this.uuidGenerator.v4();
     // if (options.loggedIn) {
     //   return {
@@ -83,20 +78,23 @@ export default class SessionCreator implements ISessionCreator {
     throw new Error("Not Implemented");
   }
 
-  async getSession(localUserId: string): Promise<ISessionInfo | null> {
+  async get(sessionId: string): Promise<ISessionInfo | undefined> {
+    const webId = await this.storageUtility.getForUser(sessionId, "webId");
+    const isLoggedIn = await this.storageUtility.getForUser(
+      sessionId,
+      "isLoggedIn"
+    );
+    if (isLoggedIn !== null) {
+      return {
+        sessionId,
+        webId: webId,
+        isLoggedIn: isLoggedIn === "true"
+      };
+    }
+    return undefined;
+  }
+
+  async getAll(): Promise<ISessionInfo[]> {
     throw new Error("Not implemented");
-    // const webId = await this.storageUtility.getForUser(localUserId, "webId");
-    // const accessToken = await this.storageUtility.getForUser(
-    //   localUserId,
-    //   "accessToken"
-    // );
-    // if (webId) {
-    //   return this.create({
-    //     localUserId,
-    //     webId: webId,
-    //     loggedIn: !!accessToken
-    //   });
-    // }
-    // return null;
   }
 }

@@ -27,6 +27,8 @@ import formurlencoded from "form-urlencoded";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import IJoseUtility from "../../jose/IJoseUtility";
+import { IClientRegistrar } from "./ClientRegistrar";
+import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 
 export interface ITokenRequester {
   request(localUserId: string, body: Record<string, string>): Promise<void>;
@@ -40,22 +42,30 @@ export default class TokenRequester {
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("fetcher") private fetcher: IFetcher,
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("joseUtility") private joseUtility: IJoseUtility
+    @inject("joseUtility") private joseUtility: IJoseUtility,
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar,
+    @inject("dpopClientKeyManager")
+    private dpopClientKeyManager: IDpopClientKeyManager
   ) {}
 
   async request(
-    localUserId: string,
+    sessionId: string,
     body: Record<string, string>
   ): Promise<void> {
-    const [issuer, clientId, clientSecret] = await Promise.all([
-      this.storageUtility.getForUser(localUserId, "issuer", true),
-      this.storageUtility.getForUser(localUserId, "clientId", true),
-      this.storageUtility.getForUser(localUserId, "clientSecret")
+    const [issuer] = await Promise.all([
+      this.storageUtility.getForUser(sessionId, "issuer", {
+        errorIfNull: true
+      })
     ]);
 
     // Get the issuer config to find the token url
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
       new URL(issuer as string)
+    );
+
+    const client = await this.clientRegistrar.getClient(
+      { sessionId },
+      issuerConfig
     );
 
     // Check that this issuer supports the provided request
@@ -72,6 +82,8 @@ export default class TokenRequester {
       throw new Error(`This issuer ${issuer} does not have a token endpoint`);
     }
 
+    await this.dpopClientKeyManager.generateClientKeyIfNotAlready();
+
     // Make request
     const tokenRequestInit: RequestInit & {
       headers: Record<string, string>;
@@ -87,13 +99,13 @@ export default class TokenRequester {
       body: formurlencoded({
         ...body,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        client_id: clientId
+        client_id: client.clientId
       })
     };
 
-    if (clientSecret) {
+    if (client.clientSecret) {
       tokenRequestInit.headers.Authorization = `Basic ${this.btoa(
-        `${clientId}:${clientSecret}`
+        `${client.clientId}:${client.clientSecret}`
       )}`;
     }
 
@@ -116,32 +128,22 @@ export default class TokenRequester {
       throw new Error("IDP token route returned an invalid response.");
     }
 
-    await this.storageUtility.setForUser(
-      localUserId,
-      "accessToken",
-      tokenResponse.access_token as string
-    );
-    await this.storageUtility.setForUser(
-      localUserId,
-      "idToken",
-      tokenResponse.id_token as string
-    );
-    await this.storageUtility.setForUser(
-      localUserId,
-      "refreshToken",
-      tokenResponse.refresh_token as string
-    );
-
     const decoded = await this.joseUtility.decodeJWT(
       tokenResponse.access_token as string
     );
     if (!decoded || !decoded.sub) {
       throw new Error("The idp returned a bad token without a sub.");
     }
+
     await this.storageUtility.setForUser(
-      localUserId,
-      "webId",
-      decoded.sub as string
+      sessionId,
+      {
+        accessToken: tokenResponse.access_token as string,
+        idToken: tokenResponse.id_token as string,
+        refreshToken: tokenResponse.refresh_token as string,
+        webId: decoded.sub as string
+      },
+      { secure: true }
     );
   }
 

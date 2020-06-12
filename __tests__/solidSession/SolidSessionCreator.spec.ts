@@ -32,7 +32,7 @@ import {
   AuthenticatedFetcherResponse
 } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { StorageUtilityMock } from "../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
 import SessionCreator from "../../src/solidSession/SessionCreator";
 import { ILoggedInSolidSession } from "../../src/solidSession/ISolidSession";
 

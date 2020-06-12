@@ -56,10 +56,13 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
     options?: JoseJWT.SignOptions
   ): Promise<string> {
     const parsedKey = await JWK.asKey(key);
+    console.log(1);
     const convertedKey: string = parsedKey.toPEM(true);
+    console.log(2);
     const signed = JWT.sign(payload, convertedKey, {
       ...(options as JWT.SignOptions)
     });
+    console.log(3);
     return signed;
   }
 

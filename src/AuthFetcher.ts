@@ -23,7 +23,7 @@ import { injectable, inject } from "tsyringe";
 import ILoginHandler from "./login/ILoginHandler";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import ILogoutHandler from "./logout/ILogoutHandler";
-import { ISessionCreator } from "./sessionInfo/SessionCreator";
+import { ISessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import { IEnvironmentDetector } from "./util/EnvironmentDetector";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
@@ -36,7 +36,8 @@ export default class AuthFetcher {
     @inject("loginHandler") private loginHandler: ILoginHandler,
     @inject("redirectHandler") private redirectHandler: IRedirectHandler,
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator,
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager,
     @inject("authenticatedFetcher")
     private authenticatedFetcher: IAuthenticatedFetcher,
     @inject("environmentDetector")
@@ -80,14 +81,14 @@ export default class AuthFetcher {
 
   async getSessionInfo(sessionId: string): Promise<ISessionInfo | undefined> {
     // TODO complete
-    return undefined;
+    return this.sessionInfoManager.get(sessionId);
   }
 
   async getAllSessionInfo(): Promise<ISessionInfo[]> {
-    throw new Error("Inner not implemented");
+    return this.sessionInfoManager.getAll();
   }
 
-  async handleIncomingRedirect(url: string): Promise<ISessionInfo> {
+  async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
     return this.redirectHandler.handle(url);
   }
 }

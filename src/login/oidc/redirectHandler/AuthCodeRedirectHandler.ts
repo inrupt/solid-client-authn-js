@@ -27,7 +27,7 @@ import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 import { ITokenRequester } from "../TokenRequester";
-import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
+import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
@@ -35,7 +35,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector,
     @inject("tokenRequester") private tokenRequester: ITokenRequester,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -43,23 +44,19 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     return !!(url.query && url.query.code && url.query.state);
   }
 
-  async handle(redirectUrl: string): Promise<ISessionInfo> {
+  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
     }
     const url = new URL(redirectUrl, true);
     const sessionId = url.query.state as string;
     const [codeVerifier, redirectUri] = await Promise.all([
-      (await this.storageUtility.getForUser(
-        sessionId,
-        "codeVerifier",
-        true
-      )) as string,
-      (await this.storageUtility.getForUser(
-        sessionId,
-        "redirectUri",
-        true
-      )) as string
+      (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
+        errorIfNull: true
+      })) as string,
+      (await this.storageUtility.getForUser(sessionId, "redirectUri", {
+        errorIfNull: true
+      })) as string
     ]);
 
     /* eslint-disable @typescript-eslint/camelcase */
@@ -73,8 +70,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
     url.set("query", {});
 
-    const sessionInfo = await this.sessionCreator.getSession(sessionId);
-    if (!session) {
+    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    if (!sessionInfo) {
       throw new Error("There was a problem creating a session.");
     }
     try {

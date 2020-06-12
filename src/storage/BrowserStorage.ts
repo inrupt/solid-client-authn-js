@@ -22,8 +22,8 @@
 import IStorage from "./IStorage";
 
 export default class BrowserStorage implements IStorage {
-  async get(key: string): Promise<string | null> {
-    return window.localStorage.getItem(key);
+  async get(key: string): Promise<string | undefined> {
+    return window.localStorage.getItem(key) || undefined;
   }
   async set(key: string, value: string): Promise<void> {
     window.localStorage.setItem(key, value);

@@ -33,7 +33,6 @@ import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import IIssuerConfig from "./IIssuerConfig";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
-import { IStorageUtility } from "../../storage/StorageUtility";
 import { IClientRegistrar } from "./ClientRegistrar";
 
 @injectable()
@@ -44,7 +43,6 @@ export default class OidcLoginHandler implements ILoginHandler {
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("dpopClientKeyManager")
     private dpopClientKeyManager: IDpopClientKeyManager,
-    @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
@@ -79,14 +77,19 @@ export default class OidcLoginHandler implements ILoginHandler {
       dpop: true,
       redirectUrl: options.redirectUrl as URL,
       issuerConfiguration: issuerConfig,
-      client: await this.clientRegistrar.getClient(options, issuerConfig),
+      client: await this.clientRegistrar.getClient(
+        {
+          sessionId: options.sessionId,
+          clientId: options.clientId,
+          clientSecret: options.clientSecret,
+          clientName: options.clientName,
+          redirectUrl: options.redirectUrl?.toString()
+        },
+        issuerConfig
+      ),
       sessionId: options.sessionId,
       handleRedirect: options.handleRedirect
     };
-
-    // Generate DPoP Key if needed
-    // TODO: should be a conditional if DPoP is needed or not
-    await this.dpopClientKeyManager.generateClientKeyIfNotAlready(OidcOptions);
 
     // Call proper OIDC Handler
     await this.oidcHandler.handle(OidcOptions);

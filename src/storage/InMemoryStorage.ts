@@ -23,8 +23,8 @@ import IStorage from "./IStorage";
 
 export default class InMemoryStorage implements IStorage {
   private map: Record<string, string> = {};
-  async get(key: string): Promise<string | null> {
-    return this.map[key] || null;
+  async get(key: string): Promise<string | undefined> {
+    return this.map[key] || undefined;
   }
   async set(key: string, value: string): Promise<void> {
     this.map[key] = value;
