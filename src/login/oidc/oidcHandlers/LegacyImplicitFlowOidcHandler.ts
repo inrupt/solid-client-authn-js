@@ -28,15 +28,12 @@ import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
-import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
+    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

@@ -53,11 +53,7 @@ export class SessionManager extends EventEmitter {
     if (!this.isInitialized) {
       const env = detectEnvironment();
       if (env === "browser") {
-        try {
-          await this.handleIncomingRedirect(window.location.href);
-        } catch (err) {
-          // Do nothing
-        }
+        await this.handleIncomingRedirect(window.location.href);
       }
       this.isInitialized = true;
     }
@@ -80,15 +76,15 @@ export class SessionManager extends EventEmitter {
     if (sessionRecord) {
       sessionRecord.session.webId = sessionInfo.webId;
       sessionRecord.session.isLoggedIn = sessionInfo.isLoggedIn;
+      return sessionRecord.session;
     } else {
-      this.addNewSessionRecord(
+      return this.addNewSessionRecord(
         new Session({
           authFetcher: this.authFetcher,
           sessionInfo: sessionInfo
         })
       );
     }
-    return sessionRecord.session;
   }
 
   async getSessions(): Promise<Session[]> {
@@ -149,10 +145,12 @@ export class SessionManager extends EventEmitter {
     if (!this.handledIncomingRedirect) {
       // This will always cause the user to log in. If not it will throw an error.
       const sessionInfo = await this.authFetcher.handleIncomingRedirect(url);
-      const session = this.getSessionFromCurrentSessionInfo(sessionInfo);
-      this.emit("sessionLogin", session);
-      session.emit("login");
-      this.handledIncomingRedirect = true;
+      if (sessionInfo) {
+        const session = this.getSessionFromCurrentSessionInfo(sessionInfo);
+        this.emit("sessionLogin", session);
+        session.emit("login");
+        this.handledIncomingRedirect = true;
+      }
     }
   }
 }

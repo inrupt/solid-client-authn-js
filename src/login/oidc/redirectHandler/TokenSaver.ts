@@ -21,9 +21,9 @@
 
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import { injectable, inject } from "tsyringe";
-import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../storage/StorageUtility";
+import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 export interface ITokenSaver {
   saveTokenAndGetSession(
@@ -37,7 +37,7 @@ export interface ITokenSaver {
 @injectable()
 export default class TokenSaver implements ITokenSaver {
   constructor(
-    @inject("sessionCreator") private sessionCreator: ISessionCreator,
+    @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager,
     @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}

@@ -24,11 +24,10 @@
  */
 import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
-import ISessionInfo from "../../sessionInfo/ISessionInfo";
 import { injectable, inject } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 import URL from "url-parse";
-import { ISessionCreator } from "../../sessionInfo/SessionCreator";
+import { ISessionInfoManager } from "../../sessionInfo/SessionInfoManager";
 
 @injectable()
 export default class PopUpLoginHandler implements ILoginHandler {
@@ -36,7 +35,7 @@ export default class PopUpLoginHandler implements ILoginHandler {
     @inject("environmentDetector")
     private environmentDetector: IEnvironmentDetector,
     @inject("postPopUpLoginHandler") private loginHandler: ILoginHandler,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
+    @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager
   ) {}
 
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {

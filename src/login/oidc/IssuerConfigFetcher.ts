@@ -154,33 +154,19 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   }
 
   async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
-    let issuerConfig: IIssuerConfig = (await this.storageUtility.safeGet(
-      this.getLocalStorageKey(issuer),
-      {
-        schema: issuerConfigSchema
-      }
-    )) as IIssuerConfig;
+    let issuerConfig: IIssuerConfig;
 
-    // If it is not stored locally, fetch it
-    if (!issuerConfig) {
-      const wellKnownUrl = new URL(issuer.toString());
-      wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
-      const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
-      // Check the validity of the fetched config
-      try {
-        issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
-      } catch (err) {
-        throw new ConfigurationError(
-          `${issuer.toString()} has an invalid configuration: ${err.message}`
-        );
-      }
+    const wellKnownUrl = new URL(issuer.toString());
+    wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
+    const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
+    // Check the validity of the fetched config
+    try {
+      issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
+    } catch (err) {
+      throw new ConfigurationError(
+        `${issuer.toString()} has an invalid configuration: ${err.message}`
+      );
     }
-
-    // Update store with fetched config
-    await this.storageUtility.set(
-      this.getLocalStorageKey(issuer),
-      JSON.stringify(issuerConfig)
-    );
 
     return issuerConfig;
   }

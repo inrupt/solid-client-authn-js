@@ -54,7 +54,7 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
     // TODO: update for multiple signing abilities
     const clientKey = await this.dpopClientKeyManager.getClientKey();
 
-    if (clientKey === null) {
+    if (clientKey === undefined) {
       throw new Error("Could not obtain the key to sign the token with.");
     }
 
@@ -72,7 +72,7 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
           typ: "dpop+jwt"
         },
         expiresIn: "1 hour",
-        algorithm: "RS256"
+        algorithm: "ES256"
       }
     );
   }

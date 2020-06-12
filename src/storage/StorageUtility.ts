@@ -27,17 +27,35 @@ import IStorage from "../storage/IStorage";
 import validateSchema from "../util/validateSchema";
 
 export interface IStorageUtility {
-  get(key: string, errorIfNull?: true): Promise<string | null>;
-  set(key: string, value: string): Promise<void>;
-  delete(key: string): Promise<void>;
+  get(
+    key: string,
+    options?: { errorIfNull?: boolean; secure?: boolean }
+  ): Promise<string | undefined>;
+  set(
+    key: string,
+    value: string,
+    options?: { secure?: boolean }
+  ): Promise<void>;
+  delete(key: string, options?: { secure?: boolean }): Promise<void>;
   getForUser(
     userId: string,
     key: string,
-    errorIfNull?: true
-  ): Promise<string | null>;
-  setForUser(userId: string, key: string, value: string): Promise<void>;
-  deleteForUser(userId: string, key: string): Promise<void>;
-  deleteAllUserData(userId: string): Promise<void>;
+    options?: { errorIfNull?: boolean; secure?: boolean }
+  ): Promise<string | undefined>;
+  setForUser(
+    userId: string,
+    values: Record<string, string>,
+    options?: { secure?: boolean }
+  ): Promise<void>;
+  deleteForUser(
+    userId: string,
+    key: string,
+    options?: { secure?: boolean }
+  ): Promise<void>;
+  deleteAllUserData(
+    userId: string,
+    options?: { secure?: boolean }
+  ): Promise<void>;
 
   /**
    * Retrieve from local storage
@@ -54,8 +72,9 @@ export interface IStorageUtility {
       schema?: Record<string, any>;
       postProcess?: (retrievedObject: any) => any;
       userId?: string;
+      secure?: boolean;
     }>
-  ): Promise<any | null>;
+  ): Promise<any | undefined>;
   /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
@@ -71,9 +90,15 @@ export default class StorageUtility implements IStorageUtility {
     return `solidAuthFetcherUser:${userId}`;
   }
 
-  private async getUserData(userId: string): Promise<Record<string, string>> {
-    const stored = await this.secureStorage.get(this.getKey(userId));
-    if (stored === null) {
+  private async getUserData(
+    userId: string,
+    secure?: boolean
+  ): Promise<Record<string, string>> {
+    const stored = await (secure
+      ? this.secureStorage
+      : this.insecureStorage
+    ).get(this.getKey(userId));
+    if (stored === undefined) {
       return {};
     }
     try {
@@ -85,58 +110,89 @@ export default class StorageUtility implements IStorageUtility {
 
   private async setUserData(
     userId: string,
-    data: Record<string, string>
+    data: Record<string, string>,
+    secure?: boolean
   ): Promise<void> {
-    await this.secureStorage.set(this.getKey(userId), JSON.stringify(data));
+    await (secure ? this.secureStorage : this.insecureStorage).set(
+      this.getKey(userId),
+      JSON.stringify(data)
+    );
   }
 
-  async get(key: string, errorIfNull?: true): Promise<string | null> {
-    const value = await this.secureStorage.get(key);
-    if (value == null && errorIfNull) {
+  async get(
+    key: string,
+    options?: { errorIfNull?: boolean; secure?: boolean }
+  ): Promise<string | undefined> {
+    const value = await (options?.secure
+      ? this.secureStorage
+      : this.insecureStorage
+    ).get(key);
+    if (value == undefined && options?.errorIfNull) {
       throw new Error(`${key} is not stored`);
     }
     return value;
   }
 
-  async set(key: string, value: string): Promise<void> {
-    return this.secureStorage.set(key, value);
+  async set(
+    key: string,
+    value: string,
+    options?: { secure?: boolean }
+  ): Promise<void> {
+    return (options?.secure ? this.secureStorage : this.insecureStorage).set(
+      key,
+      value
+    );
   }
 
-  async delete(key: string): Promise<void> {
-    return this.secureStorage.delete(key);
+  async delete(key: string, options?: { secure?: boolean }): Promise<void> {
+    return (options?.secure ? this.secureStorage : this.insecureStorage).delete(
+      key
+    );
   }
 
   async getForUser(
     userId: string,
     key: string,
-    errorIfNull?: true
-  ): Promise<string | null> {
-    const userData = await this.getUserData(userId);
+    options?: { errorIfNull?: boolean; secure?: boolean }
+  ): Promise<string | undefined> {
+    const userData = await this.getUserData(userId, options?.secure);
     let value;
     if (!userData[key]) {
-      value = null;
+      value = undefined;
     }
     value = userData[key];
-    if (value == null && errorIfNull) {
+    if (value == undefined && options?.errorIfNull) {
       throw new Error(`Field ${key} for user ${userId} is not stored`);
     }
-    return value || null;
+    return value || undefined;
   }
 
-  async setForUser(userId: string, key: string, value: string): Promise<void> {
-    const userData = await this.getUserData(userId);
-    userData[key] = value;
-    await this.setUserData(userId, userData);
+  async setForUser(
+    userId: string,
+    values: Record<string, string>,
+    options?: { secure?: boolean }
+  ): Promise<void> {
+    const userData = await this.getUserData(userId, options?.secure);
+    await this.setUserData(userId, { ...userData, ...values }, options?.secure);
   }
 
-  async deleteForUser(userId: string, key: string): Promise<void> {
-    const userData = await this.getUserData(userId);
+  async deleteForUser(
+    userId: string,
+    key: string,
+    options?: { secure?: boolean }
+  ): Promise<void> {
+    const userData = await this.getUserData(userId, options?.secure);
     delete userData[key];
-    await this.setUserData(userId, userData);
+    await this.setUserData(userId, userData, options?.secure);
   }
 
-  async deleteAllUserData(userId: string): Promise<void> {
-    await this.secureStorage.delete(this.getKey(userId));
+  async deleteAllUserData(
+    userId: string,
+    options?: { secure?: boolean }
+  ): Promise<void> {
+    await (options?.secure ? this.secureStorage : this.insecureStorage).delete(
+      this.getKey(userId)
+    );
   }
 
   async safeGet(
@@ -144,12 +200,13 @@ export default class StorageUtility implements IStorageUtility {
     options: {
       schema?: Record<string, unknown>;
       userId?: string;
+      secure?: boolean;
     } = {}
-  ): Promise<unknown | null> {
+  ): Promise<unknown | undefined> {
     // Check if key is stored locally
-    const locallyStored: string | null = options.userId
-      ? await this.getForUser(options.userId, key)
-      : await this.get(key);
+    const locallyStored: string | undefined = options.userId
+      ? await this.getForUser(options.userId, key, { secure: options.secure })
+      : await this.get(key, { secure: options.secure });
 
     // If it is stored locally, check the validity of the value
     if (locallyStored) {
@@ -162,12 +219,14 @@ export default class StorageUtility implements IStorageUtility {
         return parsedObject;
       } catch (err) {
         if (options.userId) {
-          await this.deleteForUser(options.userId, key);
+          await this.deleteForUser(options.userId, key, {
+            secure: options.secure
+          });
         } else {
-          await this.delete(key);
+          await this.delete(key, { secure: options.secure });
         }
       }
     }
-    return null;
+    return undefined;
   }
 }
