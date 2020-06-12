@@ -22,20 +22,18 @@
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 import { inject, injectable } from "tsyringe";
-import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
+import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 @injectable()
 export default class InactionRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
+    @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
     return true;
   }
-  async handle(redirectUrl: string): Promise<ISessionInfo> {
-    return this.sessionCreator.create({
-      loggedIn: false
-    });
+  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
+    return undefined;
   }
 }

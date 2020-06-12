@@ -29,7 +29,7 @@ import IRedirectHandler from "./IRedirectHandler";
 
 @injectable()
 export default class AggregateRedirectHandler
-  extends AggregateHandler<[string], ISessionInfo>
+  extends AggregateHandler<[string], ISessionInfo | undefined>
   implements IRedirectHandler {
   constructor(
     @injectAll("redirectHandlers") redirectHandlers: IRedirectHandler[]

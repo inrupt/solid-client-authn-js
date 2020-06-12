@@ -25,9 +25,7 @@
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import URL from "url-parse";
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import { injectable, inject } from "tsyringe";
-import { ISessionCreator } from "../../../sessionInfo/SessionCreator";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
@@ -36,7 +34,6 @@ import { IRedirector } from "../Redirector";
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler {
   constructor(
-    @inject("sessionCreator") private sessionCreator: ISessionCreator,
     @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector
@@ -72,33 +69,12 @@ export default class AuthorizationCodeWithPkceOidcHandler
     /* eslint-enable @typescript-eslint/camelcase */
     requestUrl.set("query", query);
     // TODO: This is inefficent, there should be a bulk
-    await this.storageUtility.setForUser(
-      oidcLoginOptions.sessionId,
-      "codeVerifier",
-      codeVerifier
-    );
-    await this.storageUtility.setForUser(
-      oidcLoginOptions.sessionId,
-      "issuer",
-      oidcLoginOptions.issuer.toString()
-    );
-    await this.storageUtility.setForUser(
-      oidcLoginOptions.sessionId,
-      "clientId",
-      oidcLoginOptions.client.clientId
-    );
-    await this.storageUtility.setForUser(
-      oidcLoginOptions.sessionId,
-      "redirectUri",
-      oidcLoginOptions.redirectUrl.toString()
-    );
-    if (oidcLoginOptions.client.clientSecret) {
-      await this.storageUtility.setForUser(
-        oidcLoginOptions.sessionId,
-        "clientSecret",
-        oidcLoginOptions.client.clientSecret
-      );
-    }
+    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+      codeVerifier,
+      issuer: oidcLoginOptions.issuer.toString(),
+      redirectUri: oidcLoginOptions.redirectUrl.toString()
+    });
+
     this.redirector.redirect(requestUrl.toString(), {
       handleRedirect: oidcLoginOptions.handleRedirect
     });

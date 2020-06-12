@@ -68,7 +68,9 @@ import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import UrlRepresenationConverter, {
   IUrlRepresentationConverter
 } from "./util/UrlRepresenationConverter";
-import SessionCreator, { ISessionCreator } from "./sessionInfo/SessionCreator";
+import SessionInfoManager, {
+  ISessionInfoManager
+} from "./sessionInfo/SessionInfoManager";
 import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
@@ -116,8 +118,8 @@ container.register<IUrlRepresentationConverter>("urlRepresentationConverter", {
 });
 
 // Session
-container.register<ISessionCreator>("sessionCreator", {
-  useClass: SessionCreator
+container.register<ISessionInfoManager>("sessionInfoManager", {
+  useClass: SessionInfoManager
 });
 
 // Authenticated Fetcher
@@ -232,7 +234,7 @@ export default function getAuthFetcherWithDependencies(dependencies: {
     case "browser":
     case "react-native":
       // TODO: change this to be secure
-      secureStorage = dependencies.secureStorage || new BrowserStorage();
+      secureStorage = dependencies.secureStorage || new InMemoryStorage();
       insecureStorage = dependencies.insecureStorage || new BrowserStorage();
       break;
     case "server":

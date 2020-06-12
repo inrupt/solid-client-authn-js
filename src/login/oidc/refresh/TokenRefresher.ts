@@ -39,7 +39,7 @@ export default class TokenRefresher implements ITokenRefresher {
     const refreshToken = await this.storageUtility.getForUser(
       localUserId,
       "refreshToken",
-      true
+      { errorIfNull: true, secure: true }
     );
     /* eslint-disable @typescript-eslint/camelcase */
     await this.tokenRequester.request(localUserId, {
