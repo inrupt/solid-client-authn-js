@@ -30,11 +30,18 @@ export interface IFetcher {
 }
 
 export default class Fetcher implements IFetcher {
+  private fetcher: typeof _fetch;
+
+  constructor() {
+    if (typeof window !== "undefined" && typeof window.fetch === "function") {
+      this.fetcher = window.fetch;
+    } else {
+      this.fetcher = _fetch;
+    }
+  }
+
   async fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const fetchUrl = url instanceof URL ? url.toString() : url;
-    if (typeof window !== "undefined" && typeof window.fetch !== "undefined") {
-      return window.fetch(fetchUrl, init);
-    }
-    return _fetch(fetchUrl, init);
+    return this.fetcher(fetchUrl, init);
   }
 }
