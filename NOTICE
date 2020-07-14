@@ -1,5 +1,6 @@
-Inrupt `solid-auth-fetcher`
-Copyright 2020 Inrupt Inc.
+Solid `solid-auth-fetcher`
+Copyright 2020 The Solid Project.
 
-This product includes software developed at
-Inrupt Inc. (https://inrupt.com/).
+This product lives at https://github.com/solid/solid-auth-fetcher.
+It was forked from https://github.com/inrupt/solid-auth-fetcher,
+and includes software developed at Inrupt Inc. (https://inrupt.com/).
