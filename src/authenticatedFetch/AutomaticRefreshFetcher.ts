@@ -33,8 +33,11 @@ export default class AutomaticRefreshHandler implements IAuthenticatedFetcher {
   ) {}
 
   async canHandle(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     requestCredentials: IRequestCredentials,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     url: RequestInfo,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     requestInit?: RequestInit
   ): Promise<boolean> {
     return true;
