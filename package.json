@@ -1,6 +1,6 @@
 {
   "name": "solid-auth-fetcher",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -91,8 +91,7 @@
     "uuid": "^8.2.0"
   },
   "husky": {
-    "hooks": {
-    }
+    "hooks": {}
   },
   "lint-staged": {
     "*.{ts,js,css,json}": [
