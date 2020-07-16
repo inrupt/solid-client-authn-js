@@ -41,7 +41,7 @@ jobs:
         run: npm ci
 
       - name: Run WhiteSource Scan
-        run: java -jar "$WHITESOURCE_UA_PATH" -c "$WHITESOURCE_CONFIG_PATH" -apiKey "${{ secrets.WHITESOURCE_API_KEY }}" -userKey "${{ secrets.WHITESOURCE_USER_KEY }}" -scanComment "Inrupt CI agent"
+        run: java -jar "$WHITESOURCE_UA_PATH" -c "$WHITESOURCE_CONFIG_PATH" -apiKey "${{ secrets.WHITESOURCE_API_KEY }}" -userKey "${{ secrets.WHITESOURCE_USER_KEY }}" -scanComment "fixme: not configured"
         env:
           WHITESOURCE_UA_PATH: resources/whitesource/wss-unified-agent.jar
           WHITESOURCE_CONFIG_PATH: resources/whitesource/wss-${{ github.event_name }}-scan.config

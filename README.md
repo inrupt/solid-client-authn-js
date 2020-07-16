@@ -20,7 +20,7 @@ npm install solid-auth-fetcher
 ### Setting up the examples
 
 ```bash
-git clone https://github.com/inrupt/solid-auth-fetcher.git
+git clone https://github.com/solid/solid-auth-fetcher.git
 cd solid-auth-fetcher
 npm i
 npm run bootstrap-examples

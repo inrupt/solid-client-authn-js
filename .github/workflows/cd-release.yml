@@ -26,4 +26,4 @@ jobs:
     - run: |
         echo "Package published (${GITHUB_REF}). To install, run:"
         echo ""
-        echo "    npm install @inrupt/solid-auth-fetcher"
+        echo "    npm install solid-auth-fetcher"
