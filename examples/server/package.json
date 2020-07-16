@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "start": "ts-node src/server.ts",
-    "dev": "ts-node-dev src/server.ts",
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 ts-node-dev src/server.ts",
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

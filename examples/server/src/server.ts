@@ -1,111 +1,51 @@
-import { uniqueLogin, handleRedirect } from "solid-auth-fetcher";
-import express, { Request, Response } from "express";
-import bodyParser from "body-parser";
-import session from "express-session";
-import fetch from "node-fetch";
-import ISolidSession from "solid-auth-fetcher/dist/solidSession/ISolidSession";
-import INeedeRedirectAction from "solid-auth-fetcher/dist/neededAction/INeededRedirectAction";
+import { customAuthFetcher } from "solid-auth-fetcher";
+import fetch, { Response } from "node-fetch";
 
-const PORT = 3001;
-const BASE_URL = `http://localhost:${PORT}`;
-
-const sessions: Record<string, ISolidSession> = {};
-
-const app = express();
-
-app.use(
-  session({
-    secret: "I let Kevin's son beat me in foosball",
-    cookie: { secure: false }
-  })
-);
-
-app.use(bodyParser.urlencoded({ extended: false }));
-
-app.set("view engine", "ejs");
-
-app.get("/", (req: Request, res: Response) => {
-  res.render("home");
-});
-
-app.post("/login", async (req: Request, res: Response) => {
-  if (req.session && req.session.localUserId) {
-    res.status(400).send("already logged in");
-  }
-  const webId: string = req.body.webid;
-  const session = await uniqueLogin({
-    oidcIssuer: webId,
-    redirect: `${BASE_URL}/redirect`,
-    clientId: "coolApp"
+async function getNodeSolidServerCookie(serverRoot: string, username: string, password: string) {
+  const authFetcher = await customAuthFetcher();
+  const serverLoginResult = await authFetcher.fetch(`${serverRoot}/login/password`, {
+    headers: {
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    body: `username=${username}&password=${password}`,
+    method: "POST",
+    redirect: "manual"
   });
-  if (req.session) {
-    req.session.localUserId = session.localUserId;
-    sessions[session.localUserId] = session;
-    if (
-      session.neededAction &&
-      session.neededAction.actionType === "redirect"
-    ) {
-      res.redirect((session.neededAction as INeedeRedirectAction).redirectUrl);
-    }
-  }
-});
+  return serverLoginResult.headers.get('set-cookie');
+}
 
-app.get("/redirect", async (req: Request, res: Response) => {
-  const session = await handleRedirect(req.url);
-  if (req.session) {
-    req.session.localUserId = session.localUserId;
-    sessions[session.localUserId] = session;
-  }
-  res.redirect("/dashboard");
-});
-
-app.get("/dashboard", (req: Request, res: Response) => {
-  if (
-    req.session &&
-    req.session.localUserId &&
-    sessions[req.session.localUserId] &&
-    sessions[req.session.localUserId].webId
-  ) {
-    res.render("dashboard", {
-      webId: sessions[req.session.localUserId].webId,
-      fetchResult: ""
+async function authenticatedFetch(serverRoot: string, cookie: string, url: string) {
+  const authFetcher = await customAuthFetcher();
+  const appRedirectUrl = "https://mysite.com/";
+  const session = await authFetcher.login({
+    oidcIssuer: serverRoot,
+    redirect: appRedirectUrl
+  });
+  let redirectedTo = (session.neededAction as any).redirectUrl;
+  do {
+    const result = await fetch(redirectedTo, {
+      headers: {
+        cookie
+      },
+      redirect: "manual"
     });
-  } else {
-    res.status(401).send("You are not logged in");
-  }
-});
+    redirectedTo = result.headers.get("location");
+    console.log("Redirected to", redirectedTo);
+  } while(!redirectedTo?.startsWith(appRedirectUrl));
 
-app.post("/fetch", async (req: Request, res: Response) => {
-  if (
-    req.session &&
-    req.session.localUserId &&
-    sessions[req.session.localUserId] &&
-    sessions[req.session.localUserId].webId
-  ) {
-    const result = await (sessions[
-      req.session.localUserId
-    ] as ISolidSession).fetch("http://localhost:10100/", {});
-    res.render("dashboard", {
-      webId: sessions[req.session.localUserId].webId,
-      fetchResult: JSON.stringify(await result.text(), null, 2)
-    });
-  } else {
-    res.status(401).send("You are not logged in");
-  }
-});
+  await authFetcher.handleRedirect(redirectedTo);
+  return authFetcher.fetch(url);
+}
 
-app.post("/logout", async (req: Request, res: Response) => {
-  if (
-    req.session &&
-    req.session.localUserId &&
-    sessions[req.session.localUserId] &&
-    sessions[req.session.localUserId].webId
-  ) {
-    await sessions[req.session.localUserId].logout();
-    delete sessions[req.session.localUserId];
-    delete req.session.localUserId;
-    res.redirect("/");
-  }
-});
-
-app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+async function run() {
+  const serverRoot = "https://localhost:8443";
+  const username = "alice";
+  const password = "123";
+  const privateResource = "https://localhost:8443/private/";
+  console.log("\n\nMake sure node-solid-server is running on https://localhost:8443, with single user 'alice' / '123'\n\n\n");
+  const cookie = await getNodeSolidServerCookie(serverRoot, username, password);
+  const result = await authenticatedFetch(serverRoot, cookie, privateResource);
+  console.log(result.status);
+  console.log(await result.text());
+}
+run();
