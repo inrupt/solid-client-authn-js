@@ -275,82 +275,7 @@ getCustomAuthFetcher({
 
 ### For Use on the Server
 
-Unlike on the browser, servers often need to deal with multiple users, so
-the server API has been configured to deal with that by default:
-
-```javascript
-import { getCustomAuthFetcher } from "solid-auth-fetcher";
-import express from "express";
-import expressSession from "express-session";
-
-// First we'll initialize an auth fetcher and hook it up to our own stroage
-let authFetcher;
-let authSessions = {}
-getCustomAuthFetcher({
-  storage: {
-    get: (key) => {/* perform get */}
-    set: (key, value) => {/* perform set */}
-    delete: (key) => {/* perform delete */}
-  }
-}).then(async (af) => { 
-  authFetcher = af
-  // Initialize any sessions that are already in stroage
-  const curAuthSessions = await getSessions()
-  curAuthSessions.forEach((curAuthSession) => {
-    authSessions[curAuthSession.localUserId] = curAuthSession
-  })
- })
-
-const app = express();
-
-app.use(
-  expressSession({
-    secret: "I let Kevin's son beat me in foosball",
-    cookie: { secure: true }
-  })
-);
-
-app.post("/login", async (req, res) => {
-    const authSession = await uniqueLogin({
-        oidcIssuer: req.body.webid,
-        redirect: "https://myapp.com/redirect",
-        clientId: "coolApp"
-    });
-    req.session.localUserId = authSession.localUserId;
-    authSessions[authSession.localUserId] = authSession;
-    if (
-        authSession.neededAction &&
-        authSession.neededAction.actionType === "redirect"
-    ) {
-        res.redirect(session.authSession.redirectUrl);
-    }
-});
-
-app.get("/redirect", async (req, res) => {
-  const authSession = await handleRedirect(req.url);
-  if (authSession.loggedIn) {
-    req.session.localUserId = authSession.localUserId;
-    authSessions[authSession.localUserId] = authSession;
-  }
-  res.redirect("/fetch");
-});
-
-app.get("/fetch", async (req, res) => {
-  if (
-    req.session &&
-    req.session.localUserId &&
-    sessions[req.session.localUserId] &&
-    sessions[req.session.localUserId].webId
-  ) {
-    const result = await authSessions[
-      req.session.localUserId
-    ].fetch("http://example.com/resource", {});
-    res.send(result.text())
-  }
-});
-
-app.listen(3000)
-```
+FIXME: https://github.com/solid/solid-auth-fetcher/issues/8
 
 ### General Usage
 
@@ -374,8 +299,15 @@ login({
     popUp: false,
 
     redirect: 'https://mysite.com/redirect'
-}).then((session) => {})
+}).then((session) => {
+  console.log("Please visit", (session.neededAction as any).redirectUrl);
+})
 ```
+It will print something like
+```
+Please visit https://localhost:8443/authorize?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fmysite.com%2Fredirect&scope=openid%20profile%20offline_access&client_id=636e3fec47416ca31d58d15344ebdfda&code_challenge_method=S256&code_challenge=5J6v7lYziRQ8yqKCsF6JsxvoLHvZjpNMt1iiJSQgdQU&state=global
+```
+
 
 Options:
 | Field Name | Required?                                          | Type          | Description                                                                                                         | Default   |
