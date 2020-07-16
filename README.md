@@ -27,10 +27,10 @@ npm run bootstrap-examples
 npm run build
 # Run each example
 npm run dev-bundle
-npm run dev-script
-npm run dev-server
-npm run dev-ios
-npm run dev-android
+# npm run dev-script - see https://github.com/solid/solid-auth-fetcher/issues/9
+# npm run dev-server - see https://github.com/solid/solid-auth-fetcher/issues/8
+# npm run dev-ios - untested, see https://github.com/solid/solid-auth-fetcher/issues/10
+# npm run dev-android - untested, see https://github.com/solid/solid-auth-fetcher/issues/10
 ```
 
 At this point, a test application will be running on port `3001` and a test solid server will be running on port `9001`
