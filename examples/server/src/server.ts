@@ -28,7 +28,7 @@ async function getNodeSolidServerCookie(
   serverRoot: string,
   username: string,
   password: string
-): Promise<void> {
+): Promise<string> {
   const authFetcher = await customAuthFetcher();
   const serverLoginResult = await authFetcher.fetch(
     `${serverRoot}/login/password`,
