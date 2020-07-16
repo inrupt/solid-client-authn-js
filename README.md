@@ -24,6 +24,7 @@ git clone https://github.com/solid/solid-auth-fetcher.git
 cd solid-auth-fetcher
 npm i
 npm run bootstrap-examples
+npm run build
 # Run each example
 npm run dev-bundle
 npm run dev-script
