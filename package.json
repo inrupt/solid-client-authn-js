@@ -73,7 +73,7 @@
     "@types/url-parse": "^1.4.3",
     "@types/uuid": "^8.0.0",
     "build-module": "^1.0.7",
-    "cross-fetch": "^3.0.4",
+    "cross-fetch": "^3.0.5",
     "crypto-random-string": "^3.2.0",
     "eslint-plugin-license-header": "^0.2.0",
     "form-urlencoded": "^4.1.4",
