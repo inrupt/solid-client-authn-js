@@ -77,7 +77,7 @@ async function run(): Promise<void> {
   const password = "123";
   const privateResource = "https://localhost:8443/private/";
   console.log(
-    "\n\nMake sure node-solid-server is running on https://localhost:8443, with single user 'alice' / '123'\n\n\n"
+    "\n\nMake sure node-solid-server is running on https://localhost:8443, with single user 'alice' / '123' and https://mysite.com as a trusted app.\n\n\n"
   );
   const cookie = await getNodeSolidServerCookie(serverRoot, username, password);
   const result = await authenticatedFetch(serverRoot, cookie, privateResource);
