@@ -76,7 +76,7 @@
     "cross-fetch": "^3.0.5",
     "crypto-random-string": "^3.2.0",
     "eslint-plugin-license-header": "^0.2.0",
-    "form-urlencoded": "^4.1.4",
+    "form-urlencoded": "^4.2.1",
     "husky": "^4.2.3",
     "jose": "^1.27.1",
     "jsonwebtoken": "^8.5.1",
