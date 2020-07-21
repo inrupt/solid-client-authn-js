@@ -11,8 +11,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "react": "16.9.0",
-    "react-native": "0.61.5"
+    "react": "16.13.1",
+    "react-native": "0.63.1"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
