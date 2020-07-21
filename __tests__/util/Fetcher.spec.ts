@@ -43,3 +43,19 @@ describe("UuidGenerator", () => {
     );
   });
 });
+
+describe("Browser behaviour", () => {
+  it("should default to the environment's fetch if available", async () => {
+    const mockCrossFetch = jest.requireMock("cross-fetch");
+    mockCrossFetch.mockReturnValueOnce(Promise.resolve("cross-fetch response"));
+    window.fetch = jest
+      .fn()
+      .mockReturnValueOnce(Promise.resolve("browser fetch response"));
+
+    const fetcher = new Fetcher();
+    expect(await fetcher.fetch("https://someurl.com")).toBe(
+      "browser fetch response"
+    );
+    expect(mockCrossFetch.mock.calls.length).toEqual(0);
+  });
+});
