@@ -22,7 +22,7 @@
 import "reflect-metadata";
 import TokenRefresher from "../../../../src/login/oidc/refresh/TokenRefresher";
 import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
-import { StorageUtilityMock } from "../../../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 
 describe("TokenRefresher", () => {
   const defaultMocks = {
