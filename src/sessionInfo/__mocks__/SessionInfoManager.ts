@@ -19,7 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ISessionCreator, ISessionCreatorOptions } from "../SessionCreator";
+import {
+  ISessionInfoManager,
+  ISessionInfoManagerOptions
+} from "../SessionInfoManager";
 import ISessionInfo from "../ISessionInfo";
 
 export const SessionCreatorCreateResponse: ISessionInfo = {
@@ -29,11 +32,14 @@ export const SessionCreatorCreateResponse: ISessionInfo = {
 };
 export const SessionCreatorGetSessionResponse: ISessionInfo = SessionCreatorCreateResponse;
 
-export const SessionCreatorMock: jest.Mocked<ISessionCreator> = {
-  create: jest.fn(
-    (options: ISessionCreatorOptions) => SessionCreatorCreateResponse
+export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
+  update: jest.fn(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (sessionId: string, options: ISessionInfoManagerOptions) => {}
   ),
-  getSession: jest.fn(
-    async (localUserId: string) => SessionCreatorGetSessionResponse
-  )
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  get: jest.fn(async (sessionId: string) =>
+    Promise.resolve(SessionCreatorCreateResponse)
+  ),
+  getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse]))
 };
