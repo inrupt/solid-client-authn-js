@@ -27,8 +27,8 @@ import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oid
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 import canHandleTests from "./OidcHandlerCanHandleTests";
-import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
-import ISolidSession from "../../../../src/solidSession/ISolidSession";
+import { SessionCreatorMock } from "../../../../src/sessionInfo/__mocks__/SessionCreator";
+import ISessionInfo from "../../../../src/sessionInfo/ISessionInfo";
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 import {
@@ -78,7 +78,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           grantTypesSupported: ["authorization_code"]
         }
       };
-      const session: ISolidSession = await authorizationCodeWithPkceOidcHandler.handle(
+      const session: ISessionInfo = await authorizationCodeWithPkceOidcHandler.handle(
         oidcOptions
       );
       expect(
@@ -103,7 +103,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           grantTypesSupported: ["authorization_code"]
         }
       };
-      const session: ISolidSession = await authorizationCodeWithPkceOidcHandler.handle(
+      const session: ISessionInfo = await authorizationCodeWithPkceOidcHandler.handle(
         oidcOptions
       );
       expect(

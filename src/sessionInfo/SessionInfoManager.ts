@@ -41,7 +41,9 @@ export default class SessionInfoManager implements ISessionInfoManager {
   ) {}
 
   update(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sessionId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     options: ISessionInfoManagerOptions
   ): Promise<void> {
     // const localUserId: string = options.localUserId || this.uuidGenerator.v4();
