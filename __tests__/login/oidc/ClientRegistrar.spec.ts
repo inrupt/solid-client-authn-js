@@ -22,6 +22,7 @@
 import "reflect-metadata";
 import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
+import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
 import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { Response as NodeResponse } from "node-fetch";
 import URL from "url-parse";
@@ -36,7 +37,10 @@ describe("ClientRegistrar", () => {
   function getClientRegistrar(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): ClientRegistrar {
-    return new ClientRegistrar(mocks.fetcher ?? defaultMocks.fetcher);
+    return new ClientRegistrar(
+      mocks.fetcher ?? defaultMocks.fetcher,
+      StorageUtilityMock
+    );
   }
 
   describe("getClient", () => {

@@ -159,6 +159,9 @@ describe("IssuerConfigFetcher", () => {
 
   it("should store the config under a key specific to the config source", async () => {
     const storageUtility = defaultMocks.storageUtility;
+    // This override prevents local resolution of the config
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    storageUtility.safeGet = jest.fn(async (key: string) => undefined);
     const configFetcher = getIssuerConfigFetcher({ storageUtility });
 
     await configFetcher.fetchConfig(new URL("https://arbitrary.url"));

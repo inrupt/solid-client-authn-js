@@ -156,6 +156,19 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
+    // Try to look up the config in the cache
+    issuerConfig = (await this.storageUtility.safeGet(
+      this.getLocalStorageKey(issuer),
+      {
+        schema: issuerConfigSchema
+      }
+    )) as IIssuerConfig;
+
+    // If a local copy of the config is available, don't fetch it
+    if (issuerConfig !== undefined) {
+      return issuerConfig;
+    }
+
     const wellKnownUrl = new URL(issuer.toString());
     wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
     const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
@@ -167,6 +180,12 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
         `${issuer.toString()} has an invalid configuration: ${err.message}`
       );
     }
+
+    // Update store with fetched config
+    await this.storageUtility.set(
+      this.getLocalStorageKey(issuer),
+      JSON.stringify(issuerConfig)
+    );
 
     return issuerConfig;
   }
