@@ -25,13 +25,14 @@
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import NotImplementedError from "../../../errors/NotImplementedError";
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 
 export default class RefreshTokenOidcHandler implements IOidcHandler {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return false;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     throw new NotImplementedError("RefreshTokenOidcHandler handle");
   }
