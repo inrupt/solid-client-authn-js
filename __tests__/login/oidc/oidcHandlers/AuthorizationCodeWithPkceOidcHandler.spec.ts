@@ -25,7 +25,7 @@
 import "reflect-metadata";
 import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
-import { StorageUtilityMock } from "../../../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
 import ISolidSession from "../../../../src/solidSession/ISolidSession";

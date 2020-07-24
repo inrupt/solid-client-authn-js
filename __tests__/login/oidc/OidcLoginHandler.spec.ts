@@ -25,7 +25,7 @@ import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler"
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
-import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 

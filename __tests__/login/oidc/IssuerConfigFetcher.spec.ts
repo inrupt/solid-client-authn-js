@@ -25,7 +25,7 @@ import {
   FetcherMock,
   FetcherMockResponse
 } from "../../../src/util/__mocks__/Fetcher";
-import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
 import { Response as NodeResponse } from "node-fetch";
