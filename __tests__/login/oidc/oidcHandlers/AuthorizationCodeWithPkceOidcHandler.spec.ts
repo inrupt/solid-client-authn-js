@@ -27,18 +27,14 @@ import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oid
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 import canHandleTests from "./OidcHandlerCanHandleTests";
-import { SessionCreatorMock } from "../../../../src/sessionInfo/__mocks__/SessionCreator";
-import ISessionInfo from "../../../../src/sessionInfo/ISessionInfo";
+import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
-import {
-  RedirectorMock,
-  RedirectorResponse
-} from "../../../../src/login/oidc/__mocks__/Redirector";
+import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
-    sessionCreator: SessionCreatorMock,
+    sessionCreator: SessionInfoManagerMock,
     joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock,
     redirector: RedirectorMock
@@ -47,7 +43,6 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): AuthorizationCodeWithPkceOidcHandler {
     return new AuthorizationCodeWithPkceOidcHandler(
-      mocks.sessionCreator ?? defaultMocks.sessionCreator,
       mocks.joseUtility ?? defaultMocks.joseUtility,
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.redirector ?? defaultMocks.redirector
@@ -78,16 +73,13 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           grantTypesSupported: ["authorization_code"]
         }
       };
-      const session: ISessionInfo = await authorizationCodeWithPkceOidcHandler.handle(
-        oidcOptions
-      );
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
         "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile%20offline_access&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global",
         { doNotAutoRedirect: false }
       );
-      expect(session.neededAction).toMatchObject(RedirectorResponse);
     });
 
     it("handles login when a client secret is present", async () => {
@@ -103,16 +95,13 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           grantTypesSupported: ["authorization_code"]
         }
       };
-      const session: ISessionInfo = await authorizationCodeWithPkceOidcHandler.handle(
-        oidcOptions
-      );
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
         "https://example.com/auth?response_type=id_token%20code&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20profile%20offline_access&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=global",
         { doNotAutoRedirect: false }
       );
-      expect(session.neededAction).toMatchObject(RedirectorResponse);
     });
   });
 });

@@ -20,7 +20,7 @@
  */
 
 import { ITokenSaver } from "../TokenSaver";
-import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionCreator";
+import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
 
 export const TokenSaverSaveTokenAndGetSessionResponse = SessionCreatorCreateResponse;
 
