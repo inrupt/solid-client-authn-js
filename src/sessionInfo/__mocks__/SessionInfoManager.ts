@@ -34,7 +34,7 @@ export const SessionCreatorGetSessionResponse: ISessionInfo = SessionCreatorCrea
 
 export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   update: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     async (sessionId: string, options: ISessionInfoManagerOptions) => {}
   ),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
