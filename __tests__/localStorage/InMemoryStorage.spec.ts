@@ -30,10 +30,10 @@ describe("InMemoryStorage", () => {
     expect(await nodeStorage.get("a")).toEqual("A");
   });
   it("returns undefined if the key does not exist", async () => {
-    expect(await nodeStorage.get("doesNotExist")).toBeNull();
+    expect(await nodeStorage.get("doesNotExist")).toBeUndefined();
   });
   it("can delete an item", async () => {
     await nodeStorage.delete("a");
-    expect(await nodeStorage.get("a")).toBeNull();
+    expect(await nodeStorage.get("a")).toBeUndefined();
   });
 });
