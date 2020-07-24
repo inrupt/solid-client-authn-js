@@ -21,7 +21,7 @@
 
 import "reflect-metadata";
 import TokenSaver from "../../../../src/login/oidc/redirectHandler/TokenSaver";
-import { SessionCreatorMock } from "../../../../src/sessionInfo/__mocks__/SessionCreator";
+import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 
@@ -30,7 +30,7 @@ import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUti
  */
 describe("TokenSaver", () => {
   const defaultMocks = {
-    sessionCreator: SessionCreatorMock,
+    sessionCreator: SessionInfoManagerMock,
     joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock
   };
@@ -46,6 +46,7 @@ describe("TokenSaver", () => {
 
   describe("saveTokenAndGetSession", () => {
     it("Saves token and returns session", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const tokenSaver = getTokenSaver();
       // TODO: write this test once you have the right tokens
     });
