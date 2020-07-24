@@ -46,7 +46,6 @@ describe("OidcLoginHandler", () => {
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
-      mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.clientRegistrar ?? defaultMocks.clientRegistrar
     );
   }

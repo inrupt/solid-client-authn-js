@@ -23,6 +23,7 @@ import IOidcOptions from "../IOidcOptions";
 import URL from "url-parse";
 
 export const standardOidcOptions: IOidcOptions = {
+  sessionId: "mySession",
   issuer: new URL("https://example.com"),
   dpop: true,
   redirectUrl: new URL("https://app.example.com"),
