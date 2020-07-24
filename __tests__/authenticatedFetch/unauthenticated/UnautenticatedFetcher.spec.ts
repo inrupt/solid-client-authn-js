@@ -33,7 +33,7 @@ import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlR
 import {
   StorageUtilityMock,
   StorageUtilityGetResponse
-} from "../../../src/localStorage/__mocks__/StorageUtility";
+} from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("UnauthenticatedFetcher", () => {
   const defaultMocks = {

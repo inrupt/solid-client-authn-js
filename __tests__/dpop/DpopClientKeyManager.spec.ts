@@ -23,7 +23,7 @@
  * Test for DPoPClientKeyManager
  */
 import "reflect-metadata";
-import { StorageUtilityMock } from "../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
 import {
   JoseUtilityMock,
   JoseUtilityGenerateJWKResponse

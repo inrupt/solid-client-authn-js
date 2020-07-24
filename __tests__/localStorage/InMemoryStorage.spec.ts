@@ -19,10 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import NodeStorage from "../../src/localStorage/NodeStorage";
+import InMemoryStorage from "../../src/storage/InMemoryStorage";
 
-describe("NodeStorage", () => {
-  const nodeStorage = new NodeStorage();
+describe("InMemoryStorage", () => {
+  const nodeStorage = new InMemoryStorage();
   it("can set an item", async () => {
     expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
   });

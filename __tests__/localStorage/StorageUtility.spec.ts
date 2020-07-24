@@ -21,8 +21,8 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { StorageMock } from "../../src/localStorage/__mocks__/Storage";
-import StorageUtility from "../../src/localStorage/StorageUtility";
+import { StorageMock } from "../../src/storage/__mocks__/Storage";
+import StorageUtility from "../../src/storage/StorageUtility";
 
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
@@ -33,7 +33,10 @@ describe("StorageUtility", () => {
   function getStorageUtility(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): StorageUtility {
-    return new StorageUtility(mocks.storage ?? defaultMocks.storage);
+    return new StorageUtility(
+      mocks.storage ?? defaultMocks.storage,
+      mocks.storage ?? defaultMocks.storage
+    );
   }
 
   describe("get", () => {
@@ -59,9 +62,9 @@ describe("StorageUtility", () => {
       const storageMock = defaultMocks.storage;
       storageMock.get.mockReturnValueOnce(Promise.resolve(null));
       const storageUtility = getStorageUtility({ storage: storageMock });
-      await expect(storageUtility.get("key", true)).rejects.toThrowError(
-        "key is not stored"
-      );
+      await expect(
+        storageUtility.get("key", { errorIfNull: true })
+      ).rejects.toThrowError("key is not stored");
     });
   });
 
@@ -128,7 +131,7 @@ describe("StorageUtility", () => {
       storageMock.get.mockReturnValueOnce(Promise.resolve(null));
       const storageUtility = getStorageUtility({ storage: storageMock });
       await expect(
-        storageUtility.getForUser("animals", "jackie", true)
+        storageUtility.getForUser("animals", "jackie", { errorIfNull: true })
       ).rejects.toThrowError("Field jackie for user animals is not stored");
     });
   });
@@ -144,7 +147,9 @@ describe("StorageUtility", () => {
         Promise.resolve(JSON.stringify(userData))
       );
       const storageUtility = getStorageUtility({ storage: storageMock });
-      await storageUtility.setForUser("animals", "jackie", "The Pretty Kitty");
+      await storageUtility.setForUser("animals", {
+        jackie: "The Pretty Kitty"
+      });
       expect(storageMock.get).toHaveBeenCalledWith(
         "solidAuthFetcherUser:animals"
       );
@@ -163,7 +168,9 @@ describe("StorageUtility", () => {
         Promise.resolve('{ cool: "bleep bloop not parsable')
       );
       const storageUtility = getStorageUtility({ storage: storageMock });
-      await storageUtility.setForUser("animals", "jackie", "The Pretty Kitty");
+      await storageUtility.setForUser("animals", {
+        jackie: "The Pretty Kitty"
+      });
       expect(storageMock.get).toHaveBeenCalledWith(
         "solidAuthFetcherUser:animals"
       );
