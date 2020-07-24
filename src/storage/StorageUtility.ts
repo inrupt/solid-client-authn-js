@@ -157,7 +157,7 @@ export default class StorageUtility implements IStorageUtility {
   ): Promise<string | undefined> {
     const userData = await this.getUserData(userId, options?.secure);
     let value;
-    if (!userData[key]) {
+    if (!userData || !userData[key]) {
       value = undefined;
     }
     value = userData[key];

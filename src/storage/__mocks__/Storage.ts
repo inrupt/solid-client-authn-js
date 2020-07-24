@@ -24,10 +24,13 @@ import IStorage from "../IStorage";
 export const StorageGetResponse = "GetResponse";
 
 export const StorageMock: jest.Mocked<IStorage> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   get: jest.fn(async (key: string) => StorageGetResponse),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   set: jest.fn(async (key: string, value: string) => {
     /* do nothing */
   }),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   delete: jest.fn(async (key: string) => {
     /* do nothing */
   })
