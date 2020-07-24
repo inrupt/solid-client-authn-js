@@ -26,7 +26,7 @@ import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/Environment
 import {
   SessionCreatorMock,
   SessionCreatorCreateResponse
-} from "../../../src/solidSession/__mocks__/SessionCreator";
+} from "../../../src/sessionInfo/__mocks__/SessionCreator";
 import {
   LoginHandlerMock,
   LoginHandlerResponse

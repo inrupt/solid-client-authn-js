@@ -21,7 +21,7 @@
 
 import "reflect-metadata";
 import TokenSaver from "../../../../src/login/oidc/redirectHandler/TokenSaver";
-import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
+import { SessionCreatorMock } from "../../../../src/sessionInfo/__mocks__/SessionCreator";
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 

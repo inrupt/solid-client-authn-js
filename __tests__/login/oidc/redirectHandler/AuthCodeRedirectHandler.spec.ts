@@ -23,7 +23,7 @@ import "reflect-metadata";
 import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
-import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
+import { SessionCreatorMock } from "../../../../src/sessionInfo/__mocks__/SessionCreator";
 import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
 
 describe("AuthCodeRedirectHandler", () => {

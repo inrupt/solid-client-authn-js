@@ -27,8 +27,8 @@ import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandle
 import { DpopHeaderCreatorMock } from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
 import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
-import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
-import ISolidSession from "../../../../src/solidSession/ISolidSession";
+import { SessionCreatorMock } from "../../../../src/sessionInfo/__mocks__/SessionCreator";
+import ISessionInfo from "../../../../src/sessionInfo/ISessionInfo";
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 
@@ -66,7 +66,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions
       };
-      const session: ISolidSession = await legacyImplicitFlowOidcHandler.handle(
+      const session: ISessionInfo = await legacyImplicitFlowOidcHandler.handle(
         oidcOptions
       );
       expect(defaultMocks.sessionCreator.create).toHaveBeenCalledWith({
@@ -85,7 +85,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
         ...standardOidcOptions,
         dpop: false
       };
-      const session: ISolidSession = await legacyImplicitFlowOidcHandler.handle(
+      const session: ISessionInfo = await legacyImplicitFlowOidcHandler.handle(
         oidcOptions
       );
       expect(defaultMocks.sessionCreator.create).toHaveBeenCalledWith({
