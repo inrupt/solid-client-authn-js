@@ -28,10 +28,22 @@ export const ClientRegistrarResponse: IClient = {
   clientSecret: "12345"
 };
 
+export const PublicClientRegistrarResponse: IClient = {
+  clientId: "abcde"
+};
+
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getClient: jest.fn(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(ClientRegistrarResponse)
+  )
+};
+
+export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
+  getClient: jest.fn(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
+      Promise.resolve(PublicClientRegistrarResponse)
   )
 };

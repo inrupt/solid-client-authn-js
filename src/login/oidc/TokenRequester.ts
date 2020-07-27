@@ -104,6 +104,7 @@ export default class TokenRequester {
     };
 
     if (client.clientSecret) {
+      // TODO: Support DPoP-bound refresh tokens
       tokenRequestInit.headers.Authorization = `Basic ${this.btoa(
         `${client.clientId}:${client.clientSecret}`
       )}`;
