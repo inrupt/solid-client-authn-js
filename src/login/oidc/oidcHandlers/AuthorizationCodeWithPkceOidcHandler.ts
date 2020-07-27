@@ -58,6 +58,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const query: { [key: string]: string } = {
       response_type: "id_token code",
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
+      // TODO: the 'webid' scope does not appear in the specification
       scope: "openid webid offline_access",
       client_id: oidcLoginOptions.client.clientId,
       code_challenge_method: "S256",
