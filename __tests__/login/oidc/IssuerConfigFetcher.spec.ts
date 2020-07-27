@@ -25,7 +25,10 @@ import {
   FetcherMock,
   FetcherMockResponse
 } from "../../../src/util/__mocks__/Fetcher";
-import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
+import {
+  StorageUtilityMock,
+  EmptyStorageUtilityMock
+} from "../../../src/storage/__mocks__/StorageUtility";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
 import { Response as NodeResponse } from "node-fetch";
@@ -67,8 +70,6 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    const storageMock = defaultMocks.storageUtility;
-    storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = (new NodeResponse(
       JSON.stringify({
         issuer: "https://example.com",
@@ -78,7 +79,7 @@ describe("IssuerConfigFetcher", () => {
       })
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
-      storageUtility: storageMock,
+      storageUtility: EmptyStorageUtilityMock,
       fetchResponse: fetchResponse
     });
 
@@ -95,8 +96,6 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should wrap URLs in url-parse's URL object", async () => {
-    const storageMock = defaultMocks.storageUtility;
-    storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
     const fetchResponse = (new NodeResponse(
       /* eslint-disable @typescript-eslint/camelcase */
       JSON.stringify({
@@ -110,7 +109,7 @@ describe("IssuerConfigFetcher", () => {
       /* eslint-enable @typescript-eslint/camelcase */
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
-      storageUtility: storageMock,
+      storageUtility: EmptyStorageUtilityMock,
       fetchResponse: fetchResponse
     });
 
@@ -135,8 +134,6 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
-    const storageMock = defaultMocks.storageUtility;
-    storageMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
     const mockFetcher = {
       fetch: (): Promise<Response> =>
         Promise.resolve(({
@@ -147,7 +144,7 @@ describe("IssuerConfigFetcher", () => {
     };
     const configFetcher = new IssuerConfigFetcher(
       mockFetcher as IFetcher,
-      storageMock
+      EmptyStorageUtilityMock
     );
 
     await expect(
