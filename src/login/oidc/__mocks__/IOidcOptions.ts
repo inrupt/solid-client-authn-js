@@ -27,6 +27,7 @@ export const standardOidcOptions: IOidcOptions = {
   issuer: new URL("https://example.com"),
   dpop: true,
   redirectUrl: new URL("https://app.example.com"),
+  handleRedirect: jest.fn(url => url),
   // This will be fixed in a different pull request
   issuerConfiguration: {
     issuer: new URL("https://example.com"),
