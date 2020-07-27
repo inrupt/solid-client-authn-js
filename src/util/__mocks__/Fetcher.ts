@@ -26,6 +26,32 @@ export const FetcherMockResponse: Response = (new NodeResponse(
   JSON.stringify({ arbitrary: "response" })
 ) as unknown) as Response;
 
+// NOTE: This are the raw JWT values
+// header: {
+//  "typ": "JWT",
+//  "alg": "HS256"
+// }
+// payload: {
+//   "sub": "https://some.pod/webid#me"
+// }
+
+export const FetchTokenResponse: Response = (new NodeResponse(
+  JSON.stringify({
+    /* eslint-disable @typescript-eslint/camelcase */
+    access_token:
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJodHRwczovL3NvbWUucG9kL3dlYmlkI21lIiwianRpIjoiMjFiNDhlOTgtNzA4YS00Y2UzLTk2NmMtYTk2M2UwMDM2ZDBiIiwiaWF0IjoxNTk1ODQxODAxLCJleHAiOjE1OTU4NDU0MDF9.MGqDiny3pzhlSOJ52cJWJA84J47b9p5kkuuJVPB-dVg",
+    id_token: "myIdToken",
+    refresh_token: "myResfreshToken"
+    /* eslint-disable @typescript-eslint/camelcase */
+  })
+) as unknown) as Response;
+
 export const FetcherMock: jest.Mocked<IFetcher> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetch: jest.fn(async (_url, _init) => FetcherMockResponse)
+};
+
+export const FetcherTokenMock: jest.Mocked<IFetcher> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  fetch: jest.fn(async (_url, _init) => FetchTokenResponse)
 };
