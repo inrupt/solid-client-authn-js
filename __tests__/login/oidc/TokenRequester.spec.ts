@@ -34,6 +34,8 @@ import { Response as NodeResponse } from "node-fetch";
 import TokenRequester from "../../../src/login/oidc/TokenRequester";
 import { JoseUtilityMock } from "../../../src/jose/__mocks__/JoseUtility";
 import IIssuerConfig from "../../../src/login/oidc/IIssuerConfig";
+import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
+import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 
 describe("TokenRequester", () => {
   const defaultMocks = {
@@ -41,7 +43,9 @@ describe("TokenRequester", () => {
     issueConfigFetcher: IssuerConfigFetcherMock,
     fetcher: FetcherMock,
     dpopHeaderCreator: DpopHeaderCreatorMock,
-    joseUtility: JoseUtilityMock
+    joseUtility: JoseUtilityMock,
+    clientRegistrar: ClientRegistrarMock,
+    dpopClientKeyManager: DpopClientKeyManagerMock
   };
   function getTokenRequester(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -51,7 +55,9 @@ describe("TokenRequester", () => {
       mocks.issueConfigFetcher ?? defaultMocks.issueConfigFetcher,
       mocks.fetcher ?? defaultMocks.fetcher,
       mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
-      mocks.joseUtility ?? JoseUtilityMock
+      mocks.joseUtility ?? JoseUtilityMock,
+      mocks.clientRegistrar ?? ClientRegistrarMock,
+      mocks.dpopClientKeyManager ?? DpopClientKeyManagerMock
     );
   }
 
