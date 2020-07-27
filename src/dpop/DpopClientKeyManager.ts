@@ -72,19 +72,17 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
   }
 
   async getClientKey(): Promise<JSONWebKey | undefined> {
+    let keyString;
     try {
-      const keyString = await this.storageUtility.get(
-        this.getLocalStorageKey(),
-        {
-          secure: true
-        }
-      );
+      keyString = await this.storageUtility.get(this.getLocalStorageKey(), {
+        secure: true
+      });
       if (!keyString) {
         return undefined;
       }
       return JSON.parse(keyString) as JSONWebKey;
     } catch (err) {
-      throw new Error("The stored token was invalid.");
+      throw new Error(`The stored token [${keyString}] was invalid: ${err}.`);
     }
   }
 }
