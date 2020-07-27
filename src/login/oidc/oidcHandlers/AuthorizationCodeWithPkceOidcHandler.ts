@@ -59,6 +59,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       response_type: "id_token code",
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       // TODO: the 'webid' scope does not appear in the specification
+      // A question regarding its use has been filed https://github.com/solid/specification
       scope: "openid webid offline_access",
       client_id: oidcLoginOptions.client.clientId,
       code_challenge_method: "S256",
