@@ -28,11 +28,16 @@ import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
+import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
+import { IRedirector } from "../Redirector";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager,
+    @inject("redirector") private redirector: IRedirector,
     @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
   ) {}
 
@@ -46,34 +51,42 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
-    throw new Error("Not Implemented");
-
-    // const requestUrl = new URL(
-    //   oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
-    // );
-    // // TODO: include client_id, state, and nonce
-    // // Disable camel case rule because this query requires camel case
-    // /* eslint-disable @typescript-eslint/camelcase */
-    // const query: { [key: string]: string } = {
-    //   response_type: "id_token token",
-    //   redirect_url: oidcLoginOptions.redirectUrl.toString(),
-    //   scope: "openid id_vc"
-    // };
-    // /* eslint-enable @typescript-eslint/camelcase */
-    // if (oidcLoginOptions.dpop) {
-    //   query.dpop = await this.dpopHeaderCreator.createHeaderToken(
-    //     oidcLoginOptions.issuer,
-    //     "GET"
-    //   );
-    // }
-    // requestUrl.set("query", query);
-
-    // return this.sessionCreator.create({
-    //   neededAction: {
-    //     actionType: "redirect",
-    //     redirectUrl: requestUrl.toString()
-    //   },
-    //   loggedIn: false
-    // });
+    // throw new Error("Not Implemented");
+    const requestUrl = new URL(
+      oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
+    );
+    // // TODO: include nonce
+    // Disable camel case rule because this query requires camel case
+    /* eslint-disable @typescript-eslint/camelcase */
+    const query: Record<string, string> = {
+      client_id: oidcLoginOptions.client.clientId,
+      response_type: "id_token token",
+      redirect_url: oidcLoginOptions.redirectUrl.toString(),
+      // The webid scope does not appear in the spec
+      scope: "openid webid offline_access",
+      state: oidcLoginOptions.sessionId
+    };
+    /* eslint-enable @typescript-eslint/camelcase */
+    // TODO: There is currently no secure storage of the DPoP key
+    if (oidcLoginOptions.dpop) {
+      query.dpop = await this.dpopHeaderCreator.createHeaderToken(
+        oidcLoginOptions.issuer,
+        "GET"
+      );
+    }
+    requestUrl.set("query", query);
+    const sessionInfo = await this.sessionInfoManager.get(
+      oidcLoginOptions.sessionId
+    );
+    if (!sessionInfo) {
+      throw new Error("There was a problem creating a session.");
+    }
+    try {
+      this.redirector.redirect(requestUrl.toString(), {
+        handleRedirect: oidcLoginOptions.handleRedirect
+      });
+    } catch (err) {
+      // Do nothing
+    }
   }
 }
