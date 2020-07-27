@@ -19,9 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IClientRegistrar } from "../ClientRegistrar";
+import { IClientRegistrar, IRegistrarOptions } from "../ClientRegistrar";
 import IClient from "../IClient";
-import ILoginOptions from "../../ILoginOptions";
 import IIssuerConfig from "../IIssuerConfig";
 
 export const ClientRegistrarResponse: IClient = {
@@ -30,7 +29,9 @@ export const ClientRegistrarResponse: IClient = {
 };
 
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
-  getClient: jest.fn((options: ILoginOptions, issuerConfig: IIssuerConfig) =>
-    Promise.resolve(ClientRegistrarResponse)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getClient: jest.fn(
+    (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
+      Promise.resolve(ClientRegistrarResponse)
   )
 };
