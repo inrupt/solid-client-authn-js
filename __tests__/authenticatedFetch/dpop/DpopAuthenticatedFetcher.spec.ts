@@ -36,7 +36,8 @@ import {
 import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlRepresentationConverter";
 import {
   StorageUtilityMock,
-  StorageUtilityGetResponse
+  StorageUtilityGetResponse,
+  EmptyStorageUtilityMock
 } from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("DpopAuthenticatedFetcher", () => {
@@ -72,6 +73,19 @@ describe("DpopAuthenticatedFetcher", () => {
 
     it("rejects configs without type dpop", async () => {
       const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
+      expect(
+        await dpopAuthenticatedFetcher.canHandle(
+          { type: "bearer", localUserId: "global" },
+          "http://example.com",
+          {}
+        )
+      ).toBe(false);
+    });
+
+    it("rejects configs where the token isn't available", async () => {
+      const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher({
+        storageUtility: EmptyStorageUtilityMock
+      });
       expect(
         await dpopAuthenticatedFetcher.canHandle(
           { type: "bearer", localUserId: "global" },
@@ -159,17 +173,5 @@ describe("DpopAuthenticatedFetcher", () => {
     });
     expect(response).toBe(FetcherMockResponse);
   });
-
-  it("Throws an error if the token isn't available", async () => {
-    defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
-    const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher();
-    await expect(
-      dpopAuthenticatedFetcher.handle(
-        { type: "dpop", localUserId: "global" },
-        "http://someurl.com"
-      )
-    ).rejects.toThrowError("cannot handle");
-  });
-
   // TODO: Create a test Where no init is provided
 });
