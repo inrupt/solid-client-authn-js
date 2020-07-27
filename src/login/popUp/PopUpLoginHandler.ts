@@ -46,31 +46,8 @@ export default class PopUpLoginHandler implements ILoginHandler {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async handle(loginOptions: ILoginOptions): Promise<void> {
-    const currentUrl = new URL(window.location.href);
-    currentUrl.set("pathname", loginOptions.redirectUrl);
-    await this.loginHandler.handle({
-      ...loginOptions,
-      redirectUrl: currentUrl
-    });
-    // TODO: handle if session doesn't have redirect
-    // const popupWindow = window.open(
-    //   (session.neededAction as INeededRedirectAction).redirectUrl,
-    //   "Log In",
-    //   "resizable,scrollbars,width=500,height=500,"
-    // );
-    // return new Promise((resolve, reject) => {
-    //   const interval = setInterval(async () => {
-    //     if (!popupWindow || popupWindow.closed) {
-    //       clearInterval(interval);
-    //       resolve(
-    //         // TODO: handle if this fails
-    //         (await this.sessionCreator.getSession(
-    //           loginOptions.localUserId || "global"
-    //         )) as ISessionInfo
-    //       );
-    //     }
-    //   }, 500);
-    // });
+    throw new Error("Popup login is not implemented yet");
   }
 }
