@@ -86,7 +86,7 @@ export default class SessionInfoManager implements ISessionInfoManager {
       sessionId,
       "isLoggedIn"
     );
-    if (isLoggedIn !== null) {
+    if (isLoggedIn !== undefined) {
       return {
         sessionId,
         webId: webId,

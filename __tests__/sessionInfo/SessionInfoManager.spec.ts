@@ -26,7 +26,7 @@ import "reflect-metadata";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { StorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
+import { EmptyStorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
 import SessionInfoManager from "../../src/sessionInfo/SessionInfoManager";
 
 describe("SessionInfoManager", () => {
@@ -34,7 +34,7 @@ describe("SessionInfoManager", () => {
     uuidGenerator: UuidGeneratorMock,
     authenticatedFetcher: AuthenticatedFetcherMock,
     logoutHandler: LogoutHandlerMock,
-    storageUtility: StorageUtilityMock
+    storageUtility: EmptyStorageUtilityMock
   };
   function getSessionInfoManager(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -47,9 +47,9 @@ describe("SessionInfoManager", () => {
 
   describe("update", () => {
     it("is not implemented yet", async () => {
-      const storageUtility = defaultMocks.storageUtility;
-      storageUtility.getForUser.mockReturnValueOnce(Promise.resolve(null));
-      const sessionManager = getSessionInfoManager({ storageUtility });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: EmptyStorageUtilityMock
+      });
       expect(
         async () => await sessionManager.update("commanderCool", {})
       ).rejects.toThrow("Not Implemented");
@@ -59,23 +59,25 @@ describe("SessionInfoManager", () => {
   describe("get", () => {
     it("creates a session from localstorage", async () => {
       const storageUtility = defaultMocks.storageUtility;
-      storageUtility.getForUser.mockReturnValueOnce(
-        Promise.resolve("https://zoomies.com/commanderCool#me")
-      );
+      storageUtility.getForUser
+        .mockReturnValueOnce(
+          Promise.resolve("https://zoomies.com/commanderCool#me")
+        )
+        .mockReturnValueOnce(Promise.resolve("true"));
       const sessionManager = getSessionInfoManager({ storageUtility });
       const session = await sessionManager.get("commanderCool");
       expect(session).toMatchObject({
-        localUserId: "commanderCool",
+        sessionId: "commanderCool",
         webId: "https://zoomies.com/commanderCool#me"
       });
     });
 
     it("creates null if localstorage does not contain the user", async () => {
-      const storageUtility = defaultMocks.storageUtility;
-      storageUtility.getForUser.mockReturnValueOnce(Promise.resolve(null));
-      const sessionManager = getSessionInfoManager({ storageUtility });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: EmptyStorageUtilityMock
+      });
       const session = await sessionManager.get("commanderCool");
-      expect(session).toBeNull();
+      expect(session).toBeUndefined();
     });
   });
 });
