@@ -31,7 +31,7 @@ describe("dependencies", () => {
 
   it("performs dependency injection with a given input", () => {
     const authFetcher = getAuthFetcherWithDependencies({
-      storage: StorageMock
+      secureStorage: StorageMock
     });
     expect(authFetcher).toBeInstanceOf(AuthFetcher);
   });
