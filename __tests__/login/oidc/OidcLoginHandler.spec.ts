@@ -54,8 +54,9 @@ describe("OidcLoginHandler", () => {
     const actualHandler = defaultMocks.oidcHandler;
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
     await handler.handle({
+      sessionId: "mySession",
       oidcIssuer: new URL("https://arbitrary.url"),
-      redirect: new URL("https://app.com/redirect"),
+      redirectUrl: new URL("https://app.com/redirect"),
       clientId: "coolApp"
     });
 
@@ -76,8 +77,9 @@ describe("OidcLoginHandler", () => {
 
     await expect(
       handler.canHandle({
+        sessionId: "mySession",
         oidcIssuer: new URL("https://arbitrary.url"),
-        redirect: new URL("https://app.com/redirect"),
+        redirectUrl: new URL("https://app.com/redirect"),
         clientId: "coolApp"
       })
     ).resolves.toBe(true);
