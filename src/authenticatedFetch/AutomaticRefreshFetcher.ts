@@ -60,6 +60,9 @@ export default class AutomaticRefreshHandler implements IAuthenticatedFetcher {
         );
       } catch (err) {
         // Do nothing
+        // Failure at this point probably indicates that the refresh token has
+        // been invalidated, and there is nothing that the client can do
+        // but authenticate again
       }
     }
     return response;
