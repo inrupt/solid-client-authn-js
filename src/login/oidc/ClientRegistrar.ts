@@ -145,9 +145,6 @@ export default class ClientRegistrar implements IClientRegistrar {
       registrationClientUri: responseBody.registration_client_uri
     });
 
-    console.log("RESPONSE BODY");
-    console.log(responseBody);
-
     return {
       clientId: responseBody.client_id,
       clientSecret: responseBody.client_secret
