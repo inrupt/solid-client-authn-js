@@ -58,6 +58,8 @@ export default class TokenRequester {
       })
     ]);
 
+    console.log(JSON.stringify(issuer, null, "  "));
+
     // Get the issuer config to find the token url
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
       new URL(issuer as string)
@@ -135,6 +137,8 @@ export default class TokenRequester {
     if (!decoded || !decoded.sub) {
       throw new Error("The idp returned a bad token without a sub.");
     }
+
+    console.log(decoded.sub as string);
 
     await this.storageUtility.setForUser(
       sessionId,

@@ -50,6 +50,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         `Cannot handle redirect url [${redirectUrl}]`
       );
     }
+    console.log("Auth code redirect handler");
     const url = new URL(redirectUrl, true);
     const sessionId = url.query.state as string;
     const [codeVerifier, redirectUri] = await Promise.all([
