@@ -62,7 +62,7 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       await expect(
         storageUtility.get("key", { errorIfNull: true })
-      ).rejects.toThrowError("key is not stored");
+      ).rejects.toThrowError("[key] is not stored");
     });
   });
 
@@ -130,7 +130,7 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       await expect(
         storageUtility.getForUser("animals", "jackie", { errorIfNull: true })
-      ).rejects.toThrowError("Field jackie for user animals is not stored");
+      ).rejects.toThrowError("Field [jackie] for user [animals] is not stored");
     });
   });
 

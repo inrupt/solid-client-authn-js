@@ -76,7 +76,7 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle("Bad Input")
-      ).rejects.toThrowError("Cannot handle redirect url Bad Input");
+      ).rejects.toThrowError("Cannot handle redirect url [Bad Input]");
     });
 
     it("Makes a code request to the correct place", async () => {

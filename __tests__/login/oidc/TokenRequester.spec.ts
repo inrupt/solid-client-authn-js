@@ -220,7 +220,7 @@ describe("TokenRequester", () => {
       })
       /* eslint-enable @typescript-eslint/camelcase */
     ).rejects.toThrowError(
-      "The issuer https://idp.com does not support the refresh_token grant"
+      "The issuer [https://idp.com] does not support the [refresh_token] grant"
     );
   });
 

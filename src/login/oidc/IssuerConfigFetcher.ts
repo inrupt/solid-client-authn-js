@@ -177,7 +177,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
     } catch (err) {
       throw new ConfigurationError(
-        `${issuer.toString()} has an invalid configuration: ${err.message}`
+        `[${issuer.toString()}] has an invalid configuration: ${err.message}`
       );
     }
 
