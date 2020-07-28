@@ -23,7 +23,8 @@ import { IRedirector, IRedirectorOptions } from "../Redirector";
 
 export const RedirectorMock: jest.Mocked<IRedirector> = {
   redirect: jest.fn(
-    (redirctUrl: string, redirectOptions: IRedirectorOptions) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
       /* void */
     }
   )
