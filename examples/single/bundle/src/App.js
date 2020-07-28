@@ -22,17 +22,22 @@
 import React, { Component } from "react";
 import "regenerator-runtime/runtime";
 
-import { login, getSession, logout, fetch } from "../../../../dist/index";
+import { Session } from "../../../../dist/index";
+import getAuthFetcher from "../../../../dist/dependencies";
 
 class App extends Component {
   constructor(props) {
     super(props);
+    const fetcher = getAuthFetcher({});
+    const session = new Session({
+      authFetcher: fetcher
+    });
     this.state = {
       status: "loading",
       loginIssuer: "https://dev.inrupt.net",
       fetchRoute: "https://jackson.dev.inrupt.net/private",
       fetchBody: "",
-      session: null
+      session: session
     };
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
@@ -43,16 +48,25 @@ class App extends Component {
   }
 
   async componentDidMount() {
-    const session = await getSession();
+    console.log("coucou");
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
       setTimeout(() => window.close(), 2000);
-    } else if (!session) {
+    } else if (!this.state.session.isLoggedIn) {
+      console.log("coucou2");
       const authCode = new URL(window.location.href).searchParams.get("code");
       if (!authCode) {
+        console.log("coucou3");
         this.setState({ status: "login" });
+      } else {
+        console.log("coucou4");
+        this.state.session.handleIncomingRedirect(
+          new URL(window.location.href)
+        );
+        this.setState({ status: "dashboard" });
       }
     } else {
+      console.log("coucou4");
       this.setState({ status: "dashboard", session });
     }
   }
@@ -60,26 +74,22 @@ class App extends Component {
   async handleLogin(e, isPopup = false) {
     e.preventDefault();
     this.setState({ status: "loading" });
-    const session = await login({
-      redirect: "http://localhost:3001/",
-      oidcIssuer: this.state.loginIssuer,
-      popUp: isPopup,
-      popUpRedirectPath: "/popup"
-    });
-    if (
-      session.neededAction &&
-      session.neededAction.actionType === "redirect"
-    ) {
-      window.location.href = session.neededAction.redirectUrl;
-    } else if (session) {
-      this.setState({ status: "dashboard", session });
-    }
+    console.log(`Trying to log in to ${this.state.loginIssuer}`);
+    this.state.session
+      .login({
+        redirectUrl: "http://localhost:3001/",
+        oidcIssuer: this.state.loginIssuer
+      })
+      .then(() => {
+        console.log("coucou5");
+        this.setState({ status: "dashboard" });
+      });
   }
 
   async handleLogout(e) {
     e.preventDefault();
     this.setState({ status: "loading" });
-    await logout();
+    await this.state.session.logout();
     this.setState({
       status: "login",
       fetchBody: "",
@@ -90,7 +100,9 @@ class App extends Component {
   async handleFetch(e) {
     e.preventDefault();
     this.setState({ status: "loading", fetchBody: "" });
-    const response = await (await fetch(this.state.fetchRoute, {})).text();
+    const response = await (
+      await this.state.session.fetch(this.state.fetchRoute, {})
+    ).text();
     this.setState({ status: "dashboard", fetchBody: response });
   }
 
@@ -110,16 +122,13 @@ class App extends Component {
               onChange={e => this.setState({ loginIssuer: e.target.value })}
             />
             <button onClick={this.handleLogin}>Log In</button>
-            <button onClick={e => this.handleLogin(e, true)}>
-              Log In with Popup
-            </button>
           </form>
         );
       case "dashboard":
         return (
           <div>
             <h1>Solid Auth Fetcher Multi Session API Demo Dashboad</h1>
-            <p>WebId: {this.state.session.webId}</p>
+            <p>WebId: {this.state.session.isLoggedIn ? "true" : "false"}</p>
             <form>
               <input
                 type="text"
