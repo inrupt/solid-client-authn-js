@@ -29,18 +29,22 @@ class App extends Component {
   constructor(props) {
     super(props);
     const fetcher = getAuthFetcher({});
-    const session = new Session({
-      authFetcher: fetcher
-    });
+    const session = new Session(
+      {
+        authFetcher: fetcher
+      },
+      "mySession"
+    );
     this.state = {
       status: "loading",
-      loginIssuer: "https://dev.inrupt.net",
-      fetchRoute: "https://jackson.dev.inrupt.net/private",
+      loginIssuer: "https://broker.demo-ess.inrupt.com",
+      fetchRoute:
+        "https://ldp.demo-ess.inrupt.com/116455455448573774513/profile/card#me",
       fetchBody: "",
       session: session,
       sessionInfo: {
         isLoggedIn: session.isLoggedIn,
-        webid: session.webid
+        webId: session.webId
       }
     };
     if (window.location.pathname === "/popup") {
@@ -52,26 +56,20 @@ class App extends Component {
   }
 
   async componentDidMount() {
-    console.log("coucou");
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
       setTimeout(() => window.close(), 2000);
     } else if (!this.state.session.isLoggedIn) {
-      console.log("coucou2");
       const authCode = new URL(window.location.href).searchParams.get("code");
       if (!authCode) {
-        console.log("coucou3");
         this.setState({ status: "login" });
       } else {
-        console.log("coucou4");
         const sessionInfo = await this.state.session.handleIncomingRedirect(
           new URL(window.location.href)
         );
-        console.log(JSON.stringify(sessionInfo, null, "  "));
         this.setState({ status: "dashboard", sessionInfo: sessionInfo });
       }
     } else {
-      console.log("coucou4");
       this.setState({ status: "dashboard", session });
     }
   }
@@ -79,14 +77,12 @@ class App extends Component {
   async handleLogin(e, isPopup = false) {
     e.preventDefault();
     this.setState({ status: "loading" });
-    console.log(`Trying to log in to ${this.state.loginIssuer}`);
     this.state.session
       .login({
         redirectUrl: "http://localhost:3001/",
         oidcIssuer: this.state.loginIssuer
       })
       .then(() => {
-        console.log("coucou5");
         this.setState({ status: "dashboard" });
       });
   }
@@ -133,7 +129,7 @@ class App extends Component {
         return (
           <div>
             <h1>Solid Auth Fetcher Multi Session API Demo Dashboad</h1>
-            <p>WebId: {this.state.sessionInfo.webid}</p>
+            <p>WebId: {this.state.sessionInfo.webId}</p>
             <form>
               <input
                 type="text"
