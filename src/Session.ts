@@ -92,7 +92,6 @@ export class Session extends EventEmitter {
   }
 
   async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
-    console.log(`Incoming redirect: ${url}`);
     const sessionInfo = await this.authFetcher.handleIncomingRedirect(url);
     if (sessionInfo) {
       this.isLoggedIn = sessionInfo.isLoggedIn;
