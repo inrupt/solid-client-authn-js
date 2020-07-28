@@ -41,7 +41,9 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
   }
   async handle(redirectUrl: string): Promise<ISessionInfo> {
     if (!(await this.canHandle(redirectUrl))) {
-      throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
+      throw new ConfigurationError(
+        `Cannot handle redirect url [${redirectUrl}]`
+      );
     }
     const url = new URL(redirectUrl, true);
 

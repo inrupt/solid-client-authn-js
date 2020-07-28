@@ -75,11 +75,11 @@ export default class TokenRequester {
         !issuerConfig.grantTypesSupported.includes(body.grant_type))
     ) {
       throw new Error(
-        `The issuer ${issuer} does not support the ${body.grant_type} grant`
+        `The issuer [${issuer}] does not support the [${body.grant_type}] grant`
       );
     }
     if (!issuerConfig.tokenEndpoint) {
-      throw new Error(`This issuer ${issuer} does not have a token endpoint`);
+      throw new Error(`This issuer [${issuer}] does not have a token endpoint`);
     }
 
     await this.dpopClientKeyManager.generateClientKeyIfNotAlready();
