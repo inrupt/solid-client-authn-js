@@ -81,12 +81,10 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     if (!sessionInfo) {
       throw new Error("There was a problem creating a session.");
     }
-    try {
-      this.redirector.redirect(requestUrl.toString(), {
-        handleRedirect: oidcLoginOptions.handleRedirect
-      });
-    } catch (err) {
-      // Do nothing
-    }
+    // This flow must happen in a browser, which means a redirection
+    // should always be possible.
+    this.redirector.redirect(requestUrl.toString(), {
+      handleRedirect: oidcLoginOptions.handleRedirect
+    });
   }
 }
