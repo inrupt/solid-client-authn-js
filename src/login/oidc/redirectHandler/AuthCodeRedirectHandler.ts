@@ -80,6 +80,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       });
     } catch (err) {
       // Do nothing
+      // This step of the flow should happen in a browser, and redirection
+      // should never fail there.
     }
 
     return sessionInfo;
