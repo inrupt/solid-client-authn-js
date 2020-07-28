@@ -29,6 +29,7 @@ import { IEnvironmentDetector } from "./util/EnvironmentDetector";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 import ILoginInputOptions from "./ILoginInputOptions";
 import URL from "url-parse";
+import IRequestCredentials from "./authenticatedFetch/IRequestCredentials";
 
 @injectable()
 export default class AuthFetcher {
@@ -72,11 +73,16 @@ export default class AuthFetcher {
     url: RequestInfo,
     init?: RequestInit
   ): Promise<Response> {
-    throw new Error("Inner not implemented");
+    const credentials: IRequestCredentials = {
+      localUserId: sessionId,
+      // TODO: This should not be hard-coded
+      type: "dpop"
+    };
+    return this.authenticatedFetcher.handle(credentials, url, init);
   }
 
   async logout(sessionId: string): Promise<void> {
-    throw new Error("Inner not implemented");
+    this.logoutHandler.handle(sessionId);
   }
 
   async getSessionInfo(sessionId: string): Promise<ISessionInfo | undefined> {
