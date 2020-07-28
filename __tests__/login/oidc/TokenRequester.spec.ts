@@ -92,7 +92,7 @@ describe("TokenRequester", () => {
       id_token: "abcd",
       access_token: "1234",
       refresh_token: "!@#$"
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-enable @typescript-eslint/camelcase */
     }),
     jwt: {
       sub: "https://jackson.solid.community/profile/card#me"
