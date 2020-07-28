@@ -72,12 +72,15 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     /* eslint-enable @typescript-eslint/camelcase */
 
     url.set("query", {});
+    console.log(`sessionId: ${sessionId}`);
 
     const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    console.log(`sessionInfo: ${JSON.stringify(sessionInfo, null, "  ")}`);
     if (!sessionInfo) {
       throw new Error("There was a problem creating a session.");
     }
     try {
+      console.log(`Logged in, redirecting to ${url}`);
       this.redirector.redirect(url.toString(), {
         redirectByReplacingState: true
       });

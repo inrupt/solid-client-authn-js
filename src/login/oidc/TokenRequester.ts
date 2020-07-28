@@ -146,7 +146,8 @@ export default class TokenRequester {
         accessToken: tokenResponse.access_token as string,
         idToken: tokenResponse.id_token as string,
         refreshToken: tokenResponse.refresh_token as string,
-        webId: decoded.sub as string
+        webId: decoded.sub as string,
+        isLoggedIn: "true"
       },
       { secure: true }
     );
