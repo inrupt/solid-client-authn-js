@@ -27,25 +27,21 @@ export const StorageUtilitySafeGetResponse = {
 };
 
 export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   get: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (key: string, options: { errorIfNull?: boolean }) =>
       StorageUtilityGetResponse
   ),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   set: jest.fn(async (key: string, value: string) => {
     /* do nothing */
   }),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   delete: jest.fn(async (key: string) => {
     /* do nothing */
   }),
   getForUser: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (userId: string, key: string, options: { errorIfNull?: true }) =>
       StorageUtilityGetResponse
   ),
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   setForUser: jest.fn(
     async (
       userId: string,
@@ -55,7 +51,6 @@ export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
       /* do nothing */
     }
   ),
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   deleteForUser: jest.fn(async (userId: string, key: string) => {
     /* do nothing */
   }),
@@ -74,27 +69,24 @@ export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
       }>
     ) => StorageUtilitySafeGetResponse
   )
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 };
 
 export const EmptyStorageUtilityMock: jest.Mocked<IStorageUtility> = {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   get: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (key: string, options: { errorIfNull?: boolean }) => undefined
   ),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   set: jest.fn(async (key: string, value: string) => {
     /* do nothing */
   }),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   delete: jest.fn(async (key: string) => {
     /* do nothing */
   }),
   getForUser: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (userId: string, key: string, options: { errorIfNull?: true }) =>
       undefined
   ),
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   setForUser: jest.fn(
     async (
       userId: string,
@@ -104,7 +96,6 @@ export const EmptyStorageUtilityMock: jest.Mocked<IStorageUtility> = {
       /* do nothing */
     }
   ),
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   deleteForUser: jest.fn(async (userId: string, key: string) => {
     /* do nothing */
   }),
@@ -123,4 +114,5 @@ export const EmptyStorageUtilityMock: jest.Mocked<IStorageUtility> = {
       }>
     ) => undefined
   )
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 };
