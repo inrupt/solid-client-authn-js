@@ -24,8 +24,6 @@ import "reflect-metadata";
 import { StorageMock } from "../../src/storage/__mocks__/Storage";
 import StorageUtility from "../../src/storage/StorageUtility";
 
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-
 describe("StorageUtility", () => {
   const defaultMocks = {
     storage: StorageMock
