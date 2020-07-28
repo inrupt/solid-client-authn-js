@@ -67,17 +67,20 @@ describe("AuthFetcher", () => {
   describe("login", () => {
     it("calls login", async () => {
       const authFetcher = getAuthFetcher();
-      const session = await authFetcher.login("mySession", {
+      await authFetcher.login("mySession", {
         clientId: "coolApp",
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com"
       });
-      expect(session).toBe(LoginHandlerResponse);
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
-        localUserId: "global",
+        sessionId: "mySession",
         clientId: "coolApp",
-        redirect: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com")
+        redirectUrl: new URL("https://coolapp.com/redirect"),
+        oidcIssuer: new URL("https://idp.com"),
+        popUp: false,
+        clientName: "coolApp",
+        clientSecret: undefined,
+        handleRedirect: undefined
       });
     });
   });
@@ -92,7 +95,7 @@ describe("AuthFetcher", () => {
       expect(response).toBe(AuthenticatedFetcherResponse);
       expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
         {
-          localUserId: "global",
+          localUserId: "mySession",
           type: "dpop"
         },
         "https://zombo.com",
@@ -105,7 +108,9 @@ describe("AuthFetcher", () => {
     it("calls logout", async () => {
       const authFetcher = getAuthFetcher();
       await authFetcher.logout("mySession");
-      expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith("global");
+      expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
+        "mySession"
+      );
     });
   });
 
