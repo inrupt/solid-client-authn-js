@@ -46,7 +46,9 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
   async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
     if (!(await this.canHandle(redirectUrl))) {
-      throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
+      throw new ConfigurationError(
+        `Cannot handle redirect url [${redirectUrl}]`
+      );
     }
     const url = new URL(redirectUrl, true);
     const sessionId = url.query.state as string;

@@ -150,7 +150,7 @@ describe("IssuerConfigFetcher", () => {
     await expect(
       configFetcher.fetchConfig(new URL("https://some.url"))
     ).rejects.toThrowError(
-      "https://some.url has an invalid configuration: Some error"
+      "[https://some.url] has an invalid configuration: Some error"
     );
   });
 
