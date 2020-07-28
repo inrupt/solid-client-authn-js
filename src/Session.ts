@@ -28,19 +28,22 @@ import getAuthFetcherWithDependencies from "./dependencies";
 import { v4 } from "uuid";
 
 export interface ISessionOptions {
-  secureStorage?: IStorage;
-  insecureStorage?: IStorage;
-  sessionInfo?: ISessionInfo;
-  authFetcher?: AuthFetcher;
+  secureStorage: IStorage;
+  insecureStorage: IStorage;
+  sessionInfo: ISessionInfo;
+  authFetcher: AuthFetcher;
 }
 
-export default class Session extends EventEmitter {
+export class Session extends EventEmitter {
   public readonly sessionId: string;
   public isLoggedIn: boolean;
   public webId?: string;
   private authFetcher: AuthFetcher;
 
-  constructor(sessionOptions: ISessionOptions, sessionId?: string) {
+  constructor(
+    sessionOptions: Partial<ISessionOptions> = {},
+    sessionId?: string
+  ) {
     super();
     if (sessionOptions.authFetcher) {
       this.authFetcher = sessionOptions.authFetcher;
@@ -73,7 +76,10 @@ export default class Session extends EventEmitter {
   }
 
   async login(options: ILoginInputOptions): Promise<void> {
-    return this.authFetcher.login(this.sessionId, options);
+    this.authFetcher.login(this.sessionId, {
+      ...options
+    });
+    this.emit("login");
   }
 
   async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
@@ -83,6 +89,11 @@ export default class Session extends EventEmitter {
   async logout(): Promise<void> {
     await this.authFetcher.logout(this.sessionId);
     this.emit("logout");
+  }
+
+  async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
+    console.log(`Incoming redirect: ${url}`);
+    return this.authFetcher.handleIncomingRedirect(url);
   }
 
   onLogin(callback: () => unknown): void {

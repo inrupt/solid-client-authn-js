@@ -20,7 +20,7 @@
  */
 
 import IStorage from "./storage/IStorage";
-import Session from "./Session";
+import { Session } from "./Session";
 import { EventEmitter } from "events";
 import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
