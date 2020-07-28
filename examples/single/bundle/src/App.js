@@ -37,7 +37,11 @@ class App extends Component {
       loginIssuer: "https://dev.inrupt.net",
       fetchRoute: "https://jackson.dev.inrupt.net/private",
       fetchBody: "",
-      session: session
+      session: session,
+      sessionInfo: {
+        isLoggedIn: session.isLoggedIn,
+        webid: session.webid
+      }
     };
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
@@ -60,10 +64,11 @@ class App extends Component {
         this.setState({ status: "login" });
       } else {
         console.log("coucou4");
-        this.state.session.handleIncomingRedirect(
+        const sessionInfo = await this.state.session.handleIncomingRedirect(
           new URL(window.location.href)
         );
-        this.setState({ status: "dashboard" });
+        console.log(JSON.stringify(sessionInfo, null, "  "));
+        this.setState({ status: "dashboard", sessionInfo: sessionInfo });
       }
     } else {
       console.log("coucou4");
@@ -128,7 +133,7 @@ class App extends Component {
         return (
           <div>
             <h1>Solid Auth Fetcher Multi Session API Demo Dashboad</h1>
-            <p>WebId: {this.state.session.isLoggedIn ? "true" : "false"}</p>
+            <p>WebId: {this.state.sessionInfo.webid}</p>
             <form>
               <input
                 type="text"
