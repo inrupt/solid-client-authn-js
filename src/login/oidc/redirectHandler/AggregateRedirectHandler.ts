@@ -35,6 +35,5 @@ export default class AggregateRedirectHandler
     @injectAll("redirectHandlers") redirectHandlers: IRedirectHandler[]
   ) {
     super(redirectHandlers);
-    console.log("AggregateRedirectHandler");
   }
 }
