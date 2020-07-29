@@ -22,16 +22,17 @@
 import React, { Component } from "react";
 import "regenerator-runtime/runtime";
 
-import { Session } from "../../../../dist/index";
-import getAuthFetcher from "../../../../dist/dependencies";
+import {
+  Session,
+  getAuthFetcherWithDependencies
+} from "../../../../dist/index";
 
 class App extends Component {
   constructor(props) {
     super(props);
-    const fetcher = getAuthFetcher({});
     const session = new Session(
       {
-        authFetcher: fetcher
+        authFetcher: getAuthFetcherWithDependencies({})
       },
       "mySession"
     );
@@ -42,10 +43,7 @@ class App extends Component {
         "https://ldp.demo-ess.inrupt.com/116455455448573774513/profile/card#me",
       fetchBody: "",
       session: session,
-      sessionInfo: {
-        isLoggedIn: session.isLoggedIn,
-        webId: session.webId
-      }
+      sessionInfo: session.info
     };
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
