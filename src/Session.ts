@@ -24,7 +24,7 @@ import ILoginInputOptions from "./ILoginInputOptions";
 import { EventEmitter } from "events";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 import AuthFetcher from "./AuthFetcher";
-import getAuthFetcherWithDependencies from "./dependencies";
+import { getAuthFetcherWithDependencies } from "./dependencies";
 import { v4 } from "uuid";
 
 export interface ISessionOptions {
@@ -35,9 +35,10 @@ export interface ISessionOptions {
 }
 
 export class Session extends EventEmitter {
-  public readonly sessionId: string;
-  public isLoggedIn: boolean;
-  public webId?: string;
+  // public readonly sessionId: string;
+  // public isLoggedIn: boolean;
+  // public webId?: string;
+  public readonly info: ISessionInfo;
   private authFetcher: AuthFetcher;
 
   constructor(
@@ -58,16 +59,16 @@ export class Session extends EventEmitter {
       );
     }
     if (sessionOptions.sessionInfo) {
-      this.sessionId = sessionOptions.sessionInfo.sessionId;
-      this.isLoggedIn = sessionOptions.sessionInfo.isLoggedIn;
-      this.webId = sessionOptions.sessionInfo.webId;
+      this.info = {
+        sessionId: sessionOptions.sessionInfo.sessionId,
+        isLoggedIn: sessionOptions.sessionInfo.isLoggedIn,
+        webId: sessionOptions.sessionInfo.webId
+      };
     } else {
-      if (sessionId) {
-        this.sessionId = sessionId;
-      } else {
-        this.sessionId = v4();
-      }
-      this.isLoggedIn = false;
+      this.info = {
+        sessionId: sessionId ?? v4(),
+        isLoggedIn: false
+      };
     }
   }
 
@@ -76,26 +77,26 @@ export class Session extends EventEmitter {
   }
 
   async login(options: ILoginInputOptions): Promise<void> {
-    this.authFetcher.login(this.sessionId, {
+    this.authFetcher.login(this.info.sessionId, {
       ...options
     });
     this.emit("login");
   }
 
   async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-    return this.authFetcher.fetch(this.sessionId, url, init);
+    return this.authFetcher.fetch(this.info.sessionId, url, init);
   }
 
   async logout(): Promise<void> {
-    await this.authFetcher.logout(this.sessionId);
+    await this.authFetcher.logout(this.info.sessionId);
     this.emit("logout");
   }
 
   async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
     const sessionInfo = await this.authFetcher.handleIncomingRedirect(url);
     if (sessionInfo) {
-      this.isLoggedIn = sessionInfo.isLoggedIn;
-      this.webId = sessionInfo.webId;
+      this.info.isLoggedIn = sessionInfo.isLoggedIn;
+      this.info.webId = sessionInfo.webId;
     }
     return sessionInfo;
   }
