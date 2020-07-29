@@ -224,7 +224,7 @@ container.register<ILogoutHandler>("logoutHandler", {
   useClass: GeneralLogoutHandler
 });
 
-export default function getAuthFetcherWithDependencies(dependencies: {
+export function getAuthFetcherWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }): AuthFetcher {

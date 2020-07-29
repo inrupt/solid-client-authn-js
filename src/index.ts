@@ -21,3 +21,4 @@
 
 export { Session } from "./Session";
 export { SessionManager } from "./SessionManager";
+export { getAuthFetcherWithDependencies } from "./dependencies";
