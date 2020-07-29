@@ -23,7 +23,7 @@ import IStorage from "./storage/IStorage";
 import { Session } from "./Session";
 import { EventEmitter } from "events";
 import AuthFetcher from "./AuthFetcher";
-import getAuthFetcherWithDependencies from "./dependencies";
+import { getAuthFetcherWithDependencies } from "./dependencies";
 import { detectEnvironment } from "./util/EnvironmentDetector";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 
@@ -64,7 +64,7 @@ export class SessionManager extends EventEmitter {
       this.emit("sessionLogout", session);
     };
     session.onLogout(logoutCallback);
-    this.sessionRecords[session.sessionId] = {
+    this.sessionRecords[session.info.sessionId] = {
       session,
       logoutCallback
     };
@@ -74,8 +74,8 @@ export class SessionManager extends EventEmitter {
   private getSessionFromCurrentSessionInfo(sessionInfo: ISessionInfo): Session {
     const sessionRecord = this.sessionRecords[sessionInfo.sessionId];
     if (sessionRecord) {
-      sessionRecord.session.webId = sessionInfo.webId;
-      sessionRecord.session.isLoggedIn = sessionInfo.isLoggedIn;
+      sessionRecord.session.info.webId = sessionInfo.webId;
+      sessionRecord.session.info.isLoggedIn = sessionInfo.isLoggedIn;
       return sessionRecord.session;
     } else {
       return this.addNewSessionRecord(
