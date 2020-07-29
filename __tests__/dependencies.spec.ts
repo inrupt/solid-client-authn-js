@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import getAuthFetcherWithDependencies from "../src/dependencies";
+import { getAuthFetcherWithDependencies } from "../src/dependencies";
 import AuthFetcher from "../src/AuthFetcher";
 import { StorageMock } from "../src/storage/__mocks__/Storage";
 
