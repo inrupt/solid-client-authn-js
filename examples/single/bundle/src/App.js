@@ -59,7 +59,9 @@ class App extends Component {
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
       setTimeout(() => window.close(), 2000);
-    } else if (!this.state.session.isLoggedIn) {
+    } else if (this.state.session.isLoggedIn) {
+      this.setState({ status: "dashboard", session });
+    } else {
       const authCode = new URL(window.location.href).searchParams.get("code");
       if (!authCode) {
         this.setState({ status: "login" });
@@ -69,8 +71,6 @@ class App extends Component {
         );
         this.setState({ status: "dashboard", sessionInfo: sessionInfo });
       }
-    } else {
-      this.setState({ status: "dashboard", session });
     }
   }
 
