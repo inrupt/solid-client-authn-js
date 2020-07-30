@@ -28,7 +28,7 @@ class App extends Component {
     super(props);
     this.state = {
       status: "loading",
-      loginIssuer: "https://oidc.dev.solid.nhs.janeirodigital.net",
+      loginIssuer: "https://dev.inrupt.net",
       fetchRoute: "https://jackson.dev.inrupt.net/private",
       fetchBody: "",
       session: null
