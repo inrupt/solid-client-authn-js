@@ -33,8 +33,6 @@ import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import IIssuerConfig from "./IIssuerConfig";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
-import ISolidSession from "../../solidSession/ISolidSession";
-import { IStorageUtility } from "../../localStorage/StorageUtility";
 import { IClientRegistrar } from "./ClientRegistrar";
 
 @injectable()
@@ -45,12 +43,11 @@ export default class OidcLoginHandler implements ILoginHandler {
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("dpopClientKeyManager")
     private dpopClientKeyManager: IDpopClientKeyManager,
-    @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   checkOptions(options: ILoginOptions): Error | null {
-    if (!options.oidcIssuer || !options.redirect) {
+    if (!options.oidcIssuer || !options.redirectUrl) {
       return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
     }
     return null;
@@ -60,7 +57,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     return !this.checkOptions(options);
   }
 
-  async handle(options: ILoginOptions): Promise<ISolidSession> {
+  async handle(options: ILoginOptions): Promise<void> {
     // Check to ensure the login options are correct
     const optionsError: Error | null = this.checkOptions(options);
     if (optionsError) {
@@ -78,19 +75,23 @@ export default class OidcLoginHandler implements ILoginHandler {
       issuer: options.oidcIssuer as URL,
       // TODO: differentiate if DPoP should be true
       dpop: true,
-      // TODO: This constrains this library to browsers. Figure out what to do with redirect
-      redirectUrl: options.redirect as URL,
+      redirectUrl: options.redirectUrl as URL,
       issuerConfiguration: issuerConfig,
-      client: await this.clientRegistrar.getClient(options, issuerConfig),
-      localUserId: options.localUserId,
-      doNotAutoRedirect: options.doNotAutoRedirect
+      client: await this.clientRegistrar.getClient(
+        {
+          sessionId: options.sessionId,
+          clientId: options.clientId,
+          clientSecret: options.clientSecret,
+          clientName: options.clientName,
+          redirectUrl: options.redirectUrl
+        },
+        issuerConfig
+      ),
+      sessionId: options.sessionId,
+      handleRedirect: options.handleRedirect
     };
 
-    // Generate DPoP Key if needed
-    // TODO: should be a conditional if DPoP is needed or not
-    await this.dpopClientKeyManager.generateClientKeyIfNotAlready(OidcOptions);
-
     // Call proper OIDC Handler
-    return await this.oidcHandler.handle(OidcOptions);
+    await this.oidcHandler.handle(OidcOptions);
   }
 }

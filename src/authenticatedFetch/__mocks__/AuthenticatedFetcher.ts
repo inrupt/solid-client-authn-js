@@ -28,16 +28,20 @@ export const AuthenticatedFetcherResponse = FetcherMockResponse;
 export const AuthenticatedFetcherMock: jest.Mocked<IAuthenticatedFetcher> = {
   canHandle: jest.fn(
     async (
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       requestCredentials: IRequestCredentials,
       requestInfo: RequestInfo,
       requestInit: RequestInit
+      /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => true as boolean
   ),
   handle: jest.fn(
     async (
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       requestCredentials: IRequestCredentials,
       requestInfo: RequestInfo,
       requestInit: RequestInit
+      /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => AuthenticatedFetcherResponse
   )
 };

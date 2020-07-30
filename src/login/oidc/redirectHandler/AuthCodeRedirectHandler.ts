@@ -19,15 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ISolidSession from "../../../solidSession/ISolidSession";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 import { ITokenRequester } from "../TokenRequester";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
+import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
@@ -35,7 +35,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector,
     @inject("tokenRequester") private tokenRequester: ITokenRequester,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -43,27 +44,25 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     return !!(url.query && url.query.code && url.query.state);
   }
 
-  async handle(redirectUrl: string): Promise<ISolidSession> {
+  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
     if (!(await this.canHandle(redirectUrl))) {
-      throw new ConfigurationError(`Cannot handle redirect url ${redirectUrl}`);
+      throw new ConfigurationError(
+        `Cannot handle redirect url [${redirectUrl}]`
+      );
     }
     const url = new URL(redirectUrl, true);
-    const localUserId = url.query.state as string;
+    const sessionId = url.query.state as string;
     const [codeVerifier, redirectUri] = await Promise.all([
-      (await this.storageUtility.getForUser(
-        localUserId,
-        "codeVerifier",
-        true
-      )) as string,
-      (await this.storageUtility.getForUser(
-        localUserId,
-        "redirectUri",
-        true
-      )) as string
+      (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
+        errorIfNull: true
+      })) as string,
+      (await this.storageUtility.getForUser(sessionId, "redirectUri", {
+        errorIfNull: true
+      })) as string
     ]);
 
     /* eslint-disable @typescript-eslint/camelcase */
-    await this.tokenRequester.request(localUserId, {
+    await this.tokenRequester.request(sessionId, {
       grant_type: "authorization_code",
       code_verifier: codeVerifier as string,
       code: url.query.code as string,
@@ -73,14 +72,20 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
     url.set("query", {});
 
-    const session = await this.sessionCreator.getSession(localUserId);
-    if (!session) {
+    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    if (!sessionInfo) {
       throw new Error("There was a problem creating a session.");
     }
-    session.neededAction = this.redirector.redirect(url.toString(), {
-      redirectByReplacingState: true
-    });
+    try {
+      this.redirector.redirect(url.toString(), {
+        redirectByReplacingState: true
+      });
+    } catch (err) {
+      // Do nothing
+      // This step of the flow should happen in a browser, and redirection
+      // should never fail there.
+    }
 
-    return session;
+    return sessionInfo;
   }
 }

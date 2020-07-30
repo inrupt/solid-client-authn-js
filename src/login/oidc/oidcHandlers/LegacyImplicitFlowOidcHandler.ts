@@ -28,16 +28,17 @@ import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import INeededRedirectAction from "../../../solidSession/INeededRedirectAction";
-import ISolidSession from "../../../solidSession/ISolidSession";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
+import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
+import { IRedirector } from "../Redirector";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager,
+    @inject("redirector") private redirector: IRedirector,
+    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -49,19 +50,23 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
-    // TODO: include client_id, state, and nonce
+    // // TODO: include nonce
     // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */
-    const query: { [key: string]: string } = {
+    const query: Record<string, string> = {
+      client_id: oidcLoginOptions.client.clientId,
       response_type: "id_token token",
       redirect_url: oidcLoginOptions.redirectUrl.toString(),
-      scope: "openid id_vc"
+      // The webid scope does not appear in the spec
+      scope: "openid webid offline_access",
+      state: oidcLoginOptions.sessionId
     };
     /* eslint-enable @typescript-eslint/camelcase */
+    // TODO: There is currently no secure storage of the DPoP key
     if (oidcLoginOptions.dpop) {
       query.dpop = await this.dpopHeaderCreator.createHeaderToken(
         oidcLoginOptions.issuer,
@@ -69,13 +74,16 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       );
     }
     requestUrl.set("query", query);
-
-    return this.sessionCreator.create({
-      neededAction: {
-        actionType: "redirect",
-        redirectUrl: requestUrl.toString()
-      } as INeededRedirectAction,
-      loggedIn: false
+    const sessionInfo = await this.sessionInfoManager.get(
+      oidcLoginOptions.sessionId
+    );
+    if (!sessionInfo) {
+      throw new Error("There was a problem creating a session.");
+    }
+    // This flow must happen in a browser, which means a redirection
+    // should always be possible.
+    this.redirector.redirect(requestUrl.toString(), {
+      handleRedirect: oidcLoginOptions.handleRedirect
     });
   }
 }

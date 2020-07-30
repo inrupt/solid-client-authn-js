@@ -19,114 +19,82 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ISolidSession from "./solidSession/ISolidSession";
-import ILoginInputOptions, {
-  loginInputOptionsSchema
-} from "./ILoginInputOptions";
 import { injectable, inject } from "tsyringe";
 import ILoginHandler from "./login/ILoginHandler";
-import ILoginOptions from "./login/ILoginOptions";
-import validateSchema from "./util/validateSchema";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import ILogoutHandler from "./logout/ILogoutHandler";
-import { ISessionCreator } from "./solidSession/SessionCreator";
+import { ISessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import { IEnvironmentDetector } from "./util/EnvironmentDetector";
-import { EventEmitter } from "events";
+import ISessionInfo from "./sessionInfo/ISessionInfo";
+import ILoginInputOptions from "./ILoginInputOptions";
+import URL from "url-parse";
+import IRequestCredentials from "./authenticatedFetch/IRequestCredentials";
 
 @injectable()
-export default class AuthFetcher extends EventEmitter {
-  private globalUserName = "global";
+export default class AuthFetcher {
   constructor(
     @inject("loginHandler") private loginHandler: ILoginHandler,
     @inject("redirectHandler") private redirectHandler: IRedirectHandler,
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
-    @inject("sessionCreator") private sessionCreator: ISessionCreator,
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager,
     @inject("authenticatedFetcher")
     private authenticatedFetcher: IAuthenticatedFetcher,
     @inject("environmentDetector")
     private environmentDetector: IEnvironmentDetector
-  ) {
-    super();
-  }
+  ) {}
 
-  private async loginHelper(
-    options: ILoginInputOptions,
-    localUserId?: string
-  ): Promise<ISolidSession> {
-    const internalOptions: ILoginOptions = validateSchema(
-      loginInputOptionsSchema,
-      options
-    );
-    if (localUserId) {
-      internalOptions.localUserId = localUserId;
+  private urlOptionToUrl(url?: URL | string): URL | undefined {
+    if (url) {
+      if (typeof url !== "string") {
+        return url;
+      }
+      return new URL(url);
     }
-    return this.loginHandler.handle(internalOptions);
+    return undefined;
   }
 
-  async login(options: ILoginInputOptions): Promise<ISolidSession> {
-    return this.loginHelper(options, this.globalUserName);
+  async login(sessionId: string, options: ILoginInputOptions): Promise<void> {
+    return this.loginHandler.handle({
+      sessionId,
+      oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
+      redirectUrl: this.urlOptionToUrl(options.redirectUrl),
+      clientId: options.clientId,
+      clientSecret: options.clientSecret,
+      clientName: options.clientId,
+      popUp: options.popUp || false,
+      handleRedirect: options.handleRedirect
+    });
   }
 
-  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-    this.emit("request", url, init);
-    return this.authenticatedFetcher.handle(
-      // TODO: generate request credentials separately
-      {
-        localUserId: this.globalUserName,
-        type: "dpop"
-      },
-      url,
-      init
-    );
+  async fetch(
+    sessionId: string,
+    url: RequestInfo,
+    init?: RequestInit
+  ): Promise<Response> {
+    const credentials: IRequestCredentials = {
+      localUserId: sessionId,
+      // TODO: This should not be hard-coded
+      type: "dpop"
+    };
+    return this.authenticatedFetcher.handle(credentials, url, init);
   }
 
-  async logout(): Promise<void> {
-    await this.logoutHandler.handle(this.globalUserName);
+  async logout(sessionId: string): Promise<void> {
+    this.logoutHandler.handle(sessionId);
   }
 
-  async getSession(): Promise<ISolidSession | null> {
-    return this.sessionCreator.getSession(this.globalUserName);
+  async getSessionInfo(sessionId: string): Promise<ISessionInfo | undefined> {
+    // TODO complete
+    return this.sessionInfoManager.get(sessionId);
   }
 
-  async uniqueLogin(options: ILoginInputOptions): Promise<ISolidSession> {
-    return this.loginHelper(options);
+  async getAllSessionInfo(): Promise<ISessionInfo[]> {
+    return this.sessionInfoManager.getAll();
   }
 
-  async onSession(
-    callback: (session: ISolidSession) => unknown
-  ): Promise<void> {
-    // TODO: this should be updated to handle non global as well
-    const currentSession = await this.getSession();
-    if (currentSession) {
-      callback(currentSession);
-    }
-    this.on("session", callback);
-  }
-
-  async onLogout(callback: (session: ISolidSession) => unknown): Promise<void> {
-    throw new Error("Not Implemented");
-  }
-
-  async onRequest(
-    callback: (RequestInfo: RequestInfo, requestInit: RequestInit) => unknown
-  ): Promise<void> {
-    this.on("request", callback);
-  }
-
-  async handleRedirect(url: string): Promise<ISolidSession> {
-    const session = await this.redirectHandler.handle(url);
-    this.emit("session", session);
-    return session;
-  }
-
-  async automaticallyHandleRedirect(): Promise<void> {
-    if (this.environmentDetector.detect() === "browser") {
-      await this.handleRedirect(window.location.href);
-    }
-  }
-
-  customAuthFetcher(options: {}): unknown {
-    throw new Error("Not Implemented");
+  async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
+    return this.redirectHandler.handle(url);
   }
 }

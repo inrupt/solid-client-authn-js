@@ -31,9 +31,9 @@ import {
 } from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import {
-  SessionCreatorMock,
+  SessionInfoManagerMock,
   SessionCreatorCreateResponse
-} from "../src/solidSession/__mocks__/SessionCreator";
+} from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import {
   AuthenticatedFetcherMock,
   AuthenticatedFetcherResponse
@@ -47,7 +47,7 @@ describe("AuthFetcher", () => {
     loginHandler: LoginHandlerMock,
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
-    sessionCreator: SessionCreatorMock,
+    sessionInfoManager: SessionInfoManagerMock,
     authenticatedFetcher: AuthenticatedFetcherMock,
     environmentDetector: EnvironmentDetectorMock
   };
@@ -58,7 +58,7 @@ describe("AuthFetcher", () => {
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
-      mocks.sessionCreator ?? defaultMocks.sessionCreator,
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
       mocks.authenticatedFetcher ?? defaultMocks.authenticatedFetcher,
       mocks.environmentDetector ?? defaultMocks.environmentDetector
     );
@@ -67,17 +67,20 @@ describe("AuthFetcher", () => {
   describe("login", () => {
     it("calls login", async () => {
       const authFetcher = getAuthFetcher();
-      const session = await authFetcher.login({
+      await authFetcher.login("mySession", {
         clientId: "coolApp",
-        redirect: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com"
-      });
-      expect(session).toBe(LoginHandlerResponse);
-      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
-        localUserId: "global",
-        clientId: "coolApp",
-        redirect: new URL("https://coolapp.com/redirect"),
+        redirectUrl: new URL("https://coolapp.com/redirect"),
         oidcIssuer: new URL("https://idp.com")
+      });
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
+        sessionId: "mySession",
+        clientId: "coolApp",
+        redirectUrl: new URL("https://coolapp.com/redirect"),
+        oidcIssuer: new URL("https://idp.com"),
+        popUp: false,
+        clientName: "coolApp",
+        clientSecret: undefined,
+        handleRedirect: undefined
       });
     });
   });
@@ -85,11 +88,14 @@ describe("AuthFetcher", () => {
   describe("fetch", () => {
     it("calls fetch", async () => {
       const authFetcher = getAuthFetcher();
-      const response = await authFetcher.fetch("https://zombo.com");
+      const response = await authFetcher.fetch(
+        "mySession",
+        "https://zombo.com"
+      );
       expect(response).toBe(AuthenticatedFetcherResponse);
       expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
         {
-          localUserId: "global",
+          localUserId: "mySession",
           type: "dpop"
         },
         "https://zombo.com",
@@ -101,99 +107,32 @@ describe("AuthFetcher", () => {
   describe("logout", () => {
     it("calls logout", async () => {
       const authFetcher = getAuthFetcher();
-      await authFetcher.logout();
-      expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith("global");
-    });
-  });
-
-  describe("getSession", () => {
-    it("creates a session for the global user", async () => {
-      const authFetcher = getAuthFetcher();
-      const session = await authFetcher.getSession();
-      expect(session).toBe(SessionCreatorCreateResponse);
-      expect(defaultMocks.sessionCreator.getSession).toHaveBeenCalledWith(
-        "global"
+      await authFetcher.logout("mySession");
+      expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
+        "mySession"
       );
     });
   });
 
-  describe("uniqueLogin", () => {
-    it("calls login without a local user", async () => {
+  describe("getSessionInfo", () => {
+    it("creates a session for the global user", async () => {
       const authFetcher = getAuthFetcher();
-      const session = await authFetcher.uniqueLogin({
-        clientId: "coolApp",
-        redirect: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com"
-      });
-      expect(session).toBe(LoginHandlerResponse);
-      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
-        clientId: "coolApp",
-        redirect: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com")
-      });
+      const session = await authFetcher.getSessionInfo("mySession");
+      expect(session).toBe(SessionCreatorCreateResponse);
+      expect(defaultMocks.sessionInfoManager.get).toHaveBeenCalledWith(
+        "mySession"
+      );
     });
   });
 
-  describe("onSession", () => {
-    it("Automatically calls the callback if the session is present", async () => {
-      const authFetcher = getAuthFetcher();
-      const callback = jest.fn();
-      await authFetcher.onSession(callback);
-      expect(callback).toHaveBeenCalledWith(SessionCreatorCreateResponse);
-    });
-
-    it("Does not automatically call the callback if the session is not present", async () => {
-      defaultMocks.sessionCreator.getSession.mockResolvedValueOnce(null);
-      const authFetcher = getAuthFetcher();
-      const callback = jest.fn();
-      await authFetcher.onSession(callback);
-      expect(callback).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("onLogout", () => {
-    it("Temp throws an error", () => {
-      const authFetcher = getAuthFetcher();
-      expect(() =>
-        authFetcher.onLogout(() => {
-          /* do nothing */
-        })
-      ).rejects.toThrowError("Not Implemented");
-    });
-  });
-
-  describe("handleRedirect", () => {
+  describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
       const authFetcher = getAuthFetcher();
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      const session = await authFetcher.handleRedirect(url);
+      const session = await authFetcher.handleIncomingRedirect(url);
       expect(session).toBe(RedirectHandlerResponse);
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
-    });
-  });
-
-  describe("automaticallyHandleRedirect", () => {
-    it("handles redirect when in the browser", async () => {
-      const authFetcher = getAuthFetcher();
-      await authFetcher.automaticallyHandleRedirect();
-      expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
-        "http://localhost/"
-      );
-    });
-
-    it("does not handle redirect when not in the browser", async () => {
-      defaultMocks.environmentDetector.detect.mockReturnValueOnce("server");
-      const authFetcher = getAuthFetcher();
-      await authFetcher.automaticallyHandleRedirect();
-      expect(defaultMocks.redirectHandler.handle).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("customAuthFetcher", () => {
-    it("Temp throws an error", () => {
-      const authFetcher = getAuthFetcher();
-      expect(() => authFetcher.customAuthFetcher({})).toThrowError();
     });
   });
 });

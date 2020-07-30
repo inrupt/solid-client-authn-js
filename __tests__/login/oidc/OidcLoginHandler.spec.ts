@@ -25,11 +25,9 @@ import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler"
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
-import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
-
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
@@ -46,7 +44,6 @@ describe("OidcLoginHandler", () => {
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
-      mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.clientRegistrar ?? defaultMocks.clientRegistrar
     );
   }
@@ -55,8 +52,9 @@ describe("OidcLoginHandler", () => {
     const actualHandler = defaultMocks.oidcHandler;
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
     await handler.handle({
+      sessionId: "mySession",
       oidcIssuer: new URL("https://arbitrary.url"),
-      redirect: new URL("https://app.com/redirect"),
+      redirectUrl: new URL("https://app.com/redirect"),
       clientId: "coolApp"
     });
 
@@ -66,6 +64,7 @@ describe("OidcLoginHandler", () => {
   it("should throw an error when called without an issuer", async () => {
     const handler = getInitialisedHandler();
     // TS Ignore because bad input is purposely given here for the purpose of testing
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     await expect(handler.handle({})).rejects.toThrowError(
       "OidcLoginHandler requires an oidcIssuer"
@@ -77,8 +76,9 @@ describe("OidcLoginHandler", () => {
 
     await expect(
       handler.canHandle({
+        sessionId: "mySession",
         oidcIssuer: new URL("https://arbitrary.url"),
-        redirect: new URL("https://app.com/redirect"),
+        redirectUrl: new URL("https://app.com/redirect"),
         clientId: "coolApp"
       })
     ).resolves.toBe(true);

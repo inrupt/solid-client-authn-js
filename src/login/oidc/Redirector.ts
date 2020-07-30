@@ -20,21 +20,15 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import INeededAction from "../../solidSession/INeededAction";
-import INeededInactionAction from "../../solidSession/INeededInactionAction";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
-import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
 
 export interface IRedirectorOptions {
-  doNotAutoRedirect?: boolean;
+  handleRedirect?: (url: string) => unknown;
   redirectByReplacingState?: boolean;
 }
 
 export interface IRedirector {
-  redirect(
-    redirectUrl: string,
-    redirectorOptions: IRedirectorOptions
-  ): INeededAction;
+  redirect(redirectUrl: string, redirectorOptions: IRedirectorOptions): void;
 }
 
 @injectable()
@@ -44,24 +38,19 @@ export default class Redirector implements IRedirector {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  redirect(redirectUrl: string, options?: IRedirectorOptions): INeededAction {
-    if (
-      this.environmentDetector.detect() === "browser" &&
-      !options?.doNotAutoRedirect
-    ) {
+  redirect(redirectUrl: string, options?: IRedirectorOptions): void {
+    if (options && options.handleRedirect) {
+      options.handleRedirect(redirectUrl);
+    } else if (this.environmentDetector.detect() === "browser") {
       if (options && options.redirectByReplacingState) {
         window.history.replaceState({}, "", redirectUrl);
       } else {
         window.location.href = redirectUrl;
       }
-      return {
-        actionType: "inaction"
-      } as INeededInactionAction;
     } else {
-      return {
-        actionType: "redirect",
-        redirectUrl
-      } as INeededRedirectAction;
+      throw new Error(
+        "A redirectHandler must be provided in any environment other than the web browser"
+      );
     }
   }
 }

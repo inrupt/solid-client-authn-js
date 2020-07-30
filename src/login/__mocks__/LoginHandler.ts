@@ -20,22 +20,17 @@
  */
 
 import ILoginHandler from "../ILoginHandler";
-import { ILoggedOutSolidSession } from "../../solidSession/ISolidSession";
-import INeededRedirectAction from "../../solidSession/INeededRedirectAction";
+import ISessionInfo from "../../sessionInfo/ISessionInfo";
 import ILoginOptions from "../ILoginOptions";
 
-export const LoginHandlerResponse: ILoggedOutSolidSession = {
-  loggedIn: false,
-  localUserId: "global",
-  neededAction: {
-    actionType: "redirect",
-    redirectUrl: "http://coolSite.com/redirect"
-  } as INeededRedirectAction
+export const LoginHandlerResponse: ISessionInfo = {
+  isLoggedIn: false,
+  sessionId: "global"
 };
 
 export const LoginHandlerMock: jest.Mocked<ILoginHandler> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canHandle: jest.fn((options: ILoginOptions) => Promise.resolve(true)),
-  handle: jest.fn((options: ILoginOptions) =>
-    Promise.resolve(LoginHandlerResponse)
-  )
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handle: jest.fn((options: ILoginOptions) => Promise.resolve())
 };

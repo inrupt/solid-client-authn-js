@@ -22,6 +22,10 @@
 import "reflect-metadata";
 import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
+import {
+  StorageUtilityMock,
+  EmptyStorageUtilityMock
+} from "../../../src/storage/__mocks__/StorageUtility";
 import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { Response as NodeResponse } from "node-fetch";
 import URL from "url-parse";
@@ -31,12 +35,16 @@ import URL from "url-parse";
  */
 describe("ClientRegistrar", () => {
   const defaultMocks = {
-    fetcher: FetcherMock
+    fetcher: FetcherMock,
+    storage: StorageUtilityMock
   };
   function getClientRegistrar(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): ClientRegistrar {
-    return new ClientRegistrar(mocks.fetcher ?? defaultMocks.fetcher);
+    return new ClientRegistrar(
+      mocks.fetcher ?? defaultMocks.fetcher,
+      mocks.storage ?? defaultMocks.storage
+    );
   }
 
   describe("getClient", () => {
@@ -45,7 +53,8 @@ describe("ClientRegistrar", () => {
       expect(
         await clientRegistrar.getClient(
           {
-            redirect: new URL("https://example.com"),
+            sessionId: "mySession",
+            redirectUrl: new URL("https://example.com"),
             clientId: "coolApp"
           },
           IssuerConfigFetcherFetchConfigResponse
@@ -66,12 +75,15 @@ describe("ClientRegistrar", () => {
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const clientRegistrar = getClientRegistrar();
+      const clientRegistrar = getClientRegistrar({
+        storage: EmptyStorageUtilityMock
+      });
       const registrationUrl = new URL("https://idp.com/register");
       expect(
         await clientRegistrar.getClient(
           {
-            redirect: new URL("https://example.com")
+            sessionId: "mySession",
+            redirectUrl: new URL("https://example.com")
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
@@ -100,11 +112,14 @@ describe("ClientRegistrar", () => {
     });
 
     it("Fails if there is not registration endpoint", async () => {
-      const clientRegistrar = getClientRegistrar();
+      const clientRegistrar = getClientRegistrar({
+        storage: EmptyStorageUtilityMock
+      });
       await expect(
         clientRegistrar.getClient(
           {
-            redirect: new URL("https://example.com")
+            sessionId: "mySession",
+            redirectUrl: new URL("https://example.com")
           },
           IssuerConfigFetcherFetchConfigResponse
         )
@@ -121,12 +136,15 @@ describe("ClientRegistrar", () => {
         }) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const clientRegistrar = getClientRegistrar();
+      const clientRegistrar = getClientRegistrar({
+        storage: EmptyStorageUtilityMock
+      });
       const registrationUrl = new URL("https://idp.com/register");
       await expect(
         clientRegistrar.getClient(
           {
-            redirect: new URL("https://example.com")
+            sessionId: "mySession",
+            redirectUrl: new URL("https://example.com")
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,

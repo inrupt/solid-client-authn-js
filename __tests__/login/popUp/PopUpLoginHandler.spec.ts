@@ -24,21 +24,20 @@ import "reflect-metadata";
 import PopUpLoginHandler from "../../../src/login/popUp/PopUpLoginHandler";
 import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/EnvironmentDetector";
 import {
-  SessionCreatorMock,
+  SessionInfoManagerMock,
   SessionCreatorCreateResponse
-} from "../../../src/solidSession/__mocks__/SessionCreator";
+} from "../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import {
   LoginHandlerMock,
   LoginHandlerResponse
 } from "../../../src/login/__mocks__/LoginHandler";
 import URL from "url-parse";
-import INeededRedirectAction from "../../../src/solidSession/INeededRedirectAction";
 
 describe("PopUpLoginHandler", () => {
   const defaultMocks = {
     environmentDetector: EnvironmentDetectorMock,
     loginHandler: LoginHandlerMock,
-    sessionCreator: SessionCreatorMock
+    sessionCreator: SessionInfoManagerMock
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -55,8 +54,9 @@ describe("PopUpLoginHandler", () => {
       const handler = getInitialisedHandler();
       expect(
         await handler.canHandle({
+          sessionId: "mySession",
           popUp: true,
-          popUpRedirectPath: "/redirect"
+          redirectUrl: new URL("/redirect")
         })
       ).toBe(true);
     });
@@ -64,40 +64,23 @@ describe("PopUpLoginHandler", () => {
       const handler = getInitialisedHandler();
       expect(
         await handler.canHandle({
+          sessionId: "mySession",
           popUp: false,
-          redirect: new URL("https://coolsite.com/redirect")
+          redirectUrl: new URL("https://coolsite.com/redirect")
         })
       ).toBe(false);
     });
   });
 
   describe("handle", () => {
-    it("can handle popup", async () => {
-      const { open } = window;
-      delete window.open;
-      const popUpWindowObject = {
-        closed: false
-      } as Window;
-      window.open = jest.fn(() => popUpWindowObject);
-
+    it("is unimplemented", async () => {
       const handler = getInitialisedHandler();
-      setTimeout(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (popUpWindowObject as any).closed = true;
-      }, 1000);
-      const session = await handler.handle({
-        popUp: true,
-        popUpRedirectPath: "/redirect"
-      });
-      expect(window.open).toHaveBeenCalledWith(
-        (LoginHandlerResponse.neededAction as INeededRedirectAction)
-          .redirectUrl,
-        "Log In",
-        "resizable,scrollbars,width=500,height=500,"
-      );
-      expect(session).toBe(SessionCreatorCreateResponse);
-
-      window.open = open;
+      await expect(
+        handler.handle({
+          sessionId: "mySession",
+          popUp: true
+        })
+      ).rejects.toThrow("Popup login is not implemented yet");
     });
   });
 });

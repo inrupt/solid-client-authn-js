@@ -20,7 +20,7 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import { IStorageUtility } from "../../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ITokenRequester } from "../TokenRequester";
 
 export interface ITokenRefresher {
@@ -39,7 +39,7 @@ export default class TokenRefresher implements ITokenRefresher {
     const refreshToken = await this.storageUtility.getForUser(
       localUserId,
       "refreshToken",
-      true
+      { errorIfNull: true, secure: true }
     );
     /* eslint-disable @typescript-eslint/camelcase */
     await this.tokenRequester.request(localUserId, {

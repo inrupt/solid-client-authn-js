@@ -29,7 +29,7 @@ export default class HandlerNotFoundError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(handlerName: string, params: any[]) {
     super(
-      `${handlerName} cannot find a suitable handler for: ${params
+      `[${handlerName}] cannot find a suitable handler for: ${params
         .map(e => {
           try {
             return JSON.stringify(e);

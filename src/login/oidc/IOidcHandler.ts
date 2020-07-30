@@ -24,7 +24,6 @@
  */
 import IHandleable from "../../util/handlerPattern/IHandleable";
 import IOidcOptions from "./IOidcOptions";
-import ISolidSession from "../../solidSession/ISolidSession";
 
-type IOidcHandler = IHandleable<[IOidcOptions], ISolidSession>;
+type IOidcHandler = IHandleable<[IOidcOptions], void>;
 export default IOidcHandler;

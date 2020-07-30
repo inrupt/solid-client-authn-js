@@ -62,7 +62,7 @@ describe("DpopHeaderCreator", () => {
     it("Fails if no client key is provided", async () => {
       const dpopClientKeyManagerMock = DpopClientKeyManagerMock;
       dpopClientKeyManagerMock.getClientKey.mockReturnValueOnce(
-        Promise.resolve(null)
+        Promise.resolve(undefined)
       );
       const dpopHeaderCreator = getDpopHeaderCreator({
         dpopClientKeyManager: dpopClientKeyManagerMock

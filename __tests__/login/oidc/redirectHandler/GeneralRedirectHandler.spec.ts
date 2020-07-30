@@ -70,7 +70,7 @@ describe("GeneralRedirectHandler", () => {
       const generalRedirectHandler = getGeneralRedirectHandler();
       await expect(
         generalRedirectHandler.handle("Bad Input")
-      ).rejects.toThrowError("Cannot handle redirect url Bad Input");
+      ).rejects.toThrowError("Cannot handle redirect url [Bad Input]");
     });
 
     it("Transfers the correct url component to the session creator", async () => {

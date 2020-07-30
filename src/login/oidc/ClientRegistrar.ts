@@ -22,70 +22,133 @@
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import IClient from "./IClient";
-import ILoginOptions from "../ILoginOptions";
 import IIssuerConfig from "./IIssuerConfig";
+import { IStorageUtility } from "../../storage/StorageUtility";
+import URL from "url-parse";
+
+export interface IRegistrarOptions {
+  sessionId: string;
+  clientId?: string;
+  clientSecret?: string;
+  clientName?: string;
+  redirectUrl?: URL;
+}
 
 export interface IClientRegistrar {
   getClient(
-    options: ILoginOptions,
+    options: IRegistrarOptions,
     issuerConfig: IIssuerConfig
   ): Promise<IClient>;
 }
 
 @injectable()
 export default class ClientRegistrar implements IClientRegistrar {
-  constructor(@inject("fetcher") private fetcher: IFetcher) {}
+  constructor(
+    @inject("fetcher") private fetcher: IFetcher,
+    @inject("storageUtility") private storageUtility: IStorageUtility
+  ) {}
 
-  private async performDynamicRegistration(
-    options: ILoginOptions,
+  async getClient(
+    options: IRegistrarOptions,
     issuerConfig: IIssuerConfig
   ): Promise<IClient> {
-    const config = {
-      /* eslint-disable @typescript-eslint/camelcase */
-      client_name: options.clientName,
-      application_type: "web",
-      redirect_uris: [options.redirect?.toString()],
-      subject_type: "pairwise",
-      token_endpoint_auth_method: "client_secret_basic",
-      code_challenge_method: "S256"
-      /* eslint-enable @typescript-eslint/camelcase */
-    };
-    if (!issuerConfig.registrationEndpoint) {
-      throw new Error(
-        "Dynamic Registration could not be completed because the issuer has no registration endpoint."
+    // If client secret and/or client id are in options, use those
+    if (options.clientId) {
+      return {
+        clientId: options.clientId,
+        clientSecret: options.clientSecret
+      };
+    }
+
+    // If client secret and/or client id are stored in storage, use those
+    const [storedClientId, storedClientSecret] = await Promise.all([
+      this.storageUtility.getForUser(options.sessionId, "clientId", {
+        secure: true
+      }),
+      this.storageUtility.getForUser(options.sessionId, "clientSecret", {
+        secure: true
+      })
+    ]);
+    if (storedClientId) {
+      return {
+        clientId: storedClientId,
+        clientSecret: storedClientSecret
+      };
+    }
+
+    // If registration access token is stored, use that
+    const [registrationAccessToken, registrationClientUri] = await Promise.all([
+      this.storageUtility.getForUser(
+        options.sessionId,
+        "registrationAccessToken"
+      ),
+      this.storageUtility.getForUser(options.sessionId, "registrationClientUri")
+    ]);
+
+    let registerResponse: Response;
+    if (registrationAccessToken && registrationClientUri) {
+      registerResponse = await this.fetcher.fetch(registrationClientUri, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${registrationAccessToken}`
+        }
+      });
+    } else {
+      // Else, begin the dynamic registration.
+      const config = {
+        /* eslint-disable @typescript-eslint/camelcase */
+        client_name: options.clientName,
+        application_type: "web",
+        redirect_uris: [options.redirectUrl?.toString()],
+        subject_type: "pairwise",
+        token_endpoint_auth_method: "client_secret_basic",
+        code_challenge_method: "S256"
+        /* eslint-enable @typescript-eslint/camelcase */
+      };
+      if (!issuerConfig.registrationEndpoint) {
+        throw new Error(
+          "Dynamic Registration could not be completed because the issuer has no registration endpoint."
+        );
+      }
+      registerResponse = await this.fetcher.fetch(
+        issuerConfig.registrationEndpoint,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(config)
+        }
       );
     }
-    const response = await this.fetcher.fetch(
-      issuerConfig.registrationEndpoint,
+
+    if (!registerResponse.ok) {
+      throw new Error(
+        `Login Registration Error: ${await registerResponse.text()}`
+      );
+    }
+    const responseBody = await registerResponse.json();
+
+    // Save info
+    await this.storageUtility.setForUser(
+      options.sessionId,
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(config)
+        clientId: responseBody.client_id,
+        clientSecret: responseBody.client_secret
+      },
+      {
+        secure: true
       }
     );
-    if (!response.ok) {
-      throw new Error(`Login Registration Error: ${await response.text()}`);
-    }
-    const responseBody = await response.json();
+    await this.storageUtility.setForUser(options.sessionId, {
+      registrationAccessToken: responseBody.registration_access_token,
+      registrationClientUri: responseBody.registration_client_uri
+    });
+
     return {
       clientId: responseBody.client_id,
       clientSecret: responseBody.client_secret
-    };
-  }
-
-  async getClient(
-    options: ILoginOptions,
-    issuerConfig: IIssuerConfig
-  ): Promise<IClient> {
-    // Do dynamic registration
-    if (!options.clientId) {
-      return await this.performDynamicRegistration(options, issuerConfig);
-    }
-    // No need for dynamic registration
-    return {
-      clientId: options.clientId
     };
   }
 }

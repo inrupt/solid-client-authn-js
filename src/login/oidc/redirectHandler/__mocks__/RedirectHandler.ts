@@ -20,12 +20,14 @@
  */
 
 import IRedirectHandler from "../IRedirectHandler";
-import ISolidSession from "../../../../solidSession/ISolidSession";
-import { SessionCreatorCreateResponse } from "../../../../solidSession/__mocks__/SessionCreator";
+import ISessionInfo from "../../../../sessionInfo/ISessionInfo";
+import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
 
-export const RedirectHandlerResponse: ISolidSession = SessionCreatorCreateResponse;
+export const RedirectHandlerResponse: ISessionInfo = SessionCreatorCreateResponse;
 
 export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canHandle: jest.fn((url: string) => Promise.resolve(true)),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handle: jest.fn((url: string) => Promise.resolve(RedirectHandlerResponse))
 };

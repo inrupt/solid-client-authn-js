@@ -22,7 +22,7 @@
 /**
  * @jest-environment node
  */
-import getAuthFetcherWithDependencies from "../src/dependencies";
+import { getAuthFetcherWithDependencies } from "../src/dependencies";
 import AuthFetcher from "../src/AuthFetcher";
 
 describe("dependencies.node", () => {

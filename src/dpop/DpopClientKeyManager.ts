@@ -22,23 +22,22 @@
 /**
  * Generates a Client Key to be stored and used for DPoP Requests
  */
-import IOidcOptions from "../login/oidc/IOidcOptions";
 import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
 import jwkSchema from "./JwkSchema";
 import IJoseUtility from "../jose/IJoseUtility";
-import { IStorageUtility } from "../localStorage/StorageUtility";
+import { IStorageUtility } from "../storage/StorageUtility";
 
 export interface IDpopClientKeyManager {
   /**
    * Generates the client key and stores it in local storage
    * @param oidcOptions Issuer options to ensure the key uses a compatible algorithm
    */
-  generateClientKeyIfNotAlready(oidcOptions: IOidcOptions): Promise<void>;
+  generateClientKeyIfNotAlready(): Promise<void>;
   /**
    * Retreives the client key from local storage
    */
-  getClientKey(): Promise<JSONWebKey | null>;
+  getClientKey(): Promise<JSONWebKey | undefined>;
 }
 
 @injectable()
@@ -49,13 +48,11 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
   ) {}
 
   private getLocalStorageKey(): string {
+    // TODO unimplemented ???
     return `clientKey`;
   }
 
-  async generateClientKeyIfNotAlready(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    oidcOptions: IOidcOptions
-  ): Promise<void> {
+  async generateClientKeyIfNotAlready(): Promise<void> {
     let jwk: JSONWebKey = (await this.storageUtility.safeGet(
       this.getLocalStorageKey(),
       { schema: jwkSchema }
@@ -63,20 +60,30 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
 
     if (!jwk) {
       // TODO: differentiate between what a server supports instead of hard coding rsa?
-      jwk = await this.joseUtility.generateJWK("RSA", 2048, {
-        alg: "RSA",
+      jwk = await this.joseUtility.generateJWK("EC", "P-256", {
+        alg: "EC",
         use: "sig"
       });
       await this.storageUtility.set(
         this.getLocalStorageKey(),
-        JSON.stringify(jwk)
+        JSON.stringify(jwk),
+        { secure: true }
       );
     }
   }
 
-  async getClientKey(): Promise<JSONWebKey | null> {
-    return (await this.storageUtility.safeGet(this.getLocalStorageKey(), {
-      schema: jwkSchema
-    })) as JSONWebKey;
+  async getClientKey(): Promise<JSONWebKey | undefined> {
+    let keyString;
+    try {
+      keyString = await this.storageUtility.get(this.getLocalStorageKey(), {
+        secure: true
+      });
+      if (!keyString) {
+        return undefined;
+      }
+      return JSON.parse(keyString) as JSONWebKey;
+    } catch (err) {
+      throw new Error(`The stored token [${keyString}] was invalid: ${err}.`);
+    }
   }
 }

@@ -21,14 +21,14 @@
 
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
-import ISolidSession from "../../../solidSession/ISolidSession";
-import { SessionCreatorGetSessionResponse } from "../../../solidSession/__mocks__/SessionCreator";
+import ISolidSession from "../../../sessionInfo/ISessionInfo";
+import { SessionCreatorGetSessionResponse } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 
 export const OidcHandlerHandleResponse: ISolidSession = SessionCreatorGetSessionResponse;
 
 export const OidcHandlerMock: jest.Mocked<IOidcHandler> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canHandle: jest.fn((_options: IOidcOptions) => Promise.resolve(true)),
-  handle: jest.fn((_options: IOidcOptions) =>
-    Promise.resolve(OidcHandlerHandleResponse)
-  )
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handle: jest.fn(async (_options: IOidcOptions) => Promise.resolve())
 };

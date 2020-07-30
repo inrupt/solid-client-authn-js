@@ -28,7 +28,7 @@ import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import issuerConfigSchema from "./issuerConfigSchema";
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IStorageUtility } from "../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../storage/StorageUtility";
 
 export interface IIssuerConfigFetcher {
   /**
@@ -154,26 +154,31 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   }
 
   async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
-    let issuerConfig: IIssuerConfig = (await this.storageUtility.safeGet(
+    let issuerConfig: IIssuerConfig;
+
+    // Try to look up the config in the cache
+    issuerConfig = (await this.storageUtility.safeGet(
       this.getLocalStorageKey(issuer),
       {
         schema: issuerConfigSchema
       }
     )) as IIssuerConfig;
 
-    // If it is not stored locally, fetch it
-    if (!issuerConfig) {
-      const wellKnownUrl = new URL(issuer.toString());
-      wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
-      const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
-      // Check the validity of the fetched config
-      try {
-        issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
-      } catch (err) {
-        throw new ConfigurationError(
-          `${issuer.toString()} has an invalid configuration: ${err.message}`
-        );
-      }
+    // If a local copy of the config is available, don't fetch it
+    if (issuerConfig !== undefined) {
+      return issuerConfig;
+    }
+
+    const wellKnownUrl = new URL(issuer.toString());
+    wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
+    const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
+    // Check the validity of the fetched config
+    try {
+      issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
+    } catch (err) {
+      throw new ConfigurationError(
+        `[${issuer.toString()}] has an invalid configuration: ${err.message}`
+      );
     }
 
     // Update store with fetched config

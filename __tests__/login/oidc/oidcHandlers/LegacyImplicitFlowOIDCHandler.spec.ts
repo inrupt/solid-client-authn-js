@@ -27,24 +27,26 @@ import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandle
 import { DpopHeaderCreatorMock } from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
 import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
-import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
-import ISolidSession from "../../../../src/solidSession/ISolidSession";
+import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
+import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 
 describe("LegacyImplicitFlowOidcHandler", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
-    dpopHeaderCreator: DpopHeaderCreatorMock,
-    sessionCreator: SessionCreatorMock
+    sessionInfoManager: SessionInfoManagerMock,
+    redirector: RedirectorMock,
+    dpopHeaderCreator: DpopHeaderCreatorMock
   };
   function getLegacyImplicitFlowOidcHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): LegacyImplicitFlowOidcHandler {
     return new LegacyImplicitFlowOidcHandler(
       mocks.fetcher ?? defaultMocks.fetcher,
-      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
-      mocks.sessionCreator ?? defaultMocks.sessionCreator
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
+      mocks.redirector ?? defaultMocks.redirector,
+      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator
     );
   }
 
@@ -66,17 +68,13 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions
       };
-      const session: ISolidSession = await legacyImplicitFlowOidcHandler.handle(
-        oidcOptions
+      await legacyImplicitFlowOidcHandler.handle(oidcOptions);
+      expect(
+        defaultMocks.redirector.redirect
+      ).toHaveBeenCalledWith(
+        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_url=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession&dpop=someToken",
+        { handleRedirect: standardOidcOptions.handleRedirect }
       );
-      expect(defaultMocks.sessionCreator.create).toHaveBeenCalledWith({
-        loggedIn: false,
-        neededAction: {
-          actionType: "redirect",
-          redirectUrl:
-            "https://example.com/auth?response_type=id_token%20token&redirect_url=https%3A%2F%2Fapp.example.com&scope=openid%20id_vc&dpop=someToken"
-        }
-      });
     });
 
     it("Creates the right session without dpop", async () => {
@@ -85,17 +83,13 @@ describe("LegacyImplicitFlowOidcHandler", () => {
         ...standardOidcOptions,
         dpop: false
       };
-      const session: ISolidSession = await legacyImplicitFlowOidcHandler.handle(
-        oidcOptions
+      await legacyImplicitFlowOidcHandler.handle(oidcOptions);
+      expect(
+        defaultMocks.redirector.redirect
+      ).toHaveBeenCalledWith(
+        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_url=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession",
+        { handleRedirect: standardOidcOptions.handleRedirect }
       );
-      expect(defaultMocks.sessionCreator.create).toHaveBeenCalledWith({
-        loggedIn: false,
-        neededAction: {
-          actionType: "redirect",
-          redirectUrl:
-            "https://example.com/auth?response_type=id_token%20token&redirect_url=https%3A%2F%2Fapp.example.com&scope=openid%20id_vc"
-        }
-      });
     });
   });
 });

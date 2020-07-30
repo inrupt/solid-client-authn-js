@@ -29,10 +29,12 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   tokenEndpoint: new URL("https://idp.com/token"),
   jwksUri: new URL("https://idp.com/jwks"),
   subjectTypesSupported: [],
-  claimsSupported: []
+  claimsSupported: [],
+  grantTypesSupported: ["refresh_token"]
 };
 
 export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchConfig: jest.fn((_issuer: URL) =>
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
   )

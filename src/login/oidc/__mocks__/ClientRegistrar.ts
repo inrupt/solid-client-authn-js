@@ -19,9 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IClientRegistrar } from "../ClientRegistrar";
+import { IClientRegistrar, IRegistrarOptions } from "../ClientRegistrar";
 import IClient from "../IClient";
-import ILoginOptions from "../../ILoginOptions";
 import IIssuerConfig from "../IIssuerConfig";
 
 export const ClientRegistrarResponse: IClient = {
@@ -29,8 +28,22 @@ export const ClientRegistrarResponse: IClient = {
   clientSecret: "12345"
 };
 
+export const PublicClientRegistrarResponse: IClient = {
+  clientId: "abcde"
+};
+
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
-  getClient: jest.fn((options: ILoginOptions, issuerConfig: IIssuerConfig) =>
-    Promise.resolve(ClientRegistrarResponse)
+  getClient: jest.fn(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
+      Promise.resolve(ClientRegistrarResponse)
+  )
+};
+
+export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
+  getClient: jest.fn(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
+      Promise.resolve(PublicClientRegistrarResponse)
   )
 };

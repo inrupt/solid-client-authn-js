@@ -22,9 +22,6 @@
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 
-// This will be fixed in another pull request
-/* eslint-disable @typescript-eslint/camelcase */
-
 const canHandleTests: {
   [key: string]: {
     oidcOptions: IOidcOptions;

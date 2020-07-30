@@ -58,31 +58,26 @@ describe("Redirector", () => {
       window.history.replaceState = replaceState;
     });
 
-    it("does not redirect if the environment is now browser", () => {
+    it("does not redirect if the environment is not browser", () => {
       defaultMocks.environmentDetector.detect.mockReturnValueOnce("server");
       const redirector = getRedirector();
-      const neededAction = redirector.redirect("https://someUrl.com/redirect");
+      expect(() => redirector.redirect("https://someUrl.com/redirect")).toThrow(
+        "A redirectHandler must be provided in any environment other than the web browser"
+      );
       expect(window.history.replaceState).not.toHaveBeenCalled();
       expect(window.location.href).toBe("https://coolSite.com");
-      expect(neededAction).toMatchObject({
-        actionType: "redirect",
-        redirectUrl: "https://someUrl.com/redirect"
-      });
     });
 
-    it("redirects using href", () => {
+    it("browser redirection defaults to using using href", () => {
       const redirector = getRedirector();
-      const neededAction = redirector.redirect("https://someUrl.com/redirect");
+      redirector.redirect("https://someUrl.com/redirect");
       expect(window.history.replaceState).not.toHaveBeenCalled();
       expect(window.location.href).toBe("https://someUrl.com/redirect");
-      expect(neededAction).toMatchObject({
-        actionType: "inaction"
-      });
     });
 
-    it("redirects using replaceState", () => {
+    it("browser redirection uses replaceState if specified", () => {
       const redirector = getRedirector();
-      const neededAction = redirector.redirect("https://someUrl.com/redirect", {
+      redirector.redirect("https://someUrl.com/redirect", {
         redirectByReplacingState: true
       });
       expect(window.history.replaceState).toHaveBeenCalledWith(
@@ -91,9 +86,6 @@ describe("Redirector", () => {
         "https://someUrl.com/redirect"
       );
       expect(window.location.href).toBe("https://coolSite.com");
-      expect(neededAction).toMatchObject({
-        actionType: "inaction"
-      });
     });
   });
 });

@@ -23,7 +23,7 @@
  * Test for DPoPClientKeyManager
  */
 import "reflect-metadata";
-import { StorageUtilityMock } from "../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
 import {
   JoseUtilityMock,
   JoseUtilityGenerateJWKResponse
@@ -48,10 +48,6 @@ describe("DpopClientKeyManager", () => {
   }
 
   describe("generateClientKeyIfNotAlready", () => {
-    // Right now this doesn't matter, so we hard code it
-    const hardCodedOidcOptions: IOidcOptions =
-      OidcHandlerCanHandleTests["legacyImplicitFlowOidcHandler"][0].oidcOptions;
-
     it("should generate a key and save it if one does not exist", async () => {
       const storageRetrieverMock = StorageUtilityMock;
       storageRetrieverMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
@@ -59,13 +55,12 @@ describe("DpopClientKeyManager", () => {
         storageUtility: storageRetrieverMock
       });
 
-      await dpopClientKeyManager.generateClientKeyIfNotAlready(
-        hardCodedOidcOptions
-      );
+      await dpopClientKeyManager.generateClientKeyIfNotAlready();
 
       expect(StorageUtilityMock.set).toHaveBeenCalledWith(
         "clientKey",
-        JSON.stringify(JoseUtilityGenerateJWKResponse)
+        JSON.stringify(JoseUtilityGenerateJWKResponse),
+        { secure: true }
       );
     });
 
@@ -78,9 +73,7 @@ describe("DpopClientKeyManager", () => {
         storageUtility: storageUtilityMock
       });
 
-      await dpopClientKeyManager.generateClientKeyIfNotAlready(
-        hardCodedOidcOptions
-      );
+      await dpopClientKeyManager.generateClientKeyIfNotAlready();
 
       expect(storageUtilityMock.set).not.toHaveBeenCalled();
     });
@@ -88,16 +81,16 @@ describe("DpopClientKeyManager", () => {
 
   describe("getClientKey", () => {
     it("should return the saved client key", async () => {
-      const savedKey = { kty: "RSA" };
+      const savedKey = '{"kty":"RSA"}';
       const storageUtilityMock = StorageUtilityMock;
-      storageUtilityMock.safeGet.mockReturnValueOnce(Promise.resolve(savedKey));
+      storageUtilityMock.get.mockReturnValueOnce(Promise.resolve(savedKey));
       const dpopClientKeyManager = getDpopClientKeyManager({
         storageUtility: storageUtilityMock
       });
 
       const clientKey = await dpopClientKeyManager.getClientKey();
 
-      expect(clientKey).toBe(savedKey);
+      expect(JSON.stringify(clientKey)).toEqual(savedKey);
     });
   });
 });

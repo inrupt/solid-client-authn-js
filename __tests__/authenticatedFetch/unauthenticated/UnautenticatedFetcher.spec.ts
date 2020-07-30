@@ -24,7 +24,6 @@
  */
 import "reflect-metadata";
 import UnauthenticatedFetcher from "../../../src/authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
-import URL from "url-parse";
 import {
   FetcherMock,
   FetcherMockResponse
@@ -32,8 +31,9 @@ import {
 import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlRepresentationConverter";
 import {
   StorageUtilityMock,
-  StorageUtilityGetResponse
-} from "../../../src/localStorage/__mocks__/StorageUtility";
+  StorageUtilityGetResponse,
+  EmptyStorageUtilityMock
+} from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("UnauthenticatedFetcher", () => {
   const defaultMocks = {
@@ -67,10 +67,10 @@ describe("UnauthenticatedFetcher", () => {
 
   describe("handle", () => {
     it("defaults to an unauthenticated request if the token isn't available", async () => {
-      defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
-        fetcher: fetcher
+        fetcher: fetcher,
+        storageUtility: EmptyStorageUtilityMock
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
@@ -84,10 +84,10 @@ describe("UnauthenticatedFetcher", () => {
     });
 
     it("preserves the request headers", async () => {
-      defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
-        fetcher: fetcher
+        fetcher: fetcher,
+        storageUtility: EmptyStorageUtilityMock
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
@@ -102,10 +102,10 @@ describe("UnauthenticatedFetcher", () => {
     });
 
     it("preserves the request method", async () => {
-      defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(null);
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
-        fetcher: fetcher
+        fetcher: fetcher,
+        storageUtility: EmptyStorageUtilityMock
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(

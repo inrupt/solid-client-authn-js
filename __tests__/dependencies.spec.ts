@@ -19,9 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import getAuthFetcherWithDependencies from "../src/dependencies";
+import { getAuthFetcherWithDependencies } from "../src/dependencies";
 import AuthFetcher from "../src/AuthFetcher";
-import { StorageMock } from "../src/localStorage/__mocks__/Storage";
+import { StorageMock } from "../src/storage/__mocks__/Storage";
 
 describe("dependencies", () => {
   it("performs dependency injection", () => {
@@ -31,7 +31,7 @@ describe("dependencies", () => {
 
   it("performs dependency injection with a given input", () => {
     const authFetcher = getAuthFetcherWithDependencies({
-      storage: StorageMock
+      secureStorage: StorageMock
     });
     expect(authFetcher).toBeInstanceOf(AuthFetcher);
   });

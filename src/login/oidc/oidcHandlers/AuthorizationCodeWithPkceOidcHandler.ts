@@ -25,18 +25,15 @@
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import URL from "url-parse";
-import ISolidSession from "../../../solidSession/ISolidSession";
 import { injectable, inject } from "tsyringe";
-import { ISessionCreator } from "../../../solidSession/SessionCreator";
 import IJoseUtility from "../../../jose/IJoseUtility";
-import { IStorageUtility } from "../../../localStorage/StorageUtility";
+import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 
 @injectable()
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler {
   constructor(
-    @inject("sessionCreator") private sessionCreator: ISessionCreator,
     @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector
@@ -51,64 +48,37 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<ISolidSession> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
     );
     const codeVerifier = await this.joseUtility.generateCodeVerifier();
-    const session = this.sessionCreator.create({
-      localUserId: oidcLoginOptions.localUserId,
-      loggedIn: false
-    });
     // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */
     const query: { [key: string]: string } = {
       response_type: "id_token code",
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
-      scope: "openid profile offline_access",
+      // TODO: the 'webid' scope does not appear in the specification
+      // A question regarding its use has been filed https://github.com/solid/specification
+      scope: "openid webid offline_access",
       client_id: oidcLoginOptions.client.clientId,
       code_challenge_method: "S256",
       code_challenge: await this.joseUtility.generateCodeChallenge(
         codeVerifier
       ),
-      state: session.localUserId
+      state: oidcLoginOptions.sessionId
     };
     /* eslint-enable @typescript-eslint/camelcase */
     requestUrl.set("query", query);
-
     // TODO: This is inefficent, there should be a bulk
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "codeVerifier",
-      codeVerifier
-    );
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "issuer",
-      oidcLoginOptions.issuer.toString()
-    );
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "clientId",
-      oidcLoginOptions.client.clientId
-    );
-    await this.storageUtility.setForUser(
-      session.localUserId,
-      "redirectUri",
-      oidcLoginOptions.redirectUrl.toString()
-    );
-    if (oidcLoginOptions.client.clientSecret) {
-      await this.storageUtility.setForUser(
-        session.localUserId,
-        "clientSecret",
-        oidcLoginOptions.client.clientSecret
-      );
-    }
-
-    session.neededAction = this.redirector.redirect(requestUrl.toString(), {
-      doNotAutoRedirect: !!oidcLoginOptions.doNotAutoRedirect
+    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+      codeVerifier,
+      issuer: oidcLoginOptions.issuer.toString(),
+      redirectUri: oidcLoginOptions.redirectUrl.toString()
     });
 
-    return session;
+    this.redirector.redirect(requestUrl.toString(), {
+      handleRedirect: oidcLoginOptions.handleRedirect
+    });
   }
 }

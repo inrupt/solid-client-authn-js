@@ -20,10 +20,10 @@
  */
 
 import "reflect-metadata";
-import { StorageUtilityMock } from "../../../../src/localStorage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
-import { SessionCreatorMock } from "../../../../src/solidSession/__mocks__/SessionCreator";
+import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
 
 describe("AuthCodeRedirectHandler", () => {
@@ -31,7 +31,7 @@ describe("AuthCodeRedirectHandler", () => {
     storageUtility: StorageUtilityMock,
     redirector: RedirectorMock,
     tokenRequester: TokenRequesterMock,
-    sessionCreator: SessionCreatorMock
+    sessionInfoManager: SessionInfoManagerMock
   };
   function getAuthCodeRedirectHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -40,7 +40,7 @@ describe("AuthCodeRedirectHandler", () => {
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.redirector ?? defaultMocks.redirector,
       mocks.tokenRequester ?? defaultMocks.tokenRequester,
-      mocks.sessionCreator ?? defaultMocks.sessionCreator
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
     );
   }
 
@@ -76,7 +76,7 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle("Bad Input")
-      ).rejects.toThrowError("Cannot handle redirect url Bad Input");
+      ).rejects.toThrowError("Cannot handle redirect url [Bad Input]");
     });
 
     it("Makes a code request to the correct place", async () => {
@@ -110,7 +110,7 @@ describe("AuthCodeRedirectHandler", () => {
       defaultMocks.storageUtility.getForUser
         .mockResolvedValueOnce("a")
         .mockResolvedValueOnce("b");
-      defaultMocks.sessionCreator.getSession.mockResolvedValueOnce(null);
+      defaultMocks.sessionInfoManager.get.mockResolvedValueOnce(undefined);
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle(
