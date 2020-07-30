@@ -19,9 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * Test for SessionCreator
- */
 import "reflect-metadata";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
@@ -57,7 +54,7 @@ describe("SessionInfoManager", () => {
   });
 
   describe("get", () => {
-    it("creates a session from localstorage", async () => {
+    it("retrieves a session from specified storage", async () => {
       const storageUtility = defaultMocks.storageUtility;
       storageUtility.getForUser
         .mockReturnValueOnce(
@@ -72,7 +69,7 @@ describe("SessionInfoManager", () => {
       });
     });
 
-    it("creates null if localstorage does not contain the user", async () => {
+    it("returns undefined if the specified storage does not contain the user", async () => {
       const sessionManager = getSessionInfoManager({
         storageUtility: EmptyStorageUtilityMock
       });
