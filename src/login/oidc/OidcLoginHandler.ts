@@ -83,7 +83,7 @@ export default class OidcLoginHandler implements ILoginHandler {
           clientId: options.clientId,
           clientSecret: options.clientSecret,
           clientName: options.clientName,
-          redirectUrl: options.redirectUrl?.toString()
+          redirectUrl: options.redirectUrl
         },
         issuerConfig
       ),

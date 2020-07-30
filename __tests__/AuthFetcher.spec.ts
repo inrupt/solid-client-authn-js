@@ -69,8 +69,8 @@ describe("AuthFetcher", () => {
       const authFetcher = getAuthFetcher();
       await authFetcher.login("mySession", {
         clientId: "coolApp",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com"
+        redirectUrl: new URL("https://coolapp.com/redirect"),
+        oidcIssuer: new URL("https://idp.com")
       });
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",

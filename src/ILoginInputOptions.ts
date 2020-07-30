@@ -22,8 +22,8 @@
 import URL from "url-parse";
 
 export default interface ILoginInputOptions {
-  oidcIssuer?: string | URL;
-  redirectUrl?: string | URL;
+  oidcIssuer?: URL;
+  redirectUrl?: URL;
   clientId?: string;
   clientSecret?: string;
   clientName?: string;

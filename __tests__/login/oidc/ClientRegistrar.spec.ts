@@ -54,7 +54,7 @@ describe("ClientRegistrar", () => {
         await clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com").toString(),
+            redirectUrl: new URL("https://example.com"),
             clientId: "coolApp"
           },
           IssuerConfigFetcherFetchConfigResponse
@@ -83,7 +83,7 @@ describe("ClientRegistrar", () => {
         await clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com").toString()
+            redirectUrl: new URL("https://example.com")
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
@@ -119,7 +119,7 @@ describe("ClientRegistrar", () => {
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com").toString()
+            redirectUrl: new URL("https://example.com")
           },
           IssuerConfigFetcherFetchConfigResponse
         )
@@ -144,7 +144,7 @@ describe("ClientRegistrar", () => {
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com").toString()
+            redirectUrl: new URL("https://example.com")
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,

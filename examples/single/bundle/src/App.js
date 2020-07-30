@@ -80,8 +80,8 @@ class App extends Component {
     this.setState({ status: "loading" });
     this.state.session
       .login({
-        redirectUrl: "http://localhost:3001/",
-        oidcIssuer: this.state.loginIssuer
+        redirectUrl: new URL("http://localhost:3001/"),
+        oidcIssuer: new URL(this.state.loginIssuer)
       })
       .then(() => {
         this.setState({ status: "dashboard" });
