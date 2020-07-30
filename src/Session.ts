@@ -35,9 +35,6 @@ export interface ISessionOptions {
 }
 
 export class Session extends EventEmitter {
-  // public readonly sessionId: string;
-  // public isLoggedIn: boolean;
-  // public webId?: string;
   public readonly info: ISessionInfo;
   private authFetcher: AuthFetcher;
 

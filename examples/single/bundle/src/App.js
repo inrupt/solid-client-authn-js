@@ -39,8 +39,7 @@ class App extends Component {
     this.state = {
       status: "loading",
       loginIssuer: "https://broker.demo-ess.inrupt.com",
-      fetchRoute:
-        "https://ldp.demo-ess.inrupt.com/116455455448573774513/profile/card#me",
+      fetchRoute: "",
       fetchBody: "",
       session: session,
       sessionInfo: session.info
@@ -67,7 +66,11 @@ class App extends Component {
         const sessionInfo = await this.state.session.handleIncomingRedirect(
           new URL(window.location.href)
         );
-        this.setState({ status: "dashboard", sessionInfo: sessionInfo });
+        this.setState({
+          status: "dashboard",
+          sessionInfo: sessionInfo,
+          fetchRoute: sessionInfo.webId
+        });
       }
     }
   }
