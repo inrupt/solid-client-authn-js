@@ -28,6 +28,6 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "regenerator-runtime": "^0.13.3",
-    "@inrupt/solid-client-authn": "file://../../"
+    "@inrupt/solid-client-authn-browser": "file://../../"
   }
 }

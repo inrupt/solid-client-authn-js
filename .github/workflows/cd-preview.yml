@@ -37,4 +37,4 @@ jobs:
     - run: |
         echo "Package published. To install, run:"
         echo ""
-        echo "    npm install @inrupt/solid-client-authn@$TAG_SLUG"
+        echo "    npm install @inrupt/solid-client-authn-browser@$TAG_SLUG"

@@ -58,7 +58,7 @@ Be sure that you type in a valid solid issuer before logging in.
 ## Installation
 
 ```bash
-npm install @inrupt/solid-client-authn
+npm install @inrupt/solid-client-authn-browser
 ```
 
 ## Importing
@@ -76,7 +76,7 @@ In the browser via the `script` tag:
 Using `import`
 
 ```javascript
-import { getSession } from "@inrupt/solid-client-authn"
+import { getSession } from "@inrupt/solid-client-authn-browser"
 
 getSessionInfo()
   .then((sessionInfo) => console.log(sessionInfo))
@@ -85,7 +85,7 @@ getSessionInfo()
 Using `require`
 
 ```javascript
-const solidClientAuthn = require("@inrupt/solid-client-authn")
+const solidClientAuthn = require("@inrupt/solid-client-authn-browser")
 
 solidClientAuthn.getSessionInfo()
   .then((sessionInfo) => console.log(sessionInfo))
@@ -101,7 +101,7 @@ import {
   login,
   getSession,
   onLogin
-} from '@inrupt/solid-client-authn'
+} from '@inrupt/solid-client-authn-browser'
 
 getSession().then(async (session) => {
   // Check if the user is already logged in
@@ -127,7 +127,7 @@ onLogin((sessionInfo) => {
 You can use the `fetch` function anywhere in your application. If you've already logged in, the `fetch` function automatically fills in the user's credentials, if not, it will attempt to make a request without the user's credentials.
 
 ```typescript
-import { fetch } from '@inrupt/solid-client-authn'
+import { fetch } from '@inrupt/solid-client-authn-browser'
 
 fetch('https://example.com/resource', {
   method: 'post',
@@ -185,7 +185,7 @@ import {
   login,
   fetch,
   handleIncomingRedirect
-} from "@inrupt/solid-client-authn"
+} from "@inrupt/solid-client-authn-browser"
 
 const app = express()
 app.get('/login', async (req, res) => {
@@ -220,7 +220,7 @@ import {
   login,
   getSessionInfo,
   onLogin
-} from '@inrupt/solid-client-authn'
+} from '@inrupt/solid-client-authn-browser'
 
 async function init() {
   await onLogin((sessionInfo) => {
@@ -251,7 +251,7 @@ init().then(login)
 Kick off the login process for the user:
 
 ```typescript
-import { login } from '@inrupt/solid-client-authn';
+import { login } from '@inrupt/solid-client-authn-browser';
 
 login({
     oidcIssuer: 'https://identityprovider.com', 
@@ -274,7 +274,7 @@ Options:
 Send an HTTP request to a Solid Pod:
 
 ```typescript
-import { fetch } from '@inrupt/solid-client-authn';
+import { fetch } from '@inrupt/solid-client-authn-browser';
 
 fetch('https://example.com/resource', {
     method: 'POST',
@@ -289,7 +289,7 @@ Fetch follows the [WHATWG Fetch Standard](https://github.github.io/fetch/).
 ### logout() => Promise:void
 Log the user out:
 ```typescript
-import { logout } from '@inrupt/solid-client-authn';
+import { logout } from '@inrupt/solid-client-authn-browser';
 
 logout().then(() => {})
 ```
@@ -298,7 +298,7 @@ logout().then(() => {})
 Retrieve the user's session:
 
 ```typescript
-import { getSession } from '@inrupt/solid-client-authn';
+import { getSession } from '@inrupt/solid-client-authn-browser';
 
 await getSession().then((session) => {
   console.log(session.isLoggedIn)
@@ -310,7 +310,7 @@ await getSession().then((session) => {
 Register a callback function to be called when a user completes login:
 
 ```typescript
-import { onLogin } from '@inrupt/solid-client-authn'
+import { onLogin } from '@inrupt/solid-client-authn-browser'
 
 onLogin((sessionInfo) => {
   console.log(session.webId)
@@ -321,7 +321,7 @@ onLogin((sessionInfo) => {
 Register a callback function to be called when a user logs out:
 
 ```typescript
-import { onLogout } from '@inrupt/solid-client-authn'
+import { onLogout } from '@inrupt/solid-client-authn-browser'
 
 onLogout(() => {})
 ```
@@ -330,7 +330,7 @@ onLogout(() => {})
 Handles redirects as a part of the login process. Servers using solid-client-authn must manually call this method on redirect, but is done automatically on web and mobile.
 
 ```typescript
-import { handleIncomingRedirect } from '@inrupt/solid-client-authn'
+import { handleIncomingRedirect } from '@inrupt/solid-client-authn-browser'
 
 handleRedirect(window.location.href)
 ```
@@ -339,7 +339,7 @@ handleRedirect(window.location.href)
 Handles redirects from the popup login process. This function should be triggered on the redirectUrl that was provided as a login option.
 
 ```typescript
-import { adapters } from '@inrupt/solid-client-authn'
+import { adapters } from '@inrupt/solid-client-authn-browser'
 
 handlePopUpRedirect(window.location.href)
 ```
@@ -357,7 +357,7 @@ A solid-client-authn Session represents the state of a user's connection. Sessio
 Before we create a session, we need to create a SessionManager. The SessionManager will manage all sessions that exist in your application. To create a session call `getSession` on the SessionManager.
 
 ```typescript
-import { SessionManager } from "@inrupt/solid-client-authn"
+import { SessionManager } from "@inrupt/solid-client-authn-browser"
 
 const sessionManager = new SessionManager()
 sessionManager.getSession().then((session) => {
@@ -535,7 +535,7 @@ A class that manages all sessions in your application.
 Creates a SessionManager object.
 
 ```typescript
-import { SessionManager } from "@inrupt/solid-client-authn";
+import { SessionManager } from "@inrupt/solid-client-authn-browser";
 import customStorage from "./myCustomStorage"
 
 const sessionManager = new SessionManager({
@@ -611,7 +611,7 @@ Creates a Session object. If sessionId is not present, a random UUID will be gen
 **Warning**: you should either use sessionManager.getSession() or call session.init() directly after calling the constructor.
 
 ```typescript
-import { Session } from "@inrupt/solid-client-authn-sessions"
+import { Session } from "@inrupt/solid-client-authn-browser-sessions"
 
 const session = new Session(sessionManager, "mySessionId")
 session.init().then(() => {})
