@@ -21,7 +21,7 @@
 
 export { Session } from "./Session";
 export { SessionManager } from "./SessionManager";
-export { getAuthFetcherWithDependencies } from "./dependencies";
+export { getClientAuthnWithDependencies } from "./dependencies";
 
 // Interfaces
 export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";

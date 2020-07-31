@@ -24,7 +24,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import experiment from 'solid-auth-fetcher/dist/experiment';
+import experiment from '@inrupt/solid-client-authn/dist/experiment';
 
 class App extends Component {
   constructor(props) {

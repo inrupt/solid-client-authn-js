@@ -22,8 +22,8 @@
 import IStorage from "./storage/IStorage";
 import { Session } from "./Session";
 import { EventEmitter } from "events";
-import AuthFetcher from "./AuthFetcher";
-import { getAuthFetcherWithDependencies } from "./dependencies";
+import ClientAuthn from "./ClientAuthn";
+import { getClientAuthnWithDependencies } from "./dependencies";
 import { detectEnvironment } from "./util/EnvironmentDetector";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 
@@ -33,7 +33,7 @@ export interface ISessionManagerOptions {
 }
 
 export class SessionManager extends EventEmitter {
-  private authFetcher: AuthFetcher;
+  private clientAuthn: ClientAuthn;
   private sessionRecords: Record<
     string,
     { session: Session; logoutCallback: () => unknown }
@@ -43,7 +43,7 @@ export class SessionManager extends EventEmitter {
 
   constructor(options: ISessionManagerOptions = {}) {
     super();
-    this.authFetcher = getAuthFetcherWithDependencies({
+    this.clientAuthn = getClientAuthnWithDependencies({
       secureStorage: options.secureStorage,
       insecureStorage: options.insecureStorage
     });
@@ -80,7 +80,7 @@ export class SessionManager extends EventEmitter {
     } else {
       return this.addNewSessionRecord(
         new Session({
-          authFetcher: this.authFetcher,
+          clientAuthn: this.clientAuthn,
           sessionInfo: sessionInfo
         })
       );
@@ -89,7 +89,7 @@ export class SessionManager extends EventEmitter {
 
   async getSessions(): Promise<Session[]> {
     await this.init();
-    const sessionInfos = await this.authFetcher.getAllSessionInfo();
+    const sessionInfos = await this.clientAuthn.getAllSessionInfo();
     return sessionInfos.map(sessionInfo =>
       this.getSessionFromCurrentSessionInfo(sessionInfo)
     );
@@ -99,19 +99,19 @@ export class SessionManager extends EventEmitter {
     await this.init();
     let session: Session;
     if (sessionId) {
-      const retrievedSessionInfo = await this.authFetcher.getSessionInfo(
+      const retrievedSessionInfo = await this.clientAuthn.getSessionInfo(
         sessionId
       );
       if (retrievedSessionInfo) {
         session = this.getSessionFromCurrentSessionInfo(retrievedSessionInfo);
       } else {
         session = this.addNewSessionRecord(
-          new Session({ authFetcher: this.authFetcher }, sessionId)
+          new Session({ clientAuthn: this.clientAuthn }, sessionId)
         );
       }
     } else {
       session = this.addNewSessionRecord(
-        new Session({ authFetcher: this.authFetcher })
+        new Session({ clientAuthn: this.clientAuthn })
       );
     }
     return session;
@@ -119,7 +119,7 @@ export class SessionManager extends EventEmitter {
 
   async hasSession(sessionId: string): Promise<boolean> {
     await this.init();
-    return (await this.authFetcher.getSessionInfo(sessionId)) !== undefined;
+    return (await this.clientAuthn.getSessionInfo(sessionId)) !== undefined;
   }
 
   onSessionLogin(callback: (session: Session) => unknown): void {
@@ -144,7 +144,7 @@ export class SessionManager extends EventEmitter {
   async handleIncomingRedirect(url: string): Promise<void> {
     if (!this.handledIncomingRedirect) {
       // This will always cause the user to log in. If not it will throw an error.
-      const sessionInfo = await this.authFetcher.handleIncomingRedirect(url);
+      const sessionInfo = await this.clientAuthn.handleIncomingRedirect(url);
       if (sessionInfo) {
         const session = this.getSessionFromCurrentSessionInfo(sessionInfo);
         this.emit("sessionLogin", session);

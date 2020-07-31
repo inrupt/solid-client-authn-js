@@ -98,7 +98,7 @@ class App extends Component {
       case "login":
         return (
           <form>
-            <h1>Solid Auth Fetcher Multi Session API Demo Login</h1>
+            <h1>solid-client-authn Multi Session API Demo Login</h1>
             <input
               type="text"
               value={this.state.loginIssuer}
@@ -113,7 +113,7 @@ class App extends Component {
       case "dashboard":
         return (
           <div>
-            <h1>Solid Auth Fetcher Multi Session API Demo Dashboad</h1>
+            <h1>solid-client-authn Multi Session API Demo Dashboad</h1>
             <p>WebId: {this.state.session.webId}</p>
             <form>
               <input

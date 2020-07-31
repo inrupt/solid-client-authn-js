@@ -9,9 +9,9 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "./index.html"));
 });
 
-app.get("/solid-auth-fetcher.bundle.js", (req, res) => {
+app.get("/solid-client-authn.bundle.js", (req, res) => {
   res.sendFile(
-    path.join(__dirname, "../../browserDist/solid-auth-fetcher.bundle.js")
+    path.join(__dirname, "../../browserDist/solid-client-authn.bundle.js")
   );
 });
 

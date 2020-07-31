@@ -39,10 +39,10 @@ import {
   AuthenticatedFetcherResponse
 } from "../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
-import AuthFetcher from "../src/AuthFetcher";
+import ClientAuthn from "../src/ClientAuthn";
 import URL from "url-parse";
 
-describe("AuthFetcher", () => {
+describe("ClientAuthn", () => {
   const defaultMocks = {
     loginHandler: LoginHandlerMock,
     redirectHandler: RedirectHandlerMock,
@@ -51,10 +51,10 @@ describe("AuthFetcher", () => {
     authenticatedFetcher: AuthenticatedFetcherMock,
     environmentDetector: EnvironmentDetectorMock
   };
-  function getAuthFetcher(
+  function getClientAuthn(
     mocks: Partial<typeof defaultMocks> = defaultMocks
-  ): AuthFetcher {
-    return new AuthFetcher(
+  ): ClientAuthn {
+    return new ClientAuthn(
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
@@ -66,8 +66,8 @@ describe("AuthFetcher", () => {
 
   describe("login", () => {
     it("calls login", async () => {
-      const authFetcher = getAuthFetcher();
-      await authFetcher.login("mySession", {
+      const clientAuthn = getClientAuthn();
+      await clientAuthn.login("mySession", {
         clientId: "coolApp",
         redirectUrl: new URL("https://coolapp.com/redirect"),
         oidcIssuer: new URL("https://idp.com")
@@ -87,8 +87,8 @@ describe("AuthFetcher", () => {
 
   describe("fetch", () => {
     it("calls fetch", async () => {
-      const authFetcher = getAuthFetcher();
-      const response = await authFetcher.fetch(
+      const clientAuthn = getClientAuthn();
+      const response = await clientAuthn.fetch(
         "mySession",
         "https://zombo.com"
       );
@@ -106,8 +106,8 @@ describe("AuthFetcher", () => {
 
   describe("logout", () => {
     it("calls logout", async () => {
-      const authFetcher = getAuthFetcher();
-      await authFetcher.logout("mySession");
+      const clientAuthn = getClientAuthn();
+      await clientAuthn.logout("mySession");
       expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
         "mySession"
       );
@@ -116,8 +116,8 @@ describe("AuthFetcher", () => {
 
   describe("getSessionInfo", () => {
     it("creates a session for the global user", async () => {
-      const authFetcher = getAuthFetcher();
-      const session = await authFetcher.getSessionInfo("mySession");
+      const clientAuthn = getClientAuthn();
+      const session = await clientAuthn.getSessionInfo("mySession");
       expect(session).toBe(SessionCreatorCreateResponse);
       expect(defaultMocks.sessionInfoManager.get).toHaveBeenCalledWith(
         "mySession"
@@ -127,10 +127,10 @@ describe("AuthFetcher", () => {
 
   describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
-      const authFetcher = getAuthFetcher();
+      const clientAuthn = getClientAuthn();
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      const session = await authFetcher.handleIncomingRedirect(url);
+      const session = await clientAuthn.handleIncomingRedirect(url);
       expect(session).toBe(RedirectHandlerResponse);
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
     });

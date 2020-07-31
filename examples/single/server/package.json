@@ -1,7 +1,7 @@
 {
-  "name": "solid-auth-fetcher-node-example",
+  "name": "@inrupt/solid-client-authn-node-example",
   "version": "1.0.0",
-  "description": "An example application for solid-auth-fetcher",
+  "description": "An example application for solid-client-authn",
   "main": "./dist/server.js",
   "scripts": {
     "clean": "rm -rf ./dist",
@@ -20,7 +20,7 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
-    "solid-auth-fetcher": "file://../../"
+    "@inrupt/solid-client-authn": "file://../../"
   },
   "devDependencies": {
     "ts-node": "^8.6.2",

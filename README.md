@@ -1,14 +1,14 @@
-# Solid-Auth-Fetcher
+# solid-client-authn
 
-Solid-Auth-Fetcher is a library designed to authenticate with Solid identity servers and make requests to Solid storage servers from JavaScript client deployed in any environment.
+solid-client-authn is a library designed to authenticate with Solid identity servers and make requests to Solid storage servers from JavaScript client deployed in any environment.
 
 ## Using the Appropriate API
 
-Solid-Auth-Fetcher includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
+solid-client-authn includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
 
 ### When to use the "Single Session API"
 
-Solid-Auth-Fetcher's "Single Session API" is designed to provide a streamlined experience to implementing authentication in apps that are focused on one user. You'd use the single session api to
+solid-client-authn's "Single Session API" is designed to provide a streamlined experience to implementing authentication in apps that are focused on one user. You'd use the single session api to
 
  - Create a single page web application that only one user logs into at a time.
  - Make a bot that only represents one user.
@@ -22,7 +22,7 @@ Solid-Auth-Fetcher's "Single Session API" is designed to provide a streamlined e
 
 ### When to use "Multi Session API"
 
-Solid-Auth-Fetcher's "Multi Session API" allows you to manage multiple sessions for multiple logged in users. You'd use the multi session api to
+solid-client-authn's "Multi Session API" allows you to manage multiple sessions for multiple logged in users. You'd use the multi session api to
 
  - Create a web application with a server side component. While one user may be logged into each individual client, the server will need to manage all logged in users.
  - Make a bot that needs to handle multiple users.
@@ -38,8 +38,8 @@ Solid-Auth-Fetcher's "Multi Session API" allows you to manage multiple sessions 
 ### Setting up the examples
 
 ```bash
-git clone https://github.com/inrupt/solid-auth-fetcher.git
-cd Solid-Auth-Fetcher
+git clone https://github.com/inrupt/solid-client-authn.git
+cd solid-client-authn
 npm i
 npm run bootstrap-examples
 # Run each example
@@ -58,7 +58,7 @@ Be sure that you type in a valid solid issuer before logging in.
 ## Installation
 
 ```bash
-npm install @inrupt/solid-auth-fetcher
+npm install @inrupt/solid-client-authn
 ```
 
 ## Importing
@@ -66,9 +66,9 @@ npm install @inrupt/solid-auth-fetcher
 In the browser via the `script` tag:
 
 ```html
-<script src="/path/to/solidAuthFetcher.bundle.js"></script>
+<script src="/path/to/solidClientAuthn.bundle.js"></script>
 </script>
-    solidAuthFetcher.getSessionInfo()
+    solidClientAuthn.getSessionInfo()
       .then((sessionInfo) => console.log(sessionInfo))
 </script>
 ```
@@ -76,7 +76,7 @@ In the browser via the `script` tag:
 Using `import`
 
 ```javascript
-import { getSession } from "@inrupt/solid-auth-fetcher"
+import { getSession } from "@inrupt/solid-client-authn"
 
 getSessionInfo()
   .then((sessionInfo) => console.log(sessionInfo))
@@ -85,23 +85,23 @@ getSessionInfo()
 Using `require`
 
 ```javascript
-const solidAuthFetcher = require("@inrupt/solid-auth-fetcher")
+const solidClientAuthn = require("@inrupt/solid-client-authn")
 
-solidAuthFetcher.getSessionInfo()
+solidClientAuthn.getSessionInfo()
   .then((sessionInfo) => console.log(sessionInfo))
 ```
 
 ## Single Session API Tutorial
 
 ### Login
-If Solid-Auth-Fetcher is installed on an application that operates in the web browser, triggering login is a simple process:
+If solid-client-authn is installed on an application that operates in the web browser, triggering login is a simple process:
 
 ```typescript
 import {
   login,
   getSession,
   onLogin
-} from '@inrupt/solid-auth-fetcher'
+} from '@inrupt/solid-client-authn'
 
 getSession().then(async (session) => {
   // Check if the user is already logged in
@@ -127,7 +127,7 @@ onLogin((sessionInfo) => {
 You can use the `fetch` function anywhere in your application. If you've already logged in, the `fetch` function automatically fills in the user's credentials, if not, it will attempt to make a request without the user's credentials.
 
 ```typescript
-import { fetch } from '@inrupt/solid-auth-fetcher'
+import { fetch } from '@inrupt/solid-client-authn'
 
 fetch('https://example.com/resource', {
   method: 'post',
@@ -144,10 +144,10 @@ By default, the user is redirected to the login page within the same window, but
 ```html
 <html>
 <head>
-<script src="/path/to/solidAuthFetcher.bundle.js"></script>
+<script src="/path/to/solidClientAuthn.bundle.js"></script>
 <script>
   function login() {
-    solidAuthFetcher.login({
+    solidClientAuthn.login({
       oidcIssuer: "https://identityProvider.com",
       popUp: true,
       redirectUrl: "https://mysite.com/popup.html"
@@ -168,9 +168,9 @@ Be sure to call the `handleIncomingRedirect` function on the redirect route.
 ```html
 <html>
 <head>
-<script src="/path/to/solidAuthFetcher.bundle.js"></script>
+<script src="/path/to/solidClientAuthn.bundle.js"></script>
 <script>
-  solidAuthFetcher.handleIncomingRedirect()
+  solidClientAuthn.handleIncomingRedirect()
 </script>
 <head>
 </html>
@@ -185,7 +185,7 @@ import {
   login,
   fetch,
   handleIncomingRedirect
-} from "@inrupt/solid-auth-fetcher"
+} from "@inrupt/solid-client-authn"
 
 const app = express()
 app.get('/login', async (req, res) => {
@@ -213,14 +213,14 @@ app.get('/fetch', async (req, res) => {
 ```
 
 ### Custom Redirect Handling
-In the web browser, by default, Solid-Auth-Fetcher redirects automatically upon login, and automatically handles a redirect back to the app when it is initialized. But, you may want to handle redirects manually. To do this you can use the `handleRedirect` option.
+In the web browser, by default, solid-client-authn redirects automatically upon login, and automatically handles a redirect back to the app when it is initialized. But, you may want to handle redirects manually. To do this you can use the `handleRedirect` option.
 
 ```typescript
 import {
   login,
   getSessionInfo,
   onLogin
-} from 'solid-auth-fetcher'
+} from '@inrupt/solid-client-authn'
 
 async function init() {
   await onLogin((sessionInfo) => {
@@ -251,7 +251,7 @@ init().then(login)
 Kick off the login process for the user:
 
 ```typescript
-import { login } from '@inrupt/solid-auth-fetcher';
+import { login } from '@inrupt/solid-client-authn';
 
 login({
     oidcIssuer: 'https://identityprovider.com', 
@@ -274,7 +274,7 @@ Options:
 Send an HTTP request to a Solid Pod:
 
 ```typescript
-import { fetch } from '@inrupt/solid-auth-fetcher';
+import { fetch } from '@inrupt/solid-client-authn';
 
 fetch('https://example.com/resource', {
     method: 'POST',
@@ -289,7 +289,7 @@ Fetch follows the [WHATWG Fetch Standard](https://github.github.io/fetch/).
 ### logout() => Promise:void
 Log the user out:
 ```typescript
-import { logout } from '@inrupt/solid-auth-fetcher';
+import { logout } from '@inrupt/solid-client-authn';
 
 logout().then(() => {})
 ```
@@ -298,7 +298,7 @@ logout().then(() => {})
 Retrieve the user's session:
 
 ```typescript
-import { getSession } from '@inrupt/solid-auth-fetcher';
+import { getSession } from '@inrupt/solid-client-authn';
 
 await getSession().then((session) => {
   console.log(session.isLoggedIn)
@@ -310,7 +310,7 @@ await getSession().then((session) => {
 Register a callback function to be called when a user completes login:
 
 ```typescript
-import { onLogin } from '@inrupt/solid-auth-fetcher'
+import { onLogin } from '@inrupt/solid-client-authn'
 
 onLogin((sessionInfo) => {
   console.log(session.webId)
@@ -321,16 +321,16 @@ onLogin((sessionInfo) => {
 Register a callback function to be called when a user logs out:
 
 ```typescript
-import { onLogout } from '@inrupt/solid-auth-fetcher'
+import { onLogout } from '@inrupt/solid-client-authn'
 
 onLogout(() => {})
 ```
 
 ### handleIncomingRedirect(url) => Promise:void
-Handles redirects as a part of the login process. Servers using Solid-Auth-Fetcher must manually call this method on redirect, but is done automatically on web and mobile.
+Handles redirects as a part of the login process. Servers using solid-client-authn must manually call this method on redirect, but is done automatically on web and mobile.
 
 ```typescript
-import { handleIncomingRedirect } from '@inrupt/solid-auth-fetcher'
+import { handleIncomingRedirect } from '@inrupt/solid-client-authn'
 
 handleRedirect(window.location.href)
 ```
@@ -339,7 +339,7 @@ handleRedirect(window.location.href)
 Handles redirects from the popup login process. This function should be triggered on the redirectUrl that was provided as a login option.
 
 ```typescript
-import { adapters } from '@inrupt/solid-auth-fetcher'
+import { adapters } from '@inrupt/solid-client-authn'
 
 handlePopUpRedirect(window.location.href)
 ```
@@ -350,14 +350,14 @@ Many applications have a centralized server-side component. This means that all 
 
 ### Understanding Session
 
-A Solid-Auth-Fetcher Session represents the state of a user's connection. Sessions start as logged out, but you can use them to log in, log out, fetch as a user, or listen for events. Each session has a unique Id.
+A solid-client-authn Session represents the state of a user's connection. Sessions start as logged out, but you can use them to log in, log out, fetch as a user, or listen for events. Each session has a unique Id.
 
 ### Creating a Session
 
 Before we create a session, we need to create a SessionManager. The SessionManager will manage all sessions that exist in your application. To create a session call `getSession` on the SessionManager.
 
 ```typescript
-import { SessionManager } from "@inrupt/solid-auth-fetcher"
+import { SessionManager } from "@inrupt/solid-client-authn"
 
 const sessionManager = new SessionManager()
 sessionManager.getSession().then((session) => {
@@ -415,7 +415,7 @@ app.get("/login", (req, res) => {
 ```
 
 When you call the login function, a few things happen.
- - Solid-Auth-Fetcher negotiates with the server you provided at `oidc-issuer` to see how a user should log in.
+ - solid-client-authn negotiates with the server you provided at `oidc-issuer` to see how a user should log in.
  - it generates a link to a special webpage that the user will use to log in (for example `https://idp.com/authorize`)
  - It will pass that link to the `handleRedirect` you provided. This is your opportunity to redirect the user to the provided link. If your code is running in a web-browser, you can do that automatically by setting `handleRedirect: "auto"`.
  - Once the user has logged in, a request will be sent to the route you provided at `redirectUrl` including the user's credentials.
@@ -535,7 +535,7 @@ A class that manages all sessions in your application.
 Creates a SessionManager object.
 
 ```typescript
-import { SessionManager } from "@inrupt/solid-auth-fetcher";
+import { SessionManager } from "@inrupt/solid-client-authn";
 import customStorage from "./myCustomStorage"
 
 const sessionManager = new SessionManager({
@@ -589,7 +589,7 @@ sessionManager.on("sessionLogout", (session) => {})
 ```
 
 #### handleInboundRedirect(url) => void
-Part of the login flow is a redirect. If Solid-Auth-Fetcher is deployed in the web-browser, this redirect is handled automatically, but on the server, it must be handled manually. Use the `handleInboundRedirect` at the redirect route for your app.
+Part of the login flow is a redirect. If solid-client-authn is deployed in the web-browser, this redirect is handled automatically, but on the server, it must be handled manually. Use the `handleInboundRedirect` at the redirect route for your app.
 
 ```typescript
 app.get("/redirect", async (req, res) => {
@@ -611,7 +611,7 @@ Creates a Session object. If sessionId is not present, a random UUID will be gen
 **Warning**: you should either use sessionManager.getSession() or call session.init() directly after calling the constructor.
 
 ```typescript
-import { Session } from "@inrupt/solid-auth-fetcher-sessions"
+import { Session } from "@inrupt/solid-client-authn-sessions"
 
 const session = new Session(sessionManager, "mySessionId")
 session.init().then(() => {})
