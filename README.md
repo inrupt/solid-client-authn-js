@@ -66,7 +66,7 @@ npm install @inrupt/solid-client-authn
 In the browser via the `script` tag:
 
 ```html
-<script src="/path/to/solidClientAuthn.bundle.js"></script>
+<script src="/path/to/solid-client-authn.bundle.js"></script>
 </script>
     solidClientAuthn.getSessionInfo()
       .then((sessionInfo) => console.log(sessionInfo))
@@ -144,7 +144,7 @@ By default, the user is redirected to the login page within the same window, but
 ```html
 <html>
 <head>
-<script src="/path/to/solidClientAuthn.bundle.js"></script>
+<script src="/path/to/solid-client-authn.bundle.js"></script>
 <script>
   function login() {
     solidClientAuthn.login({
@@ -168,7 +168,7 @@ Be sure to call the `handleIncomingRedirect` function on the redirect route.
 ```html
 <html>
 <head>
-<script src="/path/to/solidClientAuthn.bundle.js"></script>
+<script src="/path/to/solid-client-authn.bundle.js"></script>
 <script>
   solidClientAuthn.handleIncomingRedirect()
 </script>
