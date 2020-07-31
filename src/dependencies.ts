@@ -24,7 +24,7 @@
  */
 import "reflect-metadata";
 import { container } from "tsyringe";
-import AuthFetcher from "./AuthFetcher";
+import ClientAuthn from "./ClientAuthn";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
@@ -224,10 +224,10 @@ container.register<ILogoutHandler>("logoutHandler", {
   useClass: GeneralLogoutHandler
 });
 
-export function getAuthFetcherWithDependencies(dependencies: {
+export function getClientAuthnWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
-}): AuthFetcher {
+}): ClientAuthn {
   let secureStorage;
   let insecureStorage;
   switch (detectEnvironment()) {
@@ -249,5 +249,5 @@ export function getAuthFetcherWithDependencies(dependencies: {
   authenticatorContainer.register<IStorage>("insecureStorage", {
     useValue: insecureStorage
   });
-  return authenticatorContainer.resolve(AuthFetcher);
+  return authenticatorContainer.resolve(ClientAuthn);
 }

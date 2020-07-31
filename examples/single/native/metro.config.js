@@ -7,7 +7,7 @@
 
 const path = require('path');
 const extraNodeModules = {
-  'solid-auth-fetcher': path.resolve(__dirname + '/../../'),
+  '@inrupt/solid-client-authn': path.resolve(__dirname + '/../../'),
 };
 const watchFolders = [path.resolve(__dirname + '/../../')];
 

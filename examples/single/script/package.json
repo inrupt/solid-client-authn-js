@@ -1,5 +1,5 @@
 {
-  "name": "solid-auth-fetcher-browser-via-script-tag-example",
+  "name": "@inrupt/solid-client-authn-browser-via-script-tag-example",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

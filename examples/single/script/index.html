@@ -1,9 +1,9 @@
 <!-- This file is a work in progress. It should be fixed -->
 <html>
   <head>
-    <script src="/solid-auth-fetcher.bundle.js"></script>
+    <script src="/solid-client-authn.bundle.js"></script>
     <script>
-      solidAuthFetcher.login({
+      solidClientAuthn.login({
         
       }).then(instance => {
         instance.getToken().then((token) => {
@@ -13,7 +13,7 @@
     </script>
   </head>
   <body>
-    <h1>Solid Auth Fetcher Script Tag Tester</h1>
+    <h1>solid-client-authn Script Tag Tester</h1>
     <p id="tokenContainer"></p>
   </body>
 </html>

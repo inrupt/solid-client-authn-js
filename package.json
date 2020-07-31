@@ -1,5 +1,5 @@
 {
-  "name": "@inrupt/solid-auth-fetcher",
+  "name": "@inrupt/solid-client-authn-browser",
   "version": "0.0.6",
   "license": "MIT",
   "main": "dist/index.js",

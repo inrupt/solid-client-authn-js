@@ -23,30 +23,30 @@ import IStorage from "./storage/IStorage";
 import ILoginInputOptions from "./ILoginInputOptions";
 import { EventEmitter } from "events";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
-import AuthFetcher from "./AuthFetcher";
-import { getAuthFetcherWithDependencies } from "./dependencies";
+import ClientAuthn from "./ClientAuthn";
+import { getClientAuthnWithDependencies } from "./dependencies";
 import { v4 } from "uuid";
 
 export interface ISessionOptions {
   secureStorage: IStorage;
   insecureStorage: IStorage;
   sessionInfo: ISessionInfo;
-  authFetcher: AuthFetcher;
+  clientAuthn: ClientAuthn;
 }
 
 export class Session extends EventEmitter {
   public readonly info: ISessionInfo;
-  private authFetcher: AuthFetcher;
+  private clientAuthn: ClientAuthn;
 
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId?: string
   ) {
     super();
-    if (sessionOptions.authFetcher) {
-      this.authFetcher = sessionOptions.authFetcher;
+    if (sessionOptions.clientAuthn) {
+      this.clientAuthn = sessionOptions.clientAuthn;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
-      this.authFetcher = getAuthFetcherWithDependencies({
+      this.clientAuthn = getClientAuthnWithDependencies({
         secureStorage: sessionOptions.secureStorage,
         insecureStorage: sessionOptions.insecureStorage
       });
@@ -74,23 +74,23 @@ export class Session extends EventEmitter {
   }
 
   async login(options: ILoginInputOptions): Promise<void> {
-    this.authFetcher.login(this.info.sessionId, {
+    this.clientAuthn.login(this.info.sessionId, {
       ...options
     });
     this.emit("login");
   }
 
   async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-    return this.authFetcher.fetch(this.info.sessionId, url, init);
+    return this.clientAuthn.fetch(this.info.sessionId, url, init);
   }
 
   async logout(): Promise<void> {
-    await this.authFetcher.logout(this.info.sessionId);
+    await this.clientAuthn.logout(this.info.sessionId);
     this.emit("logout");
   }
 
   async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
-    const sessionInfo = await this.authFetcher.handleIncomingRedirect(url);
+    const sessionInfo = await this.clientAuthn.handleIncomingRedirect(url);
     if (sessionInfo) {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;

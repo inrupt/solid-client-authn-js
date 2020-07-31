@@ -32,7 +32,7 @@ import URL from "url-parse";
 import IRequestCredentials from "./authenticatedFetch/IRequestCredentials";
 
 @injectable()
-export default class AuthFetcher {
+export default class ClientAuthn {
   constructor(
     @inject("loginHandler") private loginHandler: ILoginHandler,
     @inject("redirectHandler") private redirectHandler: IRedirectHandler,

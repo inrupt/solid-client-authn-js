@@ -22,7 +22,7 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js"]
   },
   output: {
-    filename: "solid-auth-fetcher.bundle.js",
+    filename: "solid-client-authn.bundle.js",
     path: path.resolve(__dirname, "browserDist"),
     libraryTarget: "commonjs"
   }

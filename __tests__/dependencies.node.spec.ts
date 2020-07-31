@@ -22,12 +22,12 @@
 /**
  * @jest-environment node
  */
-import { getAuthFetcherWithDependencies } from "../src/dependencies";
-import AuthFetcher from "../src/AuthFetcher";
+import { getClientAuthnWithDependencies } from "../src/dependencies";
+import ClientAuthn from "../src/ClientAuthn";
 
 describe("dependencies.node", () => {
   it("performs dependency injection in a node environment", () => {
-    const authFetcher = getAuthFetcherWithDependencies({});
-    expect(authFetcher).toBeInstanceOf(AuthFetcher);
+    const clientAuthn = getClientAuthnWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthn);
   });
 });
