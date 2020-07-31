@@ -1,4 +1,4 @@
-package com.solidClientAuthnreactnativedemo;
+package com.solidClientAuthnReactNativeDemo;
 
 import com.facebook.react.ReactActivity;
 
