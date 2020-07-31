@@ -69,10 +69,6 @@ export class Session extends EventEmitter {
     }
   }
 
-  async init(): Promise<void> {
-    throw new Error("Not Implemented");
-  }
-
   async login(options: ILoginInputOptions): Promise<void> {
     this.clientAuthn.login(this.info.sessionId, {
       ...options

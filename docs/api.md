@@ -4,12 +4,14 @@
 Kick off the login process for the user:
 
 ```typescript
-import { login } from '@inrupt/solid-client-authn-browser';
+import { Session } from '@inrupt/solid-client-authn-browser';
 
-login({
+const session = new Session(/*...*/);
+
+await session.login({
     oidcIssuer: 'https://identityprovider.com', 
     redirectUrl: 'https://mysite.com/redirect'
-}).then((neededAction) => {})
+});
 ```
 
 Options:
@@ -22,14 +24,27 @@ Options:
 | `popUp`    | No                                                 | Boolean       | If true, the login process will initiate via a popup. This only works on web clients.                              | false     |
 | `handleRedirect`    | No                                                 | `(redirectUrl) => {}` or `"auto"`        | If a function is provided, the browser will not auto redirect and will instead trigger that function to redirect. If "auto" or undefined, the browser will auto redirect given it is in a browser environment. | "auto" |
 
+### handleIncomingRedirect(url) => Promise:void
+Handles redirects from the identity provider to wrap up the login process. 
+
+```typescript
+import { Session } from '@inrupt/solid-client-authn-browser';
+
+const session = new Session(/*...*/);
+
+session.handleIncomingRedirect(window.location.href)
+```
+
 ### fetch(url, options) => Promise:result
 
 Send an HTTP request to a Solid Pod:
 
 ```typescript
-import { fetch } from '@inrupt/solid-client-authn-browser';
+import { Session } from '@inrupt/solid-client-authn-browser';
 
-fetch('https://example.com/resource', {
+const session = new Session(/*...*/);
+
+session.fetch('https://example.com/resource', {
     method: 'POST',
     headers: {
         "Content-Type": "text/plain"
@@ -42,30 +57,22 @@ Fetch follows the [WHATWG Fetch Standard](https://github.github.io/fetch/).
 ### logout() => Promise:void
 Log the user out:
 ```typescript
-import { logout } from '@inrupt/solid-client-authn-browser';
+import { Session } from '@inrupt/solid-client-authn-browser';
 
-logout().then(() => {})
-```
+const session = new Session(/*...*/);
 
-### getSession() => Promise:[Session](#session)
-Retrieve the user's session:
-
-```typescript
-import { getSession } from '@inrupt/solid-client-authn-browser';
-
-await getSession().then((session) => {
-  console.log(session.isLoggedIn)
-  console.log(session.webId)
-})
+session.logout().then(() => {})
 ```
 
 ### onLogin(callback) => Promise:void
 Register a callback function to be called when a user completes login:
 
 ```typescript
-import { onLogin } from '@inrupt/solid-client-authn-browser'
+import { Session } from '@inrupt/solid-client-authn-browser';
 
-onLogin((sessionInfo) => {
+const session = new Session(/*...*/);
+
+session.onLogin((sessionInfo) => {
   console.log(session.webId)
 })
 ```
@@ -74,27 +81,10 @@ onLogin((sessionInfo) => {
 Register a callback function to be called when a user logs out:
 
 ```typescript
-import { onLogout } from '@inrupt/solid-client-authn-browser'
+import { Session } from '@inrupt/solid-client-authn-browser';
 
-onLogout(() => {})
-```
-
-### handleIncomingRedirect(url) => Promise:void
-Handles redirects as a part of the login process. Servers using solid-client-authn must manually call this method on redirect, but is done automatically on web and mobile.
-
-```typescript
-import { handleIncomingRedirect } from '@inrupt/solid-client-authn-browser'
-
-handleRedirect(window.location.href)
-```
-
-### handlePopUpRedirect(url) => Promise:void
-Handles redirects from the popup login process. This function should be triggered on the redirectUrl that was provided as a login option.
-
-```typescript
-import { adapters } from '@inrupt/solid-client-authn-browser'
-
-handlePopUpRedirect(window.location.href)
+const session = new Session(/*...*/);
+session.onLogout(() => {})
 ```
 
 ## Multi Session API
@@ -159,8 +149,8 @@ sessionManager.onSessionLogout((session) => {})
 sessionManager.on("sessionLogout", (session) => {})
 ```
 
-#### handleInboundRedirect(url) => void
-Part of the login flow is a redirect. If solid-client-authn is deployed in the web-browser, this redirect is handled automatically, but on the server, it must be handled manually. Use the `handleInboundRedirect` at the redirect route for your app.
+#### handleIncomingRedirect(url) => void
+Part of the login flow is a redirect. Use the `handleIncomingRedirect` at the redirect route for your app.
 
 ```typescript
 app.get("/redirect", async (req, res) => {
@@ -185,13 +175,6 @@ Creates a Session object. If sessionId is not present, a random UUID will be gen
 import { Session } from "@inrupt/solid-client-authn-browser-sessions"
 
 const session = new Session(sessionManager, "mySessionId")
-session.init().then(() => {})
-```
-
-#### init() => Promise:void
-Initializes the session by saving it to storage if a session with the given id does not already exist, or by syncing it with the session in storage if it already exists.
-
-```typescript
 session.init().then(() => {})
 ```
 
