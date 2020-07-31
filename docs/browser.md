@@ -10,19 +10,22 @@ npm install @inrupt/solid-client-authn-browser
 
 ```html
 <script src="/path/to/solid-client-authn.bundle.js"></script>
-</script>
-    solidClientAuthn.getSessionInfo()
-      .then((sessionInfo) => console.log(sessionInfo))
+<script>
+    const session = new solidClientAuthn.Session({
+        clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})
+    });
+    // ...
 </script>
 ```
 
 ### Using `import`
 
 ```javascript
-import { getSession } from "@inrupt/solid-client-authn-browser"
+import { Session } from "@inrupt/solid-client-authn-browser"
 
-getSessionInfo()
-  .then((sessionInfo) => console.log(sessionInfo))
+const session = new Session({
+    clientAuthn: getClientAuthnWithDependencies({})
+});
 ```
 
 ### Using `require`
@@ -30,8 +33,9 @@ getSessionInfo()
 ```javascript
 const solidClientAuthn = require("@inrupt/solid-client-authn-browser")
 
-solidClientAuthn.getSessionInfo()
-  .then((sessionInfo) => console.log(sessionInfo))
+const session = new solidClientAuthn.Session({
+    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})
+});
 ```
 
 ## Single Session API Tutorial
@@ -41,24 +45,29 @@ If solid-client-authn is installed on an application that operates in the web br
 
 ```typescript
 import {
-  login,
-  getSession,
-  onLogin
+  Session,
+  getClientAuthnWithDependencies
 } from '@inrupt/solid-client-authn-browser'
 
-getSession().then(async (session) => {
-  // Check if the user is already logged in
-  if (!session.loggedIn) {
-    await login({
-      // The URL of the user's OIDC issuer
-      oidcIssuer: 'https://identityProvider.com', 
-      // The url the system should redirect to after login
-      redirectUrl: 'https://mysite.com/redirect',
-      // Optional in the web browser, this signifies any needed redirects are handled automatically
-      handleRedirect: 'auto'
-    });
-  }
+// Build a session
+const session = new solidClientAuthn.Session({
+    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
+    "mySession"
+);
+
+// Redirect the user to their identity provider...
+await session.login({
+    // The URL of the user's OIDC issuer
+    oidcIssuer: 'https://identityProvider.com', 
+    // The url the system should redirect to after login
+    redirectUrl: 'https://mysite.com/redirect',
 });
+
+// Complete the login when receiing a request to https://mysite.com/redirect
+// ...
+session.handleIncomingRedirect(
+    new URL(window.location.href)
+)
 
 onLogin((sessionInfo) => {
   // Logs the user's webId
@@ -70,9 +79,14 @@ onLogin((sessionInfo) => {
 You can use the `fetch` function anywhere in your application. If you've already logged in, the `fetch` function automatically fills in the user's credentials, if not, it will attempt to make a request without the user's credentials.
 
 ```typescript
-import { fetch } from '@inrupt/solid-client-authn-browser'
+import { Session } from '@inrupt/solid-client-authn-browser'
 
-fetch('https://example.com/resource', {
+const session = new solidClientAuthn.Session({
+    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
+    "mySession"
+);
+
+session.fetch('https://example.com/resource', {
   method: 'post',
   body: 'What a cool string!'
 }).then(async (response) => {
@@ -85,30 +99,25 @@ In the web browser, by default, solid-client-authn redirects automatically upon 
 
 ```typescript
 import {
-  login,
-  getSessionInfo,
-  onLogin
+  Session,
+  getClientAuthnWithDependencies
 } from '@inrupt/solid-client-authn-browser'
 
-async function init() {
-  await onLogin((sessionInfo) => {
-    console.log(sessionInfo.webId);
-  });
-}
+// Build a session
+const session = new solidClientAuthn.Session({
+    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
+    "mySession"
+);
 
-async function login() {
-  const sessionInfo = await getSessionInfo()
-  if (!sessionInfo.loggedIn) {
-    await login({
-      oidcIssuer: 'https://identityProvider.com',
-      redirectUrl: 'https://mysite.com/redirect',
-      // Custom redirect handling here:
-      handleRedirect: (redirectUrl) => {
+// Redirect the user to their identity provider...
+await session.login({
+    // The URL of the user's OIDC issuer
+    oidcIssuer: 'https://identityProvider.com', 
+    // The url the system should redirect to after login
+    redirectUrl: 'https://mysite.com/redirect',
+    // Custom redirect handling here:
+    handleRedirect: (redirectUrl) => {
         window.location.href = redirectUrl
-      }
-    });
-  }
-}
-
-init().then(login)
+    }
+});
 ```

@@ -24,7 +24,7 @@ import "regenerator-runtime/runtime";
 
 import {
   Session,
-  getAuthFetcherWithDependencies
+  getClientAuthnWithDependencies
 } from "../../../../dist/index";
 
 class App extends Component {
@@ -32,7 +32,7 @@ class App extends Component {
     super(props);
     const session = new Session(
       {
-        clientAuthn: getAuthFetcherWithDependencies({})
+        clientAuthn: getClientAuthnWithDependencies({})
       },
       "mySession"
     );

@@ -36,8 +36,13 @@ git clone https://github.com/inrupt/solid-client-authn.git
 cd solid-client-authn
 npm ci
 npm run bootstrap-examples
-# Run each example
-npm run dev-single-bundle
+# Run each example from the root
+## single session API, bundler mode
+cd examples/single/bundle
+npm run start
+## single session API, script mode
+cd examples/single/script
+npm run start
 ```
 
 At this point, a test application will be running on port `3001`.
