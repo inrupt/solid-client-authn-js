@@ -8,7 +8,7 @@ module.exports = ({ env, addon }) => {
   const browserConfig = {
     output: {
       libraryTarget: "var",
-      library: "solidClientAuthn"
+      library: "solidClientAuthentication"
     }
   };
 

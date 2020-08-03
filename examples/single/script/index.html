@@ -6,9 +6,9 @@
     <p id="WebId"></p>
     <script type="text/javascript" src="/solid-client-authn.bundle.js"></script>
     <script>
-      const session = new solidClientAuthn.Session(
+      const session = new solidClientAuthentication.Session(
       {
-        clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})
+        clientAuthentication: solidClientAuthentication.getClientAuthenticationWithDependencies({})
       },
       "mySession"
     );

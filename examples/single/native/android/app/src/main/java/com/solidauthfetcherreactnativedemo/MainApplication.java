@@ -1,4 +1,4 @@
-package com.solidClientAuthnReactNativeDemo;
+package com.solidClientAuthenticationReactNativeDemo;
 
 import android.app.Application;
 import android.content.Context;
