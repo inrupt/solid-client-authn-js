@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
 
 app.get("/solid-client-authn.bundle.js", (req, res) => {
   res.sendFile(
-    path.join(__dirname, "../../browserDist/solid-client-authn.bundle.js")
+    path.join(__dirname, "../../../browserDist/solid-client-authn.bundle.js")
   );
 });
 
