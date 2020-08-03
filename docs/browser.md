@@ -12,7 +12,7 @@ npm install @inrupt/solid-client-authn-browser
 <script src="/path/to/solid-client-authn.bundle.js"></script>
 <script>
     const session = new solidClientAuthn.Session({
-        clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})
+        clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({});
     });
     // ...
 </script>
@@ -21,53 +21,54 @@ npm install @inrupt/solid-client-authn-browser
 ### Using `import`
 
 ```javascript
-import { Session } from "@inrupt/solid-client-authn-browser"
+import { Session } from "@inrupt/solid-client-authn-browser";
 
 const session = new Session({
-    clientAuthn: getClientAuthnWithDependencies({})
+    clientAuthn: getClientAuthnWithDependencies({});
 });
 ```
 
 ### Using `require`
 
 ```javascript
-const solidClientAuthn = require("@inrupt/solid-client-authn-browser")
+const solidClientAuthn = require("@inrupt/solid-client-authn-browser");
 
 const session = new solidClientAuthn.Session({
-    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})
+    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({});
 });
 ```
 
 ## Single Session API Tutorial
 
 ### Login
-If solid-client-authn is installed on an application that operates in the web browser, triggering login is a simple process:
+
+If solid-client-authn is installed in an application that operates in a web browser, triggering login is a simple process:
 
 ```typescript
 import {
   Session,
   getClientAuthnWithDependencies
-} from '@inrupt/solid-client-authn-browser'
+} from "@inrupt/solid-client-authn-browser";
 
-// Build a session
+// Build a session.
 const session = new solidClientAuthn.Session({
     clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
     "mySession"
 );
 
-// Redirect the user to their identity provider...
+// Redirect the user to their OIDC identity provider...
 await session.login({
-    // The URL of the user's OIDC issuer
+    // The URL of the user's OIDC issuer.
     oidcIssuer: 'https://identityProvider.com', 
-    // The url the system should redirect to after login
+    // The url the system should redirect to after login.
     redirectUrl: 'https://mysite.com/redirect',
 });
 
-// Complete the login when receiing a request to https://mysite.com/redirect
+// Complete the login when receiving a request to https://mysite.com/redirect.
 // ...
 session.handleIncomingRedirect(
     new URL(window.location.href)
-)
+);
 
 onLogin((sessionInfo) => {
   // Logs the user's webId
@@ -76,10 +77,13 @@ onLogin((sessionInfo) => {
 ```
 
 ### Fetch
-You can use the `fetch` function anywhere in your application. If you've already logged in, the `fetch` function automatically fills in the user's credentials, if not, it will attempt to make a request without the user's credentials.
+
+You can use the `fetch` function anywhere in your application.
+If you've already logged in, the `fetch` function automatically fills in the user's
+credentials. If not, it will attempt to make a request without the user's credentials.
 
 ```typescript
-import { Session } from '@inrupt/solid-client-authn-browser'
+import { Session } from "@inrupt/solid-client-authn-browser";
 
 const session = new solidClientAuthn.Session({
     clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
@@ -91,25 +95,29 @@ session.fetch('https://example.com/resource', {
   body: 'What a cool string!'
 }).then(async (response) => {
   console.log(await response.text());
-})
+});
 ```
 
 ### Custom Redirect Handling
-In the web browser, by default, solid-client-authn redirects automatically upon login, and automatically handles a redirect back to the app when it is initialized. But, you may want to handle redirects manually. To do this you can use the `handleRedirect` option.
+
+In the web browser, by default, solid-client-authn redirects automatically upon login,
+and automatically handles a redirect back to the app when it is initialized.
+But, you may want to handle redirects manually. To do this you can use the `handleRedirect`
+option.
 
 ```typescript
 import {
   Session,
   getClientAuthnWithDependencies
-} from '@inrupt/solid-client-authn-browser'
+} from "@inrupt/solid-client-authn-browser";
 
-// Build a session
+// Build a session.
 const session = new solidClientAuthn.Session({
     clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
     "mySession"
 );
 
-// Redirect the user to their identity provider...
+// Redirect the user to their OIDC identity provider...
 await session.login({
     // The URL of the user's OIDC issuer
     oidcIssuer: 'https://identityProvider.com', 
