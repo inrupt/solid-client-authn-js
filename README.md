@@ -5,7 +5,7 @@ and thereafter to make authenticated requests to Solid storage servers from Java
 deployed in any environment. The `solid-client-authn` libraries all have a common API
 , and come in different modules intended for different deployment environments:
 - `solid-client-authn-browser` can be used to help build web apps in the browser.
-- `solid-client-authn-node` is **planned** to help build server-side apps and console-based scripts.
+- `solid-client-authn-node` is **planned** to help build server-side and console-based apps.
 
 ## Using the Appropriate API
 
