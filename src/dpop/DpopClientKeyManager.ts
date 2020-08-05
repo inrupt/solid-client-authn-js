@@ -67,7 +67,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
       await this.storageUtility.set(
         this.getLocalStorageKey(),
         JSON.stringify(jwk),
-        { secure: true }
+        { secure: false }
       );
     }
   }
@@ -76,7 +76,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
     let keyString;
     try {
       keyString = await this.storageUtility.get(this.getLocalStorageKey(), {
-        secure: true
+        secure: false
       });
       if (!keyString) {
         return undefined;
