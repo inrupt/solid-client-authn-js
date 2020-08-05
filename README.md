@@ -7,6 +7,12 @@ deployed in any environment. The `solid-client-authn` libraries all have a commo
 - `solid-client-authn-browser` can be used to help build web apps in the browser.
 - `solid-client-authn-node` is **planned** to help build server-side and console-based apps.
 
+## Related libraries
+
+### Read, write and transform data
+
+`solid-client-authn` libraries are all about authentication and fetching. To manipulate the data, have convenience methods to read and write to your Pod, manage access rights to your data, and more, you can have a look at [solid-client](https://www.npmjs.com/package/@inrupt/solid-client).
+
 ## Using the Appropriate API
 
 The different `solid-client-authn` libraries all share the same interface ([see API reference](./docs/api.md)). `solid-client-authn` includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
