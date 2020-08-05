@@ -69,30 +69,32 @@ export class Session extends EventEmitter {
     }
   }
 
-  async login(options: ILoginInputOptions): Promise<void> {
+  login = async (options: ILoginInputOptions): Promise<void> => {
     this.clientAuthn.login(this.info.sessionId, {
       ...options
     });
     this.emit("login");
-  }
+  };
 
-  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
+  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
     return this.clientAuthn.fetch(this.info.sessionId, url, init);
-  }
+  };
 
-  async logout(): Promise<void> {
+  logout = async (): Promise<void> => {
     await this.clientAuthn.logout(this.info.sessionId);
     this.emit("logout");
-  }
+  };
 
-  async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
+  handleIncomingRedirect = async (
+    url: string
+  ): Promise<ISessionInfo | undefined> => {
     const sessionInfo = await this.clientAuthn.handleIncomingRedirect(url);
     if (sessionInfo) {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
     }
     return sessionInfo;
-  }
+  };
 
   onLogin(callback: () => unknown): void {
     this.on("login", callback);

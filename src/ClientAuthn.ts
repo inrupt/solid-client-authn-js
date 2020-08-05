@@ -55,7 +55,10 @@ export default class ClientAuthn {
     return undefined;
   }
 
-  async login(sessionId: string, options: ILoginInputOptions): Promise<void> {
+  login = async (
+    sessionId: string,
+    options: ILoginInputOptions
+  ): Promise<void> => {
     return this.loginHandler.handle({
       sessionId,
       oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
@@ -66,35 +69,39 @@ export default class ClientAuthn {
       popUp: options.popUp || false,
       handleRedirect: options.handleRedirect
     });
-  }
+  };
 
-  async fetch(
+  fetch = async (
     sessionId: string,
     url: RequestInfo,
     init?: RequestInit
-  ): Promise<Response> {
+  ): Promise<Response> => {
     const credentials: IRequestCredentials = {
       localUserId: sessionId,
       // TODO: This should not be hard-coded
       type: "dpop"
     };
     return this.authenticatedFetcher.handle(credentials, url, init);
-  }
+  };
 
-  async logout(sessionId: string): Promise<void> {
+  logout = async (sessionId: string): Promise<void> => {
     this.logoutHandler.handle(sessionId);
-  }
+  };
 
-  async getSessionInfo(sessionId: string): Promise<ISessionInfo | undefined> {
+  getSessionInfo = async (
+    sessionId: string
+  ): Promise<ISessionInfo | undefined> => {
     // TODO complete
     return this.sessionInfoManager.get(sessionId);
-  }
+  };
 
-  async getAllSessionInfo(): Promise<ISessionInfo[]> {
+  getAllSessionInfo = async (): Promise<ISessionInfo[]> => {
     return this.sessionInfoManager.getAll();
-  }
+  };
 
-  async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
+  handleIncomingRedirect = async (
+    url: string
+  ): Promise<ISessionInfo | undefined> => {
     return this.redirectHandler.handle(url);
-  }
+  };
 }
