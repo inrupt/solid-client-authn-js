@@ -38,7 +38,7 @@ class App extends Component {
     );
     this.state = {
       status: "loading",
-      loginIssuer: "https://broker.demo-ess.inrupt.com",
+      loginIssuer: "https://nseydoux.inrupt.net",
       fetchRoute: "",
       fetchBody: "",
       session: session,
@@ -59,7 +59,9 @@ class App extends Component {
     } else if (this.state.session.isLoggedIn) {
       this.setState({ status: "dashboard", session });
     } else {
-      const authCode = new URL(window.location.href).searchParams.get("code");
+      const authCode =
+        new URL(window.location.href).searchParams.get("code") ||
+        new URL(window.location.href).searchParams.get("access_token");
       if (!authCode) {
         this.setState({ status: "login" });
       } else {
