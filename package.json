@@ -8,6 +8,9 @@
     "dist",
     "LICENSE-DEPENDENCIES"
   ],
+  "repository": {
+    "url": "https://github.com/inrupt/solid-client-authn"
+  },
   "scripts": {
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
     "clean-module": "rm -rf ./dist",
