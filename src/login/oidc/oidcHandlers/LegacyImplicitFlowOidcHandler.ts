@@ -28,8 +28,10 @@ import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
+import { IDpopClientKeyManager } from "../../../dpop/DpopClientKeyManager";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 import { IRedirector } from "../Redirector";
+import { IStorageUtility } from "../../../storage/StorageUtility";
 
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
@@ -38,7 +40,10 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
     @inject("redirector") private redirector: IRedirector,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator
+    @inject("dpopClientKeyManager")
+    private dpopClientKeyManager: IDpopClientKeyManager,
+    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -46,7 +51,11 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "implicit"
-      ) > -1
+      ) > -1 &&
+      // Escape hatch to detect that we are talking to NSS and not the id broker
+      oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
+        "urn:ietf:params:oauth:grant-type:jwt-bearer"
+      ) === -1
     );
   }
 
@@ -60,11 +69,21 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     const query: Record<string, string> = {
       client_id: oidcLoginOptions.client.clientId,
       response_type: "id_token token",
-      redirect_url: oidcLoginOptions.redirectUrl.toString(),
+      redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       // The webid scope does not appear in the spec
       scope: "openid webid offline_access",
       state: oidcLoginOptions.sessionId
     };
+
+    await this.dpopClientKeyManager.generateClientKeyIfNotAlready();
+    await this.storageUtility.setForUser(
+      oidcLoginOptions.sessionId,
+      {
+        isLoggedIn: "false",
+        sessionId: oidcLoginOptions.sessionId
+      },
+      { secure: true }
+    );
     /* eslint-enable @typescript-eslint/camelcase */
     // TODO: There is currently no secure storage of the DPoP key
     if (oidcLoginOptions.dpop) {
