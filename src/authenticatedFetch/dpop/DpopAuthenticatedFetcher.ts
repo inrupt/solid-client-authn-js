@@ -72,6 +72,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
         )}`
       );
     }
+
     const authToken = await this.storageUtility.getForUser(
       requestCredentials.localUserId,
       "accessToken",
@@ -79,6 +80,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
         secure: true
       }
     );
+
     const requestInitiWithDefaults = {
       headers: {},
       method: "GET",
