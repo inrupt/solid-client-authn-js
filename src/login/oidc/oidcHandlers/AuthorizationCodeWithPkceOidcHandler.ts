@@ -56,7 +56,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */
     const query: { [key: string]: string } = {
-      response_type: "id_token code",
+      response_type: "code id_token",
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       // TODO: the 'webid' scope does not appear in the specification
       // A question regarding its use has been filed https://github.com/solid/specification

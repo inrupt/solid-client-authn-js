@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../storage/StorageUtility";
@@ -31,7 +30,7 @@ export interface ITokenSaver {
     idToken: string,
     accessToken?: string,
     refreshToken?: string
-  ): Promise<ISessionInfo>;
+  ): Promise<void>;
 }
 
 @injectable()
@@ -43,43 +42,33 @@ export default class TokenSaver implements ITokenSaver {
   ) {}
 
   async saveTokenAndGetSession(
-    localUserId: string,
+    sessionId: string,
     idToken: string,
     accessToken?: string,
     refreshToken?: string
-  ): Promise<ISessionInfo> {
-    throw new Error("Not Implemented");
-    // const decoded = await this.joseUtility.decodeJWT(
-    //   // TODO this should actually be the id_vc of the token
-    //   accessToken as string
-    // );
-    // // TODO validate decoded token
-    // // TODO extract the localUserId from state and put it in the session
+  ): Promise<void> {
+    // throw new Error("Not Implemented");
+    const decoded = await this.joseUtility.decodeJWT(
+      // TODO this should actually be the id_vc of the token
+      accessToken as string
+    );
+    // TODO validate decoded token
+    // TODO extract the localUserId from state and put it in the session
     // const session = this.sessionCreator.create({
     //   localUserId,
     //   webId: decoded.sub as string,
     //   loggedIn: true
     // });
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "accessToken",
-    //   accessToken as string
-    // );
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "idToken",
-    //   idToken as string
-    // );
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "webId",
-    //   decoded.sub as string
-    // );
-    // await this.storageUtility.setForUser(
-    //   session.localUserId,
-    //   "refreshToken",
-    //   refreshToken as string
-    // );
-    // return session;
+    await this.storageUtility.setForUser(
+      sessionId,
+      {
+        accessToken: accessToken as string,
+        webId: decoded.sub as string,
+        idToken: idToken as string,
+        refreshToken: refreshToken as string,
+        isLoggedIn: "true"
+      },
+      { secure: true }
+    );
   }
 }
