@@ -1,46 +1,51 @@
-# solid-client-authn
+# Solid JavaScript Authentication - solid-client-authn
 
-`solid-client-authn` is a set of libraries designed to authenticate with Solid identity servers,
-and thereafter to make authenticated requests to Solid storage servers from JavaScript clients
-deployed in any environment. The `solid-client-authn` libraries all have a common API
-, and come in different modules intended for different deployment environments:
+`solid-client-authn` is a set of libraries designed to authenticate with Solid identity servers. 
+The libraries share a common API and include different modules for different deployment environments:
 - `solid-client-authn-browser` can be used to help build web apps in the browser.
 - `solid-client-authn-node` is **planned** to help build server-side and console-based apps.
 
-## Related libraries
+@inrupt/solid-client-authn libraries are part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
-### Read, write and transform data
+# Inrupt Solid JavaScript Client Libraries
 
-`solid-client-authn` libraries are all about authentication and fetching. To manipulate the data, have convenience methods to read and write to your Pod, manage access rights to your data, and more, you can have a look at [solid-client](https://www.npmjs.com/package/@inrupt/solid-client).
+## Data access and permissions management - solid-Client
 
-## Using the Appropriate API
+[@inrupt/solid-client](https://github.com/inrupt/solid-client-js) allows developers to access data and manage permissions on data stored in Solid Pods.
+
+## Authentication - solid-client-authn
+
+[@inrupt/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
+
+## Vocabularies and interoperability - solid-common-vocab-rdf
+
+[@inrupt/solid-common-vocab-rdf](https://github.com/inrupt/solid-common-vocab-rdf) allows developers to build interoperable apps by reusing well-known vocabularies. These libraries provide vocabularies available as constants that you just have to import.
+
+# Authentication libraries
 
 The different `solid-client-authn` libraries all share the same interface ([see API reference](./docs/api.md)). `solid-client-authn` includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
 
-### When to use the "Single Session API"
+## Usage
+### Single session API
 
-`solid-client-authn`'s "Single Session API" is designed to provide a streamlined experience
-when implementing authentication in apps that focus on just one user.
+`solid-client-authn`'s single session API is designed to provide a streamlined experience when implementing authentication in apps that focus on just one user.
 You'd use the single session API to:
 
- - Create a single page web application that only one user logs into at a time.
- - Make a bot that only represents one user.
- - Build a mobile application that only one user logs into at a time.
-
-#### Examples Usage
+  - Create a single page web application that only one user logs into at a time.
+  - Make a bot that only represents one user.
+  - Build a mobile application that only one user logs into at a time.
+  
+#### Examples
 
  - [Single-session the web browser with your own bundler](./examples/single/bundle)
 
-### When to use "Multi Session API"
+### Multi Session API
 
-`solid-client-authn`'s "Multi Session API" allows you to manage multiple sessions for multiple
-logged in users at the same time. You'd use the multi session API to:
+`solid-client-authn`'s "Multi Session API" allows you to manage multiple sessions for multiple logged in users at the same time. You'd use the multi session API to:
 
- - Create a web application with a server side component. While one user may be logged into
- each individual client, the server will need to manage all logged in users.
+ - Create a web application with a server side component. While one user may be logged into each individual client, the server will need to manage all logged in users.
  - Make a bot that needs to operation on behalf of multiple users.
- - You have a single page application, but you want to maintain credentials on the server
- for security.
+ - You have a single page application, but you want to maintain credentials on the server for security.
  - You want to log in multiple identities for either a single human user, or multiple users.
 
 ### Setting up the examples
@@ -63,6 +68,18 @@ At this point, a test application will be running on port `3001`.
 Be sure that you enter a valid Solid issuer before logging in
 , for example: `https://identity.demo-ess.inrupt.com`.
 
-## Environment-specific documentation
+# Issues & Help
 
-- [For the browser](./docs/browser.md)
+## Solid Community Forum
+
+If you have questions about working with Solid or just want to share what you’re working on, visit the [Solid forum](https://forum.solidproject.org/). The Solid forum is a good place to meet the rest of the community.
+
+## Bugs and Feature Requests
+
+- For public feedback, bug reports, and feature requests please file an issue via [Github](https://github.com/inrupt/solid-client-authn/issues/).
+- For non-public feedback or support inquiries please use the [Inrupt Service Desk](https://inrupt.atlassian.net/servicedesk).
+
+## Documentation
+
+* [Using the libraries from within the browser](./docs/browser.md)
+* [Inrupt documentation Homepage](https://docs.inrupt.com/)
