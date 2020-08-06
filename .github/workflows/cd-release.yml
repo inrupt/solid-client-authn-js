@@ -56,8 +56,7 @@ jobs:
     - run: npm ci
     - name: Publish to npm
       run: |
-        echo "npm publish --access public (${GITHUB_REF#refs/tags/v})"
-        # npm publish --access public
+        npm publish --access public
         echo "Package published. To install, run:"
         echo ""
         echo "    npm install @inrupt/solid-client-authn-browser"
