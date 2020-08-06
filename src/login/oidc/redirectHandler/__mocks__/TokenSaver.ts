@@ -20,13 +20,16 @@
  */
 
 import { ITokenSaver } from "../TokenSaver";
-import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
-
-export const TokenSaverSaveTokenAndGetSessionResponse = SessionCreatorCreateResponse;
 
 export const TokenSaverMock: jest.Mocked<ITokenSaver> = {
   saveTokenAndGetSession: jest.fn(
-    (localUserId: string, idToken: string, accessToken?: string) =>
-      Promise.resolve(TokenSaverSaveTokenAndGetSessionResponse)
+    (
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      sessionId: string,
+      idToken: string,
+      accessToken?: string,
+      refreshToken?: string
+    ) => Promise.resolve()
+    /* eslint-enable-next-line @typescript-eslint/no-unused-vars */
   )
 };
