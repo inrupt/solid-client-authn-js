@@ -72,7 +72,7 @@ export class Session extends EventEmitter {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
-    this.clientAuthentication.login(this.info.sessionId, {
+    await this.clientAuthentication.login(this.info.sessionId, {
       ...options
     });
     this.emit("login");
