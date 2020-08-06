@@ -62,6 +62,8 @@ class App extends Component {
       // Depending on which flow login uses, the response will either be "code" or "access_token".
       const authCode =
         new URL(window.location.href).searchParams.get("code") ||
+        // FIXME: Temporarily handle both autch code and implicit flow.
+        // Should be either removved or refactored.
         new URL(window.location.href).searchParams.get("access_token");
       if (!authCode) {
         this.setState({ status: "login" });

@@ -53,11 +53,6 @@ export default class TokenSaver implements ITokenSaver {
     );
     // TODO validate decoded token
     // TODO extract the localUserId from state and put it in the session
-    // const session = this.sessionCreator.create({
-    //   localUserId,
-    //   webId: decoded.sub as string,
-    //   loggedIn: true
-    // });
     await this.storageUtility.setForUser(
       sessionId,
       {

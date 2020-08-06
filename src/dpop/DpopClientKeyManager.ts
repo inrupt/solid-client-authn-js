@@ -69,6 +69,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
       await this.storageUtility.set(
         this.getLocalStorageKey(),
         JSON.stringify(jwk),
+        // FIXME: implicit flow fails if the DPoP key is stored in the "secure" storage.
         { secure: false }
       );
     }

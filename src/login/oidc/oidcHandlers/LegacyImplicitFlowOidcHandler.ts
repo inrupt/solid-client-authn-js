@@ -52,7 +52,11 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "implicit"
       ) > -1 &&
-      // FIXME: Escape hatch to detect that we are talking to NSS and not the id broker
+      // FIXME: Escape hatch to detect that we are talking to NSS and not the id broker.
+      // NSS should support auth code flow, and we should be able not
+      // to use the legacy flow at all. There is curretnly a bug in how we handle NSS's
+      // auth code flow though. Once fixed, the auth code flow can be made higher
+      // priority in the dependencies.ts file, and this bandaid can be removed.
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "urn:ietf:params:oauth:grant-type:jwt-bearer"
       ) === -1
@@ -75,15 +79,17 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       state: oidcLoginOptions.sessionId
     };
 
-    await this.dpopClientKeyManager.generateClientKeyIfNotAlready();
-    await this.storageUtility.setForUser(
-      oidcLoginOptions.sessionId,
-      {
-        isLoggedIn: "false",
-        sessionId: oidcLoginOptions.sessionId
-      },
-      { secure: true }
-    );
+    await Promise.all([
+      this.dpopClientKeyManager.generateClientKeyIfNotAlready(),
+      this.storageUtility.setForUser(
+        oidcLoginOptions.sessionId,
+        {
+          isLoggedIn: "false",
+          sessionId: oidcLoginOptions.sessionId
+        },
+        { secure: true }
+      )
+    ]);
     /* eslint-enable @typescript-eslint/camelcase */
     // TODO: There is currently no secure storage of the DPoP key
     if (oidcLoginOptions.dpop) {
