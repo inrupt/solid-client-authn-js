@@ -164,12 +164,17 @@ container.register<IOidcHandler>("oidcHandler", {
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: RefreshTokenOidcHandler
 });
+
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: AuthorizationCodeOidcHandler
 });
 container.register<IOidcHandler>("oidcHandlers", {
+  useClass: LegacyImplicitFlowOidcHandler
+});
+container.register<IOidcHandler>("oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler
 });
+
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: ClientCredentialsOidcHandler
 });
@@ -179,9 +184,7 @@ container.register<IOidcHandler>("oidcHandlers", {
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: SecondaryDeviceOidcHandler
 });
-container.register<IOidcHandler>("oidcHandlers", {
-  useClass: LegacyImplicitFlowOidcHandler
-});
+
 container.register<IRedirector>("redirector", {
   useClass: Redirector
 });

@@ -25,19 +25,23 @@
 import "reflect-metadata";
 import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import { DpopHeaderCreatorMock } from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
+import { DpopClientKeyManagerMock } from "../../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
+import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 
 describe("LegacyImplicitFlowOidcHandler", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
     sessionInfoManager: SessionInfoManagerMock,
     redirector: RedirectorMock,
-    dpopHeaderCreator: DpopHeaderCreatorMock
+    dpopHeaderCreator: DpopHeaderCreatorMock,
+    dpopClientKeyManager: DpopClientKeyManagerMock,
+    storageUtility: StorageUtilityMock
   };
   function getLegacyImplicitFlowOidcHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -46,7 +50,9 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       mocks.fetcher ?? defaultMocks.fetcher,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
       mocks.redirector ?? defaultMocks.redirector,
-      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator
+      mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
+      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
+      mocks.storageUtility ?? defaultMocks.storageUtility
     );
   }
 
@@ -72,7 +78,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
-        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_url=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession&dpop=someToken",
+        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession&dpop=someToken",
         { handleRedirect: standardOidcOptions.handleRedirect }
       );
     });
@@ -87,7 +93,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
-        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_url=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession",
+        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession",
         { handleRedirect: standardOidcOptions.handleRedirect }
       );
     });
