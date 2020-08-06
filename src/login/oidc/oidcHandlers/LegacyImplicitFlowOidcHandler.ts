@@ -85,7 +85,8 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
         oidcLoginOptions.sessionId,
         {
           isLoggedIn: "false",
-          sessionId: oidcLoginOptions.sessionId
+          sessionId: oidcLoginOptions.sessionId,
+          dpopToken: `${oidcLoginOptions.dpop}`
         },
         { secure: true }
       )

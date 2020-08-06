@@ -23,7 +23,10 @@ import "reflect-metadata";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { EmptyStorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
+import {
+  EmptyStorageUtilityMock,
+  mockStorageUtility
+} from "../../src/storage/__mocks__/StorageUtility";
 import SessionInfoManager from "../../src/sessionInfo/SessionInfoManager";
 
 describe("SessionInfoManager", () => {
@@ -60,7 +63,7 @@ describe("SessionInfoManager", () => {
         .mockReturnValueOnce(
           Promise.resolve("https://zoomies.com/commanderCool#me")
         )
-        .mockReturnValueOnce(Promise.resolve("true"));
+        .mockReturnValue(Promise.resolve("true"));
       const sessionManager = getSessionInfoManager({ storageUtility });
       const session = await sessionManager.get("commanderCool");
       expect(session).toMatchObject({
@@ -70,11 +73,26 @@ describe("SessionInfoManager", () => {
     });
 
     it("returns undefined if the specified storage does not contain the user", async () => {
+      const storageUtility = mockStorageUtility({});
       const sessionManager = getSessionInfoManager({
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: storageUtility
       });
       const session = await sessionManager.get("commanderCool");
       expect(session).toBeUndefined();
+    });
+
+    it("retrieves the session token type from specified storage", async () => {
+      const storageUtility = mockStorageUtility({
+        commanderCool: {
+          dpopToken: "false",
+          webId: "https://zoomies.com/commanderCool#me",
+          sessionId: "commanderCool",
+          isLoggedIn: "false"
+        }
+      });
+      const sessionManager = getSessionInfoManager({ storageUtility });
+      const session = await sessionManager.get("commanderCool");
+      expect(session?.dpopToken).toBe(false);
     });
   });
 });

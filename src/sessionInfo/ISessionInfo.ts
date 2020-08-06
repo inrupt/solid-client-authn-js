@@ -26,4 +26,6 @@ export default interface ISessionInfo {
   isLoggedIn: boolean;
   webId?: string;
   sessionId: string;
+  // Indicates of the session is associated to a DPoP or a Bearer token
+  dpopToken?: boolean;
 }

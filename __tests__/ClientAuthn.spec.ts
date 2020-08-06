@@ -32,7 +32,8 @@ import {
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import {
   SessionInfoManagerMock,
-  SessionCreatorCreateResponse
+  SessionCreatorCreateResponse,
+  mockSessionManager
 } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import {
   AuthenticatedFetcherMock,
@@ -41,6 +42,7 @@ import {
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
 import URL from "url-parse";
+import { FetcherMock } from "../src/util/__mocks__/Fetcher";
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {
@@ -97,6 +99,65 @@ describe("ClientAuthentication", () => {
         {
           localUserId: "mySession",
           type: "dpop"
+        },
+        "https://zombo.com",
+        undefined
+      );
+    });
+
+    it("defaults to dpop fetch if the token type is unknown", async () => {
+      const authFetcher = AuthenticatedFetcherMock;
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionManager({
+          sessionId: "mySession",
+          isLoggedIn: false
+        }),
+        authenticatedFetcher: authFetcher
+      });
+      await clientAuthn.fetch("mySession", "https://zombo.com");
+      expect(authFetcher.handle).toHaveBeenCalledWith(
+        {
+          localUserId: "mySession",
+          type: "dpop"
+        },
+        "https://zombo.com",
+        undefined
+      );
+    });
+
+    it("uses the token type found in storage", async () => {
+      const authFetcher = AuthenticatedFetcherMock;
+      let clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionManager({
+          sessionId: "mySession",
+          isLoggedIn: false,
+          dpopToken: true
+        }),
+        authenticatedFetcher: authFetcher
+      });
+      await clientAuthn.fetch("mySession", "https://zombo.com");
+      expect(authFetcher.handle).toHaveBeenCalledWith(
+        {
+          localUserId: "mySession",
+          type: "dpop"
+        },
+        "https://zombo.com",
+        undefined
+      );
+
+      clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionManager({
+          sessionId: "mySession",
+          isLoggedIn: false,
+          dpopToken: false
+        }),
+        authenticatedFetcher: authFetcher
+      });
+      await clientAuthn.fetch("mySession", "https://zombo.com");
+      expect(authFetcher.handle).toHaveBeenCalledWith(
+        {
+          localUserId: "mySession",
+          type: "bearer"
         },
         "https://zombo.com",
         undefined

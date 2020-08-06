@@ -78,10 +78,17 @@ export default class ClientAuthentication {
     url: RequestInfo,
     init?: RequestInit
   ): Promise<Response> => {
+    const sessionInfo = await this.getSessionInfo(sessionId);
+    let tokenType: string;
+    if (!sessionInfo || sessionInfo.dpopToken === undefined) {
+      // By default, use a dpop token
+      tokenType = "dpop";
+    } else {
+      tokenType = sessionInfo.dpopToken ? "dpop" : "bearer";
+    }
     const credentials: IRequestCredentials = {
       localUserId: sessionId,
-      // TODO: This should not be hard-coded
-      type: "dpop"
+      type: tokenType
     };
     return this.authenticatedFetcher.handle(credentials, url, init);
   };

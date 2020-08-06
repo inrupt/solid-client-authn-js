@@ -22,7 +22,10 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
-import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
+import {
+  IssuerConfigFetcherMock,
+  mockIssuerConfigFetcher
+} from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
 import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
@@ -88,5 +91,64 @@ describe("OidcLoginHandler", () => {
     const handler = getInitialisedHandler();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await expect(handler.canHandle({} as any)).resolves.toBe(false);
+  });
+
+  const defaultMockIssuerConfig = {
+    issuer: new URL("https://idp.com"),
+    authorizationEndpoint: new URL("https://idp.com/auth"),
+    tokenEndpoint: new URL("https://idp.com/token"),
+    jwksUri: new URL("https://idp.com/jwks"),
+    subjectTypesSupported: [],
+    claimsSupported: [],
+    grantTypesSupported: ["refresh_token"]
+  };
+
+  const defaultMockLoginOptions = {
+    sessionId: "mySession",
+    oidcIssuer: new URL("https://arbitrary.url"),
+    redirectUrl: new URL("https://app.com/redirect"),
+    clientId: "coolApp"
+  };
+
+  it("should use a bearer token if possible (for NSS retro compatibility)", async () => {
+    const mockIssuerConfig = {
+      ...defaultMockIssuerConfig,
+      tokenTypesSupported: ["legacyPop", "dpop"]
+    };
+    const mockOidcHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({
+      issuerConfigFetcher: mockIssuerConfigFetcher(mockIssuerConfig),
+      oidcHandler: mockOidcHandler
+    });
+    await handler.handle(defaultMockLoginOptions);
+    expect(mockOidcHandler.handle.mock.calls[0][0]["dpop"]).toEqual(false);
+  });
+
+  it("should use a dpop token if specified", async () => {
+    const mockIssuerConfig = {
+      ...defaultMockIssuerConfig,
+      tokenTypesSupported: ["dpop"]
+    };
+    const mockOidcHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({
+      issuerConfigFetcher: mockIssuerConfigFetcher(mockIssuerConfig),
+      oidcHandler: mockOidcHandler
+    });
+    await handler.handle(defaultMockLoginOptions);
+    expect(mockOidcHandler.handle.mock.calls[0][0]["dpop"]).toEqual(true);
+  });
+
+  it("should default to a dpop token", async () => {
+    const mockIssuerConfig = {
+      ...defaultMockIssuerConfig
+      // No token types supported specified
+    };
+    const mockOidcHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({
+      issuerConfigFetcher: mockIssuerConfigFetcher(mockIssuerConfig),
+      oidcHandler: mockOidcHandler
+    });
+    await handler.handle(defaultMockLoginOptions);
+    expect(mockOidcHandler.handle.mock.calls[0][0]["dpop"]).toEqual(true);
   });
 });

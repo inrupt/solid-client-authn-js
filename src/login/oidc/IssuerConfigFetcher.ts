@@ -106,6 +106,9 @@ const issuerConfigKeyMap: Record<
   token_endpoint_auth_signing_alg_values_supported: {
     toKey: "tokenEndpointAuthSigningAlgValuesSupported"
   },
+  token_types_supported: {
+    toKey: "tokenTypesSupported"
+  },
   display_values_supported: { toKey: "displayValuesSupported" },
   claim_types_supported: { toKey: "claimTypesSupported" },
   claims_supported: { toKey: "claimsSupported" },

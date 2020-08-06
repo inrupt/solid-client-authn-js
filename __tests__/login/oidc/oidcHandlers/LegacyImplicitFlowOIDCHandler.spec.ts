@@ -97,5 +97,35 @@ describe("LegacyImplicitFlowOidcHandler", () => {
         { handleRedirect: standardOidcOptions.handleRedirect }
       );
     });
+
+    it("stores the token type", async () => {
+      const legacyImplicitFlowOidcHandler = getLegacyImplicitFlowOidcHandler();
+      const oidcOptions: IOidcOptions = {
+        ...standardOidcOptions,
+        dpop: false
+      };
+      await legacyImplicitFlowOidcHandler.handle(oidcOptions);
+      expect(defaultMocks.storageUtility.setForUser).toHaveBeenCalledWith(
+        "mySession",
+        {
+          isLoggedIn: "false",
+          sessionId: "mySession",
+          dpopToken: "false"
+        },
+        { secure: true }
+      );
+
+      oidcOptions["dpop"] = true;
+      await legacyImplicitFlowOidcHandler.handle(oidcOptions);
+      expect(defaultMocks.storageUtility.setForUser).toHaveBeenCalledWith(
+        "mySession",
+        {
+          isLoggedIn: "false",
+          sessionId: "mySession",
+          dpopToken: "true"
+        },
+        { secure: true }
+      );
+    });
   });
 });

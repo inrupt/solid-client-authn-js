@@ -43,3 +43,17 @@ export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   ),
   getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse]))
 };
+
+export const mockSessionManager = (
+  info: ISessionInfo
+): jest.Mocked<ISessionInfoManager> => {
+  return {
+    update: jest.fn(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+      async (sessionId: string, options: ISessionInfoManagerOptions) => {}
+    ),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    get: jest.fn(async (sessionId: string) => Promise.resolve(info)),
+    getAll: jest.fn(async () => Promise.resolve([info]))
+  };
+};

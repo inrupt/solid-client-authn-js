@@ -116,3 +116,52 @@ export const EmptyStorageUtilityMock: jest.Mocked<IStorageUtility> = {
   )
   /* eslint-enable @typescript-eslint/no-unused-vars */
 };
+
+export const mockStorageUtility = (
+  store: Record<string, Record<string, string>>
+): jest.Mocked<IStorageUtility> => {
+  return {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    get: jest.fn(
+      async (key: string, options: { errorIfNull?: boolean }) => undefined
+    ),
+    set: jest.fn(async (key: string, value: string) => {
+      /* do nothing */
+    }),
+    delete: jest.fn(async (key: string) => {
+      /* do nothing */
+    }),
+    getForUser: jest.fn(
+      async (userId: string, key: string, options: { errorIfNull?: true }) =>
+        store[userId] ? store[userId][key] : undefined
+    ),
+    setForUser: jest.fn(
+      async (
+        userId: string,
+        values: Record<string, string>,
+        options?: { secure?: boolean }
+      ) => {
+        store[userId] = values;
+      }
+    ),
+    deleteForUser: jest.fn(async (userId: string, key: string) => {
+      /* do nothing */
+    }),
+    deleteAllUserData: jest.fn(async (userId: string) => {
+      /* do nothing */
+    }),
+    safeGet: jest.fn(
+      async (
+        key: string,
+        options?: Partial<{
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          schema?: Record<string, any>;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          postProcess?: (retrievedObject: any) => any;
+          userId?: string;
+        }>
+      ) => undefined
+    )
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+  };
+};

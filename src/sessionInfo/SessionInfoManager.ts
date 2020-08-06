@@ -81,21 +81,23 @@ export default class SessionInfoManager implements ISessionInfoManager {
   }
 
   async get(sessionId: string): Promise<ISessionInfo | undefined> {
-    const webId = await this.storageUtility.getForUser(sessionId, "webId", {
-      secure: true
-    });
-    const isLoggedIn = await this.storageUtility.getForUser(
-      sessionId,
-      "isLoggedIn",
-      {
+    const [webId, dpopToken, isLoggedIn] = await Promise.all([
+      this.storageUtility.getForUser(sessionId, "webId", {
         secure: true
-      }
-    );
+      }),
+      this.storageUtility.getForUser(sessionId, "dpopToken", {
+        secure: true
+      }),
+      await this.storageUtility.getForUser(sessionId, "isLoggedIn", {
+        secure: true
+      })
+    ]);
     if (isLoggedIn !== undefined) {
       return {
         sessionId,
         webId: webId,
-        isLoggedIn: isLoggedIn === "true"
+        isLoggedIn: isLoggedIn === "true",
+        dpopToken: dpopToken === undefined || dpopToken === "true"
       };
     }
     return undefined;

@@ -73,8 +73,10 @@ export default class OidcLoginHandler implements ILoginHandler {
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
       issuer: options.oidcIssuer as URL,
-      // TODO: differentiate if DPoP should be true
-      dpop: true,
+      // FIXME: The logic of the test should be reversed, and test for the presence
+      // of "dpop" in the supportd token types, but a suspected bug on NSS requires
+      // that we look for the legacy bearer token instead.
+      dpop: !issuerConfig.tokenTypesSupported?.includes("legacyPop") ?? true,
       redirectUrl: options.redirectUrl as URL,
       issuerConfiguration: issuerConfig,
       client: await this.clientRegistrar.getClient(

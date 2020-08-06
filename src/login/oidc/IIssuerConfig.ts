@@ -48,6 +48,7 @@ export default interface IIssuerConfig {
   requestObjectEncryptionEncValuesSupported?: string[];
   tokenEndpointAuthMethodsSupported?: string[];
   tokenEndpointAuthSigningAlgValuesSupported?: string[];
+  tokenTypesSupported?: string[];
   displayValuesSupported?: string[];
   claimTypesSupported?: string[];
   claimsSupported: string[];
