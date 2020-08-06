@@ -64,6 +64,8 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
         alg: "EC",
         use: "sig"
       });
+
+      // FIXME: Temporarily use insecure storage while the implicit auth flow is requried.
       await this.storageUtility.set(
         this.getLocalStorageKey(),
         JSON.stringify(jwk),
@@ -74,6 +76,8 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
 
   async getClientKey(): Promise<JSONWebKey | undefined> {
     let keyString;
+
+    // FIXME: Temporarily use insecure storage while the implicit auth flow is requried.
     try {
       keyString = await this.storageUtility.get(this.getLocalStorageKey(), {
         secure: false

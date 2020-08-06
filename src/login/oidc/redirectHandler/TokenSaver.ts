@@ -47,7 +47,6 @@ export default class TokenSaver implements ITokenSaver {
     accessToken?: string,
     refreshToken?: string
   ): Promise<void> {
-    // throw new Error("Not Implemented");
     const decoded = await this.joseUtility.decodeJWT(
       // TODO this should actually be the id_vc of the token
       accessToken as string

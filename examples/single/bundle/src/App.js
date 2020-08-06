@@ -38,7 +38,7 @@ class App extends Component {
     );
     this.state = {
       status: "loading",
-      loginIssuer: "https://nseydoux.inrupt.net",
+      loginIssuer: "https://inrupt.net",
       fetchRoute: "",
       fetchBody: "",
       session: session,
@@ -59,6 +59,7 @@ class App extends Component {
     } else if (this.state.session.isLoggedIn) {
       this.setState({ status: "dashboard", session });
     } else {
+      // Depending on which flow login uses, the response will either be "code" or "access_token".
       const authCode =
         new URL(window.location.href).searchParams.get("code") ||
         new URL(window.location.href).searchParams.get("access_token");

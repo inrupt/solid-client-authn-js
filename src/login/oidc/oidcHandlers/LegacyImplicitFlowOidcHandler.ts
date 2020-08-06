@@ -52,7 +52,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "implicit"
       ) > -1 &&
-      // Escape hatch to detect that we are talking to NSS and not the id broker
+      // FIXME: Escape hatch to detect that we are talking to NSS and not the id broker
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "urn:ietf:params:oauth:grant-type:jwt-bearer"
       ) === -1
