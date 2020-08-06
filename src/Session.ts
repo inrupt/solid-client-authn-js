@@ -69,23 +69,27 @@ export class Session extends EventEmitter {
     }
   }
 
-  async login(options: ILoginInputOptions): Promise<void> {
+  // Define these functions as properties so that they don't get accidentally re-bound.
+  // Isn't Javascript fun?
+  login = async (options: ILoginInputOptions): Promise<void> => {
     this.clientAuthentication.login(this.info.sessionId, {
       ...options
     });
     this.emit("login");
-  }
+  };
 
-  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
+  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
     return this.clientAuthentication.fetch(this.info.sessionId, url, init);
-  }
+  };
 
-  async logout(): Promise<void> {
+  logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
     this.emit("logout");
-  }
+  };
 
-  async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
+  handleIncomingRedirect = async (
+    url: string
+  ): Promise<ISessionInfo | undefined> => {
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url
     );
@@ -94,7 +98,7 @@ export class Session extends EventEmitter {
       this.info.webId = sessionInfo.webId;
     }
     return sessionInfo;
-  }
+  };
 
   onLogin(callback: () => unknown): void {
     this.on("login", callback);

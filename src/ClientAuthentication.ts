@@ -55,6 +55,8 @@ export default class ClientAuthentication {
     return undefined;
   }
 
+  // Define these functions as properties so that they don't get accidentally re-bound.
+  // Isn't Javascript fun?
   login = async (
     sessionId: string,
     options: ILoginInputOptions
