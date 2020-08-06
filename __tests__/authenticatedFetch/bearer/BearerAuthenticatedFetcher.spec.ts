@@ -23,11 +23,32 @@
 import "reflect-metadata";
 import BearerAuthenticatedFetcher from "../../../src/authenticatedFetch/bearer/BearerAuthenticatedFetcher";
 import URL from "url-parse";
+import {
+  FetcherMock,
+  FetcherMockResponse
+} from "../../../src/util/__mocks__/Fetcher";
+import {
+  StorageUtilityMock,
+  StorageUtilityGetResponse,
+  EmptyStorageUtilityMock
+} from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("BearerAuthenticatedFetcher", () => {
+  const defaultMocks = {
+    fetcher: FetcherMock,
+    storageUtility: StorageUtilityMock
+  };
+  function getBearerAuthenticatedFetcher(
+    mocks: Partial<typeof defaultMocks> = defaultMocks
+  ): BearerAuthenticatedFetcher {
+    return new BearerAuthenticatedFetcher(
+      mocks.fetcher ?? defaultMocks.fetcher,
+      mocks.storageUtility ?? defaultMocks.storageUtility
+    );
+  }
   describe("canHandle", () => {
     it("accepts configs with type bearer", async () => {
-      const fetcher = new BearerAuthenticatedFetcher();
+      const fetcher = getBearerAuthenticatedFetcher();
 
       expect(
         await fetcher.canHandle(
@@ -38,7 +59,7 @@ describe("BearerAuthenticatedFetcher", () => {
     });
 
     it("rejects configs without type bearer", async () => {
-      const fetcher = new BearerAuthenticatedFetcher();
+      const fetcher = getBearerAuthenticatedFetcher();
 
       expect(
         await fetcher.canHandle(
@@ -46,6 +67,64 @@ describe("BearerAuthenticatedFetcher", () => {
           "http://example.com"
         )
       ).toBe(false);
+    });
+  });
+
+  describe("handle", () => {
+    it("throws if the request cannot be handled", async () => {
+      const fetcher = getBearerAuthenticatedFetcher();
+
+      await expect(() =>
+        fetcher.handle(
+          { type: "dpop", localUserId: "global" },
+          "http://example.com"
+        )
+      ).rejects.toThrow(
+        'BearerAuthenticatedFetcher cannot handle a request with the credentials [{"type":"dpop","localUserId":"global"}]'
+      );
+    });
+
+    it("throws if no auth token is found in storage", async () => {
+      const fetcher = getBearerAuthenticatedFetcher({
+        storageUtility: EmptyStorageUtilityMock
+      });
+      await expect(() =>
+        fetcher.handle(
+          { type: "bearer", localUserId: "global" },
+          "http://example.com"
+        )
+      ).rejects.toThrow("No bearer token are available for session [global]");
+    });
+
+    it("sends a request with a bearer auth header", async () => {
+      const fetcher = FetcherMock;
+      const bearerFetcher = getBearerAuthenticatedFetcher({ fetcher });
+      await bearerFetcher.handle(
+        { type: "bearer", localUserId: "global" },
+        "http://example.com"
+      );
+      expect(fetcher.fetch).toHaveBeenCalledWith("http://example.com", {
+        headers: {
+          authorization: `Bearer ${StorageUtilityGetResponse}`
+        }
+      });
+    });
+
+    it("preserves the request headers", async () => {
+      const fetcher = FetcherMock;
+      const bearerFetcher = getBearerAuthenticatedFetcher({ fetcher });
+      const init = { headers: { Accept: "text/turtle" } };
+      await bearerFetcher.handle(
+        { type: "bearer", localUserId: "global" },
+        "http://example.com",
+        init
+      );
+      expect(fetcher.fetch).toHaveBeenCalledWith("http://example.com", {
+        headers: {
+          authorization: `Bearer ${StorageUtilityGetResponse}`,
+          Accept: "text/turtle"
+        }
+      });
     });
   });
 });

@@ -24,14 +24,27 @@
  */
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
 import IRequestCredentials from "../IRequestCredentials";
-import NotImplementedError from "../../errors/NotImplementedError";
+import { inject, injectable } from "tsyringe";
+import { IFetcher } from "../../util/Fetcher";
+import { IStorageUtility } from "../../storage/StorageUtility";
+import { flattenHeaders } from "../headers/HeadersUtils";
 
+@injectable()
 export default class BearerAuthenticatedFetcher
   implements IAuthenticatedFetcher {
+  constructor(
+    @inject("fetcher") private fetcher: IFetcher,
+    @inject("urlRepresentationConverter")
+    @inject("storageUtility")
+    private storageUtility: IStorageUtility
+  ) {}
+
   async canHandle(
     requestCredentials: IRequestCredentials,
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     url: RequestInfo,
     requestInit?: RequestInit
+    /* eslint-enable @typescript-eslint/no-unused-vars */
   ): Promise<boolean> {
     return requestCredentials.type === "bearer";
   }
@@ -41,7 +54,36 @@ export default class BearerAuthenticatedFetcher
     url: RequestInfo,
     requestInit?: RequestInit
   ): Promise<Response> {
-    "";
-    throw new NotImplementedError("BearerAuthenticatedFetcher");
+    if (!(await this.canHandle(requestCredentials, url, requestInit))) {
+      throw new Error(
+        `BearerAuthenticatedFetcher cannot handle a request with the credentials [${JSON.stringify(
+          requestCredentials
+        )}]`
+      );
+    }
+    const authToken = await this.storageUtility.getForUser(
+      requestCredentials.localUserId,
+      "accessToken",
+      {
+        secure: true
+      }
+    );
+    if (!authToken) {
+      throw new Error(
+        `No bearer token are available for session [${requestCredentials.localUserId}]`
+      );
+    }
+    const requestInitiWithDefaults = {
+      headers: {},
+      method: "GET",
+      ...requestInit
+    };
+    return this.fetcher.fetch(url, {
+      ...requestInit,
+      headers: {
+        ...flattenHeaders(requestInitiWithDefaults.headers as Headers),
+        authorization: `Bearer ${authToken}`
+      }
+    });
   }
 }
