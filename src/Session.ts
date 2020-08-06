@@ -23,30 +23,30 @@ import IStorage from "./storage/IStorage";
 import ILoginInputOptions from "./ILoginInputOptions";
 import { EventEmitter } from "events";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
-import ClientAuthn from "./ClientAuthn";
-import { getClientAuthnWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
+import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { v4 } from "uuid";
 
 export interface ISessionOptions {
   secureStorage: IStorage;
   insecureStorage: IStorage;
   sessionInfo: ISessionInfo;
-  clientAuthn: ClientAuthn;
+  clientAuthentication: ClientAuthentication;
 }
 
 export class Session extends EventEmitter {
   public readonly info: ISessionInfo;
-  private clientAuthn: ClientAuthn;
+  private clientAuthentication: ClientAuthentication;
 
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId?: string
   ) {
     super();
-    if (sessionOptions.clientAuthn) {
-      this.clientAuthn = sessionOptions.clientAuthn;
+    if (sessionOptions.clientAuthentication) {
+      this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
-      this.clientAuthn = getClientAuthnWithDependencies({
+      this.clientAuthentication = getClientAuthenticationWithDependencies({
         secureStorage: sessionOptions.secureStorage,
         insecureStorage: sessionOptions.insecureStorage
       });
@@ -69,32 +69,32 @@ export class Session extends EventEmitter {
     }
   }
 
-  login = async (options: ILoginInputOptions): Promise<void> => {
-    this.clientAuthn.login(this.info.sessionId, {
+  async login(options: ILoginInputOptions): Promise<void> {
+    this.clientAuthentication.login(this.info.sessionId, {
       ...options
     });
     this.emit("login");
-  };
+  }
 
-  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    return this.clientAuthn.fetch(this.info.sessionId, url, init);
-  };
+  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
+    return this.clientAuthentication.fetch(this.info.sessionId, url, init);
+  }
 
-  logout = async (): Promise<void> => {
-    await this.clientAuthn.logout(this.info.sessionId);
+  async logout(): Promise<void> {
+    await this.clientAuthentication.logout(this.info.sessionId);
     this.emit("logout");
-  };
+  }
 
-  handleIncomingRedirect = async (
-    url: string
-  ): Promise<ISessionInfo | undefined> => {
-    const sessionInfo = await this.clientAuthn.handleIncomingRedirect(url);
+  async handleIncomingRedirect(url: string): Promise<ISessionInfo | undefined> {
+    const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
+      url
+    );
     if (sessionInfo) {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
     }
     return sessionInfo;
-  };
+  }
 
   onLogin(callback: () => unknown): void {
     this.on("login", callback);

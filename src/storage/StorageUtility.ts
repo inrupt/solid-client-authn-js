@@ -87,7 +87,7 @@ export default class StorageUtility implements IStorageUtility {
   ) {}
 
   private getKey(userId: string): string {
-    return `solidClientAuthnUser:${userId}`;
+    return `solidClientAuthenticationUser:${userId}`;
   }
 
   private async getUserData(

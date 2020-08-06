@@ -19,20 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { getClientAuthnWithDependencies } from "../src/dependencies";
-import ClientAuthn from "../src/ClientAuthn";
+import { getClientAuthenticationWithDependencies } from "../src/dependencies";
+import ClientAuthentication from "../src/ClientAuthentication";
 import { StorageMock } from "../src/storage/__mocks__/Storage";
 
 describe("dependencies", () => {
   it("performs dependency injection", () => {
-    const clientAuthn = getClientAuthnWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthn);
+    const clientAuthn = getClientAuthenticationWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
   });
 
   it("performs dependency injection with a given input", () => {
-    const clientAuthn = getClientAuthnWithDependencies({
+    const clientAuthn = getClientAuthenticationWithDependencies({
       secureStorage: StorageMock
     });
-    expect(clientAuthn).toBeInstanceOf(ClientAuthn);
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
   });
 });

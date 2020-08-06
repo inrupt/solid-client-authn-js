@@ -1,8 +1,8 @@
 platform :ios, '9.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-target 'solidClientAuthnReactNativeDemo' do
-  # Pods for solidClientAuthnReactNativeDemo
+target 'solidClientAuthenticationReactNativeDemo' do
+  # Pods for solidClientAuthenticationReactNativeDemo
   pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
   pod 'FBReactNativeSpec', :path => "../node_modules/react-native/Libraries/FBReactNativeSpec"
   pod 'RCTRequired', :path => "../node_modules/react-native/Libraries/RCTRequired"
@@ -34,7 +34,7 @@ target 'solidClientAuthnReactNativeDemo' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  target 'solidClientAuthnReactNativeDemoTests' do
+  target 'solidClientAuthenticationReactNativeDemoTests' do
     inherit! :search_paths
     # Pods for testing
   end
@@ -42,10 +42,10 @@ target 'solidClientAuthnReactNativeDemo' do
   use_native_modules!
 end
 
-target 'solidClientAuthnReactNativeDemo-tvOS' do
-  # Pods for solidClientAuthnReactNativeDemo-tvOS
+target 'solidClientAuthenticationReactNativeDemo-tvOS' do
+  # Pods for solidClientAuthenticationReactNativeDemo-tvOS
 
-  target 'solidClientAuthnReactNativeDemo-tvOSTests' do
+  target 'solidClientAuthenticationReactNativeDemo-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end

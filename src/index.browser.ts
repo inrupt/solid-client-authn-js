@@ -19,6 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import * as solidClientAuthn from "./index";
+import * as solidClientAuthentication from "./index";
 
-module.exports = solidClientAuthn;
+module.exports = solidClientAuthentication;
