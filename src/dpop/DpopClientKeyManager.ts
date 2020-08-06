@@ -64,19 +64,24 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
         alg: "EC",
         use: "sig"
       });
+
+      // FIXME: Temporarily use insecure storage while the implicit auth flow is requried.
       await this.storageUtility.set(
         this.getLocalStorageKey(),
         JSON.stringify(jwk),
-        { secure: true }
+        // FIXME: implicit flow fails if the DPoP key is stored in the "secure" storage.
+        { secure: false }
       );
     }
   }
 
   async getClientKey(): Promise<JSONWebKey | undefined> {
     let keyString;
+
+    // FIXME: Temporarily use insecure storage while the implicit auth flow is requried.
     try {
       keyString = await this.storageUtility.get(this.getLocalStorageKey(), {
-        secure: true
+        secure: false
       });
       if (!keyString) {
         return undefined;

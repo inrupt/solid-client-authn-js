@@ -24,7 +24,7 @@ import "regenerator-runtime/runtime";
 
 import {
   Session,
-  getClientAuthnWithDependencies
+  getClientAuthenticationWithDependencies
 } from "../../../../dist/index";
 
 class App extends Component {
@@ -32,13 +32,13 @@ class App extends Component {
     super(props);
     const session = new Session(
       {
-        clientAuthn: getClientAuthnWithDependencies({})
+        clientAuthentication: getClientAuthenticationWithDependencies({})
       },
       "mySession"
     );
     this.state = {
       status: "loading",
-      loginIssuer: "https://broker.demo-ess.inrupt.com",
+      loginIssuer: "https://inrupt.net",
       fetchRoute: "",
       fetchBody: "",
       session: session,
@@ -59,7 +59,12 @@ class App extends Component {
     } else if (this.state.session.isLoggedIn) {
       this.setState({ status: "dashboard", session });
     } else {
-      const authCode = new URL(window.location.href).searchParams.get("code");
+      // Depending on which flow login uses, the response will either be "code" or "access_token".
+      const authCode =
+        new URL(window.location.href).searchParams.get("code") ||
+        // FIXME: Temporarily handle both autch code and implicit flow.
+        // Should be either removved or refactored.
+        new URL(window.location.href).searchParams.get("access_token");
       if (!authCode) {
         this.setState({ status: "login" });
       } else {

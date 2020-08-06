@@ -11,8 +11,8 @@ npm install @inrupt/solid-client-authn-browser
 ```html
 <script src="/path/to/solid-client-authn.bundle.js"></script>
 <script>
-    const session = new solidClientAuthn.Session({
-        clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({});
+    const session = new solidClientAuthentication.Session({
+        clientAuthentication: solidClientAuthentication.getClientAuthenticationWithDependencies({});
     });
     // ...
 </script>
@@ -24,17 +24,17 @@ npm install @inrupt/solid-client-authn-browser
 import { Session } from "@inrupt/solid-client-authn-browser";
 
 const session = new Session({
-    clientAuthn: getClientAuthnWithDependencies({});
+    clientAuthentication: getClientAuthenticationWithDependencies({});
 });
 ```
 
 ### Using `require`
 
 ```javascript
-const solidClientAuthn = require("@inrupt/solid-client-authn-browser");
+const solidClientAuthentication = require("@inrupt/solid-client-authn-browser");
 
-const session = new solidClientAuthn.Session({
-    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({});
+const session = new solidClientAuthentication.Session({
+    clientAuthentication: solidClientAuthentication.getClientAuthenticationWithDependencies({});
 });
 ```
 
@@ -47,12 +47,12 @@ If solid-client-authn is installed in an application that operates in a web brow
 ```typescript
 import {
   Session,
-  getClientAuthnWithDependencies
+  getClientAuthenticationWithDependencies
 } from "@inrupt/solid-client-authn-browser";
 
 // Build a session.
-const session = new solidClientAuthn.Session({
-    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
+const session = new solidClientAuthentication.Session({
+    clientAuthentication: solidClientAuthentication.getClientAuthenticationWithDependencies({})},
     "mySession"
 );
 
@@ -85,8 +85,8 @@ credentials. If not, it will attempt to make a request without the user's creden
 ```typescript
 import { Session } from "@inrupt/solid-client-authn-browser";
 
-const session = new solidClientAuthn.Session({
-    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
+const session = new solidClientAuthentication.Session({
+    clientAuthentication: solidClientAuthentication.getClientAuthenticationWithDependencies({})},
     "mySession"
 );
 
@@ -108,12 +108,12 @@ option.
 ```typescript
 import {
   Session,
-  getClientAuthnWithDependencies
+  getClientAuthenticationWithDependencies
 } from "@inrupt/solid-client-authn-browser";
 
 // Build a session.
-const session = new solidClientAuthn.Session({
-    clientAuthn: solidClientAuthn.getClientAuthnWithDependencies({})},
+const session = new solidClientAuthentication.Session({
+    clientAuthentication: solidClientAuthentication.getClientAuthenticationWithDependencies({})},
     "mySession"
 );
 

@@ -22,8 +22,8 @@
 import IStorage from "./storage/IStorage";
 import { Session } from "./Session";
 import { EventEmitter } from "events";
-import ClientAuthn from "./ClientAuthn";
-import { getClientAuthnWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
+import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { detectEnvironment } from "./util/EnvironmentDetector";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 
@@ -33,7 +33,7 @@ export interface ISessionManagerOptions {
 }
 
 export class SessionManager extends EventEmitter {
-  private clientAuthn: ClientAuthn;
+  private clientAuthn: ClientAuthentication;
   private sessionRecords: Record<
     string,
     { session: Session; logoutCallback: () => unknown }
@@ -43,7 +43,7 @@ export class SessionManager extends EventEmitter {
 
   constructor(options: ISessionManagerOptions = {}) {
     super();
-    this.clientAuthn = getClientAuthnWithDependencies({
+    this.clientAuthn = getClientAuthenticationWithDependencies({
       secureStorage: options.secureStorage,
       insecureStorage: options.insecureStorage
     });
@@ -80,7 +80,7 @@ export class SessionManager extends EventEmitter {
     } else {
       return this.addNewSessionRecord(
         new Session({
-          clientAuthn: this.clientAuthn,
+          clientAuthentication: this.clientAuthn,
           sessionInfo: sessionInfo
         })
       );
@@ -106,12 +106,12 @@ export class SessionManager extends EventEmitter {
         session = this.getSessionFromCurrentSessionInfo(retrievedSessionInfo);
       } else {
         session = this.addNewSessionRecord(
-          new Session({ clientAuthn: this.clientAuthn }, sessionId)
+          new Session({ clientAuthentication: this.clientAuthn }, sessionId)
         );
       }
     } else {
       session = this.addNewSessionRecord(
-        new Session({ clientAuthn: this.clientAuthn })
+        new Session({ clientAuthentication: this.clientAuthn })
       );
     }
     return session;

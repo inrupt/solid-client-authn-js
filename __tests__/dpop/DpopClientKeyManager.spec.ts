@@ -29,8 +29,6 @@ import {
   JoseUtilityGenerateJWKResponse
 } from "../../src/jose/__mocks__/JoseUtility";
 import DpopClientKeyManager from "../../src/dpop/DpopClientKeyManager";
-import IOidcOptions from "../../src/login/oidc/IOidcOptions";
-import OidcHandlerCanHandleTests from "../login/oidc/oidcHandlers/OidcHandlerCanHandleTests";
 
 describe("DpopClientKeyManager", () => {
   const defaultMocks = {
@@ -60,7 +58,7 @@ describe("DpopClientKeyManager", () => {
       expect(StorageUtilityMock.set).toHaveBeenCalledWith(
         "clientKey",
         JSON.stringify(JoseUtilityGenerateJWKResponse),
-        { secure: true }
+        { secure: false }
       );
     });
 

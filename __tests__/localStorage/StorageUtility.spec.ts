@@ -95,7 +95,7 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       const value = await storageUtility.getForUser("animals", "jackie");
       expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals"
+        "solidClientAuthenticationUser:animals"
       );
       expect(value).toBe("The Cat");
     });
@@ -106,7 +106,7 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       const value = await storageUtility.getForUser("animals", "jackie");
       expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals"
+        "solidClientAuthenticationUser:animals"
       );
       expect(value).toBeUndefined();
     });
@@ -119,7 +119,7 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       const value = await storageUtility.getForUser("animals", "jackie");
       expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals"
+        "solidClientAuthenticationUser:animals"
       );
       expect(value).toBe(undefined);
     });
@@ -149,10 +149,10 @@ describe("StorageUtility", () => {
         jackie: "The Pretty Kitty"
       });
       expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals"
+        "solidClientAuthenticationUser:animals"
       );
       expect(storageMock.set).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals",
+        "solidClientAuthenticationUser:animals",
         JSON.stringify({
           jackie: "The Pretty Kitty",
           sledge: "The Dog"
@@ -170,10 +170,10 @@ describe("StorageUtility", () => {
         jackie: "The Pretty Kitty"
       });
       expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals"
+        "solidClientAuthenticationUser:animals"
       );
       expect(storageMock.set).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals",
+        "solidClientAuthenticationUser:animals",
         JSON.stringify({
           jackie: "The Pretty Kitty"
         })
@@ -194,10 +194,10 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       await storageUtility.deleteForUser("animals", "jackie");
       expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals"
+        "solidClientAuthenticationUser:animals"
       );
       expect(storageMock.set).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals",
+        "solidClientAuthenticationUser:animals",
         JSON.stringify({
           sledge: "The Dog"
         })
@@ -211,7 +211,7 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       await storageUtility.deleteAllUserData("animals");
       expect(storageMock.delete).toHaveBeenCalledWith(
-        "solidClientAuthnUser:animals"
+        "solidClientAuthenticationUser:animals"
       );
     });
   });

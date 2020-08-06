@@ -20,21 +20,25 @@
  */
 
 import "reflect-metadata";
+import { TokenSaverMock } from "../../../../src/login/oidc/redirectHandler/__mocks__/TokenSaver";
 import {
-  TokenSaverMock,
-  TokenSaverSaveTokenAndGetSessionResponse
-} from "../../../../src/login/oidc/redirectHandler/__mocks__/TokenSaver";
+  SessionInfoManagerMock,
+  SessionCreatorCreateResponse
+} from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import GeneralRedirectHandler from "../../../../src/login/oidc/redirectHandler/GeneralRedirectHandler";
 
 describe("GeneralRedirectHandler", () => {
   const defaultMocks = {
-    tokenSaver: TokenSaverMock
+    tokenSaver: TokenSaverMock,
+    sessionInfoManager: SessionInfoManagerMock
   };
+
   function getGeneralRedirectHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): GeneralRedirectHandler {
     return new GeneralRedirectHandler(
-      mocks.tokenSaver ?? defaultMocks.tokenSaver
+      mocks.tokenSaver ?? defaultMocks.tokenSaver,
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
     );
   }
 
@@ -79,7 +83,7 @@ describe("GeneralRedirectHandler", () => {
         await generalRedirectHandler.handle(
           "https://coolsite/?id_token=a&access_token=b&state=c"
         )
-      ).toBe(TokenSaverSaveTokenAndGetSessionResponse);
+      ).toBe(SessionCreatorCreateResponse);
       expect(
         defaultMocks.tokenSaver.saveTokenAndGetSession
       ).toHaveBeenCalledWith("c", "a", "b");

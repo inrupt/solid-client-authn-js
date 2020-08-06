@@ -25,10 +25,15 @@ import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
+import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 @injectable()
 export default class GeneralRedirectHandler implements IRedirectHandler {
-  constructor(@inject("tokenSaver") private tokenSaver: ITokenSaver) {}
+  constructor(
+    @inject("tokenSaver") private tokenSaver: ITokenSaver,
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager
+  ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
     const url = new URL(redirectUrl, true);
@@ -39,7 +44,7 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
       url.query.state
     );
   }
-  async handle(redirectUrl: string): Promise<ISessionInfo> {
+  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(
         `Cannot handle redirect url [${redirectUrl}]`
@@ -47,10 +52,12 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
     }
     const url = new URL(redirectUrl, true);
 
-    return this.tokenSaver.saveTokenAndGetSession(
+    await this.tokenSaver.saveTokenAndGetSession(
       url.query.state as string,
       url.query.id_token as string,
       url.query.access_token
     );
+    const sessionId = url.query.state as string;
+    return await this.sessionInfoManager.get(sessionId);
   }
 }

@@ -22,12 +22,12 @@
 /**
  * @jest-environment node
  */
-import { getClientAuthnWithDependencies } from "../src/dependencies";
-import ClientAuthn from "../src/ClientAuthn";
+import { getClientAuthenticationWithDependencies } from "../src/dependencies";
+import ClientAuthentication from "../src/ClientAuthentication";
 
 describe("dependencies.node", () => {
   it("performs dependency injection in a node environment", () => {
-    const clientAuthn = getClientAuthnWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthn);
+    const clientAuthn = getClientAuthenticationWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
   });
 });

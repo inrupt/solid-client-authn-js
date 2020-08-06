@@ -24,7 +24,7 @@
  */
 import "reflect-metadata";
 import { container } from "tsyringe";
-import ClientAuthn from "./ClientAuthn";
+import ClientAuthentication from "./ClientAuthentication";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
@@ -164,12 +164,17 @@ container.register<IOidcHandler>("oidcHandler", {
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: RefreshTokenOidcHandler
 });
+
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: AuthorizationCodeOidcHandler
 });
 container.register<IOidcHandler>("oidcHandlers", {
+  useClass: LegacyImplicitFlowOidcHandler
+});
+container.register<IOidcHandler>("oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler
 });
+
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: ClientCredentialsOidcHandler
 });
@@ -179,9 +184,7 @@ container.register<IOidcHandler>("oidcHandlers", {
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: SecondaryDeviceOidcHandler
 });
-container.register<IOidcHandler>("oidcHandlers", {
-  useClass: LegacyImplicitFlowOidcHandler
-});
+
 container.register<IRedirector>("redirector", {
   useClass: Redirector
 });
@@ -224,10 +227,10 @@ container.register<ILogoutHandler>("logoutHandler", {
   useClass: GeneralLogoutHandler
 });
 
-export function getClientAuthnWithDependencies(dependencies: {
+export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
-}): ClientAuthn {
+}): ClientAuthentication {
   let secureStorage;
   let insecureStorage;
   switch (detectEnvironment()) {
@@ -249,5 +252,5 @@ export function getClientAuthnWithDependencies(dependencies: {
   authenticatorContainer.register<IStorage>("insecureStorage", {
     useValue: insecureStorage
   });
-  return authenticatorContainer.resolve(ClientAuthn);
+  return authenticatorContainer.resolve(ClientAuthentication);
 }
