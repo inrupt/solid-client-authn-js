@@ -25,20 +25,6 @@ The libraries share a common API and include different modules for different dep
 
 The different `solid-client-authn` libraries all share the same interface ([see API reference](./docs/api.md)). `solid-client-authn` includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
 
-# Installation
-
-For the latest stable version of solid-client:
-
-```bash
-npm install @inrupt/solid-client
-```
-
-For the latest stable version of all Inrupt Solid JS libraries:
-
-```bash
-npm install @inrupt/solid-client @inrupt/solid-client-authn-browser @inrupt/vocab-common-rdf
-```
-
 ## Usage
 ### Single session API
 
