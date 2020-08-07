@@ -82,14 +82,17 @@ export default class ClientAuthentication {
     let tokenType: string;
     if (!sessionInfo || sessionInfo.dpopToken === undefined) {
       // By default, use a dpop token
+      console.log("No token type found in storage");
       tokenType = "dpop";
     } else {
+      console.log(`Token type in storage is dpop: ${sessionInfo.dpopToken}`);
       tokenType = sessionInfo.dpopToken ? "dpop" : "bearer";
     }
     const credentials: IRequestCredentials = {
       localUserId: sessionId,
       type: tokenType
     };
+    console.log(`Issuing a request with ${credentials.type} token`);
     return this.authenticatedFetcher.handle(credentials, url, init);
   };
 

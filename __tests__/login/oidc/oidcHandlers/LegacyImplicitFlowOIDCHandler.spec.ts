@@ -105,27 +105,23 @@ describe("LegacyImplicitFlowOidcHandler", () => {
         dpop: false
       };
       await legacyImplicitFlowOidcHandler.handle(oidcOptions);
-      expect(defaultMocks.storageUtility.setForUser).toHaveBeenCalledWith(
+      expect(defaultMocks.storageUtility.setForUser.mock.calls[1]).toEqual([
         "mySession",
         {
-          isLoggedIn: "false",
-          sessionId: "mySession",
           dpopToken: "false"
         },
-        { secure: true }
-      );
+        { secure: false }
+      ]);
 
       oidcOptions["dpop"] = true;
       await legacyImplicitFlowOidcHandler.handle(oidcOptions);
-      expect(defaultMocks.storageUtility.setForUser).toHaveBeenCalledWith(
+      expect(defaultMocks.storageUtility.setForUser.mock.calls[3]).toEqual([
         "mySession",
         {
-          isLoggedIn: "false",
-          sessionId: "mySession",
           dpopToken: "true"
         },
-        { secure: true }
-      );
+        { secure: false }
+      ]);
     });
   });
 });

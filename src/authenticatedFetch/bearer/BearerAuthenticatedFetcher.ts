@@ -34,7 +34,6 @@ export default class BearerAuthenticatedFetcher
   implements IAuthenticatedFetcher {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("urlRepresentationConverter")
     @inject("storageUtility")
     private storageUtility: IStorageUtility
   ) {}

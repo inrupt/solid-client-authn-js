@@ -78,26 +78,35 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       scope: "openid webid offline_access",
       state: oidcLoginOptions.sessionId
     };
-
+    console.log(`Storing token type is dpop ${oidcLoginOptions.dpop}`);
     await Promise.all([
       this.dpopClientKeyManager.generateClientKeyIfNotAlready(),
       this.storageUtility.setForUser(
         oidcLoginOptions.sessionId,
         {
           isLoggedIn: "false",
-          sessionId: oidcLoginOptions.sessionId,
-          dpopToken: `${oidcLoginOptions.dpop}`
+          sessionId: oidcLoginOptions.sessionId
         },
         { secure: true }
+      ),
+      this.storageUtility.setForUser(
+        oidcLoginOptions.sessionId,
+        {
+          dpopToken: `${oidcLoginOptions.dpop}`
+        },
+        { secure: false }
       )
     ]);
     /* eslint-enable @typescript-eslint/camelcase */
     // TODO: There is currently no secure storage of the DPoP key
     if (oidcLoginOptions.dpop) {
+      console.log("Requesting a DPoP token");
       query.dpop = await this.dpopHeaderCreator.createHeaderToken(
         oidcLoginOptions.issuer,
         "GET"
       );
+    } else {
+      console.log("Requesting a bearer token");
     }
     requestUrl.set("query", query);
     const sessionInfo = await this.sessionInfoManager.get(

@@ -86,12 +86,13 @@ export default class SessionInfoManager implements ISessionInfoManager {
         secure: true
       }),
       this.storageUtility.getForUser(sessionId, "dpopToken", {
-        secure: true
+        secure: false
       }),
       await this.storageUtility.getForUser(sessionId, "isLoggedIn", {
         secure: true
       })
     ]);
+    console.log(`dpop token is ${dpopToken}`);
     if (isLoggedIn !== undefined) {
       return {
         sessionId,
