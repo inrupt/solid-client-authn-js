@@ -135,6 +135,9 @@ export default class TokenRequester {
     if (!decoded || !decoded.sub) {
       throw new Error("The idp returned a bad token without a sub.");
     }
+    console.log(
+      `Received the following access token: ${JSON.stringify(decoded)}`
+    );
 
     await this.storageUtility.setForUser(
       sessionId,

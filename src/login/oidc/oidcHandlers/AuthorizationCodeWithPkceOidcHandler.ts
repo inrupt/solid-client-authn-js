@@ -70,6 +70,9 @@ export default class AuthorizationCodeWithPkceOidcHandler
     };
     /* eslint-enable @typescript-eslint/camelcase */
     requestUrl.set("query", query);
+    console.log(
+      `Storing code verifier ${codeVerifier} for session ${oidcLoginOptions.sessionId}`
+    );
     // TODO: This is inefficent, there should be a bulk
     await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
       codeVerifier,

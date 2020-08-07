@@ -53,6 +53,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     const url = new URL(redirectUrl, true);
     const sessionId = url.query.state as string;
     const [codeVerifier, redirectUri] = await Promise.all([
+      // FIXME cleanup the await in the promise.all
       (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
         errorIfNull: true
       })) as string,

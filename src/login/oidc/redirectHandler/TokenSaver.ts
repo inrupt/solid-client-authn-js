@@ -23,6 +23,7 @@ import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
+import JWT from "jsonwebtoken";
 
 export interface ITokenSaver {
   saveTokenAndGetSession(
@@ -51,6 +52,22 @@ export default class TokenSaver implements ITokenSaver {
       // TODO this should actually be the id_vc of the token
       accessToken as string
     );
+    console.log(
+      `Received the following access token: ${JSON.stringify(decoded)}`
+    );
+    const dpopToken = await this.storageUtility.getForUser(
+      sessionId,
+      "dpopToken",
+      {
+        secure: false
+      }
+    );
+    if (dpopToken !== undefined && dpopToken === "false") {
+      // As per https://github.com/solid/node-solid-server/issues/1061#issuecomment-459688994,
+      // the `aud` claim must be customized: the client_id should be replaced by the provider
+      // url.
+      decoded["aud"] = decoded["iss"];
+    }
     // TODO validate decoded token
     // TODO extract the localUserId from state and put it in the session
     await this.storageUtility.setForUser(
