@@ -169,10 +169,10 @@ container.register<IOidcHandler>("oidcHandlers", {
   useClass: AuthorizationCodeOidcHandler
 });
 container.register<IOidcHandler>("oidcHandlers", {
-  useClass: LegacyImplicitFlowOidcHandler
+  useClass: AuthorizationCodeWithPkceOidcHandler
 });
 container.register<IOidcHandler>("oidcHandlers", {
-  useClass: AuthorizationCodeWithPkceOidcHandler
+  useClass: LegacyImplicitFlowOidcHandler
 });
 
 container.register<IOidcHandler>("oidcHandlers", {
