@@ -9,9 +9,9 @@ The libraries share a common API and include different modules for different dep
 
 # Inrupt Solid JavaScript Client Libraries
 
-## Data access and permissions management - solid-Client
+## Data access and permissions management - solid-client
 
-[@inrupt/solid-client](https://github.com/inrupt/solid-client-js) allows developers to access data and manage permissions on data stored in Solid Pods.
+[@inrupt/solid-client](https://docs.inrupt.com/client-libraries/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
 
 ## Authentication - solid-client-authn
 
@@ -76,7 +76,7 @@ If you have questions about working with Solid or just want to share what you’
 
 ## Bugs and Feature Requests
 
-- For public feedback, bug reports, and feature requests please file an issue via [Github](https://github.com/inrupt/solid-client-authn/issues/).
+- For public feedback, bug reports, and feature requests please file an issue via [GitHub](https://github.com/inrupt/solid-client-authn/issues/).
 - For non-public feedback or support inquiries please use the [Inrupt Service Desk](https://inrupt.atlassian.net/servicedesk).
 
 ## Documentation
