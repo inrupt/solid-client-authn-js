@@ -6,7 +6,11 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+## [0.1.0] - 2020-08-10
+
+### New features
+
 First release! What's possible with this first release:
 
 - Authenticate a Web app to a Solid Identity provider
-- Perform an authenticated fetch to a Pod Server, using a DPoP or the legacy Bearer token
+- Perform an authenticated fetch to a Pod Server, using a DPoP token
