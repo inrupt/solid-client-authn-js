@@ -63,10 +63,12 @@ export default class ClientRegistrar implements IClientRegistrar {
     // If client secret and/or client id are stored in storage, use those
     const [storedClientId, storedClientSecret] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId", {
-        secure: true
+        // FIXME: figure out how to persist secure storage at reload
+        secure: false
       }),
       this.storageUtility.getForUser(options.sessionId, "clientSecret", {
-        secure: true
+        // FIXME: figure out how to persist secure storage at reload
+        secure: false
       })
     ]);
     if (storedClientId) {
@@ -138,7 +140,10 @@ export default class ClientRegistrar implements IClientRegistrar {
         clientSecret: responseBody.client_secret
       },
       {
-        secure: true
+        // FIXME: figure out how to persist secure storage at reload
+        // Otherwise, the client info cannot be retrieved from storage, and
+        // the lib tries to re-register the client on each fetch
+        secure: false
       }
     );
     await this.storageUtility.setForUser(options.sessionId, {
