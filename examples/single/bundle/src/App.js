@@ -83,14 +83,10 @@ class App extends Component {
   async handleLogin(e, isPopup = false) {
     e.preventDefault();
     this.setState({ status: "loading" });
-    this.state.session
-      .login({
-        redirectUrl: new URL("http://localhost:3001/"),
-        oidcIssuer: new URL(this.state.loginIssuer)
-      })
-      .then(() => {
-        this.setState({ status: "dashboard" });
-      });
+    await this.state.session.login({
+      redirectUrl: new URL("http://localhost:3001/"),
+      oidcIssuer: new URL(this.state.loginIssuer)
+    });
   }
 
   async handleLogout(e) {
@@ -99,8 +95,7 @@ class App extends Component {
     await this.state.session.logout();
     this.setState({
       status: "login",
-      fetchBody: "",
-      session: null
+      fetchBody: ""
     });
   }
 
