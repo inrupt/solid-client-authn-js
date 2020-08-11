@@ -37,7 +37,7 @@ import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlR
 import {
   StorageUtilityMock,
   StorageUtilityGetResponse,
-  EmptyStorageUtilityMock
+  mockStorageUtility
 } from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("DpopAuthenticatedFetcher", () => {
@@ -84,7 +84,7 @@ describe("DpopAuthenticatedFetcher", () => {
 
     it("rejects configs where the token isn't available", async () => {
       const dpopAuthenticatedFetcher = getDpopAuthenticatedFetcher({
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: mockStorageUtility({})
       });
       expect(
         await dpopAuthenticatedFetcher.canHandle(

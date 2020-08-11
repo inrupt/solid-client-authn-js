@@ -30,7 +30,7 @@ import {
 import {
   StorageUtilityMock,
   StorageUtilityGetResponse,
-  EmptyStorageUtilityMock
+  mockStorageUtility
 } from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("BearerAuthenticatedFetcher", () => {
@@ -86,7 +86,7 @@ describe("BearerAuthenticatedFetcher", () => {
 
     it("throws if no auth token is found in storage", async () => {
       const fetcher = getBearerAuthenticatedFetcher({
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: mockStorageUtility({}, true)
       });
       await expect(() =>
         fetcher.handle(

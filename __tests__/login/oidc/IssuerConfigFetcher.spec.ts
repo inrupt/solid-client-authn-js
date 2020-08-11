@@ -25,10 +25,7 @@ import {
   FetcherMock,
   FetcherMockResponse
 } from "../../../src/util/__mocks__/Fetcher";
-import {
-  StorageUtilityMock,
-  EmptyStorageUtilityMock
-} from "../../../src/storage/__mocks__/StorageUtility";
+import { mockStorageUtility } from "../../../src/storage/__mocks__/StorageUtility";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
 import { Response as NodeResponse } from "node-fetch";
@@ -39,7 +36,7 @@ import { Response as NodeResponse } from "node-fetch";
 describe("IssuerConfigFetcher", () => {
   const defaultMocks = {
     fetchResponse: FetcherMockResponse,
-    storageUtility: StorageUtilityMock
+    storageUtility: mockStorageUtility({})
   };
   function getIssuerConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -79,7 +76,7 @@ describe("IssuerConfigFetcher", () => {
       })
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
-      storageUtility: EmptyStorageUtilityMock,
+      storageUtility: mockStorageUtility({}),
       fetchResponse: fetchResponse
     });
 
@@ -109,7 +106,7 @@ describe("IssuerConfigFetcher", () => {
       /* eslint-enable @typescript-eslint/camelcase */
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
-      storageUtility: EmptyStorageUtilityMock,
+      storageUtility: mockStorageUtility({}),
       fetchResponse: fetchResponse
     });
 
@@ -144,7 +141,7 @@ describe("IssuerConfigFetcher", () => {
     };
     const configFetcher = new IssuerConfigFetcher(
       mockFetcher as IFetcher,
-      EmptyStorageUtilityMock
+      mockStorageUtility({})
     );
 
     await expect(

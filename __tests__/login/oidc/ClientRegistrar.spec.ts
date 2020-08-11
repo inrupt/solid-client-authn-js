@@ -24,7 +24,7 @@ import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
 import {
   StorageUtilityMock,
-  EmptyStorageUtilityMock
+  mockStorageUtility
 } from "../../../src/storage/__mocks__/StorageUtility";
 import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { Response as NodeResponse } from "node-fetch";
@@ -76,7 +76,7 @@ describe("ClientRegistrar", () => {
         /* eslint-enable @typescript-eslint/camelcase */
       );
       const clientRegistrar = getClientRegistrar({
-        storage: EmptyStorageUtilityMock
+        storage: mockStorageUtility({})
       });
       const registrationUrl = new URL("https://idp.com/register");
       expect(
@@ -113,7 +113,7 @@ describe("ClientRegistrar", () => {
 
     it("Fails if there is not registration endpoint", async () => {
       const clientRegistrar = getClientRegistrar({
-        storage: EmptyStorageUtilityMock
+        storage: mockStorageUtility({})
       });
       await expect(
         clientRegistrar.getClient(
@@ -137,7 +137,7 @@ describe("ClientRegistrar", () => {
         /* eslint-enable @typescript-eslint/camelcase */
       );
       const clientRegistrar = getClientRegistrar({
-        storage: EmptyStorageUtilityMock
+        storage: mockStorageUtility({})
       });
       const registrationUrl = new URL("https://idp.com/register");
       await expect(

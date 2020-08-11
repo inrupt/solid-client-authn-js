@@ -28,10 +28,7 @@ import {
   IssuerConfigFetcherMock,
   IssuerConfigFetcherFetchConfigResponse
 } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import {
-  StorageUtilityMock,
-  EmptyStorageUtilityMock
-} from "../../../src/storage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
 import {
   DpopHeaderCreatorMock,
   DpopHeaderCreatorResponse

@@ -34,7 +34,11 @@ export default class LogoutHandler implements ILogoutHandler {
   }
 
   async handle(userId: string): Promise<void> {
-    this.storageUtility.deleteAllUserData(userId);
-    // TODO: trigger onLogOut()
+    await Promise.all([
+      this.storageUtility.deleteAllUserData(userId, { secure: false }),
+      this.storageUtility.deleteAllUserData(userId, { secure: true }),
+      // FIXME: This is needed until the DPoP key is stored safely
+      this.storageUtility.delete("clientKey", { secure: false })
+    ]);
   }
 }

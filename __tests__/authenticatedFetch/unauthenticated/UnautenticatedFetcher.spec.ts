@@ -32,7 +32,7 @@ import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlR
 import {
   StorageUtilityMock,
   StorageUtilityGetResponse,
-  EmptyStorageUtilityMock
+  mockStorageUtility
 } from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("UnauthenticatedFetcher", () => {
@@ -70,7 +70,7 @@ describe("UnauthenticatedFetcher", () => {
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
         fetcher: fetcher,
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: mockStorageUtility({})
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
@@ -87,7 +87,7 @@ describe("UnauthenticatedFetcher", () => {
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
         fetcher: fetcher,
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: mockStorageUtility({})
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
@@ -105,7 +105,7 @@ describe("UnauthenticatedFetcher", () => {
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
         fetcher: fetcher,
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: mockStorageUtility({})
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
