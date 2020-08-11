@@ -136,6 +136,8 @@ export default class TokenRequester {
       throw new Error("The idp returned a bad token without a sub.");
     }
 
+    console.log(`ID token: ${tokenResponse.id_token as string}`);
+
     await this.storageUtility.setForUser(
       sessionId,
       {

@@ -29,6 +29,7 @@ export default interface IIssuerConfig {
   authorizationEndpoint: URL;
   tokenEndpoint: URL;
   userinfoEndpoint?: URL;
+  endSessionEndpoint?: URL;
   jwksUri: URL;
   registrationEndpoint?: URL;
   scopesSupported?: string[];

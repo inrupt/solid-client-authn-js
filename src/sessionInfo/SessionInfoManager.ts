@@ -84,6 +84,13 @@ export default class SessionInfoManager implements ISessionInfoManager {
     const webId = await this.storageUtility.getForUser(sessionId, "webId", {
       secure: true
     });
+    const oidcIssuer = await this.storageUtility.getForUser(
+      sessionId,
+      "oidcIssuer",
+      {
+        secure: true
+      }
+    );
     const isLoggedIn = await this.storageUtility.getForUser(
       sessionId,
       "isLoggedIn",
@@ -95,6 +102,7 @@ export default class SessionInfoManager implements ISessionInfoManager {
       return {
         sessionId,
         webId: webId,
+        oidcIssuer: oidcIssuer,
         isLoggedIn: isLoggedIn === "true"
       };
     }

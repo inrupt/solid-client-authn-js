@@ -22,7 +22,7 @@
 import { injectable, inject } from "tsyringe";
 import ILoginHandler from "./login/ILoginHandler";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
-import ILogoutHandler from "./logout/ILogoutHandler";
+import ILogoutHandler, { ILogoutOptions } from "./logout/ILogoutHandler";
 import { ISessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import { IEnvironmentDetector } from "./util/EnvironmentDetector";
@@ -86,8 +86,17 @@ export default class ClientAuthentication {
     return this.authenticatedFetcher.handle(credentials, url, init);
   };
 
-  logout = async (sessionId: string): Promise<void> => {
-    this.logoutHandler.handle(sessionId);
+  logout = async (
+    sessionId: string,
+    redirectUrl?: URL,
+    handleRedirect?: (redirectUrl: string) => unknown
+  ): Promise<void> => {
+    const logoutOptions: ILogoutOptions = {
+      sessionId: sessionId,
+      redirectUrl: redirectUrl,
+      handleRedirect: handleRedirect
+    };
+    this.logoutHandler.handle(logoutOptions);
   };
 
   getSessionInfo = async (

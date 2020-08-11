@@ -25,5 +25,6 @@
 export default interface ISessionInfo {
   isLoggedIn: boolean;
   webId?: string;
+  oidcIssuer?: string;
   sessionId: string;
 }

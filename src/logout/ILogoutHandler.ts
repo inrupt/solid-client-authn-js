@@ -20,6 +20,18 @@
  */
 
 import IHandleable from "../util/handlerPattern/IHandleable";
+import URL from "url-parse";
 
-type ILogoutHandler = IHandleable<[string], void>;
+export interface ILogoutOptions {
+  sessionId: string;
+  // The URL to which the user should be redirected after logout.
+  // Nothe: This "post_logout_url" must be specified at client registration
+  // FIXME: Not yet implemented at client registration
+  redirectUrl?: URL;
+  // Function to handle the redirection of the user to the identity provider.
+  // Optional in browser.
+  handleRedirect?: (redirectUrl: string) => unknown;
+}
+
+type ILogoutHandler = IHandleable<[ILogoutOptions], void>;
 export default ILogoutHandler;

@@ -19,26 +19,82 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ILogoutHandler from "./ILogoutHandler";
+import ILogoutHandler, { ILogoutOptions } from "./ILogoutHandler";
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../storage/StorageUtility";
+import { IIssuerConfigFetcher } from "../login/oidc/IssuerConfigFetcher";
+import URL from "url-parse";
+import { IRedirector } from "../login/oidc/Redirector";
 
 @injectable()
 export default class LogoutHandler implements ILogoutHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("redirector") private redirector: IRedirector,
+    @inject("issuerConfigFetcher")
+    private issuerConfigFetcher: IIssuerConfigFetcher
   ) {}
 
   async canHandle(): Promise<boolean> {
     return true;
   }
 
-  async handle(userId: string): Promise<void> {
+  async handle(logoutOptions: ILogoutOptions): Promise<void> {
+    const logoutEndpoint = await this.retrieveSessionEndpoint(
+      logoutOptions.sessionId
+    );
+    const idToken = await this.storageUtility.getForUser(
+      logoutOptions.sessionId,
+      "idToken",
+      {
+        secure: true
+      }
+    );
     await Promise.all([
-      this.storageUtility.deleteAllUserData(userId, { secure: false }),
-      this.storageUtility.deleteAllUserData(userId, { secure: true }),
+      this.storageUtility.deleteAllUserData(logoutOptions.sessionId, {
+        secure: false
+      }),
+      this.storageUtility.deleteAllUserData(logoutOptions.sessionId, {
+        secure: true
+      }),
       // FIXME: This is needed until the DPoP key is stored safely
       this.storageUtility.delete("clientKey", { secure: false })
     ]);
+    // The OIDC logout will redirect the user away from the current page,
+    // so it should be done after clearing the storage
+    await this.handleOidcLogout(logoutEndpoint, logoutOptions, idToken);
+  }
+
+  async retrieveSessionEndpoint(userId: string): Promise<URL> {
+    const issuer = await this.storageUtility.getForUser(userId, "issuer");
+    if (!issuer) {
+      throw new Error(
+        `Cannot find the Identity Provider [${issuer}] in storage, preventing logout to complete successfully.`
+      );
+    }
+    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
+      new URL(issuer, true)
+    );
+    if (!issuerConfig.endSessionEndpoint) {
+      throw new Error(`[${issuer}] does not have a logout endpoint.`);
+    }
+    return issuerConfig.endSessionEndpoint;
+  }
+
+  async handleOidcLogout(
+    logoutEndpoint: URL,
+    logoutOptions: ILogoutOptions,
+    idToken?: string
+  ): Promise<void> {
+    if (idToken) {
+      // See https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout
+      // Disabling the camel case rule, because the key is mandated by the OIDC spec
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      logoutEndpoint.set("query", { id_token_hint: idToken });
+      // FIXME: post_logout_redirect_uri not implemented yet
+    }
+    this.redirector.redirect(logoutEndpoint.toString(), {
+      handleRedirect: logoutOptions.handleRedirect
+    });
   }
 }

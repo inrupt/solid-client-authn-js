@@ -59,6 +59,10 @@ const issuerConfigKeyMap: Record<
     toKey: "userinfoEndpoint",
     convertToUrl: true
   },
+  end_session_endpoint: {
+    toKey: "endSessionEndpoint",
+    convertToUrl: true
+  },
   jwks_uri: {
     toKey: "jwksUri",
     convertToUrl: true
