@@ -73,25 +73,47 @@ export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
 };
 
 export const mockStorageUtility = (
-  stored: Record<string, string | Record<string, string>>
+  stored: Record<string, string | Record<string, string>>,
+  isSecure = false
 ): jest.Mocked<IStorageUtility> => {
-  const store = { ...stored };
+  let nonSecureStore: typeof stored, secureStore: typeof stored;
+  if (isSecure) {
+    secureStore = { ...stored };
+  } else {
+    nonSecureStore = { ...stored };
+  }
   return {
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    get: jest.fn(async (key: string, options: { errorIfNull?: boolean }) =>
-      store[key] ? (store[key] as string) : undefined
+    get: jest.fn(
+      async (
+        key: string,
+        options: { errorIfNull?: boolean; secure?: boolean }
+      ) => {
+        const store = options?.secure ? secureStore : nonSecureStore;
+        return store[key] ? (store[key] as string) : undefined;
+      }
     ),
-    set: jest.fn(async (key: string, value: string) => {
-      store[key] = value;
-    }),
-    delete: jest.fn(async (key: string) => {
+    set: jest.fn(
+      async (key: string, value: string, options: { secure?: boolean }) => {
+        const store = options?.secure ? secureStore : nonSecureStore;
+        store[key] = value;
+      }
+    ),
+    delete: jest.fn(async (key: string, options: { secure?: boolean }) => {
+      const store = options?.secure ? secureStore : nonSecureStore;
       delete store[key];
     }),
     getForUser: jest.fn(
-      async (userId: string, key: string, options: { errorIfNull?: true }) =>
-        store[userId]
+      async (
+        userId: string,
+        key: string,
+        options: { errorIfNull?: true; secure: boolean }
+      ) => {
+        const store = options?.secure ? secureStore : nonSecureStore;
+        return store[userId]
           ? (store[userId] as Record<string, string>)[key]
-          : undefined
+          : undefined;
+      }
     ),
     setForUser: jest.fn(
       async (
@@ -99,15 +121,22 @@ export const mockStorageUtility = (
         values: Record<string, string>,
         options?: { secure?: boolean }
       ) => {
+        const store = options?.secure ? secureStore : nonSecureStore;
         store[userId] = values;
       }
     ),
-    deleteForUser: jest.fn(async (userId: string, key: string) => {
-      delete (store[userId] as Record<string, string>)[key];
-    }),
-    deleteAllUserData: jest.fn(async (userId: string) => {
-      delete store[userId];
-    }),
+    deleteForUser: jest.fn(
+      async (userId: string, key: string, options: { secure?: boolean }) => {
+        const store = options?.secure ? secureStore : nonSecureStore;
+        delete (store[userId] as Record<string, string>)[key];
+      }
+    ),
+    deleteAllUserData: jest.fn(
+      async (userId: string, options: { secure?: boolean }) => {
+        const store = options?.secure ? secureStore : nonSecureStore;
+        delete store[userId];
+      }
+    ),
     safeGet: jest.fn(
       async (
         key: string,
@@ -118,7 +147,7 @@ export const mockStorageUtility = (
           postProcess?: (retrievedObject: any) => any;
           userId?: string;
         }>
-      ) => (store[key] ? (store[key] as string) : undefined)
+      ) => (nonSecureStore[key] ? (nonSecureStore[key] as string) : undefined)
     )
     /* eslint-enable @typescript-eslint/no-unused-vars */
   };

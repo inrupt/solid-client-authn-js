@@ -86,7 +86,7 @@ describe("BearerAuthenticatedFetcher", () => {
 
     it("throws if no auth token is found in storage", async () => {
       const fetcher = getBearerAuthenticatedFetcher({
-        storageUtility: mockStorageUtility({})
+        storageUtility: mockStorageUtility({}, true)
       });
       await expect(() =>
         fetcher.handle(

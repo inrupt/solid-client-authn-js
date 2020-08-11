@@ -71,7 +71,7 @@ describe("SessionInfoManager", () => {
 
     it("returns undefined if the specified storage does not contain the user", async () => {
       const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({})
+        storageUtility: mockStorageUtility({}, true)
       });
       const session = await sessionManager.get("commanderCool");
       expect(session).toBeUndefined();
