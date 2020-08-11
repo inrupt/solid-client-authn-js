@@ -79,8 +79,10 @@ export const mockStorageUtility = (
   let nonSecureStore: typeof stored, secureStore: typeof stored;
   if (isSecure) {
     secureStore = { ...stored };
+    nonSecureStore = {};
   } else {
     nonSecureStore = { ...stored };
+    secureStore = {};
   }
   return {
     /* eslint-disable @typescript-eslint/no-unused-vars */
