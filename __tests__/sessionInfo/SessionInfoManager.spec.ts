@@ -23,7 +23,7 @@ import "reflect-metadata";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { EmptyStorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
+import { mockStorageUtility } from "../../src/storage/__mocks__/StorageUtility";
 import SessionInfoManager from "../../src/sessionInfo/SessionInfoManager";
 
 describe("SessionInfoManager", () => {
@@ -31,7 +31,7 @@ describe("SessionInfoManager", () => {
     uuidGenerator: UuidGeneratorMock,
     authenticatedFetcher: AuthenticatedFetcherMock,
     logoutHandler: LogoutHandlerMock,
-    storageUtility: EmptyStorageUtilityMock
+    storageUtility: mockStorageUtility({})
   };
   function getSessionInfoManager(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -45,7 +45,7 @@ describe("SessionInfoManager", () => {
   describe("update", () => {
     it("is not implemented yet", async () => {
       const sessionManager = getSessionInfoManager({
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: mockStorageUtility({})
       });
       expect(
         async () => await sessionManager.update("commanderCool", {})
@@ -71,7 +71,7 @@ describe("SessionInfoManager", () => {
 
     it("returns undefined if the specified storage does not contain the user", async () => {
       const sessionManager = getSessionInfoManager({
-        storageUtility: EmptyStorageUtilityMock
+        storageUtility: mockStorageUtility({})
       });
       const session = await sessionManager.get("commanderCool");
       expect(session).toBeUndefined();
