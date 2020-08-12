@@ -84,15 +84,13 @@ export default class LogoutHandler implements ILogoutHandler {
   async handleOidcLogout(
     logoutEndpoint: URL,
     logoutOptions: ILogoutOptions,
+    // See the FIXME inside the function
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     idToken?: string
   ): Promise<void> {
-    if (idToken) {
-      // See https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout
-      // Disabling the camel case rule, because the key is mandated by the OIDC spec
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      logoutEndpoint.set("query", { id_token_hint: idToken });
-      // FIXME: post_logout_redirect_uri not implemented yet
-    }
+    // FIXME: according to https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout,
+    // id_token_hint should be sent as part of the logout request to the end_session_endpoint.
+    // However, some OP seem not to support this option, which is disabled for the time being.
     this.redirector.redirect(logoutEndpoint.toString(), {
       handleRedirect: logoutOptions.handleRedirect
     });
