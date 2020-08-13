@@ -55,12 +55,16 @@ describe("SessionInfoManager", () => {
 
   describe("get", () => {
     it("retrieves a session from specified storage", async () => {
-      const storageUtility = defaultMocks.storageUtility;
-      storageUtility.getForUser
-        .mockReturnValueOnce(
-          Promise.resolve("https://zoomies.com/commanderCool#me")
-        )
-        .mockReturnValueOnce(Promise.resolve("true"));
+      const storageUtility = mockStorageUtility(
+        {
+          commanderCool: {
+            sessionId: "commanderCool",
+            webId: "https://zoomies.com/commanderCool#me",
+            isLoggedIn: "true"
+          }
+        },
+        true
+      );
       const sessionManager = getSessionInfoManager({ storageUtility });
       const session = await sessionManager.get("commanderCool");
       expect(session).toMatchObject({

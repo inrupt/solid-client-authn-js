@@ -25,16 +25,27 @@ import {
 } from "../../src/storage/__mocks__/StorageUtility";
 import "reflect-metadata";
 import { default as LogoutHandler } from "../../src/logout/GeneralLogoutHandler";
+import { RedirectorMock } from "../../src/login/oidc/__mocks__/Redirector";
+import {
+  IssuerConfigFetcherMock,
+  mockConfigFetcher,
+  IssuerConfigFetcherFetchConfigResponse
+} from "../../src/login/oidc/__mocks__/IssuerConfigFetcher";
+import URL from "url-parse";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
-    storageUtility: StorageUtilityMock
+    storageUtility: StorageUtilityMock,
+    redirector: RedirectorMock,
+    issuerConfigFetcher: IssuerConfigFetcherMock
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): LogoutHandler {
     return new LogoutHandler(
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility,
+      mocks.redirector ?? defaultMocks.redirector,
+      mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher
     );
   }
 
@@ -44,6 +55,54 @@ describe("OidcLoginHandler", () => {
         storageUtility: mockStorageUtility({})
       });
       await expect(logoutHandler.canHandle()).resolves.toBe(true);
+    });
+  });
+
+  describe("retrieveSessionEndpoint", () => {
+    it("should throw if the IdP cannot be retrieved for the session", async () => {
+      const logoutHandler = getInitialisedHandler({
+        storageUtility: mockStorageUtility({})
+      });
+      await expect(
+        logoutHandler.retrieveSessionEndpoint("someUser")
+      ).rejects.toThrow(
+        "Cannot find the Identity Provider for session [someUser] in storage, preventing logout to complete successfully."
+      );
+    });
+
+    it("should throw if the IdP configuration does not have a logout endpoint", async () => {
+      const logoutHandler = getInitialisedHandler({
+        storageUtility: mockStorageUtility({
+          someUser: {
+            issuer: "https://some.idp"
+          }
+        }),
+        issuerConfigFetcher: mockConfigFetcher(
+          IssuerConfigFetcherFetchConfigResponse
+        ),
+        redirector: defaultMocks.redirector
+      });
+      await expect(
+        logoutHandler.retrieveSessionEndpoint("someUser")
+      ).rejects.toThrow("[https://some.idp] does not have a logout endpoint.");
+    });
+
+    it("should return the registered logout endpoint", async () => {
+      const logoutHandler = getInitialisedHandler({
+        storageUtility: mockStorageUtility({
+          someUser: {
+            issuer: "https://some.idp"
+          }
+        }),
+        issuerConfigFetcher: mockConfigFetcher({
+          ...IssuerConfigFetcherFetchConfigResponse,
+          endSessionEndpoint: new URL("https://https://some.idp/logout")
+        }),
+        redirector: defaultMocks.redirector
+      });
+      await expect(
+        logoutHandler.retrieveSessionEndpoint("someUser")
+      ).resolves.toEqual(new URL("https://https://some.idp/logout"));
     });
   });
 
@@ -60,7 +119,7 @@ describe("OidcLoginHandler", () => {
       const logoutHandler = getInitialisedHandler({
         storageUtility: nonEmptyStorage
       });
-      logoutHandler.handle("someUser");
+      logoutHandler.handle({ sessionId: "someUser" });
       expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
       ).toBeUndefined;
@@ -69,6 +128,29 @@ describe("OidcLoginHandler", () => {
       ).toBeUndefined;
       // This test is only necessary until the key is stored safely
       expect(nonEmptyStorage.get("clientKey", { secure: false })).toBeUndefined;
+    });
+
+    it("should redirect the user to the logout endpoint", async () => {
+      const redirector = defaultMocks.redirector;
+      const logoutHandler = getInitialisedHandler({
+        storageUtility: mockStorageUtility({
+          someUser: {
+            issuer: "https://some.idp"
+          }
+        }),
+        issuerConfigFetcher: mockConfigFetcher({
+          ...IssuerConfigFetcherFetchConfigResponse,
+          endSessionEndpoint: new URL("https://https://some.idp/logout")
+        }),
+        redirector: redirector
+      });
+      await logoutHandler.handle({ sessionId: "someUser" });
+      expect(redirector.redirect).toHaveBeenCalledWith(
+        "https://https://some.idp/logout",
+        {
+          handleRedirect: undefined
+        }
+      );
     });
   });
 });

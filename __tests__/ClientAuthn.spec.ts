@@ -21,10 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import {
-  LoginHandlerMock,
-  LoginHandlerResponse
-} from "../src/login/__mocks__/LoginHandler";
+import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
   RedirectHandlerResponse
@@ -108,9 +105,9 @@ describe("ClientAuthentication", () => {
     it("calls logout", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.logout("mySession");
-      expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
-        "mySession"
-      );
+      expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith({
+        sessionId: "mySession"
+      });
     });
   });
 

@@ -39,3 +39,12 @@ export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
   )
 };
+
+export const mockConfigFetcher = (
+  config: IIssuerConfig
+): jest.Mocked<IIssuerConfigFetcher> => {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    fetchConfig: jest.fn((_issuer: URL) => Promise.resolve(config))
+  };
+};

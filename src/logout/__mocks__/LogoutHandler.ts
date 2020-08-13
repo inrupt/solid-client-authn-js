@@ -19,11 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ILogoutHandler from "../ILogoutHandler";
+import ILogoutHandler, { ILogoutOptions } from "../ILogoutHandler";
 
 export const LogoutHandlerMock: jest.Mocked<ILogoutHandler> = {
-  canHandle: jest.fn(async (localUserId: string) => true),
-  handle: jest.fn(async (localUserId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  canHandle: jest.fn(async (options: ILogoutOptions) => true),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handle: jest.fn(async (options: ILogoutOptions) => {
     /* Do nothing */
   })
 };

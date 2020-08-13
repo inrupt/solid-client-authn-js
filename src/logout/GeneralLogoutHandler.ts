@@ -69,7 +69,7 @@ export default class LogoutHandler implements ILogoutHandler {
     const issuer = await this.storageUtility.getForUser(userId, "issuer");
     if (!issuer) {
       throw new Error(
-        `Cannot find the Identity Provider [${issuer}] in storage, preventing logout to complete successfully.`
+        `Cannot find the Identity Provider for session [${userId}] in storage, preventing logout to complete successfully.`
       );
     }
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
