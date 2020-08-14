@@ -11,6 +11,7 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
+    "prepublishOnly": "npm run build",
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
     "clean-module": "rm -rf ./dist",
     "clean-browser": "rm -rf ./browserDist",
