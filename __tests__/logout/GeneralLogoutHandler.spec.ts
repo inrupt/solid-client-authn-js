@@ -130,7 +130,53 @@ describe("OidcLoginHandler", () => {
       expect(nonEmptyStorage.get("clientKey", { secure: false })).toBeUndefined;
     });
 
-    it("should redirect the user to the logout endpoint", async () => {
+    it("should redirect the user to the logout endpoint on a hard logout", async () => {
+      const redirector = defaultMocks.redirector;
+      const logoutHandler = getInitialisedHandler({
+        storageUtility: mockStorageUtility({
+          someUser: {
+            issuer: "https://some.idp"
+          }
+        }),
+        issuerConfigFetcher: mockConfigFetcher({
+          ...IssuerConfigFetcherFetchConfigResponse,
+          endSessionEndpoint: new URL("https://https://some.idp/logout")
+        }),
+        redirector: redirector
+      });
+      await logoutHandler.handle({ sessionId: "someUser", soft: false });
+      expect(redirector.redirect).toHaveBeenCalledWith(
+        "https://https://some.idp/logout",
+        {
+          handleRedirect: undefined
+        }
+      );
+    });
+
+    it("should not redirect the user to the logout endpoint on a soft logout", async () => {
+      const redirector = defaultMocks.redirector;
+      const logoutHandler = getInitialisedHandler({
+        storageUtility: mockStorageUtility({
+          someUser: {
+            issuer: "https://some.idp"
+          }
+        }),
+        issuerConfigFetcher: mockConfigFetcher({
+          ...IssuerConfigFetcherFetchConfigResponse,
+          endSessionEndpoint: new URL("https://https://some.idp/logout")
+        }),
+        redirector: redirector
+      });
+      await logoutHandler.handle({ sessionId: "someUser", soft: true });
+      expect(redirector.redirect).not.toHaveBeenCalledWith(
+        "https://https://some.idp/logout",
+        {
+          handleRedirect: undefined
+        }
+      );
+    });
+
+    it("should not redirect the user to the logout endpoint by default", async () => {
       const redirector = defaultMocks.redirector;
       const logoutHandler = getInitialisedHandler({
         storageUtility: mockStorageUtility({
@@ -145,7 +191,7 @@ describe("OidcLoginHandler", () => {
         redirector: redirector
       });
       await logoutHandler.handle({ sessionId: "someUser" });
-      expect(redirector.redirect).toHaveBeenCalledWith(
+      expect(redirector.redirect).not.toHaveBeenCalledWith(
         "https://https://some.idp/logout",
         {
           handleRedirect: undefined

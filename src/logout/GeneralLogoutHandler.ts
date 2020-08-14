@@ -60,9 +60,11 @@ export default class LogoutHandler implements ILogoutHandler {
       // FIXME: This is needed until the DPoP key is stored safely
       this.storageUtility.delete("clientKey", { secure: false })
     ]);
-    // The OIDC logout will redirect the user away from the current page,
-    // so it should be done after clearing the storage
-    await this.handleOidcLogout(logoutEndpoint, logoutOptions, idToken);
+    if (logoutOptions.soft !== undefined && !logoutOptions.soft) {
+      // The OIDC logout will redirect the user away from the current page,
+      // so it should be done after clearing the storage
+      await this.handleOidcLogout(logoutEndpoint, logoutOptions, idToken);
+    }
   }
 
   async retrieveSessionEndpoint(userId: string): Promise<URL> {

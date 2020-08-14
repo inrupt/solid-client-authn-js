@@ -31,6 +31,10 @@ export interface ILogoutOptions {
   // Function to handle the redirection of the user to the identity provider.
   // Optional in browser.
   handleRedirect?: (redirectUrl: string) => unknown;
+  // A soft logout logs you out of the app. A hard logout logs you out of the
+  // identity provider as well. A soft logout should be the used unless you have
+  // a good reason not to.
+  soft?: boolean;
 }
 
 type ILogoutHandler = IHandleable<[ILogoutOptions], void>;
