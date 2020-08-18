@@ -43,7 +43,8 @@
     "test-acceptance-bundle": "echo \"Not Implemented\" && exit 1",
     "test-acceptance-ios": "echo \"Not Implemented\" && exit 1",
     "test-acceptance-android": "echo \"Not Implemented\" && exit 1",
-    "bootstrap-examples": "./bootstrap-examples.bash"
+    "bootstrap-examples": "./bootstrap-examples.bash",
+    "build-api-docs": "npx typedoc --out docs/source/api"
   },
   "devDependencies": {
     "@types/jest": "^24.0.24",

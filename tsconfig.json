@@ -18,9 +18,15 @@
     "moduleResolution": "node",
     "outDir": "./dist"
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/__mocks__/**"
-  ]
+  "exclude": ["node_modules", "dist", "**/__mocks__/**"],
+  "typedocOptions": {
+    "mode": "modules",
+    "out": "website/docs/api",
+    // The only public API is in the Session and SessionManager files.
+    "include": ["src/Session.ts", "src/SessionManager.ts"],
+    "excludeNotExported": true,
+    "stripInternal": true,
+    "theme": "markdown",
+    "readme": "none"
+  }
 }
