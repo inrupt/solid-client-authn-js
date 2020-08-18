@@ -33,9 +33,9 @@ export default class AutomaticRefreshHandler implements IAuthenticatedFetcher {
   ) {}
 
   async canHandle(
-    requestCredentials: IRequestCredentials,
-    url: RequestInfo,
-    requestInit?: RequestInit
+    _requestCredentials: IRequestCredentials,
+    _url: RequestInfo,
+    _requestInit?: RequestInit
   ): Promise<boolean> {
     return true;
   }

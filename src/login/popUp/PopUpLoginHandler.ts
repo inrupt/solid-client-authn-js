@@ -26,7 +26,6 @@ import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
 import { injectable, inject } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
-import URL from "url-parse";
 import { ISessionInfoManager } from "../../sessionInfo/SessionInfoManager";
 
 @injectable()

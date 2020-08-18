@@ -38,12 +38,12 @@ export function flattenHeaders(
   // If the headers are already a Record<string, string>,
   // they can directly be returned.
   if (typeof headersToFlatten.forEach !== "function") {
-    // @ts-ignore
-    return headersToFlatten;
+    // FIXME: This will break when passed a string[][]
+    //        (as shown when the type assertions are removed).
+    return headersToFlatten as Record<string, string>;
   }
 
-  // @ts-ignore
-  headersToFlatten.forEach((value: string, key: string) => {
+  (headersToFlatten as Headers).forEach((value: string, key: string) => {
     flatHeaders[key] = value;
   });
   return flatHeaders;

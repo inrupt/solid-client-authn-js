@@ -26,7 +26,7 @@ import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
 
 export default class WebidLoginHandler implements ILoginHandler {
-  async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
+  async canHandle(_loginOptions: ILoginOptions): Promise<boolean> {
     return false;
   }
 
@@ -36,7 +36,7 @@ export default class WebidLoginHandler implements ILoginHandler {
    * 'oidcIssuer' triple, it will create login credentials to match that
    * @param loginOptions
    */
-  async handle(loginOptions: ILoginOptions): Promise<void> {
+  async handle(_loginOptions: ILoginOptions): Promise<void> {
     // TODO: implement
     throw new Error("Not Implemented");
   }

@@ -29,7 +29,7 @@ export const DpopClientKeyManagerMockGetClientKeyResponse: JSONWebKey = {
 };
 
 export const DpopClientKeyManagerMock: jest.Mocked<IDpopClientKeyManager> = {
-  generateClientKeyIfNotAlready: jest.fn(async () => {}),
+  generateClientKeyIfNotAlready: jest.fn().mockResolvedValue({}),
   getClientKey: jest.fn(
     async () => DpopClientKeyManagerMockGetClientKeyResponse
   )

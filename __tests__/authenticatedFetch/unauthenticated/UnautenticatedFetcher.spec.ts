@@ -24,14 +24,10 @@
  */
 import "reflect-metadata";
 import UnauthenticatedFetcher from "../../../src/authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
-import {
-  FetcherMock,
-  FetcherMockResponse
-} from "../../../src/util/__mocks__/Fetcher";
+import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlRepresentationConverter";
 import {
   StorageUtilityMock,
-  StorageUtilityGetResponse,
   mockStorageUtility
 } from "../../../src/storage/__mocks__/StorageUtility";
 
@@ -78,7 +74,6 @@ describe("UnauthenticatedFetcher", () => {
         url
       );
       expect(fetcher.fetch).toHaveBeenCalledWith(url, {
-        headers: {},
         method: "GET"
       });
     });
@@ -114,7 +109,6 @@ describe("UnauthenticatedFetcher", () => {
         { method: "HEAD" }
       );
       expect(fetcher.fetch).toHaveBeenCalledWith(url, {
-        headers: {},
         method: "HEAD"
       });
     });

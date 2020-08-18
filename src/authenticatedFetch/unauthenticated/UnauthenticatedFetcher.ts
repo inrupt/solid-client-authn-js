@@ -28,7 +28,6 @@ import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 import { IStorageUtility } from "../../storage/StorageUtility";
-import { flattenHeaders } from "../headers/HeadersUtils";
 
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
@@ -69,7 +68,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
     return this.fetcher.fetch(url, {
       ...requestInit,
       method: requestInit?.method ?? "GET",
-      headers: flattenHeaders(requestInit?.headers)
+      headers: requestInit?.headers
     });
   }
 }

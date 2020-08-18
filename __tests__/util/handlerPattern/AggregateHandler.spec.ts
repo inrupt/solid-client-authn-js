@@ -39,15 +39,15 @@ describe("AggregateHandler", () => {
   ) {
     const mockHandlerInfo = configs.map(config => {
       const canHandleFunction: jest.Mock<Promise<boolean>, [string]> = jest.fn(
-        async (input: string): Promise<boolean> => {
-          return new Promise((resolve, reject) => {
+        async (_input: string): Promise<boolean> => {
+          return new Promise((resolve, _reject) => {
             setTimeout(() => resolve(config.canHandle), config.executeTime);
           });
         }
       );
       const handleFunction: jest.Mock<Promise<string>, [string]> = jest.fn(
-        async (input: string): Promise<string> => {
-          return new Promise((resolve, reject) => {
+        async (_input: string): Promise<string> => {
+          return new Promise((resolve, _reject) => {
             setTimeout(() => resolve(config.toReturn), config.executeTime);
           });
         }

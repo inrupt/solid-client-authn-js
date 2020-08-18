@@ -75,29 +75,29 @@ export const JoseUtilityMock: jest.Mocked<IJoseUtility> = {
   // @ts-ignore Because of the complex typings in this method, an error is thrown when wrapped in "Mocked"
   generateJWK: jest.fn(
     async (
-      kty: "EC" | "OKP" | "RSA" | "oct",
-      crvBitlength?: ECCurve | OKPCurve | number,
-      parameters?: BasicParameters,
-      isPrivate?: boolean
+      _kty: "EC" | "OKP" | "RSA" | "oct",
+      _crvBitlength?: ECCurve | OKPCurve | number,
+      _parameters?: BasicParameters,
+      _isPrivate?: boolean
     ) => JoseUtilityGenerateJWKResponse
   ),
   privateJWKToPublicJWK: jest.fn(
-    async (jwk: JSONWebKey) => JoseUtilityPrivateToPublicJWKResponse
+    async (_jwk: JSONWebKey) => JoseUtilityPrivateToPublicJWKResponse
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  decodeJWT: jest.fn(async (token: string) => JoseUtilityDecodeJWTResponse),
+  decodeJWT: jest.fn(async (_token: string) => JoseUtilityDecodeJWTResponse),
   signJWT: jest.fn(
     async (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payload: Record<string, any>,
-      key: JSONWebKey,
-      options?: JWT.SignOptions
+      _payload: Record<string, any>,
+      _key: JSONWebKey,
+      _options?: JWT.SignOptions
     ) => JoseUtilitySignJWTResponse
   ),
   generateCodeVerifier: jest.fn(
     async () => JoseUtilityGenerateCodeVerifierResponse
   ),
   generateCodeChallenge: jest.fn(
-    async (verifier: string) => JoseUtilityGenerateCodeChallengeResponse
+    async (_verifier: string) => JoseUtilityGenerateCodeChallengeResponse
   )
 };
