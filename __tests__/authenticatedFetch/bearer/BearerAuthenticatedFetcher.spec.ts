@@ -22,11 +22,7 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import BearerAuthenticatedFetcher from "../../../src/authenticatedFetch/bearer/BearerAuthenticatedFetcher";
-import URL from "url-parse";
-import {
-  FetcherMock,
-  FetcherMockResponse
-} from "../../../src/util/__mocks__/Fetcher";
+import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import {
   StorageUtilityMock,
   StorageUtilityGetResponse,

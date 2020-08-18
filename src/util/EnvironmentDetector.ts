@@ -25,7 +25,7 @@ export interface IEnvironmentDetector {
   detect(): environmentName;
 }
 
-export function detectEnvironment() {
+export function detectEnvironment(): "browser" | "react-native" | "server" {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore Ignore because document might not be present
   if (typeof document != "undefined") {

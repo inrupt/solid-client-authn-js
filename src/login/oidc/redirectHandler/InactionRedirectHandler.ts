@@ -27,13 +27,13 @@ import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 @injectable()
 export default class InactionRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager
+    @inject("sessionInfoManager") private _sessionCreator: ISessionInfoManager
   ) {}
 
-  async canHandle(redirectUrl: string): Promise<boolean> {
+  async canHandle(_redirectUrl: string): Promise<boolean> {
     return true;
   }
-  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
+  async handle(_redirectUrl: string): Promise<ISessionInfo | undefined> {
     return undefined;
   }
 }

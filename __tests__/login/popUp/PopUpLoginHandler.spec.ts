@@ -23,14 +23,8 @@
 import "reflect-metadata";
 import PopUpLoginHandler from "../../../src/login/popUp/PopUpLoginHandler";
 import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/EnvironmentDetector";
-import {
-  SessionInfoManagerMock,
-  SessionCreatorCreateResponse
-} from "../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import {
-  LoginHandlerMock,
-  LoginHandlerResponse
-} from "../../../src/login/__mocks__/LoginHandler";
+import { SessionInfoManagerMock } from "../../../src/sessionInfo/__mocks__/SessionInfoManager";
+import { LoginHandlerMock } from "../../../src/login/__mocks__/LoginHandler";
 import URL from "url-parse";
 
 describe("PopUpLoginHandler", () => {

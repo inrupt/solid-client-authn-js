@@ -21,10 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import {
-  LoginHandlerMock,
-  LoginHandlerResponse
-} from "../src/login/__mocks__/LoginHandler";
+import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
   RedirectHandlerResponse
