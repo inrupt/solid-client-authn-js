@@ -57,7 +57,7 @@ extensions = [
 ]
 
 extlinks = {
-    'apisolidclient': ('https://docs.inrupt.com/client-libraries/api/js/solid-client-authn-browser%s','')
+    'apimodule': ('./api/module',''),
 }
 
 # Add any paths that contain templates here, relative to this directory.
