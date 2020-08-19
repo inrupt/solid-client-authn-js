@@ -24,7 +24,7 @@ copyright = '2020-present, Inrupt Inc.'
 # -- product name -----
 # -- Separately update code samples and toc links and docs-navbar since not using substitutions--
 
-name = 'solid-client'
+name = 'solid-client-authn'
 repo_name = '{0}-js'.format(name)
 replacement_string = '.. |product|  replace:: ``{0}``'.format(name)
 
@@ -53,11 +53,10 @@ extensions = [
     'sphinx.ext.extlinks',
     'sphinx_tabs.tabs',
     'sphinx.ext.todo',
-    'myst_parser',
 ]
 
 extlinks = {
-    'apisolidclient': ('https://docs.inrupt.com/client-libraries/api/js/solid-client-authn-browser%s','')
+    'apisolidclient': ('https://docs.inrupt.com/client-libraries/api/javascript/solid-client-authn-browser%s','')
 }
 
 # Add any paths that contain templates here, relative to this directory.

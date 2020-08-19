@@ -2,9 +2,6 @@
 Inrupt |product| Documentation
 ==============================
 
-   * - :doc:`/api`
-
-     - Go to the API documentation.
 
 Issues & Help
 =============
@@ -15,7 +12,7 @@ Issues & Help
    :titlesonly:
    :hidden:
 
-   /api
+   API <https://docs.inrupt.com/client-libraries/api/javascript/solid-client-authn-js/>
    Source on GitHub <https://github.com/inrupt/solid-client-authn-js>
    /issues-help
 
