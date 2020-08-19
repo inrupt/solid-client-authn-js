@@ -19,12 +19,23 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
 export type environmentName = "browser" | "server" | "react-native";
 
+/**
+ * @hidden
+ */
 export interface IEnvironmentDetector {
   detect(): environmentName;
 }
 
+/**
+ * @hidden
+ */
 export function detectEnvironment(): "browser" | "react-native" | "server" {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore Ignore because document might not be present
@@ -44,6 +55,9 @@ export function detectEnvironment(): "browser" | "react-native" | "server" {
   }
 }
 
+/**
+ * @hidden
+ */
 export default class EnvironmentDetector {
   detect(): environmentName {
     return detectEnvironment();

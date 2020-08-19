@@ -19,6 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
 declare module "isomorphic-fetch" {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const noTypesYet: any;

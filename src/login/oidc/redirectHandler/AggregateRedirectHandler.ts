@@ -20,6 +20,11 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
 import AggregateHandler from "../../../util/handlerPattern/AggregateHandler";
@@ -27,6 +32,9 @@ import { injectable, injectAll } from "tsyringe";
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 
+/**
+ * @hidden
+ */
 @injectable()
 export default class AggregateRedirectHandler
   extends AggregateHandler<[string], ISessionInfo | undefined>

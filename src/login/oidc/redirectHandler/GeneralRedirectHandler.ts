@@ -19,6 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
@@ -27,6 +32,9 @@ import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
+/**
+ * @hidden
+ */
 @injectable()
 export default class GeneralRedirectHandler implements IRedirectHandler {
   constructor(

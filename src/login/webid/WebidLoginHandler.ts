@@ -20,11 +20,19 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Handles login if a user's webid was provided
  */
 import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
 
+/**
+ * @hidden
+ */
 export default class WebidLoginHandler implements ILoginHandler {
   async canHandle(_loginOptions: ILoginOptions): Promise<boolean> {
     return false;

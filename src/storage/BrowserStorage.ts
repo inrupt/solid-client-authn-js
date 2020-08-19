@@ -19,8 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
 import IStorage from "./IStorage";
 
+/**
+ * @hidden
+ */
 export default class BrowserStorage implements IStorage {
   async get(key: string): Promise<string | undefined> {
     return window.localStorage.getItem(key) || undefined;

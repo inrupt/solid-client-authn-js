@@ -20,6 +20,11 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Creates a DPoP JWT to be embedded in the header
  */
 import URL from "url-parse";
@@ -37,6 +42,9 @@ export interface IDpopHeaderCreator {
   createHeaderToken(audience: URL, method: string): Promise<string>;
 }
 
+/**
+ * @hidden
+ */
 @injectable()
 export default class DpopHeaderCreator implements IDpopHeaderCreator {
   constructor(

@@ -20,14 +20,25 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * A wrapper class for uuid
  */
 import { v4 } from "uuid";
 
+/**
+ * @hidden
+ */
 export interface IUuidGenerator {
   v4(): string;
 }
 
+/**
+ * @hidden
+ */
 export default class UuidGenerator {
   v4(): string {
     return v4();

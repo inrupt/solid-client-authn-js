@@ -20,6 +20,11 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * AuthenticatedFetchers are responsible for making requests based on provided credentials
  *
  * @IRequestCredentials A set of credentials that should be embedded in the request
@@ -29,6 +34,9 @@
 import IHandleable from "../util/handlerPattern/IHandleable";
 import IRequestCredentials from "./IRequestCredentials";
 
+/**
+ * @hidden
+ */
 type IAuthenticatedFetcher = IHandleable<
   [IRequestCredentials, RequestInfo, RequestInit?],
   Response

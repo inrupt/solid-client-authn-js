@@ -19,7 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
 import IHandleable from "../util/handlerPattern/IHandleable";
 
+/**
+ * @hidden
+ */
 type ILogoutHandler = IHandleable<[string], void>;
 export default ILogoutHandler;

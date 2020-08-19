@@ -20,10 +20,18 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Interface defining how each environment should define its crypto system
  */
 import { ECCurve, BasicParameters, OKPCurve, JWT, JSONWebKey } from "jose";
 
+/**
+ * @hidden
+ */
 export default interface IJoseUtility {
   /**
    * Generates a keystore

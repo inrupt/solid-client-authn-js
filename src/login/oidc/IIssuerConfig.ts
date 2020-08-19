@@ -20,10 +20,18 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Interface to define the configuration that an identity provider can return
  */
 import URL from "url-parse";
 
+/**
+ * @hidden
+ */
 export default interface IIssuerConfig {
   issuer: URL;
   authorizationEndpoint: URL;

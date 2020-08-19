@@ -20,12 +20,20 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Handler for the Device Flow on the Primary Device
  */
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import NotImplementedError from "../../../errors/NotImplementedError";
 
+/**
+ * @hidden
+ */
 export default class PrimaryDeviceOidcHandler implements IOidcHandler {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

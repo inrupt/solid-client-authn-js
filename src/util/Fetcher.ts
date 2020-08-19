@@ -20,6 +20,11 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * A wrapper method to wrap the standard w3 fetch library
  */
 import URL from "url-parse";
@@ -29,6 +34,9 @@ export interface IFetcher {
   fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
 
+/**
+ * @hidden
+ */
 export default class Fetcher implements IFetcher {
   async fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const fetchUrl = url instanceof URL ? url.toString() : url;

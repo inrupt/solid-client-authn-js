@@ -19,14 +19,25 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
 import { injectable, inject } from "tsyringe";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ITokenRequester } from "../TokenRequester";
 
+/**
+ * @hidden
+ */
 export interface ITokenRefresher {
   refresh(localUserId: string): Promise<void>;
 }
 
+/**
+ * @hidden
+ */
 @injectable()
 export default class TokenRefresher implements ITokenRefresher {
   constructor(

@@ -19,11 +19,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 import { inject, injectable } from "tsyringe";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
+/**
+ * @hidden
+ */
 @injectable()
 export default class InactionRedirectHandler implements IRedirectHandler {
   constructor(

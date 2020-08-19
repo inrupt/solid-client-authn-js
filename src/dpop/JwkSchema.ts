@@ -20,7 +20,13 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Schema used to validate JSONWebKeys
+ * @hidden
  */
 const jwkSchema = {
   description: "json web key",

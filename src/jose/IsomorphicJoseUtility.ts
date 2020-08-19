@@ -20,6 +20,11 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * File for NodeJS-compatible JOSE
  */
 import {
@@ -39,6 +44,9 @@ import IJoseUtility from "./IJoseUtility";
 import randomString from "crypto-random-string";
 import crypto from "crypto";
 
+/**
+ * @hidden
+ */
 export default class IsomorphicJoseUtility implements IJoseUtility {
   async generateJWK(
     kty: "EC" | "OKP" | "RSA" | "oct",

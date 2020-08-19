@@ -20,6 +20,11 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Handler for the Legacy Implicit Flow
  */
 import IOidcHandler from "../IOidcHandler";
@@ -33,6 +38,9 @@ import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 import { IRedirector } from "../Redirector";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 
+/**
+ * @hidden
+ */
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(

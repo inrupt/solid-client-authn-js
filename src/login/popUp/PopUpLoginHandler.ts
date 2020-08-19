@@ -20,6 +20,11 @@
  */
 
 /**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
  * Handles login if it should be in a popup
  */
 import ILoginHandler from "../ILoginHandler";
@@ -28,6 +33,14 @@ import { injectable, inject } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 import { ISessionInfoManager } from "../../sessionInfo/SessionInfoManager";
 
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
+/**
+ * @hidden
+ */
 @injectable()
 export default class PopUpLoginHandler implements ILoginHandler {
   constructor(
