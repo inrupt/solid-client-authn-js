@@ -20,7 +20,13 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Schema used to validate JSONWebKeys
+ * @internal
  */
 const jwkSchema = {
   description: "json web key",

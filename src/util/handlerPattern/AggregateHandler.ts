@@ -20,11 +20,19 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * An abstract class that will select the first handler that can handle certain parameters
  */
 import IHandleable from "./IHandleable";
 import HandlerNotFoundError from "../../errors/HandlerNotFoundError";
 
+/**
+ * @internal
+ */
 export default class AggregateHandler<P extends Array<unknown>, R>
   implements IHandleable<P, R> {
   constructor(private handleables: IHandleable<P, R>[]) {}

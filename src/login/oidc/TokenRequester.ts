@@ -19,6 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../../storage/StorageUtility";
 import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
@@ -30,10 +35,16 @@ import IJoseUtility from "../../jose/IJoseUtility";
 import { IClientRegistrar } from "./ClientRegistrar";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 
+/**
+ * @internal
+ */
 export interface ITokenRequester {
   request(localUserId: string, body: Record<string, string>): Promise<void>;
 }
 
+/**
+ * @internal
+ */
 @injectable()
 export default class TokenRequester {
   constructor(

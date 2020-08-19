@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Responsible for fetching an IDP configuration
  */
 import IIssuerConfig from "./IIssuerConfig";
@@ -30,6 +35,9 @@ import issuerConfigSchema from "./issuerConfigSchema";
 import ConfigurationError from "../../errors/ConfigurationError";
 import { IStorageUtility } from "../../storage/StorageUtility";
 
+/**
+ * @internal
+ */
 export interface IIssuerConfigFetcher {
   /**
    * Fetches the configuration
@@ -127,6 +135,9 @@ const issuerConfigKeyMap: Record<
 };
 /* eslint-enable @typescript-eslint/camelcase */
 
+/**
+ * @internal
+ */
 @injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   constructor(

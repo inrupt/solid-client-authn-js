@@ -20,10 +20,18 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Options dictating the kind of login needed
  */
 import URL from "url-parse";
 
+/**
+ * @internal
+ */
 export default interface ILoginOptions {
   sessionId: string;
   oidcIssuer?: URL;

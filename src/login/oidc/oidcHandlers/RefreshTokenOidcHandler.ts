@@ -20,12 +20,20 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Handler for the Refresh Token Flow
  */
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import NotImplementedError from "../../../errors/NotImplementedError";
 
+/**
+ * @internal
+ */
 export default class RefreshTokenOidcHandler implements IOidcHandler {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

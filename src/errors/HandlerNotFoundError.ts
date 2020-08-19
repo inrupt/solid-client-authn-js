@@ -20,7 +20,13 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Error to be triggered if there is no handler that can handle certain parameters
+ * @internal
  */
 export default class HandlerNotFoundError extends Error {
   public params: string[];

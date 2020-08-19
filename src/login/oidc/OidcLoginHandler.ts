@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Handles Common Oidc login functions (Like fetching the configuration)
  */
 
@@ -35,6 +40,9 @@ import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
 import { IClientRegistrar } from "./ClientRegistrar";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(

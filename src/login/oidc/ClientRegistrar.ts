@@ -19,6 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import IClient from "./IClient";
@@ -34,6 +39,9 @@ export interface IRegistrarOptions {
   redirectUrl?: URL;
 }
 
+/**
+ * @internal
+ */
 export interface IClientRegistrar {
   getClient(
     options: IRegistrarOptions,
@@ -41,6 +49,9 @@ export interface IClientRegistrar {
   ): Promise<IClient>;
 }
 
+/**
+ * @internal
+ */
 @injectable()
 export default class ClientRegistrar implements IClientRegistrar {
   constructor(

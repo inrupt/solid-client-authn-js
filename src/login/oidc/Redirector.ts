@@ -19,18 +19,32 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import { inject, injectable } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 
+/**
+ * @internal
+ */
 export interface IRedirectorOptions {
   handleRedirect?: (url: string) => unknown;
   redirectByReplacingState?: boolean;
 }
 
+/**
+ * @internal
+ */
 export interface IRedirector {
   redirect(redirectUrl: string, redirectorOptions: IRedirectorOptions): void;
 }
 
+/**
+ * @internal
+ */
 @injectable()
 export default class Redirector implements IRedirector {
   constructor(

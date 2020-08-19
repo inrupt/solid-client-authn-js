@@ -20,12 +20,20 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * A wrapper function for AJV schema validation
  */
 import Ajv from "ajv";
 import URL from "url-parse";
 import cloneDeep from "lodash.clonedeep";
 
+/**
+ * @internal
+ */
 export function compileTypeof(type: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data: any): boolean => {
@@ -33,12 +41,18 @@ export function compileTypeof(type: string) {
   };
 }
 
+/**
+ * @internal
+ */
 export function compileJoinedStringOf(strings: string[]) {
   return (data: string): boolean => {
     return !data.split(" ").some(value => strings.indexOf(value) === -1);
   };
 }
 
+/**
+ * @internal
+ */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function traverseObject(
   data: any,

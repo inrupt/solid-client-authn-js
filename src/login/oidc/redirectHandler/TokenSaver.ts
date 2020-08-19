@@ -19,11 +19,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
+/**
+ * @internal
+ */
 export interface ITokenSaver {
   saveTokenAndGetSession(
     localUserId: string,
@@ -33,6 +41,9 @@ export interface ITokenSaver {
   ): Promise<void>;
 }
 
+/**
+ * @internal
+ */
 @injectable()
 export default class TokenSaver implements ITokenSaver {
   constructor(

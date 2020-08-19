@@ -23,8 +23,14 @@ import IRedirectHandler from "../IRedirectHandler";
 import ISessionInfo from "../../../../sessionInfo/ISessionInfo";
 import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
 
+/**
+ * @internal
+ */
 export const RedirectHandlerResponse: ISessionInfo = SessionCreatorCreateResponse;
 
+/**
+ * @internal
+ */
 export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canHandle: jest.fn((url: string) => Promise.resolve(true)),

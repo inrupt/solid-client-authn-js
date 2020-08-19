@@ -20,10 +20,19 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * A request credential specific to Dpop Requests
+ * @internal
  */
 import IRequestCredentials from "../authenticatedFetch/IRequestCredentials";
 
+/**
+ * @internal
+ */
 export default interface IDpopRequestCredentials extends IRequestCredentials {
   type: "dpop";
 }

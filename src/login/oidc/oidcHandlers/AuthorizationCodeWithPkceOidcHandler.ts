@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Handler for the Authorization Code with PKCE Flow
  */
 import IOidcHandler from "../IOidcHandler";
@@ -30,6 +35,9 @@ import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler {

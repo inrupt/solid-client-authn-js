@@ -19,21 +19,35 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../storage/StorageUtility";
 import ISessionInfo from "./ISessionInfo";
 
+/**
+ * @internal
+ */
 export interface ISessionInfoManagerOptions {
   loggedIn?: boolean;
   webId?: string;
 }
 
+/**
+ * @internal
+ */
 export interface ISessionInfoManager {
   update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
   get(sessionId: string): Promise<ISessionInfo | undefined>;
   getAll(): Promise<ISessionInfo[]>;
 }
 
+/**
+ * @internal
+ */
 @injectable()
 export default class SessionInfoManager implements ISessionInfoManager {
   constructor(

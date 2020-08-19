@@ -19,10 +19,18 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import ILogoutHandler from "./ILogoutHandler";
 import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../storage/StorageUtility";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class LogoutHandler implements ILogoutHandler {
   constructor(

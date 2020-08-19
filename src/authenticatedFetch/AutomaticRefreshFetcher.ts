@@ -19,11 +19,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import IAuthenticatedFetcher from "./IAuthenticatedFetcher";
 import { injectable, inject } from "tsyringe";
 import IRequestCredentials from "./IRequestCredentials";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class AutomaticRefreshHandler implements IAuthenticatedFetcher {
   constructor(

@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Generates a Client Key to be stored and used for DPoP Requests
  */
 import { inject, injectable } from "tsyringe";
@@ -28,6 +33,9 @@ import jwkSchema from "./JwkSchema";
 import IJoseUtility from "../jose/IJoseUtility";
 import { IStorageUtility } from "../storage/StorageUtility";
 
+/**
+ * @internal
+ */
 export interface IDpopClientKeyManager {
   /**
    * Generates the client key and stores it in local storage
@@ -40,6 +48,9 @@ export interface IDpopClientKeyManager {
   getClientKey(): Promise<JSONWebKey | undefined>;
 }
 
+/**
+ * @internal
+ */
 @injectable()
 export default class DpopClientKeyManager implements IDpopClientKeyManager {
   constructor(

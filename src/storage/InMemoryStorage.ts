@@ -19,8 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import IStorage from "./IStorage";
 
+/**
+ * @internal
+ */
 export default class InMemoryStorage implements IStorage {
   private map: Record<string, string> = {};
   async get(key: string): Promise<string | undefined> {

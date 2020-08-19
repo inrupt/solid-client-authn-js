@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * An ajv schema defining the shape of an openid-configuration
  */
 

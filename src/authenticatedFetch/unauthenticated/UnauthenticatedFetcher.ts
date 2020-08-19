@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Responsible for sending DPoP Enabled requests
  */
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
@@ -29,6 +34,9 @@ import { IFetcher } from "../../util/Fetcher";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
 import { IStorageUtility } from "../../storage/StorageUtility";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
   constructor(

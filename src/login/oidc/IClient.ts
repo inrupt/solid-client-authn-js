@@ -19,6 +19,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
+ * @internal
+ */
 export default interface IClient {
   clientId: string;
   clientSecret?: string;

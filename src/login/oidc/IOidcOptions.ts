@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Defines how OIDC login should proceed
  */
 import URL from "url-parse";
@@ -35,6 +40,9 @@ import IClient from "./IClient";
 type IOidcOptions = IAccessTokenOidcOptions;
 export default IOidcOptions;
 
+/**
+ * @internal
+ */
 export interface ICoreOidcOptions {
   issuer: URL;
   issuerConfiguration: IIssuerConfig;
@@ -42,6 +50,9 @@ export interface ICoreOidcOptions {
   sessionId: string;
 }
 
+/**
+ * @internal
+ */
 export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
   dpop: boolean;
   redirectUrl: URL;

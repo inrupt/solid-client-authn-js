@@ -20,12 +20,20 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Handler for the Client Credentials Flow
  */
 import IOidcHandler from "../IOidcHandler";
 import IOidcOptions from "../IOidcOptions";
 import NotImplementedError from "../../../errors/NotImplementedError";
 
+/**
+ * @internal
+ */
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
   async canHandle(_oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return false;

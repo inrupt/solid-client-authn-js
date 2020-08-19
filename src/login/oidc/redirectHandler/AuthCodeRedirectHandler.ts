@@ -19,6 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
@@ -29,6 +34,9 @@ import { IRedirector } from "../Redirector";
 import { ITokenRequester } from "../TokenRequester";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(

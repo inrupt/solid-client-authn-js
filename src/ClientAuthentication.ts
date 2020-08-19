@@ -19,6 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import { injectable, inject } from "tsyringe";
 import ILoginHandler from "./login/ILoginHandler";
 import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
@@ -31,6 +36,9 @@ import ILoginInputOptions from "./ILoginInputOptions";
 import URL from "url-parse";
 import IRequestCredentials from "./authenticatedFetch/IRequestCredentials";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class ClientAuthentication {
   constructor(

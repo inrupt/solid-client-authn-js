@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Responsible for sending fetch requests given a token that is not DPoP compatible
  */
 import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
@@ -29,6 +34,9 @@ import { IFetcher } from "../../util/Fetcher";
 import { IStorageUtility } from "../../storage/StorageUtility";
 import { flattenHeaders } from "../headers/HeadersUtils";
 
+/**
+ * @internal
+ */
 @injectable()
 export default class BearerAuthenticatedFetcher
   implements IAuthenticatedFetcher {

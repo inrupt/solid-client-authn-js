@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * A helper class that will validate items taken from local storage
  */
 import { injectable, inject } from "tsyringe";
@@ -79,6 +84,9 @@ export interface IStorageUtility {
 }
 
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
+/**
+ * @internal
+ */
 @injectable()
 export default class StorageUtility implements IStorageUtility {
   constructor(

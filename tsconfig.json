@@ -22,8 +22,11 @@
   "typedocOptions": {
     "mode": "modules",
     "out": "website/docs/api",
-    // The only public API is in the Session and SessionManager files.
-    "include": ["src/Session.ts", "src/SessionManager.ts"],
+    "exclude": [
+      // Re-exported functions are already documented in their own modules:
+      "src/index.ts",
+      "src/index.browser.ts"
+    ],
     "excludeNotExported": true,
     "stripInternal": true,
     "theme": "markdown",

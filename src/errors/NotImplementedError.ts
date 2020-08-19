@@ -20,7 +20,13 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Error to be triggered if a method is not implemented
+ * @internal
  */
 export default class NotImplementedError extends Error {
   /* istanbul ignore next */

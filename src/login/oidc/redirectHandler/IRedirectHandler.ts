@@ -19,8 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 
+/**
+ * @internal
+ */
 type IRedirectHandler = IHandleable<[string], ISessionInfo | undefined>;
 export default IRedirectHandler;

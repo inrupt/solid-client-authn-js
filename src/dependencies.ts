@@ -20,6 +20,11 @@
  */
 
 /**
+ * @internal
+ * @packageDocumentation
+ */
+
+/**
  * Top Level core document. Responsible for setting up the dependency graph
  */
 import "reflect-metadata";

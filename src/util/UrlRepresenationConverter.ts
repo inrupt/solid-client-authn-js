@@ -19,12 +19,23 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @internal
+ * @packageDocumentation
+ */
+
 import URL from "url-parse";
 
+/**
+ * @internal
+ */
 export interface IUrlRepresentationConverter {
   requestInfoToUrl(requestInfo: RequestInfo): URL;
 }
 
+/**
+ * @internal
+ */
 export default class UrlRepresentationConverter {
   requestInfoToUrl(requestInfo: RequestInfo): URL {
     // TODO: parse out other ways that request info could be converted
