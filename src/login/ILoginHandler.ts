@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -31,7 +31,7 @@ import IHandleable from "../util/handlerPattern/IHandleable";
 import ILoginOptions from "./ILoginOptions";
 
 /**
- * @internal
+ * @hidden
  */
 type ILoginHandler = IHandleable<[ILoginOptions], void>;
 export default ILoginHandler;

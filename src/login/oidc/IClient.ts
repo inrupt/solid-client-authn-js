@@ -20,12 +20,12 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
 /**
- * @internal
+ * @hidden
  */
 export default interface IClient {
   clientId: string;

@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -35,7 +35,7 @@ export interface IFetcher {
 }
 
 /**
- * @internal
+ * @hidden
  */
 export default class Fetcher implements IFetcher {
   async fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {

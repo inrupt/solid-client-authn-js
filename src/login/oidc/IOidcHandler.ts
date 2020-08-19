@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -31,7 +31,7 @@ import IHandleable from "../../util/handlerPattern/IHandleable";
 import IOidcOptions from "./IOidcOptions";
 
 /**
- * @internal
+ * @hidden
  */
 type IOidcHandler = IHandleable<[IOidcOptions], void>;
 export default IOidcHandler;

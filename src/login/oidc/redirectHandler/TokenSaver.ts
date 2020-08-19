@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -30,7 +30,7 @@ import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 /**
- * @internal
+ * @hidden
  */
 export interface ITokenSaver {
   saveTokenAndGetSession(
@@ -42,7 +42,7 @@ export interface ITokenSaver {
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class TokenSaver implements ITokenSaver {

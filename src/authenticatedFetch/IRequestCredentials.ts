@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -32,7 +32,7 @@
 
 // TODO: this should be an "OR" of all possible request credentials
 /**
- * @internal
+ * @hidden
  */
 export default interface IRequestCredentials {
   type: string;

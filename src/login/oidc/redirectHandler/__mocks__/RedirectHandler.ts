@@ -24,12 +24,12 @@ import ISessionInfo from "../../../../sessionInfo/ISessionInfo";
 import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
 
 /**
- * @internal
+ * @hidden
  */
 export const RedirectHandlerResponse: ISessionInfo = SessionCreatorCreateResponse;
 
 /**
- * @internal
+ * @hidden
  */
 export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

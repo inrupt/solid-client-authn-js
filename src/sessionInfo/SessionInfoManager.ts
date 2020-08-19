@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -29,7 +29,7 @@ import { IStorageUtility } from "../storage/StorageUtility";
 import ISessionInfo from "./ISessionInfo";
 
 /**
- * @internal
+ * @hidden
  */
 export interface ISessionInfoManagerOptions {
   loggedIn?: boolean;
@@ -37,7 +37,7 @@ export interface ISessionInfoManagerOptions {
 }
 
 /**
- * @internal
+ * @hidden
  */
 export interface ISessionInfoManager {
   update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
@@ -46,7 +46,7 @@ export interface ISessionInfoManager {
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class SessionInfoManager implements ISessionInfoManager {

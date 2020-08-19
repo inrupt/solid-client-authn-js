@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -34,12 +34,12 @@ import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 import { ISessionInfoManager } from "../../sessionInfo/SessionInfoManager";
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class PopUpLoginHandler implements ILoginHandler {

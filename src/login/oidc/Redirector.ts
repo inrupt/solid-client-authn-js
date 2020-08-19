@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -28,7 +28,7 @@ import { inject, injectable } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 
 /**
- * @internal
+ * @hidden
  */
 export interface IRedirectorOptions {
   handleRedirect?: (url: string) => unknown;
@@ -36,14 +36,14 @@ export interface IRedirectorOptions {
 }
 
 /**
- * @internal
+ * @hidden
  */
 export interface IRedirector {
   redirect(redirectUrl: string, redirectorOptions: IRedirectorOptions): void;
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class Redirector implements IRedirector {

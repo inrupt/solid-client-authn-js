@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -28,7 +28,7 @@ import IHandleable from "../../../util/handlerPattern/IHandleable";
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 
 /**
- * @internal
+ * @hidden
  */
 type IRedirectHandler = IHandleable<[string], ISessionInfo | undefined>;
 export default IRedirectHandler;

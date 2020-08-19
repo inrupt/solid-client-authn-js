@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -34,7 +34,7 @@ import IAuthenticatedFetcher from "./IAuthenticatedFetcher";
 import IRequestCredentials from "./IRequestCredentials";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class AggregateAuthenticatedFetcher

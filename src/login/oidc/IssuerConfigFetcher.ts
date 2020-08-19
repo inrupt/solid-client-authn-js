@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -36,7 +36,7 @@ import ConfigurationError from "../../errors/ConfigurationError";
 import { IStorageUtility } from "../../storage/StorageUtility";
 
 /**
- * @internal
+ * @hidden
  */
 export interface IIssuerConfigFetcher {
   /**
@@ -136,7 +136,7 @@ const issuerConfigKeyMap: Record<
 /* eslint-enable @typescript-eslint/camelcase */
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {

@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -32,7 +32,7 @@ import URL from "url-parse";
 import cloneDeep from "lodash.clonedeep";
 
 /**
- * @internal
+ * @hidden
  */
 export function compileTypeof(type: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,7 +42,7 @@ export function compileTypeof(type: string) {
 }
 
 /**
- * @internal
+ * @hidden
  */
 export function compileJoinedStringOf(strings: string[]) {
   return (data: string): boolean => {
@@ -51,7 +51,7 @@ export function compileJoinedStringOf(strings: string[]) {
 }
 
 /**
- * @internal
+ * @hidden
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function traverseObject(

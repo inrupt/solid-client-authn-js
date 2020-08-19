@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -39,7 +39,7 @@ import { IRedirector } from "../Redirector";
 import { IStorageUtility } from "../../../storage/StorageUtility";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {

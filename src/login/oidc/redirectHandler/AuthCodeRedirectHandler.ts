@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -35,7 +35,7 @@ import { ITokenRequester } from "../TokenRequester";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {

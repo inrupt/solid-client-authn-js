@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -45,7 +45,7 @@ import randomString from "crypto-random-string";
 import crypto from "crypto";
 
 /**
- * @internal
+ * @hidden
  */
 export default class IsomorphicJoseUtility implements IJoseUtility {
   async generateJWK(

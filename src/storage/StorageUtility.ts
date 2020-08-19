@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -85,7 +85,7 @@ export interface IStorageUtility {
 
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class StorageUtility implements IStorageUtility {

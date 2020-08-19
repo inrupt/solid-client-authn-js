@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -41,7 +41,7 @@ import URL from "url-parse";
 import { IClientRegistrar } from "./ClientRegistrar";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {

@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -30,7 +30,7 @@
 import { ECCurve, BasicParameters, OKPCurve, JWT, JSONWebKey } from "jose";
 
 /**
- * @internal
+ * @hidden
  */
 export default interface IJoseUtility {
   /**

@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -31,7 +31,7 @@ import IHandleable from "./IHandleable";
 import HandlerNotFoundError from "../../errors/HandlerNotFoundError";
 
 /**
- * @internal
+ * @hidden
  */
 export default class AggregateHandler<P extends Array<unknown>, R>
   implements IHandleable<P, R> {

@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -36,14 +36,14 @@ import { IClientRegistrar } from "./ClientRegistrar";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 
 /**
- * @internal
+ * @hidden
  */
 export interface ITokenRequester {
   request(localUserId: string, body: Record<string, string>): Promise<void>;
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class TokenRequester {

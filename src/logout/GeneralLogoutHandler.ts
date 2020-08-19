@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -29,7 +29,7 @@ import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../storage/StorageUtility";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class LogoutHandler implements ILogoutHandler {

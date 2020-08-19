@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -35,7 +35,7 @@ import IHandleable from "../util/handlerPattern/IHandleable";
 import IRequestCredentials from "./IRequestCredentials";
 
 /**
- * @internal
+ * @hidden
  */
 type IAuthenticatedFetcher = IHandleable<
   [IRequestCredentials, RequestInfo, RequestInit?],

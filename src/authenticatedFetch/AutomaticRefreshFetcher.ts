@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -30,7 +30,7 @@ import IRequestCredentials from "./IRequestCredentials";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class AutomaticRefreshHandler implements IAuthenticatedFetcher {

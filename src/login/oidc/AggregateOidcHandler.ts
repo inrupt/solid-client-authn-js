@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -33,7 +33,7 @@ import IOidcHandler from "./IOidcHandler";
 import IOidcOptions from "./IOidcOptions";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class AggregateOidcHandler

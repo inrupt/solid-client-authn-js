@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -35,7 +35,7 @@ import { IStorageUtility } from "../../storage/StorageUtility";
 import { flattenHeaders } from "../headers/HeadersUtils";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class BearerAuthenticatedFetcher

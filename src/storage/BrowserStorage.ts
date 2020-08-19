@@ -20,14 +20,14 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
 import IStorage from "./IStorage";
 
 /**
- * @internal
+ * @hidden
  */
 export default class BrowserStorage implements IStorage {
   async get(key: string): Promise<string | undefined> {

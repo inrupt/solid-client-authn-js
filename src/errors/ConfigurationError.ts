@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -32,7 +32,7 @@
 // https://github.com/gotwarlost/istanbul/issues/690
 // The workaround is to put istanbul ignore on the constructor
 /**
- * @internal
+ * @hidden
  */
 export default class ConfigurationError extends Error {
   /* istanbul ignore next */

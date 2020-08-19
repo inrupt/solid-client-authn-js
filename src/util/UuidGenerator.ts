@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -30,14 +30,14 @@
 import { v4 } from "uuid";
 
 /**
- * @internal
+ * @hidden
  */
 export interface IUuidGenerator {
   v4(): string;
 }
 
 /**
- * @internal
+ * @hidden
  */
 export default class UuidGenerator {
   v4(): string {

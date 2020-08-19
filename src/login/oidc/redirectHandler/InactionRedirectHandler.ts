@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -30,7 +30,7 @@ import { inject, injectable } from "tsyringe";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class InactionRedirectHandler implements IRedirectHandler {

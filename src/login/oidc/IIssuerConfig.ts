@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -30,7 +30,7 @@
 import URL from "url-parse";
 
 /**
- * @internal
+ * @hidden
  */
 export default interface IIssuerConfig {
   issuer: URL;

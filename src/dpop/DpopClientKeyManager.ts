@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -34,7 +34,7 @@ import IJoseUtility from "../jose/IJoseUtility";
 import { IStorageUtility } from "../storage/StorageUtility";
 
 /**
- * @internal
+ * @hidden
  */
 export interface IDpopClientKeyManager {
   /**
@@ -49,7 +49,7 @@ export interface IDpopClientKeyManager {
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class DpopClientKeyManager implements IDpopClientKeyManager {

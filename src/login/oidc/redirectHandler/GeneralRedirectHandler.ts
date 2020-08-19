@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -33,7 +33,7 @@ import { ITokenSaver } from "./TokenSaver";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class GeneralRedirectHandler implements IRedirectHandler {

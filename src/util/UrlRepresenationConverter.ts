@@ -20,21 +20,21 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
 import URL from "url-parse";
 
 /**
- * @internal
+ * @hidden
  */
 export interface IUrlRepresentationConverter {
   requestInfoToUrl(requestInfo: RequestInfo): URL;
 }
 
 /**
- * @internal
+ * @hidden
  */
 export default class UrlRepresentationConverter {
   requestInfoToUrl(requestInfo: RequestInfo): URL {

@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -29,14 +29,14 @@ import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ITokenRequester } from "../TokenRequester";
 
 /**
- * @internal
+ * @hidden
  */
 export interface ITokenRefresher {
   refresh(localUserId: string): Promise<void>;
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class TokenRefresher implements ITokenRefresher {

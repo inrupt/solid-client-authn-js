@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -33,7 +33,7 @@ import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class AggregatePostPopUpLoginHandler

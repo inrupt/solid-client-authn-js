@@ -20,14 +20,14 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
 import IHandleable from "../util/handlerPattern/IHandleable";
 
 /**
- * @internal
+ * @hidden
  */
 type ILogoutHandler = IHandleable<[string], void>;
 export default ILogoutHandler;

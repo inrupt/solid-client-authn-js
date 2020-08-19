@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -36,7 +36,7 @@ import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class AuthorizationCodeWithPkceOidcHandler

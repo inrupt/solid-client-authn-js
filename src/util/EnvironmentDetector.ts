@@ -20,21 +20,21 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
 export type environmentName = "browser" | "server" | "react-native";
 
 /**
- * @internal
+ * @hidden
  */
 export interface IEnvironmentDetector {
   detect(): environmentName;
 }
 
 /**
- * @internal
+ * @hidden
  */
 export function detectEnvironment(): "browser" | "react-native" | "server" {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -56,7 +56,7 @@ export function detectEnvironment(): "browser" | "react-native" | "server" {
 }
 
 /**
- * @internal
+ * @hidden
  */
 export default class EnvironmentDetector {
   detect(): environmentName {

@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -35,7 +35,7 @@ import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverte
 import { IStorageUtility } from "../../storage/StorageUtility";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {

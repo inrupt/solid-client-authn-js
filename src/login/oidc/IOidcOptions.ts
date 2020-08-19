@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -41,7 +41,7 @@ type IOidcOptions = IAccessTokenOidcOptions;
 export default IOidcOptions;
 
 /**
- * @internal
+ * @hidden
  */
 export interface ICoreOidcOptions {
   issuer: URL;
@@ -51,7 +51,7 @@ export interface ICoreOidcOptions {
 }
 
 /**
- * @internal
+ * @hidden
  */
 export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
   dpop: boolean;

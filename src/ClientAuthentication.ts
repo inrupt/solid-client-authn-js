@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -37,7 +37,7 @@ import URL from "url-parse";
 import IRequestCredentials from "./authenticatedFetch/IRequestCredentials";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class ClientAuthentication {

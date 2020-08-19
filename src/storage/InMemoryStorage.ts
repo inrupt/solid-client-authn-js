@@ -20,14 +20,14 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
 import IStorage from "./IStorage";
 
 /**
- * @internal
+ * @hidden
  */
 export default class InMemoryStorage implements IStorage {
   private map: Record<string, string> = {};

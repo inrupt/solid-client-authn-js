@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -33,7 +33,7 @@ import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IRedirectHandler from "./IRedirectHandler";
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class AggregateRedirectHandler

@@ -24,12 +24,12 @@ import IRequestCredentials from "../IRequestCredentials";
 import { FetcherMockResponse } from "../../util/__mocks__/Fetcher";
 
 /**
- * @internal
+ * @hidden
  */
 export const AuthenticatedFetcherResponse = FetcherMockResponse;
 
 /**
- * @internal
+ * @hidden
  */
 export const AuthenticatedFetcherMock: jest.Mocked<IAuthenticatedFetcher> = {
   canHandle: jest.fn(

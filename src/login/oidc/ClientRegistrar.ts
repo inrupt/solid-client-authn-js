@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -40,7 +40,7 @@ export interface IRegistrarOptions {
 }
 
 /**
- * @internal
+ * @hidden
  */
 export interface IClientRegistrar {
   getClient(
@@ -50,7 +50,7 @@ export interface IClientRegistrar {
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class ClientRegistrar implements IClientRegistrar {

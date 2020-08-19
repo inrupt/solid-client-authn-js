@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -43,7 +43,7 @@ export interface IDpopHeaderCreator {
 }
 
 /**
- * @internal
+ * @hidden
  */
 @injectable()
 export default class DpopHeaderCreator implements IDpopHeaderCreator {

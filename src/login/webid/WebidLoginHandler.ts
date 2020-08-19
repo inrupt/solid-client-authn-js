@@ -20,7 +20,7 @@
  */
 
 /**
- * @internal
+ * @hidden
  * @packageDocumentation
  */
 
@@ -31,7 +31,7 @@ import ILoginHandler from "../ILoginHandler";
 import ILoginOptions from "../ILoginOptions";
 
 /**
- * @internal
+ * @hidden
  */
 export default class WebidLoginHandler implements ILoginHandler {
   async canHandle(_loginOptions: ILoginOptions): Promise<boolean> {
