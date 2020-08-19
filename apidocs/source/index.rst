@@ -9,10 +9,7 @@ solid-client-authn API
    :titlesonly:
    :hidden:
 
-   /api/*
-
-.. toctree::
-   :glob:
-   :titlesonly:
-
-   /api/*/*
+   *
+   /classes/*
+   /interfaces/*
+   /modules/*
