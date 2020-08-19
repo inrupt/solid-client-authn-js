@@ -23,7 +23,16 @@
  * Defines the data that should be persisted
  */
 export default interface ISessionInfo {
+  /**
+   * true if the session is currently logged in the associated identity provider.
+   */
   isLoggedIn: boolean;
+  /**
+   * The WebID if the user logged in the session, and undefined if not logged in.
+   */
   webId?: string;
+  /**
+   * A unique identifier for the session.
+   */
   sessionId: string;
 }

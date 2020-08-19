@@ -21,15 +21,15 @@
 
 import IStorage from "./storage/IStorage";
 import ILoginInputOptions from "./ILoginInputOptions";
+/**
+ * @hidden
+ */
 import { EventEmitter } from "events";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { v4 } from "uuid";
 
-/**
- * To initialize a Session instance, either both storages or clientAuthentication are required.
- */
 export interface ISessionOptions {
   secureStorage: IStorage;
   insecureStorage: IStorage;
@@ -41,9 +41,31 @@ export interface ISessionOptions {
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
 export class Session extends EventEmitter {
+  /**
+   * Information regarding the current session.
+   */
   public readonly info: ISessionInfo;
+
+  /**
+   * @hidden
+   */
   private clientAuthentication: ClientAuthentication;
 
+  /**
+   * Session object constructor. Typically called as follows:
+   *
+   * ```typescript
+   * const session = new Session(
+   *   {
+   *     clientAuthentication: getClientAuthenticationWithDependencies({})
+   *   },
+   *   "mySession"
+   * );
+   * ```
+   * @param sessionOptions The options enabling the correct instanciation of the session. Either both storages or clientAuthentication are required.
+   * @param sessionId A magic string uniquely identifying the session.
+   *
+   */
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId?: string

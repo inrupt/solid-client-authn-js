@@ -32,6 +32,9 @@ export interface ISessionManagerOptions {
   insecureStorage?: IStorage;
 }
 
+/**
+ * A SessionManager instance aims at managing all the sessions in an application, each session being associated to an individual user.
+ */
 export class SessionManager extends EventEmitter {
   private clientAuthn: ClientAuthentication;
   private sessionRecords: Record<
@@ -41,6 +44,19 @@ export class SessionManager extends EventEmitter {
   private isInitialized = false;
   private handledIncomingRedirect = false;
 
+  /**
+   * Constructor for the SessionManager object. It is typically used as follows:
+   *
+   * ```typescript
+   * import { SessionManager } from "@inrupt/solid-client-authn-browser";
+   * import customStorage from "./myCustomStorage";
+   *
+   * const sessionManager = new SessionManager({
+   *   secureStorage: customStorage
+   * });
+   * ```
+   * @param options Options customizing the behaviour of the SessionManager, namely to store data appropriately.
+   */
   constructor(options: ISessionManagerOptions = {}) {
     super();
     this.clientAuthn = getClientAuthenticationWithDependencies({
@@ -87,6 +103,9 @@ export class SessionManager extends EventEmitter {
     }
   }
 
+  /**
+   * @returns all the sessions currently managed by the session manager.
+   */
   async getSessions(): Promise<Session[]> {
     await this.init();
     const sessionInfos = await this.clientAuthn.getAllSessionInfo();
@@ -95,6 +114,15 @@ export class SessionManager extends EventEmitter {
     );
   }
 
+  /**
+   * Creates a new session and adds it to the session manager.
+   * If a session ID is not provided then a random UUID will be
+   * assigned as the session ID. If the session of the provided
+   * ID already exists then that session will be returned.
+   *
+   * @param sessionId An optional unique session identifier.
+   * @returns A {@link Session} associated to the given ID.
+   */
   async getSession(sessionId?: string): Promise<Session> {
     await this.init();
     let session: Session;
@@ -117,19 +145,39 @@ export class SessionManager extends EventEmitter {
     return session;
   }
 
+  /**
+   * @param sessionId A unique session identifier.
+   * @returns true if a session associated to the given ID exists.
+   */
   async hasSession(sessionId: string): Promise<boolean> {
     await this.init();
     return (await this.clientAuthn.getSessionInfo(sessionId)) !== undefined;
   }
 
+  /**
+   * Registers a callback to be called when a session is logged in.
+   *
+   * @param callback a function executed when a session logs in, with the session as a parameter.
+   */
   onSessionLogin(callback: (session: Session) => unknown): void {
     this.on("sessionLogin", callback);
   }
 
+  /**
+   * Registers a callback to be called when a session is logged out.
+   *
+   * @param callback a function executed when a session logs out, with the session as a parameter.
+   */
   onSessionLogout(callback: (session: Session) => unknown): void {
-    this.on("sessionLogin", callback);
+    this.on("sessionLogout", callback);
   }
 
+  /**
+   * Removes a session from the pool managed by the manager.
+   * This does not log out the session, but it does remove references to it, so after this call the session will become unreachable.
+   *
+   * @param sessionId A unique session identifier.
+   */
   detatchSession(sessionId: string): void {
     const sessionRecord = this.sessionRecords[sessionId];
     if (sessionRecord) {
@@ -141,16 +189,21 @@ export class SessionManager extends EventEmitter {
     }
   }
 
-  async handleIncomingRedirect(url: string): Promise<void> {
-    if (!this.handledIncomingRedirect) {
-      // This will always cause the user to log in. If not it will throw an error.
-      const sessionInfo = await this.clientAuthn.handleIncomingRedirect(url);
-      if (sessionInfo) {
-        const session = this.getSessionFromCurrentSessionInfo(sessionInfo);
-        this.emit("sessionLogin", session);
-        session.emit("login");
-        this.handledIncomingRedirect = true;
-      }
+  /**
+   * Processes the information sent by the identity provider after
+   * the user has logged in, in order to return a logged in {@link Session}.
+   *
+   * @param url The URL to which the user is being redirected.
+   * @returns The {@link Session} that completed login if the process has been successful.
+   */
+  async handleIncomingRedirect(url: string): Promise<Session | undefined> {
+    const sessionInfo = await this.clientAuthn.handleIncomingRedirect(url);
+    if (sessionInfo) {
+      const session = this.getSessionFromCurrentSessionInfo(sessionInfo);
+      this.emit("sessionLogin", session);
+      session.emit("login");
+      return session;
     }
+    return undefined;
   }
 }
