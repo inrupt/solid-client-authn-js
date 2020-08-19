@@ -80,3 +80,8 @@ data
 # Lerna
 lerna-debug.log
 packages/*/lib
+
+# Documentation
+docs/build/
+apidocs/build
+apidocs/source/api/
