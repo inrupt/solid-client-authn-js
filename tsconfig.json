@@ -28,6 +28,7 @@
       "src/index.browser.ts"
     ],
     "excludeNotExported": true,
+    "excludePrivate": true,
     "stripInternal": true,
     "theme": "markdown",
     "readme": "none"

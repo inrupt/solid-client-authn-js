@@ -23,7 +23,7 @@ The libraries share a common API and include different modules for different dep
 
 # Authentication libraries
 
-The different `solid-client-authn` libraries all share the same interface ([see API reference](./docs/api.md)). `solid-client-authn` includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
+The different `solid-client-authn` libraries all share the same interface ([see API reference](https://docs.inrupt.com/client-libraries/api/javascript/solid-client-authn-browser/)). `solid-client-authn` includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
 
 ## Usage
 ### Single session API

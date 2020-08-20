@@ -21,6 +21,9 @@
 
 import IStorage from "./storage/IStorage";
 import ILoginInputOptions from "./ILoginInputOptions";
+/**
+ * @hidden
+ */
 import { EventEmitter } from "events";
 import ISessionInfo from "./sessionInfo/ISessionInfo";
 import ClientAuthentication from "./ClientAuthentication";
@@ -28,16 +31,50 @@ import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { v4 } from "uuid";
 
 export interface ISessionOptions {
+  /**
+   * A private storage, unreachable to other scripts on the page. Typically in-memory.
+   */
   secureStorage: IStorage;
+  /**
+   * A storage where non-sensitive information may be stored, potentially longer-lived than the secure storage.
+   */
   insecureStorage: IStorage;
+  /**
+   * Details about the current session
+   */
   sessionInfo: ISessionInfo;
+  /**
+   * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
+   */
   clientAuthentication: ClientAuthentication;
 }
 
+/**
+ * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
+ */
 export class Session extends EventEmitter {
+  /**
+   * Information regarding the current session.
+   */
   public readonly info: ISessionInfo;
+
   private clientAuthentication: ClientAuthentication;
 
+  /**
+   * Session object constructor. Typically called as follows:
+   *
+   * ```typescript
+   * const session = new Session(
+   *   {
+   *     clientAuthentication: getClientAuthenticationWithDependencies({})
+   *   },
+   *   "mySession"
+   * );
+   * ```
+   * @param sessionOptions The options enabling the correct instanciation of the session. Either both storages or clientAuthentication are required. For more information, see {@link ISessionOptions}.
+   * @param sessionId A magic string uniquely identifying the session.
+   *
+   */
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId?: string
@@ -69,6 +106,12 @@ export class Session extends EventEmitter {
     }
   }
 
+  /**
+   * Triggers the login process. Note that this method will redirect the user away from your app.
+   *
+   * @param options Parameter to customize the login behaviour. In particular, two options are mandatory: `options.oidcIssuer`, the user's identity provider, and `options.redirectUrl`, the URL to which the user will be redirected after logging in their identity provider.
+   * @returns This method should redirect the user away from the app: it does not return anything. The login process is completed by {@linkcode handleIncomingRedirect}.
+   */
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
@@ -78,15 +121,29 @@ export class Session extends EventEmitter {
     this.emit("login");
   };
 
+  /**
+   * Fetches data using available login information. If the user is not logged in, this will behave as a regular `fetch`. The signature of this method is identical to the [canonical `fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
+   *
+   * @param url The URL from which data should be fetched.
+   * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
+   */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
     return this.clientAuthentication.fetch(this.info.sessionId, url, init);
   };
 
+  /**
+   * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
+   */
   logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
     this.emit("logout");
   };
 
+  /**
+   * Completes the login process by processing the information provided by the identity provider through redirect.
+   *
+   * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
+   */
   handleIncomingRedirect = async (
     url: string
   ): Promise<ISessionInfo | undefined> => {
@@ -100,10 +157,22 @@ export class Session extends EventEmitter {
     return sessionInfo;
   };
 
+  /**
+   * Register a callback function to be called when a user completes login.
+   *
+   * The callback is called when {@link handleIncomingRedirect} completes successfully.
+   *
+   * @param callback The function called when a user completes login.
+   */
   onLogin(callback: () => unknown): void {
     this.on("login", callback);
   }
 
+  /**
+   * Register a callback function to be called when a user logs out:
+   *
+   * @param callback The function called when a user completes logout.
+   */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
   }
