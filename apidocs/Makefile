@@ -32,7 +32,8 @@ migrate: clean
    # Copying to SOURCECOPYDIR instead of copying source dir to BUILDDIR
    # in case someone forgets to backslash after build/
 
-	cp -R $(SOURCEDIR)/* $(SOURCECOPYDIR)
+	cp -R $(SOURCEDIR)/index.rst $(SOURCECOPYDIR)
+	cp -R $(SOURCEDIR)/api/* $(SOURCECOPYDIR)
 
 html: Makefile migrate
 
@@ -41,9 +42,10 @@ html: Makefile migrate
 # Also, on macOS, need -i '' but not for Linux
 
 ifdef IS_MAC
-	find $(SOURCECOPYDIR)/api/modules/ -type f -name "*.md" -exec sed -i '' -e 's?\.md#?\.html#?g' {} \;
+	find $(SOURCECOPYDIR)/ -type f -name "*.md" -exec sed -i '' -e 's?\.md#?\.html#?g' {} \;
+	
 else
-	find $(SOURCECOPYDIR)/api/modules/ -type f -name "*.md" -exec sed -i  -e 's?\.md#?\.html#?g' {} \;
+	find $(SOURCECOPYDIR)/ -type f -name "*.md" -exec sed -i  -e 's?\.md#?\.html#?g' {} \;
 endif
 	@$(SPHINXBUILD) -M $@ "$(SOURCECOPYDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -c .
 

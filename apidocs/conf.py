@@ -49,9 +49,7 @@ highlight_language = 'javascript'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx_copybutton',
     'sphinx.ext.extlinks',
-    'sphinx_tabs.tabs',
     'sphinx.ext.todo',
     'myst_parser',
 ]
@@ -89,7 +87,7 @@ html_theme_options = {
     'banner': True,
     'banner_msg': 'This is a Beta (i.e. in progress) version of the manual. Content and features are subject to change.',
     'robots_index': True,
-    'github_editable': True,
+    'github_editable': False,
     'github_org': 'inrupt',
     'github_repo': repo_name,
     'github_branch': 'master',
