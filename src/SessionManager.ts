@@ -55,6 +55,8 @@ export class SessionManager extends EventEmitter {
    *   secureStorage: customStorage
    * });
    * ```
+   * See {@link IStorage} for more information on how to define your own storage mechanism.
+   *
    * @param options Options customizing the behaviour of the SessionManager, namely to store data appropriately.
    */
   constructor(options: ISessionManagerOptions = {}) {
@@ -173,8 +175,10 @@ export class SessionManager extends EventEmitter {
   }
 
   /**
-   * Removes a session from the pool managed by the manager.
-   * This does not log out the session, but it does remove references to it, so after this call the session will become unreachable.
+   * Removes a session from the pool managed by the manager. This is typically useful
+   * when a user logs out of the application, so that the number of managed session
+   * is not ever-growing. Note that this specific function **does not log out the session**,
+   * it only removes references to it, so after this call the session will become unreachable.
    *
    * @param sessionId A unique session identifier.
    */
