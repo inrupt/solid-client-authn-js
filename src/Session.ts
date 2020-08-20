@@ -31,9 +31,21 @@ import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { v4 } from "uuid";
 
 export interface ISessionOptions {
+  /**
+   * A private storage, unreachable to other scripts on the page. Typically in-memory.
+   */
   secureStorage: IStorage;
+  /**
+   * A storage where non-sensitive information may be stored, potentially longer-lived than the secure storage.
+   */
   insecureStorage: IStorage;
+  /**
+   * Details about the current session
+   */
   sessionInfo: ISessionInfo;
+  /**
+   * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
+   */
   clientAuthentication: ClientAuthentication;
 }
 
@@ -46,9 +58,6 @@ export class Session extends EventEmitter {
    */
   public readonly info: ISessionInfo;
 
-  /**
-   * @hidden
-   */
   private clientAuthentication: ClientAuthentication;
 
   /**
