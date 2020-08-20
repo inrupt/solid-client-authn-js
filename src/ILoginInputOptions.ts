@@ -23,11 +23,11 @@ import URL from "url-parse";
 
 export default interface ILoginInputOptions {
   /**
-   * The user's identity provider.
+   * The user's identity provider, e.g. `https://inrupt.net`. Usually provided by the user.
    */
   oidcIssuer?: URL;
   /**
-   * The URI within this application that the user should be redirected to after successful login. This can be either a web URL or a mobile URL scheme.
+   * The URL within this application that the user should be redirected to after successful login. This can be either a web URL or a mobile URL scheme.
    */
   redirectUrl?: URL;
   /**
@@ -47,7 +47,7 @@ export default interface ILoginInputOptions {
    */
   popUp?: boolean;
   /**
-   * If a function is provided, the browser will not auto-redirect and will instead trigger that function to redirect. May be left undefined in the browser environment.
+   * If a function is provided, the browser will not auto-redirect and will instead trigger that function to redirect. Required in non-browser environments.
    */
   handleRedirect?: (redirectUrl: string) => unknown;
 }

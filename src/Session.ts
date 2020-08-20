@@ -62,7 +62,7 @@ export class Session extends EventEmitter {
    *   "mySession"
    * );
    * ```
-   * @param sessionOptions The options enabling the correct instanciation of the session. Either both storages or clientAuthentication are required.
+   * @param sessionOptions The options enabling the correct instanciation of the session. Either both storages or clientAuthentication are required. For more information, see {@link ISessionOptions}.
    * @param sessionId A magic string uniquely identifying the session.
    *
    */
@@ -116,7 +116,7 @@ export class Session extends EventEmitter {
    * Fetches data using available login information. If the user is not logged in, this will behave as a regular `fetch`. The signature of this method is identical to the [canonical `fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
    *
    * @param url The URL from which data should be fetched.
-   * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://github.github.io/fetch/).
+   * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
     return this.clientAuthentication.fetch(this.info.sessionId, url, init);
@@ -131,9 +131,9 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * Completes the login process by receiving the information provided by the identity provider through redirect.
+   * Completes the login process by processing the information provided by the identity provider through redirect.
    *
-   * @param url The URL where the user has been redirected, as information is given by the identity provider to the app through query strings.
+   * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
    */
   handleIncomingRedirect = async (
     url: string
@@ -150,6 +150,8 @@ export class Session extends EventEmitter {
 
   /**
    * Register a callback function to be called when a user completes login.
+   *
+   * The callback is called when {@link handleIncomingRedirect} completes successfully.
    *
    * @param callback The function called when a user completes login.
    */

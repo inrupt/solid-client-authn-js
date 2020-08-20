@@ -33,7 +33,7 @@ export interface ISessionManagerOptions {
 }
 
 /**
- * A SessionManager instance aims at managing all the sessions in an application, each session being associated to an individual user.
+ * A SessionManager instance can be used to manage all the sessions in an application, each session being associated to an individual user.
  */
 export class SessionManager extends EventEmitter {
   private clientAuthn: ClientAuthentication;
@@ -147,7 +147,7 @@ export class SessionManager extends EventEmitter {
 
   /**
    * @param sessionId A unique session identifier.
-   * @returns true if a session associated to the given ID exists.
+   * @returns A Promise resolving to true if a session associated to the given ID exists, and false if not.
    */
   async hasSession(sessionId: string): Promise<boolean> {
     await this.init();
