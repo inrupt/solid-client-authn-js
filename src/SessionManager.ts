@@ -182,7 +182,7 @@ export class SessionManager extends EventEmitter {
    *
    * @param sessionId A unique session identifier.
    */
-  detatchSession(sessionId: string): void {
+  detachSession(sessionId: string): void {
     const sessionRecord = this.sessionRecords[sessionId];
     if (sessionRecord) {
       sessionRecord.session.removeListener(
