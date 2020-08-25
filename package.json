@@ -44,7 +44,8 @@
     "test-acceptance-ios": "echo \"Not Implemented\" && exit 1",
     "test-acceptance-android": "echo \"Not Implemented\" && exit 1",
     "bootstrap-examples": "./bootstrap-examples.bash",
-    "build-api-docs": "npx typedoc --out apidocs/source/api"
+    "build-api-docs": "npx typedoc --out docs/api/source/api",
+    "build-docs-preview-site": "npm run build-api-docs; cd docs/prose; make html; cd ../api; make html; cd ../; rm -r dist || true; mkdir -p dist/prose dist/api; cp -r prose/build/html/. dist/prose/; cp -r api/build/html/. dist/api/; echo 'Draft documentation: <a href=\"./prose/\">Prose</a>, <a href=\"./api/\">API docs</a>.' >> dist/index.html"
   },
   "devDependencies": {
     "@types/jest": "^24.0.24",
@@ -59,10 +60,10 @@
     "node-fetch": "^2.6.0",
     "prettier": "^1.19.1",
     "ts-jest": "^25.5.1",
-    "ts-loader": "^8.0.2",
+    "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.18.0",
-    "typedoc-plugin-markdown": "^2.4.1",
+    "typedoc-plugin-markdown": "^2.4.2",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
     "webpack-bundle-analyzer": "^3.8.0",
