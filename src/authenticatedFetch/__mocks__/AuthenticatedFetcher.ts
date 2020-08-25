@@ -37,7 +37,7 @@ export const AuthenticatedFetcherMock: jest.Mocked<IAuthenticatedFetcher> = {
       /* eslint-disable @typescript-eslint/no-unused-vars */
       requestCredentials: IRequestCredentials,
       requestInfo: RequestInfo,
-      requestInit: RequestInit
+      requestInit?: RequestInit
       /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => true as boolean
   ),
@@ -46,7 +46,7 @@ export const AuthenticatedFetcherMock: jest.Mocked<IAuthenticatedFetcher> = {
       /* eslint-disable @typescript-eslint/no-unused-vars */
       requestCredentials: IRequestCredentials,
       requestInfo: RequestInfo,
-      requestInit: RequestInit
+      requestInit?: RequestInit
       /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => AuthenticatedFetcherResponse
   )
