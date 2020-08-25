@@ -29,7 +29,7 @@ export const StorageUtilitySafeGetResponse = {
 export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
   /* eslint-disable @typescript-eslint/no-unused-vars */
   get: jest.fn(
-    async (key: string, options: { errorIfNull?: boolean }) =>
+    async (key: string, options?: { errorIfNull?: boolean }) =>
       StorageUtilityGetResponse
   ),
   set: jest.fn(async (key: string, value: string) => {
@@ -39,8 +39,11 @@ export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
     /* do nothing */
   }),
   getForUser: jest.fn(
-    async (userId: string, key: string, options: { errorIfNull?: true }) =>
-      StorageUtilityGetResponse
+    async (
+      userId: string,
+      key: string,
+      options?: { errorIfNull?: boolean; secure?: boolean }
+    ) => StorageUtilityGetResponse
   ),
   setForUser: jest.fn(
     async (
@@ -51,12 +54,16 @@ export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
       /* do nothing */
     }
   ),
-  deleteForUser: jest.fn(async (userId: string, key: string) => {
-    /* do nothing */
-  }),
-  deleteAllUserData: jest.fn(async (userId: string) => {
-    /* do nothing */
-  }),
+  deleteForUser: jest.fn(
+    async (userId: string, key: string, options?: { secure?: boolean }) => {
+      /* do nothing */
+    }
+  ),
+  deleteAllUserData: jest.fn(
+    async (userId: string, options?: { secure?: boolean }) => {
+      /* do nothing */
+    }
+  ),
   safeGet: jest.fn(
     async (
       key: string,
@@ -89,19 +96,19 @@ export const mockStorageUtility = (
     get: jest.fn(
       async (
         key: string,
-        options: { errorIfNull?: boolean; secure?: boolean }
+        options?: { errorIfNull?: boolean; secure?: boolean }
       ) => {
         const store = options?.secure ? secureStore : nonSecureStore;
         return store[key] ? (store[key] as string) : undefined;
       }
     ),
     set: jest.fn(
-      async (key: string, value: string, options: { secure?: boolean }) => {
+      async (key: string, value: string, options?: { secure?: boolean }) => {
         const store = options?.secure ? secureStore : nonSecureStore;
         store[key] = value;
       }
     ),
-    delete: jest.fn(async (key: string, options: { secure?: boolean }) => {
+    delete: jest.fn(async (key: string, options?: { secure?: boolean }) => {
       const store = options?.secure ? secureStore : nonSecureStore;
       delete store[key];
     }),
@@ -109,7 +116,7 @@ export const mockStorageUtility = (
       async (
         userId: string,
         key: string,
-        options: { errorIfNull?: true; secure: boolean }
+        options?: { errorIfNull?: boolean; secure?: boolean }
       ) => {
         const store = options?.secure ? secureStore : nonSecureStore;
         return store[userId]
@@ -128,13 +135,13 @@ export const mockStorageUtility = (
       }
     ),
     deleteForUser: jest.fn(
-      async (userId: string, key: string, options: { secure?: boolean }) => {
+      async (userId: string, key: string, options?: { secure?: boolean }) => {
         const store = options?.secure ? secureStore : nonSecureStore;
         delete (store[userId] as Record<string, string>)[key];
       }
     ),
     deleteAllUserData: jest.fn(
-      async (userId: string, options: { secure?: boolean }) => {
+      async (userId: string, options?: { secure?: boolean }) => {
         const store = options?.secure ? secureStore : nonSecureStore;
         delete store[userId];
       }
