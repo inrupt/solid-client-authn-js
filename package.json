@@ -58,7 +58,7 @@
     "eslint-plugin-prettier": "^3.1.4",
     "jest": "^25.1.0",
     "node-fetch": "^2.6.0",
-    "prettier": "^1.19.1",
+    "prettier": "^2.1.0",
     "ts-jest": "^25.5.1",
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
