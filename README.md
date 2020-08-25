@@ -1,7 +1,8 @@
 # Solid JavaScript Authentication - solid-client-authn
 
-`solid-client-authn` is a set of libraries designed to authenticate with Solid identity servers. 
+`solid-client-authn` is a set of libraries designed to authenticate with Solid identity servers.
 The libraries share a common API and include different modules for different deployment environments:
+
 - `solid-client-authn-browser` can be used to help build web apps in the browser.
 - `solid-client-authn-node` is **planned** to help build server-side and console-based apps.
 
@@ -26,27 +27,28 @@ The libraries share a common API and include different modules for different dep
 The different `solid-client-authn` libraries all share the same interface ([see API reference](https://docs.inrupt.com/client-libraries/api/javascript/solid-client-authn-browser/)). `solid-client-authn` includes two APIs for building applications: a "Single Session API" and a "Multi Session API".
 
 ## Usage
+
 ### Single session API
 
 `solid-client-authn`'s single session API is designed to provide a streamlined experience when implementing authentication in apps that focus on just one user.
 You'd use the single session API to:
 
-  - Create a single page web application that only one user logs into at a time.
-  - Make a bot that only represents one user.
-  - Build a mobile application that only one user logs into at a time.
-  
+- Create a single page web application that only one user logs into at a time.
+- Make a bot that only represents one user.
+- Build a mobile application that only one user logs into at a time.
+
 #### Examples
 
- - [Single-session the web browser with your own bundler](./examples/single/bundle)
+- [Single-session the web browser with your own bundler](./examples/single/bundle)
 
 ### Multi Session API
 
 `solid-client-authn`'s "Multi Session API" allows you to manage multiple sessions for multiple logged in users at the same time. You'd use the multi session API to:
 
- - Create a web application with a server side component. While one user may be logged into each individual client, the server will need to manage all logged in users.
- - Make a bot that needs to operation on behalf of multiple users.
- - You have a single page application, but you want to maintain credentials on the server for security.
- - You want to log in multiple identities for either a single human user, or multiple users.
+- Create a web application with a server side component. While one user may be logged into each individual client, the server will need to manage all logged in users.
+- Make a bot that needs to operation on behalf of multiple users.
+- You have a single page application, but you want to maintain credentials on the server for security.
+- You want to log in multiple identities for either a single human user, or multiple users.
 
 ### Setting up the examples
 
@@ -82,13 +84,14 @@ If you have questions about working with Solid or just want to share what you’
 ## Prerequisite
 
 Any of the `solid-client-authn` libraries require at least:
+
 - NodeJS 12.X.Y
 - npm 6.14.X
-**Note**: We recommand using [nvm](https://github.com/nvm-sh/nvm) to manage your node version
+  **Note**: We recommand using [nvm](https://github.com/nvm-sh/nvm) to manage your node version
 
 The `solid-client-authn` libraries are compatible with [NSS](https://github.com/solid/node-solid-server/releases/tag/v5.3.0) 5.3.X and higher.
 
 ## Documentation
 
-* [Using the libraries from within the browser](./docs/browser.md)
-* [Inrupt documentation Homepage](https://docs.inrupt.com/)
+- [Using the libraries from within the browser](./docs/browser.md)
+- [Inrupt documentation Homepage](https://docs.inrupt.com/)

@@ -31,13 +31,13 @@ class App extends Component {
       loginIssuer: "https://dev.inrupt.net",
       fetchRoute: "https://jackson.dev.inrupt.net/private",
       fetchBody: "",
-      session: null
+      session: null,
     };
     this.sessionManager = new SessionManager();
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
     }
-    this.sessionManager.onSessionLogin(session => {
+    this.sessionManager.onSessionLogin((session) => {
       this.setState({ status: "dashboard", session });
     });
     this.handleLogin = this.handleLogin.bind(this);
@@ -63,9 +63,9 @@ class App extends Component {
         : "http://localhost:3001/",
       oidcIssuer: this.state.loginIssuer,
       popUp: isPopup,
-      handleRedirect: redirectUrl => {
+      handleRedirect: (redirectUrl) => {
         window.location.href = redirectUrl;
-      }
+      },
     });
   }
 
@@ -76,7 +76,7 @@ class App extends Component {
     this.setState({
       status: "login",
       fetchBody: "",
-      session: null
+      session: null,
     });
   }
 
@@ -102,10 +102,10 @@ class App extends Component {
             <input
               type="text"
               value={this.state.loginIssuer}
-              onChange={e => this.setState({ loginIssuer: e.target.value })}
+              onChange={(e) => this.setState({ loginIssuer: e.target.value })}
             />
             <button onClick={this.handleLogin}>Log In</button>
-            <button onClick={e => this.handleLogin(e, true)}>
+            <button onClick={(e) => this.handleLogin(e, true)}>
               Log In with Popup
             </button>
           </form>
@@ -119,7 +119,7 @@ class App extends Component {
               <input
                 type="text"
                 value={this.state.fetchRoute}
-                onChange={e => this.setState({ fetchRoute: e.target.value })}
+                onChange={(e) => this.setState({ fetchRoute: e.target.value })}
               />
               <button onClick={this.handleFetch}>Fetch</button>
               <pre>{this.state.fetchBody}</pre>

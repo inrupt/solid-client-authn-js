@@ -8,8 +8,8 @@ module.exports = ({ env, addon }) => {
   const browserConfig = {
     output: {
       libraryTarget: "var",
-      library: "solidClientAuthentication"
-    }
+      library: "solidClientAuthentication",
+    },
   };
 
   return webpackMerge(commonConfig, envConfig, browserConfig);

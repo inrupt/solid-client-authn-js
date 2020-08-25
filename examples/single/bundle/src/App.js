@@ -24,7 +24,7 @@ import "regenerator-runtime/runtime";
 
 import {
   Session,
-  getClientAuthenticationWithDependencies
+  getClientAuthenticationWithDependencies,
 } from "../../../../dist/index";
 
 class App extends Component {
@@ -32,7 +32,7 @@ class App extends Component {
     super(props);
     const session = new Session(
       {
-        clientAuthentication: getClientAuthenticationWithDependencies({})
+        clientAuthentication: getClientAuthenticationWithDependencies({}),
       },
       "mySession"
     );
@@ -42,7 +42,7 @@ class App extends Component {
       fetchRoute: "",
       fetchBody: "",
       session: session,
-      sessionInfo: session.info
+      sessionInfo: session.info,
     };
     if (window.location.pathname === "/popup") {
       this.state.status = "popup";
@@ -74,7 +74,7 @@ class App extends Component {
         this.setState({
           status: "dashboard",
           sessionInfo: sessionInfo,
-          fetchRoute: sessionInfo.webId
+          fetchRoute: sessionInfo.webId,
         });
       }
     }
@@ -85,7 +85,7 @@ class App extends Component {
     this.setState({ status: "loading" });
     await this.state.session.login({
       redirectUrl: new URL("http://localhost:3001/"),
-      oidcIssuer: new URL(this.state.loginIssuer)
+      oidcIssuer: new URL(this.state.loginIssuer),
     });
   }
 
@@ -95,7 +95,7 @@ class App extends Component {
     await this.state.session.logout();
     this.setState({
       status: "login",
-      fetchBody: ""
+      fetchBody: "",
     });
   }
 
@@ -121,7 +121,7 @@ class App extends Component {
             <input
               type="text"
               value={this.state.loginIssuer}
-              onChange={e => this.setState({ loginIssuer: e.target.value })}
+              onChange={(e) => this.setState({ loginIssuer: e.target.value })}
             />
             <button onClick={this.handleLogin}>Log In</button>
           </form>
@@ -135,7 +135,7 @@ class App extends Component {
               <input
                 type="text"
                 value={this.state.fetchRoute}
-                onChange={e => this.setState({ fetchRoute: e.target.value })}
+                onChange={(e) => this.setState({ fetchRoute: e.target.value })}
               />
               <button onClick={this.handleFetch}>Fetch</button>
               <pre>{this.state.fetchBody}</pre>
