@@ -28,14 +28,14 @@ import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlRepresentationConverter";
 import {
   StorageUtilityMock,
-  mockStorageUtility
+  mockStorageUtility,
 } from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("UnauthenticatedFetcher", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
     urlRepresentationConverter: UrlRepresentationConverterMock,
-    storageUtility: StorageUtilityMock
+    storageUtility: StorageUtilityMock,
   };
   function getUnauthenticatedFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -66,7 +66,7 @@ describe("UnauthenticatedFetcher", () => {
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
         fetcher: fetcher,
-        storageUtility: mockStorageUtility({})
+        storageUtility: mockStorageUtility({}),
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
@@ -74,7 +74,7 @@ describe("UnauthenticatedFetcher", () => {
         url
       );
       expect(fetcher.fetch).toHaveBeenCalledWith(url, {
-        method: "GET"
+        method: "GET",
       });
     });
 
@@ -82,7 +82,7 @@ describe("UnauthenticatedFetcher", () => {
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
         fetcher: fetcher,
-        storageUtility: mockStorageUtility({})
+        storageUtility: mockStorageUtility({}),
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
@@ -92,7 +92,7 @@ describe("UnauthenticatedFetcher", () => {
       );
       expect(fetcher.fetch).toHaveBeenCalledWith(url, {
         headers: { Accept: "text/turtle" },
-        method: "GET"
+        method: "GET",
       });
     });
 
@@ -100,7 +100,7 @@ describe("UnauthenticatedFetcher", () => {
       const fetcher = FetcherMock;
       const unauthenticatedFetcher = getUnauthenticatedFetcher({
         fetcher: fetcher,
-        storageUtility: mockStorageUtility({})
+        storageUtility: mockStorageUtility({}),
       });
       const url = "http://someurl.com";
       await unauthenticatedFetcher.handle(
@@ -109,7 +109,7 @@ describe("UnauthenticatedFetcher", () => {
         { method: "HEAD" }
       );
       expect(fetcher.fetch).toHaveBeenCalledWith(url, {
-        method: "HEAD"
+        method: "HEAD",
       });
     });
   });

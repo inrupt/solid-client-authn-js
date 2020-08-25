@@ -46,7 +46,7 @@ export default class LogoutHandler implements ILogoutHandler {
       this.storageUtility.deleteAllUserData(userId, { secure: false }),
       this.storageUtility.deleteAllUserData(userId, { secure: true }),
       // FIXME: This is needed until the DPoP key is stored safely
-      this.storageUtility.delete("clientKey", { secure: false })
+      this.storageUtility.delete("clientKey", { secure: false }),
     ]);
   }
 }

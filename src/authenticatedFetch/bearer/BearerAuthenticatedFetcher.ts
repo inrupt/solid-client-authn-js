@@ -73,7 +73,7 @@ export default class BearerAuthenticatedFetcher
       requestCredentials.localUserId,
       "accessToken",
       {
-        secure: true
+        secure: true,
       }
     );
     if (!authToken) {
@@ -84,14 +84,14 @@ export default class BearerAuthenticatedFetcher
     const requestInitiWithDefaults = {
       headers: {},
       method: "GET",
-      ...requestInit
+      ...requestInit,
     };
     return this.fetcher.fetch(url, {
       ...requestInit,
       headers: {
         ...flattenHeaders(requestInitiWithDefaults.headers as Headers),
-        authorization: `Bearer ${authToken}`
-      }
+        authorization: `Bearer ${authToken}`,
+      },
     });
   }
 }

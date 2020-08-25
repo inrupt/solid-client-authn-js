@@ -41,7 +41,7 @@ export const JoseUtilityGenerateJWKResponse: JSONWebKey = {
   dq:
     "iGLgcgv_8EQq1WHI4OUfLCRcf1o-XoOchRkNMMiYEMQ3e7zyR_ZWow_YAQNk5PgOP4516Dc0VSxWDaxMU-oSNcPQ_pfulYmp6VCgxlf5_SS9lAUPtVRUAUzoayp2z3HCDl981KuAi0HEla6MgUV4q8nYMERpMAy9LWmNE8uGgxM",
   qi:
-    "uCLWDLyIVCWNdVSxdhob9TgdSUKq5GmiUjm8IDRH_hebpDIxoVwY1L2QVe50lk5iGObQJyBy5ylTHu1SxRUUUWl6IcrKp4xQRuIkAd7FO9RuowbgH26BEup36gtU5T2Qliiy7izK7Q4EX6JaXe9S7d-k7j2FqpHue9fH-KAYnuU"
+    "uCLWDLyIVCWNdVSxdhob9TgdSUKq5GmiUjm8IDRH_hebpDIxoVwY1L2QVe50lk5iGObQJyBy5ylTHu1SxRUUUWl6IcrKp4xQRuIkAd7FO9RuowbgH26BEup36gtU5T2Qliiy7izK7Q4EX6JaXe9S7d-k7j2FqpHue9fH-KAYnuU",
 };
 export const JoseUtilityPrivateToPublicJWKResponse: JSONWebKey = {
   kty: "RSA",
@@ -62,7 +62,7 @@ export const JoseUtilityPrivateToPublicJWKResponse: JSONWebKey = {
   dq:
     "iGLgcgv_8EQq1WHI4OUfLCRcf1o-XoOchRkNMMiYEMQ3e7zyR_ZWow_YAQNk5PgOP4516Dc0VSxWDaxMU-oSNcPQ_pfulYmp6VCgxlf5_SS9lAUPtVRUAUzoayp2z3HCDl981KuAi0HEla6MgUV4q8nYMERpMAy9LWmNE8uGgxM",
   qi:
-    "uCLWDLyIVCWNdVSxdhob9TgdSUKq5GmiUjm8IDRH_hebpDIxoVwY1L2QVe50lk5iGObQJyBy5ylTHu1SxRUUUWl6IcrKp4xQRuIkAd7FO9RuowbgH26BEup36gtU5T2Qliiy7izK7Q4EX6JaXe9S7d-k7j2FqpHue9fH-KAYnuU"
+    "uCLWDLyIVCWNdVSxdhob9TgdSUKq5GmiUjm8IDRH_hebpDIxoVwY1L2QVe50lk5iGObQJyBy5ylTHu1SxRUUUWl6IcrKp4xQRuIkAd7FO9RuowbgH26BEup36gtU5T2Qliiy7izK7Q4EX6JaXe9S7d-k7j2FqpHue9fH-KAYnuU",
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const JoseUtilityDecodeJWTResponse: Record<string, any> = {};
@@ -99,5 +99,5 @@ export const JoseUtilityMock: jest.Mocked<IJoseUtility> = {
   ),
   generateCodeChallenge: jest.fn(
     async (_verifier: string) => JoseUtilityGenerateCodeChallengeResponse
-  )
+  ),
 };

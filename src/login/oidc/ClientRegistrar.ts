@@ -67,7 +67,7 @@ export default class ClientRegistrar implements IClientRegistrar {
     if (options.clientId) {
       return {
         clientId: options.clientId,
-        clientSecret: options.clientSecret
+        clientSecret: options.clientSecret,
       };
     }
 
@@ -75,17 +75,17 @@ export default class ClientRegistrar implements IClientRegistrar {
     const [storedClientId, storedClientSecret] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId", {
         // FIXME: figure out how to persist secure storage at reload
-        secure: false
+        secure: false,
       }),
       this.storageUtility.getForUser(options.sessionId, "clientSecret", {
         // FIXME: figure out how to persist secure storage at reload
-        secure: false
-      })
+        secure: false,
+      }),
     ]);
     if (storedClientId) {
       return {
         clientId: storedClientId,
-        clientSecret: storedClientSecret
+        clientSecret: storedClientSecret,
       };
     }
 
@@ -95,7 +95,10 @@ export default class ClientRegistrar implements IClientRegistrar {
         options.sessionId,
         "registrationAccessToken"
       ),
-      this.storageUtility.getForUser(options.sessionId, "registrationClientUri")
+      this.storageUtility.getForUser(
+        options.sessionId,
+        "registrationClientUri"
+      ),
     ]);
 
     let registerResponse: Response;
@@ -104,8 +107,8 @@ export default class ClientRegistrar implements IClientRegistrar {
         method: "GET",
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${registrationAccessToken}`
-        }
+          Authorization: `Bearer ${registrationAccessToken}`,
+        },
       });
     } else {
       // Else, begin the dynamic registration.
@@ -116,7 +119,7 @@ export default class ClientRegistrar implements IClientRegistrar {
         redirect_uris: [options.redirectUrl?.toString()],
         subject_type: "pairwise",
         token_endpoint_auth_method: "client_secret_basic",
-        code_challenge_method: "S256"
+        code_challenge_method: "S256",
         /* eslint-enable @typescript-eslint/camelcase */
       };
       if (!issuerConfig.registrationEndpoint) {
@@ -129,9 +132,9 @@ export default class ClientRegistrar implements IClientRegistrar {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(config)
+          body: JSON.stringify(config),
         }
       );
     }
@@ -148,23 +151,23 @@ export default class ClientRegistrar implements IClientRegistrar {
       options.sessionId,
       {
         clientId: responseBody.client_id,
-        clientSecret: responseBody.client_secret
+        clientSecret: responseBody.client_secret,
       },
       {
         // FIXME: figure out how to persist secure storage at reload
         // Otherwise, the client info cannot be retrieved from storage, and
         // the lib tries to re-register the client on each fetch
-        secure: false
+        secure: false,
       }
     );
     await this.storageUtility.setForUser(options.sessionId, {
       registrationAccessToken: responseBody.registration_access_token,
-      registrationClientUri: responseBody.registration_client_uri
+      registrationClientUri: responseBody.registration_client_uri,
     });
 
     return {
       clientId: responseBody.client_id,
-      clientSecret: responseBody.client_secret
+      clientSecret: responseBody.client_secret,
     };
   }
 }

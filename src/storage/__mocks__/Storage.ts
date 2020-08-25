@@ -33,5 +33,5 @@ export const StorageMock: jest.Mocked<IStorage> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   delete: jest.fn(async (key: string) => {
     /* do nothing */
-  })
+  }),
 };

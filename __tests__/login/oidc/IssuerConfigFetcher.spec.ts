@@ -23,7 +23,7 @@ import "reflect-metadata";
 import URL from "url-parse";
 import {
   FetcherMock,
-  FetcherMockResponse
+  FetcherMockResponse,
 } from "../../../src/util/__mocks__/Fetcher";
 import { mockStorageUtility } from "../../../src/storage/__mocks__/StorageUtility";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
@@ -36,7 +36,7 @@ import { Response as NodeResponse } from "node-fetch";
 describe("IssuerConfigFetcher", () => {
   const defaultMocks = {
     fetchResponse: FetcherMockResponse,
-    storageUtility: mockStorageUtility({})
+    storageUtility: mockStorageUtility({}),
   };
   function getIssuerConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -56,7 +56,7 @@ describe("IssuerConfigFetcher", () => {
       Promise.resolve({ some: "config" })
     );
     const configFetcher = getIssuerConfigFetcher({
-      storageUtility: storageMock
+      storageUtility: storageMock,
     });
 
     const fetchedConfig = await configFetcher.fetchConfig(
@@ -72,12 +72,12 @@ describe("IssuerConfigFetcher", () => {
         issuer: "https://example.com",
         // eslint-disable-next-line @typescript-eslint/camelcase
         claim_types_supported: "oidc",
-        bleepBloop: "Meep Moop"
+        bleepBloop: "Meep Moop",
       })
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
-      fetchResponse: fetchResponse
+      fetchResponse: fetchResponse,
     });
 
     const fetchedConfig = await configFetcher.fetchConfig(
@@ -101,13 +101,13 @@ describe("IssuerConfigFetcher", () => {
         token_endpoint: "https://token_endpoint.url",
         userinfo_endpoint: "https://userinfo_endpoint.url",
         jwks_uri: "https://jwks_uri.url",
-        registration_endpoint: "https://registration_endpoint.url"
+        registration_endpoint: "https://registration_endpoint.url",
       })
       /* eslint-enable @typescript-eslint/camelcase */
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
-      fetchResponse: fetchResponse
+      fetchResponse: fetchResponse,
     });
 
     const fetchedConfig = await configFetcher.fetchConfig(
@@ -136,8 +136,8 @@ describe("IssuerConfigFetcher", () => {
         Promise.resolve(({
           json: () => {
             throw new Error("Some error");
-          }
-        } as unknown) as Response)
+          },
+        } as unknown) as Response),
     };
     const configFetcher = new IssuerConfigFetcher(
       mockFetcher as IFetcher,

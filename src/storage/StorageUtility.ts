@@ -228,7 +228,7 @@ export default class StorageUtility implements IStorageUtility {
       } catch (err) {
         if (options.userId) {
           await this.deleteForUser(options.userId, key, {
-            secure: options.secure
+            secure: options.secure,
           });
         } else {
           await this.delete(key, { secure: options.secure });

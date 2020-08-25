@@ -63,7 +63,7 @@ export class SessionManager extends EventEmitter {
     super();
     this.clientAuthn = getClientAuthenticationWithDependencies({
       secureStorage: options.secureStorage,
-      insecureStorage: options.insecureStorage
+      insecureStorage: options.insecureStorage,
     });
   }
 
@@ -84,7 +84,7 @@ export class SessionManager extends EventEmitter {
     session.onLogout(logoutCallback);
     this.sessionRecords[session.info.sessionId] = {
       session,
-      logoutCallback
+      logoutCallback,
     };
     return session;
   }
@@ -99,7 +99,7 @@ export class SessionManager extends EventEmitter {
       return this.addNewSessionRecord(
         new Session({
           clientAuthentication: this.clientAuthn,
-          sessionInfo: sessionInfo
+          sessionInfo: sessionInfo,
         })
       );
     }
@@ -111,7 +111,7 @@ export class SessionManager extends EventEmitter {
   async getSessions(): Promise<Session[]> {
     await this.init();
     const sessionInfos = await this.clientAuthn.getAllSessionInfo();
-    return sessionInfos.map(sessionInfo =>
+    return sessionInfos.map((sessionInfo) =>
       this.getSessionFromCurrentSessionInfo(sessionInfo)
     );
   }

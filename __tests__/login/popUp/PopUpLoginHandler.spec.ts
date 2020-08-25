@@ -31,7 +31,7 @@ describe("PopUpLoginHandler", () => {
   const defaultMocks = {
     environmentDetector: EnvironmentDetectorMock,
     loginHandler: LoginHandlerMock,
-    sessionCreator: SessionInfoManagerMock
+    sessionCreator: SessionInfoManagerMock,
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -50,7 +50,7 @@ describe("PopUpLoginHandler", () => {
         await handler.canHandle({
           sessionId: "mySession",
           popUp: true,
-          redirectUrl: new URL("/redirect")
+          redirectUrl: new URL("/redirect"),
         })
       ).toBe(true);
     });
@@ -60,7 +60,7 @@ describe("PopUpLoginHandler", () => {
         await handler.canHandle({
           sessionId: "mySession",
           popUp: false,
-          redirectUrl: new URL("https://coolsite.com/redirect")
+          redirectUrl: new URL("https://coolsite.com/redirect"),
         })
       ).toBe(false);
     });
@@ -72,7 +72,7 @@ describe("PopUpLoginHandler", () => {
       await expect(
         handler.handle({
           sessionId: "mySession",
-          popUp: true
+          popUp: true,
         })
       ).rejects.toThrow("Popup login is not implemented yet");
     });

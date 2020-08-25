@@ -36,7 +36,7 @@ import {
   JWKRSAKey,
   JWKOctKey,
   JWT as JoseJWT,
-  JSONWebKey
+  JSONWebKey,
 } from "jose";
 import { JWK } from "node-jose";
 import JWT from "jsonwebtoken";
@@ -66,7 +66,7 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
     const parsedKey = await JWK.asKey(key);
     const convertedKey: string = parsedKey.toPEM(true);
     const signed = JWT.sign(payload, convertedKey, {
-      ...(options as JWT.SignOptions)
+      ...(options as JWT.SignOptions),
     });
     return signed;
   }

@@ -28,7 +28,7 @@ import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/Environment
  */
 describe("Redirector", () => {
   const defaultMocks = {
-    environmentDetector: EnvironmentDetectorMock
+    environmentDetector: EnvironmentDetectorMock,
   };
   function getRedirector(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -41,14 +41,14 @@ describe("Redirector", () => {
   describe("Redirect", () => {
     const {
       location,
-      history: { replaceState }
+      history: { replaceState },
     } = window;
 
     beforeEach(() => {
       delete window.location;
       delete window.history.replaceState;
       window.location = {
-        href: "https://coolSite.com"
+        href: "https://coolSite.com",
       } as Location;
       window.history.replaceState = jest.fn();
     });
@@ -78,7 +78,7 @@ describe("Redirector", () => {
     it("browser redirection uses replaceState if specified", () => {
       const redirector = getRedirector();
       redirector.redirect("https://someUrl.com/redirect", {
-        redirectByReplacingState: true
+        redirectByReplacingState: true,
       });
       expect(window.history.replaceState).toHaveBeenCalledWith(
         {},

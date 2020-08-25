@@ -76,7 +76,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       // The webid scope does not appear in the spec
       scope: "openid webid offline_access",
-      state: oidcLoginOptions.sessionId
+      state: oidcLoginOptions.sessionId,
     };
 
     await Promise.all([
@@ -85,10 +85,10 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
         oidcLoginOptions.sessionId,
         {
           isLoggedIn: "false",
-          sessionId: oidcLoginOptions.sessionId
+          sessionId: oidcLoginOptions.sessionId,
         },
         { secure: true }
-      )
+      ),
     ]);
     /* eslint-enable @typescript-eslint/camelcase */
     // TODO: There is currently no secure storage of the DPoP key
@@ -108,7 +108,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     // This flow must happen in a browser, which means a redirection
     // should always be possible.
     this.redirector.redirect(requestUrl.toString(), {
-      handleRedirect: oidcLoginOptions.handleRedirect
+      handleRedirect: oidcLoginOptions.handleRedirect,
     });
   }
 }

@@ -71,16 +71,16 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
         // TODO: should add a slash at the end if none is present
         htu: this.normalizeHtu(audience),
         htm: method,
-        jti: this.uuidGenerator.v4()
+        jti: this.uuidGenerator.v4(),
       },
       clientKey,
       {
         header: {
           jwk: await this.joseUtility.privateJWKToPublicJWK(clientKey),
-          typ: "dpop+jwt"
+          typ: "dpop+jwt",
         },
         expiresIn: "1 hour",
-        algorithm: "ES256"
+        algorithm: "ES256",
       }
     );
   }

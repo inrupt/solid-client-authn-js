@@ -23,7 +23,7 @@ import { IStorageUtility } from "../StorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
 export const StorageUtilitySafeGetResponse = {
-  someKey: "someValue"
+  someKey: "someValue",
 };
 
 export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
@@ -75,7 +75,7 @@ export const StorageUtilityMock: jest.Mocked<IStorageUtility> = {
         userId?: string;
       }>
     ) => StorageUtilitySafeGetResponse
-  )
+  ),
   /* eslint-enable @typescript-eslint/no-unused-vars */
 };
 
@@ -157,7 +157,7 @@ export const mockStorageUtility = (
           userId?: string;
         }>
       ) => (nonSecureStore[key] ? (nonSecureStore[key] as string) : undefined)
-    )
+    ),
     /* eslint-enable @typescript-eslint/no-unused-vars */
   };
 };

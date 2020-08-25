@@ -27,7 +27,7 @@ export const standardOidcOptions: IOidcOptions = {
   issuer: new URL("https://example.com"),
   dpop: true,
   redirectUrl: new URL("https://app.example.com"),
-  handleRedirect: jest.fn(url => url),
+  handleRedirect: jest.fn((url) => url),
   // This will be fixed in a different pull request
   issuerConfiguration: {
     issuer: new URL("https://example.com"),
@@ -35,9 +35,9 @@ export const standardOidcOptions: IOidcOptions = {
     tokenEndpoint: new URL("https://example.com/token"),
     jwksUri: new URL("https://example.com/jwks"),
     subjectTypesSupported: [],
-    claimsSupported: []
+    claimsSupported: [],
   },
   client: {
-    clientId: "coolApp"
-  }
+    clientId: "coolApp",
+  },
 };

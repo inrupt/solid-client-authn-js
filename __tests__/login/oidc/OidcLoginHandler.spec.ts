@@ -35,7 +35,7 @@ describe("OidcLoginHandler", () => {
     issuerConfigFetcher: IssuerConfigFetcherMock,
     dpopClientKeyManager: DpopClientKeyManagerMock,
     storageUtility: StorageUtilityMock,
-    clientRegistrar: ClientRegistrarMock
+    clientRegistrar: ClientRegistrarMock,
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -55,7 +55,7 @@ describe("OidcLoginHandler", () => {
       sessionId: "mySession",
       oidcIssuer: new URL("https://arbitrary.url"),
       redirectUrl: new URL("https://app.com/redirect"),
-      clientId: "coolApp"
+      clientId: "coolApp",
     });
 
     expect(actualHandler.handle.mock.calls.length).toBe(1);
@@ -79,7 +79,7 @@ describe("OidcLoginHandler", () => {
         sessionId: "mySession",
         oidcIssuer: new URL("https://arbitrary.url"),
         redirectUrl: new URL("https://app.com/redirect"),
-        clientId: "coolApp"
+        clientId: "coolApp",
       })
     ).resolves.toBe(true);
   });

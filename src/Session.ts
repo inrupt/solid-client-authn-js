@@ -85,7 +85,7 @@ export class Session extends EventEmitter {
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
       this.clientAuthentication = getClientAuthenticationWithDependencies({
         secureStorage: sessionOptions.secureStorage,
-        insecureStorage: sessionOptions.insecureStorage
+        insecureStorage: sessionOptions.insecureStorage,
       });
     } else {
       throw new Error(
@@ -96,12 +96,12 @@ export class Session extends EventEmitter {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,
         isLoggedIn: sessionOptions.sessionInfo.isLoggedIn,
-        webId: sessionOptions.sessionInfo.webId
+        webId: sessionOptions.sessionInfo.webId,
       };
     } else {
       this.info = {
         sessionId: sessionId ?? v4(),
-        isLoggedIn: false
+        isLoggedIn: false,
       };
     }
   }
@@ -116,7 +116,7 @@ export class Session extends EventEmitter {
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
     await this.clientAuthentication.login(this.info.sessionId, {
-      ...options
+      ...options,
     });
     this.emit("login");
   };

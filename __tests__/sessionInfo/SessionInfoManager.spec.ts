@@ -31,7 +31,7 @@ describe("SessionInfoManager", () => {
     uuidGenerator: UuidGeneratorMock,
     authenticatedFetcher: AuthenticatedFetcherMock,
     logoutHandler: LogoutHandlerMock,
-    storageUtility: mockStorageUtility({})
+    storageUtility: mockStorageUtility({}),
   };
   function getSessionInfoManager(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -45,7 +45,7 @@ describe("SessionInfoManager", () => {
   describe("update", () => {
     it("is not implemented yet", async () => {
       const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({})
+        storageUtility: mockStorageUtility({}),
       });
       expect(
         async () => await sessionManager.update("commanderCool", {})
@@ -65,13 +65,13 @@ describe("SessionInfoManager", () => {
       const session = await sessionManager.get("commanderCool");
       expect(session).toMatchObject({
         sessionId: "commanderCool",
-        webId: "https://zoomies.com/commanderCool#me"
+        webId: "https://zoomies.com/commanderCool#me",
       });
     });
 
     it("returns undefined if the specified storage does not contain the user", async () => {
       const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({}, true)
+        storageUtility: mockStorageUtility({}, true),
       });
       const session = await sessionManager.get("commanderCool");
       expect(session).toBeUndefined();

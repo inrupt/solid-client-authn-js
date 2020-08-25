@@ -21,14 +21,14 @@
 
 import {
   StorageUtilityMock,
-  mockStorageUtility
+  mockStorageUtility,
 } from "../../src/storage/__mocks__/StorageUtility";
 import "reflect-metadata";
 import { default as LogoutHandler } from "../../src/logout/GeneralLogoutHandler";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
-    storageUtility: StorageUtilityMock
+    storageUtility: StorageUtilityMock,
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -41,7 +41,7 @@ describe("OidcLoginHandler", () => {
   describe("canHandle", () => {
     it("should always be able to handle logout", async () => {
       const logoutHandler = getInitialisedHandler({
-        storageUtility: mockStorageUtility({})
+        storageUtility: mockStorageUtility({}),
       });
       await expect(logoutHandler.canHandle()).resolves.toBe(true);
     });
@@ -50,7 +50,7 @@ describe("OidcLoginHandler", () => {
   describe("handle", () => {
     it("should clear the local storage (both secure and not secure) when logging out", async () => {
       const nonEmptyStorage = mockStorageUtility({
-        someUser: { someKey: "someValue" }
+        someUser: { someKey: "someValue" },
       });
       nonEmptyStorage.setForUser(
         "someUser",
@@ -58,7 +58,7 @@ describe("OidcLoginHandler", () => {
         { secure: true }
       );
       const logoutHandler = getInitialisedHandler({
-        storageUtility: nonEmptyStorage
+        storageUtility: nonEmptyStorage,
       });
       logoutHandler.handle("someUser");
       expect(

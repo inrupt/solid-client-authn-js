@@ -41,7 +41,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
     redirector: RedirectorMock,
     dpopHeaderCreator: DpopHeaderCreatorMock,
     dpopClientKeyManager: DpopClientKeyManagerMock,
-    storageUtility: StorageUtilityMock
+    storageUtility: StorageUtilityMock,
   };
   function getLegacyImplicitFlowOidcHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -58,7 +58,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
 
   describe("canHandle", () => {
     const legacyImplicitFlowOidcHandler = getLegacyImplicitFlowOidcHandler();
-    canHandleTests["legacyImplicitFlowOidcHandler"].forEach(testConfig => {
+    canHandleTests["legacyImplicitFlowOidcHandler"].forEach((testConfig) => {
       it(testConfig.message, async () => {
         const value = await legacyImplicitFlowOidcHandler.canHandle(
           testConfig.oidcOptions
@@ -72,7 +72,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
     it("Creates the right session with dpop ", async () => {
       const legacyImplicitFlowOidcHandler = getLegacyImplicitFlowOidcHandler();
       const oidcOptions: IOidcOptions = {
-        ...standardOidcOptions
+        ...standardOidcOptions,
       };
       await legacyImplicitFlowOidcHandler.handle(oidcOptions);
       expect(
@@ -87,7 +87,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       const legacyImplicitFlowOidcHandler = getLegacyImplicitFlowOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
-        dpop: false
+        dpop: false,
       };
       await legacyImplicitFlowOidcHandler.handle(oidcOptions);
       expect(

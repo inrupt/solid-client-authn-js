@@ -21,14 +21,14 @@
 
 import {
   ISessionInfoManager,
-  ISessionInfoManagerOptions
+  ISessionInfoManagerOptions,
 } from "../SessionInfoManager";
 import ISessionInfo from "../ISessionInfo";
 
 export const SessionCreatorCreateResponse: ISessionInfo = {
   sessionId: "global",
   isLoggedIn: true,
-  webId: "https://pod.com/profile/card#me"
+  webId: "https://pod.com/profile/card#me",
 };
 export const SessionCreatorGetSessionResponse: ISessionInfo = SessionCreatorCreateResponse;
 
@@ -41,5 +41,5 @@ export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   get: jest.fn(async (sessionId: string) =>
     Promise.resolve(SessionCreatorCreateResponse)
   ),
-  getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse]))
+  getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse])),
 };
