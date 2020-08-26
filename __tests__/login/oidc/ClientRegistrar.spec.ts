@@ -24,7 +24,7 @@ import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
 import {
   StorageUtilityMock,
-  mockStorageUtility
+  mockStorageUtility,
 } from "../../../src/storage/__mocks__/StorageUtility";
 import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { Response as NodeResponse } from "node-fetch";
@@ -36,7 +36,7 @@ import URL from "url-parse";
 describe("ClientRegistrar", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
-    storage: StorageUtilityMock
+    storage: StorageUtilityMock,
   };
   function getClientRegistrar(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -55,12 +55,12 @@ describe("ClientRegistrar", () => {
           {
             sessionId: "mySession",
             redirectUrl: new URL("https://example.com"),
-            clientId: "coolApp"
+            clientId: "coolApp",
           },
           IssuerConfigFetcherFetchConfigResponse
         )
       ).toMatchObject({
-        clientId: "coolApp"
+        clientId: "coolApp",
       });
     });
 
@@ -70,34 +70,34 @@ describe("ClientRegistrar", () => {
         (new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
-            client_secret: "1234"
+            client_secret: "1234",
           })
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
       const clientRegistrar = getClientRegistrar({
-        storage: mockStorageUtility({})
+        storage: mockStorageUtility({}),
       });
       const registrationUrl = new URL("https://idp.com/register");
       expect(
         await clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com")
+            redirectUrl: new URL("https://example.com"),
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
-            registrationEndpoint: registrationUrl
+            registrationEndpoint: registrationUrl,
           }
         )
       ).toMatchObject({
         clientId: "abcd",
-        clientSecret: "1234"
+        clientSecret: "1234",
       });
       expect(defaultMocks.fetcher.fetch).toHaveBeenCalledWith(registrationUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           /* eslint-disable @typescript-eslint/camelcase */
@@ -105,21 +105,21 @@ describe("ClientRegistrar", () => {
           redirect_uris: ["https://example.com"],
           subject_type: "pairwise",
           token_endpoint_auth_method: "client_secret_basic",
-          code_challenge_method: "S256"
+          code_challenge_method: "S256",
           /* eslint-enable @typescript-eslint/camelcase */
-        })
+        }),
       });
     });
 
     it("Fails if there is not registration endpoint", async () => {
       const clientRegistrar = getClientRegistrar({
-        storage: mockStorageUtility({})
+        storage: mockStorageUtility({}),
       });
       await expect(
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com")
+            redirectUrl: new URL("https://example.com"),
           },
           IssuerConfigFetcherFetchConfigResponse
         )
@@ -132,23 +132,23 @@ describe("ClientRegistrar", () => {
       defaultMocks.fetcher.fetch.mockResolvedValueOnce(
         /* eslint-disable @typescript-eslint/camelcase */
         (new NodeResponse("bad stuff that's an error", {
-          status: 400
+          status: 400,
         }) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
       const clientRegistrar = getClientRegistrar({
-        storage: mockStorageUtility({})
+        storage: mockStorageUtility({}),
       });
       const registrationUrl = new URL("https://idp.com/register");
       await expect(
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com")
+            redirectUrl: new URL("https://example.com"),
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
-            registrationEndpoint: registrationUrl
+            registrationEndpoint: registrationUrl,
           }
         )
       ).rejects.toThrowError(

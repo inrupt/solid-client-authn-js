@@ -34,15 +34,15 @@ const jwkSchema = {
   required: ["kty", "e", "n"],
   properties: {
     kty: {
-      type: "string"
+      type: "string",
     },
     e: {
-      type: "string"
+      type: "string",
     },
     n: {
-      type: "string"
-    }
-  }
+      type: "string",
+    },
+  },
 };
 
 export default jwkSchema;

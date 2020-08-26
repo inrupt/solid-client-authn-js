@@ -77,7 +77,7 @@ export default class ClientAuthentication {
       clientSecret: options.clientSecret,
       clientName: options.clientId,
       popUp: options.popUp || false,
-      handleRedirect: options.handleRedirect
+      handleRedirect: options.handleRedirect,
     });
   };
 
@@ -89,7 +89,7 @@ export default class ClientAuthentication {
     const credentials: IRequestCredentials = {
       localUserId: sessionId,
       // TODO: This should not be hard-coded
-      type: "dpop"
+      type: "dpop",
     };
     return this.authenticatedFetcher.handle(credentials, url, init);
   };

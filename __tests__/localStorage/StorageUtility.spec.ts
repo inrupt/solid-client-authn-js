@@ -26,7 +26,7 @@ import StorageUtility from "../../src/storage/StorageUtility";
 
 describe("StorageUtility", () => {
   const defaultMocks = {
-    storage: StorageMock
+    storage: StorageMock,
   };
   function getStorageUtility(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -87,7 +87,7 @@ describe("StorageUtility", () => {
       const storageMock = defaultMocks.storage;
       const userData = {
         jackie: "The Cat",
-        sledge: "The Dog"
+        sledge: "The Dog",
       };
       storageMock.get.mockReturnValueOnce(
         Promise.resolve(JSON.stringify(userData))
@@ -139,14 +139,14 @@ describe("StorageUtility", () => {
       const storageMock = defaultMocks.storage;
       const userData = {
         jackie: "The Cat",
-        sledge: "The Dog"
+        sledge: "The Dog",
       };
       storageMock.get.mockReturnValueOnce(
         Promise.resolve(JSON.stringify(userData))
       );
       const storageUtility = getStorageUtility({ storage: storageMock });
       await storageUtility.setForUser("animals", {
-        jackie: "The Pretty Kitty"
+        jackie: "The Pretty Kitty",
       });
       expect(storageMock.get).toHaveBeenCalledWith(
         "solidClientAuthenticationUser:animals"
@@ -155,7 +155,7 @@ describe("StorageUtility", () => {
         "solidClientAuthenticationUser:animals",
         JSON.stringify({
           jackie: "The Pretty Kitty",
-          sledge: "The Dog"
+          sledge: "The Dog",
         })
       );
     });
@@ -167,7 +167,7 @@ describe("StorageUtility", () => {
       );
       const storageUtility = getStorageUtility({ storage: storageMock });
       await storageUtility.setForUser("animals", {
-        jackie: "The Pretty Kitty"
+        jackie: "The Pretty Kitty",
       });
       expect(storageMock.get).toHaveBeenCalledWith(
         "solidClientAuthenticationUser:animals"
@@ -175,7 +175,7 @@ describe("StorageUtility", () => {
       expect(storageMock.set).toHaveBeenCalledWith(
         "solidClientAuthenticationUser:animals",
         JSON.stringify({
-          jackie: "The Pretty Kitty"
+          jackie: "The Pretty Kitty",
         })
       );
     });
@@ -186,7 +186,7 @@ describe("StorageUtility", () => {
       const storageMock = defaultMocks.storage;
       const userData = {
         jackie: "The Cat",
-        sledge: "The Dog"
+        sledge: "The Dog",
       };
       storageMock.get.mockReturnValueOnce(
         Promise.resolve(JSON.stringify(userData))
@@ -199,7 +199,7 @@ describe("StorageUtility", () => {
       expect(storageMock.set).toHaveBeenCalledWith(
         "solidClientAuthenticationUser:animals",
         JSON.stringify({
-          sledge: "The Dog"
+          sledge: "The Dog",
         })
       );
     });
@@ -223,7 +223,7 @@ describe("StorageUtility", () => {
       );
       const storageUtility = getStorageUtility();
       await expect(storageUtility.safeGet("key")).resolves.toEqual({
-        some: "data"
+        some: "data",
       });
     });
 
@@ -247,13 +247,13 @@ describe("StorageUtility", () => {
       const schema = {
         type: "object",
         properties: {
-          some: { type: "string" }
-        }
+          some: { type: "string" },
+        },
       };
       const storageUtility = getStorageUtility();
       expect(
         await storageUtility.safeGet("arbitrary key", {
-          schema
+          schema,
         })
       ).toMatchObject({ some: "data" });
     });
@@ -265,13 +265,13 @@ describe("StorageUtility", () => {
       const schema = {
         type: "object",
         properties: {
-          some: { type: "string" }
-        }
+          some: { type: "string" },
+        },
       };
       const storageUtility = getStorageUtility();
       expect(
         await storageUtility.safeGet("arbitrary key", {
-          schema
+          schema,
         })
       ).toBeUndefined();
       expect(defaultMocks.storage.delete).toHaveBeenCalledWith("arbitrary key");
@@ -291,7 +291,7 @@ describe("StorageUtility", () => {
       defaultMocks.storage.get.mockReturnValueOnce(
         Promise.resolve(
           JSON.stringify({
-            key: '{ "some": "notice this does not have a closing quote }'
+            key: '{ "some": "notice this does not have a closing quote }',
           })
         )
       );

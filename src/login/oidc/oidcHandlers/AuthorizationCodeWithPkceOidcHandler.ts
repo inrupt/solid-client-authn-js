@@ -74,7 +74,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       code_challenge: await this.joseUtility.generateCodeChallenge(
         codeVerifier
       ),
-      state: oidcLoginOptions.sessionId
+      state: oidcLoginOptions.sessionId,
     };
     /* eslint-enable @typescript-eslint/camelcase */
     requestUrl.set("query", query);
@@ -82,11 +82,11 @@ export default class AuthorizationCodeWithPkceOidcHandler
     await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
       codeVerifier,
       issuer: oidcLoginOptions.issuer.toString(),
-      redirectUri: oidcLoginOptions.redirectUrl.toString()
+      redirectUri: oidcLoginOptions.redirectUrl.toString(),
     });
 
     this.redirector.redirect(requestUrl.toString(), {
-      handleRedirect: oidcLoginOptions.handleRedirect
+      handleRedirect: oidcLoginOptions.handleRedirect,
     });
   }
 }

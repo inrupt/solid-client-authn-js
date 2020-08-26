@@ -49,5 +49,5 @@ export const AuthenticatedFetcherMock: jest.Mocked<IAuthenticatedFetcher> = {
       requestInit?: RequestInit
       /* eslint-enable @typescript-eslint/no-unused-vars */
     ) => AuthenticatedFetcherResponse
-  )
+  ),
 };

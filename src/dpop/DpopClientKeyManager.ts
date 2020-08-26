@@ -73,7 +73,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
       // TODO: differentiate between what a server supports instead of hard coding rsa?
       jwk = await this.joseUtility.generateJWK("EC", "P-256", {
         alg: "EC",
-        use: "sig"
+        use: "sig",
       });
 
       // FIXME: Temporarily use insecure storage while the implicit auth flow is requried.
@@ -92,7 +92,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
     // FIXME: Temporarily use insecure storage while the implicit auth flow is requried.
     try {
       keyString = await this.storageUtility.get(this.getLocalStorageKey(), {
-        secure: false
+        secure: false,
       });
       if (!keyString) {
         return undefined;

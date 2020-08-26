@@ -34,5 +34,5 @@ export const TokenSaverMock: jest.Mocked<ITokenSaver> = {
       refreshToken?: string
     ) => Promise.resolve()
     /* eslint-enable-next-line @typescript-eslint/no-unused-vars */
-  )
+  ),
 };

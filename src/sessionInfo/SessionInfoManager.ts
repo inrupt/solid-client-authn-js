@@ -96,20 +96,20 @@ export default class SessionInfoManager implements ISessionInfoManager {
 
   async get(sessionId: string): Promise<ISessionInfo | undefined> {
     const webId = await this.storageUtility.getForUser(sessionId, "webId", {
-      secure: true
+      secure: true,
     });
     const isLoggedIn = await this.storageUtility.getForUser(
       sessionId,
       "isLoggedIn",
       {
-        secure: true
+        secure: true,
       }
     );
     if (isLoggedIn !== undefined) {
       return {
         sessionId,
         webId: webId,
-        isLoggedIn: isLoggedIn === "true"
+        isLoggedIn: isLoggedIn === "true",
       };
     }
     return undefined;

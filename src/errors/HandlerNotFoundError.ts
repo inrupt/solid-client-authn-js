@@ -36,7 +36,7 @@ export default class HandlerNotFoundError extends Error {
   constructor(handlerName: string, params: any[]) {
     super(
       `[${handlerName}] cannot find a suitable handler for: ${params
-        .map(e => {
+        .map((e) => {
           try {
             return JSON.stringify(e);
           } catch (err) {

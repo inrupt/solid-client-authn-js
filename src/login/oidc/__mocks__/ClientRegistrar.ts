@@ -25,11 +25,11 @@ import IIssuerConfig from "../IIssuerConfig";
 
 export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",
-  clientSecret: "12345"
+  clientSecret: "12345",
 };
 
 export const PublicClientRegistrarResponse: IClient = {
-  clientId: "abcde"
+  clientId: "abcde",
 };
 
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
@@ -37,7 +37,7 @@ export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(ClientRegistrarResponse)
-  )
+  ),
 };
 
 export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
@@ -45,5 +45,5 @@ export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(PublicClientRegistrarResponse)
-  )
+  ),
 };

@@ -85,14 +85,14 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
       requestCredentials.localUserId,
       "accessToken",
       {
-        secure: true
+        secure: true,
       }
     );
 
     const requestInitiWithDefaults = {
       headers: {},
       method: "GET",
-      ...requestInit
+      ...requestInit,
     };
     return this.fetcher.fetch(url, {
       ...requestInit,
@@ -102,8 +102,8 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
         dpop: await this.dpopHeaderCreator.createHeaderToken(
           this.urlRepresentationConverter.requestInfoToUrl(url),
           requestInitiWithDefaults.method
-        )
-      }
+        ),
+      },
     });
   }
 }

@@ -62,11 +62,11 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     const sessionId = url.query.state as string;
     const [codeVerifier, redirectUri] = await Promise.all([
       (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
-        errorIfNull: true
+        errorIfNull: true,
       })) as string,
       (await this.storageUtility.getForUser(sessionId, "redirectUri", {
-        errorIfNull: true
-      })) as string
+        errorIfNull: true,
+      })) as string,
     ]);
 
     /* eslint-disable @typescript-eslint/camelcase */
@@ -74,7 +74,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       grant_type: "authorization_code",
       code_verifier: codeVerifier as string,
       code: url.query.code as string,
-      redirect_uri: redirectUri as string
+      redirect_uri: redirectUri as string,
     });
     /* eslint-enable @typescript-eslint/camelcase */
 
@@ -86,7 +86,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
     try {
       this.redirector.redirect(url.toString(), {
-        redirectByReplacingState: true
+        redirectByReplacingState: true,
       });
     } catch (err) {
       // Do nothing

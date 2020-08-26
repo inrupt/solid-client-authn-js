@@ -26,13 +26,13 @@ import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import {
   StorageUtilityMock,
   StorageUtilityGetResponse,
-  mockStorageUtility
+  mockStorageUtility,
 } from "../../../src/storage/__mocks__/StorageUtility";
 
 describe("BearerAuthenticatedFetcher", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
-    storageUtility: StorageUtilityMock
+    storageUtility: StorageUtilityMock,
   };
   function getBearerAuthenticatedFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -82,7 +82,7 @@ describe("BearerAuthenticatedFetcher", () => {
 
     it("throws if no auth token is found in storage", async () => {
       const fetcher = getBearerAuthenticatedFetcher({
-        storageUtility: mockStorageUtility({}, true)
+        storageUtility: mockStorageUtility({}, true),
       });
       await expect(() =>
         fetcher.handle(
@@ -101,8 +101,8 @@ describe("BearerAuthenticatedFetcher", () => {
       );
       expect(fetcher.fetch).toHaveBeenCalledWith("http://example.com", {
         headers: {
-          authorization: `Bearer ${StorageUtilityGetResponse}`
-        }
+          authorization: `Bearer ${StorageUtilityGetResponse}`,
+        },
       });
     });
 
@@ -118,8 +118,8 @@ describe("BearerAuthenticatedFetcher", () => {
       expect(fetcher.fetch).toHaveBeenCalledWith("http://example.com", {
         headers: {
           authorization: `Bearer ${StorageUtilityGetResponse}`,
-          Accept: "text/turtle"
-        }
+          Accept: "text/turtle",
+        },
       });
     });
   });

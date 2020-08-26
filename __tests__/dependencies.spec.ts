@@ -31,7 +31,7 @@ describe("dependencies", () => {
 
   it("performs dependency injection with a given input", () => {
     const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: StorageMock
+      secureStorage: StorageMock,
     });
     expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
   });

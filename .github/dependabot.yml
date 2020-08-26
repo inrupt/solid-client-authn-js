@@ -1,27 +1,27 @@
 version: 2
 updates:
-- package-ecosystem: npm
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: npm
-  directory: "/examples/bundle"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: npm
-  directory: "/examples/native"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: npm
-  directory: "/examples/script"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: npm
-  directory: "/examples/server"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/examples/bundle"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/examples/native"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/examples/script"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/examples/server"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10

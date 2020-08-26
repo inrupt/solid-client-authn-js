@@ -71,7 +71,7 @@ export default class TokenSaver implements ITokenSaver {
         webId: decoded.sub as string,
         idToken: idToken as string,
         refreshToken: refreshToken as string,
-        isLoggedIn: "true"
+        isLoggedIn: "true",
       },
       { secure: true }
     );

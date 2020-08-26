@@ -25,7 +25,7 @@
 import "reflect-metadata";
 import {
   JoseUtilityMock,
-  JoseUtilitySignJWTResponse
+  JoseUtilitySignJWTResponse,
 } from "../../src/jose/__mocks__/JoseUtility";
 import { DpopClientKeyManagerMock } from "../../src/dpop/__mocks__/DpopClientKeyManager";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
@@ -36,7 +36,7 @@ describe("DpopHeaderCreator", () => {
   const defaultMocks = {
     joseUtility: JoseUtilityMock,
     dpopClientKeyManager: DpopClientKeyManagerMock,
-    uuidGenerator: UuidGeneratorMock
+    uuidGenerator: UuidGeneratorMock,
   };
   function getDpopHeaderCreator(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -65,7 +65,7 @@ describe("DpopHeaderCreator", () => {
         Promise.resolve(undefined)
       );
       const dpopHeaderCreator = getDpopHeaderCreator({
-        dpopClientKeyManager: dpopClientKeyManagerMock
+        dpopClientKeyManager: dpopClientKeyManagerMock,
       });
       await expect(
         dpopHeaderCreator.createHeaderToken(
@@ -83,49 +83,49 @@ describe("DpopHeaderCreator", () => {
       {
         it: "should not change a url",
         url: new URL("https://audience.com"),
-        expected: "https://audience.com"
+        expected: "https://audience.com",
       },
       {
         it: "should not change a URL with a slash at the end",
         url: new URL("https://audience.com/"),
-        expected: "https://audience.com/"
+        expected: "https://audience.com/",
       },
       {
         it: "should not include queries",
         url: new URL("https://audience.com?cool=stuff&dope=things"),
-        expected: "https://audience.com"
+        expected: "https://audience.com",
       },
       {
         it: "should not include queries but still include a slash",
         url: new URL("https://audience.com/?cool=stuff&dope=things"),
-        expected: "https://audience.com/"
+        expected: "https://audience.com/",
       },
       {
         it: "should not include hash",
         url: new URL("https://audience.com#throwBackThursday"),
-        expected: "https://audience.com"
+        expected: "https://audience.com",
       },
       {
         it: "should not include hash but include the slash",
         url: new URL("https://audience.com/#throwBackThursday"),
-        expected: "https://audience.com/"
+        expected: "https://audience.com/",
       },
       {
         it: "should include the path",
         url: new URL("https://audience.com/path"),
-        expected: "https://audience.com/path"
+        expected: "https://audience.com/path",
       },
       {
         it: "should not include the username and password",
         url: new URL("https://jackson:badpassword@audience.com"),
-        expected: "https://audience.com"
+        expected: "https://audience.com",
       },
       {
         it: "should include ports",
         url: new URL("https://localhost:8080/path"),
-        expected: "https://localhost:8080/path"
-      }
-    ].forEach(test => {
+        expected: "https://localhost:8080/path",
+      },
+    ].forEach((test) => {
       it(test.it, () => {
         const dpopHeaderCreator = getDpopHeaderCreator();
         const htu = dpopHeaderCreator.normalizeHtu(test.url);

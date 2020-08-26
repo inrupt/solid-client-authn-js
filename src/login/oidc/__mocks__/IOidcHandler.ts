@@ -30,5 +30,5 @@ export const OidcHandlerMock: jest.Mocked<IOidcHandler> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canHandle: jest.fn((_options: IOidcOptions) => Promise.resolve(true)),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handle: jest.fn(async (_options: IOidcOptions) => Promise.resolve())
+  handle: jest.fn(async (_options: IOidcOptions) => Promise.resolve()),
 };

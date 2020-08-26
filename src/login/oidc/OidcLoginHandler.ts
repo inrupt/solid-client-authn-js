@@ -91,12 +91,12 @@ export default class OidcLoginHandler implements ILoginHandler {
           clientId: options.clientId,
           clientSecret: options.clientSecret,
           clientName: options.clientName,
-          redirectUrl: options.redirectUrl
+          redirectUrl: options.redirectUrl,
         },
         issuerConfig
       ),
       sessionId: options.sessionId,
-      handleRedirect: options.handleRedirect
+      handleRedirect: options.handleRedirect,
     };
 
     // Call proper OIDC Handler

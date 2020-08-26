@@ -22,16 +22,16 @@
 import "reflect-metadata";
 import {
   FetcherMock,
-  FetcherTokenMock
+  FetcherTokenMock,
 } from "../../../src/util/__mocks__/Fetcher";
 import {
   IssuerConfigFetcherMock,
-  IssuerConfigFetcherFetchConfigResponse
+  IssuerConfigFetcherFetchConfigResponse,
 } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
 import {
   DpopHeaderCreatorMock,
-  DpopHeaderCreatorResponse
+  DpopHeaderCreatorResponse,
 } from "../../../src/dpop/__mocks__/DpopHeaderCreator";
 import { Response as NodeResponse } from "node-fetch";
 import TokenRequester from "../../../src/login/oidc/TokenRequester";
@@ -39,7 +39,7 @@ import { JoseUtilityMock } from "../../../src/jose/__mocks__/JoseUtility";
 import IIssuerConfig from "../../../src/login/oidc/IIssuerConfig";
 import {
   ClientRegistrarMock,
-  PublicClientRegistrarMock
+  PublicClientRegistrarMock,
 } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 
@@ -51,7 +51,7 @@ describe("TokenRequester", () => {
     dpopHeaderCreator: DpopHeaderCreatorMock,
     joseUtility: JoseUtilityMock,
     clientRegistrar: ClientRegistrarMock,
-    dpopClientKeyManager: DpopClientKeyManagerMock
+    dpopClientKeyManager: DpopClientKeyManagerMock,
   };
   function getTokenRequester(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -82,18 +82,18 @@ describe("TokenRequester", () => {
     storageClientSecret: undefined,
     issuerConfig: {
       ...IssuerConfigFetcherFetchConfigResponse,
-      grantTypesSupported: ["refresh_token"]
+      grantTypesSupported: ["refresh_token"],
     },
     responseBody: JSON.stringify({
       /* eslint-disable @typescript-eslint/camelcase */
       id_token: "abcd",
       access_token: "1234",
-      refresh_token: "!@#$"
+      refresh_token: "!@#$",
       /* eslint-enable @typescript-eslint/camelcase */
     }),
     jwt: {
-      sub: "https://jackson.solid.community/profile/card#me"
-    }
+      sub: "https://jackson.solid.community/profile/card#me",
+    },
   };
   function setUpMockedReturnValues(
     values: Partial<typeof defaultReturnValues>
@@ -126,12 +126,12 @@ describe("TokenRequester", () => {
   it("Properly follows the refresh flow", async () => {
     setUpMockedReturnValues({});
     const TokenRefresher = getTokenRequester({
-      clientRegistrar: PublicClientRegistrarMock
+      clientRegistrar: PublicClientRegistrarMock,
     });
     /* eslint-disable @typescript-eslint/camelcase */
     await TokenRefresher.request("global", {
       grant_type: "refresh_token",
-      refresh_token: "thisIsARefreshToken"
+      refresh_token: "thisIsARefreshToken",
     });
     /* eslint-enable @typescript-eslint/camelcase */
     expect(defaultMocks.fetcher.fetch).toBeCalledWith(
@@ -140,10 +140,10 @@ describe("TokenRequester", () => {
         method: "POST",
         headers: {
           DPoP: DpopHeaderCreatorResponse,
-          "content-type": "application/x-www-form-urlencoded"
+          "content-type": "application/x-www-form-urlencoded",
         },
         body:
-          "grant_type=refresh_token&refresh_token=thisIsARefreshToken&client_id=abcde"
+          "grant_type=refresh_token&refresh_token=thisIsARefreshToken&client_id=abcde",
       }
     );
   });
@@ -153,18 +153,18 @@ describe("TokenRequester", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mockJoseUtility.decodeJWT = jest.fn(async (token: string) => {
       return {
-        sub: "https://some.pod/webid#me"
+        sub: "https://some.pod/webid#me",
       };
     });
 
     const TokenRefresher = getTokenRequester({
       fetcher: FetcherTokenMock,
-      joseUtility: mockJoseUtility
+      joseUtility: mockJoseUtility,
     });
     /* eslint-disable @typescript-eslint/camelcase */
     await TokenRefresher.request("global", {
       grant_type: "refresh_token",
-      refresh_token: "thisIsARefreshToken"
+      refresh_token: "thisIsARefreshToken",
     });
     /* eslint-enable @typescript-eslint/camelcase */
     expect(FetcherTokenMock.fetch).toBeCalledWith(
@@ -174,10 +174,10 @@ describe("TokenRequester", () => {
         headers: {
           DPoP: DpopHeaderCreatorResponse,
           Authorization: "Basic YWJjZGU6MTIzNDU=",
-          "content-type": "application/x-www-form-urlencoded"
+          "content-type": "application/x-www-form-urlencoded",
         },
         body:
-          "grant_type=refresh_token&refresh_token=thisIsARefreshToken&client_id=abcde"
+          "grant_type=refresh_token&refresh_token=thisIsARefreshToken&client_id=abcde",
       }
     );
   });
@@ -186,15 +186,15 @@ describe("TokenRequester", () => {
     setUpMockedReturnValues({
       responseBody: JSON.stringify({
         // eslint-disable-next-line @typescript-eslint/camelcase
-        id_token: "ohNoThereIsNoAccessToken"
-      })
+        id_token: "ohNoThereIsNoAccessToken",
+      }),
     });
     const TokenRefresher = getTokenRequester();
     await expect(
       /* eslint-disable @typescript-eslint/camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
-        refresh_token: "thisIsARefreshToken"
+        refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable @typescript-eslint/camelcase */
     ).rejects.toThrowError("IDP token route returned an invalid response.");
@@ -205,15 +205,15 @@ describe("TokenRequester", () => {
       issuerConfig: {
         ...IssuerConfigFetcherFetchConfigResponse,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        grantTypesSupported: ["id_token"]
-      }
+        grantTypesSupported: ["id_token"],
+      },
     });
     const TokenRefresher = getTokenRequester();
     await expect(
       /* eslint-disable @typescript-eslint/camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
-        refresh_token: "thisIsARefreshToken"
+        refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable @typescript-eslint/camelcase */
     ).rejects.toThrowError(
@@ -226,7 +226,7 @@ describe("TokenRequester", () => {
       ...IssuerConfigFetcherFetchConfigResponse,
       tokenEndpoint: null,
       // eslint-disable-next-line @typescript-eslint/camelcase
-      grantTypesSupported: ["refresh_token"]
+      grantTypesSupported: ["refresh_token"],
     };
     const mockIssuerConfigFetcher = defaultMocks.issueConfigFetcher;
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -237,13 +237,13 @@ describe("TokenRequester", () => {
     mockStorageUtility.getForUser.mockResolvedValueOnce("https://idp.com");
     const TokenRefresher = getTokenRequester({
       issueConfigFetcher: mockIssuerConfigFetcher,
-      storageUtility: mockStorageUtility
+      storageUtility: mockStorageUtility,
     });
     await expect(
       /* eslint-disable @typescript-eslint/camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
-        refresh_token: "thisIsARefreshToken"
+        refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable @typescript-eslint/camelcase */
       // TODO: Should be This issuer https://idp.com does not have a token endpoint"
@@ -254,15 +254,15 @@ describe("TokenRequester", () => {
   it("Fails elegantly if the access token does not have a sub claim", async () => {
     setUpMockedReturnValues({
       jwt: {
-        iss: "https://idp.com"
-      }
+        iss: "https://idp.com",
+      },
     });
     const TokenRefresher = getTokenRequester();
     await expect(
       /* eslint-disable @typescript-eslint/camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
-        refresh_token: "thisIsARefreshToken"
+        refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable @typescript-eslint/camelcase */
     ).rejects.toThrowError("The idp returned a bad token without a sub.");

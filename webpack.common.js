@@ -10,20 +10,20 @@ module.exports = {
           {
             loader: "ts-loader",
             options: {
-              configFile: "tsconfig.json"
-            }
-          }
+              configFile: "tsconfig.json",
+            },
+          },
         ],
-        exclude: /node_modules/
-      }
-    ]
+        exclude: /node_modules/,
+      },
+    ],
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js"]
+    extensions: [".tsx", ".ts", ".js"],
   },
   output: {
     filename: "solid-client-authn.bundle.js",
     path: path.resolve(__dirname, "browserDist"),
-    libraryTarget: "commonjs"
-  }
+    libraryTarget: "commonjs",
+  },
 };

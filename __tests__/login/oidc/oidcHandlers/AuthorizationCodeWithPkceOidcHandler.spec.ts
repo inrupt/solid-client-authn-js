@@ -37,7 +37,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
     sessionCreator: SessionInfoManagerMock,
     joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock,
-    redirector: RedirectorMock
+    redirector: RedirectorMock,
   };
   function getAuthorizationCodeWithPkceOidcHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -52,7 +52,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   describe("canHandle", () => {
     const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
     canHandleTests["authorizationCodeWithPkceOidcHandler"].forEach(
-      testConfig => {
+      (testConfig) => {
         it(testConfig.message, async () => {
           const value = await authorizationCodeWithPkceOidcHandler.canHandle(
             testConfig.oidcOptions
@@ -70,8 +70,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         ...standardOidcOptions,
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
-          grantTypesSupported: ["authorization_code"]
-        }
+          grantTypesSupported: ["authorization_code"],
+        },
       };
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
       expect(
@@ -88,12 +88,12 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         ...standardOidcOptions,
         client: {
           ...standardOidcOptions.client,
-          clientSecret: "I can't cook because I only drink Soylent"
+          clientSecret: "I can't cook because I only drink Soylent",
         },
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,
-          grantTypesSupported: ["authorization_code"]
-        }
+          grantTypesSupported: ["authorization_code"],
+        },
       };
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
       expect(

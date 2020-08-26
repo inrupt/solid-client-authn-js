@@ -46,7 +46,7 @@ export function compileTypeof(type: string) {
  */
 export function compileJoinedStringOf(strings: string[]) {
   return (data: string): boolean => {
-    return !data.split(" ").some(value => strings.indexOf(value) === -1);
+    return !data.split(" ").some((value) => strings.indexOf(value) === -1);
   };
 }
 
@@ -96,10 +96,10 @@ export default function validateSchema(
   const item = cloneDeep(inputItem);
   const ajv = new Ajv();
   ajv.addKeyword("typeof", {
-    compile: compileTypeof
+    compile: compileTypeof,
   });
   ajv.addKeyword("joinedStringOf", {
-    compile: compileJoinedStringOf
+    compile: compileJoinedStringOf,
   });
   if (!ajv.validate(schema, item)) {
     let message = `${schema.title ? schema.title : "schema"} is invalid`;
@@ -108,7 +108,7 @@ export default function validateSchema(
     if (ajv.errors) {
       message += ":";
       message += ajv.errors
-        .map(err => `\n${err.dataPath} ${err.message}`)
+        .map((err) => `\n${err.dataPath} ${err.message}`)
         .toString();
     }
     throw new Error(message);

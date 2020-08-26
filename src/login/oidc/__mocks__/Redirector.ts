@@ -27,5 +27,5 @@ export const RedirectorMock: jest.Mocked<IRedirector> = {
     (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
       /* void */
     }
-  )
+  ),
 };

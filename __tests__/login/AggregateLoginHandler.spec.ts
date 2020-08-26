@@ -32,7 +32,7 @@ describe("AggregateLoginHandler", () => {
     new AggregateLoginHandler((["Some handler"] as unknown) as ILoginHandler[]);
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
-      [["Some handler"]]
+      [["Some handler"]],
     ]);
   });
 });

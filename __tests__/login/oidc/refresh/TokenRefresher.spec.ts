@@ -27,7 +27,7 @@ import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUti
 describe("TokenRefresher", () => {
   const defaultMocks = {
     storageUtility: StorageUtilityMock,
-    tokenRequester: TokenRequesterMock
+    tokenRequester: TokenRequesterMock,
   };
   function getTokenRefresher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -47,7 +47,7 @@ describe("TokenRefresher", () => {
     /* eslint-disable @typescript-eslint/camelcase */
     expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith("global", {
       grant_type: "refresh_token",
-      refresh_token: "refreshToken"
+      refresh_token: "refreshToken",
     });
     /* eslint-enable @typescript-eslint/camelcase */
   });

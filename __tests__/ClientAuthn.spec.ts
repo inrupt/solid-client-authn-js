@@ -24,16 +24,16 @@ import "reflect-metadata";
 import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
-  RedirectHandlerResponse
+  RedirectHandlerResponse,
 } from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import {
   SessionInfoManagerMock,
-  SessionCreatorCreateResponse
+  SessionCreatorCreateResponse,
 } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import {
   AuthenticatedFetcherMock,
-  AuthenticatedFetcherResponse
+  AuthenticatedFetcherResponse,
 } from "../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
@@ -46,7 +46,7 @@ describe("ClientAuthentication", () => {
     logoutHandler: LogoutHandlerMock,
     sessionInfoManager: SessionInfoManagerMock,
     authenticatedFetcher: AuthenticatedFetcherMock,
-    environmentDetector: EnvironmentDetectorMock
+    environmentDetector: EnvironmentDetectorMock,
   };
   function getClientAuthentication(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -67,7 +67,7 @@ describe("ClientAuthentication", () => {
       await clientAuthn.login("mySession", {
         clientId: "coolApp",
         redirectUrl: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com")
+        oidcIssuer: new URL("https://idp.com"),
       });
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
@@ -77,7 +77,7 @@ describe("ClientAuthentication", () => {
         popUp: false,
         clientName: "coolApp",
         clientSecret: undefined,
-        handleRedirect: undefined
+        handleRedirect: undefined,
       });
     });
   });
@@ -93,7 +93,7 @@ describe("ClientAuthentication", () => {
       expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
         {
           localUserId: "mySession",
-          type: "dpop"
+          type: "dpop",
         },
         "https://zombo.com",
         undefined

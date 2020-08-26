@@ -36,7 +36,7 @@ describe("Headers interoperability function", () => {
     const flatHeaders = flattenHeaders(myHeaders);
     expect(Object.entries(flatHeaders)).toEqual([
       ["accept", "application/json"],
-      ["content-type", "text/turtle"]
+      ["content-type", "text/turtle"],
     ]);
   });
 
@@ -52,7 +52,7 @@ describe("Headers interoperability function", () => {
     const flatHeaders = flattenHeaders(myHeaders);
     expect(Object.entries(flatHeaders)).toEqual([
       ["accept", "application/json"],
-      ["content-type", "text/turtle"]
+      ["content-type", "text/turtle"],
     ]);
   });
 });

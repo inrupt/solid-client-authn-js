@@ -65,8 +65,8 @@ export default class TokenRequester {
   ): Promise<void> {
     const [issuer] = await Promise.all([
       this.storageUtility.getForUser(sessionId, "issuer", {
-        errorIfNull: true
-      })
+        errorIfNull: true,
+      }),
     ]);
 
     // Get the issuer config to find the token url
@@ -105,13 +105,13 @@ export default class TokenRequester {
           issuerConfig.tokenEndpoint,
           "POST"
         ),
-        "content-type": "application/x-www-form-urlencoded"
+        "content-type": "application/x-www-form-urlencoded",
       },
       body: formurlencoded({
         ...body,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        client_id: client.clientId
-      })
+        client_id: client.clientId,
+      }),
     };
 
     if (client.clientSecret) {
@@ -154,7 +154,7 @@ export default class TokenRequester {
         idToken: tokenResponse.id_token as string,
         refreshToken: tokenResponse.refresh_token as string,
         webId: decoded.sub as string,
-        isLoggedIn: "true"
+        isLoggedIn: "true",
       },
       { secure: true }
     );
