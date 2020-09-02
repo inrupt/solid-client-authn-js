@@ -9,6 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+### Bugfixes
+
+- Browser
+  - Login now clears the local storage, so that you can log into a different server
+even if not logged out properly.
+
 ## [0.1.2] - 2020-09-07
 
 ### Internal refactor:
