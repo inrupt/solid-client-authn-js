@@ -39,6 +39,7 @@ import IIssuerConfig from "./IIssuerConfig";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
 import { IClientRegistrar } from "./ClientRegistrar";
+import { IStorageUtility } from "../../storage/StorageUtility";
 
 /**
  * @hidden
@@ -51,7 +52,8 @@ export default class OidcLoginHandler implements ILoginHandler {
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("dpopClientKeyManager")
     private dpopClientKeyManager: IDpopClientKeyManager,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar,
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   checkOptions(options: ILoginOptions): Error | null {
@@ -71,6 +73,18 @@ export default class OidcLoginHandler implements ILoginHandler {
     if (optionsError) {
       throw optionsError;
     }
+
+    // Clears storage in case the session has not properly logged out.
+    await Promise.all([
+      this.storageUtility.deleteAllUserData(options.sessionId, {
+        secure: false,
+      }),
+      this.storageUtility.deleteAllUserData(options.sessionId, {
+        secure: true,
+      }),
+      // FIXME: This is needed until the DPoP key is stored safely
+      this.storageUtility.delete("clientKey", { secure: false }),
+    ]);
 
     // Fetch OpenId Config
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(

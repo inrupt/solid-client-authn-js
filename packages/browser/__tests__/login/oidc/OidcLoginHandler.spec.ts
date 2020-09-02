@@ -25,7 +25,10 @@ import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler"
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
-import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
+import {
+  StorageUtilityMock,
+  mockStorageUtility,
+} from "../../../src/storage/__mocks__/StorageUtility";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 
@@ -44,7 +47,8 @@ describe("OidcLoginHandler", () => {
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
-      mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+      mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
+      mocks.storageUtility ?? defaultMocks.storageUtility
     );
   }
 
@@ -88,5 +92,31 @@ describe("OidcLoginHandler", () => {
     const handler = getInitialisedHandler();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await expect(handler.canHandle({} as any)).resolves.toBe(false);
+  });
+
+  it("should clear the local storage when logging in", async () => {
+    const nonEmptyStorage = mockStorageUtility({
+      someUser: { someKey: "someValue" },
+    });
+    nonEmptyStorage.setForUser(
+      "someUser",
+      { someKey: "someValue" },
+      { secure: true }
+    );
+    const handler = getInitialisedHandler({
+      storageUtility: nonEmptyStorage,
+    });
+    handler.handle({
+      sessionId: "someUser",
+      oidcIssuer: new URL("https://arbitrary.url"),
+      redirectUrl: new URL("https://app.com/redirect"),
+      clientId: "coolApp",
+    });
+    expect(nonEmptyStorage.getForUser("someUser", "someKey", { secure: true }))
+      .toBeUndefined;
+    expect(nonEmptyStorage.getForUser("someUser", "someKey", { secure: false }))
+      .toBeUndefined;
+    // This test is only necessary until the key is stored safely
+    expect(nonEmptyStorage.get("clientKey", { secure: false })).toBeUndefined;
   });
 });
