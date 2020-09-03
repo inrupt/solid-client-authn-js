@@ -56,7 +56,15 @@ jobs:
       - run: npm ci
       - name: Publish to npm
         run: |
-          npm publish --access public
+#  If you want a package to be public (e.g. you'd expect
+#  `npm publish --access public` here), then just add this to the relevant
+#  `package.json` file:
+#    {
+#      "publishConfig": {
+#        "access": "public"
+#      }
+#    }
+          ./node_modules/.bin/lerna publish
           echo "Package published. To install, run:"
           echo ""
           echo "    npm install @inrupt/solid-client-authn-browser"
