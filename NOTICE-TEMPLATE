@@ -1,0 +1,13 @@
+###############################################################################
+#
+# This file is intended as a template, to be copied to contained packages and
+# edited as appropriate for that particular package (including deleting this
+# template pre-amble!), and renamed to remove the '-TEMPLATE' suffix.
+#
+###############################################################################
+
+Inrupt `solid-client-authn-XXXX`
+Copyright 2020 Inrupt Inc.
+
+This product includes software developed at
+Inrupt Inc. (https://inrupt.com/).
