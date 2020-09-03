@@ -110,5 +110,8 @@
   },
   "react-native": {
     "node-jose": "react-native-jose"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
