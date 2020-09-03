@@ -1,0 +1,37 @@
+{
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "paths": { "*": ["src/external-types/*"] },
+    "baseUrl": "../..",
+    "module": "commonjs",
+    "strict": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "noLib": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "target": "es2018",
+    "sourceMap": true,
+    "lib": ["es2018", "dom"],
+    "moduleResolution": "node",
+    "outDir": "./dist"
+  },
+  "exclude": [
+    "../../node_modules", "dist", "**/__mocks__/**"],
+  "typedocOptions": {
+    "mode": "modules",
+    "out": "website/docs/api",
+    "exclude": [
+      // Re-exported functions are already documented in their own modules:
+      "src/index.ts",
+      "src/index.browser.ts"
+    ],
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "stripInternal": true,
+    "theme": "markdown",
+    "readme": "none"
+  }
+}
