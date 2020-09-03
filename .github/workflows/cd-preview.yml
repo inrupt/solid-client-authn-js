@@ -24,7 +24,7 @@ jobs:
         run: echo "::set-env name=TAG_SLUG::$(echo ${GITHUB_REF#refs/heads/} | tr -cd '[:alnum:]-')"
       - name: Prepare prerelease version
       - run: npm ci
-        run: |
+      - run: |
           git config user.name $GITHUB_ACTOR
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
