@@ -113,10 +113,10 @@ describe("OidcLoginHandler", () => {
       clientId: "coolApp",
     });
     expect(nonEmptyStorage.getForUser("someUser", "someKey", { secure: true }))
-      .toBeUndefined;
+      .toBeUndefined();
     expect(nonEmptyStorage.getForUser("someUser", "someKey", { secure: false }))
-      .toBeUndefined;
+      .toBeUndefined();
     // This test is only necessary until the key is stored safely
-    expect(nonEmptyStorage.get("clientKey", { secure: false })).toBeUndefined;
+    expect(nonEmptyStorage.get("clientKey", { secure: false })).toBeUndefined();
   });
 });
