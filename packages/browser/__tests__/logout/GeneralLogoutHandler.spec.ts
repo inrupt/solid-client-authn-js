@@ -61,14 +61,16 @@ describe("OidcLoginHandler", () => {
         storageUtility: nonEmptyStorage,
       });
       logoutHandler.handle("someUser");
-      expect(
+      await expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
-      ).toBeUndefined;
+      ).resolves.toBeUndefined();
       expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
-      ).toBeUndefined;
+      ).resolves.toBeUndefined();
       // This test is only necessary until the key is stored safely
-      expect(nonEmptyStorage.get("clientKey", { secure: false })).toBeUndefined;
+      expect(
+        nonEmptyStorage.get("clientKey", { secure: false })
+      ).resolves.toBeUndefined();
     });
   });
 });

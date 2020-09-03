@@ -112,11 +112,15 @@ describe("OidcLoginHandler", () => {
       redirectUrl: new URL("https://app.com/redirect"),
       clientId: "coolApp",
     });
-    expect(nonEmptyStorage.getForUser("someUser", "someKey", { secure: true }))
-      .toBeUndefined();
-    expect(nonEmptyStorage.getForUser("someUser", "someKey", { secure: false }))
-      .toBeUndefined();
+    expect(
+      nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
+    ).resolves.toBeUndefined();
+    expect(
+      nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
+    ).resolves.toBeUndefined();
     // This test is only necessary until the key is stored safely
-    expect(nonEmptyStorage.get("clientKey", { secure: false })).toBeUndefined();
+    await expect(
+      nonEmptyStorage.get("clientKey", { secure: false })
+    ).resolves.toBeUndefined();
   });
 });
