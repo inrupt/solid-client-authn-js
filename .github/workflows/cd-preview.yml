@@ -28,7 +28,7 @@ jobs:
           git config user.name $GITHUB_ACTOR
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
-          ./node_modules/.bin/lerna version prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER
+          ./node_modules/.bin/lerna version prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER --yes
       - run: ./node_modules/.bin/lerna bootstrap --ci
       - run: ./node_modules/.bin/lerna run build
       - run: ./node_modules/.bin/lerna publish --dist-tag "$TAG_SLUG"
