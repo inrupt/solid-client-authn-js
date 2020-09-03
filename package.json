@@ -2,6 +2,9 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "format": "prettier --write \"packages/*/src/**\" \"packages/*/__tests__/**\"",
+    "licenses": "license-checker --production --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
+    "lint": "eslint \"packages/*/src/**/*.ts\" && eslint \"packages/*/__tests__/**/*.ts\"",
     "test": "npm run lint && npm run licenses && npm run test-unit",
     "test-unit": "jest --coverage --verbose"
   },
@@ -13,7 +16,10 @@
     "@typescript-eslint/parser": "^2.34.0",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-license-header": "^0.2.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "jest": "^25.1.0",
+    "license-checker": "^25.0.1",
     "prettier": "2.1.1",
     "ts-jest": "^25.5.1",
     "typescript": "^3.9.7"
