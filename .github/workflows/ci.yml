@@ -25,9 +25,10 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-      - run: lerna bootstrap --ci
-      - run: lerna run build
-      - run: lerna run test
+      - run: npm ci
+      - run: ./node_modules/.bin/lerna bootstrap --ci
+      - run: ./node_modules/.bin/lerna run build
+      - run: ./node_modules/.bin/lerna run test
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
       - run: npm audit --audit-level=moderate
       - name: Archive code coverage results
