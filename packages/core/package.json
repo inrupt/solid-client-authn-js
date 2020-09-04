@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "0.1.1",
+  "version": "0.0.1-featsetup-lerna-239637534-666.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
