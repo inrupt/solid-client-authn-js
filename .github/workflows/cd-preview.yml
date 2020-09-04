@@ -29,7 +29,7 @@ jobs:
           git config user.name $GITHUB_ACTOR
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
-          npm run version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER --yes
+          npm run version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER --yes --no-push
       - run: npm run build
       - run: npm run publish -- --dist-tag "$TAG_SLUG"
         env:
