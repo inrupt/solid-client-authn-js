@@ -17,14 +17,16 @@
     "outDir": "./dist"
   },
   "exclude": [
-    "../../node_modules", "dist", "**/__mocks__/**"],
+    "**/node_modules", "**/dist", "**/__mocks__/**"],
+
+  // We don't provide an 'out' value here, each sub-package should provide its
+  // own.
   "typedocOptions": {
     "mode": "modules",
-    "out": "website/docs/api",
     "exclude": [
       // Re-exported functions are already documented in their own modules:
-      "src/index.ts",
-      "src/index.browser.ts"
+      "./packages/*/src/index.ts",
+      "./packages/*/src/index.browser.ts"
     ],
     "excludeNotExported": true,
     "excludePrivate": true,

@@ -5,5 +5,9 @@
     "outDir": "./dist"
   },
 
+  "typedocOptions": {
+    "out": "website/docs/api/browser"
+  },
+
   "include": ["src/**/*"]
 }

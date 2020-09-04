@@ -16,7 +16,7 @@ module.exports = {
     "import/no-unresolved": 0,
     // TODO: FIXME: This rule is causing 'Invalid license header' errors on all
     //  the (valid!) source - so will have to look into this later!
-    // "license-header/header": ["error", "../../resources/license-header.js"],
+    "license-header/header": ["error", "../../resources/license-header.js"],
     "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
   }
 }

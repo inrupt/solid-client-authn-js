@@ -2,11 +2,16 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "format": "prettier --write \"packages/*/src/**\" \"packages/*/__tests__/**\"",
-    "licenses": "license-checker --production --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
-    "lint": "eslint \"packages/*/src/**/*.ts\" && eslint \"packages/*/__tests__/**/*.ts\"",
-    "test": "npm run lint && npm run licenses && npm run test-unit",
-    "test-unit": "jest --coverage --verbose"
+    "format-all": "prettier --write \"packages/*/src/**\" \"packages/*/__tests__/**\"",
+    "jest-all": "jest --coverage --verbose",
+    "licenses-all": "license-checker --production --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
+    "lint-all": "eslint \"packages/*/src/**/*.ts\" && eslint \"packages/*/__tests__/**/*.ts\"",
+    "test-all": "npm run lint-all && npm run licenses-all && npm run test-unit-all",
+    "test-unit-all": "jest --coverage --verbose",
+    "test": "./node_modules/.bin/lerna run build",
+    "build": "./node_modules/.bin/lerna run build",
+    "build-api-docs": "./node_modules/.bin/lerna run build-api-docs",
+    "postinstall": "./node_modules/.bin/lerna bootstrap"
   },
   "dependencies": {
     "lerna": "^3.22.1"
@@ -20,9 +25,9 @@
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-license-header": "^0.2.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "jest": "^25.1.0",
     "husky": "^4.2.3",
-    "lint-staged": "^10.3.0",
+    "jest": "^25.1.0",
+    "lint-staged": "^10.2.13",
     "license-checker": "^25.0.1",
     "prettier": "2.1.1",
     "ts-jest": "^25.5.1",
