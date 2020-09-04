@@ -12,7 +12,7 @@
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "build-api-docs": "lerna run build-api-docs",
-    "publish": "lerna publish",
+    "publish": "lerna publish --skip-git",
     "postinstall": "lerna bootstrap",
     "version": "lerna version"
   },
