@@ -8,10 +8,13 @@
     "lint-all": "eslint \"packages/*/src/**/*.ts\" && eslint \"packages/*/__tests__/**/*.ts\"",
     "test-all": "npm run lint-all && npm run licenses-all && npm run test-unit-all",
     "test-unit-all": "jest --coverage --verbose",
-    "test": "./node_modules/.bin/lerna run build",
-    "build": "./node_modules/.bin/lerna run build",
-    "build-api-docs": "./node_modules/.bin/lerna run build-api-docs",
-    "postinstall": "./node_modules/.bin/lerna bootstrap"
+    "test": "lerna run build",
+    "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
+    "build-api-docs": "lerna run build-api-docs",
+    "publish": "lerna publish",
+    "postinstall": "lerna bootstrap",
+    "version": "lerna version"
   },
   "dependencies": {
     "lerna": "^3.22.1"

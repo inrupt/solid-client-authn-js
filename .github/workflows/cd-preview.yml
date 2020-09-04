@@ -23,15 +23,15 @@ jobs:
         # See https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         run: echo "::set-env name=TAG_SLUG::$(echo ${GITHUB_REF#refs/heads/} | tr -cd '[:alnum:]-')"
       - run: npm ci
-      - run: ./node_modules/.bin/lerna bootstrap --ci
+      - run: npm run bootstrap -- --ci
       - name: Prepare prerelease version
         run: |
           git config user.name $GITHUB_ACTOR
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
-          ./node_modules/.bin/lerna version prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER --yes
-      - run: ./node_modules/.bin/lerna run build
-      - run: ./node_modules/.bin/lerna publish --dist-tag "$TAG_SLUG"
+          npm run version prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER --yes
+      - run: npm run build
+      - run: npm run publish -- --dist-tag "$TAG_SLUG"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: |
