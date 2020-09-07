@@ -1,6 +1,4 @@
 {
-  "packages": [
-    "packages/*"
-  ],
-  "version": "0.0.1-featsetup-lerna-239799074-675.0"
+  "packages": ["packages/*"],
+  "version": "0.0.1-0.1.1-featsetup-lerna-000-000.000.0"
 }
