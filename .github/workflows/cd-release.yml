@@ -64,7 +64,7 @@ jobs:
         #      }
         #    }
         run: |
-          npm run publish -- --yes --from-package
+          npm run publish -- from-package --yes 
           echo "Packages published. To install, run:"
           echo ""
           echo "    npm install @inrupt/solid-client-authn-XXXX"
