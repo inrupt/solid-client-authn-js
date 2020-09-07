@@ -13,6 +13,7 @@
     "build": "lerna run build",
     "build-api-docs": "lerna run build-api-docs",
     "publish": "lerna publish",
+    "publish-preview": "lerna publish from-package",
     "postinstall": "lerna bootstrap",
     "version": "lerna version"
   },
