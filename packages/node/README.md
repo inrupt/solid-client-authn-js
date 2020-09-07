@@ -1,4 +1,4 @@
-# NOTE: Only this package should to refer to "dom", remove from Node one:
+# NOTE: This package shouldn't to refer to "dom", only the Browser one should.
 {
   "compilerOptions": {
     "lib": ["es2018", "dom"],
