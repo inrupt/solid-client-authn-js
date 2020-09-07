@@ -23,7 +23,6 @@ jobs:
         # See https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         run: echo "::set-env name=TAG_SLUG::$(echo ${GITHUB_REF#refs/heads/} | tr -cd '[:alnum:]-')"
       - run: npm ci
-      - run: npm run bootstrap -- --ci
       - name: Prepare prerelease version
         run: |
           git config user.name $GITHUB_ACTOR
@@ -31,7 +30,7 @@ jobs:
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
           npm run version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER --yes --no-push
       - run: npm run build
-      - run: npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
+      - run: npm run publish-preview -- --dist-tag "$TAG_SLUG"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: |

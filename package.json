@@ -15,6 +15,7 @@
     "publish": "lerna publish",
     "publish-preview": "lerna publish from-package",
     "postinstall": "lerna bootstrap",
+    "prepublish": "npm run build",
     "version": "lerna version"
   },
   "dependencies": {
