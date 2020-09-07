@@ -39,7 +39,7 @@ You'd use the single session API to:
 
 #### Examples
 
-- [Single-session the web browser with your own bundler](./examples/single/bundle)
+- [Single-session the web browser with your own bundler](examples/single/bundle)
 
 ### Multi Session API
 

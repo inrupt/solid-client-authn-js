@@ -1,4 +1,4 @@
-name: Release
+name: CD-release
 
 on:
   push:
@@ -55,11 +55,19 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - name: Publish to npm
+        #  If you want a package to be public (e.g. you'd expect
+        #  `npm publish --access public` here), then just add this to the relevant
+        #  `package.json` file:
+        #    {
+        #      "publishConfig": {
+        #        "access": "public"
+        #      }
+        #    }
         run: |
-          npm publish --access public
-          echo "Package published. To install, run:"
+          npm run publish -- --yes
+          echo "Packages published. To install, run:"
           echo ""
-          echo "    npm install @inrupt/solid-client-authn-browser"
+          echo "    npm install @inrupt/solid-client-authn-XXXX"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Mark GitHub Deployment as successful

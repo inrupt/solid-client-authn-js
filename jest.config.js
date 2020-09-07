@@ -6,10 +6,10 @@ module.exports = {
     "^.+\\.(ts|tsx)?$": "ts-jest",
   },
   collectCoverageFrom: [
-    "src/**/*.ts",
+    "**/src/**/*.ts",
     "!**/node_modules/**",
     "!**/__tests__/**",
-    "!src/external-types/**",
-    "!src/index.ts",
+    "!**/src/external-types/**",
+    "!**/src/index.ts",
   ],
 };

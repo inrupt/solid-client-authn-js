@@ -82,7 +82,7 @@ lerna-debug.log
 packages/*/lib
 
 # Documentation
-docs/prose/build/
-docs/api/build/
-docs/api/source/api/
-docs/dist/
+packages/**/docs/prose/build/
+packages/**/docs/api/build/
+packages/**/docs/api/source/api/
+packages/**/docs/dist/
