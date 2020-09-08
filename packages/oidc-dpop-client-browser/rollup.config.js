@@ -15,7 +15,7 @@ export default {
     {
       dir: "umd",
       format: "umd",
-      name: "LitSolidCore",
+      name: "OidcDpopClient",
     },
   ],
   plugins: [
