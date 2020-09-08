@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IStorageUtility } from "../StorageUtility";
+import { default as IStorageUtility } from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
 export const StorageUtilitySafeGetResponse = {

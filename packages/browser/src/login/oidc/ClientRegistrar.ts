@@ -26,8 +26,11 @@
 
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
-import { IStorageUtility } from "../../storage/StorageUtility";
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import {
+  IClient,
+  IIssuerConfig,
+  IStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 
 import URL from "url-parse";
 

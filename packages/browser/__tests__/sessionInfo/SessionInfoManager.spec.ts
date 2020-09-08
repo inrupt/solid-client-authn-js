@@ -23,7 +23,7 @@ import "reflect-metadata";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { mockStorageUtility } from "../../src/storage/__mocks__/StorageUtility";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import SessionInfoManager from "../../src/sessionInfo/SessionInfoManager";
 
 describe("SessionInfoManager", () => {

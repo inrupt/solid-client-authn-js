@@ -25,7 +25,7 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../../storage/StorageUtility";
+import { IStorageUtility } from "@inrupt/solid-client-authn-core";
 import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import URL from "url-parse";
 import formurlencoded from "form-urlencoded";

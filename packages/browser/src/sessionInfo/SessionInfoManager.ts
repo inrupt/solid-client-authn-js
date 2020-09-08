@@ -25,8 +25,7 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../storage/StorageUtility";
-import { ISessionInfo } from "@inrupt/solid-client-authn-core";
+import { ISessionInfo, IStorageUtility } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

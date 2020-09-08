@@ -28,7 +28,6 @@ import {
   IssuerConfigFetcherMock,
   IssuerConfigFetcherFetchConfigResponse,
 } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import { StorageUtilityMock } from "../../../src/storage/__mocks__/StorageUtility";
 import {
   DpopHeaderCreatorMock,
   DpopHeaderCreatorResponse,
@@ -41,7 +40,10 @@ import {
   PublicClientRegistrarMock,
 } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
-import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import {
+  IIssuerConfig,
+  StorageUtilityMock,
+} from "@inrupt/solid-client-authn-core";
 
 describe("TokenRequester", () => {
   const defaultMocks = {

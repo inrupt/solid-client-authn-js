@@ -30,11 +30,11 @@
 import {
   IAuthenticatedFetcher,
   IRequestCredentials,
+  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
-import { IStorageUtility } from "../../storage/StorageUtility";
 
 /**
  * @hidden

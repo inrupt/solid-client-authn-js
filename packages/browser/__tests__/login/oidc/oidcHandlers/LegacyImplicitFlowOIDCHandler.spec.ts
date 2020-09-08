@@ -31,8 +31,10 @@ import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
-import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
-import { IOidcOptions } from "@inrupt/solid-client-authn-core";
+import {
+  IOidcOptions,
+  StorageUtilityMock,
+} from "@inrupt/solid-client-authn-core";
 
 describe("LegacyImplicitFlowOidcHandler", () => {
   const defaultMocks = {

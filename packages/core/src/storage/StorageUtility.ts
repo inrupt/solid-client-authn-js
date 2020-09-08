@@ -28,60 +28,9 @@
  * A helper class that will validate items taken from local storage
  */
 import { injectable, inject } from "tsyringe";
-import IStorage from "./IStorage";
 import validateSchema from "../util/validateSchema";
-
-export interface IStorageUtility {
-  get(
-    key: string,
-    options?: { errorIfNull?: boolean; secure?: boolean }
-  ): Promise<string | undefined>;
-  set(
-    key: string,
-    value: string,
-    options?: { secure?: boolean }
-  ): Promise<void>;
-  delete(key: string, options?: { secure?: boolean }): Promise<void>;
-  getForUser(
-    userId: string,
-    key: string,
-    options?: { errorIfNull?: boolean; secure?: boolean }
-  ): Promise<string | undefined>;
-  setForUser(
-    userId: string,
-    values: Record<string, string>,
-    options?: { secure?: boolean }
-  ): Promise<void>;
-  deleteForUser(
-    userId: string,
-    key: string,
-    options?: { secure?: boolean }
-  ): Promise<void>;
-  deleteAllUserData(
-    userId: string,
-    options?: { secure?: boolean }
-  ): Promise<void>;
-
-  /**
-   * Retrieve from local storage
-   * @param key The key of the item
-   * @param options.schema The schema it should follow. If it does not follow this schema, it will
-   * be deleted
-   * @param options.postProcess A function that can be applied after the item is retrieved
-   */
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  safeGet(
-    key: string,
-    options?: Partial<{
-      //
-      schema?: Record<string, any>;
-      postProcess?: (retrievedObject: any) => any;
-      userId?: string;
-      secure?: boolean;
-    }>
-  ): Promise<any | undefined>;
-  /* eslint-enable @typescript-eslint/no-explicit-any */
-}
+import IStorage from "./IStorage";
+import IStorageUtility from "./IStorageUtility";
 
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**

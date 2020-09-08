@@ -20,7 +20,7 @@
  */
 
 import "reflect-metadata";
-import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";

@@ -27,13 +27,15 @@
 /**
  * Responsible for fetching an IDP configuration
  */
-import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import {
+  IIssuerConfig,
+  IStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import issuerConfigSchema from "./issuerConfigSchema";
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IStorageUtility } from "../../storage/StorageUtility";
 
 /**
  * @hidden

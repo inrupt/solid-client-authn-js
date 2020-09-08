@@ -52,5 +52,21 @@ export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";
 export { default as IClient } from "./login/oidc/IClient";
 export { default as IIssuerConfig } from "./login/oidc/IIssuerConfig";
 
+// Storage.
+export { default as IStorage } from "./storage/IStorage";
+
 // Utility functions.
 export { default as validateSchema } from "./util/validateSchema";
+
+export { default as IStorageUtility } from "./storage/IStorageUtility";
+export { default as StorageUtility } from "./storage/StorageUtility";
+
+// Mocks.
+export {
+  mockStorageUtility,
+  StorageUtilityMock,
+  StorageUtilityGetResponse,
+  StorageUtilitySafeGetResponse,
+} from "./storage/__mocks__/StorageUtility";
+
+export { StorageMock } from "./storage/__mocks__/Storage";

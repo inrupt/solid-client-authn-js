@@ -27,6 +27,7 @@ import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
+import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {

@@ -27,11 +27,14 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
-import { IOidcHandler, IOidcOptions } from "@inrupt/solid-client-authn-core";
+import {
+  IOidcHandler,
+  IOidcOptions,
+  IStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
-import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 
 /**

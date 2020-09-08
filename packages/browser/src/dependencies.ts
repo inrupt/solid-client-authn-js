@@ -35,13 +35,15 @@ import {
   ILogoutHandler,
   IOidcHandler,
   IRedirectHandler,
+  IStorage,
+  IStorageUtility,
+  StorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "./ClientAuthentication";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import UnauthenticatedFetcher from "./authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
-import IStorage from "./storage/IStorage";
 import IJoseUtility from "./jose/IJoseUtility";
 import IsomorphicJoseUtility from "./jose/IsomorphicJoseUtility";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
@@ -64,7 +66,6 @@ import DpopHeaderCreator, {
 import DpopClientKeyManager, {
   IDpopClientKeyManager,
 } from "./dpop/DpopClientKeyManager";
-import StorageUtility, { IStorageUtility } from "./storage/StorageUtility";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
 import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
 import EnvironmentDetector, {

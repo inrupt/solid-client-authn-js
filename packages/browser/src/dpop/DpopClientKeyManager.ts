@@ -31,7 +31,7 @@ import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
 import jwkSchema from "./JwkSchema";
 import IJoseUtility from "../jose/IJoseUtility";
-import { IStorageUtility } from "../storage/StorageUtility";
+import { IStorageUtility } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

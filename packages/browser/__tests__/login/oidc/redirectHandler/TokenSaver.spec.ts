@@ -23,7 +23,7 @@ import "reflect-metadata";
 import TokenSaver from "../../../../src/login/oidc/redirectHandler/TokenSaver";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
-import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
+import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
 /**
  * Test for TokenSaver

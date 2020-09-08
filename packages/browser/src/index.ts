@@ -24,8 +24,8 @@ export { SessionManager } from "./SessionManager";
 export { getClientAuthenticationWithDependencies } from "./dependencies";
 
 // Interfaces
-// TODO: PMcB - should we re-export this interface (now in 'core')?
+// TODO: PMcB - should we re-export these interfaces (now in 'core')?
 // export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";
+// export { default as IStorage } from "./storage/IStorage";
 export { ISessionOptions } from "./Session";
 export { ISessionManagerOptions } from "./SessionManager";
-export { default as IStorage } from "./storage/IStorage";

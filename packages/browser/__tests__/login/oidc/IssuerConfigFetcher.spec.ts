@@ -25,7 +25,8 @@ import {
   FetcherMock,
   FetcherMockResponse,
 } from "../../../src/util/__mocks__/Fetcher";
-import { mockStorageUtility } from "../../../src/storage/__mocks__/StorageUtility";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
 import { Response as NodeResponse } from "node-fetch";

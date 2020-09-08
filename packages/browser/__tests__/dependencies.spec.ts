@@ -21,7 +21,7 @@
 
 import { getClientAuthenticationWithDependencies } from "../src/dependencies";
 import ClientAuthentication from "../src/ClientAuthentication";
-import { StorageMock } from "../src/storage/__mocks__/Storage";
+import { StorageMock } from "@inrupt/solid-client-authn-core";
 
 describe("dependencies", () => {
   it("performs dependency injection", () => {

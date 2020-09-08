@@ -25,8 +25,8 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import { IStorageUtility } from "../../../storage/StorageUtility";
 import { ITokenRequester } from "../TokenRequester";
+import { IStorageUtility } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

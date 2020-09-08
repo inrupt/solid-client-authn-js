@@ -19,13 +19,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IStorage from "./storage/IStorage";
 import { Session } from "./Session";
 import { EventEmitter } from "events";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { detectEnvironment } from "./util/EnvironmentDetector";
-import { ISessionInfo } from "@inrupt/solid-client-authn-core";
+import { ISessionInfo, IStorage } from "@inrupt/solid-client-authn-core";
 
 export interface ISessionManagerOptions {
   secureStorage?: IStorage;

@@ -30,10 +30,10 @@
 import {
   IAuthenticatedFetcher,
   IRequestCredentials,
+  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
-import { IStorageUtility } from "../../storage/StorageUtility";
 import { flattenHeaders } from "../headers/HeadersUtils";
 
 /**

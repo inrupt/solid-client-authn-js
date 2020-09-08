@@ -26,7 +26,7 @@
 
 import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
-import { IStorageUtility } from "../../../storage/StorageUtility";
+import { IStorageUtility } from "@inrupt/solid-client-authn-core";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 /**
