@@ -28,7 +28,7 @@
  * Top Level core document. Responsible for setting up the dependency graph
  */
 import "reflect-metadata";
-import { container } from "tsyringe";
+import { container as emptyContainer } from "tsyringe";
 import {
   IAuthenticatedFetcher,
   ILoginHandler,
@@ -36,8 +36,7 @@ import {
   IOidcHandler,
   IRedirectHandler,
   IStorage,
-  IStorageUtility,
-  StorageUtility,
+  resolveCoreDependencies,
 } from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "./ClientAuthentication";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
@@ -99,6 +98,9 @@ import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetche
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 import InMemoryStorage from "./storage/InMemoryStorage";
 
+const container = resolveCoreDependencies();
+// const container = emptyContainer;
+
 // Util
 container.register<IFetcher>("fetcher", {
   useClass: Fetcher,
@@ -108,9 +110,6 @@ container.register<IDpopHeaderCreator>("dpopHeaderCreator", {
 });
 container.register<IDpopClientKeyManager>("dpopClientKeyManager", {
   useClass: DpopClientKeyManager,
-});
-container.register<IStorageUtility>("storageUtility", {
-  useClass: StorageUtility,
 });
 container.register<IUuidGenerator>("uuidGenerator", {
   useClass: UuidGenerator,

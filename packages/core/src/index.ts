@@ -70,3 +70,5 @@ export {
 } from "./storage/__mocks__/StorageUtility";
 
 export { StorageMock } from "./storage/__mocks__/Storage";
+
+export { resolveCoreDependencies } from "./dependencies";
