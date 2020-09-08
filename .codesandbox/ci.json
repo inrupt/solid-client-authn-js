@@ -1,5 +1,5 @@
 {
-  "installCommand": "install",
-  "buildCommand": "build",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
   "sandboxes": ["/.codesandbox/sandbox"]
 }
