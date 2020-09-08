@@ -19,8 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IRedirectHandler from "../IRedirectHandler";
-import ISessionInfo from "../../../../sessionInfo/ISessionInfo";
+import {
+  IRedirectHandler,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
+
 import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
 
 /**

@@ -20,8 +20,7 @@
  */
 
 import { IClientRegistrar, IRegistrarOptions } from "../ClientRegistrar";
-import IClient from "../IClient";
-import IIssuerConfig from "../IIssuerConfig";
+import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
 export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",

@@ -27,8 +27,10 @@
 /**
  * Responsible for sending DPoP Enabled requests
  */
-import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
-import IRequestCredentials from "../IRequestCredentials";
+import {
+  IAuthenticatedFetcher,
+  IRequestCredentials,
+} from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";

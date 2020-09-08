@@ -21,8 +21,8 @@
 
 import "reflect-metadata";
 import AggregateAuthenticatedFetcher from "../../src/authenticatedFetch/AggregateAuthenticatedFetcher";
-import IAuthenticatedFetcher from "../../src/authenticatedFetch/IAuthenticatedFetcher";
 import AggregateHandler from "../../src/util/handlerPattern/AggregateHandler";
+import { IAuthenticatedFetcher } from "@inrupt/solid-client-authn-core";
 
 jest.mock("../../src/util/handlerPattern/AggregateHandler");
 

@@ -24,10 +24,12 @@
  * @packageDocumentation
  */
 
-import IAuthenticatedFetcher from "./IAuthenticatedFetcher";
 import { injectable, inject } from "tsyringe";
-import IRequestCredentials from "./IRequestCredentials";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
+import {
+  IAuthenticatedFetcher,
+  IRequestCredentials,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

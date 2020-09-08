@@ -28,9 +28,9 @@ import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
+import { IOidcOptions } from "@inrupt/solid-client-authn-core";
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {

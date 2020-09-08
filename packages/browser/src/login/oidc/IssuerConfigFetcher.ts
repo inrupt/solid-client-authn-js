@@ -27,7 +27,7 @@
 /**
  * Responsible for fetching an IDP configuration
  */
-import IIssuerConfig from "./IIssuerConfig";
+import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";

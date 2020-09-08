@@ -24,7 +24,8 @@
  * @packageDocumentation
  */
 
-import ILogoutHandler from "./ILogoutHandler";
+import { ILogoutHandler } from "@inrupt/solid-client-authn-core";
+
 import { inject, injectable } from "tsyringe";
 import { ISessionInfoManager } from "../sessionInfo/SessionInfoManager";
 

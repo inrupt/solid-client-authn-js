@@ -24,7 +24,7 @@ jest.mock("../../../src/util/handlerPattern/AggregateHandler");
 // Required by TSyringe:
 import "reflect-metadata";
 import AggregateOidcHandler from "../../../src/login/oidc/AggregateOidcHandler";
-import IOidcHandler from "../../../src/login/oidc/IOidcHandler";
+import { IOidcHandler } from "@inrupt/solid-client-authn-core";
 import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
 
 describe("AggregateOidcHandler", () => {

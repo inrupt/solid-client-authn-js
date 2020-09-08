@@ -25,16 +25,18 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import ILoginHandler from "./login/ILoginHandler";
-import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
-import ILogoutHandler from "./logout/ILogoutHandler";
 import { ISessionInfoManager } from "./sessionInfo/SessionInfoManager";
-import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import { IEnvironmentDetector } from "./util/EnvironmentDetector";
-import ISessionInfo from "./sessionInfo/ISessionInfo";
-import ILoginInputOptions from "./ILoginInputOptions";
+import {
+  ILoginInputOptions,
+  ILoginHandler,
+  ILogoutHandler,
+  IAuthenticatedFetcher,
+  IRedirectHandler,
+  IRequestCredentials,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
-import IRequestCredentials from "./authenticatedFetch/IRequestCredentials";
 
 /**
  * @hidden

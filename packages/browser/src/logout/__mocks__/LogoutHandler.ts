@@ -19,8 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ILogoutHandler from "../ILogoutHandler";
-import { IStorageUtility } from "../../storage/StorageUtility";
+import { ILogoutHandler, IStorageUtility } from "@inrupt/solid-client-authn-core";
 import { clear } from "../../sessionInfo/SessionInfoManager";
 
 export const LogoutHandlerMock: jest.Mocked<ILogoutHandler> = {

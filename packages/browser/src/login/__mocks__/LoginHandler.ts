@@ -19,9 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ILoginHandler from "../ILoginHandler";
-import ISessionInfo from "../../sessionInfo/ISessionInfo";
-import ILoginOptions from "../ILoginOptions";
+import {
+  ILoginOptions,
+  ILoginHandler,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
 
 export const LoginHandlerResponse: ISessionInfo = {
   isLoggedIn: false,

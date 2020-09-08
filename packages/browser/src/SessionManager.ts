@@ -25,7 +25,7 @@ import { EventEmitter } from "events";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { detectEnvironment } from "./util/EnvironmentDetector";
-import ISessionInfo from "./sessionInfo/ISessionInfo";
+import { ISessionInfo } from "@inrupt/solid-client-authn-core";
 
 export interface ISessionManagerOptions {
   secureStorage?: IStorage;

@@ -27,8 +27,7 @@
 /**
  * Handles login if a user's webid was provided
  */
-import ILoginHandler from "../ILoginHandler";
-import ILoginOptions from "../ILoginOptions";
+import { ILoginOptions, ILoginHandler } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

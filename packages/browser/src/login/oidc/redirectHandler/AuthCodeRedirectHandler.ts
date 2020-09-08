@@ -24,8 +24,6 @@
  * @packageDocumentation
  */
 
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
-import IRedirectHandler from "./IRedirectHandler";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
@@ -33,6 +31,10 @@ import { IStorageUtility } from "../../../storage/StorageUtility";
 import { IRedirector } from "../Redirector";
 import { ITokenRequester } from "../TokenRequester";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
+import {
+  IRedirectHandler,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

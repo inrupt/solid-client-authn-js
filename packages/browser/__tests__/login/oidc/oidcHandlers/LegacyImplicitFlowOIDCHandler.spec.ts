@@ -29,10 +29,10 @@ import { DpopClientKeyManagerMock } from "../../../../src/dpop/__mocks__/DpopCli
 import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import IOidcOptions from "../../../../src/login/oidc/IOidcOptions";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
+import { IOidcOptions } from "@inrupt/solid-client-authn-core";
 
 describe("LegacyImplicitFlowOidcHandler", () => {
   const defaultMocks = {

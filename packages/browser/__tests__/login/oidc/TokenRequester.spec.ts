@@ -36,12 +36,12 @@ import {
 import { Response as NodeResponse } from "node-fetch";
 import TokenRequester from "../../../src/login/oidc/TokenRequester";
 import { JoseUtilityMock } from "../../../src/jose/__mocks__/JoseUtility";
-import IIssuerConfig from "../../../src/login/oidc/IIssuerConfig";
 import {
   ClientRegistrarMock,
   PublicClientRegistrarMock,
 } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
+import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
 describe("TokenRequester", () => {
   const defaultMocks = {

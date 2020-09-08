@@ -27,8 +27,10 @@
 /**
  * Responsible for sending fetch requests given a token that is not DPoP compatible
  */
-import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
-import IRequestCredentials from "../IRequestCredentials";
+import {
+  IAuthenticatedFetcher,
+  IRequestCredentials,
+} from "@inrupt/solid-client-authn-core";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IStorageUtility } from "../../storage/StorageUtility";

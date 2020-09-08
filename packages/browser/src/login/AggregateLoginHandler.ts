@@ -29,8 +29,7 @@
  */
 import AggregateHandler from "../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
-import ILoginHandler from "./ILoginHandler";
-import ILoginOptions from "./ILoginOptions";
+import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

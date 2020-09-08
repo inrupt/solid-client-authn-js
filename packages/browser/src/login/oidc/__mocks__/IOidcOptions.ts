@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IOidcOptions from "../IOidcOptions";
+import { IOidcOptions } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 
 export const standardOidcOptions: IOidcOptions = {

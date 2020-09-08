@@ -27,8 +27,7 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
-import IOidcHandler from "../IOidcHandler";
-import IOidcOptions from "../IOidcOptions";
+import { IOidcHandler, IOidcOptions } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";

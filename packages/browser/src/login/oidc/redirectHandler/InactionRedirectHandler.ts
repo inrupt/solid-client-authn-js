@@ -24,8 +24,10 @@
  * @packageDocumentation
  */
 
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
-import IRedirectHandler from "./IRedirectHandler";
+import {
+  IRedirectHandler,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
 import { inject, injectable } from "tsyringe";
 import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 

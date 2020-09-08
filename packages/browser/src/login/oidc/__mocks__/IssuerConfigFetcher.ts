@@ -21,7 +21,7 @@
 
 import { IIssuerConfigFetcher } from "../IssuerConfigFetcher";
 import URL from "url-parse";
-import IIssuerConfig from "../IIssuerConfig";
+import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: new URL("https://idp.com"),

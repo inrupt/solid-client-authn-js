@@ -21,7 +21,7 @@
 
 import "reflect-metadata";
 import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
-import IHandleable from "../../../src/util/handlerPattern/IHandleable";
+import { IHandleable } from "@inrupt/solid-client-authn-core";
 
 describe("AggregateHandler", () => {
   // Set up mock extension

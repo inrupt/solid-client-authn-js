@@ -29,18 +29,22 @@
  */
 import "reflect-metadata";
 import { container } from "tsyringe";
+import {
+  IAuthenticatedFetcher,
+  ILoginHandler,
+  ILogoutHandler,
+  IOidcHandler,
+  IRedirectHandler,
+} from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "./ClientAuthentication";
-import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import UnauthenticatedFetcher from "./authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
-import ILoginHandler from "./login/ILoginHandler";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 import IStorage from "./storage/IStorage";
 import IJoseUtility from "./jose/IJoseUtility";
 import IsomorphicJoseUtility from "./jose/IsomorphicJoseUtility";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
-import IOidcHandler from "./login/oidc/IOidcHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
@@ -62,13 +66,11 @@ import DpopClientKeyManager, {
 } from "./dpop/DpopClientKeyManager";
 import StorageUtility, { IStorageUtility } from "./storage/StorageUtility";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
-import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
 import EnvironmentDetector, {
   IEnvironmentDetector,
   detectEnvironment,
 } from "./util/EnvironmentDetector";
-import ILogoutHandler from "./logout/ILogoutHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import UrlRepresenationConverter, {
   IUrlRepresentationConverter,
