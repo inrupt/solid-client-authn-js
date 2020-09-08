@@ -4,9 +4,7 @@ import {
   getClientAuthenticationWithDependencies
 } from "@inrupt/solid-client-authn-browser";
 
-// const REDIRECT_URL = "https://podpecker.zwifi.eu"
-// const REDIRECT_URL = "http://localhost:3000";
-const REDIRECT_URL = "https://ycos2.csb.app/";
+const REDIRECT_URL = window.location;
 
 export default function Home() {
   // eslint-disable-next-line
@@ -19,18 +17,8 @@ export default function Home() {
     )
   );
   const [issuer, setIssuer] = useState("https://broker.demo-ess.inrupt.com/");
-  const [oidc, setOidc] = useState("awaiting_login");
   const [resource, setResource] = useState(session.info.webId);
   const [data, setData] = useState(null);
-
-  useEffect(() => {
-    if (oidc === "login_sent") {
-      session.login({
-        redirectUrl: new URL(REDIRECT_URL),
-        oidcIssuer: new URL(issuer)
-      });
-    }
-  }, [oidc, issuer, session]);
 
   useEffect(() => {
     const authCode = new URL(window.location.href).searchParams.get("code");
@@ -48,7 +36,10 @@ export default function Home() {
     // The default behaviour of the button is to resubmit.
     // This prevents the page from reloading.
     e.preventDefault();
-    setOidc("login_sent");
+    session.login({
+      redirectUrl: new URL(REDIRECT_URL),
+      oidcIssuer: new URL(issuer)
+    });
   };
 
   const handleFetch = (e) => {
