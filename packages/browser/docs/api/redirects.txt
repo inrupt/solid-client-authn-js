@@ -1,0 +1,12 @@
+client-libraries/api/javascript/solid-client-authn-browser/classes/_src_session_.session.html  ->  client-libraries/api/javascript/solid-client-authn-browser/classes/_session_.session.html
+client-libraries/api/javascript/solid-client-authn-browser/classes/_src_sessionmanager_.sessionmanager.html  ->  client-libraries/api/javascript/solid-client-authn-browser/classes/_sessionmanager_.sessionmanager.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_src_ilogininputoptions_.ilogininputoptions.html  ->  client-libraries/api/javascript/solid-client-authn-browser/interfaces/_ilogininputoptions_.ilogininputoptions.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_src_session_.isessionoptions.html  ->  client-libraries/api/javascript/solid-client-authn-browser/interfaces/_session_.isessionoptions.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_src_sessioninfo_isessioninfo_.isessioninfo.html  ->  client-libraries/api/javascript/solid-client-authn-browser/interfaces/_sessioninfo_isessioninfo_.isessioninfo.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_src_sessionmanager_.isessionmanageroptions.html  ->  client-libraries/api/javascript/solid-client-authn-browser/interfaces/_sessionmanager_.isessionmanageroptions.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_src_storage_istorage_.istorage.html  ->  client-libraries/api/javascript/solid-client-authn-browser/interfaces/_storage_istorage_.istorage.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_src_ilogininputoptions_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_ilogininputoptions_.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_src_session_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_session_.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_src_sessioninfo_isessioninfo_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_sessioninfo_isessioninfo_.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_src_sessionmanager_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_sessionmanager_.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_src_storage_istorage_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_storage_istorage_.html
