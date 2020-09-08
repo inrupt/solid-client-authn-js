@@ -1,11 +1,12 @@
 {
-  "name": "vanilla-typescript",
-  "version": "1.0.0",
-  "description": "JavaScript and TypeScript example starter project",
-  "main": "index.html",
+  "name": "solid-client-auth-browser-demo",
+  "version": "0.0.0",
+  "description": "solid-client-auth-browser demo app",
+  "main": "build/index.html",
   "scripts": {
-    "start": "parcel index.html --open",
-    "build": "parcel build index.html"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom"
   },
   "dependencies": {
     "@inrupt/solid-client": "0.3.0",
@@ -23,5 +24,17 @@
   "keywords": [
     "typescript",
     "javascript"
-  ]
+  ],
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }
