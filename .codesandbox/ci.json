@@ -1,5 +1,5 @@
 {
   "installCommand": "install-sandbox",
-  "buildCommand": false,
+  "buildCommand": "build-sandbox",
   "sandboxes": ["/.codesandbox/sandbox"]
 }
