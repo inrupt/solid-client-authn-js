@@ -86,3 +86,6 @@ packages/**/docs/prose/build/
 packages/**/docs/api/build/
 packages/**/docs/api/source/api/
 packages/**/docs/dist/
+
+# Examples
+build/

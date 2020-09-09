@@ -1,0 +1,40 @@
+{
+  "name": "solid-client-auth-browser-demo",
+  "version": "0.0.0",
+  "description": "solid-client-auth-browser demo app",
+  "main": "build/index.html",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom"
+  },
+  "dependencies": {
+    "@inrupt/solid-client": "0.3.0",
+    "@inrupt/solid-client-authn-browser": "0.1.1",
+    "ajv": "6.12.4",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-scripts": "3.4.3",
+    "readable-stream": "3.6.0",
+    "stream-browserify": "3.0.0"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.6.1"
+  },
+  "keywords": [
+    "typescript",
+    "javascript"
+  ],
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

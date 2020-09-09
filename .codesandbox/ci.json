@@ -1,0 +1,5 @@
+{
+  "installCommand": "install-sandbox",
+  "buildCommand": "build-sandbox",
+  "sandboxes": ["/.codesandbox/sandbox"]
+}
