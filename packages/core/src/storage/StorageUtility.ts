@@ -27,7 +27,6 @@
 /**
  * A helper class that will validate items taken from local storage
  */
-import { injectable, inject } from "tsyringe";
 import validateSchema from "../util/validateSchema";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
@@ -36,11 +35,10 @@ import IStorageUtility from "./IStorageUtility";
 /**
  * @hidden
  */
-@injectable()
 export default class StorageUtility implements IStorageUtility {
   constructor(
-    @inject("secureStorage") private secureStorage: IStorage,
-    @inject("insecureStorage") private insecureStorage: IStorage
+    private secureStorage: IStorage,
+    private insecureStorage: IStorage
   ) {}
 
   private getKey(userId: string): string {

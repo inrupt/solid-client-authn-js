@@ -36,8 +36,10 @@ import {
   IOidcHandler,
   IRedirectHandler,
   IStorage,
-  resolveCoreDependencies,
 } from "@inrupt/solid-client-authn-core";
+import { IStorageUtility } from "@inrupt/solid-client-authn-core";
+import StorageUtilityBrowser from "./storage/StorageUtility";
+// import StorageUtility from "../../core/src/storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
@@ -98,8 +100,11 @@ import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetche
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 import InMemoryStorage from "./storage/InMemoryStorage";
 
-const container = resolveCoreDependencies();
-// const container = emptyContainer;
+const container = emptyContainer;
+
+container.register<IStorageUtility>("storageUtility", {
+  useClass: StorageUtilityBrowser,
+});
 
 // Util
 container.register<IFetcher>("fetcher", {

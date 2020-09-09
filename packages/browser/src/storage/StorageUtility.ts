@@ -19,15 +19,31 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import "reflect-metadata";
-import { container, DependencyContainer } from "tsyringe";
-import IStorageUtility from "./storage/IStorageUtility";
-import StorageUtility from "./storage/StorageUtility";
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export function resolveCoreDependencies(): DependencyContainer {
-  // const storageContainer = container.createChildContainer();
-  container.register<IStorageUtility>("storageUtility", {
-    useClass: StorageUtility,
-  });
-  return container.createChildContainer();
+/**
+ * A helper class that will validate items taken from local storage
+ */
+import { injectable, inject } from "tsyringe";
+import { IStorage } from "@inrupt/solid-client-authn-core";
+import { StorageUtility } from "@inrupt/solid-client-authn-core";
+
+/**
+ * This class in a no-value-added extension of StorageUtility from the core module.
+ * The reason it has to be declared is for TSyringe to find the decorators in the
+ * same modules as where the dependency container is declared (in this case,
+ * the browser module, with the dependancy container in dependencies.ts).
+ * @hidden
+ */
+@injectable()
+export default class StorageUtilityBrowser extends StorageUtility {
+  constructor(
+    @inject("secureStorage") secureStorage: IStorage,
+    @inject("insecureStorage") insecureStorage: IStorage
+  ) {
+    super(secureStorage, insecureStorage);
+  }
 }
