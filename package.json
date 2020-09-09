@@ -4,7 +4,6 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
-    "build-sandbox": "npm run build --prefix .codesandbox/sandbox",
     "build-api-docs": "lerna run build-api-docs",
     "format-all": "prettier --write \"packages/*/src/**\" \"packages/*/__tests__/**\"",
     "licenses-all": "license-checker --production --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
@@ -16,7 +15,9 @@
     "test": "lerna run test",
     "test-all": "npm run lint && npm run licenses-all && npm run test-unit-all",
     "test-unit-all": "jest --coverage --verbose",
-    "version": "lerna version"
+    "version": "lerna version",
+    "install-sandbox": "npm ci --prefix .codesandbox/sandbox",
+    "build-sandbox": "npm run build --prefix .codesandbox/sandbox"
   },
   "dependencies": {
     "lerna": "^3.22.1"
