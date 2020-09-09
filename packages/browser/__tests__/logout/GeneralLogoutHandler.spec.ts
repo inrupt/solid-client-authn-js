@@ -64,11 +64,11 @@ describe("OidcLoginHandler", () => {
       await expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
       ).resolves.toBeUndefined();
-      expect(
+      await expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
       ).resolves.toBeUndefined();
       // This test is only necessary until the key is stored safely
-      expect(
+      await expect(
         nonEmptyStorage.get("clientKey", { secure: false })
       ).resolves.toBeUndefined();
     });
