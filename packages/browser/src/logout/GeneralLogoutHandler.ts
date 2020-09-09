@@ -29,6 +29,24 @@ import { inject, injectable } from "tsyringe";
 import { IStorageUtility } from "../storage/StorageUtility";
 
 /**
+ * This function removes all session-related information from storage.
+ * @param userId the session identifier
+ * @param storage the storage where session info is stored
+ * @hidden
+ */
+export async function clearSession(
+  userId: string,
+  storage: IStorageUtility
+): Promise<void> {
+  await Promise.all([
+    storage.deleteAllUserData(userId, { secure: false }),
+    storage.deleteAllUserData(userId, { secure: true }),
+    // FIXME: This is needed until the DPoP key is stored safely
+    storage.delete("clientKey", { secure: false }),
+  ]);
+}
+
+/**
  * @hidden
  */
 @injectable()
@@ -42,11 +60,6 @@ export default class LogoutHandler implements ILogoutHandler {
   }
 
   async handle(userId: string): Promise<void> {
-    await Promise.all([
-      this.storageUtility.deleteAllUserData(userId, { secure: false }),
-      this.storageUtility.deleteAllUserData(userId, { secure: true }),
-      // FIXME: This is needed until the DPoP key is stored safely
-      this.storageUtility.delete("clientKey", { secure: false }),
-    ]);
+    await clearSession(userId, this.storageUtility);
   }
 }

@@ -25,10 +25,6 @@ import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler"
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
-import {
-  StorageUtilityMock,
-  mockStorageUtility,
-} from "../../../src/storage/__mocks__/StorageUtility";
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 
@@ -37,7 +33,6 @@ describe("OidcLoginHandler", () => {
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
     dpopClientKeyManager: DpopClientKeyManagerMock,
-    storageUtility: StorageUtilityMock,
     clientRegistrar: ClientRegistrarMock,
   };
   function getInitialisedHandler(
@@ -47,8 +42,7 @@ describe("OidcLoginHandler", () => {
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
-      mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.clientRegistrar ?? defaultMocks.clientRegistrar
     );
   }
 
@@ -92,35 +86,5 @@ describe("OidcLoginHandler", () => {
     const handler = getInitialisedHandler();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await expect(handler.canHandle({} as any)).resolves.toBe(false);
-  });
-
-  it("should clear the local storage when logging in", async () => {
-    const nonEmptyStorage = mockStorageUtility({
-      someUser: { someKey: "someValue" },
-    });
-    nonEmptyStorage.setForUser(
-      "someUser",
-      { someKey: "someValue" },
-      { secure: true }
-    );
-    const handler = getInitialisedHandler({
-      storageUtility: nonEmptyStorage,
-    });
-    handler.handle({
-      sessionId: "someUser",
-      oidcIssuer: new URL("https://arbitrary.url"),
-      redirectUrl: new URL("https://app.com/redirect"),
-      clientId: "coolApp",
-    });
-    expect(
-      nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
-    ).resolves.toBeUndefined();
-    expect(
-      nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
-    ).resolves.toBeUndefined();
-    // This test is only necessary until the key is stored safely
-    await expect(
-      nonEmptyStorage.get("clientKey", { secure: false })
-    ).resolves.toBeUndefined();
   });
 });

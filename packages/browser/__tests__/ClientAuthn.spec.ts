@@ -26,7 +26,10 @@ import {
   RedirectHandlerMock,
   RedirectHandlerResponse,
 } from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
-import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
+import {
+  LogoutHandlerMock,
+  mockLogoutHandler,
+} from "../src/logout/__mocks__/LogoutHandler";
 import {
   SessionInfoManagerMock,
   SessionCreatorCreateResponse,
@@ -38,6 +41,7 @@ import {
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
 import URL from "url-parse";
+import { mockStorageUtility } from "../src/storage/__mocks__/StorageUtility";
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {
@@ -79,6 +83,35 @@ describe("ClientAuthentication", () => {
         clientSecret: undefined,
         handleRedirect: undefined,
       });
+    });
+
+    it("should clear the local storage when logging in", async () => {
+      const nonEmptyStorage = mockStorageUtility({
+        someUser: { someKey: "someValue" },
+      });
+      nonEmptyStorage.setForUser(
+        "someUser",
+        { someKey: "someValue" },
+        { secure: true }
+      );
+      const clientAuthn = getClientAuthentication({
+        logoutHandler: mockLogoutHandler(nonEmptyStorage),
+      });
+      await clientAuthn.login("someUser", {
+        clientId: "coolApp",
+        redirectUrl: new URL("https://coolapp.com/redirect"),
+        oidcIssuer: new URL("https://idp.com"),
+      });
+      await expect(
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
+      ).resolves.toBeUndefined();
+      await expect(
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
+      ).resolves.toBeUndefined();
+      // This test is only necessary until the key is stored safely
+      await expect(
+        nonEmptyStorage.get("clientKey", { secure: false })
+      ).resolves.toBeUndefined();
     });
   });
 

@@ -20,10 +20,24 @@
  */
 
 import ILogoutHandler from "../ILogoutHandler";
+import { IStorageUtility } from "../../storage/StorageUtility";
+import { clearSession } from "../GeneralLogoutHandler";
 
 export const LogoutHandlerMock: jest.Mocked<ILogoutHandler> = {
   canHandle: jest.fn(async (_localUserId: string) => true),
   handle: jest.fn(async (_localUserId: string) => {
     /* Do nothing */
   }),
+};
+
+export const mockLogoutHandler = (
+  storageUtility: IStorageUtility
+): jest.Mocked<ILogoutHandler> => {
+  console.log("coucou");
+  return {
+    canHandle: jest.fn(async (_localUserId: string) => true),
+    handle: jest.fn(async (localUserId: string) => {
+      await clearSession(localUserId, storageUtility);
+    }),
+  };
 };
