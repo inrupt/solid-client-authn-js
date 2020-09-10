@@ -39,12 +39,14 @@ describe("IssuerConfigFetcher", () => {
     fetchResponse: FetcherMockResponse,
     storageUtility: mockStorageUtility({}),
   };
+
   function getIssuerConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): IssuerConfigFetcher {
     FetcherMock.fetch.mockReturnValue(
       Promise.resolve(mocks.fetchResponse ?? defaultMocks.fetchResponse)
     );
+
     return new IssuerConfigFetcher(
       FetcherMock,
       mocks.storageUtility ?? defaultMocks.storageUtility
@@ -52,17 +54,18 @@ describe("IssuerConfigFetcher", () => {
   }
 
   it("should return the config stored in the storage", async () => {
-    const storageMock = defaultMocks.storageUtility;
-    storageMock.safeGet.mockReturnValueOnce(
-      Promise.resolve({ some: "config" })
-    );
+    const url = new URL("https://arbitrary.url");
+    const storageKey = IssuerConfigFetcher.getLocalStorageKey(url);
+
+    const storageMock = mockStorageUtility({
+      [storageKey]: { some: "config" },
+    });
+
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: storageMock,
     });
 
-    const fetchedConfig = await configFetcher.fetchConfig(
-      new URL("https://arbitrary.url")
-    );
+    const fetchedConfig = await configFetcher.fetchConfig(url);
 
     expect(fetchedConfig).toEqual({ some: "config" });
   });
@@ -149,21 +152,6 @@ describe("IssuerConfigFetcher", () => {
       configFetcher.fetchConfig(new URL("https://some.url"))
     ).rejects.toThrowError(
       "[https://some.url] has an invalid configuration: Some error"
-    );
-  });
-
-  it("should store the config under a key specific to the config source", async () => {
-    const storageUtility = defaultMocks.storageUtility;
-    // This override prevents local resolution of the config
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    storageUtility.safeGet = jest.fn(async (key: string) => undefined);
-    const configFetcher = getIssuerConfigFetcher({ storageUtility });
-
-    await configFetcher.fetchConfig(new URL("https://arbitrary.url"));
-
-    expect(storageUtility.set.mock.calls.length).toBe(1);
-    expect(storageUtility.set.mock.calls[0][0]).toBe(
-      "issuerConfig:https://arbitrary.url"
     );
   });
 });

@@ -24,36 +24,16 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
-import {
-  IRedirector,
-  IRedirectorOptions,
-} from "@inrupt/solid-client-authn-core";
-import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
-
 /**
- * @hidden
+ * Responsible for fetching an IDP configuration
  */
-@injectable()
-export default class Redirector implements IRedirector {
-  constructor(
-    @inject("environmentDetector")
-    private environmentDetector: IEnvironmentDetector
-  ) {}
+import URL from "url-parse";
+import { default as IIssuerConfig } from "./IIssuerConfig";
 
-  redirect(redirectUrl: string, options?: IRedirectorOptions): void {
-    if (options && options.handleRedirect) {
-      options.handleRedirect(redirectUrl);
-    } else if (this.environmentDetector.detect() === "browser") {
-      if (options && options.redirectByReplacingState) {
-        window.history.replaceState({}, "", redirectUrl);
-      } else {
-        window.location.href = redirectUrl;
-      }
-    } else {
-      throw new Error(
-        "A redirectHandler must be provided in any environment other than the web browser"
-      );
-    }
-  }
+export default interface IIssuerConfigFetcher {
+  /**
+   * Fetches the configuration
+   * @param issuer URL of the IDP
+   */
+  fetchConfig(issuer: URL): Promise<IIssuerConfig>;
 }

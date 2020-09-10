@@ -31,9 +31,12 @@ import "reflect-metadata";
 import { container as emptyContainer } from "tsyringe";
 import {
   IAuthenticatedFetcher,
+  IClientRegistrar,
+  IIssuerConfigFetcher,
   ILoginHandler,
   ILogoutHandler,
   IOidcHandler,
+  IRedirector,
   IRedirectHandler,
   IStorage,
 } from "@inrupt/solid-client-authn-core";
@@ -57,9 +60,7 @@ import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDevic
 import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import Fetcher, { IFetcher } from "./util/Fetcher";
-import IssuerConfigFetcher, {
-  IIssuerConfigFetcher,
-} from "./login/oidc/IssuerConfigFetcher";
+import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import BearerAuthenticatedFetcher from "./authenticatedFetch/bearer/BearerAuthenticatedFetcher";
 import DpopHeaderCreator, {
   IDpopHeaderCreator,
@@ -86,13 +87,11 @@ import BrowserStorage from "./storage/BrowserStorage";
 import TokenSaver, {
   ITokenSaver,
 } from "./login/oidc/redirectHandler/TokenSaver";
-import Redirector, { IRedirector } from "./login/oidc/Redirector";
+import Redirector from "./login/oidc/Redirector";
 import InactionRedirectHandler from "./login/oidc/redirectHandler/InactionRedirectHandler";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
-import ClientRegistrar, {
-  IClientRegistrar,
-} from "./login/oidc/ClientRegistrar";
+import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher, {
   ITokenRefresher,
 } from "./login/oidc/refresh/TokenRefresher";

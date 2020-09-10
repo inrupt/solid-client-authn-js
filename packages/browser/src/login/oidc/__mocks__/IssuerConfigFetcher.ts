@@ -19,9 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IIssuerConfigFetcher } from "../IssuerConfigFetcher";
 import URL from "url-parse";
-import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import {
+  IIssuerConfig,
+  IIssuerConfigFetcher,
+} from "@inrupt/solid-client-authn-core";
 
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: new URL("https://idp.com"),

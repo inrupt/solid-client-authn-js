@@ -30,12 +30,12 @@
 import {
   IOidcHandler,
   IOidcOptions,
+  IRedirector,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
-import { IRedirector } from "../Redirector";
 
 /**
  * @hidden

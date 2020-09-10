@@ -22,13 +22,19 @@
 import "reflect-metadata";
 import TokenRefresher from "../../../../src/login/oidc/refresh/TokenRefresher";
 import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
-import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
+import {
+  mockStorageUtility,
+  StorageUtilityMock,
+} from "@inrupt/solid-client-authn-core";
+import URL from "url-parse";
+import IssuerConfigFetcher from "../../../../src/login/oidc/IssuerConfigFetcher";
 
 describe("TokenRefresher", () => {
   const defaultMocks = {
     storageUtility: StorageUtilityMock,
     tokenRequester: TokenRequesterMock,
   };
+
   function getTokenRefresher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): TokenRefresher {
@@ -39,16 +45,25 @@ describe("TokenRefresher", () => {
   }
 
   it("Refreshes the token properly", async () => {
-    defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(
-      "refreshToken"
+    const key = "global";
+    const refreshTokenValue = "refresh token value";
+
+    const storageMock = mockStorageUtility(
+      {
+        [key]: {
+          refreshToken: refreshTokenValue,
+        },
+      },
+      true
     );
-    const tokenRefresher = getTokenRefresher();
-    await tokenRefresher.refresh("global");
-    /* eslint-disable @typescript-eslint/camelcase */
+
+    const tokenRefresher = getTokenRefresher({ storageUtility: storageMock });
+    await tokenRefresher.refresh(key);
     expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith("global", {
+      /* eslint-disable @typescript-eslint/camelcase */
       grant_type: "refresh_token",
-      refresh_token: "refreshToken",
+      refresh_token: refreshTokenValue,
+      /* eslint-enable @typescript-eslint/camelcase */
     });
-    /* eslint-enable @typescript-eslint/camelcase */
   });
 });

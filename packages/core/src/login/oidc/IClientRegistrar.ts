@@ -24,36 +24,25 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
-import {
-  IRedirector,
-  IRedirectorOptions,
-} from "@inrupt/solid-client-authn-core";
-import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
+import { default as IClient } from "./IClient";
+import { default as IIssuerConfig } from "./IIssuerConfig";
+
+import URL from "url-parse";
+
+export interface IClientRegistrarOptions {
+  sessionId: string;
+  clientId?: string;
+  clientSecret?: string;
+  clientName?: string;
+  redirectUrl?: URL;
+}
 
 /**
  * @hidden
  */
-@injectable()
-export default class Redirector implements IRedirector {
-  constructor(
-    @inject("environmentDetector")
-    private environmentDetector: IEnvironmentDetector
-  ) {}
-
-  redirect(redirectUrl: string, options?: IRedirectorOptions): void {
-    if (options && options.handleRedirect) {
-      options.handleRedirect(redirectUrl);
-    } else if (this.environmentDetector.detect() === "browser") {
-      if (options && options.redirectByReplacingState) {
-        window.history.replaceState({}, "", redirectUrl);
-      } else {
-        window.location.href = redirectUrl;
-      }
-    } else {
-      throw new Error(
-        "A redirectHandler must be provided in any environment other than the web browser"
-      );
-    }
-  }
+export interface IClientRegistrar {
+  getClient(
+    options: IClientRegistrarOptions,
+    issuerConfig: IIssuerConfig
+  ): Promise<IClient>;
 }

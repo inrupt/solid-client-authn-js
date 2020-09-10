@@ -30,7 +30,9 @@
 
 import { injectable, inject } from "tsyringe";
 import {
+  IClientRegistrar,
   IIssuerConfig,
+  IIssuerConfigFetcher,
   ILoginOptions,
   ILoginHandler,
   IOidcHandler,
@@ -38,10 +40,8 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
-import { IClientRegistrar } from "./ClientRegistrar";
 
 /**
  * @hidden

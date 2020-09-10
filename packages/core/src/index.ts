@@ -28,6 +28,8 @@
 // export { ISessionOptions } from "./Session";
 // export { ISessionManagerOptions } from "./SessionManager";
 // export { default as IStorage } from "./storage/IStorage";
+import issuerConfigSchema from "./login/oidc/issuerConfigSchema";
+
 export { default as ILoginInputOptions } from "./ILoginInputOptions";
 
 export { default as ILoginHandler } from "./login/ILoginHandler";
@@ -46,11 +48,20 @@ export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 
 export { default as IRedirectHandler } from "./login/oidc/redirectHandler/IRedirectHandler";
+export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 
 export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";
 
 export { default as IClient } from "./login/oidc/IClient";
+
+export {
+  IClientRegistrar,
+  IClientRegistrarOptions,
+} from "./login/oidc/IClientRegistrar";
+
 export { default as IIssuerConfig } from "./login/oidc/IIssuerConfig";
+export { default as IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
+export { default as issuerConfigSchema } from "./login/oidc/issuerConfigSchema";
 
 // Storage.
 export { default as IStorage } from "./storage/IStorage";

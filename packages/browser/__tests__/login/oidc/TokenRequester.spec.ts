@@ -42,12 +42,12 @@ import {
 import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import {
   IIssuerConfig,
-  StorageUtilityMock,
+  mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 
 describe("TokenRequester", () => {
   const defaultMocks = {
-    storageUtility: StorageUtilityMock,
+    storageUtility: mockStorageUtility({}),
     issueConfigFetcher: IssuerConfigFetcherMock,
     fetcher: FetcherMock,
     dpopHeaderCreator: DpopHeaderCreatorMock,
@@ -55,6 +55,7 @@ describe("TokenRequester", () => {
     clientRegistrar: ClientRegistrarMock,
     dpopClientKeyManager: DpopClientKeyManagerMock,
   };
+
   function getTokenRequester(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): TokenRequester {
@@ -70,22 +71,18 @@ describe("TokenRequester", () => {
   }
 
   const defaultReturnValues: {
-    storageRefreshToken: string;
     storageIdp: string;
-    storageClientId: string;
-    storageClientSecret: string | undefined;
     issuerConfig: IIssuerConfig;
     responseBody: string;
     jwt: Record<string, string>;
   } = {
-    storageRefreshToken: "thisIsARefreshToken",
     storageIdp: "https://idp.com",
-    storageClientId: "coolApp",
-    storageClientSecret: undefined,
+
     issuerConfig: {
       ...IssuerConfigFetcherFetchConfigResponse,
       grantTypesSupported: ["refresh_token"],
     },
+
     responseBody: JSON.stringify({
       /* eslint-disable @typescript-eslint/camelcase */
       id_token: "abcd",
@@ -93,32 +90,31 @@ describe("TokenRequester", () => {
       refresh_token: "!@#$",
       /* eslint-enable @typescript-eslint/camelcase */
     }),
+
     jwt: {
       sub: "https://jackson.solid.community/profile/card#me",
     },
   };
+
   function setUpMockedReturnValues(
     values: Partial<typeof defaultReturnValues>
   ): void {
-    defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(
-      values.storageIdp ?? defaultReturnValues.storageIdp
-    );
-    defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(
-      values.storageClientId ?? defaultReturnValues.storageClientId
-    );
-    defaultMocks.storageUtility.getForUser.mockResolvedValueOnce(
-      values.storageClientSecret ?? defaultReturnValues.storageClientSecret
-    );
+    defaultMocks.storageUtility.setForUser("global", {
+      issuer: values.storageIdp ?? defaultReturnValues.storageIdp,
+    });
+
     const issuerConfig =
       values.issuerConfig ?? defaultReturnValues.issuerConfig;
     defaultMocks.issueConfigFetcher.fetchConfig.mockResolvedValueOnce(
       issuerConfig
     );
+
     defaultMocks.fetcher.fetch.mockResolvedValueOnce(
       (new NodeResponse(
         values.responseBody ?? defaultReturnValues.responseBody
       ) as unknown) as Response
     );
+
     defaultMocks.joseUtility.decodeJWT.mockReset();
     defaultMocks.joseUtility.decodeJWT.mockResolvedValueOnce(
       values.jwt ?? defaultReturnValues.jwt
@@ -235,11 +231,8 @@ describe("TokenRequester", () => {
     // @ts-ignore This is ignored to test an edge case: tokenEndpoint should not be null
     mockIssuerConfigFetcher.fetchConfig.mockResolvedValueOnce(mockIssuerConfig);
 
-    const mockStorageUtility = { ...StorageUtilityMock };
-    mockStorageUtility.getForUser.mockResolvedValueOnce("https://idp.com");
     const TokenRefresher = getTokenRequester({
       issueConfigFetcher: mockIssuerConfigFetcher,
-      storageUtility: mockStorageUtility,
     });
     await expect(
       /* eslint-disable @typescript-eslint/camelcase */

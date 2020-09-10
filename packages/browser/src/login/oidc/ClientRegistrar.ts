@@ -28,29 +28,11 @@ import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import {
   IClient,
+  IClientRegistrar,
+  IClientRegistrarOptions,
   IIssuerConfig,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-
-import URL from "url-parse";
-
-export interface IRegistrarOptions {
-  sessionId: string;
-  clientId?: string;
-  clientSecret?: string;
-  clientName?: string;
-  redirectUrl?: URL;
-}
-
-/**
- * @hidden
- */
-export interface IClientRegistrar {
-  getClient(
-    options: IRegistrarOptions,
-    issuerConfig: IIssuerConfig
-  ): Promise<IClient>;
-}
 
 /**
  * @hidden
@@ -63,7 +45,7 @@ export default class ClientRegistrar implements IClientRegistrar {
   ) {}
 
   async getClient(
-    options: IRegistrarOptions,
+    options: IClientRegistrarOptions,
     issuerConfig: IIssuerConfig
   ): Promise<IClient> {
     // If client secret and/or client id are in options, use those
