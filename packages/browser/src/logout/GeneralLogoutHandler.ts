@@ -26,7 +26,7 @@
 
 import ILogoutHandler from "./ILogoutHandler";
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../storage/StorageUtility";
+import { ISessionInfoManager } from "../sessionInfo/SessionInfoManager";
 
 /**
  * @hidden
@@ -34,7 +34,8 @@ import { IStorageUtility } from "../storage/StorageUtility";
 @injectable()
 export default class LogoutHandler implements ILogoutHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager
   ) {}
 
   async canHandle(): Promise<boolean> {
@@ -42,11 +43,6 @@ export default class LogoutHandler implements ILogoutHandler {
   }
 
   async handle(userId: string): Promise<void> {
-    await Promise.all([
-      this.storageUtility.deleteAllUserData(userId, { secure: false }),
-      this.storageUtility.deleteAllUserData(userId, { secure: true }),
-      // FIXME: This is needed until the DPoP key is stored safely
-      this.storageUtility.delete("clientKey", { secure: false }),
-    ]);
+    await this.sessionInfoManager.clear(userId);
   }
 }

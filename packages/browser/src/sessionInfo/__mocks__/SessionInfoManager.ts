@@ -19,11 +19,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
+import SessionInfoManager, {
   ISessionInfoManager,
   ISessionInfoManagerOptions,
 } from "../SessionInfoManager";
 import ISessionInfo from "../ISessionInfo";
+import { IStorageUtility } from "../../storage/StorageUtility";
 
 export const SessionCreatorCreateResponse: ISessionInfo = {
   sessionId: "global",
@@ -42,4 +43,12 @@ export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
     Promise.resolve(SessionCreatorCreateResponse)
   ),
   getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse])),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  clear: jest.fn(async (sessionId: string) => Promise.resolve()),
 };
+
+export function mockSessionInfoManager(
+  storageUtility: IStorageUtility
+): ISessionInfoManager {
+  return new SessionInfoManager(storageUtility);
+}

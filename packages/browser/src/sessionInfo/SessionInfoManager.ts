@@ -43,6 +43,24 @@ export interface ISessionInfoManager {
   update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
   get(sessionId: string): Promise<ISessionInfo | undefined>;
   getAll(): Promise<ISessionInfo[]>;
+  clear(sessionId: string): Promise<void>;
+}
+
+/**
+ * @param sessionId
+ * @param storage
+ * @hidden
+ */
+export async function clear(
+  sessionId: string,
+  storage: IStorageUtility
+): Promise<void> {
+  await Promise.all([
+    storage.deleteAllUserData(sessionId, { secure: false }),
+    storage.deleteAllUserData(sessionId, { secure: true }),
+    // FIXME: This is needed until the DPoP key is stored safely
+    storage.delete("clientKey", { secure: false }),
+  ]);
 }
 
 /**
@@ -117,5 +135,15 @@ export default class SessionInfoManager implements ISessionInfoManager {
 
   async getAll(): Promise<ISessionInfo[]> {
     throw new Error("Not implemented");
+  }
+
+  /**
+   * This function removes all session-related information from storage.
+   * @param sessionId the session identifier
+   * @param storage the storage where session info is stored
+   * @hidden
+   */
+  async clear(sessionId: string): Promise<void> {
+    return clear(sessionId, this.storageUtility);
   }
 }

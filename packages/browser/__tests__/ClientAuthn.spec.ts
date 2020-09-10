@@ -27,10 +27,7 @@ import {
   RedirectHandlerResponse,
 } from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
-import {
-  SessionInfoManagerMock,
-  SessionCreatorCreateResponse,
-} from "../src/sessionInfo/__mocks__/SessionInfoManager";
+import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import {
   AuthenticatedFetcherMock,
   AuthenticatedFetcherResponse,
@@ -38,13 +35,14 @@ import {
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
 import URL from "url-parse";
+import { mockStorageUtility } from "../src/storage/__mocks__/StorageUtility";
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {
     loginHandler: LoginHandlerMock,
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
-    sessionInfoManager: SessionInfoManagerMock,
+    sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
     authenticatedFetcher: AuthenticatedFetcherMock,
     environmentDetector: EnvironmentDetectorMock,
   };
@@ -80,6 +78,35 @@ describe("ClientAuthentication", () => {
         handleRedirect: undefined,
       });
     });
+
+    it("should clear the local storage when logging in", async () => {
+      const nonEmptyStorage = mockStorageUtility({
+        someUser: { someKey: "someValue" },
+      });
+      nonEmptyStorage.setForUser(
+        "someUser",
+        { someKey: "someValue" },
+        { secure: true }
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
+      });
+      await clientAuthn.login("someUser", {
+        clientId: "coolApp",
+        redirectUrl: new URL("https://coolapp.com/redirect"),
+        oidcIssuer: new URL("https://idp.com"),
+      });
+      await expect(
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
+      ).resolves.toBeUndefined();
+      await expect(
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
+      ).resolves.toBeUndefined();
+      // This test is only necessary until the key is stored safely
+      await expect(
+        nonEmptyStorage.get("clientKey", { secure: false })
+      ).resolves.toBeUndefined();
+    });
   });
 
   describe("fetch", () => {
@@ -113,12 +140,24 @@ describe("ClientAuthentication", () => {
 
   describe("getSessionInfo", () => {
     it("creates a session for the global user", async () => {
-      const clientAuthn = getClientAuthentication();
+      const sessionInfo = {
+        isLoggedIn: "true",
+        sessionId: "mySession",
+        webId: "https://pod.com/profile/card#me",
+      };
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(
+          mockStorageUtility(
+            {
+              mySession: { ...sessionInfo },
+            },
+            true
+          )
+        ),
+      });
       const session = await clientAuthn.getSessionInfo("mySession");
-      expect(session).toBe(SessionCreatorCreateResponse);
-      expect(defaultMocks.sessionInfoManager.get).toHaveBeenCalledWith(
-        "mySession"
-      );
+      // isLoggedIn is stored as a string under the hood, but deserialized as a boolean
+      expect(session).toEqual({ ...sessionInfo, isLoggedIn: true });
     });
   });
 

@@ -69,6 +69,8 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<void> => {
+    // In order to get a clean start, make sure that the session is logged out on login.
+    await this.sessionInfoManager.clear(sessionId);
     return this.loginHandler.handle({
       sessionId,
       oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
