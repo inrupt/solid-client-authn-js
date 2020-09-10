@@ -26,14 +26,8 @@ import {
   RedirectHandlerMock,
   RedirectHandlerResponse,
 } from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
-import {
-  LogoutHandlerMock,
-  mockLogoutHandler,
-} from "../src/logout/__mocks__/LogoutHandler";
-import {
-  SessionInfoManagerMock,
-  SessionCreatorCreateResponse,
-} from "../src/sessionInfo/__mocks__/SessionInfoManager";
+import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
+import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import {
   AuthenticatedFetcherMock,
   AuthenticatedFetcherResponse,
@@ -48,7 +42,7 @@ describe("ClientAuthentication", () => {
     loginHandler: LoginHandlerMock,
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
-    sessionInfoManager: SessionInfoManagerMock,
+    sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
     authenticatedFetcher: AuthenticatedFetcherMock,
     environmentDetector: EnvironmentDetectorMock,
   };
@@ -95,7 +89,7 @@ describe("ClientAuthentication", () => {
         { secure: true }
       );
       const clientAuthn = getClientAuthentication({
-        logoutHandler: mockLogoutHandler(nonEmptyStorage),
+        sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
       });
       await clientAuthn.login("someUser", {
         clientId: "coolApp",
@@ -146,12 +140,24 @@ describe("ClientAuthentication", () => {
 
   describe("getSessionInfo", () => {
     it("creates a session for the global user", async () => {
-      const clientAuthn = getClientAuthentication();
+      const sessionInfo = {
+        isLoggedIn: "true",
+        sessionId: "mySession",
+        webId: "https://pod.com/profile/card#me",
+      };
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(
+          mockStorageUtility(
+            {
+              mySession: { ...sessionInfo },
+            },
+            true
+          )
+        ),
+      });
       const session = await clientAuthn.getSessionInfo("mySession");
-      expect(session).toBe(SessionCreatorCreateResponse);
-      expect(defaultMocks.sessionInfoManager.get).toHaveBeenCalledWith(
-        "mySession"
-      );
+      // isLoggedIn is stored as a string under the hood, but deserialized as a boolean
+      expect(session).toEqual({ ...sessionInfo, isLoggedIn: true });
     });
   });
 

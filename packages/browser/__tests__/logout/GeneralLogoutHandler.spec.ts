@@ -19,30 +19,26 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  StorageUtilityMock,
-  mockStorageUtility,
-} from "../../src/storage/__mocks__/StorageUtility";
+import { mockStorageUtility } from "../../src/storage/__mocks__/StorageUtility";
 import "reflect-metadata";
 import { default as LogoutHandler } from "../../src/logout/GeneralLogoutHandler";
+import { mockSessionInfoManager } from "../../src/sessionInfo/__mocks__/SessionInfoManager";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
-    storageUtility: StorageUtilityMock,
+    sessionManager: mockSessionInfoManager(mockStorageUtility({})),
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): LogoutHandler {
     return new LogoutHandler(
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.sessionManager ?? defaultMocks.sessionManager
     );
   }
 
   describe("canHandle", () => {
     it("should always be able to handle logout", async () => {
-      const logoutHandler = getInitialisedHandler({
-        storageUtility: mockStorageUtility({}),
-      });
+      const logoutHandler = getInitialisedHandler();
       await expect(logoutHandler.canHandle()).resolves.toBe(true);
     });
   });
@@ -58,7 +54,7 @@ describe("OidcLoginHandler", () => {
         { secure: true }
       );
       const logoutHandler = getInitialisedHandler({
-        storageUtility: nonEmptyStorage,
+        sessionManager: mockSessionInfoManager(nonEmptyStorage),
       });
       logoutHandler.handle("someUser");
       await expect(
