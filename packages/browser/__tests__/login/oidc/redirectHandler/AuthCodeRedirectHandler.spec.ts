@@ -20,7 +20,7 @@
  */
 
 import "reflect-metadata";
-import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
+import { StorageUtilityMock, mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
@@ -80,10 +80,14 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("Makes a code request to the correct place", async () => {
+      // TODO (pmcb55)
+      const storage = mockStorageUtility({})
       defaultMocks.storageUtility.getForUser
         .mockResolvedValueOnce("a")
         .mockResolvedValueOnce("b");
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: storage
+      });
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=userId"
       );
