@@ -39,6 +39,7 @@ import {
   IRedirector,
   IRedirectHandler,
   IStorage,
+  ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import { IStorageUtility } from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
@@ -78,9 +79,7 @@ import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import UrlRepresenationConverter, {
   IUrlRepresentationConverter,
 } from "./util/UrlRepresenationConverter";
-import SessionInfoManager, {
-  ISessionInfoManager,
-} from "./sessionInfo/SessionInfoManager";
+import SessionInfoManager from "./sessionInfo/SessionInfoManager";
 import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";

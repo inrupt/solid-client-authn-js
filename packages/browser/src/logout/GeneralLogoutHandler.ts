@@ -26,9 +26,8 @@
 
 import {
   ILogoutHandler,
-  IStorageUtility,
+  ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import { ISessionInfoManager } from "../sessionInfo/SessionInfoManager";
 
 import { inject, injectable } from "tsyringe";
 

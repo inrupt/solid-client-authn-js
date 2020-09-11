@@ -25,25 +25,12 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import { ISessionInfo, IStorageUtility } from "@inrupt/solid-client-authn-core";
-
-/**
- * @hidden
- */
-export interface ISessionInfoManagerOptions {
-  loggedIn?: boolean;
-  webId?: string;
-}
-
-/**
- * @hidden
- */
-export interface ISessionInfoManager {
-  update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
-  get(sessionId: string): Promise<ISessionInfo | undefined>;
-  getAll(): Promise<ISessionInfo[]>;
-  clear(sessionId: string): Promise<void>;
-}
+import {
+  ISessionInfo,
+  ISessionInfoManager,
+  ISessionInfoManagerOptions,
+  IStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @param sessionId

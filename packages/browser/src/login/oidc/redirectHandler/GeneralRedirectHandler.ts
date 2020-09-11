@@ -27,12 +27,12 @@
 import {
   IRedirectHandler,
   ISessionInfo,
+  ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
-import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 /**
  * @hidden

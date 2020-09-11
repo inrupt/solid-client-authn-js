@@ -25,7 +25,6 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import { ISessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import { IEnvironmentDetector } from "./util/EnvironmentDetector";
 import {
   ILoginInputOptions,
@@ -35,6 +34,7 @@ import {
   IRedirectHandler,
   IRequestCredentials,
   ISessionInfo,
+  ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 

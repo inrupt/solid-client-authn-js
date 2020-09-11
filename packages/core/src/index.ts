@@ -19,17 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// export { Session } from "./Session";
-// export { SessionManager } from "./SessionManager";
-// export { getClientAuthenticationWithDependencies } from "./dependencies";
-
-// Interfaces
-// export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";
-// export { ISessionOptions } from "./Session";
-// export { ISessionManagerOptions } from "./SessionManager";
-// export { default as IStorage } from "./storage/IStorage";
-import issuerConfigSchema from "./login/oidc/issuerConfigSchema";
-
 export { default as ILoginInputOptions } from "./ILoginInputOptions";
 
 export { default as ILoginHandler } from "./login/ILoginHandler";
@@ -51,6 +40,10 @@ export { default as IRedirectHandler } from "./login/oidc/redirectHandler/IRedir
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 
 export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";
+export {
+  ISessionInfoManager,
+  ISessionInfoManagerOptions,
+} from "./sessionInfo/ISessionInfoManager";
 
 export { default as IClient } from "./login/oidc/IClient";
 

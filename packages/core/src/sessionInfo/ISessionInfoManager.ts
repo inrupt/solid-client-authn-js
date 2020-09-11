@@ -24,44 +24,22 @@
  * @packageDocumentation
  */
 
-/**
- * Handles login if it should be in a popup
- */
-import {
-  ILoginOptions,
-  ILoginHandler,
-  ISessionInfoManager,
-} from "@inrupt/solid-client-authn-core";
-import { injectable, inject } from "tsyringe";
-import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
-
-/**
- * @hidden
- * @packageDocumentation
- */
+import { default as ISessionInfo } from "./ISessionInfo";
 
 /**
  * @hidden
  */
-@injectable()
-export default class PopUpLoginHandler implements ILoginHandler {
-  constructor(
-    @inject("environmentDetector")
-    private environmentDetector: IEnvironmentDetector,
-    @inject("postPopUpLoginHandler") private loginHandler: ILoginHandler,
-    @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager
-  ) {}
+export interface ISessionInfoManagerOptions {
+  loggedIn?: boolean;
+  webId?: string;
+}
 
-  async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
-    return !!(
-      loginOptions.popUp &&
-      loginOptions.redirectUrl &&
-      this.environmentDetector.detect() === "browser"
-    );
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async handle(loginOptions: ILoginOptions): Promise<void> {
-    throw new Error("Popup login is not implemented yet");
-  }
+/**
+ * @hidden
+ */
+export interface ISessionInfoManager {
+  update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
+  get(sessionId: string): Promise<ISessionInfo | undefined>;
+  getAll(): Promise<ISessionInfo[]>;
+  clear(sessionId: string): Promise<void>;
 }

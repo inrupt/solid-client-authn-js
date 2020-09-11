@@ -19,11 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import SessionInfoManager, {
+import SessionInfoManager from "../SessionInfoManager";
+import {
+  ISessionInfo,
   ISessionInfoManager,
   ISessionInfoManagerOptions,
-} from "../SessionInfoManager";
-import { ISessionInfo, IStorageUtility } from "@inrupt/solid-client-authn-core";
+  IStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 
 export const SessionCreatorCreateResponse: ISessionInfo = {
   sessionId: "global",

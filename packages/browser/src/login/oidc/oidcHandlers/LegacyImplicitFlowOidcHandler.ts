@@ -31,6 +31,7 @@ import {
   IOidcHandler,
   IOidcOptions,
   IRedirector,
+  ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
@@ -38,7 +39,6 @@ import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
 import { IDpopClientKeyManager } from "../../../dpop/DpopClientKeyManager";
-import { ISessionInfoManager } from "../../../sessionInfo/SessionInfoManager";
 
 /**
  * @hidden
