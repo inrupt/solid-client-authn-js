@@ -26,8 +26,6 @@ import {
   mockStorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
-import IssuerConfigFetcher from "../../../../src/login/oidc/IssuerConfigFetcher";
 
 describe("TokenRefresher", () => {
   const defaultMocks = {

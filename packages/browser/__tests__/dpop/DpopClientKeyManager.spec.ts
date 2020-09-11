@@ -27,10 +27,7 @@ import {
   mockStorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import {
-  JoseUtilityMock,
-  JoseUtilityGenerateJWKResponse,
-} from "../../src/jose/__mocks__/JoseUtility";
+import { JoseUtilityMock } from "../../src/jose/__mocks__/JoseUtility";
 import DpopClientKeyManager from "../../src/dpop/DpopClientKeyManager";
 
 describe("DpopClientKeyManager", () => {

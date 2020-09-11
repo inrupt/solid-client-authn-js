@@ -56,7 +56,6 @@ describe("SessionInfoManager", () => {
 
   describe("get", () => {
     it("retrieves a session from specified storage", async () => {
-      const userId = "does not matter";
       const sessionId = "commanderCool";
 
       const webId = "https://zoomies.com/commanderCool#me";
