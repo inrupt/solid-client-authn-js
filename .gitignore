@@ -89,3 +89,6 @@ packages/**/docs/dist/
 
 # Examples
 build/
+
+# Rollup-built code
+umd/

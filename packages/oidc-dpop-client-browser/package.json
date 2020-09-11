@@ -1,0 +1,37 @@
+{
+  "name": "@inrupt/oidc-dpop-client-browser",
+  "version": "0.0.1",
+  "description": "A module extending oidc-client-js with new features, such as dynamic client registration and DPoP support.",
+  "homepage": "https://github.com/inrupt/solid-client-authn-js/tree/master/packages/oidc-dpop-client-browser/",
+  "bugs": "https://github.com/inrupt/solid-client-authn-js/issues",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
+    "clean-module": "rm -rf ./dist",
+    "clean-browser": "rm -rf ./browserDist",
+    "build": "rollup --config rollup.config.js",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint-fix": "eslint --fix \"src/**\"",
+    "format": "prettier --write \"src/**\" \"__tests__/**\"",
+    "licenses": "license-checker --production --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
+    "test": "npm run lint && npm run licenses && npm run test-unit",
+    "test-unit": "jest --coverage --verbose --passWithNoTests",
+    "build-api-docs": "npx typedoc --out docs/api/source/api",
+    "build-docs-preview-site": "npm run build-api-docs; cd docs/prose; make html; cd ../api; make html; cd ../; rm -r dist || true; mkdir -p dist/prose dist/api; cp -r prose/build/html/. dist/prose/; cp -r api/build/html/. dist/api/; echo 'Draft documentation: <a href=\"./prose/\">Prose</a>, <a href=\"./api/\">API docs</a>.' >> dist/index.html"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^2.15.0",
+    "rollup-plugin-typescript2": "^0.27.1"
+  },
+  "dependencies": {
+    "oidc-client": "^1.10.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
