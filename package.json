@@ -15,7 +15,7 @@
     "test": "lerna run test",
     "test-all": "npm run lint && npm run licenses-all && npm run test-unit-all",
     "test-unit-all": "jest --coverage --verbose",
-    "version": "lerna version --no-push",
+    "version": "lerna version",
     "install-sandbox": "npm ci && npm ci --prefix .codesandbox/sandbox",
     "build-sandbox": "npm run build && npm run build --prefix .codesandbox/sandbox"
   },
