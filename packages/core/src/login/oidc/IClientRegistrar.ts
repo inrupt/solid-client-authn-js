@@ -19,19 +19,30 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IStorage from "../IStorage";
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export const StorageGetResponse = "GetResponse";
+import { default as IClient } from "./IClient";
+import { default as IIssuerConfig } from "./IIssuerConfig";
 
-export const StorageMock: jest.Mocked<IStorage> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  get: jest.fn(async (key: string) => StorageGetResponse),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  set: jest.fn(async (key: string, value: string) => {
-    /* do nothing */
-  }),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  delete: jest.fn(async (key: string) => {
-    /* do nothing */
-  }),
-};
+import URL from "url-parse";
+
+export interface IClientRegistrarOptions {
+  sessionId: string;
+  clientId?: string;
+  clientSecret?: string;
+  clientName?: string;
+  redirectUrl?: URL;
+}
+
+/**
+ * @hidden
+ */
+export interface IClientRegistrar {
+  getClient(
+    options: IClientRegistrarOptions,
+    issuerConfig: IIssuerConfig
+  ): Promise<IClient>;
+}

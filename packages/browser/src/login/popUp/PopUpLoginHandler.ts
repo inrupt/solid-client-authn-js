@@ -27,11 +27,13 @@
 /**
  * Handles login if it should be in a popup
  */
-import ILoginHandler from "../ILoginHandler";
-import ILoginOptions from "../ILoginOptions";
+import {
+  ILoginOptions,
+  ILoginHandler,
+  ISessionInfoManager,
+} from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
-import { ISessionInfoManager } from "../../sessionInfo/SessionInfoManager";
 
 /**
  * @hidden

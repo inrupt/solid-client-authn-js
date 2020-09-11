@@ -29,8 +29,10 @@
  */
 import AggregateHandler from "../../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
-import IRedirectHandler from "./IRedirectHandler";
+import {
+  IRedirectHandler,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

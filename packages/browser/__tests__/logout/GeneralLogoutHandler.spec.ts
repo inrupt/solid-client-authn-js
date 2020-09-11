@@ -19,8 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { mockStorageUtility } from "../../src/storage/__mocks__/StorageUtility";
 import "reflect-metadata";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { default as LogoutHandler } from "../../src/logout/GeneralLogoutHandler";
 import { mockSessionInfoManager } from "../../src/sessionInfo/__mocks__/SessionInfoManager";
 

@@ -25,22 +25,11 @@
  */
 
 import { inject, injectable } from "tsyringe";
+import {
+  IRedirector,
+  IRedirectorOptions,
+} from "@inrupt/solid-client-authn-core";
 import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
-
-/**
- * @hidden
- */
-export interface IRedirectorOptions {
-  handleRedirect?: (url: string) => unknown;
-  redirectByReplacingState?: boolean;
-}
-
-/**
- * @hidden
- */
-export interface IRedirector {
-  redirect(redirectUrl: string, redirectorOptions: IRedirectorOptions): void;
-}
 
 /**
  * @hidden

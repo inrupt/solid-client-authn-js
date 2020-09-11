@@ -30,8 +30,10 @@
  */
 import { injectable, injectAll } from "tsyringe";
 import AggregateHandler from "../util/handlerPattern/AggregateHandler";
-import IAuthenticatedFetcher from "./IAuthenticatedFetcher";
-import IRequestCredentials from "./IRequestCredentials";
+import {
+  IAuthenticatedFetcher,
+  IRequestCredentials,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

@@ -19,9 +19,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IClientRegistrar, IRegistrarOptions } from "../ClientRegistrar";
-import IClient from "../IClient";
-import IIssuerConfig from "../IIssuerConfig";
+import {
+  IClient,
+  IClientRegistrar,
+  IClientRegistrarOptions,
+  IIssuerConfig,
+} from "@inrupt/solid-client-authn-core";
 
 export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",
@@ -35,7 +38,7 @@ export const PublicClientRegistrarResponse: IClient = {
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
+    (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(ClientRegistrarResponse)
   ),
 };
@@ -43,7 +46,7 @@ export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
 export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (options: IRegistrarOptions, issuerConfig: IIssuerConfig) =>
+    (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(PublicClientRegistrarResponse)
   ),
 };

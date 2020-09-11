@@ -29,7 +29,7 @@ import { UrlRepresentationConverterMock } from "../../../src/util/__mocks__/UrlR
 import {
   StorageUtilityMock,
   mockStorageUtility,
-} from "../../../src/storage/__mocks__/StorageUtility";
+} from "@inrupt/solid-client-authn-core";
 
 describe("UnauthenticatedFetcher", () => {
   const defaultMocks = {

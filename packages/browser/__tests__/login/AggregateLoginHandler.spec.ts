@@ -24,8 +24,8 @@ jest.mock("../../src/util/handlerPattern/AggregateHandler");
 // Required by TSyringe:
 import "reflect-metadata";
 import AggregateLoginHandler from "../../src/login/AggregateLoginHandler";
-import ILoginHandler from "../../src/login/ILoginHandler";
 import AggregateHandler from "../../src/util/handlerPattern/AggregateHandler";
+import { ILoginHandler } from "@inrupt/solid-client-authn-core";
 
 describe("AggregateLoginHandler", () => {
   it("should pass injected handlers to its superclass", () => {

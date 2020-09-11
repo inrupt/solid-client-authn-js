@@ -23,11 +23,11 @@
  * Test for DPoPClientKeyManager
  */
 import "reflect-metadata";
-import { StorageUtilityMock } from "../../src/storage/__mocks__/StorageUtility";
 import {
-  JoseUtilityMock,
-  JoseUtilityGenerateJWKResponse,
-} from "../../src/jose/__mocks__/JoseUtility";
+  mockStorageUtility,
+  StorageUtilityMock,
+} from "@inrupt/solid-client-authn-core";
+import { JoseUtilityMock } from "../../src/jose/__mocks__/JoseUtility";
 import DpopClientKeyManager from "../../src/dpop/DpopClientKeyManager";
 
 describe("DpopClientKeyManager", () => {
@@ -35,6 +35,7 @@ describe("DpopClientKeyManager", () => {
     joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock,
   };
+
   function getDpopClientKeyManager(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): DpopClientKeyManager {
@@ -42,48 +43,57 @@ describe("DpopClientKeyManager", () => {
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.joseUtility ?? defaultMocks.joseUtility
     );
+
     return dpopClientKeyManager;
   }
 
   describe("generateClientKeyIfNotAlready", () => {
     it("should generate a key and save it if one does not exist", async () => {
-      const storageRetrieverMock = StorageUtilityMock;
-      storageRetrieverMock.safeGet.mockReturnValueOnce(Promise.resolve(null));
+      const storageMock = mockStorageUtility({});
       const dpopClientKeyManager = getDpopClientKeyManager({
-        storageUtility: storageRetrieverMock,
+        storageUtility: storageMock,
       });
 
       await dpopClientKeyManager.generateClientKeyIfNotAlready();
 
-      expect(StorageUtilityMock.set).toHaveBeenCalledWith(
-        "clientKey",
-        JSON.stringify(JoseUtilityGenerateJWKResponse),
-        { secure: false }
+      const jwk = await storageMock.get(
+        DpopClientKeyManager.getLocalStorageKey()
       );
+
+      // We expect our JWK to be JSON stringified, but to contain specific
+      // values.
+      expect(jwk).toContain('kty":"RSA');
+      expect(jwk).toContain('use":"sig');
     });
 
     it("should not generate a client key and save it if one already exists", async () => {
-      const storageUtilityMock = StorageUtilityMock;
-      storageUtilityMock.safeGet.mockReturnValueOnce(
-        Promise.resolve({ kty: "RSA" })
-      );
+      const storageKey = DpopClientKeyManager.getLocalStorageKey();
+      const storageValue = "Value doesn't matter";
+
+      const storageMock = mockStorageUtility({
+        [storageKey]: storageValue,
+      });
+
       const dpopClientKeyManager = getDpopClientKeyManager({
-        storageUtility: storageUtilityMock,
+        storageUtility: storageMock,
       });
 
       await dpopClientKeyManager.generateClientKeyIfNotAlready();
 
-      expect(storageUtilityMock.set).not.toHaveBeenCalled();
+      // We expect our storage to remain exactly the same (not overwritten).
+      expect(storageMock.get(storageKey)).resolves.toEqual(storageValue);
     });
   });
 
   describe("getClientKey", () => {
     it("should return the saved client key", async () => {
       const savedKey = '{"kty":"RSA"}';
-      const storageUtilityMock = StorageUtilityMock;
-      storageUtilityMock.get.mockReturnValueOnce(Promise.resolve(savedKey));
+      const storageKey = DpopClientKeyManager.getLocalStorageKey();
+
       const dpopClientKeyManager = getDpopClientKeyManager({
-        storageUtility: storageUtilityMock,
+        storageUtility: mockStorageUtility({
+          [storageKey]: savedKey,
+        }),
       });
 
       const clientKey = await dpopClientKeyManager.getClientKey();

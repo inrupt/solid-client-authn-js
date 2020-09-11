@@ -19,12 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IOidcHandler from "../IOidcHandler";
-import IOidcOptions from "../IOidcOptions";
-import ISolidSession from "../../../sessionInfo/ISessionInfo";
+import {
+  IOidcHandler,
+  IOidcOptions,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
+
 import { SessionCreatorGetSessionResponse } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 
-export const OidcHandlerHandleResponse: ISolidSession = SessionCreatorGetSessionResponse;
+export const OidcHandlerHandleResponse: ISessionInfo = SessionCreatorGetSessionResponse;
 
 export const OidcHandlerMock: jest.Mocked<IOidcHandler> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

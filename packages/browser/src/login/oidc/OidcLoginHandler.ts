@@ -29,16 +29,19 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import ILoginHandler from "../ILoginHandler";
-import ILoginOptions from "../ILoginOptions";
-import IOidcHandler from "./IOidcHandler";
-import IOidcOptions from "./IOidcOptions";
+import {
+  IClientRegistrar,
+  IIssuerConfig,
+  IIssuerConfigFetcher,
+  ILoginOptions,
+  ILoginHandler,
+  IOidcHandler,
+  IOidcOptions,
+} from "@inrupt/solid-client-authn-core";
+
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
-import IIssuerConfig from "./IIssuerConfig";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
-import { IClientRegistrar } from "./ClientRegistrar";
 
 /**
  * @hidden

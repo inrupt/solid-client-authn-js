@@ -23,7 +23,7 @@ import "reflect-metadata";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { mockStorageUtility } from "../../src/storage/__mocks__/StorageUtility";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import SessionInfoManager from "../../src/sessionInfo/SessionInfoManager";
 
 describe("SessionInfoManager", () => {
@@ -33,6 +33,7 @@ describe("SessionInfoManager", () => {
     logoutHandler: LogoutHandlerMock,
     storageUtility: mockStorageUtility({}),
   };
+
   function getSessionInfoManager(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): SessionInfoManager {
@@ -55,17 +56,35 @@ describe("SessionInfoManager", () => {
 
   describe("get", () => {
     it("retrieves a session from specified storage", async () => {
-      const storageUtility = defaultMocks.storageUtility;
-      storageUtility.getForUser
-        .mockReturnValueOnce(
-          Promise.resolve("https://zoomies.com/commanderCool#me")
-        )
-        .mockReturnValueOnce(Promise.resolve("true"));
-      const sessionManager = getSessionInfoManager({ storageUtility });
-      const session = await sessionManager.get("commanderCool");
+      const sessionId = "commanderCool";
+
+      const webId = "https://zoomies.com/commanderCool#me";
+
+      const storageMock = mockStorageUtility(
+        {
+          [sessionId]: {
+            webId: webId,
+            isLoggedIn: "true",
+          },
+        },
+        true
+      );
+
+      // const storageUtility = defaultMocks.storageUtility;
+      // storageUtility.getForUser
+      //   .mockReturnValueOnce(
+      //     Promise.resolve("https://zoomies.com/commanderCool#me")
+      //   )
+      //   .mockReturnValueOnce(Promise.resolve("true"));
+
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storageMock,
+      });
+      const session = await sessionManager.get(sessionId);
       expect(session).toMatchObject({
-        sessionId: "commanderCool",
-        webId: "https://zoomies.com/commanderCool#me",
+        sessionId: sessionId,
+        webId: webId,
+        isLoggedIn: true,
       });
     });
 

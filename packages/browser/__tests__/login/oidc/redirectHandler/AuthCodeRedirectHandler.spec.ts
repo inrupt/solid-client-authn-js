@@ -20,7 +20,10 @@
  */
 
 import "reflect-metadata";
-import { StorageUtilityMock } from "../../../../src/storage/__mocks__/StorageUtility";
+import {
+  StorageUtilityMock,
+  mockStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
@@ -33,6 +36,7 @@ describe("AuthCodeRedirectHandler", () => {
     tokenRequester: TokenRequesterMock,
     sessionInfoManager: SessionInfoManagerMock,
   };
+
   function getAuthCodeRedirectHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): AuthCodeRedirectHandler {
@@ -80,13 +84,21 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("Makes a code request to the correct place", async () => {
-      defaultMocks.storageUtility.getForUser
-        .mockResolvedValueOnce("a")
-        .mockResolvedValueOnce("b");
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+      const storage = mockStorageUtility({
+        userId: {
+          codeVerifier: "a",
+          redirectUri: "b",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: storage,
+      });
+
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=userId"
       );
+
       expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith(
         "userId",
         /* eslint-disable @typescript-eslint/camelcase */
@@ -98,6 +110,7 @@ describe("AuthCodeRedirectHandler", () => {
         }
         /* eslint-enable @typescript-eslint/camelcase */
       );
+
       expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
         "https://coolsite.com/",
         {
@@ -107,10 +120,8 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("Fails if a session was not retrieved", async () => {
-      defaultMocks.storageUtility.getForUser
-        .mockResolvedValueOnce("a")
-        .mockResolvedValueOnce("b");
       defaultMocks.sessionInfoManager.get.mockResolvedValueOnce(undefined);
+
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle(

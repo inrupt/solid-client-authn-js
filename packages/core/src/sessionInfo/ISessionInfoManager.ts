@@ -19,6 +19,27 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-const validateSchemaMock = jest.fn(() => true);
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export default validateSchemaMock;
+import { default as ISessionInfo } from "./ISessionInfo";
+
+/**
+ * @hidden
+ */
+export interface ISessionInfoManagerOptions {
+  loggedIn?: boolean;
+  webId?: string;
+}
+
+/**
+ * @hidden
+ */
+export interface ISessionInfoManager {
+  update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
+  get(sessionId: string): Promise<ISessionInfo | undefined>;
+  getAll(): Promise<ISessionInfo[]>;
+  clear(sessionId: string): Promise<void>;
+}

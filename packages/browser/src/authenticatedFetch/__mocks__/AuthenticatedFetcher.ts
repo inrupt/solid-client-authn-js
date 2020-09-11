@@ -19,8 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
-import IRequestCredentials from "../IRequestCredentials";
+import {
+  IAuthenticatedFetcher,
+  IRequestCredentials,
+} from "@inrupt/solid-client-authn-core";
 import { FetcherMockResponse } from "../../util/__mocks__/Fetcher";
 
 /**

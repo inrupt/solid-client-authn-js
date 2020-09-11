@@ -27,8 +27,7 @@
 /**
  * Handler for the Authorization Code Flow
  */
-import IOidcHandler from "../IOidcHandler";
-import IOidcOptions from "../IOidcOptions";
+import { IOidcHandler, IOidcOptions } from "@inrupt/solid-client-authn-core";
 import NotImplementedError from "../../../errors/NotImplementedError";
 
 /**

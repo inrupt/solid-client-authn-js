@@ -71,6 +71,7 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@inrupt/solid-client-authn-core": "^0.1.2",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",

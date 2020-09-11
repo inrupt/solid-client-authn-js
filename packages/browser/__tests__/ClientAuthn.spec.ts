@@ -35,7 +35,7 @@ import {
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
 import URL from "url-parse";
-import { mockStorageUtility } from "../src/storage/__mocks__/StorageUtility";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {

@@ -25,14 +25,16 @@
  */
 
 import { inject, injectable } from "tsyringe";
-import { IStorageUtility } from "../../storage/StorageUtility";
-import { IIssuerConfigFetcher } from "./IssuerConfigFetcher";
+import {
+  IClientRegistrar,
+  IStorageUtility,
+  IIssuerConfigFetcher,
+} from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import formurlencoded from "form-urlencoded";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import IJoseUtility from "../../jose/IJoseUtility";
-import { IClientRegistrar } from "./ClientRegistrar";
 import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 
 /**

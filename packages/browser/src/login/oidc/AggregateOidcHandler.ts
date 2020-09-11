@@ -29,8 +29,7 @@
  */
 import AggregateHandler from "../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
-import IOidcHandler from "./IOidcHandler";
-import IOidcOptions from "./IOidcOptions";
+import { IOidcHandler, IOidcOptions } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

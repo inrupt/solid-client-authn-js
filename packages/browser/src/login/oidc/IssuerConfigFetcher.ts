@@ -27,24 +27,16 @@
 /**
  * Responsible for fetching an IDP configuration
  */
-import IIssuerConfig from "./IIssuerConfig";
+import {
+  IIssuerConfig,
+  IIssuerConfigFetcher,
+  IStorageUtility,
+  issuerConfigSchema,
+} from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
-import issuerConfigSchema from "./issuerConfigSchema";
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IStorageUtility } from "../../storage/StorageUtility";
-
-/**
- * @hidden
- */
-export interface IIssuerConfigFetcher {
-  /**
-   * Fetches the configuration
-   * @param issuer URL of the IDP
-   */
-  fetchConfig(issuer: URL): Promise<IIssuerConfig>;
-}
 
 /* eslint-disable @typescript-eslint/camelcase */
 const issuerConfigKeyMap: Record<
@@ -145,7 +137,9 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
-  private getLocalStorageKey(issuer: URL): string {
+  // This method needs no state (so can be static), and can be exposed to allow
+  // callers to know where this implementation puts state it needs.
+  public static getLocalStorageKey(issuer: URL): string {
     return `issuerConfig:${issuer.toString()}`;
   }
 
@@ -169,7 +163,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
 
     // Try to look up the config in the cache
     issuerConfig = (await this.storageUtility.safeGet(
-      this.getLocalStorageKey(issuer),
+      IssuerConfigFetcher.getLocalStorageKey(issuer),
       {
         schema: issuerConfigSchema,
       }
@@ -194,7 +188,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
 
     // Update store with fetched config
     await this.storageUtility.set(
-      this.getLocalStorageKey(issuer),
+      IssuerConfigFetcher.getLocalStorageKey(issuer),
       JSON.stringify(issuerConfig)
     );
 

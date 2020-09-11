@@ -19,13 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IStorage from "./storage/IStorage";
-import ILoginInputOptions from "./ILoginInputOptions";
 /**
  * @hidden
  */
 import { EventEmitter } from "events";
-import ISessionInfo from "./sessionInfo/ISessionInfo";
+import {
+  ILoginInputOptions,
+  ISessionInfo,
+  IStorage,
+} from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { v4 } from "uuid";

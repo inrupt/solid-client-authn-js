@@ -28,19 +28,30 @@
  * Top Level core document. Responsible for setting up the dependency graph
  */
 import "reflect-metadata";
-import { container } from "tsyringe";
+import { container as emptyContainer } from "tsyringe";
+import {
+  IAuthenticatedFetcher,
+  IClientRegistrar,
+  IIssuerConfigFetcher,
+  ILoginHandler,
+  ILogoutHandler,
+  IOidcHandler,
+  IRedirector,
+  IRedirectHandler,
+  IStorage,
+  IStorageUtility,
+  ISessionInfoManager,
+} from "@inrupt/solid-client-authn-core";
+import StorageUtilityBrowser from "./storage/StorageUtility";
+// import StorageUtility from "../../core/src/storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
-import IAuthenticatedFetcher from "./authenticatedFetch/IAuthenticatedFetcher";
 import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
 import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
 import UnauthenticatedFetcher from "./authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
-import ILoginHandler from "./login/ILoginHandler";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
-import IStorage from "./storage/IStorage";
 import IJoseUtility from "./jose/IJoseUtility";
 import IsomorphicJoseUtility from "./jose/IsomorphicJoseUtility";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
-import IOidcHandler from "./login/oidc/IOidcHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
@@ -50,9 +61,7 @@ import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDevic
 import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import Fetcher, { IFetcher } from "./util/Fetcher";
-import IssuerConfigFetcher, {
-  IIssuerConfigFetcher,
-} from "./login/oidc/IssuerConfigFetcher";
+import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import BearerAuthenticatedFetcher from "./authenticatedFetch/bearer/BearerAuthenticatedFetcher";
 import DpopHeaderCreator, {
   IDpopHeaderCreator,
@@ -60,41 +69,40 @@ import DpopHeaderCreator, {
 import DpopClientKeyManager, {
   IDpopClientKeyManager,
 } from "./dpop/DpopClientKeyManager";
-import StorageUtility, { IStorageUtility } from "./storage/StorageUtility";
 import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
-import IRedirectHandler from "./login/oidc/redirectHandler/IRedirectHandler";
 import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
 import EnvironmentDetector, {
   IEnvironmentDetector,
   detectEnvironment,
 } from "./util/EnvironmentDetector";
-import ILogoutHandler from "./logout/ILogoutHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import UrlRepresenationConverter, {
   IUrlRepresentationConverter,
 } from "./util/UrlRepresenationConverter";
-import SessionInfoManager, {
-  ISessionInfoManager,
-} from "./sessionInfo/SessionInfoManager";
+import SessionInfoManager from "./sessionInfo/SessionInfoManager";
 import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
 import TokenSaver, {
   ITokenSaver,
 } from "./login/oidc/redirectHandler/TokenSaver";
-import Redirector, { IRedirector } from "./login/oidc/Redirector";
+import Redirector from "./login/oidc/Redirector";
 import InactionRedirectHandler from "./login/oidc/redirectHandler/InactionRedirectHandler";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
-import ClientRegistrar, {
-  IClientRegistrar,
-} from "./login/oidc/ClientRegistrar";
+import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher, {
   ITokenRefresher,
 } from "./login/oidc/refresh/TokenRefresher";
 import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetcher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 import InMemoryStorage from "./storage/InMemoryStorage";
+
+const container = emptyContainer;
+
+container.register<IStorageUtility>("storageUtility", {
+  useClass: StorageUtilityBrowser,
+});
 
 // Util
 container.register<IFetcher>("fetcher", {
@@ -105,9 +113,6 @@ container.register<IDpopHeaderCreator>("dpopHeaderCreator", {
 });
 container.register<IDpopClientKeyManager>("dpopClientKeyManager", {
   useClass: DpopClientKeyManager,
-});
-container.register<IStorageUtility>("storageUtility", {
-  useClass: StorageUtility,
 });
 container.register<IUuidGenerator>("uuidGenerator", {
   useClass: UuidGenerator,

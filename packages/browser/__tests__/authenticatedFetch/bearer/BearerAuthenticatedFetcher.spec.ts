@@ -27,7 +27,7 @@ import {
   StorageUtilityMock,
   StorageUtilityGetResponse,
   mockStorageUtility,
-} from "../../../src/storage/__mocks__/StorageUtility";
+} from "@inrupt/solid-client-authn-core";
 
 describe("BearerAuthenticatedFetcher", () => {
   const defaultMocks = {

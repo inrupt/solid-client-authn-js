@@ -27,14 +27,16 @@
 /**
  * Responsible for sending DPoP Enabled requests
  */
-import IAuthenticatedFetcher from "../IAuthenticatedFetcher";
-import IRequestCredentials from "../IRequestCredentials";
+import {
+  IAuthenticatedFetcher,
+  IRequestCredentials,
+  IStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 import ConfigurationError from "../../errors/ConfigurationError";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
 import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverter";
-import { IStorageUtility } from "../../storage/StorageUtility";
 import { flattenHeaders } from "../headers/HeadersUtils";
 
 /**
