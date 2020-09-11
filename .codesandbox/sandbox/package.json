@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@inrupt/solid-client": "0.3.0",
-    "@inrupt/solid-client-authn-browser": "0.1.1",
+    "@inrupt/solid-client-authn-browser": "^0.1.1",
     "ajv": "6.12.4",
     "react": "16.13.1",
     "react-dom": "16.13.1",
