@@ -21,13 +21,19 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { StorageMock } from "../../src/storage/__mocks__/Storage";
 import StorageUtility from "../../src/storage/StorageUtility";
+import { mockStorageUtility } from "../../src";
 
 describe("StorageUtility", () => {
   const defaultMocks = {
-    storage: StorageMock,
+    // storage: StorageMock,
+    storage: mockStorageUtility({}),
   };
+
+  const key = "the key";
+  const value = "the value";
+  const userId = "animals";
+
   function getStorageUtility(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): StorageUtility {
@@ -39,26 +45,24 @@ describe("StorageUtility", () => {
 
   describe("get", () => {
     it("gets an item from storage", async () => {
-      const storageMock = defaultMocks.storage;
-      storageMock.get.mockReturnValueOnce(Promise.resolve("cool"));
-      const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.get("key");
-      expect(storageMock.get).toHaveBeenCalledWith("key");
-      expect(value).toBe("cool");
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+      await storageUtility.set(key, value);
+      const result = await storageUtility.get(key);
+      expect(result).toBe(value);
     });
 
     it("returns undefined if the item is not in storage", async () => {
-      const storageMock = defaultMocks.storage;
-      storageMock.get.mockReturnValueOnce(Promise.resolve(undefined));
-      const storageUtility = getStorageUtility({ storage: storageMock });
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
       const value = await storageUtility.get("key");
-      expect(storageMock.get).toHaveBeenCalledWith("key");
       expect(value).toBeUndefined();
     });
 
     it("throws an error if the item is not in storage and errorOnNull is true", async () => {
       const storageMock = defaultMocks.storage;
-      storageMock.get.mockReturnValueOnce(Promise.resolve(undefined));
       const storageUtility = getStorageUtility({ storage: storageMock });
       await expect(
         storageUtility.get("key", { errorIfNull: true })
@@ -68,236 +72,232 @@ describe("StorageUtility", () => {
 
   describe("set", () => {
     it("sets an item in storage", async () => {
-      const storageUtility = getStorageUtility();
-      await storageUtility.set("key", "value");
-      expect(defaultMocks.storage.set).toHaveBeenCalledWith("key", "value");
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+      await storageUtility.set(key, value);
+      await expect(storageUtility.get(key)).resolves.toEqual(value);
     });
   });
 
   describe("delete", () => {
     it("deletes an item", async () => {
-      const storageUtility = getStorageUtility();
-      await storageUtility.delete("key");
-      expect(defaultMocks.storage.delete).toHaveBeenCalledWith("key");
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+
+      await expect(storageUtility.get(key)).resolves.toEqual(undefined);
+      await storageUtility.set(key, value);
+      await expect(storageUtility.get(key)).resolves.toEqual(value);
+
+      await storageUtility.delete(key);
+      await expect(storageUtility.get(key)).resolves.toEqual(undefined);
     });
   });
 
   describe("getForUser", () => {
     it("gets an item from storage for a user", async () => {
-      const storageMock = defaultMocks.storage;
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
       const userData = {
         jackie: "The Cat",
         sledge: "The Dog",
       };
-      storageMock.get.mockReturnValueOnce(
-        Promise.resolve(JSON.stringify(userData))
-      );
-      const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.getForUser("animals", "jackie");
-      expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals"
-      );
+      await storageUtility.setForUser(userId, userData);
+
+      const value = await storageUtility.getForUser(userId, "jackie");
+
       expect(value).toBe("The Cat");
     });
 
     it("returns undefined if no item is in storage", async () => {
-      const storageMock = defaultMocks.storage;
-      storageMock.get.mockReturnValueOnce(Promise.resolve(undefined));
-      const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.getForUser("animals", "jackie");
-      expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals"
-      );
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+      const value = await storageUtility.getForUser(userId, "jackie");
       expect(value).toBeUndefined();
     });
 
     it("returns null if the item in storage is corrupted", async () => {
-      const storageMock = defaultMocks.storage;
-      storageMock.get.mockReturnValueOnce(
-        Promise.resolve('{ cool: "bleep bloop not parsable')
-      );
-      const storageUtility = getStorageUtility({ storage: storageMock });
-      const value = await storageUtility.getForUser("animals", "jackie");
-      expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals"
-      );
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+      storageUtility.setForUser(userId, { cool: "bleep bloop not parsable" });
+      const value = await storageUtility.getForUser(userId, "jackie");
       expect(value).toBe(undefined);
     });
 
     it("throws an error if the item is not in storage and errorOnNull is true", async () => {
-      const storageMock = defaultMocks.storage;
-      storageMock.get.mockReturnValueOnce(Promise.resolve(undefined));
-      const storageUtility = getStorageUtility({ storage: storageMock });
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
       await expect(
-        storageUtility.getForUser("animals", "jackie", { errorIfNull: true })
-      ).rejects.toThrowError("Field [jackie] for user [animals] is not stored");
+        storageUtility.getForUser(userId, "jackie", { errorIfNull: true })
+      ).rejects.toThrowError(
+        `Field [jackie] for user [${userId}] is not stored`
+      );
     });
   });
 
   describe("setForUser", () => {
     it("sets a value for a user", async () => {
-      const storageMock = defaultMocks.storage;
-      const userData = {
-        jackie: "The Cat",
-        sledge: "The Dog",
-      };
-      storageMock.get.mockReturnValueOnce(
-        Promise.resolve(JSON.stringify(userData))
-      );
-      const storageUtility = getStorageUtility({ storage: storageMock });
-      await storageUtility.setForUser("animals", {
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+      await storageUtility.setForUser(userId, {
         jackie: "The Pretty Kitty",
       });
-      expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals"
-      );
-      expect(storageMock.set).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals",
-        JSON.stringify({
-          jackie: "The Pretty Kitty",
-          sledge: "The Dog",
-        })
-      );
+
+      const value = await storageUtility.getForUser(userId, "jackie");
+      expect(value).toBe("The Pretty Kitty");
     });
 
     it("sets a value for a user if the original data was corrupted", async () => {
       const storageMock = defaultMocks.storage;
-      storageMock.get.mockReturnValueOnce(
-        Promise.resolve('{ cool: "bleep bloop not parsable')
-      );
+      storageMock.setForUser(userId, { cool: "bleep bloop not parsable" });
+
       const storageUtility = getStorageUtility({ storage: storageMock });
-      await storageUtility.setForUser("animals", {
+      await storageUtility.setForUser(userId, {
         jackie: "The Pretty Kitty",
       });
-      expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals"
-      );
-      expect(storageMock.set).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals",
-        JSON.stringify({
-          jackie: "The Pretty Kitty",
-        })
-      );
+      const value = await storageUtility.getForUser(userId, "jackie");
+      expect(value).toBe("The Pretty Kitty");
     });
   });
 
   describe("deleteForUser", () => {
     it("deletes a value for a user", async () => {
-      const storageMock = defaultMocks.storage;
       const userData = {
         jackie: "The Cat",
         sledge: "The Dog",
       };
-      storageMock.get.mockReturnValueOnce(
-        Promise.resolve(JSON.stringify(userData))
-      );
-      const storageUtility = getStorageUtility({ storage: storageMock });
-      await storageUtility.deleteForUser("animals", "jackie");
-      expect(storageMock.get).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals"
-      );
-      expect(storageMock.set).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals",
-        JSON.stringify({
-          sledge: "The Dog",
-        })
-      );
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+      await storageUtility.setForUser(userId, userData);
+
+      await storageUtility.deleteForUser(userId, "jackie");
+
+      await expect(
+        storageUtility.getForUser(userId, "jackie")
+      ).resolves.toEqual(undefined);
+      await expect(
+        storageUtility.getForUser(userId, "sledge")
+      ).resolves.toEqual("The Dog");
     });
   });
 
   describe("deleteAllUserData", () => {
     it("deletes all data for a particular user", async () => {
-      const storageMock = defaultMocks.storage;
-      const storageUtility = getStorageUtility({ storage: storageMock });
-      await storageUtility.deleteAllUserData("animals");
-      expect(storageMock.delete).toHaveBeenCalledWith(
-        "solidClientAuthenticationUser:animals"
-      );
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+      const userData = {
+        jackie: "The Cat",
+        sledge: "The Dog",
+      };
+
+      // Write some user data, and make sure it's there.
+      await storageUtility.setForUser(userId, userData);
+      await expect(
+        storageUtility.getForUser(userId, "jackie")
+      ).resolves.toEqual("The Cat");
+
+      // Delete that user data, and make sure it's gone.
+      await storageUtility.deleteAllUserData(userId);
+      await expect(
+        storageUtility.getForUser(userId, "jackie")
+      ).resolves.toEqual(undefined);
     });
   });
 
   describe("safeGet", () => {
     it("should correctly retrieve valid data from the given storage", async () => {
-      defaultMocks.storage.get.mockReturnValueOnce(
-        Promise.resolve(JSON.stringify({ some: "data" }))
-      );
-      const storageUtility = getStorageUtility();
-      await expect(storageUtility.safeGet("key")).resolves.toEqual({
-        some: "data",
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
       });
-    });
 
-    it("should fetch data using the given key", async () => {
-      const storageUtility = getStorageUtility();
-      await storageUtility.safeGet("some key");
-      expect(defaultMocks.storage.get.mock.calls).toEqual([["some key"]]);
+      const jsonData = '   {   "jsonKey":   "some json value"   }';
+      await storageUtility.set(key, jsonData);
+      const result = await storageUtility.safeGet(key);
+      expect(result).toEqual({ jsonKey: "some json value" });
     });
 
     it("should return null if data could not be found in the given storage", async () => {
-      defaultMocks.storage.get.mockReturnValueOnce(Promise.resolve(undefined));
-      const storageUtility = getStorageUtility();
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
       const retrieved = await storageUtility.safeGet("arbitrary key");
       expect(retrieved).toBeUndefined();
     });
 
     it("should validate the data from the storage if passed a schema", async () => {
-      defaultMocks.storage.get.mockReturnValueOnce(
-        Promise.resolve(JSON.stringify({ some: "data" }))
-      );
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+
+      const jsonData = '   {   "jsonKey":   "some json value"   }';
+      await storageUtility.set(key, jsonData);
+
       const schema = {
         type: "object",
         properties: {
-          some: { type: "string" },
+          jsonKey: { type: "string" },
         },
       };
-      const storageUtility = getStorageUtility();
-      expect(
-        await storageUtility.safeGet("arbitrary key", {
-          schema,
-        })
-      ).toMatchObject({ some: "data" });
+
+      const result = await storageUtility.safeGet(key, {
+        schema,
+      });
+      expect(result).toEqual({ jsonKey: "some json value" });
     });
 
     it("should invalidate bad data from the storage if passed a schema and remove it from stroage", async () => {
-      defaultMocks.storage.get.mockReturnValueOnce(
-        Promise.resolve(JSON.stringify({ some: 1 }))
-      );
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+
+      const jsonData = '   {   "jsonKey":   "some json value"   }';
+      await storageUtility.set(key, jsonData);
+
       const schema = {
         type: "object",
         properties: {
-          some: { type: "string" },
+          jsonKey: { type: "boolean" },
         },
       };
-      const storageUtility = getStorageUtility();
-      expect(
-        await storageUtility.safeGet("arbitrary key", {
-          schema,
-        })
-      ).toBeUndefined();
-      expect(defaultMocks.storage.delete).toHaveBeenCalledWith("arbitrary key");
+
+      const result = await storageUtility.safeGet(key, {
+        schema,
+      });
+      expect(result).toBeUndefined();
     });
 
     it("gets an item for a user if a user id is passed in", async () => {
-      defaultMocks.storage.get.mockReturnValueOnce(
-        Promise.resolve(JSON.stringify({ key: '{ "some": "data" }' }))
-      );
-      const storageUtility = getStorageUtility();
-      await expect(
-        storageUtility.safeGet("key", { userId: "global" })
-      ).resolves.toMatchObject({ some: "data" });
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+
+      await storageUtility.setForUser(userId, {
+        [key]: '   {   "jsonKey":   "some json value"   }',
+      });
+
+      const result = await storageUtility.safeGet(key, { userId: userId });
+      expect(result).toEqual({ jsonKey: "some json value" });
     });
 
     it("should reject and delete for corrupted user specific values", async () => {
-      defaultMocks.storage.get.mockReturnValueOnce(
-        Promise.resolve(
-          JSON.stringify({
-            key: '{ "some": "notice this does not have a closing quote }',
-          })
-        )
-      );
-      const storageUtility = getStorageUtility();
-      const val = await storageUtility.safeGet("key", { userId: "global" });
-      expect(val).toBeUndefined();
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+
+      await storageUtility.setForUser(userId, {
+        [key]: '{ "some": "notice this does not have a closing quote }',
+      });
+
+      const result = await storageUtility.safeGet(key, { userId: userId });
+      expect(result).toBeUndefined();
     });
   });
 });

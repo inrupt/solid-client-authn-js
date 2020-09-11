@@ -21,7 +21,7 @@
 
 import { getClientAuthenticationWithDependencies } from "../src/dependencies";
 import ClientAuthentication from "../src/ClientAuthentication";
-import { StorageMock } from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 
 describe("dependencies", () => {
   it("performs dependency injection", () => {
@@ -31,7 +31,7 @@ describe("dependencies", () => {
 
   it("performs dependency injection with a given input", () => {
     const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: StorageMock,
+      secureStorage: mockStorageUtility({}),
     });
     expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
   });

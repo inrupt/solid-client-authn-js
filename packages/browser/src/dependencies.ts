@@ -39,9 +39,9 @@ import {
   IRedirector,
   IRedirectHandler,
   IStorage,
+  IStorageUtility,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import { IStorageUtility } from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
 // import StorageUtility from "../../core/src/storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";

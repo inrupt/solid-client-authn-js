@@ -72,5 +72,3 @@ export {
   StorageUtilityGetResponse,
   StorageUtilitySafeGetResponse,
 } from "./storage/__mocks__/StorageUtility";
-
-export { StorageMock } from "./storage/__mocks__/Storage";
