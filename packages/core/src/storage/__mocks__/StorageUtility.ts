@@ -113,7 +113,7 @@ export const mockStorageUtility = (
       userId: string,
       key: string,
       options?: { errorIfNull?: boolean; secure?: boolean }
-    ) => {
+    ): Promise<string | undefined> => {
       const store = options?.secure ? secureStore : nonSecureStore;
       return store[userId]
         ? (store[userId] as Record<string, string>)[key]
@@ -123,7 +123,7 @@ export const mockStorageUtility = (
       userId: string,
       values: Record<string, string>,
       options?: { secure?: boolean }
-    ) => {
+    ): Promise<void> => {
       const store = options?.secure ? secureStore : nonSecureStore;
       store[userId] = values;
     },
@@ -131,14 +131,14 @@ export const mockStorageUtility = (
       userId: string,
       key: string,
       options?: { secure?: boolean }
-    ) => {
+    ): Promise<void> => {
       const store = options?.secure ? secureStore : nonSecureStore;
       delete (store[userId] as Record<string, string>)[key];
     },
     deleteAllUserData: async (
       userId: string,
       options?: { secure?: boolean }
-    ) => {
+    ): Promise<void> => {
       const store = options?.secure ? secureStore : nonSecureStore;
       delete store[userId];
     },
@@ -151,7 +151,8 @@ export const mockStorageUtility = (
         postProcess?: (retrievedObject: any) => any;
         userId?: string;
       }>
-    ) => (nonSecureStore[key] ? (nonSecureStore[key] as string) : undefined),
+    ): Promise<string | undefined> =>
+      nonSecureStore[key] ? (nonSecureStore[key] as string) : undefined,
     /* eslint-enable @typescript-eslint/no-unused-vars */
   };
 };
