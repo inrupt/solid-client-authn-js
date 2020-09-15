@@ -24,32 +24,22 @@
     "lerna": "^3.22.1"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.13",
+    "@types/jest": "^26.0.12",
     "@types/node-fetch": "^2.5.6",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
-    "eslint": "^6.1.0",
+    "concurrently": "^5.3.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-license-header": "^0.2.0",
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.3",
-    "jest": "^25.1.0",
     "license-checker": "^25.0.1",
     "lint-staged": "^10.2.13",
     "node-fetch": "^2.6.1",
     "prettier": "2.1.1",
-    "rollup": "^2.26.11",
-    "rollup-plugin-typescript2": "^0.27.2",
+    "jest": "^25.1.0",
     "ts-jest": "^25.5.1",
-    "ts-loader": "^8.0.3",
-    "tsc-watch": "^4.2.9",
-    "typedoc": "^0.19.1",
-    "typedoc-plugin-markdown": "^2.4.2",
-    "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
-    "webpack-bundle-analyzer": "^3.8.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-merge": "^4.2.2"
+    "typedoc-plugin-markdown": "^2.4.2"
   },
   "husky": {
     "hooks": {
