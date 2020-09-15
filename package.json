@@ -17,7 +17,8 @@
     "test-unit-all": "jest --coverage --verbose",
     "version": "lerna version",
     "install-sandbox": "npm ci && npm ci --prefix .codesandbox/sandbox",
-    "build-sandbox": "npm run build && npm run build --prefix .codesandbox/sandbox"
+    "build-sandbox": "npm run build && npm run build --prefix .codesandbox/sandbox",
+    "build-docs-preview-site": "lerna run build-docs-preview-site; rm -r dist/api-docs || true; lerna exec -- mkdir -p ../../dist/api-docs/\\${PWD##*/}; lerna exec -- \"cp -r docs/api/build/html/. ../../dist/api-docs/\\${PWD##*/}/ || true\"; echo 'API documentation: <a href=\"./browser/\">solid-client-authn-browser</a>, <a href=\"./core/\">solid-client-authn-core</a>.' >> dist/api-docs/index.html"
   },
   "dependencies": {
     "lerna": "^3.22.1"
