@@ -24,7 +24,7 @@ copyright = '2020-present, Inrupt Inc.'
 # -- product name -----
 # -- Separately update code samples and toc links and docs-navbar since not using substitutions--
 
-name = 'solid-client-authn-browser'
+name = 'solid-client-authn-core'
 repo_name = 'solid-client-authn-js'
 replacement_string = '.. |product|  replace:: ``{0}``'.format(name)
 
