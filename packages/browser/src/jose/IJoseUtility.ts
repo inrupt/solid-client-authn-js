@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
