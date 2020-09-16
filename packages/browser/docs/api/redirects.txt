@@ -10,3 +10,9 @@ client-libraries/api/javascript/solid-client-authn-browser/modules/_src_session_
 client-libraries/api/javascript/solid-client-authn-browser/modules/_src_sessioninfo_isessioninfo_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_sessioninfo_isessioninfo_.html
 client-libraries/api/javascript/solid-client-authn-browser/modules/_src_sessionmanager_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_sessionmanager_.html
 client-libraries/api/javascript/solid-client-authn-browser/modules/_src_storage_istorage_.html  ->  client-libraries/api/javascript/solid-client-authn-browser/modules/_storage_istorage_.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_ilogininputoptions_.ilogininputoptions.html -> client-libraries/api/javascript/solid-client-authn-core/interfaces/_ilogininputoptions_.ilogininputoptions.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_sessioninfo_isessioninfo_.isessioninfo.html -> client-libraries/api/javascript/solid-client-authn-core/interfaces/_sessioninfo_isessioninfo_.isessioninfo.html
+client-libraries/api/javascript/solid-client-authn-browser/interfaces/_storage_istorage_.istorage.html ->  client-libraries/api/javascript/solid-client-authn-core/interfaces/_storage_istorage_.istorage.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_ilogininputoptions_.html ->  client-libraries/api/javascript/solid-client-authn-core/modules/_ilogininputoptions_.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_sessioninfo_isessioninfo_.html -> client-libraries/api/javascript/solid-client-authn-core/modules/_sessioninfo_isessioninfo_.html
+client-libraries/api/javascript/solid-client-authn-browser/modules/_storage_istorage_.html -> client-libraries/api/javascript/solid-client-authn-core/modules/_storage_istorage_.html
