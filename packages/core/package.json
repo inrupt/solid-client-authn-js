@@ -35,7 +35,7 @@
     "node-fetch": "^2.6.1",
     "prettier": "2.1.1",
     "ts-jest": "^25.5.1",
-    "ts-loader": "^8.0.3",
+    "ts-loader": "^8.0.4",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.18.0",
     "typedoc-plugin-markdown": "^2.4.2",
