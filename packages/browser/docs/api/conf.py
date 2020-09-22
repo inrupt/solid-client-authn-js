@@ -24,8 +24,8 @@ copyright = '2020-present, Inrupt Inc.'
 # -- product name -----
 # -- Separately update code samples and toc links and docs-navbar since not using substitutions--
 
-name = 'solid-client'
-repo_name = '{0}-js'.format(name)
+name = 'solid-client-authn-browser'
+repo_name = 'solid-client-authn-js'
 replacement_string = '.. |product|  replace:: ``{0}``'.format(name)
 
 rst_epilog = '\n'.join([
@@ -92,7 +92,7 @@ html_theme_options = {
     'github_repo': repo_name,
     'github_branch': 'master',
     'ess_docs': 'https://docs.inrupt.com/ess/',
-    'clientlibjs_docs': 'https://docs.inrupt.com/client-libraries/{0}/'.format(repo_name),
+    'clientlibjs_docs': 'https://docs.inrupt.com/developer-tools/javascript/client-libraries/',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
