@@ -72,7 +72,6 @@ export default class ClientRegistrar implements IClientRegistrar {
         secure: false,
       }),
       this.storageUtility.getForUser(options.sessionId, "clientName", {
-        // FIXME: figure out how to persist secure storage at reload
         secure: false,
       }),
     ]);

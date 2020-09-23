@@ -27,7 +27,6 @@
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
-import { ITokenRequester } from "../TokenRequester";
 import {
   IRedirector,
   IRedirectHandler,
@@ -63,28 +62,21 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       );
     }
     const url = new URL(redirectUrl, true);
-
     const oauthState = url.query.state as string;
-    const oauthAuthCode = url.query.code as string;
 
-    const [
-      storedSessionId,
-      // storedCodeVerifier,
-      // storedRedirectUri,
-    ] = await Promise.all([
-      (await this.storageUtility.getForUser(oauthState, "sessionId", {
+    const storedSessionId = (await this.storageUtility.getForUser(
+      oauthState,
+      "sessionId",
+      {
         errorIfNull: true,
-      })) as string,
-      // (await this.storageUtility.getForUser(oauthState, "codeVerifier", {
-      //   errorIfNull: true,
-      // })) as string,
-      // (await this.storageUtility.getForUser(oauthState, "redirectUri", {
-      //   errorIfNull: true,
-      // })) as string,
-    ]);
+      }
+    )) as string;
 
     // PMCB55: TODO: I think we still need a catch handler around this...
     const signinResponse = await new OidcClient({
+      // We are instantiating a new instance here, so the only value we need to
+      // explicitly provide is the response mode (default otherwise will look
+      // for a hash '#' fragment!).
       // eslint-disable-next-line @typescript-eslint/camelcase
       response_mode: "query",
     }).processSigninResponse(redirectUrl.toString());
