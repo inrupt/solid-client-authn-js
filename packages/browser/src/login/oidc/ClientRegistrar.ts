@@ -48,16 +48,21 @@ export default class ClientRegistrar implements IClientRegistrar {
     options: IClientRegistrarOptions,
     issuerConfig: IIssuerConfig
   ): Promise<IClient> {
-    // If client secret and/or client id are in options, use those
+    // If client secret and/or client id are in options, use those.
     if (options.clientId) {
       return {
         clientId: options.clientId,
         clientSecret: options.clientSecret,
+        clientName: options.clientName,
       };
     }
 
-    // If client secret and/or client id are stored in storage, use those
-    const [storedClientId, storedClientSecret] = await Promise.all([
+    // If client secret and/or client id are stored in storage, use those.
+    const [
+      storedClientId,
+      storedClientSecret,
+      storedClientName,
+    ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId", {
         // FIXME: figure out how to persist secure storage at reload
         secure: false,
@@ -66,15 +71,21 @@ export default class ClientRegistrar implements IClientRegistrar {
         // FIXME: figure out how to persist secure storage at reload
         secure: false,
       }),
+      this.storageUtility.getForUser(options.sessionId, "clientName", {
+        // FIXME: figure out how to persist secure storage at reload
+        secure: false,
+      }),
     ]);
+
     if (storedClientId) {
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
+        clientName: storedClientName,
       };
     }
 
-    // If registration access token is stored, use that
+    // If registration access token is stored, use that.
     const [registrationAccessToken, registrationClientUri] = await Promise.all([
       this.storageUtility.getForUser(
         options.sessionId,
@@ -126,9 +137,10 @@ export default class ClientRegistrar implements IClientRegistrar {
 
     if (!registerResponse.ok) {
       throw new Error(
-        `Login Registration Error: ${await registerResponse.text()}`
+        `Login Registration Error: [${await registerResponse.text()}]`
       );
     }
+
     const responseBody = await registerResponse.json();
 
     // Save info
@@ -145,6 +157,7 @@ export default class ClientRegistrar implements IClientRegistrar {
         secure: false,
       }
     );
+
     await this.storageUtility.setForUser(options.sessionId, {
       registrationAccessToken: responseBody.registration_access_token,
       registrationClientUri: responseBody.registration_client_uri,

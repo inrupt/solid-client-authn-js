@@ -81,6 +81,17 @@ export default class OidcLoginHandler implements ILoginHandler {
       options.oidcIssuer as URL
     );
 
+    const dynamicClientRegistration = await this.clientRegistrar.getClient(
+      {
+        sessionId: options.sessionId,
+        clientId: options.clientId,
+        clientSecret: options.clientSecret,
+        clientName: options.clientName,
+        redirectUrl: options.redirectUrl,
+      },
+      issuerConfig
+    );
+
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
       issuer: options.oidcIssuer as URL,
@@ -88,16 +99,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       dpop: true,
       redirectUrl: options.redirectUrl as URL,
       issuerConfiguration: issuerConfig,
-      client: await this.clientRegistrar.getClient(
-        {
-          sessionId: options.sessionId,
-          clientId: options.clientId,
-          clientSecret: options.clientSecret,
-          clientName: options.clientName,
-          redirectUrl: options.redirectUrl,
-        },
-        issuerConfig
-      ),
+      client: dynamicClientRegistration,
       sessionId: options.sessionId,
       handleRedirect: options.handleRedirect,
     };

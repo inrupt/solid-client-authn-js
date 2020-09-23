@@ -35,6 +35,8 @@ import {
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { OidcClient } from "oidc-client";
+import IJoseUtility from "../../../jose/IJoseUtility";
 
 /**
  * @hidden
@@ -42,9 +44,9 @@ import {
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
+    @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector,
-    @inject("tokenRequester") private tokenRequester: ITokenRequester,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager
   ) {}
@@ -61,30 +63,60 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       );
     }
     const url = new URL(redirectUrl, true);
-    const sessionId = url.query.state as string;
-    const [codeVerifier, redirectUri] = await Promise.all([
-      (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
+
+    const oauthState = url.query.state as string;
+    const oauthAuthCode = url.query.code as string;
+
+    const [
+      storedSessionId,
+      // storedCodeVerifier,
+      // storedRedirectUri,
+    ] = await Promise.all([
+      (await this.storageUtility.getForUser(oauthState, "sessionId", {
         errorIfNull: true,
       })) as string,
-      (await this.storageUtility.getForUser(sessionId, "redirectUri", {
-        errorIfNull: true,
-      })) as string,
+      // (await this.storageUtility.getForUser(oauthState, "codeVerifier", {
+      //   errorIfNull: true,
+      // })) as string,
+      // (await this.storageUtility.getForUser(oauthState, "redirectUri", {
+      //   errorIfNull: true,
+      // })) as string,
     ]);
 
-    /* eslint-disable @typescript-eslint/camelcase */
-    await this.tokenRequester.request(sessionId, {
-      grant_type: "authorization_code",
-      code_verifier: codeVerifier as string,
-      code: url.query.code as string,
-      redirect_uri: redirectUri as string,
-    });
-    /* eslint-enable @typescript-eslint/camelcase */
+    // PMCB55: TODO: I think we still need a catch handler around this...
+    const signinResponse = await new OidcClient({
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      response_mode: "query",
+    }).processSigninResponse(redirectUrl.toString());
+
+    // We need to decode the access_token JWT to extract out the full WebID.
+    const decoded = await this.joseUtility.decodeJWT(
+      signinResponse.access_token as string
+    );
+    if (!decoded || !decoded.sub) {
+      throw new Error("The idp returned a bad token without a sub.");
+    }
+
+    await this.storageUtility.setForUser(
+      storedSessionId,
+      {
+        accessToken: signinResponse.access_token as string,
+        idToken: signinResponse.id_token as string,
+        // TODO: PMCB55: Still need to work out refresh tokens (seems ESS is not
+        //  providing it!).
+        refreshToken:
+          "Refresh Token is not part of 'oidc-client.js' structure for 'signinResponse', and ESS doesn't seem to include it here!",
+        webId: decoded.sub as string,
+        isLoggedIn: "true",
+      },
+      { secure: true }
+    );
 
     url.set("query", {});
 
-    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
-      throw new Error("There was a problem creating a session.");
+      throw new Error(`Could not retrieve session: [${storedSessionId}].`);
     }
     try {
       this.redirector.redirect(url.toString(), {

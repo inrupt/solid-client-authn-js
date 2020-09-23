@@ -46,6 +46,7 @@ describe("ClientAuthentication", () => {
     authenticatedFetcher: AuthenticatedFetcherMock,
     environmentDetector: EnvironmentDetectorMock,
   };
+
   function getClientAuthentication(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): ClientAuthentication {

@@ -73,13 +73,14 @@ export default class ClientAuthentication {
   ): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out on login.
     await this.sessionInfoManager.clear(sessionId);
+
     return this.loginHandler.handle({
       sessionId,
       oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
       redirectUrl: this.urlOptionToUrl(options.redirectUrl),
       clientId: options.clientId,
       clientSecret: options.clientSecret,
-      clientName: options.clientId,
+      clientName: options.clientName || options.clientId,
       popUp: options.popUp || false,
       handleRedirect: options.handleRedirect,
     });
@@ -93,7 +94,10 @@ export default class ClientAuthentication {
     const credentials: IRequestCredentials = {
       localUserId: sessionId,
       // TODO: This should not be hard-coded
-      type: "dpop",
+      // type: "dpop",
+      // PMcB55: No, it definitely shouldn't :)! DPoP is still to be done while
+      // using 'oidc-client-js'.
+      type: "bearer",
     };
     return this.authenticatedFetcher.handle(credentials, url, init);
   };
