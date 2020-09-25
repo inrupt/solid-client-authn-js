@@ -21,6 +21,6 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App-client-authn";
+import DemoClientApp from "./DemoClientApp";
 
-ReactDOM.render(<App />, document.getElementById("container"));
+ReactDOM.render(<DemoClientApp />, document.getElementById("container"));

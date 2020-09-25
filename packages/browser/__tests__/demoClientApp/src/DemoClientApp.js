@@ -28,12 +28,13 @@ import "regenerator-runtime/runtime";
 // } from "@inrupt/solid-client-authn-browser";
 import { Session } from "../../../dist/Session";
 import { getClientAuthenticationWithDependencies } from "../../../dist/dependencies";
-import { SessionManager } from "../../../dist";
 
-const clientApplicationName =
-  "Solid Client AuthN Browser Test Client Application";
+const clientApplicationName = "S-C-A-B Demo Client App";
+let snackBarTimeout = undefined;
 
 const defaultLocalClientAppSessionId = "my local session id";
+// TODO: PMCB55: make demo's 'prettier' by avoiding 'localhost'...
+// const defaultClientEndpoint = "http://my-demo-app.com/";
 const defaultClientEndpoint = "http://localhost:3001/";
 const defaultIssuer = "https://broker.demo-ess.inrupt.com/";
 const defaultProtectedResource =
@@ -45,7 +46,7 @@ const style = {
   padding: "5px",
 };
 
-class App extends Component {
+class DemoClientApp extends Component {
   constructor(props) {
     super(props);
 
@@ -63,6 +64,7 @@ class App extends Component {
     this.state = {
       status: "loading",
       loginIssuer: defaultIssuer,
+      clearClientRegistrationInfo: false,
       fetchRoute: "",
       fetchBody: "",
       session: session,
@@ -93,7 +95,10 @@ class App extends Component {
         new URL(window.location.href).searchParams.get("access_token");
 
       if (!authCode) {
-        this.setState({ status: "login" });
+        this.setState({
+          status: "login",
+          fetchRoute: defaultProtectedResource,
+        });
       } else {
         const sessionInfo = await this.state.session.handleIncomingRedirect(
           new URL(window.location.href)
@@ -102,7 +107,6 @@ class App extends Component {
         this.setState({
           status: "dashboard",
           sessionInfo: sessionInfo,
-          // fetchRoute: sessionInfo.webId,
           fetchRoute: defaultProtectedResource,
         });
       }
@@ -112,6 +116,13 @@ class App extends Component {
   async handleLogin(e, isPopup = false) {
     e.preventDefault();
     this.setState({ status: "loading" });
+
+    if (this.state.clearClientRegistrationInfo) {
+      window.localStorage.clear(
+        "solidClientAuthenticationUser:clientApplicationRegistrationInfo"
+      );
+    }
+
     await this.state.session.login({
       redirectUrl: new URL(defaultClientEndpoint),
       oidcIssuer: new URL(this.state.loginIssuer),
@@ -138,6 +149,43 @@ class App extends Component {
     this.setState({ status: "dashboard", fetchBody: response });
   }
 
+  highlightPartOfWebId(webId, part) {
+    // Example: https://ldp.demo-ess.inrupt.com/110592712913443799002/profile/card#me
+    let result;
+    switch (part) {
+      case 0:
+        result = webId.substring(0, webId.indexOf(".com/") + 5);
+        break;
+      case 1:
+        result = webId.substring(
+          webId.indexOf(".com/") + 5,
+          webId.indexOf("/profile/")
+        );
+        break;
+      case 2:
+        result = webId.substring(webId.indexOf("/profile/"));
+        break;
+    }
+
+    return result;
+  }
+
+  displaySnackBar(text) {
+    const snackBar = document.getElementById("snackbar");
+    snackBar.className = "show";
+    snackBar.innerHTML = text;
+    if (snackBarTimeout) {
+      clearTimeout(snackBarTimeout);
+    }
+    snackBarTimeout = setTimeout(function () {
+      snackBar.className = snackBar.className.replace("show", "");
+    }, 3000);
+  }
+
+  openNewTab(url) {
+    window.open(url, "_blank");
+  }
+
   render() {
     switch (this.state.status) {
       case "popup":
@@ -149,17 +197,87 @@ class App extends Component {
       case "login":
         return (
           <form>
-            <h1>solid-client-authn-browser API Demo - Login</h1>
+            <div id="snackbar">Some text some message..</div>
+            <h1>{clientApplicationName} - Login</h1>
             <div style={style}>
-              <span>Login with your Identity Provider:</span>
-              <input
-                type="text"
-                size="80"
-                value={this.state.loginIssuer}
-                onChange={(e) => this.setState({ loginIssuer: e.target.value })}
-              />
-              <button onClick={this.handleLogin}>Log In</button>
+              <div>
+                <span>Login with your Identity Provider:</span>
+                <input
+                  type="text"
+                  size="80"
+                  value={this.state.loginIssuer}
+                  onChange={(e) =>
+                    this.setState({ loginIssuer: e.target.value })
+                  }
+                />
+                <button onClick={this.handleLogin}>Log In</button>
+              </div>
+
+              <div className="tooltip">
+                <div>
+                  <input
+                    type="checkbox"
+                    id="reauthorize_client_app"
+                    checked={this.state.clearClientRegistrationInfo}
+                    onChange={(e) => {
+                      this.setState({
+                        clearClientRegistrationInfo: e.target.checked,
+                      });
+                      this.displaySnackBar(
+                        e.target.checked
+                          ? "Login will force a re-authorization"
+                          : "Login will use existing authorization (if any!)"
+                      );
+                    }}
+                  />
+
+                  <label htmlFor="reauthorize_client_app">
+                    Re-authorize this client application on Login
+                  </label>
+                </div>
+
+                <span className="tooltiptext">
+                  Re-authorize this Client Application on Login.
+                  <p></p>
+                  For example, to change the access permissions you may have
+                  already granted to this application.
+                </span>
+              </div>
+
+              <p></p>
+              <div className="tooltip">
+                <div>
+                  Open Identity Provider in a new tab:{" "}
+                  <a target="_blank" href={this.state.loginIssuer}>
+                    {this.state.loginIssuer}
+                  </a>
+                </div>
+
+                <span className="tooltiptext">
+                  Allows you to see authorizations you've granted, and to log
+                  out (maybe you'd like to log in again using a different
+                  account).
+                </span>
+              </div>
             </div>
+
+            {/* TODO: PMCB55: Illustrate unauthenticated fetch too (without logging in first).*/}
+            {/*<div style={style}>*/}
+            {/*  <input*/}
+            {/*    size="80"*/}
+            {/*    type="text"*/}
+            {/*    value={this.state.fetchRoute}*/}
+            {/*    onChange={(e) =>*/}
+            {/*      this.setState({ fetchRoute: e.target.value })*/}
+            {/*    }*/}
+            {/*  />*/}
+            {/*  <button onClick={this.handleFetch}>Fetch</button>*/}
+            {/*</div>*/}
+            {/*<p></p>*/}
+            {/*<div style={style}>*/}
+            {/*  <strong>Resource:</strong>*/}
+            {/*  <pre>{this.state.fetchBody}</pre>*/}
+            {/*</div>*/}
           </form>
         );
 
@@ -167,11 +285,19 @@ class App extends Component {
         return (
           <div>
             <h1>
-              solid-client-authn-browser API Demo - Authenticated! Ready to
-              browse...
+              {clientApplicationName}
+              <p></p>
+              Authenticated! Ready to browse...
             </h1>
             <p>
-              <strong>WebID:</strong> {this.state.sessionInfo.webId}
+              <strong>WebID:</strong>
+              {this.highlightPartOfWebId(this.state.sessionInfo.webId, 0)}
+              <span style={{ color: "red", fontSize: "18px" }}>
+                <strong>
+                  {this.highlightPartOfWebId(this.state.sessionInfo.webId, 1)}
+                </strong>
+              </span>
+              {this.highlightPartOfWebId(this.state.sessionInfo.webId, 2)}
             </p>
             <form>
               <div style={style}>
@@ -204,4 +330,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default DemoClientApp;

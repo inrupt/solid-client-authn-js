@@ -121,7 +121,7 @@ describe("ClientAuthentication", () => {
       expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
         {
           localUserId: "mySession",
-          type: "dpop",
+          type: "bearer",
         },
         "https://zombo.com",
         undefined

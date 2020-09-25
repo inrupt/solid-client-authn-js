@@ -37,6 +37,8 @@ import {
   ILoginHandler,
   IOidcHandler,
   IOidcOptions,
+  IStorageUtility,
+  IClient,
 } from "@inrupt/solid-client-authn-core";
 
 import ConfigurationError from "../../errors/ConfigurationError";
@@ -49,6 +51,7 @@ import URL from "url-parse";
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
+    @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("oidcHandler") private oidcHandler: IOidcHandler,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
@@ -81,16 +84,49 @@ export default class OidcLoginHandler implements ILoginHandler {
       options.oidcIssuer as URL
     );
 
-    const dynamicClientRegistration = await this.clientRegistrar.getClient(
-      {
-        sessionId: options.sessionId,
+    let dynamicClientRegistration: IClient;
+    if (options.clientId) {
+      dynamicClientRegistration = {
         clientId: options.clientId,
         clientSecret: options.clientSecret,
         clientName: options.clientName,
-        redirectUrl: options.redirectUrl,
-      },
-      issuerConfig
-    );
+      };
+    } else {
+      const clientId = await this.storageUtility.getForUser(
+        "clientApplicationRegistrationInfo", //options.sessionId,
+        "clientId"
+      );
+
+      if (clientId) {
+        dynamicClientRegistration = {
+          clientId,
+          clientSecret: await this.storageUtility.getForUser(
+            "clientApplicationRegistrationInfo",
+            "clientSecret"
+          ),
+          clientName: options.clientName,
+        };
+      } else {
+        dynamicClientRegistration = await this.clientRegistrar.getClient(
+          {
+            sessionId: options.sessionId,
+            clientId: options.clientId,
+            clientSecret: options.clientSecret,
+            clientName: options.clientName,
+            redirectUrl: options.redirectUrl,
+          },
+          issuerConfig
+        );
+
+        await this.storageUtility.setForUser(
+          "clientApplicationRegistrationInfo",
+          {
+            clientId: dynamicClientRegistration.clientId,
+            clientSecret: dynamicClientRegistration.clientSecret as string,
+          }
+        );
+      }
+    }
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {

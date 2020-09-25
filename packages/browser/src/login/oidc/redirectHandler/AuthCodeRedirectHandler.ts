@@ -92,12 +92,13 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     await this.storageUtility.setForUser(
       storedSessionId,
       {
-        accessToken: signinResponse.access_token as string,
-        idToken: signinResponse.id_token as string,
-        // TODO: PMCB55: Still need to work out refresh tokens (seems ESS is not
-        //  providing it!).
-        refreshToken:
-          "Refresh Token is not part of 'oidc-client.js' structure for 'signinResponse', and ESS doesn't seem to include it here!",
+        accessToken: signinResponse.access_token,
+        idToken: signinResponse.id_token,
+        // The 'refresh_token' is not defined in the oidc-client-js signin
+        // response object, so we need to cast that structure to allow us access
+        // it without TypeScript complaining.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        refreshToken: (signinResponse as any).refresh_token,
         webId: decoded.sub as string,
         isLoggedIn: "true",
       },
@@ -110,6 +111,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     if (!sessionInfo) {
       throw new Error(`Could not retrieve session: [${storedSessionId}].`);
     }
+
     try {
       this.redirector.redirect(url.toString(), {
         redirectByReplacingState: true,

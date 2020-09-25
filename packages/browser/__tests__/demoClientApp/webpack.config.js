@@ -27,6 +27,9 @@ module.exports = {
     }),
   ],
   devServer: {
+    // TODO: PMCB55: make demo's 'prettier' by avoiding 'localhost'...
+    // public: "my-demo-app.com",
+    // port: 80,
     port: 3001,
     historyApiFallback: true,
   },

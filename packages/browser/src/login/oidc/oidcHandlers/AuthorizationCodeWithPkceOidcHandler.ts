@@ -34,11 +34,14 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { default as Oidc, OidcClient, SigninRequest } from "oidc-client";
+import { OidcClient, SigninRequest } from "oidc-client";
 
-// We set the logging details for all of oidc-client here
-Oidc.Log.logger = console;
-Oidc.Log.level = Oidc.Log.DEBUG;
+// TODO: PMCB55: Awkward to mock, not sure how it works, and probably should be
+// done from the library entrypoint anyway, and not an internal class.
+// import { default as Oidc } from "oidc-client";
+// // We set the logging details for all of oidc-client here
+// Oidc.Log.logger = console;
+// Oidc.Log.level = Oidc.Log.DEBUG;
 
 /**
  * @hidden
@@ -61,9 +64,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
-    const redirector = this.redirector;
-    const storage = this.storageUtility;
-
     /* eslint-disable @typescript-eslint/camelcase */
     const oidcOptions = {
       authority: oidcLoginOptions.issuer?.toString(),
@@ -72,7 +72,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
       post_logout_redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
       response_type: "code",
-      scope: "openid webid",
+      scope: "openid webid offline_access",
       filterProtocolClaims: true,
       loadUserInfo: true,
       code_verifier: true,
@@ -81,37 +81,40 @@ export default class AuthorizationCodeWithPkceOidcHandler
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
 
-    oidcClientLibrary
-      .createSigninRequest()
-      .then(async function (req: SigninRequest) {
-        // We use the OAuth 'state' value (which should be crypto-random) as
-        // the key in our storage to store our actual SessionID. We do this 'cos
-        // we'll need to lookup our session information again when the browser
-        // is redirected back to us (i.e. the OAuth client application) from the
-        // Authorization Server.
-        // We don't want to use our session ID as the OAuth 'state' value, as
-        // that session ID can be any developer-specified value, and therefore
-        // may not be appropriate (since the OAuth 'state' value should really
-        // be an unguessable crypto-random value).
-        await storage.setForUser(req.state._id, {
-          sessionId: oidcLoginOptions.sessionId,
-          // codeVerifier: req.state._code_verifier,
-          // issuer: oidcLoginOptions.issuer.toString(),
-          // redirectUri: oidcLoginOptions.redirectUrl.toString(),
-        });
+    const redirector = this.redirector;
+    const storage = this.storageUtility;
 
-        await storage.setForUser(oidcLoginOptions.sessionId, {
-          codeVerifier: req.state._code_verifier,
-          issuer: oidcLoginOptions.issuer.toString(),
-          redirectUri: oidcLoginOptions.redirectUrl.toString(),
-        });
+    return (
+      oidcClientLibrary
+        .createSigninRequest()
+        .then(async function (req: SigninRequest) {
+          // We use the OAuth 'state' value (which should be crypto-random) as
+          // the key in our storage to store our actual SessionID. We do this 'cos
+          // we'll need to lookup our session information again when the browser
+          // is redirected back to us (i.e. the OAuth client application) from the
+          // Authorization Server.
+          // We don't want to use our session ID as the OAuth 'state' value, as
+          // that session ID can be any developer-specified value, and therefore
+          // may not be appropriate (since the OAuth 'state' value should really
+          // be an unguessable crypto-random value).
+          await storage.setForUser(req.state._id, {
+            sessionId: oidcLoginOptions.sessionId,
+          });
 
-        redirector.redirect(req.url.toString(), {
-          handleRedirect: oidcLoginOptions.handleRedirect,
-        });
-      })
-      .catch((err: any) => {
-        console.error(err);
-      });
+          await storage.setForUser(oidcLoginOptions.sessionId, {
+            codeVerifier: req.state._code_verifier,
+            issuer: oidcLoginOptions.issuer.toString(),
+            redirectUri: oidcLoginOptions.redirectUrl.toString(),
+          });
+
+          redirector.redirect(req.url.toString(), {
+            handleRedirect: oidcLoginOptions.handleRedirect,
+          });
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .catch((err: any) => {
+          console.error(err);
+        })
+    );
   }
 }

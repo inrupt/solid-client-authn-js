@@ -71,7 +71,12 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<void> => {
-    // In order to get a clean start, make sure that the session is logged out on login.
+    // In order to get a clean start, make sure that the session is logged out
+    // on login.
+    // But we may want to preserve our client application info, particularly if
+    // we used Dynamic Client Registration to register (since we don't
+    // necessarily want the user to have to register this app each time they
+    // login).
     await this.sessionInfoManager.clear(sessionId);
 
     return this.loginHandler.handle({
@@ -95,7 +100,7 @@ export default class ClientAuthentication {
       localUserId: sessionId,
       // TODO: This should not be hard-coded
       // type: "dpop",
-      // PMcB55: No, it definitely shouldn't :)! DPoP is still to be done while
+      // PMcB55: No, it definitely shouldn't :)! DPoP is still to be implemented
       // using 'oidc-client-js'.
       type: "bearer",
     };
