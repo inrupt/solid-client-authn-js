@@ -38,7 +38,7 @@
     "ts-loader": "^8.0.4",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^3.0.2",
+    "typedoc-plugin-markdown": "^3.0.3",
     "typescript": "^3.9.7"
   },
   "dependencies": {
