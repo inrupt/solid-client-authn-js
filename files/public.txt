@@ -1,0 +1,1 @@
+This is a textfile stored in the /public Container.

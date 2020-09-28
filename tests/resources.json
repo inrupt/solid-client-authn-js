@@ -1,0 +1,16 @@
+[
+    {
+        "Name": "Private file",
+        "URI": "https://ldp.demo-ess.inrupt.com/113897280460524999456/private/private.txt",
+        "Needs Authorisation": true,
+        "AuthorisedResponse": "textfile stored in the /private Container.",
+        "UnauthorisedResponse": "Error"
+    },
+    {
+        "Name": "Public file",
+        "URI": "https://ldp.demo-ess.inrupt.com/113897280460524999456/public/public.txt",
+        "NeedsAuthorisation": false,
+        "AuthorisedResponse": "textfile stored in the /public Container.",
+        "UnauthorisedResponse": "textfile stored in the /public Container."
+    }
+]
