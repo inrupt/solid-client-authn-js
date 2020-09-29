@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ### Bugfixes
 
 - Source files are now also published to npm, so source maps should work from now on.
+- Fixed typo in `detachSession` function name for the browser `SessionManager`.
 
 ## [0.1.4] - 2020-09-11
 
