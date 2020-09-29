@@ -36,13 +36,6 @@ import {
 import { injectable, inject } from "tsyringe";
 import { OidcClient, SigninRequest } from "oidc-client";
 
-// TODO: PMCB55: Awkward to mock, not sure how it works, and probably should be
-// done from the library entrypoint anyway, and not an internal class.
-// import { default as Oidc } from "oidc-client";
-// // We set the logging details for all of oidc-client here
-// Oidc.Log.logger = console;
-// Oidc.Log.level = Oidc.Log.DEBUG;
-
 /**
  * @hidden
  */
@@ -97,22 +90,23 @@ export default class AuthorizationCodeWithPkceOidcHandler
           // that session ID can be any developer-specified value, and therefore
           // may not be appropriate (since the OAuth 'state' value should really
           // be an unguessable crypto-random value).
-          await storage.setForUser(req.state._id, {
-            sessionId: oidcLoginOptions.sessionId,
-          });
-
-          await storage.setForUser(oidcLoginOptions.sessionId, {
-            codeVerifier: req.state._code_verifier,
-            issuer: oidcLoginOptions.issuer.toString(),
-            redirectUri: oidcLoginOptions.redirectUrl.toString(),
-          });
+          await Promise.all([
+            storage.setForUser(req.state._id, {
+              sessionId: oidcLoginOptions.sessionId,
+            }),
+            storage.setForUser(oidcLoginOptions.sessionId, {
+              codeVerifier: req.state._code_verifier,
+              issuer: oidcLoginOptions.issuer.toString(),
+              redirectUri: oidcLoginOptions.redirectUrl.toString(),
+            }),
+          ]);
 
           redirector.redirect(req.url.toString(), {
             handleRedirect: oidcLoginOptions.handleRedirect,
           });
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .catch((err: any) => {
+        .catch((err: unknown) => {
           console.error(err);
         })
     );

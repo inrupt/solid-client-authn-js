@@ -85,7 +85,7 @@ export default class ClientAuthentication {
       redirectUrl: this.urlOptionToUrl(options.redirectUrl),
       clientId: options.clientId,
       clientSecret: options.clientSecret,
-      clientName: options.clientName || options.clientId,
+      clientName: options.clientName ?? options.clientId,
       popUp: options.popUp || false,
       handleRedirect: options.handleRedirect,
     });
