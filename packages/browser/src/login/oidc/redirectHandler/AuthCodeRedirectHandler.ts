@@ -73,13 +73,26 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     )) as string;
 
     // PMCB55: TODO: I think we still need a catch handler around this...
-    const signinResponse = await new OidcClient({
-      // We are instantiating a new instance here, so the only value we need to
-      // explicitly provide is the response mode (default otherwise will look
-      // for a hash '#' fragment!).
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      response_mode: "query",
-    }).processSigninResponse(redirectUrl.toString());
+    let signinResponse;
+    try {
+      signinResponse = await new OidcClient({
+        // TODO: We should look at the various interfaces being used for storage,
+        //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
+        //  (which has an interface Storage), and our own proprietary interface
+        //  IStorage - i.e. we should really just be using the browser Web Storage
+        //  API, e.g. "stateStore: window.localStorage,".
+
+        // We are instantiating a new instance here, so the only value we need to
+        // explicitly provide is the response mode (default otherwise will look
+        // for a hash '#' fragment!).
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        response_mode: "query",
+      }).processSigninResponse(redirectUrl.toString());
+    } catch (err) {
+      throw new Error(
+        `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
+      );
+    }
 
     // We need to decode the access_token JWT to extract out the full WebID.
     const decoded = await this.joseUtility.decodeJWT(
@@ -94,11 +107,10 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       {
         accessToken: signinResponse.access_token,
         idToken: signinResponse.id_token,
-        // The 'refresh_token' is not defined in the oidc-client-js signin
-        // response object, so we need to cast that structure to allow us access
-        // it without TypeScript complaining.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        refreshToken: (signinResponse as any).refresh_token,
+        // TODO: We need a PR to oidc-client-js to add parsing of the
+        //  refresh_token from the redirect URL.
+        refreshToken:
+          "<Refresh token that *is* coming back in the redirect URL is not yet being parsed and provided by oidc-client-js in it's response object>",
         webId: decoded.sub as string,
         isLoggedIn: "true",
       },

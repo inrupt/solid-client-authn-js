@@ -8,7 +8,7 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
-    "demo-app": "concurrently \"npm run dev\" \"cd __tests__/demoApp; npm run start\"",
+    "demo-app": "concurrently \"npm run dev\" \"cd examples/demoClientApp; npm run start\"",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
     "clean-module": "rm -rf ./dist",

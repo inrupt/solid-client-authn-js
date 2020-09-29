@@ -65,6 +65,10 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
       post_logout_redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
       response_type: "code",
+      // TODO: The 'webid' scope is still a spec discussion topic
+      //  https://github.com/solid/specification/issues/203, i.e. the 'webid'
+      //  scope does not yet appear in the Solid specification (it's not even
+      //  mentioned in the WebID-OIDC spec).
       scope: "openid webid offline_access",
       filterProtocolClaims: true,
       loadUserInfo: true,

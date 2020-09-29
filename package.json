@@ -2,6 +2,7 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "demo-app": "cd packages/browser; npm run demo-app",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "build-api-docs": "lerna run build-api-docs",
