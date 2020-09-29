@@ -1,0 +1,25 @@
+{
+    "screenshots": {
+        "path": "./screenshots/",
+        "takeOnFails": true,
+        "pathPattern": "${DATE}_${TIME}/test-${TEST_INDEX}/${USERAGENT}/${FILE_INDEX}.png"
+    },
+    "clientScripts": [
+        { "module": "@testing-library/dom/dist/@testing-library/dom.umd.js" }
+    ],
+    "browsers": ["chrome:emulation:device=iphone X"],    
+    "quarantineMode": false,
+    "debugMode": false,
+    "debugOnFail": true,
+    "stopOnFirstFail": true,
+    "skipJsErrors": true,
+    "skipUncaughtErrors": true,
+    "concurrency": 1,
+    "selectorTimeout": 30000,
+    "assertionTimeout": 1000,
+    "pageLoadTimeout": 3000,
+    "hostname": "localhost",
+    "disablePageCaching": false,
+    "developmentMode": false,
+    "qrCode": false
+}
