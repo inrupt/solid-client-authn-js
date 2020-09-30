@@ -52,9 +52,7 @@ export interface IDpopHeaderCreator {
  * @hidden
  */
 export function normalizeHtu(audience: URL): string {
-  return `${audience.origin}${audience.pathname}${
-    audience.pathname.endsWith("/") ? "" : "/"
-  }`;
+  return `${audience.origin}${audience.pathname}`;
 }
 
 /**

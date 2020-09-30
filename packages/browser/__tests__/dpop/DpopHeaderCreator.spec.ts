@@ -36,9 +36,9 @@ import { decodeJWT, generateJWK } from "../../src/jose/IsomorphicJoseUtility";
 describe("normalizeHtu", () => {
   [
     {
-      it: "should add a /  if missing at the end of the url",
+      it: "should not add a / if not present at the end of the url",
       url: new URL("https://audience.com"),
-      expected: "https://audience.com/",
+      expected: "https://audience.com",
     },
     {
       it: "should not change a URL with a slash at the end",
@@ -48,7 +48,7 @@ describe("normalizeHtu", () => {
     {
       it: "should not include queries",
       url: new URL("https://audience.com?cool=stuff&dope=things"),
-      expected: "https://audience.com/",
+      expected: "https://audience.com",
     },
     {
       it: "should not include queries but still include a slash",
@@ -58,7 +58,7 @@ describe("normalizeHtu", () => {
     {
       it: "should not include hash",
       url: new URL("https://audience.com#throwBackThursday"),
-      expected: "https://audience.com/",
+      expected: "https://audience.com",
     },
     {
       it: "should not include hash but include the slash",
@@ -68,17 +68,17 @@ describe("normalizeHtu", () => {
     {
       it: "should include the path",
       url: new URL("https://audience.com/path"),
-      expected: "https://audience.com/path/",
+      expected: "https://audience.com/path",
     },
     {
       it: "should not include the username and password",
       url: new URL("https://jackson:badpassword@audience.com"),
-      expected: "https://audience.com/",
+      expected: "https://audience.com",
     },
     {
       it: "should include ports",
       url: new URL("https://localhost:8080/path"),
-      expected: "https://localhost:8080/path/",
+      expected: "https://localhost:8080/path",
     },
   ].forEach((test) => {
     it(test.it, () => {
