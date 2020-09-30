@@ -32,6 +32,9 @@ import { inject, injectable } from "tsyringe";
 import IJoseUtility from "../jose/IJoseUtility";
 import { IDpopClientKeyManager } from "./DpopClientKeyManager";
 import { IUuidGenerator } from "../util/UuidGenerator";
+import { privateJWKToPublicJWK, signJWT } from "../jose/IsomorphicJoseUtility";
+import { v4 } from "uuid";
+import { JSONWebKey } from "jose";
 
 export interface IDpopHeaderCreator {
   /**
@@ -40,6 +43,47 @@ export interface IDpopHeaderCreator {
    * @param method The HTTP method that is being used
    */
   createHeaderToken(audience: URL, method: string): Promise<string>;
+}
+
+/**
+ * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
+ * @param audience The URL to normalize.
+ * @returns The normalized URL as a string.
+ * @hidden
+ */
+export function normalizeHtu(audience: URL): string {
+  return `${audience.origin}${audience.pathname}`;
+}
+
+/**
+ * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
+ * based on the target URL and method, using the provided key.
+ * @param audience Target URL.
+ * @param method HTTP method allowed.
+ * @param key Key used to sign the token.
+ * @returns A JWT that can be used as a DPoP Authorization header.
+ */
+export async function createHeaderToken(
+  audience: URL,
+  method: string,
+  key: JSONWebKey
+): Promise<string> {
+  return signJWT(
+    {
+      htu: normalizeHtu(audience),
+      htm: method,
+      jti: v4(),
+    },
+    key,
+    {
+      header: {
+        jwk: privateJWKToPublicJWK(key),
+        typ: "dpop+jwt",
+      },
+      expiresIn: "1 hour",
+      algorithm: "ES256",
+    }
+  );
 }
 
 /**
@@ -54,9 +98,7 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
     @inject("uuidGenerator") private uuidGenerator: IUuidGenerator
   ) {}
 
-  public normalizeHtu(audience: URL): string {
-    return `${audience.origin}${audience.pathname}`;
-  }
+  public normalizeHtu = normalizeHtu;
 
   async createHeaderToken(audience: URL, method: string): Promise<string> {
     // TODO: update for multiple signing abilities
@@ -65,23 +107,6 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
     if (clientKey === undefined) {
       throw new Error("Could not obtain the key to sign the token with.");
     }
-
-    return this.joseUtility.signJWT(
-      {
-        // TODO: should add a slash at the end if none is present
-        htu: this.normalizeHtu(audience),
-        htm: method,
-        jti: this.uuidGenerator.v4(),
-      },
-      clientKey,
-      {
-        header: {
-          jwk: await this.joseUtility.privateJWKToPublicJWK(clientKey),
-          typ: "dpop+jwt",
-        },
-        expiresIn: "1 hour",
-        algorithm: "ES256",
-      }
-    );
+    return createHeaderToken(audience, method, clientKey);
   }
 }

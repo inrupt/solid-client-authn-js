@@ -92,3 +92,6 @@ build/
 
 # Rollup-built code
 umd/
+
+# Ignore license checker output
+licenses.csv
