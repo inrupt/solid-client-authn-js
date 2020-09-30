@@ -39,59 +39,121 @@ import {
   JSONWebKey,
 } from "jose";
 import { JWK } from "node-jose";
-import JWT from "jsonwebtoken";
+import JWT, { VerifyOptions } from "jsonwebtoken";
 import IJoseUtility from "./IJoseUtility";
 import randomString from "crypto-random-string";
 import crypto from "crypto";
 
 /**
+ * Generates a Json Web Key
+ * @param kty Key type
+ * @param crvBitlength Curve length (nly relevant for elliptic curve algorithms)
+ * @param parameters
+ */
+export async function generateJWK(
+  kty: "EC" | "OKP" | "RSA" | "oct",
+  crvBitlength?: ECCurve | OKPCurve | number,
+  parameters?: BasicParameters
+): Promise<JSONWebKey> {
+  const key = await JWK.createKey(kty, crvBitlength, parameters);
+  return key.toJSON(true) as JSONWebKey;
+}
+
+/**
+ * Generates a Json Web Token (https://tools.ietf.org/html/rfc7519) containing
+ * the provided payload and using the signature algorithm specified in the options.
+ * @param payload The body of the JWT.
+ * @param key The key used for the signature.
+ * @param options
+ * @returns a 3-parts base64-encoded string, split by dots.
+ * @hidden
+ */
+export async function signJWT(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>,
+  key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
+  options?: JoseJWT.SignOptions
+): Promise<string> {
+  const parsedKey = await JWK.asKey(key);
+  const convertedKey: string = parsedKey.toPEM(true);
+  const signed = JWT.sign(payload, convertedKey, {
+    ...(options as JWT.SignOptions),
+  });
+  return signed;
+}
+
+/**
+ * Decodes the base64 Json Web Token into an object. If a key is specified, the
+ * JWT is also verified.
+ * @param token The base64-encoded token
+ * @param key The key used to sign the token
+ * @returns the payload of the JWT
+ * @hidden
+ */
+export async function decodeJWT(
+  token: string,
+  key?: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
+  options?: VerifyOptions
+): Promise<Record<string, unknown>> {
+  if (key) {
+    const parsedKey = await JWK.asKey(key);
+    const convertedKey: string = parsedKey.toPEM(true);
+    return JWT.verify(token, convertedKey, options) as Promise<
+      Record<string, unknown>
+    >;
+  }
+  return JWT.decode(token) as Promise<Record<string, unknown>>;
+}
+
+/**
+ * @param key
+ * @hidden
+ */
+export async function privateJWKToPublicJWK(
+  key: JSONWebKey
+): Promise<JSONWebKey> {
+  return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
+}
+
+/**
+ * Generates a PKCE (https://tools.ietf.org/html/rfc7636) token.
+ * @returns A random string usable as a code verifier.
+ * @hidden
+ */
+export async function generateCodeVerifier(): Promise<string> {
+  return randomString({ length: 10, type: "base64" });
+}
+
+/**
+ * Hashes the code verifier to create a code challenge.
+ * @param verifier A PKCE token.
+ * @returns A SHA-256 hash of the input token.
+ * @hidden
+ */
+export async function generateCodeChallenge(verifier: string): Promise<string> {
+  const hash = crypto.createHash("sha256");
+  hash.update(verifier);
+  return hash
+    .digest()
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+}
+
+/**
  * @hidden
  */
 export default class IsomorphicJoseUtility implements IJoseUtility {
-  async generateJWK(
-    kty: "EC" | "OKP" | "RSA" | "oct",
-    crvBitlength?: ECCurve | OKPCurve | number,
-    parameters?: BasicParameters
-  ): Promise<JSONWebKey> {
-    const key = await JWK.createKey(kty, crvBitlength, parameters);
-    return key.toJSON(true) as JSONWebKey;
-  }
+  generateJWK = generateJWK;
 
-  async signJWT(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    payload: Record<string, any>,
-    key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
-    options?: JoseJWT.SignOptions
-  ): Promise<string> {
-    const parsedKey = await JWK.asKey(key);
-    const convertedKey: string = parsedKey.toPEM(true);
-    const signed = JWT.sign(payload, convertedKey, {
-      ...(options as JWT.SignOptions),
-    });
-    return signed;
-  }
+  signJWT = signJWT;
 
-  // TODO: also should have functionality to validate the token
-  async decodeJWT(token: string): Promise<Record<string, unknown>> {
-    return JWT.decode(token) as Promise<Record<string, unknown>>;
-  }
+  decodeJWT = decodeJWT;
 
-  async privateJWKToPublicJWK(key: JSONWebKey): Promise<JSONWebKey> {
-    return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
-  }
+  privateJWKToPublicJWK = privateJWKToPublicJWK;
 
-  async generateCodeVerifier(): Promise<string> {
-    return randomString({ length: 10, type: "base64" });
-  }
+  generateCodeVerifier = generateCodeVerifier;
 
-  async generateCodeChallenge(verifier: string): Promise<string> {
-    const hash = crypto.createHash("sha256");
-    hash.update(verifier);
-    return hash
-      .digest()
-      .toString("base64")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "");
-  }
+  generateCodeChallenge = generateCodeChallenge;
 }
