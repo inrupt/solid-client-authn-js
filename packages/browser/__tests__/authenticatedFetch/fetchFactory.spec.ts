@@ -68,7 +68,7 @@ describe("buildDpopFetch", () => {
     const dpopHeader = fetch.fetch.mock.calls[0][1]?.headers["DPoP"];
     /* eslint-enable @typescript-eslint/ban-ts-ignore */
     const decodedHeader = await decodeJWT(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url/");
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
   });
 });
