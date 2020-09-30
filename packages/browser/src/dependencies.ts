@@ -97,6 +97,7 @@ import TokenRefresher, {
 import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetcher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 import InMemoryStorage from "./storage/InMemoryStorage";
+import { ISessionManager, SessionManager } from "./SessionManager";
 
 const container = emptyContainer;
 
@@ -130,6 +131,9 @@ container.register<IUrlRepresentationConverter>("urlRepresentationConverter", {
 // Session
 container.register<ISessionInfoManager>("sessionInfoManager", {
   useClass: SessionInfoManager,
+});
+container.register<ISessionManager>("sessionManager", {
+  useClass: SessionManager,
 });
 
 // Authenticated Fetcher
@@ -243,6 +247,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
 }): ClientAuthentication {
   let secureStorage;
   let insecureStorage;
+
   switch (detectEnvironment()) {
     case "browser":
     case "react-native":

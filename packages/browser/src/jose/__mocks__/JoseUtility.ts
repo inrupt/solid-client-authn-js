@@ -65,7 +65,9 @@ export const JoseUtilityPrivateToPublicJWKResponse: JSONWebKey = {
     "uCLWDLyIVCWNdVSxdhob9TgdSUKq5GmiUjm8IDRH_hebpDIxoVwY1L2QVe50lk5iGObQJyBy5ylTHu1SxRUUUWl6IcrKp4xQRuIkAd7FO9RuowbgH26BEup36gtU5T2Qliiy7izK7Q4EX6JaXe9S7d-k7j2FqpHue9fH-KAYnuU",
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const JoseUtilityDecodeJWTResponse: Record<string, any> = {};
+export const JoseUtilityDecodeJWTResponse: Record<string, any> = {
+  sub: "mocked sub claim value",
+};
 export const JoseUtilitySignJWTResponse = "signedToken";
 export const JoseUtilityGenerateCodeVerifierResponse = "codeVerifier";
 export const JoseUtilityGenerateCodeChallengeResponse = "codeChallenge";

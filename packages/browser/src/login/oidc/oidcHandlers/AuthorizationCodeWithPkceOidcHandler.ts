@@ -33,9 +33,8 @@ import {
   IRedirector,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
-import IJoseUtility from "../../../jose/IJoseUtility";
+import { OidcClient, SigninRequest } from "oidc-client";
 
 /**
  * @hidden
@@ -44,7 +43,6 @@ import IJoseUtility from "../../../jose/IJoseUtility";
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler {
   constructor(
-    @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector
   ) {}
@@ -59,36 +57,62 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
-    const requestUrl = new URL(
-      oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
-    );
-    const codeVerifier = await this.joseUtility.generateCodeVerifier();
-    // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */
-    const query: { [key: string]: string } = {
-      response_type: "code id_token",
-      redirect_uri: oidcLoginOptions.redirectUrl.toString(),
-      // TODO: the 'webid' scope does not appear in the specification
-      // A question regarding its use has been filed https://github.com/solid/specification
-      scope: "openid webid offline_access",
+    const oidcOptions = {
+      authority: oidcLoginOptions.issuer?.toString(),
       client_id: oidcLoginOptions.client.clientId,
-      code_challenge_method: "S256",
-      code_challenge: await this.joseUtility.generateCodeChallenge(
-        codeVerifier
-      ),
-      state: oidcLoginOptions.sessionId,
+      client_secret: oidcLoginOptions.client.clientSecret,
+      redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
+      post_logout_redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
+      response_type: "code",
+      // TODO: The 'webid' scope is still a spec discussion topic
+      //  https://github.com/solid/specification/issues/203, i.e. the 'webid'
+      //  scope does not yet appear in the Solid specification (it's not even
+      //  mentioned in the WebID-OIDC spec).
+      scope: "openid webid offline_access",
+      filterProtocolClaims: true,
+      loadUserInfo: true,
+      code_verifier: true,
     };
     /* eslint-enable @typescript-eslint/camelcase */
-    requestUrl.set("query", query);
-    // TODO: This is inefficent, there should be a bulk
-    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-      codeVerifier,
-      issuer: oidcLoginOptions.issuer.toString(),
-      redirectUri: oidcLoginOptions.redirectUrl.toString(),
-    });
 
-    this.redirector.redirect(requestUrl.toString(), {
-      handleRedirect: oidcLoginOptions.handleRedirect,
-    });
+    const oidcClientLibrary = new OidcClient(oidcOptions);
+
+    const redirector = this.redirector;
+    const storage = this.storageUtility;
+
+    return (
+      oidcClientLibrary
+        .createSigninRequest()
+        .then(async function (req: SigninRequest) {
+          // We use the OAuth 'state' value (which should be crypto-random) as
+          // the key in our storage to store our actual SessionID. We do this 'cos
+          // we'll need to lookup our session information again when the browser
+          // is redirected back to us (i.e. the OAuth client application) from the
+          // Authorization Server.
+          // We don't want to use our session ID as the OAuth 'state' value, as
+          // that session ID can be any developer-specified value, and therefore
+          // may not be appropriate (since the OAuth 'state' value should really
+          // be an unguessable crypto-random value).
+          await Promise.all([
+            storage.setForUser(req.state._id, {
+              sessionId: oidcLoginOptions.sessionId,
+            }),
+            storage.setForUser(oidcLoginOptions.sessionId, {
+              codeVerifier: req.state._code_verifier,
+              issuer: oidcLoginOptions.issuer.toString(),
+              redirectUri: oidcLoginOptions.redirectUrl.toString(),
+            }),
+          ]);
+
+          redirector.redirect(req.url.toString(), {
+            handleRedirect: oidcLoginOptions.handleRedirect,
+          });
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .catch((err: unknown) => {
+          console.error(err);
+        })
+    );
   }
 }

@@ -44,7 +44,6 @@ export default class BearerAuthenticatedFetcher
   implements IAuthenticatedFetcher {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("urlRepresentationConverter")
     @inject("storageUtility")
     private storageUtility: IStorageUtility
   ) {}
@@ -78,16 +77,19 @@ export default class BearerAuthenticatedFetcher
         secure: true,
       }
     );
+
     if (!authToken) {
       throw new Error(
         `No bearer token are available for session [${requestCredentials.localUserId}]`
       );
     }
+
     const requestInitiWithDefaults = {
       headers: {},
       method: "GET",
       ...requestInit,
     };
+
     return this.fetcher.fetch(url, {
       ...requestInit,
       headers: {

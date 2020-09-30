@@ -27,7 +27,6 @@
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
-import { ITokenRequester } from "../TokenRequester";
 import {
   IRedirector,
   IRedirectHandler,
@@ -35,6 +34,8 @@ import {
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { OidcClient } from "oidc-client";
+import IJoseUtility from "../../../jose/IJoseUtility";
 
 /**
  * @hidden
@@ -42,9 +43,9 @@ import {
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
+    @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector,
-    @inject("tokenRequester") private tokenRequester: ITokenRequester,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager
   ) {}
@@ -61,31 +62,68 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       );
     }
     const url = new URL(redirectUrl, true);
-    const sessionId = url.query.state as string;
-    const [codeVerifier, redirectUri] = await Promise.all([
-      (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
-        errorIfNull: true,
-      })) as string,
-      (await this.storageUtility.getForUser(sessionId, "redirectUri", {
-        errorIfNull: true,
-      })) as string,
-    ]);
+    const oauthState = url.query.state as string;
 
-    /* eslint-disable @typescript-eslint/camelcase */
-    await this.tokenRequester.request(sessionId, {
-      grant_type: "authorization_code",
-      code_verifier: codeVerifier as string,
-      code: url.query.code as string,
-      redirect_uri: redirectUri as string,
-    });
-    /* eslint-enable @typescript-eslint/camelcase */
+    const storedSessionId = (await this.storageUtility.getForUser(
+      oauthState,
+      "sessionId",
+      {
+        errorIfNull: true,
+      }
+    )) as string;
+
+    // PMCB55: TODO: I think we still need a catch handler around this...
+    let signinResponse;
+    try {
+      signinResponse = await new OidcClient({
+        // TODO: We should look at the various interfaces being used for storage,
+        //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
+        //  (which has an interface Storage), and our own proprietary interface
+        //  IStorage - i.e. we should really just be using the browser Web Storage
+        //  API, e.g. "stateStore: window.localStorage,".
+
+        // We are instantiating a new instance here, so the only value we need to
+        // explicitly provide is the response mode (default otherwise will look
+        // for a hash '#' fragment!).
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        response_mode: "query",
+      }).processSigninResponse(redirectUrl.toString());
+    } catch (err) {
+      throw new Error(
+        `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
+      );
+    }
+
+    // We need to decode the access_token JWT to extract out the full WebID.
+    const decoded = await this.joseUtility.decodeJWT(
+      signinResponse.access_token as string
+    );
+    if (!decoded || !decoded.sub) {
+      throw new Error("The idp returned a bad token without a sub.");
+    }
+
+    await this.storageUtility.setForUser(
+      storedSessionId,
+      {
+        accessToken: signinResponse.access_token,
+        idToken: signinResponse.id_token,
+        // TODO: We need a PR to oidc-client-js to add parsing of the
+        //  refresh_token from the redirect URL.
+        refreshToken:
+          "<Refresh token that *is* coming back in the redirect URL is not yet being parsed and provided by oidc-client-js in it's response object>",
+        webId: decoded.sub as string,
+        isLoggedIn: "true",
+      },
+      { secure: true }
+    );
 
     url.set("query", {});
 
-    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
-      throw new Error("There was a problem creating a session.");
+      throw new Error(`Could not retrieve session: [${storedSessionId}].`);
     }
+
     try {
       this.redirector.redirect(url.toString(), {
         redirectByReplacingState: true,

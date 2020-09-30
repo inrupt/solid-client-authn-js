@@ -73,7 +73,9 @@ export class Session extends EventEmitter {
    *   "mySession"
    * );
    * ```
-   * @param sessionOptions The options enabling the correct instanciation of the session. Either both storages or clientAuthentication are required. For more information, see {@link ISessionOptions}.
+   * @param sessionOptions The options enabling the correct instantiation of
+   * the session. Either both storages or clientAuthentication are required. For
+   * more information, see {@link ISessionOptions}.
    * @param sessionId A magic string uniquely identifying the session.
    *
    */
@@ -82,6 +84,7 @@ export class Session extends EventEmitter {
     sessionId?: string
   ) {
     super();
+
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -91,9 +94,10 @@ export class Session extends EventEmitter {
       });
     } else {
       throw new Error(
-        "Session requires either storage options or auth fetcher."
+        "Session requires either storage options, or a client authentication instance."
       );
     }
+
     if (sessionOptions.sessionInfo) {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,

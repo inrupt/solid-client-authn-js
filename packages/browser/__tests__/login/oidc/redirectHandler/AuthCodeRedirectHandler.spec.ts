@@ -27,13 +27,30 @@ import {
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
+import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
+import { SigninResponse } from "oidc-client";
+
+jest.mock("oidc-client", () => {
+  return {
+    OidcClient: jest.fn().mockImplementation(() => {
+      return {
+        processSigninResponse: (): Promise<SigninResponse> =>
+          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // @ts-ignore Ignore because we don't need to mock out all data fields.
+          Promise.resolve({
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            access_token: "test access token",
+          }),
+      };
+    }),
+  };
+});
 
 describe("AuthCodeRedirectHandler", () => {
   const defaultMocks = {
+    joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock,
     redirector: RedirectorMock,
-    tokenRequester: TokenRequesterMock,
     sessionInfoManager: SessionInfoManagerMock,
   };
 
@@ -41,9 +58,9 @@ describe("AuthCodeRedirectHandler", () => {
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): AuthCodeRedirectHandler {
     return new AuthCodeRedirectHandler(
+      mocks.joseUtility ?? defaultMocks.joseUtility,
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.redirector ?? defaultMocks.redirector,
-      mocks.tokenRequester ?? defaultMocks.tokenRequester,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
     );
   }
@@ -53,7 +70,7 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode&state=userId"
+          "https://coolparty.com/?code=someCode&state=oauth2_state_value"
         )
       ).toBe(true);
     });
@@ -96,19 +113,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://coolsite.com/?code=someCode&state=userId"
-      );
-
-      expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith(
-        "userId",
-        /* eslint-disable @typescript-eslint/camelcase */
-        {
-          code: "someCode",
-          code_verifier: "a",
-          grant_type: "authorization_code",
-          redirect_uri: "b",
-        }
-        /* eslint-enable @typescript-eslint/camelcase */
+        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
 
       expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
@@ -125,9 +130,9 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle(
-          "https://coolsite.com/?code=someCode&state=userId"
+          "https://coolsite.com/?code=someCode&state=oauth2_state_value"
         )
-      ).rejects.toThrowError("There was a problem creating a session.");
+      ).rejects.toThrowError("Could not retrieve session");
     });
   });
 });

@@ -46,6 +46,7 @@ describe("ClientAuthentication", () => {
     authenticatedFetcher: AuthenticatedFetcherMock,
     environmentDetector: EnvironmentDetectorMock,
   };
+
   function getClientAuthentication(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): ClientAuthentication {
@@ -120,7 +121,7 @@ describe("ClientAuthentication", () => {
       expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
         {
           localUserId: "mySession",
-          type: "dpop",
+          type: "bearer",
         },
         "https://zombo.com",
         undefined
