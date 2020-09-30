@@ -97,7 +97,7 @@ export async function decodeJWT(
 ): Promise<Record<string, unknown>> {
   if (key) {
     const parsedKey = await JWK.asKey(key);
-    const convertedKey: string = parsedKey.toPEM(true);
+    const convertedKey: string = parsedKey.toPEM(false);
     return JWT.verify(token, convertedKey, options) as Promise<
       Record<string, unknown>
     >;
