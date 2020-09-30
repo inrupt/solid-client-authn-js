@@ -40,7 +40,7 @@ export const mockDpopClientKeyManager = (
 ): IDpopClientKeyManager => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    generateClientKeyIfNotAlready: async (): Promise<void> => {},
+    generateClientKeyIfNotAlready: () => Promise.resolve(),
     getClientKey: async (): Promise<JSONWebKey | undefined> => key,
   };
 };
