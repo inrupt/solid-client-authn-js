@@ -115,13 +115,6 @@ describe("AuthCodeRedirectHandler", () => {
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
-
-      expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
-        "https://coolsite.com/",
-        {
-          redirectByReplacingState: true,
-        }
-      );
     });
 
     it("Fails if a session was not retrieved", async () => {
