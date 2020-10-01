@@ -110,9 +110,9 @@ describe("ClientAuthentication", () => {
   describe("fetch", () => {
     it("calls fetch", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.fetch("https://zombo.com");
+      await clientAuthn.fetch("https://html5zombo.com");
       expect(defaultMocks.fetcher.fetch).toHaveBeenCalledWith(
-        "https://zombo.com"
+        "https://html5zombo.com"
       );
     });
   });
