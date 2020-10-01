@@ -159,7 +159,6 @@ describe("ClientAuthentication", () => {
       const redirectInfo = await clientAuthn.handleIncomingRedirect(url);
       expect(redirectInfo).toEqual({
         ...RedirectHandlerResponse,
-        accessToken: "myToken",
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
       // Calling handleredirect should have updated the fetch
