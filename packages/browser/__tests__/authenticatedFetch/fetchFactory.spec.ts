@@ -29,6 +29,9 @@ import { decodeJWT, generateJWK } from "../../src/jose/IsomorphicJoseUtility";
 
 jest.mock("cross-fetch");
 
+// We use ts-ignore comments here only to access mock call arguments
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
     const fetch = jest.requireMock("cross-fetch") as {
@@ -39,11 +42,48 @@ describe("buildBearerFetch", () => {
     };
     const myFetch = buildBearerFetch("myToken");
     await myFetch("someUrl");
-    expect(fetch).toHaveBeenCalledWith("someUrl", {
-      headers: {
-        Authorization: "Bearer myToken",
-      },
-    });
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+    ).toEqual("Bearer myToken");
+  });
+
+  it("returns a fetch preserving the optional headers", async () => {
+    const fetch = jest.requireMock("cross-fetch") as {
+      fetch: jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
+    };
+    const myFetch = buildBearerFetch("myToken");
+    await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+    ).toEqual("Bearer myToken");
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("someHeader")
+    ).toEqual("SomeValue");
+  });
+
+  it("returns a fetch overriding any pre-existing authorization headers", async () => {
+    const fetch = jest.requireMock("cross-fetch") as {
+      fetch: jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
+    };
+    const myFetch = buildBearerFetch("myToken");
+    await myFetch("someUrl", { headers: { Authorization: "some token" } });
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+    ).toEqual("Bearer myToken");
   });
 });
 
@@ -58,17 +98,76 @@ describe("buildDpopFetch", () => {
     const key = await generateJWK("EC", "P-256", { alg: "ES256" });
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url");
-    // We use ts-ignore comments here only to access mock call arguments
-    /* eslint-disable @typescript-eslint/ban-ts-ignore */
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+    ).toEqual("DPoP myToken");
     // @ts-ignore
-    expect(fetch.fetch.mock.calls[0][1]?.headers["Authorization"]).toEqual(
-      "DPoP myToken"
-    );
+    const dpopHeader = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
+      "DPoP"
+    ) as string;
+    const decodedHeader = await decodeJWT(dpopHeader, key);
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
+    expect(decodedHeader["htm"]).toEqual("get");
+  });
+
+  it("returns a fetch preserving the provided optional headers", async () => {
+    const fetch = jest.requireMock("cross-fetch") as {
+      fetch: jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
+    };
+    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const myFetch = await buildDpopFetch("myToken", key);
+    await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+    ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = fetch.fetch.mock.calls[0][1]?.headers["DPoP"];
-    /* eslint-enable @typescript-eslint/ban-ts-ignore */
+    const dpopHeader = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
+      "DPoP"
+    ) as string;
+    const decodedHeader = await decodeJWT(dpopHeader, key);
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
+    expect(decodedHeader["htm"]).toEqual("get");
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("someHeader")
+    ).toEqual("SomeValue");
+  });
+
+  it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
+    const fetch = jest.requireMock("cross-fetch") as {
+      fetch: jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
+    };
+    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const myFetch = await buildDpopFetch("myToken", key);
+    await myFetch("http://some.url", {
+      headers: {
+        Authorization: "some token",
+        DPoP: "some header",
+      },
+    });
+
+    expect(
+      // @ts-ignore
+      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+    ).toEqual("DPoP myToken");
+    // @ts-ignore
+    const dpopHeader = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
+      "DPoP"
+    ) as string;
     const decodedHeader = await decodeJWT(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
   });
 });
+/* eslint-enable @typescript-eslint/ban-ts-ignore */
