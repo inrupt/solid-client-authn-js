@@ -116,6 +116,10 @@ export default class ClientAuthentication {
     // TODO: When handling DPoP, both the key and the token should be returned
     // by the redirect handler.
     this.fetch = buildBearerFetch(redirectInfo.accessToken);
-    return { ...redirectInfo } as ISessionInfo;
+    return {
+      isLoggedIn: redirectInfo.isLoggedIn,
+      webId: redirectInfo.webId,
+      sessionId: redirectInfo.sessionId,
+    };
   };
 }
