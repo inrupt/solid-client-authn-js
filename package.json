@@ -59,11 +59,9 @@
   },
   "lint-staged": {
     "packages/*/src/**/*.{ts,js,css,json}": [
-      "eslint --max-warnings=0",
       "prettier --write"
     ],
     "packages/*/__tests__/**/*.{ts,js,css,json}": [
-      "eslint --max-warnings=0",
       "prettier --write"
     ]
   }
