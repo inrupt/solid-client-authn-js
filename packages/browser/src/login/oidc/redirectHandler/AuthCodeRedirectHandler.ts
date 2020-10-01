@@ -34,7 +34,7 @@ import {
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { OidcClient } from "oidc-client";
+import { OidcClient } from "@inrupt/oidc-dpop-client-browser";
 import IJoseUtility from "../../../jose/IJoseUtility";
 
 /**
