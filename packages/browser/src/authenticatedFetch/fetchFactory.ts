@@ -24,8 +24,6 @@ import { JSONWebKey } from "jose";
 import { createHeaderToken } from "../dpop/DpopHeaderCreator";
 import { fetch } from "cross-fetch";
 
-jest.mock("cross-fetch");
-
 /**
  * @param authToken A bearer token.
  * @returns A fetch function that adds an Authorization header with the provided
