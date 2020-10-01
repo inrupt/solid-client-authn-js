@@ -26,17 +26,14 @@
 
 import { injectable, inject } from "tsyringe";
 import IJoseUtility from "../../../jose/IJoseUtility";
-import {
-  ISessionInfoManager,
-  IStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+import { IStorageUtility } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden
  */
 export interface ITokenSaver {
-  saveTokenAndGetSession(
-    localUserId: string,
+  saveSession(
+    oauthState: string,
     idToken: string,
     accessToken?: string,
     refreshToken?: string
@@ -49,13 +46,12 @@ export interface ITokenSaver {
 @injectable()
 export default class TokenSaver implements ITokenSaver {
   constructor(
-    @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager,
     @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
-  async saveTokenAndGetSession(
-    sessionId: string,
+  async saveSession(
+    oauthState: string,
     idToken: string,
     accessToken?: string,
     refreshToken?: string
@@ -64,12 +60,18 @@ export default class TokenSaver implements ITokenSaver {
       // TODO this should actually be the id_vc of the token
       accessToken as string
     );
+    const sessionId = (await this.storageUtility.getForUser(
+      oauthState,
+      "sessionId",
+      {
+        errorIfNull: true,
+      }
+    )) as string;
+
     // TODO validate decoded token
-    // TODO extract the localUserId from state and put it in the session
     await this.storageUtility.setForUser(
       sessionId,
       {
-        accessToken: accessToken as string,
         webId: decoded.sub as string,
         idToken: idToken as string,
         refreshToken: refreshToken as string,

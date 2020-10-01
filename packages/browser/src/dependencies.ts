@@ -87,7 +87,6 @@ import TokenSaver, {
   ITokenSaver,
 } from "./login/oidc/redirectHandler/TokenSaver";
 import Redirector from "./login/oidc/Redirector";
-import InactionRedirectHandler from "./login/oidc/redirectHandler/InactionRedirectHandler";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
@@ -218,9 +217,6 @@ container.register<IRedirectHandler>("redirectHandlers", {
 });
 container.register<IRedirectHandler>("redirectHandlers", {
   useClass: GeneralRedirectHandler,
-});
-container.register<IRedirectHandler>("redirectHandlers", {
-  useClass: InactionRedirectHandler,
 });
 container.register<ITokenSaver>("tokenSaver", {
   useClass: TokenSaver,

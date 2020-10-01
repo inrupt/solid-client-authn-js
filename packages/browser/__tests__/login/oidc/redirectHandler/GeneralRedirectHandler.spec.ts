@@ -84,9 +84,11 @@ describe("GeneralRedirectHandler", () => {
           "https://coolsite/?id_token=a&access_token=b&state=c"
         )
       ).toBe(SessionCreatorCreateResponse);
-      expect(
-        defaultMocks.tokenSaver.saveTokenAndGetSession
-      ).toHaveBeenCalledWith("c", "a", "b");
+      expect(defaultMocks.tokenSaver.saveSession).toHaveBeenCalledWith(
+        "c",
+        "a",
+        "b"
+      );
     });
   });
 });

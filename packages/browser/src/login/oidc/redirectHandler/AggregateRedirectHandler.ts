@@ -39,7 +39,7 @@ import {
  */
 @injectable()
 export default class AggregateRedirectHandler
-  extends AggregateHandler<[string], ISessionInfo | undefined>
+  extends AggregateHandler<[string], ISessionInfo & { accessToken: string }>
   implements IRedirectHandler {
   constructor(
     @injectAll("redirectHandlers") redirectHandlers: IRedirectHandler[]

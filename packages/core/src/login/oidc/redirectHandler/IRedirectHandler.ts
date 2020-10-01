@@ -34,6 +34,6 @@ import IHandleable from "../../../util/handlerPattern/IHandleable";
  */
 type IRedirectHandler = IHandleable<
   [string],
-  Promise<ISessionInfo & { accessToken: string }>
+  ISessionInfo & { accessToken: string }
 >;
 export default IRedirectHandler;
