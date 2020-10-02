@@ -30,13 +30,12 @@ import {
   ILoginInputOptions,
   ILoginHandler,
   ILogoutHandler,
-  IAuthenticatedFetcher,
   IRedirectHandler,
-  IRequestCredentials,
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
+import { IFetcher } from "./util/Fetcher";
 
 /**
  * @hidden
@@ -49,8 +48,8 @@ export default class ClientAuthentication {
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
-    @inject("authenticatedFetcher")
-    private authenticatedFetcher: IAuthenticatedFetcher,
+    @inject("fetcher")
+    private fetcher: IFetcher,
     @inject("environmentDetector")
     private environmentDetector: IEnvironmentDetector
   ) {}
@@ -91,21 +90,8 @@ export default class ClientAuthentication {
     });
   };
 
-  fetch = async (
-    sessionId: string,
-    url: RequestInfo,
-    init?: RequestInit
-  ): Promise<Response> => {
-    const credentials: IRequestCredentials = {
-      localUserId: sessionId,
-      // TODO: This should not be hard-coded
-      // type: "dpop",
-      // PMcB55: No, it definitely shouldn't :)! DPoP is still to be implemented
-      // using 'oidc-client-js'.
-      type: "bearer",
-    };
-    return this.authenticatedFetcher.handle(credentials, url, init);
-  };
+  // By default, resolves to the environment fetch function.
+  fetch = this.fetcher.fetch;
 
   logout = async (sessionId: string): Promise<void> => {
     this.logoutHandler.handle(sessionId);
@@ -125,6 +111,14 @@ export default class ClientAuthentication {
   handleIncomingRedirect = async (
     url: string
   ): Promise<ISessionInfo | undefined> => {
-    return this.redirectHandler.handle(url);
+    const redirectInfo = await this.redirectHandler.handle(url);
+    // TODO: When handling DPoP, both the key and the token should be returned
+    // by the redirect handler.
+    this.fetch = redirectInfo.fetch;
+    return {
+      isLoggedIn: redirectInfo.isLoggedIn,
+      webId: redirectInfo.webId,
+      sessionId: redirectInfo.sessionId,
+    };
   };
 }

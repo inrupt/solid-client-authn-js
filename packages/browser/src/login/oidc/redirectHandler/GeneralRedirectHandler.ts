@@ -33,6 +33,7 @@ import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
+import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
 
 /**
  * @hidden
@@ -54,7 +55,9 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
       url.query.state
     );
   }
-  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
+  async handle(
+    redirectUrl: string
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(
         `Cannot handle redirect url [${redirectUrl}]`
@@ -62,12 +65,20 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
     }
     const url = new URL(redirectUrl, true);
 
-    await this.tokenSaver.saveTokenAndGetSession(
+    await this.tokenSaver.saveSession(
       url.query.state as string,
       url.query.id_token as string,
       url.query.access_token
     );
     const sessionId = url.query.state as string;
-    return await this.sessionInfoManager.get(sessionId);
+    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    if (url.query.access_token === undefined) {
+      throw new Error(
+        `No access token is present in the redirect URL: [${url.toString()}]`
+      );
+    }
+    return Object.assign(sessionInfo, {
+      fetch: buildBearerFetch(url.query.access_token),
+    });
   }
 }

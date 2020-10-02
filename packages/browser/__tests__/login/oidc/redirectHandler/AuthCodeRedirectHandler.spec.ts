@@ -29,42 +29,55 @@ import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector"
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { SigninResponse } from "@inrupt/oidc-dpop-client-browser";
+import {
+  generateJWK,
+  signJWT,
+} from "../../../../src/jose/IsomorphicJoseUtility";
+
+jest.mock("cross-fetch");
 
 jest.mock("@inrupt/oidc-dpop-client-browser", () => {
   return {
     OidcClient: jest.fn().mockImplementation(() => {
       return {
-        processSigninResponse: (): Promise<SigninResponse> =>
+        processSigninResponse: async (): Promise<SigninResponse> => {
+          const jwk = await generateJWK("RSA");
+          const accessToken = await signJWT({ sub: "https://my.webid" }, jwk, {
+            algorithm: "RS256",
+          });
           // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           // @ts-ignore Ignore because we don't need to mock out all data fields.
-          Promise.resolve({
+          return Promise.resolve({
             // eslint-disable-next-line @typescript-eslint/camelcase
-            access_token: "test access token",
-          }),
+            access_token: accessToken,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            id_token: "Some ID token",
+          });
+        },
       };
     }),
   };
 });
 
+const defaultMocks = {
+  joseUtility: JoseUtilityMock,
+  storageUtility: StorageUtilityMock,
+  redirector: RedirectorMock,
+  sessionInfoManager: SessionInfoManagerMock,
+};
+
+function getAuthCodeRedirectHandler(
+  mocks: Partial<typeof defaultMocks> = defaultMocks
+): AuthCodeRedirectHandler {
+  return new AuthCodeRedirectHandler(
+    mocks.joseUtility ?? defaultMocks.joseUtility,
+    mocks.storageUtility ?? defaultMocks.storageUtility,
+    mocks.redirector ?? defaultMocks.redirector,
+    mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
+  );
+}
+
 describe("AuthCodeRedirectHandler", () => {
-  const defaultMocks = {
-    joseUtility: JoseUtilityMock,
-    storageUtility: StorageUtilityMock,
-    redirector: RedirectorMock,
-    sessionInfoManager: SessionInfoManagerMock,
-  };
-
-  function getAuthCodeRedirectHandler(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
-  ): AuthCodeRedirectHandler {
-    return new AuthCodeRedirectHandler(
-      mocks.joseUtility ?? defaultMocks.joseUtility,
-      mocks.storageUtility ?? defaultMocks.storageUtility,
-      mocks.redirector ?? defaultMocks.redirector,
-      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
-    );
-  }
-
   describe("canHandler", () => {
     it("Accepts a valid url with the correct query", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
@@ -115,13 +128,6 @@ describe("AuthCodeRedirectHandler", () => {
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
-
-      expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
-        "https://coolsite.com/",
-        {
-          redirectByReplacingState: true,
-        }
-      );
     });
 
     it("Fails if a session was not retrieved", async () => {
@@ -133,6 +139,34 @@ describe("AuthCodeRedirectHandler", () => {
           "https://coolsite.com/?code=someCode&state=oauth2_state_value"
         )
       ).rejects.toThrowError("Could not retrieve session");
+    });
+
+    // We use ts-ignore comments here only to access mock call arguments
+    /* eslint-disable @typescript-eslint/ban-ts-ignore */
+    it("returns an authenticated fetch", async () => {
+      const fetch = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock<
+          ReturnType<typeof window.fetch>,
+          [RequestInfo, RequestInit?]
+        >;
+      };
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockStorageUtility({}),
+      });
+      const redirectInfo = await authCodeRedirectHandler.handle(
+        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+      );
+      await redirectInfo.fetch("https://some.other.url");
+      // @ts-ignore
+      const header = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
+        "Authorization"
+      );
+      // We test that the Authorization header matches the structure of a JWT.
+      expect(
+        // @ts-ignore
+        header
+      ).toMatch(/^Bearer .+\..+\..+$/);
     });
   });
 });

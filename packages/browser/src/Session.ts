@@ -134,7 +134,7 @@ export class Session extends EventEmitter {
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    return this.clientAuthentication.fetch(this.info.sessionId, url, init);
+    return this.clientAuthentication.fetch(url, init);
   };
 
   /**

@@ -38,7 +38,6 @@ describe("TokenSaver", () => {
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): TokenSaver {
     return new TokenSaver(
-      mocks.sessionCreator ?? defaultMocks.sessionCreator,
       mocks.joseUtility ?? defaultMocks.joseUtility,
       mocks.storageUtility ?? defaultMocks.storageUtility
     );

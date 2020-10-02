@@ -36,6 +36,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { OidcClient } from "@inrupt/oidc-dpop-client-browser";
 import IJoseUtility from "../../../jose/IJoseUtility";
+import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
 
 /**
  * @hidden
@@ -55,7 +56,9 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     return !!(url.query && url.query.code && url.query.state);
   }
 
-  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
+  async handle(
+    redirectUrl: string
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(
         `Cannot handle redirect url [${redirectUrl}]`
@@ -105,7 +108,6 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     await this.storageUtility.setForUser(
       storedSessionId,
       {
-        accessToken: signinResponse.access_token,
         idToken: signinResponse.id_token,
         // TODO: We need a PR to oidc-client-js to add parsing of the
         //  refresh_token from the redirect URL.
@@ -117,23 +119,13 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       { secure: true }
     );
 
-    url.set("query", {});
-
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
       throw new Error(`Could not retrieve session: [${storedSessionId}].`);
     }
 
-    try {
-      this.redirector.redirect(url.toString(), {
-        redirectByReplacingState: true,
-      });
-    } catch (err) {
-      // Do nothing
-      // This step of the flow should happen in a browser, and redirection
-      // should never fail there.
-    }
-
-    return sessionInfo;
+    return Object.assign(sessionInfo, {
+      fetch: buildBearerFetch(signinResponse.access_token),
+    });
   }
 }
