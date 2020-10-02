@@ -39,6 +39,6 @@ export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
   canHandle: jest.fn((url: string) => Promise.resolve(true)),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handle: jest.fn((url: string) =>
-    Promise.resolve({ ...RedirectHandlerResponse, accessToken: "myToken" })
+    Promise.resolve({ ...RedirectHandlerResponse, fetch: jest.fn() })
   ),
 };

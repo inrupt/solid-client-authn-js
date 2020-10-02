@@ -26,6 +26,12 @@ import {
   SessionCreatorCreateResponse,
 } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import GeneralRedirectHandler from "../../../../src/login/oidc/redirectHandler/GeneralRedirectHandler";
+import {
+  generateJWK,
+  signJWT,
+} from "../../../../src/jose/IsomorphicJoseUtility";
+
+jest.mock("cross-fetch");
 
 describe("GeneralRedirectHandler", () => {
   const defaultMocks = {
@@ -89,6 +95,40 @@ describe("GeneralRedirectHandler", () => {
         "a",
         "b"
       );
+    });
+
+    // We use ts-ignore comments here only to access mock call arguments
+    /* eslint-disable @typescript-eslint/ban-ts-ignore */
+    it("returns an authenticated fetch", async () => {
+      const fetch = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock<
+          ReturnType<typeof window.fetch>,
+          [RequestInfo, RequestInit?]
+        >;
+      };
+      const jwk = await generateJWK("RSA");
+      const accessToken = await signJWT({ sub: "https://my.webid" }, jwk, {
+        algorithm: "RS256",
+      });
+      const redirectUrl = new URL("http://some.url");
+      redirectUrl.searchParams.append("access_token", accessToken);
+      redirectUrl.searchParams.append("id_token", "Some ID token");
+      redirectUrl.searchParams.append("state", "Idaho");
+
+      const authCodeRedirectHandler = getGeneralRedirectHandler();
+      const redirectInfo = await authCodeRedirectHandler.handle(
+        redirectUrl.toString()
+      );
+      await redirectInfo.fetch("https://some.other.url");
+      // @ts-ignore
+      const header = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
+        "Authorization"
+      );
+      // We test that the Authorization header matches the structure of a JWT.
+      expect(
+        // @ts-ignore
+        header
+      ).toMatch(/^Bearer .+\..+\..+$/);
     });
   });
 });

@@ -35,7 +35,6 @@ import {
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
-import { buildBearerFetch } from "./authenticatedFetch/fetchFactory";
 import { IFetcher } from "./util/Fetcher";
 
 /**
@@ -115,7 +114,7 @@ export default class ClientAuthentication {
     const redirectInfo = await this.redirectHandler.handle(url);
     // TODO: When handling DPoP, both the key and the token should be returned
     // by the redirect handler.
-    this.fetch = buildBearerFetch(redirectInfo.accessToken);
+    this.fetch = redirectInfo.fetch;
     return {
       isLoggedIn: redirectInfo.isLoggedIn,
       webId: redirectInfo.webId,

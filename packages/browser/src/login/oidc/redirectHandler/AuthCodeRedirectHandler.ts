@@ -36,6 +36,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { OidcClient } from "@inrupt/oidc-dpop-client-browser";
 import IJoseUtility from "../../../jose/IJoseUtility";
+import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
 
 /**
  * @hidden
@@ -57,7 +58,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
   async handle(
     redirectUrl: string
-  ): Promise<ISessionInfo & { accessToken: string }> {
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(
         `Cannot handle redirect url [${redirectUrl}]`
@@ -124,7 +125,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
 
     return Object.assign(sessionInfo, {
-      accessToken: signinResponse.access_token,
+      fetch: buildBearerFetch(signinResponse.access_token),
     });
   }
 }
