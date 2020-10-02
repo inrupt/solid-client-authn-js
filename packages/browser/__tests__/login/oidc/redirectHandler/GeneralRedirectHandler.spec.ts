@@ -121,9 +121,7 @@ describe("GeneralRedirectHandler", () => {
       );
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
-        "Authorization"
-      );
+      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
       // We test that the Authorization header matches the structure of a JWT.
       expect(
         // @ts-ignore

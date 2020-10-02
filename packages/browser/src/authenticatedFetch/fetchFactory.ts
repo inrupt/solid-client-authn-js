@@ -22,7 +22,7 @@
 import URL from "url-parse";
 import { JSONWebKey } from "jose";
 import { createHeaderToken } from "../dpop/DpopHeaderCreator";
-import { fetch, Headers } from "cross-fetch";
+import { fetch } from "cross-fetch";
 
 /**
  * @param authToken A bearer token.
@@ -32,11 +32,12 @@ import { fetch, Headers } from "cross-fetch";
  */
 export function buildBearerFetch(authToken: string): typeof fetch {
   return (init, options): Promise<Response> => {
-    const headers = new Headers(options?.headers);
-    headers.set("Authorization", `Bearer ${authToken}`);
     return fetch(init, {
       ...options,
-      headers: headers,
+      headers: {
+        ...options?.headers,
+        Authorization: `Bearer ${authToken}`,
+      },
     });
   };
 }
@@ -52,19 +53,17 @@ export async function buildDpopFetch(
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
   return async (init, options): Promise<Response> => {
-    const headers = new Headers(options?.headers);
-    headers.set("Authorization", `DPoP ${authToken}`);
-    headers.set(
-      "DPoP",
-      await createHeaderToken(
-        new URL(init.toString()),
-        options?.method ?? "get",
-        dpopKey
-      )
-    );
     return fetch(init, {
       ...options,
-      headers: headers,
+      headers: {
+        ...options?.headers,
+        Authorization: `DPoP ${authToken}`,
+        DPoP: await createHeaderToken(
+          new URL(init.toString()),
+          options?.method ?? "get",
+          dpopKey
+        ),
+      },
     });
   };
 }
