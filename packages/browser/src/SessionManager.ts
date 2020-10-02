@@ -187,6 +187,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
    * it only removes references to it, so after this call the session will become unreachable.
    *
    * @param sessionId A unique session identifier.
+   * @since 0.2.0
    */
   detachSession(sessionId: string): void {
     const sessionRecord = this.sessionRecords[sessionId];

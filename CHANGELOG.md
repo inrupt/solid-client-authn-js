@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+### New features
+
+## [0.2.0]
+
+### Breaking changes
+
+- Fixed typo in `detachSession` function name for the browser `SessionManager`.
+
 ### Internal refactor:
 
 - Uses [oidc-client-js](https://github.com/IdentityModel/oidc-client-js) now to
@@ -15,7 +23,7 @@ perform the Auth Code Flow (replacing lots of hand-rolled code).
 ### Bugfixes
 
 - Source files are now also published to npm, so source maps should work from now on.
-- Fixed typo in `detachSession` function name for the browser `SessionManager`.
+- Patches a security vulnerability: https://www.npmjs.com/advisories/1561
 
 ## [0.1.4] - 2020-09-11
 
