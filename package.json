@@ -58,7 +58,10 @@
     }
   },
   "lint-staged": {
-    "*.{ts,js,css,json}": [
+    "packages/*/src/**/*.{ts,js,css,json}": [
+      "prettier --write"
+    ],
+    "packages/*/__tests__/**/*.{ts,js,css,json}": [
       "prettier --write"
     ]
   }
