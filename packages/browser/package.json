@@ -63,7 +63,7 @@
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^2.4.2",
+    "typedoc-plugin-markdown": "^3.0.4",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
     "webpack-bundle-analyzer": "^3.8.0",
