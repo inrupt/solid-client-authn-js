@@ -28,9 +28,9 @@ import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
-import { SigninResponse } from "oidc-client";
+import { SigninResponse } from "@inrupt/oidc-dpop-client-browser";
 
-jest.mock("oidc-client", () => {
+jest.mock("@inrupt/oidc-dpop-client-browser", () => {
   return {
     OidcClient: jest.fn().mockImplementation(() => {
       return {

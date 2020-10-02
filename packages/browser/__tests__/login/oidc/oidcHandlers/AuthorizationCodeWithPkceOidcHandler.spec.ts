@@ -32,10 +32,10 @@ import {
   IOidcOptions,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { SigninRequest } from "oidc-client";
+import { SigninRequest } from "@inrupt/oidc-dpop-client-browser";
 
 const expectedSigninRedirectUrl = "https://test";
-jest.mock("oidc-client", () => {
+jest.mock("@inrupt/oidc-dpop-client-browser", () => {
   return {
     OidcClient: jest.fn().mockImplementation(() => {
       return {

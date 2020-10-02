@@ -19,8 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Required by TSyringe:
-import "reflect-metadata";
 import StorageUtility from "../../src/storage/StorageUtility";
 import { mockStorageUtility } from "../../src";
 import { mockUserIdStoringInvalidData } from "../../src/storage/__mocks__/StorageUtility";
