@@ -22,7 +22,7 @@
 import URL from "url-parse";
 import { JSONWebKey } from "jose";
 import { createHeaderToken } from "../dpop/DpopHeaderCreator";
-import { fetch } from "cross-fetch";
+import { fetch, Headers } from "cross-fetch";
 
 /**
  * @param authToken A bearer token.

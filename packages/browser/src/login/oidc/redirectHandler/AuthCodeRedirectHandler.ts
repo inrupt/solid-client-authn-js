@@ -123,7 +123,6 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     if (!sessionInfo) {
       throw new Error(`Could not retrieve session: [${storedSessionId}].`);
     }
-
     return Object.assign(sessionInfo, {
       fetch: buildBearerFetch(signinResponse.access_token),
     });
