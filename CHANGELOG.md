@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+### Bugfixes
+
+- The Authorization header was not set properly, which made it impossible to access private resources.
+
 ## [0.2.0]
 
 ### Breaking changes
