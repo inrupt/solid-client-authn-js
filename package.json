@@ -38,7 +38,7 @@
     "license-checker": "^25.0.1",
     "lint-staged": "^10.2.13",
     "node-fetch": "^2.6.1",
-    "prettier": "2.1.1",
+    "prettier": "2.1.2",
     "rollup": "^2.26.11",
     "rollup-plugin-typescript2": "^0.27.2",
     "ts-jest": "^25.5.1",
