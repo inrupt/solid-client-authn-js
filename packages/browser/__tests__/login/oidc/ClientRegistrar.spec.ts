@@ -55,7 +55,7 @@ describe("ClientRegistrar", () => {
           {
             sessionId: "mySession",
             redirectUrl: new URL("https://example.com"),
-            clientId: "coolApp",
+            // clientId: "coolApp",
           },
           IssuerConfigFetcherFetchConfigResponse
         )

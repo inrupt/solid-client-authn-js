@@ -1,4 +1,3 @@
-import IIssuerConfig from "../IIssuerConfig";
 /*
  * Copyright 2020 Inrupt Inc.
  *
@@ -19,6 +18,8 @@ import IIssuerConfig from "../IIssuerConfig";
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+import IIssuerConfig from "../IIssuerConfig";
 
 /**
  * @hidden
@@ -74,90 +75,3 @@ export async function registerClient(
 }
 
 export { IClient, IClientRegistrarOptions };
-
-// export async function getClient(
-//     options: IClientRegistrarOptions,
-//     issuerConfig: IIssuerConfig,
-//     storage?: typeof window.localStorage
-//   ): Promise<IClient> {
-//     // If client secret and/or client id are in options, use those.
-//     if (options.clientId) {
-//       return {
-//         clientId: options.clientId,
-//         clientSecret: options.clientSecret,
-//         clientName: options.clientName,
-//       };
-//     }
-
-//     // If client secret and/or client id are stored in storage, use those.
-//     const [
-//       storedClientId,
-//       storedClientSecret,
-//       storedClientName,
-//     ] = await Promise.all([
-//       this.storageUtility.getForUser(options.sessionId, "clientId", {
-//         // FIXME: figure out how to persist secure storage at reload
-//         secure: false,
-//       }),
-//       this.storageUtility.getForUser(options.sessionId, "clientSecret", {
-//         // FIXME: figure out how to persist secure storage at reload
-//         secure: false,
-//       }),
-//       this.storageUtility.getForUser(options.sessionId, "clientName", {
-//         secure: false,
-//       }),
-//     ]);
-
-//     if (storedClientId) {
-//       return {
-//         clientId: storedClientId,
-//         clientSecret: storedClientSecret,
-//         clientName: storedClientName,
-//       };
-//     }
-
-//     // If registration access token is stored, use that.
-//     const [registrationAccessToken, registrationClientUri] = await Promise.all([
-//       this.storageUtility.getForUser(
-//         options.sessionId,
-//         "registrationAccessToken"
-//       ),
-//       this.storageUtility.getForUser(
-//         options.sessionId,
-//         "registrationClientUri"
-//       ),
-//     ]);
-
-//     let registerResponse: Response;
-//     if (registrationAccessToken && registrationClientUri) {
-//       registerResponse = await this.fetcher.fetch(registrationClientUri, {
-//         method: "GET",
-//         headers: {
-//           Accept: "application/json",
-//           Authorization: `Bearer ${registrationAccessToken}`,
-//         },
-//       });
-//     } else {
-//       // Else, begin the dynamic registration.
-
-//     // Save info
-//     await this.storageUtility.setForUser(
-//       options.sessionId,
-//       {
-//         clientId: responseBody.client_id,
-//         clientSecret: responseBody.client_secret,
-//       },
-//       {
-//         // FIXME: figure out how to persist secure storage at reload
-//         // Otherwise, the client info cannot be retrieved from storage, and
-//         // the lib tries to re-register the client on each fetch
-//         secure: false,
-//       }
-//     );
-
-//     await this.storageUtility.setForUser(options.sessionId, {
-//       registrationAccessToken: responseBody.registration_access_token,
-//       registrationClientUri: responseBody.registration_client_uri,
-//     });
-//   }
-// }
