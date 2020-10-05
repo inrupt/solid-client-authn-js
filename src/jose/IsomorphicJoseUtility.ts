@@ -75,7 +75,7 @@ export default class IsomorphicJoseUtility implements IJoseUtility {
   }
 
   async generateCodeVerifier(): Promise<string> {
-    return randomString({ length: 10, type: "base64" });
+    return randomString({ length: 50, type: "base64" });
   }
 
   async generateCodeChallenge(verifier: string): Promise<string> {
