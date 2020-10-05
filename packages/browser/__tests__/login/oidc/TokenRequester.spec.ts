@@ -195,9 +195,7 @@ describe("TokenRequester", () => {
         refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable @typescript-eslint/camelcase */
-    ).rejects.toThrowError(
-      /IDP token route returned an invalid response.*ohNo/s
-    );
+    ).rejects.toThrowError("IDP token route returned an invalid response.");
   });
 
   it("Fails elegantly if the issuer does not support refresh tokens", async () => {

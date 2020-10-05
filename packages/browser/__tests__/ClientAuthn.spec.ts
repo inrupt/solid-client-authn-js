@@ -28,11 +28,14 @@ import {
 } from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
+import {
+  AuthenticatedFetcherMock,
+  AuthenticatedFetcherResponse,
+} from "../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
 import URL from "url-parse";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { mockFetcher } from "../src/util/__mocks__/Fetcher";
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {
@@ -40,10 +43,9 @@ describe("ClientAuthentication", () => {
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
     sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
-    fetcher: mockFetcher(),
+    authenticatedFetcher: AuthenticatedFetcherMock,
     environmentDetector: EnvironmentDetectorMock,
   };
-
   function getClientAuthentication(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): ClientAuthentication {
@@ -52,7 +54,7 @@ describe("ClientAuthentication", () => {
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
-      mocks.fetcher ?? defaultMocks.fetcher,
+      mocks.authenticatedFetcher ?? defaultMocks.authenticatedFetcher,
       mocks.environmentDetector ?? defaultMocks.environmentDetector
     );
   }
@@ -110,9 +112,18 @@ describe("ClientAuthentication", () => {
   describe("fetch", () => {
     it("calls fetch", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.fetch("https://html5zombo.com");
-      expect(defaultMocks.fetcher.fetch).toHaveBeenCalledWith(
-        "https://html5zombo.com"
+      const response = await clientAuthn.fetch(
+        "mySession",
+        "https://zombo.com"
+      );
+      expect(response).toBe(AuthenticatedFetcherResponse);
+      expect(defaultMocks.authenticatedFetcher.handle).toHaveBeenCalledWith(
+        {
+          localUserId: "mySession",
+          type: "dpop",
+        },
+        "https://zombo.com",
+        undefined
       );
     });
   });
@@ -153,16 +164,11 @@ describe("ClientAuthentication", () => {
   describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
       const clientAuthn = getClientAuthentication();
-      const unauthFetch = clientAuthn.fetch;
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      const redirectInfo = await clientAuthn.handleIncomingRedirect(url);
-      expect(redirectInfo).toEqual({
-        ...RedirectHandlerResponse,
-      });
+      const session = await clientAuthn.handleIncomingRedirect(url);
+      expect(session).toBe(RedirectHandlerResponse);
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
-      // Calling handleredirect should have updated the fetch
-      expect(clientAuthn.fetch).not.toBe(unauthFetch);
     });
   });
 });

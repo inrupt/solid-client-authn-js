@@ -27,6 +27,7 @@
 import URL from "url-parse";
 import ConfigurationError from "../../..//errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
+import { ITokenRequester } from "../TokenRequester";
 import {
   IRedirector,
   IRedirectHandler,
@@ -34,9 +35,6 @@ import {
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { OidcClient } from "@inrupt/oidc-dpop-client-browser";
-import IJoseUtility from "../../../jose/IJoseUtility";
-import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
 
 /**
  * @hidden
@@ -44,9 +42,9 @@ import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector,
+    @inject("tokenRequester") private tokenRequester: ITokenRequester,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager
   ) {}
@@ -56,76 +54,48 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     return !!(url.query && url.query.code && url.query.state);
   }
 
-  async handle(
-    redirectUrl: string
-  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(
         `Cannot handle redirect url [${redirectUrl}]`
       );
     }
     const url = new URL(redirectUrl, true);
-    const oauthState = url.query.state as string;
-
-    const storedSessionId = (await this.storageUtility.getForUser(
-      oauthState,
-      "sessionId",
-      {
+    const sessionId = url.query.state as string;
+    const [codeVerifier, redirectUri] = await Promise.all([
+      (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
         errorIfNull: true,
-      }
-    )) as string;
+      })) as string,
+      (await this.storageUtility.getForUser(sessionId, "redirectUri", {
+        errorIfNull: true,
+      })) as string,
+    ]);
 
-    // PMCB55: TODO: I think we still need a catch handler around this...
-    let signinResponse;
-    try {
-      signinResponse = await new OidcClient({
-        // TODO: We should look at the various interfaces being used for storage,
-        //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
-        //  (which has an interface Storage), and our own proprietary interface
-        //  IStorage - i.e. we should really just be using the browser Web Storage
-        //  API, e.g. "stateStore: window.localStorage,".
-
-        // We are instantiating a new instance here, so the only value we need to
-        // explicitly provide is the response mode (default otherwise will look
-        // for a hash '#' fragment!).
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        response_mode: "query",
-      }).processSigninResponse(redirectUrl.toString());
-    } catch (err) {
-      throw new Error(
-        `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
-      );
-    }
-
-    // We need to decode the access_token JWT to extract out the full WebID.
-    const decoded = await this.joseUtility.decodeJWT(
-      signinResponse.access_token as string
-    );
-    if (!decoded || !decoded.sub) {
-      throw new Error("The idp returned a bad token without a sub.");
-    }
-
-    await this.storageUtility.setForUser(
-      storedSessionId,
-      {
-        idToken: signinResponse.id_token,
-        // TODO: We need a PR to oidc-client-js to add parsing of the
-        //  refresh_token from the redirect URL.
-        refreshToken:
-          "<Refresh token that *is* coming back in the redirect URL is not yet being parsed and provided by oidc-client-js in it's response object>",
-        webId: decoded.sub as string,
-        isLoggedIn: "true",
-      },
-      { secure: true }
-    );
-
-    const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
-    if (!sessionInfo) {
-      throw new Error(`Could not retrieve session: [${storedSessionId}].`);
-    }
-
-    return Object.assign(sessionInfo, {
-      fetch: buildBearerFetch(signinResponse.access_token),
+    /* eslint-disable @typescript-eslint/camelcase */
+    await this.tokenRequester.request(sessionId, {
+      grant_type: "authorization_code",
+      code_verifier: codeVerifier as string,
+      code: url.query.code as string,
+      redirect_uri: redirectUri as string,
     });
+    /* eslint-enable @typescript-eslint/camelcase */
+
+    url.set("query", {});
+
+    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    if (!sessionInfo) {
+      throw new Error("There was a problem creating a session.");
+    }
+    try {
+      this.redirector.redirect(url.toString(), {
+        redirectByReplacingState: true,
+      });
+    } catch (err) {
+      // Do nothing
+      // This step of the flow should happen in a browser, and redirection
+      // should never fail there.
+    }
+
+    return sessionInfo;
   }
 }

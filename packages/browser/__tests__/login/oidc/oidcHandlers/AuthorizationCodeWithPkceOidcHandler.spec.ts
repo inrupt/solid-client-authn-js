@@ -24,6 +24,7 @@
  */
 import "reflect-metadata";
 import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
+import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
@@ -32,34 +33,19 @@ import {
   IOidcOptions,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { SigninRequest } from "@inrupt/oidc-dpop-client-browser";
-
-const expectedSigninRedirectUrl = "https://test";
-jest.mock("@inrupt/oidc-dpop-client-browser", () => {
-  return {
-    OidcClient: jest.fn().mockImplementation(() => {
-      return {
-        createSigninRequest: (): Promise<SigninRequest> =>
-          Promise.resolve({
-            url: expectedSigninRedirectUrl,
-            state: "test state",
-          }),
-      };
-    }),
-  };
-});
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
     sessionCreator: SessionInfoManagerMock,
+    joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock,
     redirector: RedirectorMock,
   };
-
   function getAuthorizationCodeWithPkceOidcHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): AuthorizationCodeWithPkceOidcHandler {
     return new AuthorizationCodeWithPkceOidcHandler(
+      mocks.joseUtility ?? defaultMocks.joseUtility,
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.redirector ?? defaultMocks.redirector
     );
@@ -90,11 +76,11 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         },
       };
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
-      expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
-        expectedSigninRedirectUrl,
-        {
-          handleRedirect: standardOidcOptions.handleRedirect,
-        }
+      expect(
+        defaultMocks.redirector.redirect
+      ).toHaveBeenCalledWith(
+        "https://example.com/auth?response_type=code%20id_token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=mySession",
+        { handleRedirect: standardOidcOptions.handleRedirect }
       );
     });
 
@@ -112,11 +98,11 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         },
       };
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
-      expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
-        expectedSigninRedirectUrl,
-        {
-          handleRedirect: standardOidcOptions.handleRedirect,
-        }
+      expect(
+        defaultMocks.redirector.redirect
+      ).toHaveBeenCalledWith(
+        "https://example.com/auth?response_type=code%20id_token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&client_id=coolApp&code_challenge_method=S256&code_challenge=codeChallenge&state=mySession",
+        { handleRedirect: standardOidcOptions.handleRedirect }
       );
     });
   });

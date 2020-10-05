@@ -152,7 +152,7 @@ describe("ClientRegistrar", () => {
           }
         )
       ).rejects.toThrowError(
-        "Login Registration Error: [bad stuff that's an error]"
+        "Login Registration Error: bad stuff that's an error"
       );
     });
   });

@@ -91,7 +91,6 @@ export default class TokenRequester {
         `The issuer [${issuer}] does not support the [${body.grant_type}] grant`
       );
     }
-
     if (!issuerConfig.tokenEndpoint) {
       throw new Error(`This issuer [${issuer}] does not have a token endpoint`);
     }
@@ -140,13 +139,7 @@ export default class TokenRequester {
           typeof tokenResponse.refresh_token === "string")
       )
     ) {
-      throw new Error(
-        `IDP token route returned an invalid response: [${JSON.stringify(
-          tokenResponse,
-          null,
-          2
-        )}`
-      );
+      throw new Error("IDP token route returned an invalid response.");
     }
 
     const decoded = await this.joseUtility.decodeJWT(

@@ -27,63 +27,33 @@ import {
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
-import { SigninResponse } from "@inrupt/oidc-dpop-client-browser";
-import {
-  generateJWK,
-  signJWT,
-} from "../../../../src/jose/IsomorphicJoseUtility";
-
-jest.mock("cross-fetch");
-
-jest.mock("@inrupt/oidc-dpop-client-browser", () => {
-  return {
-    OidcClient: jest.fn().mockImplementation(() => {
-      return {
-        processSigninResponse: async (): Promise<SigninResponse> => {
-          const jwk = await generateJWK("RSA");
-          const accessToken = await signJWT({ sub: "https://my.webid" }, jwk, {
-            algorithm: "RS256",
-          });
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-          // @ts-ignore Ignore because we don't need to mock out all data fields.
-          return Promise.resolve({
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            access_token: accessToken,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            id_token: "Some ID token",
-          });
-        },
-      };
-    }),
-  };
-});
-
-const defaultMocks = {
-  joseUtility: JoseUtilityMock,
-  storageUtility: StorageUtilityMock,
-  redirector: RedirectorMock,
-  sessionInfoManager: SessionInfoManagerMock,
-};
-
-function getAuthCodeRedirectHandler(
-  mocks: Partial<typeof defaultMocks> = defaultMocks
-): AuthCodeRedirectHandler {
-  return new AuthCodeRedirectHandler(
-    mocks.joseUtility ?? defaultMocks.joseUtility,
-    mocks.storageUtility ?? defaultMocks.storageUtility,
-    mocks.redirector ?? defaultMocks.redirector,
-    mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
-  );
-}
+import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
 
 describe("AuthCodeRedirectHandler", () => {
+  const defaultMocks = {
+    storageUtility: StorageUtilityMock,
+    redirector: RedirectorMock,
+    tokenRequester: TokenRequesterMock,
+    sessionInfoManager: SessionInfoManagerMock,
+  };
+
+  function getAuthCodeRedirectHandler(
+    mocks: Partial<typeof defaultMocks> = defaultMocks
+  ): AuthCodeRedirectHandler {
+    return new AuthCodeRedirectHandler(
+      mocks.storageUtility ?? defaultMocks.storageUtility,
+      mocks.redirector ?? defaultMocks.redirector,
+      mocks.tokenRequester ?? defaultMocks.tokenRequester,
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
+    );
+  }
+
   describe("canHandler", () => {
     it("Accepts a valid url with the correct query", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode&state=oauth2_state_value"
+          "https://coolparty.com/?code=someCode&state=userId"
         )
       ).toBe(true);
     });
@@ -126,7 +96,26 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+        "https://coolsite.com/?code=someCode&state=userId"
+      );
+
+      expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith(
+        "userId",
+        /* eslint-disable @typescript-eslint/camelcase */
+        {
+          code: "someCode",
+          code_verifier: "a",
+          grant_type: "authorization_code",
+          redirect_uri: "b",
+        }
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+
+      expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
+        "https://coolsite.com/",
+        {
+          redirectByReplacingState: true,
+        }
       );
     });
 
@@ -136,37 +125,9 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle(
-          "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+          "https://coolsite.com/?code=someCode&state=userId"
         )
-      ).rejects.toThrowError("Could not retrieve session");
-    });
-
-    // We use ts-ignore comments here only to access mock call arguments
-    /* eslint-disable @typescript-eslint/ban-ts-ignore */
-    it("returns an authenticated fetch", async () => {
-      const fetch = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock<
-          ReturnType<typeof window.fetch>,
-          [RequestInfo, RequestInit?]
-        >;
-      };
-
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockStorageUtility({}),
-      });
-      const redirectInfo = await authCodeRedirectHandler.handle(
-        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
-      );
-      await redirectInfo.fetch("https://some.other.url");
-      // @ts-ignore
-      const header = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
-        "Authorization"
-      );
-      // We test that the Authorization header matches the structure of a JWT.
-      expect(
-        // @ts-ignore
-        header
-      ).toMatch(/^Bearer .+\..+\..+$/);
+      ).rejects.toThrowError("There was a problem creating a session.");
     });
   });
 });
