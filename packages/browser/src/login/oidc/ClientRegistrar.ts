@@ -89,37 +89,18 @@ export default class ClientRegistrar implements IClientRegistrar {
     try {
       const registeredClient = await registerClient(options, issuerConfig);
       // Save info
-      const infoToSave = [
-        this.storageUtility.setForUser(
-          options.sessionId,
-          {
-            clientId: registeredClient.clientId,
-          },
-          {
-            // FIXME: figure out how to persist secure storage at reload
-            // Otherwise, the client info cannot be retrieved from storage, and
-            // the lib tries to re-register the client on each fetch
-            secure: false,
-          }
-        ),
-      ];
+      const infoToSave: Record<string, string> = {
+        clientId: registeredClient.clientId,
+      };
       if (registeredClient.clientSecret) {
-        infoToSave.push(
-          this.storageUtility.setForUser(
-            options.sessionId,
-            {
-              clientSecret: registeredClient.clientSecret,
-            },
-            {
-              // FIXME: figure out how to persist secure storage at reload
-              // Otherwise, the client info cannot be retrieved from storage, and
-              // the lib tries to re-register the client on each fetch
-              secure: false,
-            }
-          )
-        );
+        infoToSave["clientSecret"] = registeredClient.clientSecret;
       }
-      await Promise.all(infoToSave);
+      await this.storageUtility.setForUser(options.sessionId, infoToSave, {
+        // FIXME: figure out how to persist secure storage at reload
+        // Otherwise, the client info cannot be retrieved from storage, and
+        // the lib tries to re-register the client on each fetch
+        secure: false,
+      });
       return registeredClient;
     } catch (error) {
       throw new Error(`Client registration failed: [${error.toString()}]`);
