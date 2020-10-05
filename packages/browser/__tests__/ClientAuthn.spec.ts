@@ -37,6 +37,8 @@ import ClientAuthentication from "../src/ClientAuthentication";
 import URL from "url-parse";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 
+jest.mock("cross-fetch");
+
 describe("ClientAuthentication", () => {
   const defaultMocks = {
     loginHandler: LoginHandlerMock,
@@ -163,6 +165,12 @@ describe("ClientAuthentication", () => {
 
   describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
+      const fetch = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock<
+          ReturnType<typeof window.fetch>,
+          [RequestInfo, RequestInit?]
+        >;
+      };
       const clientAuthn = getClientAuthentication();
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
