@@ -34,6 +34,8 @@ import URL from "url-parse";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { mockFetcher } from "../src/util/__mocks__/Fetcher";
 
+jest.mock("cross-fetch");
+
 describe("ClientAuthentication", () => {
   const defaultMocks = {
     loginHandler: LoginHandlerMock,
@@ -152,6 +154,12 @@ describe("ClientAuthentication", () => {
 
   describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
+      const fetch = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock<
+          ReturnType<typeof window.fetch>,
+          [RequestInfo, RequestInit?]
+        >;
+      };
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
       const url =

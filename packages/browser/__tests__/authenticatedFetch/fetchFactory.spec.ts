@@ -45,7 +45,7 @@ describe("buildBearerFetch", () => {
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+      fetch.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("Bearer myToken");
   });
 
@@ -61,12 +61,12 @@ describe("buildBearerFetch", () => {
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+      fetch.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("Bearer myToken");
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("someHeader")
+      fetch.fetch.mock.calls[0][1].headers["someHeader"]
     ).toEqual("SomeValue");
   });
 
@@ -82,7 +82,7 @@ describe("buildBearerFetch", () => {
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+      fetch.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("Bearer myToken");
   });
 });
@@ -101,12 +101,10 @@ describe("buildDpopFetch", () => {
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+      fetch.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
-      "DPoP"
-    ) as string;
+    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJWT(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
@@ -125,19 +123,17 @@ describe("buildDpopFetch", () => {
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+      fetch.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
-      "DPoP"
-    ) as string;
+    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJWT(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("someHeader")
+      fetch.fetch.mock.calls[0][1].headers["someHeader"]
     ).toEqual("SomeValue");
   });
 
@@ -159,12 +155,10 @@ describe("buildDpopFetch", () => {
 
     expect(
       // @ts-ignore
-      (fetch.fetch.mock.calls[0][1].headers as Headers).get("Authorization")
+      fetch.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = (fetch.fetch.mock.calls[0][1].headers as Headers).get(
-      "DPoP"
-    ) as string;
+    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJWT(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
