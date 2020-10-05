@@ -24,25 +24,19 @@
  * @packageDocumentation
  */
 
-import { default as IClient } from "./IClient";
-import { default as IIssuerConfig } from "./IIssuerConfig";
-
-import URL from "url-parse";
-
-export interface IClientRegistrarOptions {
-  sessionId: string;
-  clientId?: string;
-  clientSecret?: string;
-  clientName?: string;
-  redirectUrl?: URL;
-}
-
 /**
  * @hidden
  */
-export interface IClientRegistrar {
-  getClient(
-    options: IClientRegistrarOptions,
-    issuerConfig: IIssuerConfig
-  ): Promise<IClient>;
+export interface IClient {
+  clientId: string;
+  clientSecret?: string;
+  // The client name is a human-readable name for the client application. It
+  // should be provided by the developer of the client application, as it can be
+  // displayed on OAuth 'Authorize this client application' pages displayed by
+  // Authorization Servers (AS).
+  // If the client application doesn't provide a value here, then an AS will
+  // typically display the client ID to the user for authorization, which with
+  // dynamic registration will typically be a meaningless (to a human!) random
+  // number.
+  clientName?: string;
 }

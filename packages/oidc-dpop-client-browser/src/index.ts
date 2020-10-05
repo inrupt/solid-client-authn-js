@@ -40,3 +40,9 @@ export {
   // Global,
   User,
 } from "oidc-client";
+
+export {
+  registerClient,
+  IClient,
+  IClientRegistrarOptions,
+} from "./dcr/clientRegistrar";
