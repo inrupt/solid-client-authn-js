@@ -2,7 +2,8 @@
 
 A client tool to login and make authenticated requests to Solid compliant servers.
 
-***NOTE: The interface documented here is the proposed interface not the one actually implemented yet. For the actually implemented interface see the "Example Usage"***
+***NOTE: The interface documented here is the proposed interface not the one actually implemented yet. For the actually implemented interface see the "Example Usage". See [the Solid Crud tests](https://github.com/solid/solid-crud-tests/blob/master/test/helpers/obtain-auth-headers.ts for an example of how we're currently using solid-auth-fetcher from nodejs.
+***
 
 ## Installation
 
