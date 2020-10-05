@@ -41,8 +41,4 @@ export {
   User,
 } from "oidc-client";
 
-export {
-  registerClient,
-  IClient,
-  IClientRegistrarOptions,
-} from "./dcr/clientRegistrar";
+export { registerClient } from "./dcr/clientRegistrar";

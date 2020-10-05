@@ -110,8 +110,6 @@ export default class OidcLoginHandler implements ILoginHandler {
         dynamicClientRegistration = await this.clientRegistrar.getClient(
           {
             sessionId: options.sessionId,
-            clientId: options.clientId,
-            clientSecret: options.clientSecret,
             clientName: options.clientName,
             redirectUrl: options.redirectUrl,
           },

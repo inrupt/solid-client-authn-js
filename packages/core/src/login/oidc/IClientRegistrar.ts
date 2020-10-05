@@ -25,7 +25,7 @@
  */
 
 import { IClient } from "./IClient";
-import { default as IIssuerConfig } from "../IIssuerConfig";
+import { IIssuerConfig } from "./IIssuerConfig";
 
 import URL from "url-parse";
 

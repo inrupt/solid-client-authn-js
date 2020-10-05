@@ -32,6 +32,7 @@
     "rollup-plugin-typescript2": "^0.27.1"
   },
   "dependencies": {
+    "@inrupt/solid-client-authn-core": "^0.2.0",
     "@types/url-parse": "^1.4.3",
     "oidc-client": "^1.10.1",
     "url-parse": "^1.4.7"

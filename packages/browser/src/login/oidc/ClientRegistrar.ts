@@ -27,15 +27,13 @@
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import {
+  IStorageUtility,
   IClientRegistrar,
   IIssuerConfig,
-  IStorageUtility,
-} from "@inrupt/solid-client-authn-core";
-import {
   IClient,
   IClientRegistrarOptions,
-  registerClient,
-} from "@inrupt/oidc-dpop-client-browser";
+} from "@inrupt/solid-client-authn-core";
+import { registerClient } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden

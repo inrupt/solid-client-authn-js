@@ -20,9 +20,12 @@
  */
 
 import { it, describe } from "@jest/globals";
-import IIssuerConfig from "../IIssuerConfig";
+import {
+  IIssuerConfig,
+  IClientRegistrarOptions,
+} from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
-import { IClientRegistrarOptions, registerClient } from "./clientRegistrar";
+import { registerClient } from "./clientRegistrar";
 import { Response } from "cross-fetch";
 
 const getMockIssuer = (): IIssuerConfig => {

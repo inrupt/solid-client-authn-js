@@ -19,15 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import IIssuerConfig from "../IIssuerConfig";
-
 /**
  * @hidden
  * @packageDocumentation
  */
 
-import { IClient } from "./IClient";
-import { IClientRegistrarOptions } from "./IClientRegistrar";
+import {
+  IIssuerConfig,
+  IClient,
+  IClientRegistrarOptions,
+} from "@inrupt/solid-client-authn-core";
 
 export async function registerClient(
   options: IClientRegistrarOptions,
@@ -73,5 +74,3 @@ export async function registerClient(
     clientSecret: responseBody.client_secret,
   };
 }
-
-export { IClient, IClientRegistrarOptions };
