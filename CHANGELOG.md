@@ -7,6 +7,26 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+<<<<<<< HEAD
+=======
+### New features
+
+### Bugfixes
+
+- The Authorization header was not set properly, which made it impossible to access private resources.
+
+## [0.2.0]
+
+### Breaking changes
+
+- Fixed typo in `detachSession` function name for the browser `SessionManager`.
+
+### Internal refactor:
+
+- Uses [oidc-client-js](https://github.com/IdentityModel/oidc-client-js) now to
+perform the Auth Code Flow (replacing lots of hand-rolled code).
+
+>>>>>>> Fix Header management issue (#375)
 ### Bugfixes
 
 - Source files are now also published to npm, so source maps should work from now on.

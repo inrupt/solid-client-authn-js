@@ -127,7 +127,33 @@ describe("AuthCodeRedirectHandler", () => {
         authCodeRedirectHandler.handle(
           "https://coolsite.com/?code=someCode&state=userId"
         )
-      ).rejects.toThrowError("There was a problem creating a session.");
+      ).rejects.toThrowError("Could not retrieve session");
+    });
+
+    // We use ts-ignore comments here only to access mock call arguments
+    /* eslint-disable @typescript-eslint/ban-ts-ignore */
+    it("returns an authenticated fetch", async () => {
+      const fetch = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock<
+          ReturnType<typeof window.fetch>,
+          [RequestInfo, RequestInit?]
+        >;
+      };
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockStorageUtility({}),
+      });
+      const redirectInfo = await authCodeRedirectHandler.handle(
+        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+      );
+      await redirectInfo.fetch("https://some.other.url");
+      // @ts-ignore
+      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
+      // We test that the Authorization header matches the structure of a JWT.
+      expect(
+        // @ts-ignore
+        header
+      ).toMatch(/^Bearer .+\..+\..+$/);
     });
   });
 });

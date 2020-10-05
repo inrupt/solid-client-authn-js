@@ -95,7 +95,8 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       // This step of the flow should happen in a browser, and redirection
       // should never fail there.
     }
-
-    return sessionInfo;
+    return Object.assign(sessionInfo, {
+      fetch: buildBearerFetch(signinResponse.access_token),
+    });
   }
 }
