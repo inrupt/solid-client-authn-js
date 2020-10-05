@@ -32,8 +32,6 @@ export {
   CordovaPopupNavigator,
   CordovaIFrameNavigator,
   CheckSessionIFrame,
-  SigninRequest,
-  SigninResponse,
   // TODO: Investigate why this fails
   // TokenRevocationClient,
   SessionMonitor,

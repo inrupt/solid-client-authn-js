@@ -34,13 +34,3 @@ export const DpopClientKeyManagerMock: jest.Mocked<IDpopClientKeyManager> = {
     async () => DpopClientKeyManagerMockGetClientKeyResponse
   ),
 };
-
-export const mockDpopClientKeyManager = (
-  key: JSONWebKey | undefined
-): IDpopClientKeyManager => {
-  return {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    generateClientKeyIfNotAlready: (): Promise<void> => Promise.resolve(),
-    getClientKey: async (): Promise<JSONWebKey | undefined> => key,
-  };
-};

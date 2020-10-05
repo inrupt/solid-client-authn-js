@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Session as AuthSession,
-  getClientAuthenticationWithDependencies,
+  getClientAuthenticationWithDependencies
 } from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = window.location;
@@ -11,7 +11,7 @@ export default function Home() {
   const [session, setSession] = useState(
     new AuthSession(
       {
-        clientAuthentication: getClientAuthenticationWithDependencies({}),
+        clientAuthentication: getClientAuthenticationWithDependencies({})
       },
       "mySession"
     )
@@ -23,6 +23,7 @@ export default function Home() {
   useEffect(() => {
     const authCode = new URL(window.location.href).searchParams.get("code");
     if (authCode) {
+      console.log("Being redirected from the IdP");
       session
         .handleIncomingRedirect(new URL(window.location.href))
         .then((info) => {
@@ -37,7 +38,7 @@ export default function Home() {
     e.preventDefault();
     session.login({
       redirectUrl: new URL(REDIRECT_URL),
-      oidcIssuer: new URL(issuer),
+      oidcIssuer: new URL(issuer)
     });
   };
 

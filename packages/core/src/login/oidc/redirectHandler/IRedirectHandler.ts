@@ -24,16 +24,11 @@
  * @packageDocumentation
  */
 
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
+import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 
 /**
- * The redirect handler extracts information from the URL to which the IdP redirects
- * the user after login.
  * @hidden
  */
-type IRedirectHandler = IHandleable<
-  [string],
-  ISessionInfo & { fetch: typeof fetch }
->;
+type IRedirectHandler = IHandleable<[string], ISessionInfo | undefined>;
 export default IRedirectHandler;

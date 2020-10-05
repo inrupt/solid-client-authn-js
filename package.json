@@ -2,7 +2,6 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "demo-app": "cd packages/browser; npm run demo-app",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "build-api-docs": "lerna run build-api-docs",
@@ -38,7 +37,7 @@
     "license-checker": "^25.0.1",
     "lint-staged": "^10.2.13",
     "node-fetch": "^2.6.1",
-    "prettier": "2.1.2",
+    "prettier": "2.1.1",
     "rollup": "^2.26.11",
     "rollup-plugin-typescript2": "^0.27.2",
     "ts-jest": "^25.5.1",
@@ -58,10 +57,7 @@
     }
   },
   "lint-staged": {
-    "packages/*/src/**/*.{ts,js,css,json}": [
-      "prettier --write"
-    ],
-    "packages/*/__tests__/**/*.{ts,js,css,json}": [
+    "*.{ts,js,css,json}": [
       "prettier --write"
     ]
   }

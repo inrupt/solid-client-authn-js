@@ -53,11 +53,9 @@ export default class StorageUtility implements IStorageUtility {
       ? this.secureStorage
       : this.insecureStorage
     ).get(this.getKey(userId));
-
     if (stored === undefined) {
       return {};
     }
-
     try {
       return JSON.parse(stored);
     } catch (err) {

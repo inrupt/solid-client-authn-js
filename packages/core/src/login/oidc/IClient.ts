@@ -30,13 +30,4 @@
 export default interface IClient {
   clientId: string;
   clientSecret?: string;
-  // The client name is a human-readable name for the client application. It
-  // should be provided by the developer of the client application, as it can be
-  // displayed on OAuth 'Authorize this client application' pages displayed by
-  // Authorization Servers (AS).
-  // If the client application doesn't provide a value here, then an AS will
-  // typically display the client ID to the user for authorization, which with
-  // dynamic registration will typically be a meaningless (to a human!) random
-  // number.
-  clientName?: string;
 }
