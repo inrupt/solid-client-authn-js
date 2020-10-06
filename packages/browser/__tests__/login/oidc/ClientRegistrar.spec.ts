@@ -150,7 +150,7 @@ describe("ClientRegistrar", () => {
     it("handles a failure to dynamically register elegantly", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable @typescript-eslint/camelcase */
-        (new NodeResponse("bad stuff that's an error", {
+        (new NodeResponse('{"error":"bad stuff that\'s an error"}', {
           status: 400,
         }) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
@@ -173,7 +173,7 @@ describe("ClientRegistrar", () => {
           }
         )
       ).rejects.toThrowError(
-        "Login Registration Error: [bad stuff that's an error]"
+        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]"
       );
       global.fetch = savedFetch;
     });

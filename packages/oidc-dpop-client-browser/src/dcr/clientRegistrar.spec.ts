@@ -62,12 +62,6 @@ const getSuccessfulFetch = (): typeof fetch =>
       )
   );
 
-const getFailedFetch = (): typeof fetch =>
-  jest.fn(
-    async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-      new Response(undefined, { status: 400 })
-  );
-
 describe("registerClient", () => {
   global.fetch = getSuccessfulFetch();
 
@@ -79,14 +73,6 @@ describe("registerClient", () => {
     ).rejects.toThrow(
       "Dynamic Registration could not be completed because the issuer has no registration endpoint."
     );
-  });
-
-  it("Throws if the Identity provider returns an invalid response", async () => {
-    global.fetch = getFailedFetch();
-    await expect(() =>
-      registerClient(getMockOptions(), getMockIssuer())
-    ).rejects.toThrow("Login Registration Error:");
-    global.fetch = getSuccessfulFetch();
   });
 
   it("uses an access token if provided", async () => {
@@ -170,6 +156,91 @@ describe("registerClient", () => {
       registerClient(options, getMockIssuer())
     ).rejects.toThrow(
       'Dynamic client registration failed: no client_id has been found on {"some_key":"some value"}'
+    );
+  });
+
+  it("throws if the redirect URI is invalid", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            error: "invalid_redirect_uri",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            error_description: "some description",
+          }),
+          { status: 400 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+    options.redirectUrl = new URL("https://some.url");
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      "Dynamic client registration failed: the provided redirect uri [https://some.url] is invalid - some description"
+    );
+  });
+
+  it("throws if the client metadata are invalid", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            error: "invalid_client_metadata",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            error_description: "some description",
+          }),
+          { status: 400 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - some description'
+    );
+  });
+
+  it("throws if the IdP returns a custom error", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            error: "custom_error",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            error_description: "some description",
+          }),
+          { status: 400 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      "Dynamic client registration failed: custom_error - some description"
+    );
+  });
+
+  it("throws without parsing the response body as JSON on non-400 error", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response("Resource not found", {
+          status: 404,
+          statusText: "Not found",
+        })
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      "Dynamic client registration failed: the server returned 404 Not found - Resource not found"
     );
   });
 });
