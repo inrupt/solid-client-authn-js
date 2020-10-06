@@ -65,23 +65,30 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     const [codeVerifier, redirectUri] = await Promise.all([
       (await this.storageUtility.getForUser(sessionId, "codeVerifier", {
         errorIfNull: true,
-      })) as string,
-      (await this.storageUtility.getForUser(sessionId, "redirectUri", {
-        errorIfNull: true,
-      })) as string,
-    ]);
+      }
+    )) as string;
 
-    /* eslint-disable @typescript-eslint/camelcase */
-    await this.tokenRequester.request(sessionId, {
-      grant_type: "authorization_code",
-      code_verifier: codeVerifier as string,
-      code: url.query.code as string,
-      redirect_uri: redirectUri as string,
-    });
-    /* eslint-enable @typescript-eslint/camelcase */
+    let signinResponse;
+    try {
+      signinResponse = await new OidcClient({
+        // TODO: We should look at the various interfaces being used for storage,
+        //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
+        //  (which has an interface Storage), and our own proprietary interface
+        //  IStorage - i.e. we should really just be using the browser Web Storage
+        //  API, e.g. "stateStore: window.localStorage,".
 
-    url.set("query", {});
-
+        // We are instantiating a new instance here, so the only value we need to
+        // explicitly provide is the response mode (default otherwise will look
+        // for a hash '#' fragment!).
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        response_mode: "query",
+      }).processSigninResponse(redirectUrl.toString());
+    } catch (err) {
+      throw new Error(
+        `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
+      );
+    }
+    
     const sessionInfo = await this.sessionInfoManager.get(sessionId);
     if (!sessionInfo) {
       throw new Error("There was a problem creating a session.");
@@ -95,7 +102,10 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       // This step of the flow should happen in a browser, and redirection
       // should never fail there.
     }
+
     return Object.assign(sessionInfo, {
+      // TODO: When handling DPoP, both the key and the token should be returned
+      // by the redirect handler.
       fetch: buildBearerFetch(signinResponse.access_token),
     });
   }

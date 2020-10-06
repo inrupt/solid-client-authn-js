@@ -85,21 +85,16 @@ export default class ClientAuthentication {
     });
   };
 
-  fetch = async (
-    sessionId: string,
-    url: RequestInfo,
-    init?: RequestInit
-  ): Promise<Response> => {
-    const credentials: IRequestCredentials = {
-      localUserId: sessionId,
-      // TODO: This should not be hard-coded
-      type: "dpop",
-    };
-    return this.authenticatedFetcher.handle(credentials, url, init);
-  };
+  // By default, resolves our fetch() function to the environment fetch()
+  // function.
+  fetch: typeof global.fetch = this.fetcher.fetch;
 
   logout = async (sessionId: string): Promise<void> => {
     this.logoutHandler.handle(sessionId);
+
+    // Restore our fetch() function back to the environment fetch(), effectively
+    // leaving us with un-authenticated fetches from now on.
+    this.fetch = this.fetcher.fetch;
   };
 
   getSessionInfo = async (
@@ -116,6 +111,14 @@ export default class ClientAuthentication {
   handleIncomingRedirect = async (
     url: string
   ): Promise<ISessionInfo | undefined> => {
-    return this.redirectHandler.handle(url);
+    const redirectInfo = await this.redirectHandler.handle(url);
+
+    this.fetch = redirectInfo.fetch;
+
+    return {
+      isLoggedIn: redirectInfo.isLoggedIn,
+      webId: redirectInfo.webId,
+      sessionId: redirectInfo.sessionId,
+    };
   };
 }
