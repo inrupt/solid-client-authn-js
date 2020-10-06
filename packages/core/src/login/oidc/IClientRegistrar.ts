@@ -24,17 +24,16 @@
  * @packageDocumentation
  */
 
-import { default as IClient } from "./IClient";
-import { default as IIssuerConfig } from "./IIssuerConfig";
+import { IClient } from "./IClient";
+import { IIssuerConfig } from "./IIssuerConfig";
 
 import URL from "url-parse";
 
 export interface IClientRegistrarOptions {
   sessionId: string;
-  clientId?: string;
-  clientSecret?: string;
   clientName?: string;
   redirectUrl?: URL;
+  registrationAccessToken?: string;
 }
 
 /**

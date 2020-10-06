@@ -38,3 +38,5 @@ export {
   // Global,
   User,
 } from "oidc-client";
+
+export { registerClient } from "./dcr/clientRegistrar";

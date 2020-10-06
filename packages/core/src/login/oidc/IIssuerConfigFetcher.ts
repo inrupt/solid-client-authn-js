@@ -28,9 +28,9 @@
  * Responsible for fetching an IDP configuration
  */
 import URL from "url-parse";
-import { default as IIssuerConfig } from "./IIssuerConfig";
+import { IIssuerConfig } from "./IIssuerConfig";
 
-export default interface IIssuerConfigFetcher {
+export interface IIssuerConfigFetcher {
   /**
    * Fetches the configuration
    * @param issuer URL of the IDP
