@@ -120,12 +120,21 @@ describe("ClientAuthentication", () => {
   });
 
   describe("logout", () => {
-    it("calls logout", async () => {
+    it("reverts back to un-authenticated fetch on logout", async () => {
       const clientAuthn = getClientAuthentication();
+      const unauthFetch = clientAuthn.fetch;
+
+      const url =
+        "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
+      await clientAuthn.handleIncomingRedirect(url);
+
+      // Calling handleredirect should give us an authenticated fetch.
+      expect(clientAuthn.fetch).not.toBe(unauthFetch);
+
       await clientAuthn.logout("mySession");
-      expect(defaultMocks.logoutHandler.handle).toHaveBeenCalledWith(
-        "mySession"
-      );
+
+      // Calling logout should revert back to our un-authenticated fetch.
+      expect(clientAuthn.fetch).toBe(unauthFetch);
     });
   });
 
@@ -169,7 +178,8 @@ describe("ClientAuthentication", () => {
         ...RedirectHandlerResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
-      // Calling handleredirect should have updated the fetch
+
+      // Calling handleredirect should have updated the fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
     });
   });

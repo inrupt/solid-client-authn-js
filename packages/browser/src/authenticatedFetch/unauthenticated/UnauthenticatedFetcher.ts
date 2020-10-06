@@ -40,7 +40,7 @@ import { IUrlRepresentationConverter } from "../../util/UrlRepresenationConverte
  * @hidden
  */
 @injectable()
-export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
+export default class UnauthenticatedFetcher implements IAuthenticatedFetcher {
   constructor(
     @inject("fetcher") private fetcher: IFetcher,
     @inject("urlRepresentationConverter")
