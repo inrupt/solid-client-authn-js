@@ -55,6 +55,8 @@ const getSuccessfulFetch = (): typeof fetch =>
           client_id: "some id",
           // eslint-disable-next-line @typescript-eslint/camelcase
           client_secret: "some secret",
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          redirect_uris: ["https://some.url"],
         }),
         { status: 200 }
       )
@@ -122,5 +124,52 @@ describe("registerClient", () => {
     const rawBody = myFetch.mock.calls[0][1].body;
     const parsedBody = JSON.parse(rawBody);
     expect(parsedBody["redirect_uris"]).toEqual(["https://some.url"]);
+  });
+
+  it("throws if the IdP returns a mismatching redirect URL", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            client_id: "some id",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            client_secret: "some secret",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            redirect_uris: ["https://some.other.url"],
+          }),
+          { status: 200 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+    options.redirectUrl = new URL("https://some.url");
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      'Dynamic client registration failed: the returned redirect URIs ["https://some.other.url"] don\'t match the provided ["https://some.url"]'
+    );
+  });
+
+  it("throws if no client_id is returned", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            some_key: "some value",
+          }),
+          { status: 200 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      'Dynamic client registration failed: no client_id has been found on {"some_key":"some value"}'
+    );
   });
 });
