@@ -75,7 +75,6 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       }
     )) as string;
 
-    // PMCB55: TODO: I think we still need a catch handler around this...
     let signinResponse;
     try {
       signinResponse = await new OidcClient({
@@ -123,7 +122,10 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     if (!sessionInfo) {
       throw new Error(`Could not retrieve session: [${storedSessionId}].`);
     }
+
     return Object.assign(sessionInfo, {
+      // TODO: When handling DPoP, both the key and the token should be returned
+      // by the redirect handler.
       fetch: buildBearerFetch(signinResponse.access_token),
     });
   }

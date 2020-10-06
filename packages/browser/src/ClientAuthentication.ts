@@ -90,11 +90,16 @@ export default class ClientAuthentication {
     });
   };
 
-  // By default, resolves to the environment fetch function.
-  fetch = this.fetcher.fetch;
+  // By default, resolves our fetch() function to the environment fetch()
+  // function.
+  fetch: typeof global.fetch = this.fetcher.fetch;
 
   logout = async (sessionId: string): Promise<void> => {
     this.logoutHandler.handle(sessionId);
+
+    // Restore our fetch() function back to the environment fetch(), effectively
+    // leaving us with un-authenticated fetches from now on.
+    this.fetch = this.fetcher.fetch;
   };
 
   getSessionInfo = async (
@@ -112,9 +117,9 @@ export default class ClientAuthentication {
     url: string
   ): Promise<ISessionInfo | undefined> => {
     const redirectInfo = await this.redirectHandler.handle(url);
-    // TODO: When handling DPoP, both the key and the token should be returned
-    // by the redirect handler.
+
     this.fetch = redirectInfo.fetch;
+
     return {
       isLoggedIn: redirectInfo.isLoggedIn,
       webId: redirectInfo.webId,
