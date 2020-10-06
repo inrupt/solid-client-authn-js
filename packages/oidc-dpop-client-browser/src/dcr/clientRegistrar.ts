@@ -69,6 +69,25 @@ export async function registerClient(
     );
   }
   const responseBody = await registerResponse.json();
+  if (responseBody.client_id === undefined) {
+    throw new Error(
+      `Dynamic client registration failed: no client_id has been found on ${JSON.stringify(
+        responseBody
+      )}`
+    );
+  }
+  if (
+    options.redirectUrl &&
+    responseBody.redirect_uris[0] !== options.redirectUrl.toString()
+  ) {
+    throw new Error(
+      `Dynamic client registration failed: the returned redirect URIs ${JSON.stringify(
+        responseBody.redirect_uris
+      )} don't match the provided ${JSON.stringify([
+        options.redirectUrl.toString(),
+      ])}`
+    );
+  }
   return {
     clientId: responseBody.client_id,
     clientSecret: responseBody.client_secret,
