@@ -55,6 +55,7 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
+            redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
@@ -104,6 +105,7 @@ describe("ClientRegistrar", () => {
         (new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
+            redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
@@ -212,6 +214,7 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
+            redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
@@ -257,6 +260,7 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
+            redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
@@ -290,6 +294,7 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "some id",
             client_secret: "some secret",
+            redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
