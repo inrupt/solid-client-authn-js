@@ -78,7 +78,8 @@ export async function registerClient(
   }
   if (
     options.redirectUrl &&
-    responseBody.redirect_uris[0] !== options.redirectUrl.toString()
+    (responseBody.redirect_uris === undefined ||
+      responseBody.redirect_uris[0] !== options.redirectUrl.toString())
   ) {
     throw new Error(
       `Dynamic client registration failed: the returned redirect URIs ${JSON.stringify(
