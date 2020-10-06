@@ -45,16 +45,14 @@ export {
   ISessionInfoManagerOptions,
 } from "./sessionInfo/ISessionInfoManager";
 
-export { default as IClient } from "./login/oidc/IClient";
-
+export { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
+export { IIssuerConfig } from "./login/oidc/IIssuerConfig";
 export {
   IClientRegistrar,
   IClientRegistrarOptions,
 } from "./login/oidc/IClientRegistrar";
-
-export { default as IIssuerConfig } from "./login/oidc/IIssuerConfig";
-export { default as IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
-export { default as issuerConfigSchema } from "./login/oidc/issuerConfigSchema";
+export { IClient } from "./login/oidc/IClient";
+export { issuerConfigSchema } from "./login/oidc/issuerConfigSchema";
 
 // Storage.
 export { default as IStorage } from "./storage/IStorage";

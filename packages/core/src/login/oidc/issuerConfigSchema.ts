@@ -141,4 +141,4 @@ const issuerConfigSchema = {
   additionalProperties: true,
 };
 
-export default issuerConfigSchema;
+export { issuerConfigSchema };
