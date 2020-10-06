@@ -60,7 +60,6 @@ describe("ClientRegistrar", () => {
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const savedFetch = global.fetch;
       global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
@@ -96,7 +95,6 @@ describe("ClientRegistrar", () => {
           /* eslint-enable @typescript-eslint/camelcase */
         }),
       });
-      global.fetch = savedFetch;
     });
 
     it("can register a public client without secret", async () => {
@@ -110,7 +108,6 @@ describe("ClientRegistrar", () => {
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const savedFetch = global.fetch;
       global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
@@ -127,7 +124,6 @@ describe("ClientRegistrar", () => {
         }
       );
       expect(registeredClient.clientSecret).toBeUndefined();
-      global.fetch = savedFetch;
     });
 
     it("Fails if there is not registration endpoint", async () => {
@@ -155,7 +151,6 @@ describe("ClientRegistrar", () => {
         }) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const savedFetch = global.fetch;
       global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
@@ -175,7 +170,6 @@ describe("ClientRegistrar", () => {
       ).rejects.toThrowError(
         "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]"
       );
-      global.fetch = savedFetch;
     });
 
     it("retrieves client id and secret from storage if they are present", async () => {
@@ -219,7 +213,6 @@ describe("ClientRegistrar", () => {
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const savedFetch = global.fetch;
       global.fetch = mockFetch;
 
       await clientRegistrar.getClient(
@@ -239,7 +232,6 @@ describe("ClientRegistrar", () => {
         string
       >;
       expect(registrationHeaders["Authorization"]).toEqual("Bearer some token");
-      global.fetch = savedFetch;
     });
 
     it("retrieves the registration token from storage if present", async () => {
@@ -265,7 +257,6 @@ describe("ClientRegistrar", () => {
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const savedFetch = global.fetch;
       global.fetch = mockFetch;
 
       await clientRegistrar.getClient(
@@ -284,7 +275,6 @@ describe("ClientRegistrar", () => {
         string
       >;
       expect(registrationHeaders["Authorization"]).toEqual("Bearer some token");
-      global.fetch = savedFetch;
     });
 
     it("saves dynamic registration information", async () => {
@@ -299,7 +289,6 @@ describe("ClientRegistrar", () => {
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
-      const savedFetch = global.fetch;
       global.fetch = mockFetch;
       const myStorage = mockStorageUtility({});
       const clientRegistrar = getClientRegistrar({
@@ -324,8 +313,6 @@ describe("ClientRegistrar", () => {
       await expect(
         myStorage.getForUser("mySession", "clientSecret", { secure: false })
       ).resolves.toEqual("some secret");
-
-      global.fetch = savedFetch;
     });
   });
 });
