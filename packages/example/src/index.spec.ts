@@ -25,43 +25,23 @@ import {
   IStorage,
 } from "@inrupt/solid-client-authn-browser";
 
-/**
- * Simple implementation of our exported types.
- */
-export class MyExportTestingClass
-  implements ILoginInputOptions, ISessionInfo, IStorage {
-  // From: ILoginInputOptions.
-  public readonly clientName: string;
+import { MyExportTestingClass } from "./index";
 
-  // From: ISessionInfo.
-  public readonly isLoggedIn: boolean;
-  public readonly sessionId: string;
+describe("Test exports", () => {
+  it("exports storage", async () => {
+    const testImpl: ILoginInputOptions = new MyExportTestingClass();
+    expect(testImpl.clientName).toBe("Some client application name");
+  });
 
-  constructor() {
-    this.clientName = "Some client application name";
+  it("exports storage", async () => {
+    const testImpl: ISessionInfo = new MyExportTestingClass();
+    expect(testImpl.isLoggedIn).toBeTruthy();
+    expect(testImpl.sessionId).toBe("Required Session ID");
+  });
 
-    this.isLoggedIn = true;
-    this.sessionId = "Required Session ID";
-  }
-
-  async get(key: string): Promise<string | undefined> {
-    return Promise.resolve("no problem!");
-  }
-
-  async set(key: string, value: string): Promise<void> {
-    return Promise.resolve();
-  }
-
-  async delete(key: string): Promise<void> {
-    return Promise.resolve();
-  }
-}
-
-const testImpl = new MyExportTestingClass();
-
-console.log(`Client name: [${testImpl.clientName}]`);
-console.log(`Is logged in: [${testImpl.isLoggedIn}]`);
-console.log(`Session ID [${testImpl.sessionId}]`);
-testImpl
-  .get("whatever")
-  .then((response) => console.log(`Storage value: [${response}]`));
+  it("exports storage", async () => {
+    const testImpl: IStorage = new MyExportTestingClass();
+    const storedValue = await testImpl.get("whatever");
+    expect(storedValue).toBe("no problem!");
+  });
+});
