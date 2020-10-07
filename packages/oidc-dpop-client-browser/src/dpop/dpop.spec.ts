@@ -19,27 +19,32 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export {
-  Version,
-  Log,
-  OidcClient,
-  OidcClientSettings,
-  WebStorageStateStore,
-  InMemoryWebStorage,
-  UserManager,
-  AccessTokenEvents,
-  MetadataService,
-  CordovaPopupNavigator,
-  CordovaIFrameNavigator,
-  CheckSessionIFrame,
-  SigninRequest,
-  SigninResponse,
-  // TODO: Investigate why this fails
-  // TokenRevocationClient,
-  SessionMonitor,
-  // Global,
-  User,
-} from "oidc-client";
+import { describe, it } from "@jest/globals";
 
-export { registerClient } from "./dcr/clientRegistrar";
-export { generateDpopKey, generateRsaKey } from "./dpop/dpop";
+import { generateJWK, generateDpopKey, generateRsaKey } from "./dpop";
+
+describe("generateJWK", () => {
+  it("can generate a RSA-based JWK", async () => {
+    const key = await generateJWK("RSA");
+    expect(key.kty).toEqual("RSA");
+  });
+
+  it("can generate an elliptic curve-based JWK", async () => {
+    const key = await generateJWK("EC", "P-256");
+    expect(key.kty).toEqual("EC");
+  });
+});
+
+describe("generateDpopKey", () => {
+  it("generates an elliptic curve-base key", async () => {
+    const key = await generateDpopKey();
+    expect(key.kty).toEqual("EC");
+  });
+});
+
+describe("generateRsaKey", () => {
+  it("generates an RSA key", async () => {
+    const key = await generateRsaKey();
+    expect(key.kty).toEqual("RSA");
+  });
+});

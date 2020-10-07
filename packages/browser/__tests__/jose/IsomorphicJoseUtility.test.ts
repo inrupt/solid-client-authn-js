@@ -23,25 +23,16 @@ import { describe, it } from "@jest/globals";
 import {
   decodeJWT,
   generateCodeVerifier,
-  generateJWK,
   signJWT,
 } from "../../src/jose/IsomorphicJoseUtility";
-
-describe("generateJWK", () => {
-  it("can generate a RSA-based JWK", async () => {
-    const key = await generateJWK("RSA");
-    expect(key.kty).toEqual("RSA");
-  });
-
-  it("can generate an elliptic curve-based JWK", async () => {
-    const key = await generateJWK("EC", "P-256");
-    expect(key.kty).toEqual("EC");
-  });
-});
+import {
+  generateDpopKey,
+  generateRsaKey,
+} from "@inrupt/oidc-dpop-client-browser";
 
 describe("signJWT/decodeJWT", () => {
   it("generates a JWT that can be decoded without signature verification", async () => {
-    const key = await generateJWK("RSA");
+    const key = await generateRsaKey();
     const payload = { testClaim: "testValue" };
     const jwt = await signJWT(payload, key, { algorithm: "RS256" });
     const decoded = await decodeJWT(jwt);
@@ -49,7 +40,7 @@ describe("signJWT/decodeJWT", () => {
   });
 
   it("can verify the RSA signature of the generated JWT", async () => {
-    const key = await generateJWK("RSA");
+    const key = await generateRsaKey();
     const payload = { testClaim: "testValue" };
     const jwt = await signJWT(payload, key, { algorithm: "RS256" });
     const decoded = await decodeJWT(jwt, key, { algorithms: ["RS256"] });
@@ -57,7 +48,7 @@ describe("signJWT/decodeJWT", () => {
   });
 
   it("can verify the ES256 signature of the generated JWT", async () => {
-    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const key = await generateDpopKey();
     const payload = { testClaim: "testValue" };
     const jwt = await signJWT(payload, key, { algorithm: "ES256" });
     const decoded = await decodeJWT(jwt, key, { algorithms: ["ES256"] });
