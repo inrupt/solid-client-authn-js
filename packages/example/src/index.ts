@@ -44,14 +44,17 @@ export class MyExportTestingClass
     this.sessionId = "Required Session ID";
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async get(key: string): Promise<string | undefined> {
     return Promise.resolve("no problem!");
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async set(key: string, value: string): Promise<void> {
     return Promise.resolve();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async delete(key: string): Promise<void> {
     return Promise.resolve();
   }
