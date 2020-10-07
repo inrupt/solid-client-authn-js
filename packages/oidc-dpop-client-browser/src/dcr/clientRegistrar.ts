@@ -30,6 +30,65 @@ import {
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
 
+function processErrorResponse(
+  // The type is any here because the object is parsed from a JSON response
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  responseBody: any,
+  options: IClientRegistrarOptions
+): void {
+  // The following errors are defined by the spec, and allow providing some context.
+  // See https://tools.ietf.org/html/rfc7591#section-3.2.2 for more information
+  if (responseBody.error === "invalid_redirect_uri") {
+    throw new Error(
+      `Dynamic client registration failed: the provided redirect uri [${options.redirectUrl?.toString()}] is invalid - ${
+        responseBody.error_description ?? ""
+      }`
+    );
+  }
+  if (responseBody.error === "invalid_client_metadata") {
+    throw new Error(
+      `Dynamic client registration failed: the provided client metadata ${JSON.stringify(
+        options
+      )} is invalid - ${responseBody.error_description ?? ""}`
+    );
+  }
+  // We currently don't support software statements, so no related error should happen.
+  // If an error outside of the spec happens, no additional context can be provided
+  throw new Error(
+    `Dynamic client registration failed: ${responseBody.error} - ${
+      responseBody.error_description ?? ""
+    }`
+  );
+}
+
+function validateRegistrationResponse(
+  // The type is any here because the object is parsed from a JSON response
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  responseBody: any,
+  options: IClientRegistrarOptions
+): void {
+  if (responseBody.client_id === undefined) {
+    throw new Error(
+      `Dynamic client registration failed: no client_id has been found on ${JSON.stringify(
+        responseBody
+      )}`
+    );
+  }
+  if (
+    options.redirectUrl &&
+    (responseBody.redirect_uris === undefined ||
+      responseBody.redirect_uris[0] !== options.redirectUrl.toString())
+  ) {
+    throw new Error(
+      `Dynamic client registration failed: the returned redirect URIs ${JSON.stringify(
+        responseBody.redirect_uris
+      )} don't match the provided ${JSON.stringify([
+        options.redirectUrl.toString(),
+      ])}`
+    );
+  }
+}
+
 export async function registerClient(
   options: IClientRegistrarOptions,
   issuerConfig: IIssuerConfig
@@ -63,34 +122,20 @@ export async function registerClient(
       body: JSON.stringify(config),
     }
   );
-  if (!registerResponse.ok) {
-    throw new Error(
-      `Login Registration Error: [${await registerResponse.text()}]`
-    );
+  if (registerResponse.ok) {
+    const responseBody = await registerResponse.json();
+    validateRegistrationResponse(responseBody, options);
+    return {
+      clientId: responseBody.client_id,
+      clientSecret: responseBody.client_secret,
+    };
   }
-  const responseBody = await registerResponse.json();
-  if (responseBody.client_id === undefined) {
-    throw new Error(
-      `Dynamic client registration failed: no client_id has been found on ${JSON.stringify(
-        responseBody
-      )}`
-    );
+  if (registerResponse.status === 400) {
+    processErrorResponse(await registerResponse.json(), options);
   }
-  if (
-    options.redirectUrl &&
-    (responseBody.redirect_uris === undefined ||
-      responseBody.redirect_uris[0] !== options.redirectUrl.toString())
-  ) {
-    throw new Error(
-      `Dynamic client registration failed: the returned redirect URIs ${JSON.stringify(
-        responseBody.redirect_uris
-      )} don't match the provided ${JSON.stringify([
-        options.redirectUrl.toString(),
-      ])}`
-    );
-  }
-  return {
-    clientId: responseBody.client_id,
-    clientSecret: responseBody.client_secret,
-  };
+  throw new Error(
+    `Dynamic client registration failed: the server returned ${
+      registerResponse.status
+    } ${registerResponse.statusText} - ${await registerResponse.text()}`
+  );
 }
