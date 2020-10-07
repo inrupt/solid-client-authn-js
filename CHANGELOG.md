@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ### Bugfixes
 
 - The Authorization header was not set properly, which made it impossible to access private resources.
+- The types consumed/returned by the API are now exported for convenience.
 
 ## [0.2.0]
 
