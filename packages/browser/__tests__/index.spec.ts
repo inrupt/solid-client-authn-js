@@ -19,19 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export { Session, ISessionOptions } from "./Session";
+import { it } from "@jest/globals";
 
-export {
+import {
+  Session,
   SessionManager,
-  ISessionManager,
-  ISessionManagerOptions,
-} from "./SessionManager";
-export { getClientAuthenticationWithDependencies } from "./dependencies";
+  getClientAuthenticationWithDependencies,
+} from "../src/index";
 
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-} from "@inrupt/solid-client-authn-core";
+it("exports the public API from the entrypoint", () => {
+  expect(Session).toBeDefined();
+  expect(SessionManager).toBeDefined();
+  expect(getClientAuthenticationWithDependencies).toBeDefined();
+});
