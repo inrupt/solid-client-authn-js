@@ -32,12 +32,12 @@ export default {
         },
       },
     }),
-    resolve(),
-    commonjs(),
-    polyfills(),
-    builtins({crypto: false})
+    // resolve(),
+    // commonjs(),
+    // polyfills(),
+    // builtins({crypto: false})
   ],
-  external: ['crypto'],
+  // external: ['crypto'],
   // The following option is useful because symlinks are used in monorepos
   preserveSymlinks: true
 };
