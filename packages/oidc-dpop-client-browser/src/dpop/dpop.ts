@@ -25,7 +25,7 @@ import { JWK } from "node-jose";
 /**
  * Generates a Json Web Key
  * @param kty Key type
- * @param crvBitlength Curve length (nly relevant for elliptic curve algorithms)
+ * @param crvBitlength Curve length (only relevant for elliptic curve algorithms)
  * @param parameters
  * @hidden
  */
@@ -46,7 +46,7 @@ export async function generateKeyForDpop(): Promise<JSONWebKey> {
 }
 
 /**
- * Generates a JSON Web Key adapted based on the RSA algorithm
+ * Generates a JSON Web Key based on the RSA algorithm
  */
 export async function generateRsaKey(): Promise<JSONWebKey> {
   return generateJWK("RSA");

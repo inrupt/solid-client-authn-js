@@ -36,7 +36,7 @@ describe("generateJWK", () => {
 });
 
 describe("generateDpopKey", () => {
-  it("generates an elliptic curve-base key", async () => {
+  it("generates an elliptic curve-base key, which is a sensible default for DPoP", async () => {
     const key = await generateKeyForDpop();
     expect(key.kty).toEqual("EC");
   });
