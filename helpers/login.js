@@ -3,8 +3,21 @@
 import { t } from 'testcafe';
 import loginPage from '../page-models/loginPage.js';
 
+// Login using NSS User
+export async function nssLogin(brokerURL, username, password) {
+
+    // Log in via ESS Broker service
+    await loginPage.submitLoginForm(brokerURL);
+
+    await t
+        .typeText('#username', username)
+        .typeText('#password', password)
+        .click('#login');
+};
+
+
 // Login using Google
-export async function googleLogin(brokerURL, username, password) {
+export async function essGoogleLogin(brokerURL, username, password) {
 
     // Log in via ESS Broker service
     await loginPage.submitLoginForm(brokerURL);
@@ -15,7 +28,7 @@ export async function googleLogin(brokerURL, username, password) {
 
     // Enter login information
     await t
-        .typeText('#identifierId', username + '@gmail.com')
+        .typeText('#identifierId', username)
         .click('#identifierNext .VfPpkd-RLmnJb')
         .typeText('#password .whsOnd.zHQkBf', password)
         .click('#passwordNext .VfPpkd-RLmnJb');
@@ -27,7 +40,7 @@ export async function googleLogin(brokerURL, username, password) {
 
 
 // Login using Twitter
-export async function twitterLogin(brokerURL, username, password) {
+export async function essTwitterLogin(brokerURL, username, password) {
 
     // Log in via ESS Broker service
     await loginPage.submitLoginForm(brokerURL);
@@ -49,7 +62,7 @@ export async function twitterLogin(brokerURL, username, password) {
 
 
 // ESS (GitHub) User
-export async function githubLogin(brokerURL, username, password) {
+export async function essGithubLogin(brokerURL, username, password) {
     
     // Log in via ESS Broker service
     await loginPage.submitLoginForm(brokerURL);

@@ -1,26 +1,30 @@
-import { googleLogin } from '../helpers/login.js';
+import { nssLogin } from '../helpers/login.js';
 
 // Page Models
 import fetchPage from '../page-models/fetchPage.js';
 
-import { applicationURL, podUsername, podPassword, essPodServer, essBrokerService } from '../variables.js';
+// Application to test
+import { applicationURL } from '../variables.js';
+
+// NSS Server
+import { nssPodServer } from '../variables.js';
+
+// NSS User
+import { nssUsername, nssPassword } from '../variables.js';
 
 // Resources to test
 const resources = require('./resources.json');
 
 // Fetch Tests
-fixture('Fetch tests (Google)')
+fixture('Fetch tests - NSS')
     //.disablePageCaching
     //.disablePageReloads
     .page(applicationURL)
     .beforeEach( async t => {
 
-        // Using Roles causes a sessionID error
-        //await t.useRole(essGoogleUser);
-
         // Login
-        await googleLogin('https://' + essBrokerService + '.' + essPodServer, podUsername, podPassword);
-        await t.wait(2000);
+        await nssLogin('https://' + nssPodServer, nssUsername, nssPassword);
+        await t.wait(10000);
         await t.expect(fetchPage.fetchButton.exists).ok("Logged in");
     });
 
@@ -28,9 +32,13 @@ fixture('Fetch tests (Google)')
 resources.forEach(data => {
     test(`Resource: '${data.Name}'`, async t => {
 
+        // Form the URI of the resource to fetch
+        var webID = 'https://' + nssUsername + '.' + nssPodServer;
+        var fetchURI = data.URI.replace('<WEBID>', webID);
+
         await t
             .selectText(fetchPage.fetchURI)
-            .typeText(fetchPage.fetchURI, data.URI)
+            .typeText(fetchPage.fetchURI, fetchURI)
             .click(fetchPage.fetchButton)
             .wait(2000)
             .expect(fetchPage.fetchResponse.textContent).contains(data.AuthorisedResponse, "Authorized");

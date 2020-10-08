@@ -1,13 +1,30 @@
 import { Role, Selector, t } from 'testcafe';
-import { applicationURL, podUsername, podPassword } from '../variables.js';
 import loginPage from '../page-models/loginPage.js';
 
+// Application that is being tested
+import { applicationURL } from '../variables.js';
+
+// NSS Server
+import { nssPodServer } from '../variables.js';
+
 // ESS Server
-const essPodServer = "demo-ess.inrupt.com";
-const essBrokerService = "broker";
+import { essPodServer, essBrokerService } from '../variables.js';
+
+// NSS User
+import { nssUsername, nssPassword } from '../variables.js';
+export const nssUser = Role(applicationURL, async t => {
+
+    await loginPage.submitLoginForm('https://' + nssPodServer);
+
+    await t
+        .typeText('#username', nssUsername)
+        .typeText('#password', nssPassword)
+        .click('#login');
+    }, { preserveUrl: true });
 
 
 // ESS (Google) User
+import { googleUsername, googlePassword } from '../variables.js';
 export const essGoogleUser = Role(applicationURL, async t => {
     
     // Log in via ESS Broker service
@@ -17,9 +34,9 @@ export const essGoogleUser = Role(applicationURL, async t => {
         .click('#wrap [alt="Google"]');
 
     await t
-        .typeText('#identifierId', podUsername + '@gmail.com')
+        .typeText('#identifierId', googleUsername)
         .click('#identifierNext .VfPpkd-RLmnJb')
-        .typeText('#password .whsOnd.zHQkBf', podPassword)
+        .typeText('#password .whsOnd.zHQkBf', googlePassword)
         .click('#passwordNext .VfPpkd-RLmnJb');
 
     await t
