@@ -22,7 +22,6 @@
 import "reflect-metadata";
 import TokenSaver from "../../../../src/login/oidc/redirectHandler/TokenSaver";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
 /**
@@ -31,16 +30,12 @@ import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 describe("TokenSaver", () => {
   const defaultMocks = {
     sessionCreator: SessionInfoManagerMock,
-    joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock,
   };
   function getTokenSaver(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): TokenSaver {
-    return new TokenSaver(
-      mocks.joseUtility ?? defaultMocks.joseUtility,
-      mocks.storageUtility ?? defaultMocks.storageUtility
-    );
+    return new TokenSaver(mocks.storageUtility ?? defaultMocks.storageUtility);
   }
 
   describe("saveTokenAndGetSession", () => {

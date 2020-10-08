@@ -24,8 +24,6 @@
  */
 import "reflect-metadata";
 import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
-import { DpopHeaderCreatorMock } from "../../../../src/dpop/__mocks__/DpopHeaderCreator";
-import { DpopClientKeyManagerMock } from "../../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
@@ -35,14 +33,35 @@ import {
   IOidcOptions,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
+import URL from "url-parse";
+import { JSONWebKey } from "jose";
+
+const mockJWK = {
+  kty: "EC",
+  kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+  alg: "ES256",
+  crv: "P-256",
+  x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
+  y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+  d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+};
+
+jest.mock("@inrupt/oidc-dpop-client-browser", () => {
+  return {
+    generateJwkForDpop: async (): Promise<typeof mockJWK> => mockJWK,
+    createHeaderToken: async (
+      _audience: URL,
+      _method: string,
+      _jwt: JSONWebKey
+    ): Promise<string> => "someToken",
+  };
+});
 
 describe("LegacyImplicitFlowOidcHandler", () => {
   const defaultMocks = {
     fetcher: FetcherMock,
     sessionInfoManager: SessionInfoManagerMock,
     redirector: RedirectorMock,
-    dpopHeaderCreator: DpopHeaderCreatorMock,
-    dpopClientKeyManager: DpopClientKeyManagerMock,
     storageUtility: StorageUtilityMock,
   };
   function getLegacyImplicitFlowOidcHandler(
@@ -52,8 +71,6 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       mocks.fetcher ?? defaultMocks.fetcher,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
       mocks.redirector ?? defaultMocks.redirector,
-      mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
-      mocks.dpopHeaderCreator ?? defaultMocks.dpopHeaderCreator,
       mocks.storageUtility ?? defaultMocks.storageUtility
     );
   }
