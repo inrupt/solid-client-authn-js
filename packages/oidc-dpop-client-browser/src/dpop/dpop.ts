@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import URL from "url-parse";
 import { JWK } from "node-jose";
 import {
   BasicParameters,
@@ -32,7 +33,7 @@ import {
   JWT as JoseJWT,
 } from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
-// import rs from "jsrsasign";
+import { v4 } from "uuid";
 
 /**
  * Generates a Json Web Key
@@ -46,11 +47,6 @@ export async function generateJWK(
   crvBitlength?: ECCurve | OKPCurve | number,
   parameters?: BasicParameters
 ): Promise<JSONWebKey> {
-  // var kp = rs.KEYUTIL.generateKeypair(kty, crvBitlength ?? "P-256");
-  // var prvKey = kp.prvKeyObj;
-  // var pubKey = kp.pubKeyObj;
-  // var prvJWK = rs.KEYUTIL.getJWKFromKey(prvKey);
-  // return prvJWK as JSONWebKey;
   const key = await JWK.createKey(kty, crvBitlength, parameters);
   return key.toJSON(true) as JSONWebKey;
 }
@@ -70,7 +66,6 @@ export async function signJWT(
   key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
   options?: JoseJWT.SignOptions
 ): Promise<string> {
-  // return rs.KJUR.jws.JWS.sign("ES256", {alg: "ES256"}, payload, key);
   const parsedKey = await JWK.asKey(key);
   const convertedKey: string = parsedKey.toPEM(true);
   const signed = JWT.sign(payload, convertedKey, {
@@ -100,6 +95,57 @@ export async function decodeJWT(
     >;
   }
   return JWT.decode(token) as Promise<Record<string, unknown>>;
+}
+
+/**
+ * @param key
+ * @hidden
+ */
+export async function privateJWKToPublicJWK(
+  key: JSONWebKey
+): Promise<JSONWebKey> {
+  return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
+}
+
+/**
+ * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
+ * @param audience The URL to normalize.
+ * @returns The normalized URL as a string.
+ * @hidden
+ */
+export function normalizeHtu(audience: URL): string {
+  return `${audience.origin}${audience.pathname}`;
+}
+
+/**
+ * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
+ * based on the target URL and method, using the provided key.
+ * @param audience Target URL.
+ * @param method HTTP method allowed.
+ * @param key Key used to sign the token.
+ * @returns A JWT that can be used as a DPoP Authorization header.
+ */
+export async function createHeaderToken(
+  audience: URL,
+  method: string,
+  key: JSONWebKey
+): Promise<string> {
+  return signJWT(
+    {
+      htu: normalizeHtu(audience),
+      htm: method,
+      jti: v4(),
+    },
+    key,
+    {
+      header: {
+        jwk: privateJWKToPublicJWK(key),
+        typ: "dpop+jwt",
+      },
+      expiresIn: "1 hour",
+      algorithm: "ES256",
+    }
+  );
 }
 
 /**

@@ -19,13 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import URL from "url-parse";
 import { describe, it } from "@jest/globals";
 
 import {
+  createHeaderToken,
   decodeJWT,
   generateJWK,
   generateKeyForDpop,
   generateRsaKey,
+  normalizeHtu,
   signJWT,
 } from "./dpop";
 
@@ -74,5 +77,74 @@ describe("signJWT/decodeJWT", () => {
     });
     const decoded = await decodeJWT(jwt, key, { algorithms: ["ES256"] });
     expect(decoded.testClaim).toEqual(payload.testClaim);
+  });
+});
+
+describe("normalizeHtu", () => {
+  [
+    {
+      it: "should not add a / if not present at the end of the url",
+      url: new URL("https://audience.com"),
+      expected: "https://audience.com",
+    },
+    {
+      it: "should not change a URL with a slash at the end",
+      url: new URL("https://audience.com/"),
+      expected: "https://audience.com/",
+    },
+    {
+      it: "should not include queries",
+      url: new URL("https://audience.com?cool=stuff&dope=things"),
+      expected: "https://audience.com",
+    },
+    {
+      it: "should not include queries but still include a slash",
+      url: new URL("https://audience.com/?cool=stuff&dope=things"),
+      expected: "https://audience.com/",
+    },
+    {
+      it: "should not include hash",
+      url: new URL("https://audience.com#throwBackThursday"),
+      expected: "https://audience.com",
+    },
+    {
+      it: "should not include hash but include the slash",
+      url: new URL("https://audience.com/#throwBackThursday"),
+      expected: "https://audience.com/",
+    },
+    {
+      it: "should include the path",
+      url: new URL("https://audience.com/path"),
+      expected: "https://audience.com/path",
+    },
+    {
+      it: "should not include the username and password",
+      url: new URL("https://jackson:badpassword@audience.com"),
+      expected: "https://audience.com",
+    },
+    {
+      it: "should include ports",
+      url: new URL("https://localhost:8080/path"),
+      expected: "https://localhost:8080/path",
+    },
+  ].forEach((test) => {
+    it(test.it, () => {
+      const htu = normalizeHtu(test.url);
+      expect(htu).toBe(test.expected);
+    });
+  });
+});
+
+describe("createHeaderToken", () => {
+  it("Properly builds a token when given a key", async () => {
+    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const token = await createHeaderToken(
+      new URL("https://audience.com/"),
+      "post",
+      key
+    );
+    const decoded = await decodeJWT(token);
+    expect(decoded.htu).toEqual("https://audience.com/");
+    expect(decoded.htm).toEqual("post");
   });
 });

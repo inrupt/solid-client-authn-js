@@ -42,7 +42,8 @@
     "jsonwebtoken": "^8.5.1",
     "node-jose": "^2.0.0",
     "oidc-client": "^1.10.1",
-    "url-parse": "^1.4.7"
+    "url-parse": "^1.4.7",
+    "uuid": "^8.3.1"
   },
   "publishConfig": {
     "access": "public"

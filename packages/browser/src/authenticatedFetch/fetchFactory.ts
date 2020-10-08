@@ -21,7 +21,7 @@
 
 import URL from "url-parse";
 import { JSONWebKey } from "jose";
-import { createHeaderToken } from "../dpop/DpopHeaderCreator";
+import { createHeaderToken } from "@inrupt/oidc-dpop-client-browser";
 import { fetch } from "cross-fetch";
 
 /**

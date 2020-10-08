@@ -27,23 +27,16 @@
 /**
  * File for NodeJS-compatible JOSE
  */
-import {
-  ECCurve,
-  BasicParameters,
-  OKPCurve,
-  JSONWebKey,
-  // JWKECKey,
-  // JWKOKPKey,
-  // JWKRSAKey,
-  // JWKOctKey,
-  // JWT as JoseJWT,
-} from "jose";
+import { ECCurve, BasicParameters, OKPCurve, JSONWebKey } from "jose";
 import { JWK } from "node-jose";
 import IJoseUtility from "./IJoseUtility";
 import randomString from "crypto-random-string";
 import crypto from "crypto";
-import { signJWT, decodeJWT } from "@inrupt/oidc-dpop-client-browser";
-// import JWT, { VerifyOptions } from "jsonwebtoken";
+import {
+  signJWT,
+  decodeJWT,
+  privateJWKToPublicJWK,
+} from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * Generates a Json Web Key
@@ -58,16 +51,6 @@ export async function generateJWK(
 ): Promise<JSONWebKey> {
   const key = await JWK.createKey(kty, crvBitlength, parameters);
   return key.toJSON(true) as JSONWebKey;
-}
-
-/**
- * @param key
- * @hidden
- */
-export async function privateJWKToPublicJWK(
-  key: JSONWebKey
-): Promise<JSONWebKey> {
-  return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
 }
 
 /**

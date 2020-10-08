@@ -47,4 +47,6 @@ export {
   generateRsaKey,
   decodeJWT,
   signJWT,
+  createHeaderToken,
+  privateJWKToPublicJWK,
 } from "./dpop/dpop";
