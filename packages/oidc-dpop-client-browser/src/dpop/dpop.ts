@@ -49,5 +49,5 @@ export async function generateDpopKey(): Promise<JSONWebKey> {
  * Generates a JSON Web Key adapted based on the RSA algorithm
  */
 export async function generateRsaKey(): Promise<JSONWebKey> {
-  return generateJWK("RSA", undefined, { use: "sig" });
+  return generateJWK("RSA");
 }
