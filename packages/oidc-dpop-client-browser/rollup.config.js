@@ -29,4 +29,5 @@ export default {
       },
     }),
   ],
+  external: ['crypto']
 };
