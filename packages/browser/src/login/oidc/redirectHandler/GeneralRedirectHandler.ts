@@ -78,7 +78,7 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
       );
     }
     return Object.assign(sessionInfo, {
-      fetch: buildBearerFetch(url.query.access_token),
+      fetch: buildBearerFetch(url.query.access_token, undefined),
     });
   }
 }

@@ -101,17 +101,24 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       signinResponse.access_token as string
     );
     if (!decoded || !decoded.sub) {
-      throw new Error("The idp returned a bad token without a sub.");
+      throw new Error(
+        "The Authorization Server returned a bad token (i.e. when decoded we did not find the required 'sub' claim)."
+      );
     }
+
+    // Although not a field in the TypeScript response interface, the refresh
+    // token (which can optionally come back with the access token (if, as per
+    // the OAuth2 spec, we requested one using the scope of 'offline_access')
+    // will be included in the signin response object.
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    const refreshToken = signinResponse.refresh_token;
 
     await this.storageUtility.setForUser(
       storedSessionId,
       {
         idToken: signinResponse.id_token,
-        // TODO: We need a PR to oidc-client-js to add parsing of the
-        //  refresh_token from the redirect URL.
-        refreshToken:
-          "<Refresh token that *is* coming back in the redirect URL is not yet being parsed and provided by oidc-client-js in it's response object>",
         webId: decoded.sub as string,
         isLoggedIn: "true",
       },
@@ -126,7 +133,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     return Object.assign(sessionInfo, {
       // TODO: When handling DPoP, both the key and the token should be returned
       // by the redirect handler.
-      fetch: buildBearerFetch(signinResponse.access_token),
+      fetch: buildBearerFetch(signinResponse.access_token, refreshToken),
     });
   }
 }
