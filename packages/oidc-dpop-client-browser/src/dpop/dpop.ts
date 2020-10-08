@@ -19,8 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { BasicParameters, ECCurve, JSONWebKey, OKPCurve } from "jose";
 import { JWK } from "node-jose";
+import {
+  BasicParameters,
+  ECCurve,
+  JSONWebKey,
+  JWKECKey,
+  JWKOctKey,
+  JWKOKPKey,
+  JWKRSAKey,
+  OKPCurve,
+  JWT as JoseJWT,
+} from "jose";
+import JWT, { VerifyOptions } from "jsonwebtoken";
+// import rs from "jsrsasign";
 
 /**
  * Generates a Json Web Key
@@ -30,12 +42,64 @@ import { JWK } from "node-jose";
  * @hidden
  */
 export async function generateJWK(
-  kty: "EC" | "OKP" | "RSA" | "oct",
+  kty: "EC" | "RSA",
   crvBitlength?: ECCurve | OKPCurve | number,
   parameters?: BasicParameters
 ): Promise<JSONWebKey> {
+  // var kp = rs.KEYUTIL.generateKeypair(kty, crvBitlength ?? "P-256");
+  // var prvKey = kp.prvKeyObj;
+  // var pubKey = kp.pubKeyObj;
+  // var prvJWK = rs.KEYUTIL.getJWKFromKey(prvKey);
+  // return prvJWK as JSONWebKey;
   const key = await JWK.createKey(kty, crvBitlength, parameters);
   return key.toJSON(true) as JSONWebKey;
+}
+
+/**
+ * Generates a Json Web Token (https://tools.ietf.org/html/rfc7519) containing
+ * the provided payload and using the signature algorithm specified in the options.
+ * @param payload The body of the JWT.
+ * @param key The key used for the signature.
+ * @param options
+ * @returns a 3-parts base64-encoded string, split by dots.
+ * @hidden
+ */
+export async function signJWT(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>,
+  key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
+  options?: JoseJWT.SignOptions
+): Promise<string> {
+  // return rs.KJUR.jws.JWS.sign("ES256", {alg: "ES256"}, payload, key);
+  const parsedKey = await JWK.asKey(key);
+  const convertedKey: string = parsedKey.toPEM(true);
+  const signed = JWT.sign(payload, convertedKey, {
+    ...(options as JWT.SignOptions),
+  });
+  return signed;
+}
+
+/**
+ * Decodes the base64 Json Web Token into an object. If a key is specified, the
+ * JWT is also verified.
+ * @param token The base64-encoded token
+ * @param key The key used to sign the token
+ * @returns the payload of the JWT
+ * @hidden
+ */
+export async function decodeJWT(
+  token: string,
+  key?: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
+  options?: VerifyOptions
+): Promise<Record<string, unknown>> {
+  if (key) {
+    const parsedKey = await JWK.asKey(key);
+    const convertedKey: string = parsedKey.toPEM(false);
+    return JWT.verify(token, convertedKey, options) as Promise<
+      Record<string, unknown>
+    >;
+  }
+  return JWT.decode(token) as Promise<Record<string, unknown>>;
 }
 
 /**

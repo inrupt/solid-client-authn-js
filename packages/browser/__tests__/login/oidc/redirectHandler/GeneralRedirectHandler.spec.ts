@@ -28,8 +28,9 @@ import {
 import GeneralRedirectHandler from "../../../../src/login/oidc/redirectHandler/GeneralRedirectHandler";
 import {
   generateJWK,
-  signJWT,
+  // signJWT,
 } from "../../../../src/jose/IsomorphicJoseUtility";
+import { signJWT } from "@inrupt/oidc-dpop-client-browser";
 
 jest.mock("cross-fetch");
 

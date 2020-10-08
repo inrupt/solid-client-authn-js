@@ -31,7 +31,8 @@ import DpopHeaderCreator, {
   normalizeHtu,
 } from "../../src/dpop/DpopHeaderCreator";
 import URL from "url-parse";
-import { decodeJWT, generateJWK } from "../../src/jose/IsomorphicJoseUtility";
+import { generateJWK } from "../../src/jose/IsomorphicJoseUtility";
+import { decodeJWT } from "@inrupt/oidc-dpop-client-browser";
 
 describe("normalizeHtu", () => {
   [

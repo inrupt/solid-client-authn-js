@@ -25,7 +25,7 @@
  */
 
 import URL from "url-parse";
-import ConfigurationError from "../../..//errors/ConfigurationError";
+import ConfigurationError from "../../../errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import {
   IRedirector,

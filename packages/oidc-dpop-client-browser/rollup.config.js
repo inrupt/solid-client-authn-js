@@ -1,9 +1,9 @@
 import pkg from "./package.json";
 import typescript from "rollup-plugin-typescript2";
-import nodeResolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import nodePolyfills from 'rollup-plugin-node-polyfills';
+import resolve from "@rollup/plugin-node-resolve";
 import builtins from 'rollup-plugin-node-builtins';
+import commonjs from "@rollup/plugin-commonjs";
+import polyfills from 'rollup-plugin-node-polyfills';
 
 export default {
   input: "./src/index.ts",
@@ -32,10 +32,12 @@ export default {
         },
       },
     }),
-    nodeResolve(),
+    resolve(),
     commonjs(),
-    nodePolyfills(),
+    polyfills(),
     builtins({crypto: false})
   ],
-  external: ['crypto']
+  external: ['crypto'],
+  // The following option is useful because symlinks are used in monorepos
+  preserveSymlinks: true
 };

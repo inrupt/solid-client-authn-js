@@ -25,7 +25,8 @@ import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../src/authenticatedFetch/fetchFactory";
-import { decodeJWT, generateJWK } from "../../src/jose/IsomorphicJoseUtility";
+import { generateJWK } from "../../src/jose/IsomorphicJoseUtility";
+import { decodeJWT } from "@inrupt/oidc-dpop-client-browser";
 
 jest.mock("cross-fetch");
 

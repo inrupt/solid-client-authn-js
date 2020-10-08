@@ -29,27 +29,36 @@ import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector"
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { SigninResponse } from "@inrupt/oidc-dpop-client-browser";
-import {
-  generateJWK,
-  signJWT,
-} from "../../../../src/jose/IsomorphicJoseUtility";
 
 jest.mock("cross-fetch");
+
+// The following key has been used to sign the mock access token. It is given
+// for an information purpose.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _mockJWK = {
+  kty: "EC",
+  kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+  alg: "ES256",
+  crv: "P-256",
+  x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
+  y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+  d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+};
+
+// Payload: { sub: "https://my.webid" }
+const mockAccessToken =
+  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0Q2xhaW0iOiJ0ZXN0VmFsdWUiLCJpYXQiOjE2MDIxNTg2NDJ9.wGZ49jU3wNSAFvWvZsjjulmbfRjlIQMp0VY0Q5u2--5vyzeKwfGUmssOW8kftIXG1ikm2iqMb6YRXCO4KGEctQ";
 
 jest.mock("@inrupt/oidc-dpop-client-browser", () => {
   return {
     OidcClient: jest.fn().mockImplementation(() => {
       return {
         processSigninResponse: async (): Promise<SigninResponse> => {
-          const jwk = await generateJWK("RSA");
-          const accessToken = await signJWT({ sub: "https://my.webid" }, jwk, {
-            algorithm: "RS256",
-          });
           // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           // @ts-ignore Ignore because we don't need to mock out all data fields.
           return Promise.resolve({
             // eslint-disable-next-line @typescript-eslint/camelcase
-            access_token: accessToken,
+            access_token: mockAccessToken,
             // eslint-disable-next-line @typescript-eslint/camelcase
             id_token: "Some ID token",
           });

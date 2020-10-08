@@ -32,7 +32,10 @@ import { inject, injectable } from "tsyringe";
 import IJoseUtility from "../jose/IJoseUtility";
 import { IDpopClientKeyManager } from "./DpopClientKeyManager";
 import { IUuidGenerator } from "../util/UuidGenerator";
-import { privateJWKToPublicJWK, signJWT } from "../jose/IsomorphicJoseUtility";
+import {
+  /*signJWT,*/ privateJWKToPublicJWK,
+} from "../jose/IsomorphicJoseUtility";
+import { signJWT } from "@inrupt/oidc-dpop-client-browser";
 import { v4 } from "uuid";
 import { JSONWebKey } from "jose";
 

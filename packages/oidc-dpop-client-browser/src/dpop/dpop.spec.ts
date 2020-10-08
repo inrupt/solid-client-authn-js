@@ -21,7 +21,13 @@
 
 import { describe, it } from "@jest/globals";
 
-import { generateJWK, generateKeyForDpop, generateRsaKey } from "./dpop";
+import {
+  decodeJWT,
+  generateJWK,
+  generateKeyForDpop,
+  generateRsaKey,
+  signJWT,
+} from "./dpop";
 
 describe("generateJWK", () => {
   it("can generate a RSA-based JWK", async () => {
@@ -35,7 +41,7 @@ describe("generateJWK", () => {
   });
 });
 
-describe("generateDpopKey", () => {
+describe("generateKeyForDpop", () => {
   it("generates an elliptic curve-base key, which is a sensible default for DPoP", async () => {
     const key = await generateKeyForDpop();
     expect(key.kty).toEqual("EC");
@@ -46,5 +52,27 @@ describe("generateRsaKey", () => {
   it("generates an RSA key", async () => {
     const key = await generateRsaKey();
     expect(key.kty).toEqual("RSA");
+  });
+});
+
+describe("signJWT/decodeJWT", () => {
+  it("generates a JWT that can be decoded without signature verification", async () => {
+    const key = await generateKeyForDpop();
+    const payload = { testClaim: "testValue" };
+    const jwt = await signJWT(payload, key, {
+      algorithm: "RS256",
+    });
+    const decoded = await decodeJWT(jwt);
+    expect(decoded.testClaim).toEqual(payload.testClaim);
+  });
+
+  it("can verify the ES256 signature of the generated JWT", async () => {
+    const key = await generateKeyForDpop();
+    const payload = { testClaim: "testValue" };
+    const jwt = await signJWT(payload, key, {
+      algorithm: "ES256",
+    });
+    const decoded = await decodeJWT(jwt, key, { algorithms: ["ES256"] });
+    expect(decoded.testClaim).toEqual(payload.testClaim);
   });
 });
