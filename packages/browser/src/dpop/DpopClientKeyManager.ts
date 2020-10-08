@@ -30,8 +30,8 @@
 import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
 import jwkSchema from "./JwkSchema";
-import IJoseUtility from "../jose/IJoseUtility";
 import { IStorageUtility } from "@inrupt/solid-client-authn-core";
+import { generateKeyForDpop } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -54,8 +54,7 @@ export interface IDpopClientKeyManager {
 @injectable()
 export default class DpopClientKeyManager implements IDpopClientKeyManager {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("joseUtility") private joseUtility: IJoseUtility
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   public static getLocalStorageKey(): string {
@@ -71,10 +70,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
 
     if (!jwk) {
       // TODO: differentiate between what a server supports instead of hard coding rsa?
-      jwk = await this.joseUtility.generateJWK("EC", "P-256", {
-        alg: "EC",
-        use: "sig",
-      });
+      jwk = await generateKeyForDpop();
 
       // FIXME: Temporarily use insecure storage while the implicit auth flow is required.
       await this.storageUtility.set(
