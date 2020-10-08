@@ -1,0 +1,12 @@
+{
+  "name": "e2e-browser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "testcafe all index.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}

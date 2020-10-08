@@ -35,3 +35,9 @@ export {
   ISessionInfo,
   IStorage,
 } from "@inrupt/solid-client-authn-core";
+
+export function removeBeforeMergingDemoDeployment(): void {
+  console.log(
+    "This is a function to demonstrate that we're actually calling code from this branch. Woohoo!"
+  );
+}
