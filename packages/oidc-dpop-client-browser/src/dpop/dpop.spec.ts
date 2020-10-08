@@ -21,7 +21,7 @@
 
 import { describe, it } from "@jest/globals";
 
-import { generateJWK, generateDpopKey, generateRsaKey } from "./dpop";
+import { generateJWK, generateKeyForDpop, generateRsaKey } from "./dpop";
 
 describe("generateJWK", () => {
   it("can generate a RSA-based JWK", async () => {
@@ -37,7 +37,7 @@ describe("generateJWK", () => {
 
 describe("generateDpopKey", () => {
   it("generates an elliptic curve-base key", async () => {
-    const key = await generateDpopKey();
+    const key = await generateKeyForDpop();
     expect(key.kty).toEqual("EC");
   });
 });

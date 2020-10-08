@@ -31,7 +31,7 @@ import { inject, injectable } from "tsyringe";
 import { JSONWebKey } from "jose";
 import jwkSchema from "./JwkSchema";
 import { IStorageUtility } from "@inrupt/solid-client-authn-core";
-import { generateDpopKey } from "@inrupt/oidc-dpop-client-browser";
+import { generateKeyForDpop } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -70,7 +70,7 @@ export default class DpopClientKeyManager implements IDpopClientKeyManager {
 
     if (!jwk) {
       // TODO: differentiate between what a server supports instead of hard coding rsa?
-      jwk = await generateDpopKey();
+      jwk = await generateKeyForDpop();
 
       // FIXME: Temporarily use insecure storage while the implicit auth flow is required.
       await this.storageUtility.set(

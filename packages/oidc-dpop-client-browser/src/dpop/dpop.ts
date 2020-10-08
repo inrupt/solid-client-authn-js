@@ -41,7 +41,7 @@ export async function generateJWK(
 /**
  * Generates a JSON Web Key suitable to be used to sign HTTP request headers.
  */
-export async function generateDpopKey(): Promise<JSONWebKey> {
+export async function generateKeyForDpop(): Promise<JSONWebKey> {
   return generateJWK("EC", "P-256", { alg: "ES256" });
 }
 

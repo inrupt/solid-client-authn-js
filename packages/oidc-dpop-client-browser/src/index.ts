@@ -42,4 +42,4 @@ export {
 } from "oidc-client";
 
 export { registerClient } from "./dcr/clientRegistrar";
-export { generateDpopKey, generateRsaKey } from "./dpop/dpop";
+export { generateKeyForDpop, generateRsaKey } from "./dpop/dpop";
