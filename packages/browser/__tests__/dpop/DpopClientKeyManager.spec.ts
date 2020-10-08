@@ -27,12 +27,10 @@ import {
   mockStorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { JoseUtilityMock } from "../../src/jose/__mocks__/JoseUtility";
 import DpopClientKeyManager from "../../src/dpop/DpopClientKeyManager";
 
 describe("DpopClientKeyManager", () => {
   const defaultMocks = {
-    joseUtility: JoseUtilityMock,
     storageUtility: StorageUtilityMock,
   };
 
@@ -40,8 +38,7 @@ describe("DpopClientKeyManager", () => {
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): DpopClientKeyManager {
     const dpopClientKeyManager = new DpopClientKeyManager(
-      mocks.storageUtility ?? defaultMocks.storageUtility,
-      mocks.joseUtility ?? defaultMocks.joseUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility
     );
 
     return dpopClientKeyManager;
@@ -62,8 +59,8 @@ describe("DpopClientKeyManager", () => {
 
       // We expect our JWK to be JSON stringified, but to contain specific
       // values.
-      expect(jwk).toContain('kty":"RSA');
-      expect(jwk).toContain('use":"sig');
+      expect(jwk).toContain('kty":"EC');
+      expect(jwk).toContain('alg":"ES256');
     });
 
     it("should not generate a client key and save it if one already exists", async () => {
