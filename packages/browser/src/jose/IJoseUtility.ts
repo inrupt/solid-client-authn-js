@@ -27,7 +27,8 @@
 /**
  * Interface defining how each environment should define its crypto system
  */
-import { ECCurve, BasicParameters, OKPCurve, JWT, JSONWebKey } from "jose";
+import { ECCurve, BasicParameters, OKPCurve, JSONWebKey } from "jose";
+import JWT from "jsonwebtoken";
 
 /**
  * @hidden

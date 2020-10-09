@@ -64,13 +64,11 @@ export async function signJwt(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>,
   key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
-  options?: JoseJWT.SignOptions
+  options?: JWT.SignOptions
 ): Promise<string> {
   const parsedKey = await JWK.asKey(key);
   const convertedKey: string = parsedKey.toPEM(true);
-  const signed = JWT.sign(payload, convertedKey, {
-    ...(options as JWT.SignOptions),
-  });
+  const signed = JWT.sign(payload, convertedKey, options);
   return signed;
 }
 
