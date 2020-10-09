@@ -53,7 +53,7 @@ const mockJWK = {
 jest.mock("@inrupt/oidc-dpop-client-browser", () => {
   return {
     generateJwkForDpop: async (): Promise<typeof mockJWK> => mockJWK,
-    createHeaderToken: async (
+    createDpopHeader: async (
       _audience: URL,
       _method: string,
       _jwt: JSONWebKey
