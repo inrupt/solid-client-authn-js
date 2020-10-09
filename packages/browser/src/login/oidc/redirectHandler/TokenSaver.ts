@@ -60,7 +60,7 @@ export default class TokenSaver implements ITokenSaver {
     accessToken?: string,
     refreshToken?: string
   ): Promise<void> {
-    const decoded = await this.joseUtility.decodeJWT(
+    const decoded = await this.joseUtility.decodeJwt(
       // TODO this should actually be the id_vc of the token
       accessToken as string
     );

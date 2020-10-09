@@ -115,8 +115,8 @@ describe("TokenRequester", () => {
       ) as unknown) as Response
     );
 
-    defaultMocks.joseUtility.decodeJWT.mockReset();
-    defaultMocks.joseUtility.decodeJWT.mockResolvedValueOnce(
+    defaultMocks.joseUtility.decodeJwt.mockReset();
+    defaultMocks.joseUtility.decodeJwt.mockResolvedValueOnce(
       values.jwt ?? defaultReturnValues.jwt
     );
   }
@@ -149,7 +149,7 @@ describe("TokenRequester", () => {
   it("Adds an authorization header if a client secret is present", async () => {
     const mockJoseUtility = JoseUtilityMock;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mockJoseUtility.decodeJWT = jest.fn(async (token: string) => {
+    mockJoseUtility.decodeJwt = jest.fn(async (token: string) => {
       return {
         sub: "https://some.pod/webid#me",
       };

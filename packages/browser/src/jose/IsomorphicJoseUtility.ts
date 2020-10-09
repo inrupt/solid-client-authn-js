@@ -27,58 +27,69 @@
 /**
  * File for NodeJS-compatible JOSE
  */
-import {
-  JWKECKey,
-  ECCurve,
-  BasicParameters,
-  OKPCurve,
-  JWKOKPKey,
-  JWKRSAKey,
-  JWKOctKey,
-  JWT as JoseJWT,
-  JSONWebKey,
-} from "jose";
+import { ECCurve, BasicParameters, OKPCurve, JSONWebKey } from "jose";
 import { JWK } from "node-jose";
-import JWT from "jsonwebtoken";
 import IJoseUtility from "./IJoseUtility";
 import randomString from "crypto-random-string";
 import crypto from "crypto";
+import {
+  signJwt,
+  decodeJwt,
+  privateJwkToPublicJwk,
+} from "@inrupt/oidc-dpop-client-browser";
+
+/**
+ * Generates a Json Web Key
+ * @param kty Key type
+ * @param crvBitlength Curve length (nly relevant for elliptic curve algorithms)
+ * @param parameters
+ */
+export async function generateJwk(
+  kty: "EC" | "OKP" | "RSA" | "oct",
+  crvBitlength?: ECCurve | OKPCurve | number,
+  parameters?: BasicParameters
+): Promise<JSONWebKey> {
+  const key = await JWK.createKey(kty, crvBitlength, parameters);
+  return key.toJSON(true) as JSONWebKey;
+}
+
+/**
+ * Generates a PKCE (https://tools.ietf.org/html/rfc7636) token.
+ * @returns A random string usable as a code verifier.
+ * @hidden
+ */
+export async function generateCodeVerifier(): Promise<string> {
+  return randomString({ length: 10, type: "base64" });
+}
+
+/**
+ * Hashes the code verifier to create a code challenge.
+ * @param verifier A PKCE token.
+ * @returns A SHA-256 hash of the input token.
+ * @hidden
+ */
+export async function generateCodeChallenge(verifier: string): Promise<string> {
+  const hash = crypto.createHash("sha256");
+  hash.update(verifier);
+  return hash
+    .digest()
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+}
 
 /**
  * @hidden
  */
 export default class IsomorphicJoseUtility implements IJoseUtility {
-  async generateJWK(
-    kty: "EC" | "OKP" | "RSA" | "oct",
-    crvBitlength?: ECCurve | OKPCurve | number,
-    parameters?: BasicParameters
-  ): Promise<JSONWebKey> {
-    const key = await JWK.createKey(kty, crvBitlength, parameters);
-    return key.toJSON(true) as JSONWebKey;
-  }
+  generateJwk = generateJwk;
 
-  async signJWT(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    payload: Record<string, any>,
-    key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
-    options?: JoseJWT.SignOptions
-  ): Promise<string> {
-    const parsedKey = await JWK.asKey(key);
-    const convertedKey: string = parsedKey.toPEM(true);
-    const signed = JWT.sign(payload, convertedKey, {
-      ...(options as JWT.SignOptions),
-    });
-    return signed;
-  }
+  signJwt = signJwt;
 
-  // TODO: also should have functionality to validate the token
-  async decodeJWT(token: string): Promise<Record<string, unknown>> {
-    return JWT.decode(token) as Promise<Record<string, unknown>>;
-  }
+  decodeJwt = decodeJwt;
 
-  async privateJWKToPublicJWK(key: JSONWebKey): Promise<JSONWebKey> {
-    return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
-  }
+  privateJwkToPublicJwk = privateJwkToPublicJwk;
 
   async generateCodeVerifier(): Promise<string> {
     return randomString({ length: 10, type: "base64" });

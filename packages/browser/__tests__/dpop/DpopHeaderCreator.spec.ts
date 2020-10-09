@@ -31,6 +31,8 @@ import { DpopClientKeyManagerMock } from "../../src/dpop/__mocks__/DpopClientKey
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import DpopHeaderCreator from "../../src/dpop/DpopHeaderCreator";
 import URL from "url-parse";
+import { generateJwk } from "../../src/jose/IsomorphicJoseUtility";
+import { decodeJwt } from "@inrupt/oidc-dpop-client-browser";
 
 describe("DpopHeaderCreator", () => {
   const defaultMocks = {
@@ -49,14 +51,19 @@ describe("DpopHeaderCreator", () => {
     return dpopHeaderCreator;
   }
 
-  describe("createHeaderToken", () => {
-    it("Properly builds a token", async () => {
-      const dpopHeaderCreator = getDpopHeaderCreator();
-      const token = await dpopHeaderCreator.createHeaderToken(
-        new URL("https://audience.com"),
+  describe("DpopHeaderCreator.createDpopHeader", () => {
+    it("Properly builds a token by retrieving the stored key", async () => {
+      const key = await generateJwk("EC", "P-256", { alg: "ES256" });
+      const dpopHeaderCreator = getDpopHeaderCreator({
+        dpopClientKeyManager: mockDpopClientKeyManager(key),
+      });
+      const token = await dpopHeaderCreator.createDpopHeader(
+        new URL("https://audience.com/"),
         "post"
       );
-      expect(token).toBe(JoseUtilitySignJWTResponse);
+      const decoded = await decodeJwt(token);
+      expect(decoded.htu).toEqual("https://audience.com/");
+      expect(decoded.htm).toEqual("post");
     });
 
     it("Fails if no client key is provided", async () => {
@@ -68,7 +75,7 @@ describe("DpopHeaderCreator", () => {
         dpopClientKeyManager: dpopClientKeyManagerMock,
       });
       await expect(
-        dpopHeaderCreator.createHeaderToken(
+        dpopHeaderCreator.createDpopHeader(
           new URL("https://audience.com"),
           "post"
         )
