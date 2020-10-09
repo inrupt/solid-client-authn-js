@@ -71,7 +71,10 @@ export default class AuthorizationCodeWithPkceOidcHandler
       //  mentioned in the WebID-OIDC spec).
       scope: "openid webid offline_access",
       filterProtocolClaims: true,
-      loadUserInfo: true,
+      // The userinfo endpoint on NSS fails, so disable this for now
+      // Note that in Solid, information should be retrieved from the
+      // profile referenced by the WebId.
+      loadUserInfo: false,
       code_verifier: true,
     };
     /* eslint-enable @typescript-eslint/camelcase */
