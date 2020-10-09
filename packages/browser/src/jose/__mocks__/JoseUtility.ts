@@ -20,7 +20,8 @@
  */
 
 import IJoseUtility from "../IJoseUtility";
-import { ECCurve, OKPCurve, BasicParameters, JSONWebKey, JWT } from "jose";
+import { ECCurve, OKPCurve, BasicParameters, JSONWebKey } from "jose";
+import JWT from "jsonwebtoken";
 
 export const JoseUtilityGenerateJwkResponse: JSONWebKey = {
   kty: "RSA",
