@@ -28,7 +28,7 @@ import {
   generateJwk,
   generateKeyForDpop,
   generateRsaKey,
-  normalizeHtu,
+  normalizeHttpUriClaim,
   signJwt,
 } from "./dpop";
 
@@ -80,7 +80,7 @@ describe("signJwt/decodeJwt", () => {
   });
 });
 
-describe("normalizeHtu", () => {
+describe("normalizeHttpUriClaim", () => {
   [
     {
       it: "should not add a / if not present at the end of the url",
@@ -93,14 +93,14 @@ describe("normalizeHtu", () => {
       expected: "https://audience.com/",
     },
     {
-      it: "should not include queries",
+      it: "should include queries",
       url: new URL("https://audience.com?cool=stuff&dope=things"),
-      expected: "https://audience.com",
+      expected: "https://audience.com?cool=stuff&dope=things",
     },
     {
-      it: "should not include queries but still include a slash",
+      it: "should include queries and a slash",
       url: new URL("https://audience.com/?cool=stuff&dope=things"),
-      expected: "https://audience.com/",
+      expected: "https://audience.com/?cool=stuff&dope=things",
     },
     {
       it: "should not include hash",
@@ -129,7 +129,7 @@ describe("normalizeHtu", () => {
     },
   ].forEach((test) => {
     it(test.it, () => {
-      const htu = normalizeHtu(test.url);
+      const htu = normalizeHttpUriClaim(test.url);
       expect(htu).toBe(test.expected);
     });
   });

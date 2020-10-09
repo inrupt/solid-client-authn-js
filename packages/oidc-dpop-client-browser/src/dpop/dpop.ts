@@ -113,8 +113,12 @@ export async function privateJwkToPublicJwk(
  * @returns The normalized URL as a string.
  * @hidden
  */
-export function normalizeHtu(audience: URL): string {
-  return `${audience.origin}${audience.pathname}`;
+export function normalizeHttpUriClaim(audience: URL): string {
+  const cleanedAudience = new URL(audience.href);
+  cleanedAudience.set("hash", "");
+  cleanedAudience.set("username", "");
+  cleanedAudience.set("password", "");
+  return cleanedAudience.href;
 }
 
 /**
@@ -132,7 +136,7 @@ export async function createHeaderToken(
 ): Promise<string> {
   return signJwt(
     {
-      htu: normalizeHtu(audience),
+      htu: normalizeHttpUriClaim(audience),
       htm: method,
       jti: v4(),
     },
