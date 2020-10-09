@@ -42,4 +42,11 @@ export {
 } from "oidc-client";
 
 export { registerClient } from "./dcr/clientRegistrar";
-export { generateKeyForDpop, generateRsaKey } from "./dpop/dpop";
+export {
+  generateJwkForDpop,
+  generateJwkRsa,
+  decodeJwt,
+  signJwt,
+  createDpopHeader,
+  privateJwkToPublicJwk,
+} from "./dpop/dpop";

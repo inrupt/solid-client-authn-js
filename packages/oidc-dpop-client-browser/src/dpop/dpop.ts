@@ -19,8 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { BasicParameters, ECCurve, JSONWebKey, OKPCurve } from "jose";
+import URL from "url-parse";
 import { JWK } from "node-jose";
+import {
+  BasicParameters,
+  ECCurve,
+  JSONWebKey,
+  JWKECKey,
+  JWKOctKey,
+  JWKOKPKey,
+  JWKRSAKey,
+  OKPCurve,
+} from "jose";
+import JWT, { VerifyOptions } from "jsonwebtoken";
+import { v4 } from "uuid";
 
 /**
  * Generates a Json Web Key
@@ -29,8 +41,8 @@ import { JWK } from "node-jose";
  * @param parameters
  * @hidden
  */
-export async function generateJWK(
-  kty: "EC" | "OKP" | "RSA" | "oct",
+export async function generateJwk(
+  kty: "EC" | "RSA",
   crvBitlength?: ECCurve | OKPCurve | number,
   parameters?: BasicParameters
 ): Promise<JSONWebKey> {
@@ -39,15 +51,114 @@ export async function generateJWK(
 }
 
 /**
+ * Generates a Json Web Token (https://tools.ietf.org/html/rfc7519) containing
+ * the provided payload and using the signature algorithm specified in the options.
+ * @param payload The body of the JWT.
+ * @param key The key used for the signature.
+ * @param options
+ * @returns a 3-parts base64-encoded string, split by dots.
+ * @hidden
+ */
+export async function signJwt(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>,
+  key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
+  options?: JWT.SignOptions
+): Promise<string> {
+  const parsedKey = await JWK.asKey(key);
+  const convertedKey: string = parsedKey.toPEM(true);
+  const signed = JWT.sign(payload, convertedKey, options);
+  return signed;
+}
+
+/**
+ * Decodes the base64 Json Web Token into an object. If a key is specified, the
+ * JWT is also verified.
+ * @param token The base64-encoded token
+ * @param key The key used to sign the token
+ * @returns the payload of the JWT
+ * @hidden
+ */
+export async function decodeJwt(
+  token: string,
+  key?: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
+  options?: VerifyOptions
+): Promise<Record<string, unknown>> {
+  if (key) {
+    const parsedKey = await JWK.asKey(key);
+    const convertedKey: string = parsedKey.toPEM(false);
+    return JWT.verify(token, convertedKey, options) as Promise<
+      Record<string, unknown>
+    >;
+  }
+  return JWT.decode(token) as Promise<Record<string, unknown>>;
+}
+
+/**
+ * @param key
+ * @hidden
+ */
+export async function privateJwkToPublicJwk(
+  key: JSONWebKey
+): Promise<JSONWebKey> {
+  return (await JWK.asKey(key, "public")) as JSONWebKey;
+}
+
+/**
+ * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
+ * @param audience The URL to normalize.
+ * @returns The normalized URL as a string.
+ * @hidden
+ */
+export function normalizeHttpUriClaim(audience: URL): string {
+  const cleanedAudience = new URL(audience.href);
+  cleanedAudience.set("hash", "");
+  cleanedAudience.set("username", "");
+  cleanedAudience.set("password", "");
+  return cleanedAudience.href;
+}
+
+/**
+ * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
+ * based on the target URL and method, using the provided key.
+ * @param audience Target URL.
+ * @param method HTTP method allowed.
+ * @param key Key used to sign the token.
+ * @returns A JWT that can be used as a DPoP Authorization header.
+ */
+export async function createDpopHeader(
+  audience: URL,
+  method: string,
+  key: JSONWebKey
+): Promise<string> {
+  return signJwt(
+    {
+      htu: normalizeHttpUriClaim(audience),
+      htm: method,
+      jti: v4(),
+    },
+    key,
+    {
+      header: {
+        jwk: privateJwkToPublicJwk(key),
+        typ: "dpop+jwt",
+      },
+      expiresIn: "1 hour",
+      algorithm: "ES256",
+    }
+  );
+}
+
+/**
  * Generates a JSON Web Key suitable to be used to sign HTTP request headers.
  */
-export async function generateKeyForDpop(): Promise<JSONWebKey> {
-  return generateJWK("EC", "P-256", { alg: "ES256" });
+export async function generateJwkForDpop(): Promise<JSONWebKey> {
+  return generateJwk("EC", "P-256", { alg: "ES256" });
 }
 
 /**
  * Generates a JSON Web Key based on the RSA algorithm
  */
-export async function generateRsaKey(): Promise<JSONWebKey> {
-  return generateJWK("RSA");
+export async function generateJwkRsa(): Promise<JSONWebKey> {
+  return generateJwk("RSA");
 }

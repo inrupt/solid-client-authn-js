@@ -26,10 +26,8 @@ import {
   SessionCreatorCreateResponse,
 } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import GeneralRedirectHandler from "../../../../src/login/oidc/redirectHandler/GeneralRedirectHandler";
-import {
-  generateJWK,
-  signJWT,
-} from "../../../../src/jose/IsomorphicJoseUtility";
+import { generateJwk } from "../../../../src/jose/IsomorphicJoseUtility";
+import { signJwt } from "@inrupt/oidc-dpop-client-browser";
 
 jest.mock("cross-fetch");
 
@@ -106,8 +104,8 @@ describe("GeneralRedirectHandler", () => {
           [RequestInfo, RequestInit?]
         >;
       };
-      const jwk = await generateJWK("RSA");
-      const accessToken = await signJWT({ sub: "https://my.webid" }, jwk, {
+      const jwk = await generateJwk("RSA");
+      const accessToken = await signJwt({ sub: "https://my.webid" }, jwk, {
         algorithm: "RS256",
       });
       const redirectUrl = new URL("http://some.url");

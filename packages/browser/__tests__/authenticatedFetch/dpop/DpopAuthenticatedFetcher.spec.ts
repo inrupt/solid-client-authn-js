@@ -128,7 +128,7 @@ describe("DpopAuthenticatedFetcher", () => {
         url.toString(),
         init
       );
-      expect(dpopHeaderCreator.createHeaderToken).toHaveBeenCalledWith(
+      expect(dpopHeaderCreator.createDpopHeader).toHaveBeenCalledWith(
         url,
         "GET"
       );
@@ -160,10 +160,7 @@ describe("DpopAuthenticatedFetcher", () => {
       url.toString(),
       init
     );
-    expect(dpopHeaderCreator.createHeaderToken).toHaveBeenCalledWith(
-      url,
-      "GET"
-    );
+    expect(dpopHeaderCreator.createDpopHeader).toHaveBeenCalledWith(url, "GET");
     expect(fetcher.fetch).toHaveBeenCalledWith(url.toString(), {
       headers: {
         authorization: `DPOP ${StorageUtilityGetResponse}`,

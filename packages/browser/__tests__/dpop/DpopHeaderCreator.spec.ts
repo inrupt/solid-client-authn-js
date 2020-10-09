@@ -26,81 +26,10 @@ import "reflect-metadata";
 import { JoseUtilityMock } from "../../src/jose/__mocks__/JoseUtility";
 import { mockDpopClientKeyManager } from "../../src/dpop/__mocks__/DpopClientKeyManager";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
-import DpopHeaderCreator, {
-  createHeaderToken,
-  normalizeHtu,
-} from "../../src/dpop/DpopHeaderCreator";
+import DpopHeaderCreator from "../../src/dpop/DpopHeaderCreator";
 import URL from "url-parse";
-import { decodeJWT, generateJWK } from "../../src/jose/IsomorphicJoseUtility";
-
-describe("normalizeHtu", () => {
-  [
-    {
-      it: "should not add a / if not present at the end of the url",
-      url: new URL("https://audience.com"),
-      expected: "https://audience.com",
-    },
-    {
-      it: "should not change a URL with a slash at the end",
-      url: new URL("https://audience.com/"),
-      expected: "https://audience.com/",
-    },
-    {
-      it: "should not include queries",
-      url: new URL("https://audience.com?cool=stuff&dope=things"),
-      expected: "https://audience.com",
-    },
-    {
-      it: "should not include queries but still include a slash",
-      url: new URL("https://audience.com/?cool=stuff&dope=things"),
-      expected: "https://audience.com/",
-    },
-    {
-      it: "should not include hash",
-      url: new URL("https://audience.com#throwBackThursday"),
-      expected: "https://audience.com",
-    },
-    {
-      it: "should not include hash but include the slash",
-      url: new URL("https://audience.com/#throwBackThursday"),
-      expected: "https://audience.com/",
-    },
-    {
-      it: "should include the path",
-      url: new URL("https://audience.com/path"),
-      expected: "https://audience.com/path",
-    },
-    {
-      it: "should not include the username and password",
-      url: new URL("https://jackson:badpassword@audience.com"),
-      expected: "https://audience.com",
-    },
-    {
-      it: "should include ports",
-      url: new URL("https://localhost:8080/path"),
-      expected: "https://localhost:8080/path",
-    },
-  ].forEach((test) => {
-    it(test.it, () => {
-      const htu = normalizeHtu(test.url);
-      expect(htu).toBe(test.expected);
-    });
-  });
-});
-
-describe("createHeaderToken", () => {
-  it("Properly builds a token when given a key", async () => {
-    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
-    const token = await createHeaderToken(
-      new URL("https://audience.com/"),
-      "post",
-      key
-    );
-    const decoded = await decodeJWT(token);
-    expect(decoded.htu).toEqual("https://audience.com/");
-    expect(decoded.htm).toEqual("post");
-  });
-});
+import { generateJwk } from "../../src/jose/IsomorphicJoseUtility";
+import { decodeJwt } from "@inrupt/oidc-dpop-client-browser";
 
 describe("DpopHeaderCreator", () => {
   const defaultMocks = {
@@ -119,17 +48,17 @@ describe("DpopHeaderCreator", () => {
     return dpopHeaderCreator;
   }
 
-  describe("DpopHeaderCreator.createHeaderToken", () => {
+  describe("DpopHeaderCreator.createDpopHeader", () => {
     it("Properly builds a token by retrieving the stored key", async () => {
-      const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+      const key = await generateJwk("EC", "P-256", { alg: "ES256" });
       const dpopHeaderCreator = getDpopHeaderCreator({
         dpopClientKeyManager: mockDpopClientKeyManager(key),
       });
-      const token = await dpopHeaderCreator.createHeaderToken(
+      const token = await dpopHeaderCreator.createDpopHeader(
         new URL("https://audience.com/"),
         "post"
       );
-      const decoded = await decodeJWT(token);
+      const decoded = await decodeJwt(token);
       expect(decoded.htu).toEqual("https://audience.com/");
       expect(decoded.htm).toEqual("post");
     });
@@ -139,7 +68,7 @@ describe("DpopHeaderCreator", () => {
         dpopClientKeyManager: mockDpopClientKeyManager(undefined),
       });
       await expect(
-        dpopHeaderCreator.createHeaderToken(
+        dpopHeaderCreator.createDpopHeader(
           new URL("https://audience.com"),
           "post"
         )

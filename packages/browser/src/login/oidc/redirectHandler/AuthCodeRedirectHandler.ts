@@ -25,7 +25,7 @@
  */
 
 import URL from "url-parse";
-import ConfigurationError from "../../..//errors/ConfigurationError";
+import ConfigurationError from "../../../errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import {
   IRedirector,
@@ -89,6 +89,10 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         // for a hash '#' fragment!).
         // eslint-disable-next-line @typescript-eslint/camelcase
         response_mode: "query",
+        // The userinfo endpoint on NSS fails, so disable this for now
+        // Note that in Solid, information should be retrieved from the
+        // profile referenced by the WebId.
+        loadUserInfo: false,
       }).processSigninResponse(redirectUrl.toString());
     } catch (err) {
       throw new Error(
@@ -97,7 +101,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
 
     // We need to decode the access_token JWT to extract out the full WebID.
-    const decoded = await this.joseUtility.decodeJWT(
+    const decoded = await this.joseUtility.decodeJwt(
       signinResponse.access_token as string
     );
     if (!decoded || !decoded.sub) {
