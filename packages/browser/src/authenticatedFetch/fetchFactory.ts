@@ -21,7 +21,7 @@
 
 import URL from "url-parse";
 import { JSONWebKey } from "jose";
-import { createHeaderToken } from "../dpop/DpopHeaderCreator";
+import { createDpopHeader } from "@inrupt/oidc-dpop-client-browser";
 import { fetch } from "cross-fetch";
 
 /**
@@ -58,7 +58,7 @@ export async function buildDpopFetch(
       headers: {
         ...options?.headers,
         Authorization: `DPoP ${authToken}`,
-        DPoP: await createHeaderToken(
+        DPoP: await createDpopHeader(
           new URL(init.toString()),
           options?.method ?? "get",
           dpopKey

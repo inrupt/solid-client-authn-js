@@ -19,32 +19,144 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import URL from "url-parse";
 import { describe, it } from "@jest/globals";
 
-import { generateJWK, generateKeyForDpop, generateRsaKey } from "./dpop";
+import {
+  createDpopHeader,
+  decodeJwt,
+  generateJwk,
+  generateJwkForDpop,
+  generateJwkRsa,
+  normalizeHttpUriClaim,
+  signJwt,
+} from "./dpop";
 
-describe("generateJWK", () => {
+describe("generateJwk", () => {
   it("can generate a RSA-based JWK", async () => {
-    const key = await generateJWK("RSA");
+    const key = await generateJwk("RSA");
     expect(key.kty).toEqual("RSA");
   });
 
   it("can generate an elliptic curve-based JWK", async () => {
-    const key = await generateJWK("EC", "P-256");
+    const key = await generateJwk("EC", "P-256");
     expect(key.kty).toEqual("EC");
   });
 });
 
-describe("generateDpopKey", () => {
+describe("generateJwkForDpop", () => {
   it("generates an elliptic curve-base key, which is a sensible default for DPoP", async () => {
-    const key = await generateKeyForDpop();
+    const key = await generateJwkForDpop();
     expect(key.kty).toEqual("EC");
   });
 });
 
-describe("generateRsaKey", () => {
+describe("generateJwkRsa", () => {
   it("generates an RSA key", async () => {
-    const key = await generateRsaKey();
+    const key = await generateJwkRsa();
     expect(key.kty).toEqual("RSA");
+  });
+});
+
+describe("signJwt/decodeJwt", () => {
+  it("generates a JWT that can be decoded without signature verification", async () => {
+    const key = await generateJwkForDpop();
+    const payload = { testClaim: "testValue" };
+    const jwt = await signJwt(payload, key, {
+      algorithm: "RS256",
+    });
+    const decoded = await decodeJwt(jwt);
+    expect(decoded.testClaim).toEqual(payload.testClaim);
+  });
+
+  it("can verify the ES256 signature of the generated JWT", async () => {
+    const key = await generateJwkForDpop();
+    const payload = { testClaim: "testValue" };
+    const jwt = await signJwt(payload, key, {
+      algorithm: "ES256",
+    });
+    const decoded = await decodeJwt(jwt, key, { algorithms: ["ES256"] });
+    expect(decoded.testClaim).toEqual(payload.testClaim);
+  });
+
+  it("throws if the ES256 signature of the generated JWT doesn't match the provided key", async () => {
+    const goodKey = await generateJwkForDpop();
+    const otherKey = await generateJwkForDpop();
+    const payload = { testClaim: "testValue" };
+    const jwt = await signJwt(payload, goodKey, {
+      algorithm: "ES256",
+    });
+    await expect(() =>
+      decodeJwt(jwt, otherKey, { algorithms: ["ES256"] })
+    ).rejects.toThrow("invalid signature");
+  });
+});
+
+describe("normalizeHttpUriClaim", () => {
+  [
+    {
+      it: "should not add a / if not present at the end of the url",
+      url: new URL("https://audience.com"),
+      expected: "https://audience.com",
+    },
+    {
+      it: "should not change a URL with a slash at the end",
+      url: new URL("https://audience.com/"),
+      expected: "https://audience.com/",
+    },
+    {
+      it: "should include queries",
+      url: new URL("https://audience.com?cool=stuff&dope=things"),
+      expected: "https://audience.com?cool=stuff&dope=things",
+    },
+    {
+      it: "should include queries and a slash",
+      url: new URL("https://audience.com/?cool=stuff&dope=things"),
+      expected: "https://audience.com/?cool=stuff&dope=things",
+    },
+    {
+      it: "should not include hash",
+      url: new URL("https://audience.com#throwBackThursday"),
+      expected: "https://audience.com",
+    },
+    {
+      it: "should not include hash but include the slash",
+      url: new URL("https://audience.com/#throwBackThursday"),
+      expected: "https://audience.com/",
+    },
+    {
+      it: "should include the path",
+      url: new URL("https://audience.com/path"),
+      expected: "https://audience.com/path",
+    },
+    {
+      it: "should not include the username and password",
+      url: new URL("https://jackson:badpassword@audience.com"),
+      expected: "https://audience.com",
+    },
+    {
+      it: "should include ports",
+      url: new URL("https://localhost:8080/path"),
+      expected: "https://localhost:8080/path",
+    },
+  ].forEach((test) => {
+    it(test.it, () => {
+      const htu = normalizeHttpUriClaim(test.url);
+      expect(htu).toBe(test.expected);
+    });
+  });
+});
+
+describe("createDpopHeader", () => {
+  it("Properly builds a token when given a key", async () => {
+    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
+    const token = await createDpopHeader(
+      new URL("https://audience.com/"),
+      "post",
+      key
+    );
+    const decoded = await decodeJwt(token);
+    expect(decoded.htu).toEqual("https://audience.com/");
+    expect(decoded.htm).toEqual("post");
   });
 });

@@ -25,7 +25,7 @@
  */
 
 import URL from "url-parse";
-import ConfigurationError from "../../..//errors/ConfigurationError";
+import ConfigurationError from "../../../errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { ITokenRequester } from "../TokenRequester";
 import {
@@ -82,14 +82,40 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         // for a hash '#' fragment!).
         // eslint-disable-next-line @typescript-eslint/camelcase
         response_mode: "query",
+        // The userinfo endpoint on NSS fails, so disable this for now
+        // Note that in Solid, information should be retrieved from the
+        // profile referenced by the WebId.
+        loadUserInfo: false,
       }).processSigninResponse(redirectUrl.toString());
     } catch (err) {
       throw new Error(
         `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
       );
     }
-    
-    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+
+    // We need to decode the access_token JWT to extract out the full WebID.
+    const decoded = await this.joseUtility.decodeJwt(
+      signinResponse.access_token as string
+    );
+    if (!decoded || !decoded.sub) {
+      throw new Error("The idp returned a bad token without a sub.");
+    }
+
+    await this.storageUtility.setForUser(
+      storedSessionId,
+      {
+        idToken: signinResponse.id_token,
+        // TODO: We need a PR to oidc-client-js to add parsing of the
+        //  refresh_token from the redirect URL.
+        refreshToken:
+          "<Refresh token that *is* coming back in the redirect URL is not yet being parsed and provided by oidc-client-js in it's response object>",
+        webId: decoded.sub as string,
+        isLoggedIn: "true",
+      },
+      { secure: true }
+    );
+
+    const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
       throw new Error("There was a problem creating a session.");
     }

@@ -20,9 +20,10 @@
  */
 
 import IJoseUtility from "../IJoseUtility";
-import { ECCurve, OKPCurve, BasicParameters, JSONWebKey, JWT } from "jose";
+import { ECCurve, OKPCurve, BasicParameters, JSONWebKey } from "jose";
+import JWT from "jsonwebtoken";
 
-export const JoseUtilityGenerateJWKResponse: JSONWebKey = {
+export const JoseUtilityGenerateJwkResponse: JSONWebKey = {
   kty: "RSA",
   kid: "KzQzLcQWpJJpuFQij4eyfJOCilhjntj4G0ge_yTEmq8",
   use: "sig",
@@ -43,7 +44,7 @@ export const JoseUtilityGenerateJWKResponse: JSONWebKey = {
   qi:
     "uCLWDLyIVCWNdVSxdhob9TgdSUKq5GmiUjm8IDRH_hebpDIxoVwY1L2QVe50lk5iGObQJyBy5ylTHu1SxRUUUWl6IcrKp4xQRuIkAd7FO9RuowbgH26BEup36gtU5T2Qliiy7izK7Q4EX6JaXe9S7d-k7j2FqpHue9fH-KAYnuU",
 };
-export const JoseUtilityPrivateToPublicJWKResponse: JSONWebKey = {
+export const JoseUtilityPrivateToPublicJwkResponse: JSONWebKey = {
   kty: "RSA",
   kid: "KzQzLcQWpJJpuFQij4eyfJOCilhjntj4G0ge_yTEmq8",
   use: "sig",
@@ -65,34 +66,36 @@ export const JoseUtilityPrivateToPublicJWKResponse: JSONWebKey = {
     "uCLWDLyIVCWNdVSxdhob9TgdSUKq5GmiUjm8IDRH_hebpDIxoVwY1L2QVe50lk5iGObQJyBy5ylTHu1SxRUUUWl6IcrKp4xQRuIkAd7FO9RuowbgH26BEup36gtU5T2Qliiy7izK7Q4EX6JaXe9S7d-k7j2FqpHue9fH-KAYnuU",
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const JoseUtilityDecodeJWTResponse: Record<string, any> = {};
-export const JoseUtilitySignJWTResponse = "signedToken";
+export const JoseUtilityDecodeJwtResponse: Record<string, any> = {
+  sub: "mocked sub claim value",
+};
+export const JoseUtilitySignJwtResponse = "signedToken";
 export const JoseUtilityGenerateCodeVerifierResponse = "codeVerifier";
 export const JoseUtilityGenerateCodeChallengeResponse = "codeChallenge";
 
 export const JoseUtilityMock: jest.Mocked<IJoseUtility> = {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore Because of the complex typings in this method, an error is thrown when wrapped in "Mocked"
-  generateJWK: jest.fn(
+  generateJwk: jest.fn(
     async (
       _kty: "EC" | "OKP" | "RSA" | "oct",
       _crvBitlength?: ECCurve | OKPCurve | number,
       _parameters?: BasicParameters,
       _isPrivate?: boolean
-    ) => JoseUtilityGenerateJWKResponse
+    ) => JoseUtilityGenerateJwkResponse
   ),
-  privateJWKToPublicJWK: jest.fn(
-    async (_jwk: JSONWebKey) => JoseUtilityPrivateToPublicJWKResponse
+  privateJwkToPublicJwk: jest.fn(
+    async (_jwk: JSONWebKey) => JoseUtilityPrivateToPublicJwkResponse
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  decodeJWT: jest.fn(async (_token: string) => JoseUtilityDecodeJWTResponse),
-  signJWT: jest.fn(
+  decodeJwt: jest.fn(async (_token: string) => JoseUtilityDecodeJwtResponse),
+  signJwt: jest.fn(
     async (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       _payload: Record<string, any>,
       _key: JSONWebKey,
       _options?: JWT.SignOptions
-    ) => JoseUtilitySignJWTResponse
+    ) => JoseUtilitySignJwtResponse
   ),
   generateCodeVerifier: jest.fn(
     async () => JoseUtilityGenerateCodeVerifierResponse
