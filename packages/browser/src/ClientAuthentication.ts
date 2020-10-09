@@ -117,9 +117,9 @@ export default class ClientAuthentication {
     url: string
   ): Promise<ISessionInfo | undefined> => {
     const redirectInfo = await this.redirectHandler.handle(url);
-    console.log(`clientAuthentication fetch: ${typeof redirectInfo.fetch}`);
+
     this.fetch = redirectInfo.fetch;
-    console.log(`clientauth webid: ${redirectInfo?.webId}`);
+
     return {
       isLoggedIn: redirectInfo.isLoggedIn,
       webId: redirectInfo.webId,

@@ -59,7 +59,6 @@ class App extends Component {
     } else if (this.state.session.isLoggedIn) {
       this.setState({ status: "dashboard", session });
     } else {
-      console.log("Checking for an auth code")
       // Depending on which flow login uses, the response will either be "code" or "access_token".
       const authCode =
         new URL(window.location.href).searchParams.get("code") ||

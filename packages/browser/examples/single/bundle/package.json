@@ -24,11 +24,9 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-browser": "file://../../../",
-    "@inrupt/solid-client-authn-core": "file://../../../../core",
-    "@inrupt/oidc-dpop-client-browser": "file://../../../../oidc-dpop-client-browser",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "regenerator-runtime": "^0.13.3"
+    "regenerator-runtime": "^0.13.3",
+    "@inrupt/solid-client-authn-browser": "file://../../../"
   }
 }
