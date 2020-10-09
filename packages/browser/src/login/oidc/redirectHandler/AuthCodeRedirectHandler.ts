@@ -59,6 +59,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
   async handle(
     redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+    console.log("handling incoming redirect");
     if (!(await this.canHandle(redirectUrl))) {
       throw new ConfigurationError(
         `Cannot handle redirect url [${redirectUrl}]`
@@ -66,7 +67,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
     const url = new URL(redirectUrl, true);
     const oauthState = url.query.state as string;
-
+    console.log(`state: ${oauthState}`);
     const storedSessionId = (await this.storageUtility.getForUser(
       oauthState,
       "sessionId",
@@ -74,7 +75,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         errorIfNull: true,
       }
     )) as string;
-
+    console.log(`session: ${storedSessionId}`);
     let signinResponse;
     try {
       signinResponse = await new OidcClient({
@@ -117,7 +118,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       },
       { secure: true }
     );
-
+    console.log(`Session webid: ${decoded.sub as string}`);
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
       throw new Error(`Could not retrieve session: [${storedSessionId}].`);
