@@ -48,13 +48,13 @@ describe("DpopHeaderCreator", () => {
     return dpopHeaderCreator;
   }
 
-  describe("DpopHeaderCreator.createHeaderToken", () => {
+  describe("DpopHeaderCreator.createDpopHeader", () => {
     it("Properly builds a token by retrieving the stored key", async () => {
       const key = await generateJwk("EC", "P-256", { alg: "ES256" });
       const dpopHeaderCreator = getDpopHeaderCreator({
         dpopClientKeyManager: mockDpopClientKeyManager(key),
       });
-      const token = await dpopHeaderCreator.createHeaderToken(
+      const token = await dpopHeaderCreator.createDpopHeader(
         new URL("https://audience.com/"),
         "post"
       );
@@ -68,7 +68,7 @@ describe("DpopHeaderCreator", () => {
         dpopClientKeyManager: mockDpopClientKeyManager(undefined),
       });
       await expect(
-        dpopHeaderCreator.createHeaderToken(
+        dpopHeaderCreator.createDpopHeader(
           new URL("https://audience.com"),
           "post"
         )

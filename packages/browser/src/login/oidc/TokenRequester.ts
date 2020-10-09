@@ -104,7 +104,7 @@ export default class TokenRequester {
     } = {
       method: "POST",
       headers: {
-        DPoP: await this.dpopHeaderCreator.createHeaderToken(
+        DPoP: await this.dpopHeaderCreator.createDpopHeader(
           issuerConfig.tokenEndpoint,
           "POST"
         ),

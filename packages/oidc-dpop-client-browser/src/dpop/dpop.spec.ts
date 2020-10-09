@@ -23,7 +23,7 @@ import URL from "url-parse";
 import { describe, it } from "@jest/globals";
 
 import {
-  createHeaderToken,
+  createDpopHeader,
   decodeJwt,
   generateJwk,
   generateKeyForDpop,
@@ -135,10 +135,10 @@ describe("normalizeHttpUriClaim", () => {
   });
 });
 
-describe("createHeaderToken", () => {
+describe("createDpopHeader", () => {
   it("Properly builds a token when given a key", async () => {
     const key = await generateJwk("EC", "P-256", { alg: "ES256" });
-    const token = await createHeaderToken(
+    const token = await createDpopHeader(
       new URL("https://audience.com/"),
       "post",
       key

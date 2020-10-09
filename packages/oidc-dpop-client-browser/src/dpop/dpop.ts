@@ -129,7 +129,7 @@ export function normalizeHttpUriClaim(audience: URL): string {
  * @param key Key used to sign the token.
  * @returns A JWT that can be used as a DPoP Authorization header.
  */
-export async function createHeaderToken(
+export async function createDpopHeader(
   audience: URL,
   method: string,
   key: JSONWebKey

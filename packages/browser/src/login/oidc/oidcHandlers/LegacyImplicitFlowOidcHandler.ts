@@ -95,7 +95,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     /* eslint-enable @typescript-eslint/camelcase */
     // TODO: There is currently no secure storage of the DPoP key
     if (oidcLoginOptions.dpop) {
-      query.dpop = await this.dpopHeaderCreator.createHeaderToken(
+      query.dpop = await this.dpopHeaderCreator.createDpopHeader(
         oidcLoginOptions.issuer,
         "GET"
       );

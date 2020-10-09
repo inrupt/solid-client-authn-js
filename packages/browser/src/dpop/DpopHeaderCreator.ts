@@ -32,7 +32,7 @@ import { inject, injectable } from "tsyringe";
 import IJoseUtility from "../jose/IJoseUtility";
 import { IDpopClientKeyManager } from "./DpopClientKeyManager";
 import { IUuidGenerator } from "../util/UuidGenerator";
-import { createHeaderToken } from "@inrupt/oidc-dpop-client-browser";
+import { createDpopHeader } from "@inrupt/oidc-dpop-client-browser";
 
 export interface IDpopHeaderCreator {
   /**
@@ -40,7 +40,7 @@ export interface IDpopHeaderCreator {
    * @param audience The URL of the RS
    * @param method The HTTP method that is being used
    */
-  createHeaderToken(audience: URL, method: string): Promise<string>;
+  createDpopHeader(audience: URL, method: string): Promise<string>;
 }
 
 /**
@@ -55,13 +55,13 @@ export default class DpopHeaderCreator implements IDpopHeaderCreator {
     @inject("uuidGenerator") private uuidGenerator: IUuidGenerator
   ) {}
 
-  async createHeaderToken(audience: URL, method: string): Promise<string> {
+  async createDpopHeader(audience: URL, method: string): Promise<string> {
     // TODO: update for multiple signing abilities
     const clientKey = await this.dpopClientKeyManager.getClientKey();
 
     if (clientKey === undefined) {
       throw new Error("Could not obtain the key to sign the token with.");
     }
-    return createHeaderToken(audience, method, clientKey);
+    return createDpopHeader(audience, method, clientKey);
   }
 }

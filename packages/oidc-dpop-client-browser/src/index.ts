@@ -47,6 +47,6 @@ export {
   generateRsaKey,
   decodeJwt,
   signJwt,
-  createHeaderToken,
+  createDpopHeader,
   privateJwkToPublicJwk,
 } from "./dpop/dpop";
