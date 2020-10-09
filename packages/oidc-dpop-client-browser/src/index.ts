@@ -43,8 +43,8 @@ export {
 
 export { registerClient } from "./dcr/clientRegistrar";
 export {
-  generateKeyForDpop,
-  generateRsaKey,
+  generateJwkForDpop,
+  generateJwkRsa,
   decodeJwt,
   signJwt,
   createDpopHeader,

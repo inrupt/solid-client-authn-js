@@ -26,8 +26,8 @@ import {
   createDpopHeader,
   decodeJwt,
   generateJwk,
-  generateKeyForDpop,
-  generateRsaKey,
+  generateJwkForDpop,
+  generateJwkRsa,
   normalizeHttpUriClaim,
   signJwt,
 } from "./dpop";
@@ -44,23 +44,23 @@ describe("generateJwk", () => {
   });
 });
 
-describe("generateKeyForDpop", () => {
+describe("generateJwkForDpop", () => {
   it("generates an elliptic curve-base key, which is a sensible default for DPoP", async () => {
-    const key = await generateKeyForDpop();
+    const key = await generateJwkForDpop();
     expect(key.kty).toEqual("EC");
   });
 });
 
-describe("generateRsaKey", () => {
+describe("generateJwkRsa", () => {
   it("generates an RSA key", async () => {
-    const key = await generateRsaKey();
+    const key = await generateJwkRsa();
     expect(key.kty).toEqual("RSA");
   });
 });
 
 describe("signJwt/decodeJwt", () => {
   it("generates a JWT that can be decoded without signature verification", async () => {
-    const key = await generateKeyForDpop();
+    const key = await generateJwkForDpop();
     const payload = { testClaim: "testValue" };
     const jwt = await signJwt(payload, key, {
       algorithm: "RS256",
@@ -70,7 +70,7 @@ describe("signJwt/decodeJwt", () => {
   });
 
   it("can verify the ES256 signature of the generated JWT", async () => {
-    const key = await generateKeyForDpop();
+    const key = await generateJwkForDpop();
     const payload = { testClaim: "testValue" };
     const jwt = await signJwt(payload, key, {
       algorithm: "ES256",

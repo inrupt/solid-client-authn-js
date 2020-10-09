@@ -155,13 +155,13 @@ export async function createDpopHeader(
 /**
  * Generates a JSON Web Key suitable to be used to sign HTTP request headers.
  */
-export async function generateKeyForDpop(): Promise<JSONWebKey> {
+export async function generateJwkForDpop(): Promise<JSONWebKey> {
   return generateJwk("EC", "P-256", { alg: "ES256" });
 }
 
 /**
  * Generates a JSON Web Key based on the RSA algorithm
  */
-export async function generateRsaKey(): Promise<JSONWebKey> {
+export async function generateJwkRsa(): Promise<JSONWebKey> {
   return generateJwk("RSA");
 }
