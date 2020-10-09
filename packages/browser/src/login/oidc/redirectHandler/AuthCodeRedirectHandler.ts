@@ -101,7 +101,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
 
     // We need to decode the access_token JWT to extract out the full WebID.
-    const decoded = await this.joseUtility.decodeJWT(
+    const decoded = await this.joseUtility.decodeJwt(
       signinResponse.access_token as string
     );
     if (!decoded || !decoded.sub) {

@@ -42,7 +42,7 @@ import { v4 } from "uuid";
  * @param parameters
  * @hidden
  */
-export async function generateJWK(
+export async function generateJwk(
   kty: "EC" | "RSA",
   crvBitlength?: ECCurve | OKPCurve | number,
   parameters?: BasicParameters
@@ -60,7 +60,7 @@ export async function generateJWK(
  * @returns a 3-parts base64-encoded string, split by dots.
  * @hidden
  */
-export async function signJWT(
+export async function signJwt(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>,
   key: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
@@ -82,7 +82,7 @@ export async function signJWT(
  * @returns the payload of the JWT
  * @hidden
  */
-export async function decodeJWT(
+export async function decodeJwt(
   token: string,
   key?: JWKECKey | JWKOKPKey | JWKRSAKey | JWKOctKey,
   options?: VerifyOptions
@@ -101,7 +101,7 @@ export async function decodeJWT(
  * @param key
  * @hidden
  */
-export async function privateJWKToPublicJWK(
+export async function privateJwkToPublicJwk(
   key: JSONWebKey
 ): Promise<JSONWebKey> {
   return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
@@ -130,7 +130,7 @@ export async function createHeaderToken(
   method: string,
   key: JSONWebKey
 ): Promise<string> {
-  return signJWT(
+  return signJwt(
     {
       htu: normalizeHtu(audience),
       htm: method,
@@ -139,7 +139,7 @@ export async function createHeaderToken(
     key,
     {
       header: {
-        jwk: privateJWKToPublicJWK(key),
+        jwk: privateJwkToPublicJwk(key),
         typ: "dpop+jwt",
       },
       expiresIn: "1 hour",
@@ -152,12 +152,12 @@ export async function createHeaderToken(
  * Generates a JSON Web Key suitable to be used to sign HTTP request headers.
  */
 export async function generateKeyForDpop(): Promise<JSONWebKey> {
-  return generateJWK("EC", "P-256", { alg: "ES256" });
+  return generateJwk("EC", "P-256", { alg: "ES256" });
 }
 
 /**
  * Generates a JSON Web Key based on the RSA algorithm
  */
 export async function generateRsaKey(): Promise<JSONWebKey> {
-  return generateJWK("RSA");
+  return generateJwk("RSA");
 }

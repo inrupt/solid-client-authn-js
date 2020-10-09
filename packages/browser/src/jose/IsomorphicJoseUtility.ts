@@ -33,9 +33,9 @@ import IJoseUtility from "./IJoseUtility";
 import randomString from "crypto-random-string";
 import crypto from "crypto";
 import {
-  signJWT,
-  decodeJWT,
-  privateJWKToPublicJWK,
+  signJwt,
+  decodeJwt,
+  privateJwkToPublicJwk,
 } from "@inrupt/oidc-dpop-client-browser";
 
 /**
@@ -44,7 +44,7 @@ import {
  * @param crvBitlength Curve length (nly relevant for elliptic curve algorithms)
  * @param parameters
  */
-export async function generateJWK(
+export async function generateJwk(
   kty: "EC" | "OKP" | "RSA" | "oct",
   crvBitlength?: ECCurve | OKPCurve | number,
   parameters?: BasicParameters
@@ -83,13 +83,13 @@ export async function generateCodeChallenge(verifier: string): Promise<string> {
  * @hidden
  */
 export default class IsomorphicJoseUtility implements IJoseUtility {
-  generateJWK = generateJWK;
+  generateJwk = generateJwk;
 
-  signJWT = signJWT;
+  signJwt = signJwt;
 
-  decodeJWT = decodeJWT;
+  decodeJwt = decodeJwt;
 
-  privateJWKToPublicJWK = privateJWKToPublicJWK;
+  privateJwkToPublicJwk = privateJwkToPublicJwk;
 
   generateCodeVerifier = generateCodeVerifier;
 

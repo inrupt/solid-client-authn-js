@@ -35,7 +35,7 @@ jest.mock("cross-fetch");
 // The following key has been used to sign the mock access token. It is given
 // for an information purpose.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _mockJWK = {
+const _mockJwk = {
   kty: "EC",
   kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
   alg: "ES256",

@@ -45,8 +45,8 @@ export { registerClient } from "./dcr/clientRegistrar";
 export {
   generateKeyForDpop,
   generateRsaKey,
-  decodeJWT,
-  signJWT,
+  decodeJwt,
+  signJwt,
   createHeaderToken,
-  privateJWKToPublicJWK,
+  privateJwkToPublicJwk,
 } from "./dpop/dpop";

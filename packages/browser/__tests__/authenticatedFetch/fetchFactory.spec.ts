@@ -25,8 +25,8 @@ import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../src/authenticatedFetch/fetchFactory";
-import { generateJWK } from "../../src/jose/IsomorphicJoseUtility";
-import { decodeJWT } from "@inrupt/oidc-dpop-client-browser";
+import { generateJwk } from "../../src/jose/IsomorphicJoseUtility";
+import { decodeJwt } from "@inrupt/oidc-dpop-client-browser";
 
 jest.mock("cross-fetch");
 
@@ -96,7 +96,7 @@ describe("buildDpopFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url");
 
@@ -106,7 +106,7 @@ describe("buildDpopFetch", () => {
     ).toEqual("DPoP myToken");
     // @ts-ignore
     const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
-    const decodedHeader = await decodeJWT(dpopHeader, key);
+    const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
   });
@@ -118,7 +118,7 @@ describe("buildDpopFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
 
@@ -128,7 +128,7 @@ describe("buildDpopFetch", () => {
     ).toEqual("DPoP myToken");
     // @ts-ignore
     const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
-    const decodedHeader = await decodeJWT(dpopHeader, key);
+    const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
 
@@ -145,7 +145,7 @@ describe("buildDpopFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", {
       headers: {
@@ -160,7 +160,7 @@ describe("buildDpopFetch", () => {
     ).toEqual("DPoP myToken");
     // @ts-ignore
     const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
-    const decodedHeader = await decodeJWT(dpopHeader, key);
+    const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("get");
   });

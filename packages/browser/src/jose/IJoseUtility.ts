@@ -40,25 +40,25 @@ export default interface IJoseUtility {
    * @param parameters Parameters to generate the key
    * @param isPrivate True if a private token should be generated
    */
-  generateJWK(
+  generateJwk(
     kty: "EC",
     crv?: ECCurve,
     parameters?: BasicParameters,
     isPrivate?: boolean
   ): Promise<JSONWebKey>;
-  generateJWK(
+  generateJwk(
     kty: "OKP",
     crv?: OKPCurve,
     parameters?: BasicParameters,
     isPrivate?: boolean
   ): Promise<JSONWebKey>;
-  generateJWK(
+  generateJwk(
     kty: "RSA",
     bitlength?: number,
     parameters?: BasicParameters,
     isPrivate?: boolean
   ): Promise<JSONWebKey>;
-  generateJWK(
+  generateJwk(
     kty: "oct",
     bitlength?: number,
     parameters?: BasicParameters
@@ -67,20 +67,20 @@ export default interface IJoseUtility {
    * Converts a privake key to a public key
    * @param jwk The given private key
    */
-  privateJWKToPublicJWK(jwk: JSONWebKey): Promise<JSONWebKey>;
+  privateJwkToPublicJwk(jwk: JSONWebKey): Promise<JSONWebKey>;
 
   /**
    * Decodes a JSON Web Token
    * @param token The encoded token
    */
-  decodeJWT(token: string): Promise<Record<string, unknown>>;
+  decodeJwt(token: string): Promise<Record<string, unknown>>;
   /**
    * Creates a JSON Web Token
    * @param payload Custom fields to be included
    * @param key Private JWK
    * @param options Common fields on tokens
    */
-  signJWT(
+  signJwt(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     payload: Record<string, any>,
     key: JSONWebKey,

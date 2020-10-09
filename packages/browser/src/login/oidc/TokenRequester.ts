@@ -149,7 +149,7 @@ export default class TokenRequester {
       );
     }
 
-    const decoded = await this.joseUtility.decodeJWT(
+    const decoded = await this.joseUtility.decodeJwt(
       tokenResponse.access_token as string
     );
     if (!decoded || !decoded.sub) {

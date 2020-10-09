@@ -28,8 +28,8 @@ import { mockDpopClientKeyManager } from "../../src/dpop/__mocks__/DpopClientKey
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import DpopHeaderCreator from "../../src/dpop/DpopHeaderCreator";
 import URL from "url-parse";
-import { generateJWK } from "../../src/jose/IsomorphicJoseUtility";
-import { decodeJWT } from "@inrupt/oidc-dpop-client-browser";
+import { generateJwk } from "../../src/jose/IsomorphicJoseUtility";
+import { decodeJwt } from "@inrupt/oidc-dpop-client-browser";
 
 describe("DpopHeaderCreator", () => {
   const defaultMocks = {
@@ -50,7 +50,7 @@ describe("DpopHeaderCreator", () => {
 
   describe("DpopHeaderCreator.createHeaderToken", () => {
     it("Properly builds a token by retrieving the stored key", async () => {
-      const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+      const key = await generateJwk("EC", "P-256", { alg: "ES256" });
       const dpopHeaderCreator = getDpopHeaderCreator({
         dpopClientKeyManager: mockDpopClientKeyManager(key),
       });
@@ -58,7 +58,7 @@ describe("DpopHeaderCreator", () => {
         new URL("https://audience.com/"),
         "post"
       );
-      const decoded = await decodeJWT(token);
+      const decoded = await decodeJwt(token);
       expect(decoded.htu).toEqual("https://audience.com/");
       expect(decoded.htm).toEqual("post");
     });

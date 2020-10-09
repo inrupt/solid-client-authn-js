@@ -24,22 +24,22 @@ import { describe, it } from "@jest/globals";
 
 import {
   createHeaderToken,
-  decodeJWT,
-  generateJWK,
+  decodeJwt,
+  generateJwk,
   generateKeyForDpop,
   generateRsaKey,
   normalizeHtu,
-  signJWT,
+  signJwt,
 } from "./dpop";
 
-describe("generateJWK", () => {
+describe("generateJwk", () => {
   it("can generate a RSA-based JWK", async () => {
-    const key = await generateJWK("RSA");
+    const key = await generateJwk("RSA");
     expect(key.kty).toEqual("RSA");
   });
 
   it("can generate an elliptic curve-based JWK", async () => {
-    const key = await generateJWK("EC", "P-256");
+    const key = await generateJwk("EC", "P-256");
     expect(key.kty).toEqual("EC");
   });
 });
@@ -58,24 +58,24 @@ describe("generateRsaKey", () => {
   });
 });
 
-describe("signJWT/decodeJWT", () => {
+describe("signJwt/decodeJwt", () => {
   it("generates a JWT that can be decoded without signature verification", async () => {
     const key = await generateKeyForDpop();
     const payload = { testClaim: "testValue" };
-    const jwt = await signJWT(payload, key, {
+    const jwt = await signJwt(payload, key, {
       algorithm: "RS256",
     });
-    const decoded = await decodeJWT(jwt);
+    const decoded = await decodeJwt(jwt);
     expect(decoded.testClaim).toEqual(payload.testClaim);
   });
 
   it("can verify the ES256 signature of the generated JWT", async () => {
     const key = await generateKeyForDpop();
     const payload = { testClaim: "testValue" };
-    const jwt = await signJWT(payload, key, {
+    const jwt = await signJwt(payload, key, {
       algorithm: "ES256",
     });
-    const decoded = await decodeJWT(jwt, key, { algorithms: ["ES256"] });
+    const decoded = await decodeJwt(jwt, key, { algorithms: ["ES256"] });
     expect(decoded.testClaim).toEqual(payload.testClaim);
   });
 });
@@ -137,13 +137,13 @@ describe("normalizeHtu", () => {
 
 describe("createHeaderToken", () => {
   it("Properly builds a token when given a key", async () => {
-    const key = await generateJWK("EC", "P-256", { alg: "ES256" });
+    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
     const token = await createHeaderToken(
       new URL("https://audience.com/"),
       "post",
       key
     );
-    const decoded = await decodeJWT(token);
+    const decoded = await decodeJwt(token);
     expect(decoded.htu).toEqual("https://audience.com/");
     expect(decoded.htm).toEqual("post");
   });
