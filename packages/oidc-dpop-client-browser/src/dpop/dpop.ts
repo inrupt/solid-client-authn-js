@@ -30,7 +30,6 @@ import {
   JWKOKPKey,
   JWKRSAKey,
   OKPCurve,
-  JWT as JoseJWT,
 } from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
 import { v4 } from "uuid";
@@ -102,7 +101,7 @@ export async function decodeJwt(
 export async function privateJwkToPublicJwk(
   key: JSONWebKey
 ): Promise<JSONWebKey> {
-  return (await JWK.asKey(key as JWK.RawKey, "public")) as JSONWebKey;
+  return (await JWK.asKey(key, "public")) as JSONWebKey;
 }
 
 /**
