@@ -78,6 +78,18 @@ describe("signJwt/decodeJwt", () => {
     const decoded = await decodeJwt(jwt, key, { algorithms: ["ES256"] });
     expect(decoded.testClaim).toEqual(payload.testClaim);
   });
+
+  it("throws if the ES256 signature of the generated JWT doesn't match the provided key", async () => {
+    const goodKey = await generateJwkForDpop();
+    const otherKey = await generateJwkForDpop();
+    const payload = { testClaim: "testValue" };
+    const jwt = await signJwt(payload, goodKey, {
+      algorithm: "ES256",
+    });
+    await expect(() =>
+      decodeJwt(jwt, otherKey, { algorithms: ["ES256"] })
+    ).rejects.toThrow("invalid signature");
+  });
 });
 
 describe("normalizeHttpUriClaim", () => {
