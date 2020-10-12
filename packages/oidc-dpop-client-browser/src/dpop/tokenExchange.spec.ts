@@ -20,7 +20,7 @@
  */
 
 import URL from "url-parse";
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import { IClient, IIssuerConfig } from "../common/types";
 import { jest, it, describe } from "@jest/globals";
 
 import { getTokens, TokenEndpointInput } from "./tokenExchange";

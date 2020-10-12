@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
 import { createDpopHeader, decodeJwt } from "./dpop";
 import { generateJwkForDpop } from "./keyGen";

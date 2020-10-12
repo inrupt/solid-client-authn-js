@@ -54,3 +54,8 @@ export {
   TokenEndpointInput,
   TokenEndpointResponse,
 } from "./dpop/tokenExchange";
+export {
+  IClient,
+  IClientRegistrarOptions,
+  IIssuerConfig,
+} from "./common/types";
