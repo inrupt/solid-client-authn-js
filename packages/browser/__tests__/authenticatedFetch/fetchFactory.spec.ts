@@ -25,8 +25,10 @@ import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../src/authenticatedFetch/fetchFactory";
-import { generateJwk } from "../../src/jose/IsomorphicJoseUtility";
-import { decodeJwt } from "@inrupt/oidc-dpop-client-browser";
+import {
+  decodeJwt,
+  generateJwkForDpop,
+} from "@inrupt/oidc-dpop-client-browser";
 
 jest.mock("cross-fetch");
 
@@ -96,7 +98,7 @@ describe("buildDpopFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
+    const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url");
 
@@ -118,7 +120,7 @@ describe("buildDpopFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
+    const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
 
@@ -145,7 +147,7 @@ describe("buildDpopFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
+    const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", {
       headers: {
