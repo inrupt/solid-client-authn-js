@@ -31,27 +31,6 @@ import { Response } from "cross-fetch";
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable @typescript-eslint/camelcase */
 
-// The two following modules introduce randomness in the process, which prevents
-// making assumptions on the returned values. Mocking them out makes keys and
-// DPoP headers predictible.
-jest.mock("./keyGen", () => {
-  return {
-    generateJwkForDpop: (): JWKECKey => {
-      return {
-        kty: "EC",
-        kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-        alg: "ES256",
-        crv: "P-256",
-        x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-        y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-        d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-      };
-    },
-  };
-});
-
-// Note that mockJwk and the mocked generateJwkForDpop from keygen return the
-// same mocked key, but due to jest initialisation, one cannot call the other.
 const mockJwk = (): JWKECKey => {
   return {
     kty: "EC",
@@ -63,6 +42,15 @@ const mockJwk = (): JWKECKey => {
     d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
   };
 };
+
+// The two following modules introduce randomness in the process, which prevents
+// making assumptions on the returned values. Mocking them out makes keys and
+// DPoP headers predictible.
+jest.mock("./keyGen", () => {
+  return {
+    generateJwkForDpop: (): JWKECKey => mockJwk(),
+  };
+});
 
 jest.mock("uuid", () => {
   return {
