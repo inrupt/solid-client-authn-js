@@ -164,10 +164,6 @@ const mockFetch = (payload: string, status: number): typeof fetch => async (
   _init?: RequestInit
 ): Promise<Response> => new Response(payload, { status });
 
-it.skip("manually generate JWT", async () => {
-  await generateMockJwt();
-});
-
 describe("getTokens", () => {
   it("throws if the grant type isn't supported", async () => {
     const tokenRequest = getTokens(
