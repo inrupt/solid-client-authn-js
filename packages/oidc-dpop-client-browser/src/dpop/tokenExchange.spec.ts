@@ -21,7 +21,7 @@
 
 import URL from "url-parse";
 import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
-import { it, describe } from "@jest/globals";
+import { jest, it, describe } from "@jest/globals";
 
 import { getTokens, TokenEndpointInput } from "./tokenExchange";
 import { decodeJwt, signJwt } from "./dpop";
