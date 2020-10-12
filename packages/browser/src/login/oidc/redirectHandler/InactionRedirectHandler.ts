@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,8 +19,31 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import React from "react";
-import ReactDOM from "react-dom";
-import DemoClientApp from "./DemoClientApp";
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-ReactDOM.render(<DemoClientApp />, document.getElementById("container"));
+import {
+  IRedirectHandler,
+  ISessionInfo,
+  ISessionInfoManager,
+} from "@inrupt/solid-client-authn-core";
+import { inject, injectable } from "tsyringe";
+
+/**
+ * @hidden
+ */
+@injectable()
+export default class InactionRedirectHandler implements IRedirectHandler {
+  constructor(
+    @inject("sessionInfoManager") private _sessionCreator: ISessionInfoManager
+  ) {}
+
+  async canHandle(_redirectUrl: string): Promise<boolean> {
+    return true;
+  }
+  async handle(_redirectUrl: string): Promise<ISessionInfo | undefined> {
+    return undefined;
+  }
+}
