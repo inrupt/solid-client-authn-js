@@ -96,7 +96,7 @@ export default class TokenRequester {
       throw new Error(`This issuer [${issuer}] does not have a token endpoint`);
     }
 
-    const key = await generateJwkForDpop();
+    const jsonWebKey = await generateJwkForDpop();
 
     // Make request
     const tokenRequestInit: RequestInit & {
@@ -104,7 +104,11 @@ export default class TokenRequester {
     } = {
       method: "POST",
       headers: {
-        DPoP: await createDpopHeader(issuerConfig.tokenEndpoint, "POST", key),
+        DPoP: await createDpopHeader(
+          issuerConfig.tokenEndpoint,
+          "POST",
+          jsonWebKey
+        ),
         "content-type": "application/x-www-form-urlencoded",
       },
       body: formurlencoded({

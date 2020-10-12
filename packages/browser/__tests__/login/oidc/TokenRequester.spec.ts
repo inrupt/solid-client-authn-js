@@ -251,20 +251,20 @@ describe("TokenRequester", () => {
 
   // This test fails with the current mock, but since the whole tokenrequester class is
   // going to be removed soon, it's not a priority to fix this now.
-  // it("Fails elegantly if the access token does not have a sub claim", async () => {
-  //   setUpMockedReturnValues({
-  //     jwt: {
-  //       iss: "https://idp.com",
-  //     },
-  //   });
-  //   const TokenRefresher = getTokenRequester();
-  //   await expect(
-  //     /* eslint-disable @typescript-eslint/camelcase */
-  //     TokenRefresher.request("global", {
-  //       grant_type: "refresh_token",
-  //       refresh_token: "thisIsARefreshToken",
-  //     })
-  //     /* eslint-enable @typescript-eslint/camelcase */
-  //   ).rejects.toThrowError("The idp returned a bad token without a sub.");
-  // });
+  it.skip("Fails elegantly if the access token does not have a sub claim", async () => {
+    setUpMockedReturnValues({
+      jwt: {
+        iss: "https://idp.com",
+      },
+    });
+    const TokenRefresher = getTokenRequester();
+    await expect(
+      /* eslint-disable @typescript-eslint/camelcase */
+      TokenRefresher.request("global", {
+        grant_type: "refresh_token",
+        refresh_token: "thisIsARefreshToken",
+      })
+      /* eslint-enable @typescript-eslint/camelcase */
+    ).rejects.toThrowError("The idp returned a bad token without a sub.");
+  });
 });
