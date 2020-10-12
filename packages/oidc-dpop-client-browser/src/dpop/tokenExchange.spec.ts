@@ -94,6 +94,9 @@ const mockEndpointInput = (): TokenEndpointInput => {
   };
 };
 
+// The following function is only there to be used manually if
+// the JWT needed to be manually re-generated.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function generateMockJwt(): Promise<void> {
   const payload = {
     sub: "https://my.webid",
