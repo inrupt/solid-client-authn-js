@@ -33,9 +33,11 @@ import {
 import URL from "url-parse";
 import formurlencoded from "form-urlencoded";
 import { IFetcher } from "../../util/Fetcher";
-import { IDpopHeaderCreator } from "../../dpop/DpopHeaderCreator";
-import IJoseUtility from "../../jose/IJoseUtility";
-import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
+import {
+  generateJwkForDpop,
+  createDpopHeader,
+  decodeJwt,
+} from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -43,6 +45,8 @@ import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 export interface ITokenRequester {
   request(localUserId: string, body: Record<string, string>): Promise<void>;
 }
+
+// NOTE: The code from this class will soon move to oidc-client-dpop-browser
 
 /**
  * @hidden
@@ -54,11 +58,7 @@ export default class TokenRequester {
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
     @inject("fetcher") private fetcher: IFetcher,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
-    @inject("joseUtility") private joseUtility: IJoseUtility,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar,
-    @inject("dpopClientKeyManager")
-    private dpopClientKeyManager: IDpopClientKeyManager
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async request(
@@ -95,7 +95,7 @@ export default class TokenRequester {
       throw new Error(`This issuer [${issuer}] does not have a token endpoint`);
     }
 
-    await this.dpopClientKeyManager.generateClientKeyIfNotAlready();
+    const jsonWebKey = await generateJwkForDpop();
 
     // Make request
     const tokenRequestInit: RequestInit & {
@@ -103,9 +103,10 @@ export default class TokenRequester {
     } = {
       method: "POST",
       headers: {
-        DPoP: await this.dpopHeaderCreator.createDpopHeader(
+        DPoP: await createDpopHeader(
           issuerConfig.tokenEndpoint,
-          "POST"
+          "POST",
+          jsonWebKey
         ),
         "content-type": "application/x-www-form-urlencoded",
       },
@@ -142,9 +143,7 @@ export default class TokenRequester {
       throw new Error("IDP token route returned an invalid response.");
     }
 
-    const decoded = await this.joseUtility.decodeJwt(
-      tokenResponse.access_token as string
-    );
+    const decoded = await decodeJwt(tokenResponse.access_token as string);
     if (!decoded || !decoded.sub) {
       throw new Error("The idp returned a bad token without a sub.");
     }

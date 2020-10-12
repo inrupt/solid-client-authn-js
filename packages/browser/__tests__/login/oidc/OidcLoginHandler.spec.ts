@@ -25,14 +25,12 @@ import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler"
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
-import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
-    dpopClientKeyManager: DpopClientKeyManagerMock,
     clientRegistrar: ClientRegistrarMock,
   };
   function getInitialisedHandler(
@@ -41,7 +39,6 @@ describe("OidcLoginHandler", () => {
     return new OidcLoginHandler(
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-      mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
       mocks.clientRegistrar ?? defaultMocks.clientRegistrar
     );
   }

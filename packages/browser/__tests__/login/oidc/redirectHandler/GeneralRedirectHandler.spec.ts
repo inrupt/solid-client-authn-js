@@ -26,10 +26,25 @@ import {
   SessionCreatorCreateResponse,
 } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import GeneralRedirectHandler from "../../../../src/login/oidc/redirectHandler/GeneralRedirectHandler";
-import { generateJwk } from "../../../../src/jose/IsomorphicJoseUtility";
-import { signJwt } from "@inrupt/oidc-dpop-client-browser";
 
 jest.mock("cross-fetch");
+
+// The following key has been used to sign the mock access token. It is given
+// for an information purpose.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _mockJWK = {
+  kty: "EC",
+  kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+  alg: "ES256",
+  crv: "P-256",
+  x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
+  y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+  d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+};
+
+// Payload: { sub: "https://my.webid" }
+const mockAccessToken =
+  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0Q2xhaW0iOiJ0ZXN0VmFsdWUiLCJpYXQiOjE2MDIxNTg2NDJ9.wGZ49jU3wNSAFvWvZsjjulmbfRjlIQMp0VY0Q5u2--5vyzeKwfGUmssOW8kftIXG1ikm2iqMb6YRXCO4KGEctQ";
 
 describe("GeneralRedirectHandler", () => {
   const defaultMocks = {
@@ -104,12 +119,8 @@ describe("GeneralRedirectHandler", () => {
           [RequestInfo, RequestInit?]
         >;
       };
-      const jwk = await generateJwk("RSA");
-      const accessToken = await signJwt({ sub: "https://my.webid" }, jwk, {
-        algorithm: "RS256",
-      });
       const redirectUrl = new URL("http://some.url");
-      redirectUrl.searchParams.append("access_token", accessToken);
+      redirectUrl.searchParams.append("access_token", mockAccessToken);
       redirectUrl.searchParams.append("id_token", "Some ID token");
       redirectUrl.searchParams.append("state", "Idaho");
 

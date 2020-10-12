@@ -40,7 +40,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 import ConfigurationError from "../../errors/ConfigurationError";
-import { IDpopClientKeyManager } from "../../dpop/DpopClientKeyManager";
 import URL from "url-parse";
 
 /**
@@ -52,8 +51,6 @@ export default class OidcLoginHandler implements ILoginHandler {
     @inject("oidcHandler") private oidcHandler: IOidcHandler,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("dpopClientKeyManager")
-    private dpopClientKeyManager: IDpopClientKeyManager,
     @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
