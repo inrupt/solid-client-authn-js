@@ -19,38 +19,35 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export {
-  Version,
-  Log,
-  OidcClient,
-  OidcClientSettings,
-  WebStorageStateStore,
-  InMemoryWebStorage,
-  UserManager,
-  AccessTokenEvents,
-  MetadataService,
-  CordovaPopupNavigator,
-  CordovaIFrameNavigator,
-  CheckSessionIFrame,
-  SigninRequest,
-  SigninResponse,
-  // TODO: Investigate why this fails
-  // TokenRevocationClient,
-  SessionMonitor,
-  // Global,
-  User,
-} from "oidc-client";
+import { JWK } from "node-jose";
+import { BasicParameters, ECCurve, JSONWebKey, OKPCurve } from "jose";
 
-export { registerClient } from "./dcr/clientRegistrar";
-export {
-  decodeJwt,
-  signJwt,
-  createDpopHeader,
-  privateJwkToPublicJwk,
-} from "./dpop/dpop";
-export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGen";
-export {
-  getTokens,
-  TokenEndpointInput,
-  TokenEndpointResponse,
-} from "./dpop/tokenExchange";
+/**
+ * Generates a Json Web Key
+ * @param kty Key type
+ * @param crvBitlength Curve length (only relevant for elliptic curve algorithms)
+ * @param parameters
+ * @hidden
+ */
+export async function generateJwk(
+  kty: "EC" | "RSA",
+  crvBitlength?: ECCurve | OKPCurve | number,
+  parameters?: BasicParameters
+): Promise<JSONWebKey> {
+  const key = await JWK.createKey(kty, crvBitlength, parameters);
+  return key.toJSON(true) as JSONWebKey;
+}
+
+/**
+ * Generates a JSON Web Key suitable to be used to sign HTTP request headers.
+ */
+export async function generateJwkForDpop(): Promise<JSONWebKey> {
+  return generateJwk("EC", "P-256", { alg: "ES256" });
+}
+
+/**
+ * Generates a JSON Web Key based on the RSA algorithm
+ */
+export async function generateJwkRsa(): Promise<JSONWebKey> {
+  return generateJwk("RSA");
+}

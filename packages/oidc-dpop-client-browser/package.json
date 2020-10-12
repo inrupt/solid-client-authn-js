@@ -29,15 +29,17 @@
     "@rollup/plugin-node-resolve": "^9.0.0",
     "cross-fetch": "^3.0.6",
     "rollup": "^2.15.0",
-    "rollup-plugin-typescript2": "^0.27.1",
-    "rollup-plugin-node-polyfills": "^0.2.1"
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-typescript2": "^0.27.1"
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^0.2.0",
+    "@types/form-urlencoded": "^2.0.1",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node-jose": "^1.1.5",
     "@types/url-parse": "^1.4.3",
     "@types/uuid": "^8.3.0",
+    "form-urlencoded": "^4.2.1",
     "jose": "^2.0.2",
     "jsonwebtoken": "^8.5.1",
     "node-jose": "^2.0.0",

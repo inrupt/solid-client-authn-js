@@ -25,38 +25,10 @@ import { describe, it } from "@jest/globals";
 import {
   createDpopHeader,
   decodeJwt,
-  generateJwk,
-  generateJwkForDpop,
-  generateJwkRsa,
   normalizeHttpUriClaim,
   signJwt,
 } from "./dpop";
-
-describe("generateJwk", () => {
-  it("can generate a RSA-based JWK", async () => {
-    const key = await generateJwk("RSA");
-    expect(key.kty).toEqual("RSA");
-  });
-
-  it("can generate an elliptic curve-based JWK", async () => {
-    const key = await generateJwk("EC", "P-256");
-    expect(key.kty).toEqual("EC");
-  });
-});
-
-describe("generateJwkForDpop", () => {
-  it("generates an elliptic curve-base key, which is a sensible default for DPoP", async () => {
-    const key = await generateJwkForDpop();
-    expect(key.kty).toEqual("EC");
-  });
-});
-
-describe("generateJwkRsa", () => {
-  it("generates an RSA key", async () => {
-    const key = await generateJwkRsa();
-    expect(key.kty).toEqual("RSA");
-  });
-});
+import { generateJwk, generateJwkForDpop } from "./keyGen";
 
 describe("signJwt/decodeJwt", () => {
   it("generates a JWT that can be decoded without signature verification", async () => {

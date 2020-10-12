@@ -19,38 +19,32 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export {
-  Version,
-  Log,
-  OidcClient,
-  OidcClientSettings,
-  WebStorageStateStore,
-  InMemoryWebStorage,
-  UserManager,
-  AccessTokenEvents,
-  MetadataService,
-  CordovaPopupNavigator,
-  CordovaIFrameNavigator,
-  CheckSessionIFrame,
-  SigninRequest,
-  SigninResponse,
-  // TODO: Investigate why this fails
-  // TokenRevocationClient,
-  SessionMonitor,
-  // Global,
-  User,
-} from "oidc-client";
+import { describe, it } from "@jest/globals";
 
-export { registerClient } from "./dcr/clientRegistrar";
-export {
-  decodeJwt,
-  signJwt,
-  createDpopHeader,
-  privateJwkToPublicJwk,
-} from "./dpop/dpop";
-export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGen";
-export {
-  getTokens,
-  TokenEndpointInput,
-  TokenEndpointResponse,
-} from "./dpop/tokenExchange";
+import { generateJwk, generateJwkForDpop, generateJwkRsa } from "./keyGen";
+
+describe("generateJwk", () => {
+  it("can generate a RSA-based JWK", async () => {
+    const key = await generateJwk("RSA");
+    expect(key.kty).toEqual("RSA");
+  });
+
+  it("can generate an elliptic curve-based JWK", async () => {
+    const key = await generateJwk("EC", "P-256");
+    expect(key.kty).toEqual("EC");
+  });
+});
+
+describe("generateJwkForDpop", () => {
+  it("generates an elliptic curve-base key, which is a sensible default for DPoP", async () => {
+    const key = await generateJwkForDpop();
+    expect(key.kty).toEqual("EC");
+  });
+});
+
+describe("generateJwkRsa", () => {
+  it("generates an RSA key", async () => {
+    const key = await generateJwkRsa();
+    expect(key.kty).toEqual("RSA");
+  });
+});
