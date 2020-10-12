@@ -25,8 +25,8 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import IJoseUtility from "../../../jose/IJoseUtility";
 import { IStorageUtility } from "@inrupt/solid-client-authn-core";
+import { decodeJwt } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -46,7 +46,6 @@ export interface ITokenSaver {
 @injectable()
 export default class TokenSaver implements ITokenSaver {
   constructor(
-    @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
@@ -56,7 +55,7 @@ export default class TokenSaver implements ITokenSaver {
     accessToken?: string,
     refreshToken?: string
   ): Promise<void> {
-    const decoded = await this.joseUtility.decodeJwt(
+    const decoded = await decodeJwt(
       // TODO this should actually be the id_vc of the token
       accessToken as string
     );

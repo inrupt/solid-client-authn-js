@@ -27,7 +27,6 @@ import {
 import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { JoseUtilityMock } from "../../../../src/jose/__mocks__/JoseUtility";
 import { SigninResponse } from "@inrupt/oidc-dpop-client-browser";
 
 jest.mock("cross-fetch");
@@ -65,11 +64,15 @@ jest.mock("@inrupt/oidc-dpop-client-browser", () => {
         },
       };
     }),
+    decodeJwt: (_jwt: string): Record<string, string> => {
+      return {
+        sub: "https://some.webid",
+      };
+    },
   };
 });
 
 const defaultMocks = {
-  joseUtility: JoseUtilityMock,
   storageUtility: StorageUtilityMock,
   redirector: RedirectorMock,
   sessionInfoManager: SessionInfoManagerMock,
@@ -79,9 +82,7 @@ function getAuthCodeRedirectHandler(
   mocks: Partial<typeof defaultMocks> = defaultMocks
 ): AuthCodeRedirectHandler {
   return new AuthCodeRedirectHandler(
-    mocks.joseUtility ?? defaultMocks.joseUtility,
     mocks.storageUtility ?? defaultMocks.storageUtility,
-    mocks.redirector ?? defaultMocks.redirector,
     mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
   );
 }

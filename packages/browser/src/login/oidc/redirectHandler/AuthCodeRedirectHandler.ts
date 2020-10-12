@@ -28,14 +28,12 @@ import URL from "url-parse";
 import ConfigurationError from "../../../errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import {
-  IRedirector,
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { OidcClient } from "@inrupt/oidc-dpop-client-browser";
-import IJoseUtility from "../../../jose/IJoseUtility";
+import { OidcClient, decodeJwt } from "@inrupt/oidc-dpop-client-browser";
 import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
 
 /**
@@ -44,9 +42,7 @@ import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
 @injectable()
 export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("redirector") private redirector: IRedirector,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager
   ) {}
@@ -101,9 +97,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
 
     // We need to decode the access_token JWT to extract out the full WebID.
-    const decoded = await this.joseUtility.decodeJwt(
-      signinResponse.access_token as string
-    );
+    const decoded = await decodeJwt(signinResponse.access_token as string);
     if (!decoded || !decoded.sub) {
       throw new Error("The idp returned a bad token without a sub.");
     }
