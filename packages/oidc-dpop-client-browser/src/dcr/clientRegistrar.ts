@@ -28,7 +28,7 @@ import {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
-} from "@inrupt/solid-client-authn-core";
+} from "../common/types";
 
 function processErrorResponse(
   // The type is any here because the object is parsed from a JSON response

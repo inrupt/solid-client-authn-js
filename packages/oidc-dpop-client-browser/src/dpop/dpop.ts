@@ -21,34 +21,9 @@
 
 import URL from "url-parse";
 import { JWK } from "node-jose";
-import {
-  BasicParameters,
-  ECCurve,
-  JSONWebKey,
-  JWKECKey,
-  JWKOctKey,
-  JWKOKPKey,
-  JWKRSAKey,
-  OKPCurve,
-} from "jose";
+import { JSONWebKey, JWKECKey, JWKOctKey, JWKOKPKey, JWKRSAKey } from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
 import { v4 } from "uuid";
-
-/**
- * Generates a Json Web Key
- * @param kty Key type
- * @param crvBitlength Curve length (only relevant for elliptic curve algorithms)
- * @param parameters
- * @hidden
- */
-export async function generateJwk(
-  kty: "EC" | "RSA",
-  crvBitlength?: ECCurve | OKPCurve | number,
-  parameters?: BasicParameters
-): Promise<JSONWebKey> {
-  const key = await JWK.createKey(kty, crvBitlength, parameters);
-  return key.toJSON(true) as JSONWebKey;
-}
 
 /**
  * Generates a Json Web Token (https://tools.ietf.org/html/rfc7519) containing
@@ -147,18 +122,4 @@ export async function createDpopHeader(
       algorithm: "ES256",
     }
   );
-}
-
-/**
- * Generates a JSON Web Key suitable to be used to sign HTTP request headers.
- */
-export async function generateJwkForDpop(): Promise<JSONWebKey> {
-  return generateJwk("EC", "P-256", { alg: "ES256" });
-}
-
-/**
- * Generates a JSON Web Key based on the RSA algorithm
- */
-export async function generateJwkRsa(): Promise<JSONWebKey> {
-  return generateJwk("RSA");
 }
