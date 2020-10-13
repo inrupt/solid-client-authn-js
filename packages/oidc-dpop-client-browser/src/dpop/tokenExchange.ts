@@ -272,12 +272,12 @@ export async function getBearerToken(
       `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
     );
   }
-  const webid = await deriveWebidFromIdToken(signinResponse.id_token);
+  const webId = await deriveWebIdFromIdToken(signinResponse.id_token);
 
   return {
     accessToken: signinResponse.access_token,
     idToken: signinResponse.id_token,
-    webid,
+    webId,
     // TODO: Properly handle refresh token
     // refreshToken: signinResponse.refresh_token
   };
