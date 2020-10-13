@@ -87,6 +87,8 @@ export default class ClientAuthentication {
       clientName: options.clientName ?? options.clientId,
       popUp: options.popUp || false,
       handleRedirect: options.handleRedirect,
+      // Defaults to DPoP
+      tokenType: options.tokenType ?? "DPoP",
     });
   };
 
