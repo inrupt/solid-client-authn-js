@@ -19,9 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { it, describe } from "@jest/globals";
+
 import URL from "url-parse";
 import { IClient, IIssuerConfig } from "../common/types";
-import { jest, it, describe } from "@jest/globals";
 
 import { getTokens, TokenEndpointInput } from "./tokenExchange";
 import { decodeJwt, signJwt } from "./dpop";
