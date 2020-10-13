@@ -47,7 +47,7 @@ const mockJwk = (): JWKECKey => {
 // The two following modules introduce randomness in the process, which prevents
 // making assumptions on the returned values. Mocking them out makes keys and
 // DPoP headers predictible.
-jest.mock("./keyGen", () => {
+jest.mock("./keyGeneration", () => {
   return {
     generateJwkForDpop: (): JWKECKey => mockJwk(),
   };
@@ -223,7 +223,7 @@ describe("getTokens", () => {
       true
     );
     await expect(request).rejects.toThrow(
-      `Invalid token endpoint response: requested a [DPoP] token, got a token_type [Bearer].`
+      `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [Bearer].`
     );
   });
 
@@ -237,7 +237,7 @@ describe("getTokens", () => {
       false
     );
     await expect(request).rejects.toThrow(
-      `Invalid token endpoint response: requested a [Bearer] token, got a token_type [DPoP].`
+      `Invalid token endpoint response: requested a [Bearer] token, but got a 'token_type' value of [DPoP].`
     );
   });
 
@@ -255,9 +255,9 @@ describe("getTokens", () => {
       false
     );
     await expect(request).rejects.toThrow(
-      `Invalid token endpoint response: ${JSON.stringify(
+      `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
         tokenResponse
-      )} is missing an token_type.`
+      )}`
     );
   });
 
@@ -327,9 +327,9 @@ describe("getTokens", () => {
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
     ).rejects.toThrow(
-      `Invalid token endpoint response: ${JSON.stringify(
+      `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
         tokenEndpointResponse
-      )} is missing an access_token.`
+      )}`
     );
   });
 
@@ -344,9 +344,9 @@ describe("getTokens", () => {
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
     ).rejects.toThrow(
-      `Invalid token endpoint response: ${JSON.stringify(
+      `Invalid token endpoint response (missing the field 'id_token'): ${JSON.stringify(
         tokenEndpointResponse
-      )} is missing an id_token.`
+      )}`
     );
   });
 
@@ -415,7 +415,7 @@ describe("getTokens", () => {
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
     ).rejects.toThrow(
-      `Cannot extract WebID from ID token: the ID token returned by ${mockIssuer().issuer.toString()} has no webid claim, nor an IRI-like sub claim: [some subject]`
+      `Cannot extract WebID from ID token: the ID token returned by [${mockIssuer().issuer.toString()}] has no 'webid' claim, nor an IRI-like 'sub' claim: [some subject]`
     );
   });
 

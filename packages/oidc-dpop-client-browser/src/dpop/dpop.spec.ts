@@ -28,7 +28,7 @@ import {
   normalizeHttpUriClaim,
   signJwt,
 } from "./dpop";
-import { generateJwk, generateJwkForDpop } from "./keyGen";
+import { generateJwk, generateJwkForDpop } from "./keyGeneration";
 
 describe("signJwt/decodeJwt", () => {
   it("generates a JWT that can be decoded without signature verification", async () => {

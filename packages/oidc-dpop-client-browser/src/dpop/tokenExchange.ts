@@ -67,7 +67,8 @@ export type TokenEndpointInput = {
 type WebIdOidcIdToken = {
   sub: string;
   iss: string;
-  webId?: string;
+  // The spec requires this capitalization of webid
+  webid?: string;
 };
 
 function isWebIdOidcIdToken(
@@ -78,8 +79,8 @@ function isWebIdOidcIdToken(
       typeof token.sub === "string" &&
       token.iss &&
       typeof token.iss === "string" &&
-      !token.webId) ||
-    typeof token.webId === "string"
+      !token.webid) ||
+    typeof token.webid === "string"
   );
 }
 
@@ -99,12 +100,12 @@ async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
       )} is missing 'sub' or 'iss' claims`
     );
   }
-  if (decoded.webId) {
-    return decoded.webId;
+  if (decoded.webid) {
+    return decoded.webid;
   }
   if (!decoded.sub.match(/^https?:\/\/.+\..+$/)) {
     throw new Error(
-      `Cannot extract WebID from ID token: the ID token returned by ${decoded.iss} has no 'webid' claim, nor an IRI-like sub claim: [${decoded.sub}]`
+      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]`
     );
   }
   return decoded.sub;
@@ -138,37 +139,37 @@ function validateTokenEndpointResponse(
 ): Record<string, unknown> & { access_token: string; id_token: string } {
   if (!hasAccessToken(tokenResponse)) {
     throw new Error(
-      `Invalid token endpoint response: ${JSON.stringify(
+      `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
         tokenResponse
-      )} is missing an access_token.`
+      )}`
     );
   }
 
   if (!hasIdToken(tokenResponse)) {
     throw new Error(
-      `Invalid token endpoint response: ${JSON.stringify(
+      `Invalid token endpoint response (missing the field 'id_token'): ${JSON.stringify(
         tokenResponse
-      )} is missing an id_token.`
+      )}.`
     );
   }
 
   if (!hasTokenType(tokenResponse)) {
     throw new Error(
-      `Invalid token endpoint response: ${JSON.stringify(
+      `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
         tokenResponse
-      )} is missing an token_type.`
+      )}`
     );
   }
 
   if (dpop && tokenResponse.token_type.toLowerCase() !== "dpop") {
     throw new Error(
-      `Invalid token endpoint response: requested a [DPoP] token, got a token_type [${tokenResponse.token_type}].`
+      `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
     );
   }
 
   if (!dpop && tokenResponse.token_type.toLowerCase() !== "bearer") {
     throw new Error(
-      `Invalid token endpoint response: requested a [Bearer] token, got a token_type [${tokenResponse.token_type}].`
+      `Invalid token endpoint response: requested a [Bearer] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
     );
   }
   return tokenResponse;

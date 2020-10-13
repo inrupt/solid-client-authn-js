@@ -48,7 +48,7 @@ export {
   createDpopHeader,
   privateJwkToPublicJwk,
 } from "./dpop/dpop";
-export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGen";
+export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGeneration";
 export {
   getTokens,
   TokenEndpointInput,
