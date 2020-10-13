@@ -26,6 +26,9 @@ module.exports = {
       filename: "./index.html",
     }),
   ],
+  output: {
+    publicPath: process.env.ASSET_PATH || '/',
+  },
   devServer: {
     // TODO: PMCB55: make demo's 'prettier' by avoiding 'localhost'...
     // public: "my-demo-app.com",

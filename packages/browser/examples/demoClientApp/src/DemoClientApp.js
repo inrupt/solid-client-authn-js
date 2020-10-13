@@ -33,9 +33,6 @@ const clientApplicationName = "S-C-A-B Demo Client App";
 let snackBarTimeout = undefined;
 
 const defaultLocalClientAppSessionId = "my local session id";
-// TODO: PMCB55: make demo's 'prettier' by avoiding 'localhost'...
-// const defaultClientEndpoint = "http://my-demo-app.com/";
-const defaultClientEndpoint = "http://localhost:3001/";
 const defaultIssuer = "https://broker.demo-ess.inrupt.com/";
 const defaultProtectedResource =
   "https://ldp.demo-ess.inrupt.com/110592712913443799002/private/End-2-End-Test/private-resource.ttl";
@@ -124,7 +121,7 @@ class DemoClientApp extends Component {
     }
 
     await this.state.session.login({
-      redirectUrl: new URL(defaultClientEndpoint),
+      redirectUrl: new URL(document.location.href),
       oidcIssuer: new URL(this.state.loginIssuer),
       clientName: clientApplicationName,
     });

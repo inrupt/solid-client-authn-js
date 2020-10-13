@@ -1,7 +1,7 @@
 // Login via ESS Broker using various Auth0 workflows.
 
-import { t } from 'testcafe';
-import loginPage from '../page-models/loginPage.js';
+import { Selector, t } from 'testcafe';
+import loginPage from '../page-models/loginPage';
 
 // Login using NSS User
 export async function nssLogin(brokerURL, username, password) {
@@ -19,6 +19,7 @@ export async function nssLogin(brokerURL, username, password) {
 // Login using Google
 export async function essGoogleLogin(brokerURL, username, password) {
 
+    console.log("STARTING GOOGLE LOGIN");
     // Log in via ESS Broker service
     await loginPage.submitLoginForm(brokerURL);
 
