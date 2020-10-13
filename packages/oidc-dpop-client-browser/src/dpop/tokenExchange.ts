@@ -22,7 +22,7 @@
 import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
 import { createDpopHeader, decodeJwt } from "./dpop";
-import { generateJwkForDpop } from "./keyGen";
+import { generateJwkForDpop } from "./keyGeneration";
 import formurlencoded from "form-urlencoded";
 
 function hasAccessToken(
@@ -52,7 +52,7 @@ function hasTokenType(
 export type TokenEndpointResponse = {
   accessToken: string;
   idToken: string;
-  webid: string;
+  webId: string;
   refreshToken?: string;
   dpopJwk?: string;
 };
@@ -64,47 +64,47 @@ export type TokenEndpointInput = {
   codeVerifier: string;
 };
 
-type WebidOidcIdToken = {
+type WebIdOidcIdToken = {
   sub: string;
   iss: string;
-  webid?: string;
+  webId?: string;
 };
 
-function isWebidOidcIdToken(
-  token: WebidOidcIdToken | Record<string, unknown>
-): token is WebidOidcIdToken {
+function isWebIdOidcIdToken(
+  token: WebIdOidcIdToken | Record<string, unknown>
+): token is WebIdOidcIdToken {
   return (
     (token.sub &&
       typeof token.sub === "string" &&
       token.iss &&
       typeof token.iss === "string" &&
-      !token.webid) ||
-    typeof token.webid === "string"
+      !token.webId) ||
+    typeof token.webId === "string"
   );
 }
 
 /**
- * Extracts a Webid from an ID token based on https://github.com/solid/webid-oidc-spec.
+ * Extracts a WebId from an ID token based on https://github.com/solid/webid-oidc-spec.
  * The upcoming spec is still a work in progress.
  *
- * Note: this function does not implement the userinfo webid lookup yet.
+ * Note: this function does not implement the userinfo WebId lookup yet.
  * @param idToken
  */
-async function deriveWebidFromIdToken(idToken: string): Promise<string> {
+async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
   const decoded = await decodeJwt(idToken);
-  if (!isWebidOidcIdToken(decoded)) {
+  if (!isWebIdOidcIdToken(decoded)) {
     throw new Error(
       `Invalid ID token: ${JSON.stringify(
         decoded
       )} is missing 'sub' or 'iss' claims`
     );
   }
-  if (decoded.webid) {
-    return decoded.webid;
+  if (decoded.webId) {
+    return decoded.webId;
   }
   if (!decoded.sub.match(/^https?:\/\/.+\..+$/)) {
     throw new Error(
-      `Cannot extract WebID from ID token: the ID token returned by ${decoded.iss} has no webid claim, nor an IRI-like sub claim: [${decoded.sub}]`
+      `Cannot extract WebID from ID token: the ID token returned by ${decoded.iss} has no 'webid' claim, nor an IRI-like sub claim: [${decoded.sub}]`
     );
   }
   return decoded.sub;
@@ -219,7 +219,7 @@ export async function getTokens(
   ).json()) as Record<string, unknown>;
 
   const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
-  const webid = await deriveWebidFromIdToken(tokenResponse.id_token);
+  const webId = await deriveWebIdFromIdToken(tokenResponse.id_token);
 
   return {
     accessToken: tokenResponse.access_token,
@@ -227,7 +227,7 @@ export async function getTokens(
     refreshToken: hasRefreshToken(tokenResponse)
       ? tokenResponse.refresh_token
       : undefined,
-    webid,
+    webId: webId,
     dpopJwk: dpopJwk ? JSON.stringify(dpopJwk) : undefined,
   };
 }

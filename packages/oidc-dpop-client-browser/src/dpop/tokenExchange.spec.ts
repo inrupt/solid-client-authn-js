@@ -362,7 +362,7 @@ describe("getTokens", () => {
     expect(result?.dpopJwk).toBe(undefined);
   });
 
-  it("derives a webid from the custom claim if available", async () => {
+  it("derives a WebId from the custom claim if available", async () => {
     const payload = {
       webid: "https://my.webid",
       sub: "some subject",
@@ -389,7 +389,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       false
     );
-    expect(result?.webid).toEqual(payload.webid);
+    expect(result?.webId).toEqual(payload.webid);
   });
 
   it("throws if no webid can be derived from the ID token", async () => {
