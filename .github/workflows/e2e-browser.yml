@@ -1,0 +1,66 @@
+name: End-to-end tests (browser)
+
+on: [deployment_status]
+
+env:
+  CI: true
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    if: github.event.deployment_status.state == 'success'
+    steps:
+      - uses: actions/checkout@v2.1.0
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1.4.1
+      - name: Cache node modules
+        uses: actions/cache@v1.1.2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: e2e/browser/node_modules
+          key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Run tests
+        uses: DevExpress/testcafe-action@latest
+        env:
+          DEMO_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
+          E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
+          E2E_GOOGLE_ACCOUNTID: ${{ secrets.E2E_GOOGLE_ACCOUNTID }}
+          E2E_GOOGLE_USERNAME: ${{ secrets.E2E_GOOGLE_USERNAME }}
+          E2E_GOOGLE_PASSWORD: ${{ secrets.E2E_GOOGLE_PASSWORD }}
+          E2E_GITHUB_USERNAME: ${{ secrets.E2E_GITHUB_USERNAME }}
+          E2E_GITHUB_PASSWORD: ${{ secrets.E2E_GITHUB_PASSWORD }}
+        with:
+          version: 1.9.4
+          args: "all e2e/browser/ess.test.ts"
+      - name: Add status check with successful test result
+        id: set-status-check-success
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/:repository/statuses/:ref
+          repository: ${{ github.repository }}
+          ref: ${{ github.sha }}
+          state: success
+          context: 'End-to-end tests (browser)'
+          description: 'TestCafe clicking through the demo application deployed to Vercel'
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}?check_suite_focus=true
+          # The deployment runs in parallel with CI, so status checks will never have succeeded yet:
+          required_contexts: "[]"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Add status check with failed test result
+        id: set-status-check-failure
+        if: failure()
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/:repository/statuses/:ref
+          repository: ${{ github.repository }}
+          ref: ${{ github.sha }}
+          state: failure
+          context: 'End-to-end tests (browser)'
+          description: 'TestCafe clicking through the demo application deployed to Vercel'
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}?check_suite_focus=true
+          # The deployment runs in parallel with CI, so status checks will never have succeeded yet:
+          required_contexts: "[]"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
