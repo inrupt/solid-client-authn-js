@@ -128,12 +128,14 @@ export type TokenEndpointRawResponse = {
   access_token: string;
   id_token: string;
   refresh_token?: string;
+  token_type: string;
 };
 
 const mockBearerTokens = (): TokenEndpointRawResponse => {
   return {
     access_token: "some token",
     id_token: mockIdToken(),
+    token_type: "Bearer",
   };
 };
 
@@ -141,6 +143,7 @@ const mockDpopTokens = (): TokenEndpointRawResponse => {
   return {
     access_token: JSON.stringify(mockKeyBoundToken()),
     id_token: mockIdToken(),
+    token_type: "DPoP",
   };
 };
 
@@ -195,7 +198,7 @@ describe("getTokens", () => {
     );
   });
 
-  it("requests a key-bound token if requested", async () => {
+  it("can request a key-bound token", async () => {
     const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
     global.fetch = myFetch;
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
@@ -205,8 +208,56 @@ describe("getTokens", () => {
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     const dpopJwt = await decodeJwt(headers["DPoP"], mockJwk());
     expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString()),
-      expect(dpopJwt.htm).toEqual("POST"),
-      expect(dpopJwt.jti).toEqual("1234");
+      expect(dpopJwt.htm).toEqual("POST");
+    expect(dpopJwt.jti).toEqual("1234");
+  });
+
+  it("throws if a key-bound token was requested, but a bearer token is returned", async () => {
+    const myFetch = jest.fn(mockFetch(JSON.stringify(mockBearerTokens()), 200));
+    global.fetch = myFetch;
+    const request = getTokens(
+      mockIssuer(),
+      mockClient(),
+      mockEndpointInput(),
+      true
+    );
+    await expect(request).rejects.toThrow(
+      `Invalid token endpoint response: requested a [DPoP] token, got a token_type [Bearer].`
+    );
+  });
+
+  it("throws if a bearer token was requested, but a dpop token is returned", async () => {
+    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
+    global.fetch = myFetch;
+    const request = getTokens(
+      mockIssuer(),
+      mockClient(),
+      mockEndpointInput(),
+      false
+    );
+    await expect(request).rejects.toThrow(
+      `Invalid token endpoint response: requested a [Bearer] token, got a token_type [DPoP].`
+    );
+  });
+
+  it("throws if the token type is unspecified", async () => {
+    const tokenResponse = {
+      access_token: "some token",
+      id_token: mockIdToken(),
+    };
+    const myFetch = jest.fn(mockFetch(JSON.stringify(tokenResponse), 200));
+    global.fetch = myFetch;
+    const request = getTokens(
+      mockIssuer(),
+      mockClient(),
+      mockEndpointInput(),
+      false
+    );
+    await expect(request).rejects.toThrow(
+      `Invalid token endpoint response: ${JSON.stringify(
+        tokenResponse
+      )} is missing an token_type.`
+    );
   });
 
   // See https://tools.ietf.org/html/rfc6749#page-29 for the required parameters
@@ -325,6 +376,7 @@ describe("getTokens", () => {
         JSON.stringify({
           access_token: "some token",
           id_token: idJwt,
+          token_type: "Bearer",
         }),
         200
       )
@@ -353,6 +405,7 @@ describe("getTokens", () => {
         JSON.stringify({
           access_token: "some token",
           id_token: idJwt,
+          token_type: "Bearer",
         }),
         200
       )
@@ -378,6 +431,7 @@ describe("getTokens", () => {
         JSON.stringify({
           access_token: "some token",
           id_token: idJwt,
+          token_type: "Bearer",
         }),
         200
       )
@@ -403,6 +457,7 @@ describe("getTokens", () => {
         JSON.stringify({
           access_token: "some token",
           id_token: idJwt,
+          token_type: "Bearer",
         }),
         200
       )

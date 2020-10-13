@@ -43,6 +43,12 @@ function hasRefreshToken(
   return value.refresh_token && typeof value.refresh_token === "string";
 }
 
+function hasTokenType(
+  value: { token_type: string } | Record<string, unknown>
+): value is { token_type: string } {
+  return value.token_type && typeof value.token_type === "string";
+}
+
 export type TokenEndpointResponse = {
   accessToken: string;
   idToken: string;
@@ -127,7 +133,8 @@ function validatePreconditions(
 }
 
 function validateTokenEndpointResponse(
-  tokenResponse: Record<string, unknown>
+  tokenResponse: Record<string, unknown>,
+  dpop: boolean
 ): Record<string, unknown> & { access_token: string; id_token: string } {
   if (!hasAccessToken(tokenResponse)) {
     throw new Error(
@@ -142,6 +149,26 @@ function validateTokenEndpointResponse(
       `Invalid token endpoint response: ${JSON.stringify(
         tokenResponse
       )} is missing an id_token.`
+    );
+  }
+
+  if (!hasTokenType(tokenResponse)) {
+    throw new Error(
+      `Invalid token endpoint response: ${JSON.stringify(
+        tokenResponse
+      )} is missing an token_type.`
+    );
+  }
+
+  if (dpop && tokenResponse.token_type.toLowerCase() !== "dpop") {
+    throw new Error(
+      `Invalid token endpoint response: requested a [DPoP] token, got a token_type [${tokenResponse.token_type}].`
+    );
+  }
+
+  if (!dpop && tokenResponse.token_type.toLowerCase() !== "bearer") {
+    throw new Error(
+      `Invalid token endpoint response: requested a [Bearer] token, got a token_type [${tokenResponse.token_type}].`
     );
   }
   return tokenResponse;
@@ -191,7 +218,7 @@ export async function getTokens(
     await fetch(issuer.tokenEndpoint.toString(), tokenRequestInit)
   ).json()) as Record<string, unknown>;
 
-  const tokenResponse = validateTokenEndpointResponse(rawTokenResponse);
+  const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
   const webid = await deriveWebidFromIdToken(tokenResponse.id_token);
 
   return {
