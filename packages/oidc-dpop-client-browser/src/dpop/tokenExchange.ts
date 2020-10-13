@@ -19,11 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import URL from "url-parse";
 import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
 import { createDpopHeader, decodeJwt } from "./dpop";
 import { generateJwkForDpop } from "./keyGeneration";
 import formurlencoded from "form-urlencoded";
+import { OidcClient } from "oidc-client";
 
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>
@@ -54,7 +56,11 @@ export type TokenEndpointResponse = {
   idToken: string;
   webId: string;
   refreshToken?: string;
-  dpopJwk?: string;
+  dpopJwk?: JSONWebKey;
+};
+
+export type TokenEndpointDpopResponse = TokenEndpointResponse & {
+  dpopJwk: JSONWebKey;
 };
 
 export type TokenEndpointInput = {
@@ -91,7 +97,7 @@ function isWebIdOidcIdToken(
  * Note: this function does not implement the userinfo WebId lookup yet.
  * @param idToken
  */
-async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
+export async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
   const decoded = await decodeJwt(idToken);
   if (!isWebIdOidcIdToken(decoded)) {
     throw new Error(
@@ -133,7 +139,7 @@ function validatePreconditions(
   }
 }
 
-function validateTokenEndpointResponse(
+export function validateTokenEndpointResponse(
   tokenResponse: Record<string, unknown>,
   dpop: boolean
 ): Record<string, unknown> & { access_token: string; id_token: string } {
@@ -180,7 +186,7 @@ export async function getTokens(
   client: IClient,
   data: TokenEndpointInput,
   dpop: boolean
-): Promise<TokenEndpointResponse | undefined> {
+): Promise<TokenEndpointResponse> {
   validatePreconditions(issuer, data);
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
@@ -228,7 +234,62 @@ export async function getTokens(
     refreshToken: hasRefreshToken(tokenResponse)
       ? tokenResponse.refresh_token
       : undefined,
-    webId: webId,
-    dpopJwk: dpopJwk ? JSON.stringify(dpopJwk) : undefined,
+    webId,
+    dpopJwk,
   };
+}
+
+/**
+ * This function exchanges an authorization code for a bearer token.
+ * Note that it is based on oidc-client-js, and assumes that the same client has
+ * been used to issue the initial redirect.
+ * @param redirectUrl The URL to which the user has been redirected
+ */
+export async function getBearerToken(
+  redirectUrl: URL
+): Promise<TokenEndpointResponse> {
+  let signinResponse;
+  try {
+    signinResponse = await new OidcClient({
+      // TODO: We should look at the various interfaces being used for storage,
+      //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
+      //  (which has an interface Storage), and our own proprietary interface
+      //  IStorage - i.e. we should really just be using the browser Web Storage
+      //  API, e.g. "stateStore: window.localStorage,".
+
+      // We are instantiating a new instance here, so the only value we need to
+      // explicitly provide is the response mode (default otherwise will look
+      // for a hash '#' fragment!).
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      response_mode: "query",
+      // The userinfo endpoint on NSS fails, so disable this for now
+      // Note that in Solid, information should be retrieved from the
+      // profile referenced by the WebId.
+      loadUserInfo: false,
+    }).processSigninResponse(redirectUrl.toString());
+  } catch (err) {
+    throw new Error(
+      `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
+    );
+  }
+  const webid = await deriveWebidFromIdToken(signinResponse.id_token);
+
+  return {
+    accessToken: signinResponse.access_token,
+    idToken: signinResponse.id_token,
+    webid,
+    // TODO: Properly handle refresh token
+    // refreshToken: signinResponse.refresh_token
+  };
+}
+
+export async function getDpopToken(
+  issuer: IIssuerConfig,
+  client: IClient,
+  data: TokenEndpointInput
+): Promise<TokenEndpointDpopResponse> {
+  // The type assertion is okay, because the absence of the jwk would throw an error
+  return getTokens(issuer, client, data, true) as Promise<
+    TokenEndpointDpopResponse
+  >;
 }

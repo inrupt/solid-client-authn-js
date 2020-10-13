@@ -105,6 +105,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
               codeVerifier: req.state._code_verifier,
               issuer: oidcLoginOptions.issuer.toString(),
               redirectUri: oidcLoginOptions.redirectUrl.toString(),
+              dpop: oidcLoginOptions.dpop ? "true" : "false",
             }),
           ]);
 

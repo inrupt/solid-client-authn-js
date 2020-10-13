@@ -24,7 +24,12 @@ import { it, describe } from "@jest/globals";
 import URL from "url-parse";
 import { IClient, IIssuerConfig } from "../common/types";
 
-import { getTokens, TokenEndpointInput } from "./tokenExchange";
+import {
+  getBearerToken,
+  getDpopToken,
+  getTokens,
+  TokenEndpointInput,
+} from "./tokenExchange";
 import { decodeJwt, signJwt } from "./dpop";
 import { JWKECKey } from "jose";
 import { Response } from "cross-fetch";
@@ -125,6 +130,8 @@ const mockKeyBoundToken = (): AccessJwt => {
   };
 };
 
+const mockBearerAccessToken = (): string => "some token";
+
 export type TokenEndpointRawResponse = {
   access_token: string;
   id_token: string;
@@ -134,7 +141,7 @@ export type TokenEndpointRawResponse = {
 
 const mockBearerTokens = (): TokenEndpointRawResponse => {
   return {
-    access_token: "some token",
+    access_token: mockBearerAccessToken(),
     id_token: mockIdToken(),
     token_type: "Bearer",
   };
@@ -243,7 +250,7 @@ describe("getTokens", () => {
 
   it("throws if the token type is unspecified", async () => {
     const tokenResponse = {
-      access_token: "some token",
+      access_token: mockBearerAccessToken(),
       id_token: mockIdToken(),
     };
     const myFetch = jest.fn(mockFetch(JSON.stringify(tokenResponse), 200));
@@ -285,7 +292,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       true
     );
-    expect(result?.dpopJwk).toEqual(JSON.stringify(mockJwk()));
+    expect(result?.dpopJwk).toEqual(mockJwk());
   });
 
   it("returns the tokens provided by the IdP", async () => {
@@ -335,7 +342,7 @@ describe("getTokens", () => {
 
   it("throws if the ID token is missing", async () => {
     const tokenEndpointResponse = {
-      access_token: "some token",
+      access_token: mockBearerAccessToken(),
     };
     const myFetch = jest.fn(
       mockFetch(JSON.stringify(tokenEndpointResponse), 200)
@@ -375,7 +382,7 @@ describe("getTokens", () => {
     const myFetch = jest.fn(
       mockFetch(
         JSON.stringify({
-          access_token: "some token",
+          access_token: mockBearerAccessToken(),
           id_token: idJwt,
           token_type: "Bearer",
         }),
@@ -404,7 +411,7 @@ describe("getTokens", () => {
     const myFetch = jest.fn(
       mockFetch(
         JSON.stringify({
-          access_token: "some token",
+          access_token: mockBearerAccessToken(),
           id_token: idJwt,
           token_type: "Bearer",
         }),
@@ -430,7 +437,7 @@ describe("getTokens", () => {
     const myFetch = jest.fn(
       mockFetch(
         JSON.stringify({
-          access_token: "some token",
+          access_token: mockBearerAccessToken(),
           id_token: idJwt,
           token_type: "Bearer",
         }),
@@ -456,7 +463,7 @@ describe("getTokens", () => {
     const myFetch = jest.fn(
       mockFetch(
         JSON.stringify({
-          access_token: "some token",
+          access_token: mockBearerAccessToken(),
           id_token: idJwt,
           token_type: "Bearer",
         }),
@@ -468,6 +475,70 @@ describe("getTokens", () => {
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
     ).rejects.toThrow(
       /Invalid ID token: {.+} is missing 'sub' or 'iss' claims/
+    );
+  });
+});
+
+describe("getDpopToken", () => {
+  it("requests a key-bound token, and returns the appropriate key with the token", async () => {
+    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
+    global.fetch = myFetch;
+    const tokens = await getDpopToken(
+      mockIssuer(),
+      mockClient(),
+      mockEndpointInput()
+    );
+    expect(myFetch.mock.calls[0][0]).toBe(
+      mockIssuer().tokenEndpoint.toString()
+    );
+    const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
+    const dpopJwt = await decodeJwt(headers["DPoP"], mockJwk());
+    expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
+    expect(dpopJwt.htm).toEqual("POST");
+    expect(dpopJwt.jti).toEqual("1234");
+    expect(tokens.dpopJwk).not.toBeUndefined();
+  });
+});
+
+jest.mock("oidc-client", () => {
+  const { processSigninResponse } = jest.requireActual("oidc-client");
+  return {
+    OidcClient: jest.fn().mockImplementation(() => {
+      return {
+        processSigninResponse: async (
+          redirectUrl: string
+        ): Promise<ReturnType<typeof processSigninResponse>> => {
+          if (redirectUrl === "https://invalid.url") {
+            throw new Error("Dummy error");
+          }
+          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // @ts-ignore Ignore because we don't need to mock out all data fields.
+          return Promise.resolve({
+            access_token: mockBearerAccessToken(),
+            id_token: mockIdToken(),
+          });
+        },
+      };
+    }),
+  };
+});
+
+describe("getBearerToken", () => {
+  it("returns the tokens returned by the endpoint", async () => {
+    const myFetch = jest.fn(mockFetch(JSON.stringify(mockBearerTokens()), 200));
+    global.fetch = myFetch;
+    const tokens = await getBearerToken(new URL("https://my.app/redirect"));
+    expect(tokens.accessToken).toEqual(mockBearerAccessToken());
+    expect(tokens.idToken).toEqual(mockIdToken());
+    expect(tokens.dpopJwk).toBeUndefined();
+  });
+
+  it("wraps oidc-client errors", async () => {
+    const myFetch = jest.fn(mockFetch("", 200));
+    global.fetch = myFetch;
+    const tokenRequest = getBearerToken(new URL("https://invalid.url"));
+    await expect(tokenRequest).rejects.toThrow(
+      `Problem handling Auth Code Grant (Flow) redirect - URL [https://invalid.url]: Error: Dummy error`
     );
   });
 });
