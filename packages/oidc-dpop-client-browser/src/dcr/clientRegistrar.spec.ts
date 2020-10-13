@@ -20,10 +20,7 @@
  */
 
 import { it, describe } from "@jest/globals";
-import {
-  IIssuerConfig,
-  IClientRegistrarOptions,
-} from "@inrupt/solid-client-authn-core";
+import { IIssuerConfig, IClientRegistrarOptions } from "../common/types";
 import URL from "url-parse";
 import { registerClient } from "./clientRegistrar";
 import { Response } from "cross-fetch";
