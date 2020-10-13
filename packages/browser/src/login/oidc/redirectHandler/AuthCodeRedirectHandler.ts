@@ -161,7 +161,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         //  refresh_token from the redirect URL.
         refreshToken:
           "<Refresh token that *is* coming back in the redirect URL is not yet being parsed and provided by oidc-client-js in it's response object>",
-        webId: tokens.webid,
+        webId: tokens.webId,
         isLoggedIn: "true",
       },
       { secure: true }

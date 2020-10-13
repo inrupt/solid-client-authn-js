@@ -103,7 +103,7 @@ const mockTokenEndpointBearerResponse = (): TokenEndpointResponse => {
   return {
     accessToken: mockAccessTokenBearer(),
     idToken: mockIdToken(),
-    webid: mockWebId(),
+    webId: mockWebId(),
   };
 };
 
@@ -111,7 +111,7 @@ const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
   return {
     accessToken: JSON.stringify(mockAccessTokenDpop()),
     idToken: mockIdToken(),
-    webid: mockWebId(),
+    webId: mockWebId(),
     dpopJwk: mockJwk(),
   };
 };
