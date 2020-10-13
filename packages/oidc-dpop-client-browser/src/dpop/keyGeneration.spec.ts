@@ -21,7 +21,11 @@
 
 import { describe, it } from "@jest/globals";
 
-import { generateJwk, generateJwkForDpop, generateJwkRsa } from "./keyGen";
+import {
+  generateJwk,
+  generateJwkForDpop,
+  generateJwkRsa,
+} from "./keyGeneration";
 
 describe("generateJwk", () => {
   it("can generate a RSA-based JWK", async () => {
