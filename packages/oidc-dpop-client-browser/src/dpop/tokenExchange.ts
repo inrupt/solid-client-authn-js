@@ -195,6 +195,12 @@ export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
+  dpop: false
+): Promise<TokenEndpointResponse>;
+export async function getTokens(
+  issuer: IIssuerConfig,
+  client: IClient,
+  data: TokenEndpointInput,
   dpop: boolean
 ): Promise<TokenEndpointResponse> {
   validatePreconditions(issuer, data);
