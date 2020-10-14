@@ -81,7 +81,7 @@
     "@types/uuid": "^8.3.0",
     "build-module": "^1.0.7",
     "cross-fetch": "^3.0.6",
-    "crypto-random-string": "^3.2.0",
+    "crypto-random-string": "^3.3.0",
     "form-urlencoded": "^4.2.1",
     "jose": "^2.0.2",
     "jsonwebtoken": "^8.5.1",
