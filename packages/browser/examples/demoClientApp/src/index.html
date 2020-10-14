@@ -1,124 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <style>
-      .tooltip {
-        position: relative;
-        display: inline-block;
-      }
+    <title>S-C-A Browser Demo</title>
+  </head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  <style>
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
 
-      .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 350px;
-        background-color: #555;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px 0;
-        position: absolute;
+    /* Without this other elements may appear on top of our tooltip text! */
+    .tooltip span {
+      z-index: 9999;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 350px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      opacity: 1;
+      transition: opacity 0.3s;
+      top: 20px;
+    }
+
+    .tooltip .tooltiptext::after {
+      content: "";
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent #555 transparent;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: .95;
+    }
+
+    #snackbar {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+
+    #snackbar.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    @-webkit-keyframes fadein {
+      from {
+        bottom: 0;
         opacity: 0;
-        transition: opacity 0.3s;
-
-        top: 20px;
       }
-
-      .tooltip .tooltiptext::after {
-        content: "";
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        margin-left: -5px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent transparent #555 transparent;
-      }
-      /*.tooltip .tooltiptext::after {*/
-      /*  content: " ";*/
-      /*  position: absolute;*/
-      /*  bottom: 100%;  !* At the top of the tooltip *!*/
-      /*  left: 50%;*/
-      /*  margin-left: -5px;*/
-      /*  border-width: 5px;*/
-      /*  border-style: solid;*/
-      /*  border-color: transparent transparent black transparent;*/
-      /*}*/
-
-      .tooltip:hover .tooltiptext {
-        visibility: visible;
+      to {
+        bottom: 30px;
         opacity: 1;
       }
+    }
 
-      #snackbar {
-        visibility: hidden;
-        min-width: 250px;
-        margin-left: -125px;
-        background-color: #333;
-        color: #fff;
-        text-align: center;
-        border-radius: 5px;
-        padding: 12px;
-        position: fixed;
-        z-index: 1;
-        left: 50%;
+    @keyframes fadein {
+      from {
+        bottom: 0;
+        opacity: 0;
+      }
+      to {
         bottom: 30px;
-        font-size: 17px;
+        opacity: 1;
       }
+    }
 
-      #snackbar.show {
-        visibility: visible;
-        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    @-webkit-keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
       }
-
-      @-webkit-keyframes fadein {
-        from {
-          bottom: 0;
-          opacity: 0;
-        }
-        to {
-          bottom: 30px;
-          opacity: 1;
-        }
+      to {
+        bottom: 0;
+        opacity: 0;
       }
+    }
 
-      @keyframes fadein {
-        from {
-          bottom: 0;
-          opacity: 0;
-        }
-        to {
-          bottom: 30px;
-          opacity: 1;
-        }
+    @keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
       }
-
-      @-webkit-keyframes fadeout {
-        from {
-          bottom: 30px;
-          opacity: 1;
-        }
-        to {
-          bottom: 0;
-          opacity: 0;
-        }
+      to {
+        bottom: 0;
+        opacity: 0;
       }
+    }
 
-      @keyframes fadeout {
-        from {
-          bottom: 30px;
-          opacity: 1;
-        }
-        to {
-          bottom: 0;
-          opacity: 0;
-        }
-      }
-    </style>
+    /* Trying to get rid of the opacity on the tooltips, but this doesn't */
+    /* seem to work...*/
+    .tooltip.in {
+      opacity: 1 !important;
+      filter:alpha(opacity=100);
+    }
 
-    <title>S-C-A-B Demo Client App</title>
-  </head>
+    circle {
+      stroke: #fff;
+      stroke-width: 1;
+    }
+
+    .link {
+      stroke: #999;
+      stroke-opacity: .6;
+    }
+  </style>
+
   <body>
     <div id="container"></div>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script>
+      const margin = {
+        top: 40,
+        bottom: 10,
+        left: 20,
+        right: 20
+      };
+      const width = 800 - margin.left - margin.right;
+      const height = 600 - margin.top - margin.bottom;
+
+      // Creates sources <svg> element and inner g (for margins).
+      const svg = d3.select('body').append('svg')
+              .attr('width', width + margin.left + margin.right)
+              .attr('height', height + margin.top + margin.bottom)
+              .append('g')
+              .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+      /////////////////////////
+
+      const simulation = d3.forceSimulation()
+              .force('link', d3.forceLink().id((d) => d.id))
+              .force('charge', d3.forceManyBody())
+              .force('center', d3.forceCenter(width / 2, height / 2));
+
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      d3.json('https://rawgit.com/thinkh/d3tutorial/master/examples/miserables.json').then((data) => {
+
+        // Links data join
+        const link = svg.selectAll('.link').data(data.links).join(
+                (enter) => enter.append('line').attr('class', 'link')
+        );
+
+        // Nodes data join
+        const node = svg.selectAll('.node').data(data.nodes).join(
+                (enter) => {
+                  // const node_enter = enter.append('circle')
+                  //         .attr('class', 'node')
+                  //         .attr('r', 10);
+
+                  const node_enter = enter.append("text")       // Append a text element
+                          .attr("class", "node fa")  // Give it the font-awesome class
+                          .text("\uf005");      // Specify your icon in unicode
+
+
+                  node_enter.append('title').text((d) => d.id);
+                  return node_enter;
+                }
+        );
+
+        node.style('fill', (d) => color(d.group));
+
+        simulation
+                .nodes(data.nodes)
+                .force('link').links(data.links);
+
+        simulation.on('tick', (e) => {
+          link
+                  .attr('x1', (d) => d.source.x)
+                  .attr('y1', (d) => d.source.y)
+                  .attr('x2', (d) => d.target.x)
+                  .attr('y2', (d) => d.target.y);
+
+          node
+                  // .attr('cx', (d) => d.x)
+                  // .attr('cy', (d) => d.y);
+                  .attr('x', (d) => d.x)
+                  .attr('y', (d) => d.y);
+        });
+      });
+    </script>
   </body>
 </html>
+

@@ -1,0 +1,15 @@
+{
+  "name": "demo-authentiation-monitor",
+  "version": "1.0.0",
+  "description": "Demo for monitoring Authentication interactions in real-time",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Inrupt, Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "server": "^1.0.30"
+  }
+}

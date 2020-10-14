@@ -1,0 +1,16 @@
+@prefix as:    <https://www.w3.org/ns/activitystreams#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix ldp:   <http://www.w3.org/ns/ldp#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix acl:   <http://www.w3.org/ns/auth/acl#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix dc:    <http://purl.org/dc/terms/> .
+
+#
+# This is just a very simple sample RDF resource - handy for uploading to a Pod
+# as a private resource - as it contains a top secret access code!
+#
+<#top-secret-thing> <https://schema.org/accessCode>  "Top secret access code!" .
