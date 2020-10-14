@@ -189,6 +189,12 @@ export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
+  dpop: true
+): Promise<TokenEndpointDpopResponse>;
+export async function getTokens(
+  issuer: IIssuerConfig,
+  client: IClient,
+  data: TokenEndpointInput,
   dpop: boolean
 ): Promise<TokenEndpointResponse> {
   validatePreconditions(issuer, data);
@@ -301,8 +307,5 @@ export async function getDpopToken(
   client: IClient,
   data: TokenEndpointInput
 ): Promise<TokenEndpointDpopResponse> {
-  // The type assertion is okay, because the absence of the jwk would throw an error
-  return getTokens(issuer, client, data, true) as Promise<
-    TokenEndpointDpopResponse
-  >;
+  return getTokens(issuer, client, data, true);
 }
