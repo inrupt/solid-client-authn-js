@@ -29,13 +29,48 @@ import ConfigurationError from "../../../errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import { ITokenRequester } from "../TokenRequester";
 import {
+  IClient,
+  IClientRegistrar,
+  IIssuerConfig,
+  IIssuerConfigFetcher,
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { OidcClient, decodeJwt } from "@inrupt/oidc-dpop-client-browser";
-import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
+import {
+  getDpopToken,
+  getBearerToken,
+  TokenEndpointResponse,
+  TokenEndpointDpopResponse,
+} from "@inrupt/oidc-dpop-client-browser";
+import {
+  buildBearerFetch,
+  buildDpopFetch,
+} from "../../../authenticatedFetch/fetchFactory";
+import { JSONWebKey } from "jose";
+
+export async function exchangeDpopToken(
+  sessionId: string,
+  issuer: URL,
+  issuerFetcher: IIssuerConfigFetcher,
+  clientRegistrar: IClientRegistrar,
+  code: string,
+  codeVerifier: string,
+  redirectUrl: URL
+): Promise<TokenEndpointDpopResponse> {
+  const issuerConfig: IIssuerConfig = await issuerFetcher.fetchConfig(issuer);
+  const client: IClient = await clientRegistrar.getClient(
+    { sessionId },
+    issuerConfig
+  );
+  return getDpopToken(issuerConfig, client, {
+    grantType: "authorization_code",
+    code,
+    codeVerifier,
+    redirectUri: redirectUrl.toString(),
+  });
+}
 
 /**
  * @hidden
@@ -45,12 +80,19 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("sessionInfoManager")
-    private sessionInfoManager: ISessionInfoManager
+    private sessionInfoManager: ISessionInfoManager,
+    @inject("issuerConfigFetcher")
+    private issuerConfigFetcher: IIssuerConfigFetcher,
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
     const url = new URL(redirectUrl, true);
-    return !!(url.query && url.query.code && url.query.state);
+    return (
+      url.query !== undefined &&
+      url.query.code !== undefined &&
+      url.query.state !== undefined
+    );
   }
 
   async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
@@ -67,46 +109,60 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
       }
     )) as string;
 
-    let signinResponse;
-    try {
-      signinResponse = await new OidcClient({
-        // TODO: We should look at the various interfaces being used for storage,
-        //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
-        //  (which has an interface Storage), and our own proprietary interface
-        //  IStorage - i.e. we should really just be using the browser Web Storage
-        //  API, e.g. "stateStore: window.localStorage,".
+    const isDpop =
+      (await this.storageUtility.getForUser(storedSessionId, "dpop")) ===
+      "true";
 
-        // We are instantiating a new instance here, so the only value we need to
-        // explicitly provide is the response mode (default otherwise will look
-        // for a hash '#' fragment!).
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        response_mode: "query",
-        // The userinfo endpoint on NSS fails, so disable this for now
-        // Note that in Solid, information should be retrieved from the
-        // profile referenced by the WebId.
-        loadUserInfo: false,
-      }).processSigninResponse(redirectUrl.toString());
-    } catch (err) {
-      throw new Error(
-        `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
+    let tokens: TokenEndpointResponse | TokenEndpointDpopResponse;
+    let authFetch: typeof fetch;
+
+    if (isDpop) {
+      // Since we throw if not found, the type assertion is okay
+      const issuer = (await this.storageUtility.getForUser(
+        storedSessionId,
+        "issuer",
+        { errorIfNull: true }
+      )) as string;
+      const codeVerifier = (await this.storageUtility.getForUser(
+        storedSessionId,
+        "codeVerifier",
+        { errorIfNull: true }
+      )) as string;
+      const storedRedirectIri = (await this.storageUtility.getForUser(
+        storedSessionId,
+        "redirectUri",
+        { errorIfNull: true }
+      )) as string;
+
+      tokens = await exchangeDpopToken(
+        storedSessionId,
+        new URL(issuer),
+        this.issuerConfigFetcher,
+        this.clientRegistrar,
+        // the canHandle function checks that the code is part of the query strings
+        url.query["code"] as string,
+        codeVerifier,
+        new URL(storedRedirectIri)
       );
-    }
-
-    // We need to decode the access_token JWT to extract out the full WebID.
-    const decoded = await decodeJwt(signinResponse.access_token as string);
-    if (!decoded || !decoded.sub) {
-      throw new Error("The idp returned a bad token without a sub.");
+      // The type assertion should not be necessary
+      authFetch = await buildDpopFetch(
+        tokens.accessToken,
+        tokens.dpopJwk as JSONWebKey
+      );
+    } else {
+      tokens = await getBearerToken(url);
+      authFetch = buildBearerFetch(tokens.accessToken);
     }
 
     await this.storageUtility.setForUser(
       storedSessionId,
       {
-        idToken: signinResponse.id_token,
+        idToken: tokens.idToken,
         // TODO: We need a PR to oidc-client-js to add parsing of the
         //  refresh_token from the redirect URL.
         refreshToken:
           "<Refresh token that *is* coming back in the redirect URL is not yet being parsed and provided by oidc-client-js in it's response object>",
-        webId: decoded.sub as string,
+        webId: tokens.webId,
         isLoggedIn: "true",
       },
       { secure: true }
@@ -127,9 +183,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     }
 
     return Object.assign(sessionInfo, {
-      // TODO: When handling DPoP, both the key and the token should be returned
-      // by the redirect handler.
-      fetch: buildBearerFetch(signinResponse.access_token),
+      fetch: authFetch,
     });
   }
 }

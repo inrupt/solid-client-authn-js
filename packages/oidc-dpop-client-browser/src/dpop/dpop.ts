@@ -109,13 +109,14 @@ export async function createDpopHeader(
   return signJwt(
     {
       htu: normalizeHttpUriClaim(audience),
-      htm: method,
+      htm: method.toUpperCase(),
       jti: v4(),
     },
     key,
     {
       header: {
-        jwk: privateJwkToPublicJwk(key),
+        // TODO: Add a test
+        jwk: await privateJwkToPublicJwk(key),
         typ: "dpop+jwt",
       },
       expiresIn: "1 hour",
