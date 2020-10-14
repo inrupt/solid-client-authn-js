@@ -321,7 +321,7 @@ describe("exchangeDpopToken", () => {
       mockIssuerConfigFetcher(mockedIssuer),
       mockClientRegistrar(mockClient()),
       "some code",
-      "some pkcd token",
+      "some pkce token",
       new URL("https://my.app/redirect")
     );
     expect(tokens.accessToken).toEqual(
