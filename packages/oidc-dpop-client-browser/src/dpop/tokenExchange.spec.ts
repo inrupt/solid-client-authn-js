@@ -249,6 +249,8 @@ describe("getTokens", () => {
 
   // This test is currently disabled due to the behaviours of both NSS and the ID broker, which return
   // token_type: 'Bearer' even when returning a DPoP token.
+  // https://github.com/solid/oidc-op/issues/26
+  // Fixed, but unreleased for the ESS (current version: inrupt-oidc-server-0.5.2)
   it.skip("throws if a key-bound token was requested, but a bearer token is returned", async () => {
     const myFetch = jest.fn(mockFetch(JSON.stringify(mockBearerTokens()), 200));
     global.fetch = myFetch;

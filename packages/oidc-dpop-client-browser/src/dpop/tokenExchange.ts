@@ -167,8 +167,10 @@ export function validateTokenEndpointResponse(
     );
   }
 
-  // TODO: Due to what seems to be a bug in the ID broker, a DPoP token is returned
-  // with a token_type 'Bearer'. To work around this, this test is curretnly disabled.
+  // TODO: Due to a bug in both the ESS ID broker AND NSS (what were the odds), a DPoP token is returned
+  // with a token_type 'Bearer'. To work around this, this test is currently disabled.
+  // https://github.com/solid/oidc-op/issues/26
+  // Fixed, but unreleased for the ESS (current version: inrupt-oidc-server-0.5.2)
   // if (dpop && tokenResponse.token_type.toLowerCase() !== "dpop") {
   //   throw new Error(
   //     `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
