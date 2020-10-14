@@ -96,10 +96,10 @@ async function generateMockJwt(): Promise<void> {
     sub: "https://my.webid",
     iss: mockIssuer().issuer.toString(),
   };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const jwt = await signJwt(payload, mockJwk(), {
     algorithm: "ES256",
   });
-  console.log(jwt.toString());
 }
 
 // result of generateMockJwt()
@@ -215,12 +215,41 @@ describe("getTokens", () => {
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     const dpopJwt = await decodeJwt(headers["DPoP"], mockJwk());
-    expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString()),
-      expect(dpopJwt.htm).toEqual("POST");
+    expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
+    expect(dpopJwt.htm).toEqual("POST");
     expect(dpopJwt.jti).toEqual("1234");
   });
 
-  it("throws if a key-bound token was requested, but a bearer token is returned", async () => {
+  it("does not use basic auth if a client secret is not available", async () => {
+    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
+    global.fetch = myFetch;
+    await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
+    expect(myFetch.mock.calls[0][0]).toBe(
+      mockIssuer().tokenEndpoint.toString()
+    );
+    const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
+    expect(headers["Authorization"]).toBeUndefined();
+  });
+
+  it("uses basic auth if a client secret is available", async () => {
+    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
+    global.fetch = myFetch;
+    const client = mockClient();
+    client.clientSecret = "some secret";
+    await getTokens(mockIssuer(), client, mockEndpointInput(), true);
+    expect(myFetch.mock.calls[0][0]).toBe(
+      mockIssuer().tokenEndpoint.toString()
+    );
+    const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
+    // c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ= is 'some client:some secret' encoded in base 64
+    expect(headers["Authorization"]).toEqual(
+      "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ="
+    );
+  });
+
+  // This test is currently disabled due to the behaviours of both NSS and the ID broker, which return
+  // token_type: 'Bearer' even when returning a DPoP token.
+  it.skip("throws if a key-bound token was requested, but a bearer token is returned", async () => {
     const myFetch = jest.fn(mockFetch(JSON.stringify(mockBearerTokens()), 200));
     global.fetch = myFetch;
     const request = getTokens(
