@@ -87,8 +87,44 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirectUri: oidcLoginOptions.redirectUrl.toString(),
     });
 
-    this.redirector.redirect(requestUrl.toString(), {
-      handleRedirect: oidcLoginOptions.handleRedirect,
-    });
+    const oidcClientLibrary = new OidcClient(oidcOptions);
+
+    const redirector = this.redirector;
+    const storage = this.storageUtility;
+
+    return (
+      oidcClientLibrary
+        .createSigninRequest()
+        .then(async function (req: SigninRequest) {
+          // We use the OAuth 'state' value (which should be crypto-random) as
+          // the key in our storage to store our actual SessionID. We do this 'cos
+          // we'll need to lookup our session information again when the browser
+          // is redirected back to us (i.e. the OAuth client application) from the
+          // Authorization Server.
+          // We don't want to use our session ID as the OAuth 'state' value, as
+          // that session ID can be any developer-specified value, and therefore
+          // may not be appropriate (since the OAuth 'state' value should really
+          // be an unguessable crypto-random value).
+          await Promise.all([
+            storage.setForUser(req.state._id, {
+              sessionId: oidcLoginOptions.sessionId,
+            }),
+            storage.setForUser(oidcLoginOptions.sessionId, {
+              codeVerifier: req.state._code_verifier,
+              issuer: oidcLoginOptions.issuer.toString(),
+              redirectUri: oidcLoginOptions.redirectUrl.toString(),
+              dpop: oidcLoginOptions.dpop ? "true" : "false",
+            }),
+          ]);
+
+          redirector.redirect(req.url.toString(), {
+            handleRedirect: oidcLoginOptions.handleRedirect,
+          });
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .catch((err: unknown) => {
+          console.error(err);
+        })
+    );
   }
 }

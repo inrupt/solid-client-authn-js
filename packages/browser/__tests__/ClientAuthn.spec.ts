@@ -62,7 +62,7 @@ describe("ClientAuthentication", () => {
   }
 
   describe("login", () => {
-    it("calls login", async () => {
+    it("calls login, and defaults to a DPoP token", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login("mySession", {
         clientId: "coolApp",
@@ -78,6 +78,28 @@ describe("ClientAuthentication", () => {
         clientName: "coolApp",
         clientSecret: undefined,
         handleRedirect: undefined,
+        tokenType: "DPoP",
+      });
+    });
+
+    it("request a bearer token if specified", async () => {
+      const clientAuthn = getClientAuthentication();
+      await clientAuthn.login("mySession", {
+        clientId: "coolApp",
+        redirectUrl: new URL("https://coolapp.com/redirect"),
+        oidcIssuer: new URL("https://idp.com"),
+        tokenType: "Bearer",
+      });
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
+        sessionId: "mySession",
+        clientId: "coolApp",
+        redirectUrl: new URL("https://coolapp.com/redirect"),
+        oidcIssuer: new URL("https://idp.com"),
+        popUp: false,
+        clientName: "coolApp",
+        clientSecret: undefined,
+        handleRedirect: undefined,
+        tokenType: "Bearer",
       });
     });
 

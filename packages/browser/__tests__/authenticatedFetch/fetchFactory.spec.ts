@@ -110,7 +110,7 @@ describe("buildDpopFetch", () => {
     const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
-    expect(decodedHeader["htm"]).toEqual("get");
+    expect(decodedHeader["htm"]).toEqual("GET");
   });
 
   it("returns a fetch preserving the provided optional headers", async () => {
@@ -132,7 +132,7 @@ describe("buildDpopFetch", () => {
     const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
-    expect(decodedHeader["htm"]).toEqual("get");
+    expect(decodedHeader["htm"]).toEqual("GET");
 
     expect(
       // @ts-ignore
@@ -164,7 +164,7 @@ describe("buildDpopFetch", () => {
     const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
-    expect(decodedHeader["htm"]).toEqual("get");
+    expect(decodedHeader["htm"]).toEqual("GET");
   });
 });
 /* eslint-enable @typescript-eslint/ban-ts-ignore */

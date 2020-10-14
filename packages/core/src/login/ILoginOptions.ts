@@ -40,5 +40,6 @@ export default interface ILoginOptions {
   clientSecret?: string;
   clientName?: string;
   popUp?: boolean;
+  tokenType: "DPoP" | "Bearer";
   handleRedirect?: (redirectUrl: string) => unknown;
 }

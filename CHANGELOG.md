@@ -7,9 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
-<<<<<<< HEAD
-=======
-### New features
+### Security patches
+
+- The support for DPoP was re-implemented in @inrupt/oidc-client-dpop-browser, such that the DPoP JWK is never stored, and only kept inside the closure of the authenticated fetch.
 
 ### Bugfixes
 
@@ -27,7 +27,6 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - Uses [oidc-client-js](https://github.com/IdentityModel/oidc-client-js) now to
 perform the Auth Code Flow (replacing lots of hand-rolled code).
 
->>>>>>> Fix Header management issue (#375)
 ### Bugfixes
 
 - Source files are now also published to npm, so source maps should work from now on.
