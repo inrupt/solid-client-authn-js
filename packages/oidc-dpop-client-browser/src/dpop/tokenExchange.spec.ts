@@ -96,10 +96,10 @@ async function generateMockJwt(): Promise<void> {
     sub: "https://my.webid",
     iss: mockIssuer().issuer.toString(),
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const jwt = await signJwt(payload, mockJwk(), {
     algorithm: "ES256",
   });
+  console.log(jwt.toString());
 }
 
 // result of generateMockJwt()
