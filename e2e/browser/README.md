@@ -1,4 +1,5 @@
 # solid-client-authn-testcafe
+
 TestCafe end-to-end tests for [solid-client-authn.js](https://github.com/inrupt/solid-client-authn-js). These are run automatically in CI.
 
 ## Running locally
@@ -8,13 +9,13 @@ The commands below assume they are executed in this directory, and that you have
 
 To run the ESS tests, insert your credentials into the following command:
 
-  E2E_GITHUB_USERNAME=<GitHub username> E2E_GITHUB_PASSWORD=<GitHub password> npx testcafe all ess.test.ts
+E2E_GITHUB_USERNAME=<GitHub username> E2E_GITHUB_PASSWORD=<GitHub password> npx testcafe all ess.test.ts
 
 (Replace `all` with e.g. `chrome` or `firefox` to only run it in a specific browser.)
 
 Likewise, the NSS tests can be run by inserting your credentials in the following command:
 
-  E2E_NSS_USERNAME=<NSS username> E2E_NSS_PASSWORD=<NSS password> npx testcafe all nss.test.ts
+E2E_NSS_USERNAME=<NSS username> E2E_NSS_PASSWORD=<NSS password> npx testcafe all nss.test.ts
 
 ## Configuring CI
 
@@ -26,6 +27,7 @@ When adding new secrets, make sure to also expose them to the CI job using /.git
 # Notes by Kevin
 
 ## Login
+
 TestCafe allows defined tests to be executed with different authentications through the use of [Roles](https://devexpress.github.io/testcafe/documentation/guides/advanced-guides/authentication.html). However, when Roles were implemented for the solid-client-authn-browser test application, the application does not render after being redirected back from the Broker and shows the following error in the browser console:
 
 ```
@@ -40,7 +42,9 @@ Attempting to store the Local Storage between redirects, as proposed [here](http
 Hence, a [Login Helper](../helperslogin.js) was implemented that allows login by Google, Twitter, or Github, as the expense of need to perform the full login workflow at the start of each test.
 
 ## Tests
+
 The solid-client-authn-browser test application attempts to fetch resources based on particular authentications. To provide flexibility, the resources to fetch together with expected responses are stored in `resources.json`.
 
 ## To Do
-* Implement a method whereby the expected response can be dynamically determined based on a particular authentication.
+
+- Implement a method whereby the expected response can be dynamically determined based on a particular authentication.

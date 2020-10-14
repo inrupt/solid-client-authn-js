@@ -226,7 +226,7 @@ class DemoClientApp extends Component {
       this.setState({ status: "login", fetchBody: response });
     }
 
-    this.lookupIdentityProviderConfig(this.state.loginIssuer);
+    // this.lookupIdentityProviderConfig(this.state.loginIssuer);
   }
 
   highlightPartOfWebId(webId, part) {
@@ -386,6 +386,7 @@ class DemoClientApp extends Component {
             </span>
           </div>
           <input
+            id="identity_provider_textbox"
             type="text"
             size="80"
             value={this.state.loginIssuer}
@@ -403,8 +404,8 @@ class DemoClientApp extends Component {
         <div className="tooltip">
           <div>
             <input
-              type="checkbox"
               id="reauthorize_client_app"
+              type="checkbox"
               checked={this.state.clearClientRegistrationInfo}
               onChange={(e) => {
                 this.setState({
@@ -439,17 +440,18 @@ class DemoClientApp extends Component {
       <form>
         <div style={style}>
           <input
+            id="fetch_uri_textbox"
             size="80"
             type="text"
             value={this.state.fetchRoute}
             onChange={(e) => this.setState({ fetchRoute: e.target.value })}
           />
-          <button onClick={this.handleFetch}>Fetch</button>
+          <button id="fetch_button" onClick={this.handleFetch}>Fetch</button>
         </div>
         <br></br>
         <div style={style}>
           <strong>Resource:</strong>
-          <pre>{this.state.fetchBody}</pre>
+          <pre id="fetch_response_textbox">{this.state.fetchBody}</pre>
         </div>
       </form>
     );
@@ -467,7 +469,7 @@ class DemoClientApp extends Component {
           <div className="tooltip">
             <form>
               <button
-                id="logout_buton"
+                id="logout_button"
                 onClick={this.handleLogout}
                 disabled={!this.state.session.info.isLoggedIn}
               >
@@ -545,7 +547,7 @@ class DemoClientApp extends Component {
           <div>
             <div id="snackbar">--- Text written here dynamically ---</div>
 
-            <h1>{clientApplicationName} - Login</h1>
+            <h1>{clientApplicationName}</h1>
             {this.htmlLogin()}
 
             <p></p>

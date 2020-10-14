@@ -1,0 +1,37 @@
+{
+  "podResourceServer": "https://ldp.pod.inrupt.com/",
+  "identityProvider": "https://broker.pod.inrupt.com",
+
+  "testList": [
+  {
+    "name": "Public resource in my Pod - not logged in",
+    "performLogin": false,
+    "resourceToGet": "<POD ROOT>/public/",
+    "expectResponseContains": "\"This is an LDP container.\"@en"
+  },
+  {
+    "name": "Private resource in my Pod - not logged in",
+    "performLogin": false,
+    "resourceToGet": "<POD ROOT>/private/",
+    "expectResponseContains": "\"Unauthorized\""
+  },
+  {
+    "name": "Private resource in my Pod - logged in",
+    "performLogin": true,
+    "resourceToGet": "<POD ROOT>/private/",
+    "expectResponseContains": "\"This is an LDP container.\"@en"
+  },
+  {
+    "name": "Public resource in my Pod - logged in",
+    "performLogin": true,
+    "resourceToGet": "<POD ROOT>/public/",
+    "expectResponseContains": "\"This is an LDP container.\"@en"
+  },
+  {
+    "name": "Private resource that doesn't exist - logged in",
+    "performLogin": true,
+    "resourceToGet": "<POD ROOT>/private/private-resource-that-does-not exist.ttl",
+    "expectResponseContains": "\"Not Found\""
+  }
+]
+}

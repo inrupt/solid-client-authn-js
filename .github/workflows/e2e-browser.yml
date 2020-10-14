@@ -22,14 +22,11 @@ jobs:
       - name: Run tests
         uses: DevExpress/testcafe-action@latest
         env:
-          DEMO_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_USER_NAME: ${{ secrets.E2E_USER_NAME }}
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
           E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
           E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
-          E2E_GOOGLE_ACCOUNTID: ${{ secrets.E2E_GOOGLE_ACCOUNTID }}
-          E2E_GOOGLE_USERNAME: ${{ secrets.E2E_GOOGLE_USERNAME }}
-          E2E_GOOGLE_PASSWORD: ${{ secrets.E2E_GOOGLE_PASSWORD }}
-          E2E_GITHUB_USERNAME: ${{ secrets.E2E_GITHUB_USERNAME }}
-          E2E_GITHUB_PASSWORD: ${{ secrets.E2E_GITHUB_PASSWORD }}
         with:
           version: 1.9.4
           args: "all e2e/browser/ess.test.ts"
