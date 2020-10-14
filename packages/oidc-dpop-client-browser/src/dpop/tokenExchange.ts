@@ -167,11 +167,14 @@ export function validateTokenEndpointResponse(
     );
   }
 
-  if (dpop && tokenResponse.token_type.toLowerCase() !== "dpop") {
-    throw new Error(
-      `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
-    );
-  }
+
+  // TODO: Due to what seems to be a bug in the ID broker, a DPoP token is returned 
+  // with a token_type 'Bearer'. To work around this, this test is curretnly disabled.
+  // if (dpop && tokenResponse.token_type.toLowerCase() !== "dpop") {
+  //   throw new Error(
+  //     `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
+  //   );
+  // }
 
   if (!dpop && tokenResponse.token_type.toLowerCase() !== "bearer") {
     throw new Error(
@@ -194,17 +197,23 @@ export async function getTokens(
   let dpopJwk: JSONWebKey | undefined = undefined;
   if (dpop) {
     dpopJwk = await generateJwkForDpop();
+    console.log(`Generated JWK: ${JSON.stringify(dpopJwk)}`)
     headers["DPoP"] = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
       dpopJwk
     );
+    console.log(`Resulting header: ${headers["DPoP"]}`)
   }
   // TODO: is this necessary ? it's present in OAuth2 in action book, but not in spec
-  // if (client.clientSecret) {
-  //   headers["Authorization"] = `Basic ${this.btoa(
-  //     `${client.clientId}:${client.clientSecret}`
-  // }
+  // It appears to be necessary against ESS. Pending test against NSS
+  // TODO: add test
+  if (client.clientSecret) {
+    headers["Authorization"] = `Basic ${
+      btoa(`${client.clientId}:${client.clientSecret}`)
+    }`
+  }
+
   const tokenRequestInit: RequestInit & {
     headers: Record<string, string>;
   } = {

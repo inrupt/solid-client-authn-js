@@ -132,6 +132,11 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         "codeVerifier",
         { errorIfNull: true }
       )) as string;
+      const storedRedirectIri = (await this.storageUtility.getForUser(
+        storedSessionId,
+        "redirectUri",
+        { errorIfNull: true }
+      )) as string;
 
       tokens = await exchangeDpopToken(
         storedSessionId,
@@ -141,7 +146,7 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         // the canHandle function checks that the code is part of the query strings
         url.query["code"] as string,
         codeVerifier,
-        url
+        new URL(storedRedirectIri)
       );
       // The type assertion should not be necessary
       authFetch = await buildDpopFetch(
