@@ -120,7 +120,7 @@ describe("normalizeHttpUriClaim", () => {
 });
 
 describe("createDpopHeader", () => {
-  it("Properly builds a token when given a key", async () => {
+  it("properly builds a token when given a key", async () => {
     const key = await generateJwk("EC", "P-256", { alg: "ES256" });
     const token = await createDpopHeader(
       new URL("https://audience.com/"),
@@ -129,6 +129,22 @@ describe("createDpopHeader", () => {
     );
     const decoded = await decodeJwt(token);
     expect(decoded.htu).toEqual("https://audience.com/");
-    expect(decoded.htm).toEqual("post");
+    expect(decoded.htm).toEqual("POST");
+  });
+
+  it("create the correct JWT headers", async () => {
+    const key = await generateJwk("EC", "P-256", { alg: "ES256" });
+    const publicKey = { ...key, d: undefined };
+    const token = await createDpopHeader(
+      new URL("https://audience.com/"),
+      "post",
+      key
+    );
+    const decoded = await decodeJwt(token, key, {
+      complete: true,
+    });
+    expect((decoded.header as Record<string, string>).alg).toEqual("ES256");
+    expect((decoded.header as Record<string, string>).typ).toEqual("dpop+jwt");
+    expect((decoded.header as Record<string, string>).jwk).toEqual(publicKey);
   });
 });

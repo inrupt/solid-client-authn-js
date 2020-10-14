@@ -54,6 +54,7 @@ describe("OidcLoginHandler", () => {
       oidcIssuer: new URL("https://arbitrary.url"),
       redirectUrl: new URL("https://app.com/redirect"),
       clientId: "coolApp",
+      tokenType: "DPoP",
     });
 
     expect(actualHandler.handle.mock.calls.length).toBe(1);
@@ -78,6 +79,7 @@ describe("OidcLoginHandler", () => {
         oidcIssuer: new URL("https://arbitrary.url"),
         redirectUrl: new URL("https://app.com/redirect"),
         clientId: "coolApp",
+        tokenType: "DPoP",
       })
     ).resolves.toBe(true);
   });

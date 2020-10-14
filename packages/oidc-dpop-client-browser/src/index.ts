@@ -50,9 +50,11 @@ export {
 } from "./dpop/dpop";
 export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGeneration";
 export {
-  getTokens,
+  getDpopToken,
+  getBearerToken,
   TokenEndpointInput,
   TokenEndpointResponse,
+  TokenEndpointDpopResponse,
 } from "./dpop/tokenExchange";
 export {
   IClient,

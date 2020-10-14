@@ -20,62 +20,142 @@
  */
 
 import "reflect-metadata";
+import URL from "url-parse";
 import {
   StorageUtilityMock,
   mockStorageUtility,
+  IClient,
+  IClientRegistrar,
+  IClientRegistrarOptions,
+  IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
-import AuthCodeRedirectHandler from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
+import AuthCodeRedirectHandler, {
+  exchangeDpopToken,
+} from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { SigninResponse } from "@inrupt/oidc-dpop-client-browser";
+import {
+  IIssuerConfig,
+  TokenEndpointResponse,
+} from "@inrupt/oidc-dpop-client-browser";
+import { JSONWebKey } from "jose";
 
 jest.mock("cross-fetch");
 
-// The following key has been used to sign the mock access token. It is given
-// for an information purpose.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _mockJwk = {
-  kty: "EC",
-  kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-  alg: "ES256",
-  crv: "P-256",
-  x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-  y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-  d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+const mockJwk = (): JSONWebKey => {
+  return {
+    kty: "EC",
+    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+    alg: "ES256",
+    crv: "P-256",
+    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
+    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+  };
 };
 
-// Payload: { sub: "https://my.webid" }
-const mockAccessToken =
-  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0Q2xhaW0iOiJ0ZXN0VmFsdWUiLCJpYXQiOjE2MDIxNTg2NDJ9.wGZ49jU3wNSAFvWvZsjjulmbfRjlIQMp0VY0Q5u2--5vyzeKwfGUmssOW8kftIXG1ikm2iqMb6YRXCO4KGEctQ";
+const mockWebId = (): string => "https://my.webid";
 
-jest.mock("@inrupt/oidc-dpop-client-browser", () => {
+// result of generateMockJwt()
+const mockIdToken = (): string =>
+  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9zb21lLmlzc3VlciIsImlhdCI6MTYwMjQ5MTk5N30.R0hNKpCR3J8fS6JkTGTuFdz43_2zBMAQvCejSEO5S88DEaMQ4ktOYT__VfPmS7DHLt6Mju-J9bEc4twCnPxXjA";
+
+type AccessJwt = {
+  sub: string;
+  iss: string;
+  aud: string;
+  nbf: number;
+  exp: number;
+  cnf: {
+    jkt: string;
+  };
+};
+
+const mockIssuer = (): IIssuerConfig => {
   return {
-    OidcClient: jest.fn().mockImplementation(() => {
-      return {
-        processSigninResponse: async (): Promise<SigninResponse> => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-          // @ts-ignore Ignore because we don't need to mock out all data fields.
-          return Promise.resolve({
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            access_token: mockAccessToken,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            id_token: "Some ID token",
-          });
-        },
-      };
-    }),
-    decodeJwt: (_jwt: string): Record<string, string> => {
-      return {
-        sub: "https://some.webid",
-      };
+    issuer: new URL("https://some.issuer"),
+    authorizationEndpoint: new URL("https://some.issuer/autorization"),
+    tokenEndpoint: new URL("https://some.issuer/token"),
+    jwksUri: new URL("https://some.issuer/keys"),
+    claimsSupported: ["code", "openid"],
+    subjectTypesSupported: ["public", "pairwise"],
+    registrationEndpoint: new URL("https://some.issuer/registration"),
+    grantTypesSupported: ["authorization_code"],
+  };
+};
+
+const mockAccessTokenDpop = (): AccessJwt => {
+  return {
+    sub: mockWebId(),
+    iss: mockIssuer().issuer.toString(),
+    aud: "https://resource.example.org",
+    nbf: 1562262611,
+    exp: 1562266216,
+    cnf: {
+      jkt: mockJwk().kid as string,
     },
   };
+};
+
+const mockAccessTokenBearer = (): string => "some token";
+
+const mockTokenEndpointBearerResponse = (): TokenEndpointResponse => {
+  return {
+    accessToken: mockAccessTokenBearer(),
+    idToken: mockIdToken(),
+    webId: mockWebId(),
+  };
+};
+
+const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
+  return {
+    accessToken: JSON.stringify(mockAccessTokenDpop()),
+    idToken: mockIdToken(),
+    webId: mockWebId(),
+    dpopJwk: mockJwk(),
+  };
+};
+
+jest.mock("@inrupt/oidc-dpop-client-browser", () => {
+  const { createDpopHeader } = jest.requireActual(
+    "@inrupt/oidc-dpop-client-browser"
+  );
+  return {
+    getDpopToken: async (): Promise<TokenEndpointResponse> =>
+      mockTokenEndpointDpopResponse(),
+    getBearerToken: async (): Promise<TokenEndpointResponse> =>
+      mockTokenEndpointBearerResponse(),
+    createDpopHeader: createDpopHeader,
+  };
 });
+
+function mockIssuerConfigFetcher(config: IIssuerConfig): IIssuerConfigFetcher {
+  return {
+    fetchConfig: async (): Promise<IIssuerConfig> => config,
+  };
+}
+
+const mockClient = (): IClient => {
+  return {
+    clientId: "some client",
+  };
+};
+
+function mockClientRegistrar(client: IClient): IClientRegistrar {
+  return {
+    getClient: async (
+      _options: IClientRegistrarOptions,
+      _issuer: IIssuerConfig
+    ): Promise<IClient> => client,
+  };
+}
 
 const defaultMocks = {
   storageUtility: StorageUtilityMock,
   redirector: RedirectorMock,
   sessionInfoManager: SessionInfoManagerMock,
+  clientRegistrar: mockClientRegistrar(mockClient()),
+  issuerConfigFetcher: mockIssuerConfigFetcher(mockIssuer()),
 };
 
 function getAuthCodeRedirectHandler(
@@ -83,7 +163,9 @@ function getAuthCodeRedirectHandler(
 ): AuthCodeRedirectHandler {
   return new AuthCodeRedirectHandler(
     mocks.storageUtility ?? defaultMocks.storageUtility,
-    mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
+    mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
+    mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
+    mocks.clientRegistrar ?? defaultMocks.clientRegistrar
   );
 }
 
@@ -110,6 +192,24 @@ describe("AuthCodeRedirectHandler", () => {
       expect(
         await authCodeRedirectHandler.canHandle(
           "https://coolparty.com/?meep=mop"
+        )
+      ).toBe(false);
+    });
+
+    it("rejects a valid url without authorization code", async () => {
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+      expect(
+        await authCodeRedirectHandler.canHandle(
+          "https://coolparty.com/?state=someState"
+        )
+      ).toBe(false);
+    });
+
+    it("rejects a valid url without state", async () => {
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+      expect(
+        await authCodeRedirectHandler.canHandle(
+          "https://coolparty.com/?code=someCode"
         )
       ).toBe(false);
     });
@@ -153,7 +253,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-ignore */
-    it("returns an authenticated fetch", async () => {
+    it("returns an authenticated bearer fetch by default", async () => {
       const fetch = jest.requireMock("cross-fetch") as {
         fetch: jest.Mock<
           ReturnType<typeof window.fetch>,
@@ -167,14 +267,72 @@ describe("AuthCodeRedirectHandler", () => {
       const redirectInfo = await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
+      // This will call the oidc-dpop-client-browser module, which is mocked at
+      // the top of this file. The purpose of this test is to check that, if
+      // no additional information is given, the `getBearerToken` method is called
+      // (as opposed to the getDpopToken one), which here returns a mock token
+      // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
       const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
-      // We test that the Authorization header matches the structure of a JWT.
       expect(
         // @ts-ignore
         header
-      ).toMatch(/^Bearer .+\..+\..+$/);
+      ).toMatch(/^Bearer some token$/);
     });
+
+    it("returns an authenticated dpop fetch if requested", async () => {
+      const fetch = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock<
+          ReturnType<typeof window.fetch>,
+          [RequestInfo, RequestInit?]
+        >;
+      };
+
+      const storage = mockStorageUtility({
+        oauth2StateValue: {
+          sessionId: "mySession",
+        },
+        mySession: {
+          dpop: "true",
+          issuer: mockIssuer().issuer.toString(),
+          codeVerifier: "some code verifier",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: storage,
+      });
+      const redirectInfo = await authCodeRedirectHandler.handle(
+        "https://coolsite.com/?code=someCode&state=oauth2StateValue"
+      );
+      await redirectInfo.fetch("https://some.other.url");
+      // @ts-ignore
+      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
+      expect(
+        // @ts-ignore
+        header
+      ).toMatch(/^DPoP .+$/);
+    });
+  });
+});
+
+describe("exchangeDpopToken", () => {
+  it("requests a key-bound token", async () => {
+    const mockedIssuer = mockIssuer();
+    const tokens = await exchangeDpopToken(
+      "mySession",
+      mockedIssuer.issuer,
+      mockIssuerConfigFetcher(mockedIssuer),
+      mockClientRegistrar(mockClient()),
+      "some code",
+      "some pkce token",
+      new URL("https://my.app/redirect")
+    );
+    expect(tokens.accessToken).toEqual(
+      mockTokenEndpointDpopResponse().accessToken
+    );
+    expect(tokens.idToken).toEqual(mockTokenEndpointDpopResponse().idToken);
+    expect(tokens.dpopJwk).toEqual(mockTokenEndpointDpopResponse().dpopJwk);
   });
 });

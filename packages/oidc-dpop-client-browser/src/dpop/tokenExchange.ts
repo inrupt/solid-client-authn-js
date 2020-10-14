@@ -19,11 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import URL from "url-parse";
 import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
 import { createDpopHeader, decodeJwt } from "./dpop";
 import { generateJwkForDpop } from "./keyGeneration";
 import formurlencoded from "form-urlencoded";
+import { OidcClient } from "oidc-client";
 
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>
@@ -54,7 +56,11 @@ export type TokenEndpointResponse = {
   idToken: string;
   webId: string;
   refreshToken?: string;
-  dpopJwk?: string;
+  dpopJwk?: JSONWebKey;
+};
+
+export type TokenEndpointDpopResponse = TokenEndpointResponse & {
+  dpopJwk: JSONWebKey;
 };
 
 export type TokenEndpointInput = {
@@ -91,7 +97,7 @@ function isWebIdOidcIdToken(
  * Note: this function does not implement the userinfo WebId lookup yet.
  * @param idToken
  */
-async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
+export async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
   const decoded = await decodeJwt(idToken);
   if (!isWebIdOidcIdToken(decoded)) {
     throw new Error(
@@ -133,7 +139,7 @@ function validatePreconditions(
   }
 }
 
-function validateTokenEndpointResponse(
+export function validateTokenEndpointResponse(
   tokenResponse: Record<string, unknown>,
   dpop: boolean
 ): Record<string, unknown> & { access_token: string; id_token: string } {
@@ -161,11 +167,15 @@ function validateTokenEndpointResponse(
     );
   }
 
-  if (dpop && tokenResponse.token_type.toLowerCase() !== "dpop") {
-    throw new Error(
-      `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
-    );
-  }
+  // TODO: Due to a bug in both the ESS ID broker AND NSS (what were the odds), a DPoP token is returned
+  // with a token_type 'Bearer'. To work around this, this test is currently disabled.
+  // https://github.com/solid/oidc-op/issues/26
+  // Fixed, but unreleased for the ESS (current version: inrupt-oidc-server-0.5.2)
+  // if (dpop && tokenResponse.token_type.toLowerCase() !== "dpop") {
+  //   throw new Error(
+  //     `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
+  //   );
+  // }
 
   if (!dpop && tokenResponse.token_type.toLowerCase() !== "bearer") {
     throw new Error(
@@ -179,8 +189,20 @@ export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
+  dpop: true
+): Promise<TokenEndpointDpopResponse>;
+export async function getTokens(
+  issuer: IIssuerConfig,
+  client: IClient,
+  data: TokenEndpointInput,
+  dpop: false
+): Promise<TokenEndpointResponse>;
+export async function getTokens(
+  issuer: IIssuerConfig,
+  client: IClient,
+  data: TokenEndpointInput,
   dpop: boolean
-): Promise<TokenEndpointResponse | undefined> {
+): Promise<TokenEndpointResponse> {
   validatePreconditions(issuer, data);
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
@@ -194,11 +216,14 @@ export async function getTokens(
       dpopJwk
     );
   }
-  // TODO: is this necessary ? it's present in OAuth2 in action book, but not in spec
-  // if (client.clientSecret) {
-  //   headers["Authorization"] = `Basic ${this.btoa(
-  //     `${client.clientId}:${client.clientSecret}`
-  // }
+
+  // TODO: Find out where this is specified.
+  if (client.clientSecret) {
+    headers["Authorization"] = `Basic ${btoa(
+      `${client.clientId}:${client.clientSecret}`
+    )}`;
+  }
+
   const tokenRequestInit: RequestInit & {
     headers: Record<string, string>;
   } = {
@@ -228,7 +253,65 @@ export async function getTokens(
     refreshToken: hasRefreshToken(tokenResponse)
       ? tokenResponse.refresh_token
       : undefined,
-    webId: webId,
-    dpopJwk: dpopJwk ? JSON.stringify(dpopJwk) : undefined,
+    webId,
+    dpopJwk,
   };
+}
+
+/**
+ * This function exchanges an authorization code for a bearer token.
+ * Note that it is based on oidc-client-js, and assumes that the same client has
+ * been used to issue the initial redirect.
+ * @param redirectUrl The URL to which the user has been redirected
+ */
+export async function getBearerToken(
+  redirectUrl: URL
+): Promise<TokenEndpointResponse> {
+  let signinResponse;
+  try {
+    signinResponse = await new OidcClient({
+      // TODO: We should look at the various interfaces being used for storage,
+      //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
+      //  (which has an interface Storage), and our own proprietary interface
+      //  IStorage - i.e. we should really just be using the browser Web Storage
+      //  API, e.g. "stateStore: window.localStorage,".
+
+      // We are instantiating a new instance here, so the only value we need to
+      // explicitly provide is the response mode (default otherwise will look
+      // for a hash '#' fragment!).
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      response_mode: "query",
+      // The userinfo endpoint on NSS fails, so disable this for now
+      // Note that in Solid, information should be retrieved from the
+      // profile referenced by the WebId.
+      // TODO: Note that this is heavy-handed, and that this userinfo check verifies
+      // that the `sub` caim in the id token you get along with the access token
+      // matches the sub claim associated to the access token at the userinfo endpoint.
+      // That is a useful check, and in the future it should be only disabled against
+      // NSS, and not in general.
+      // Issue tracker: https://github.com/solid/node-solid-server/issues/1490
+      loadUserInfo: false,
+    }).processSigninResponse(redirectUrl.toString());
+  } catch (err) {
+    throw new Error(
+      `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
+    );
+  }
+  const webId = await deriveWebIdFromIdToken(signinResponse.id_token);
+
+  return {
+    accessToken: signinResponse.access_token,
+    idToken: signinResponse.id_token,
+    webId,
+    // TODO: Properly handle refresh token
+    // refreshToken: signinResponse.refresh_token
+  };
+}
+
+export async function getDpopToken(
+  issuer: IIssuerConfig,
+  client: IClient,
+  data: TokenEndpointInput
+): Promise<TokenEndpointDpopResponse> {
+  return getTokens(issuer, client, data, true);
 }

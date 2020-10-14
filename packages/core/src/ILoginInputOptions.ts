@@ -50,4 +50,9 @@ export default interface ILoginInputOptions {
    * If a function is provided, the browser will not auto-redirect and will instead trigger that function to redirect. Required in non-browser environments.
    */
   handleRedirect?: (redirectUrl: string) => unknown;
+  /**
+   * The type of access token you want to use. Using a cookie-based system requires Bearer tokens, but DPoP tokens provide
+   * an additional safety against replay. By default, a DPoP token will be used.
+   */
+  tokenType?: "DPoP" | "Bearer";
 }
