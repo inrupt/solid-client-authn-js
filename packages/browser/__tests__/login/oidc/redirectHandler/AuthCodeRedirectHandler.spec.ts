@@ -267,6 +267,11 @@ describe("AuthCodeRedirectHandler", () => {
       const redirectInfo = await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
+      // This will call the oidc-dpop-client-browser module, which is mocked at
+      // the top of this file. The purpose of this test is to check that, if
+      // no additional information is given, the `getBearerToken` method is called
+      // (as opposed to the getDpopToken one), which here returns a mock token
+      // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
       const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
