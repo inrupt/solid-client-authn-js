@@ -25,5 +25,5 @@ export default interface IPodServerConfig {
   envTestUserName: string;
   envTestUserPassword: string;
 
-  loginMechanism: string;
+  loginMechanism: "nss" | "essGluu";
 }

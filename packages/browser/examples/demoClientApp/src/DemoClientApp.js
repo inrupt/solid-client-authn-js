@@ -305,12 +305,9 @@ class DemoClientApp extends Component {
           );
 
           if (result.userinfo_endpoint.startsWith("https://inrupt.net")) {
-            console.log(
-              `Identity Provider is NSS, but it's support for user information is currently broken - so we can't determine who (or if) anyone is logged in!`
-            );
-            document.getElementById(
-              "idp_userinfo"
-            ).innerHTML = `Identity Provider is NSS, but it's support for user information is currently broken - so we can't determine who (or if) anyone is logged in!`;
+            const message = `Identity Provider is NSS, but it's support for user information is currently broken - so we can't verify the current \`id_token\` against the identity provider.`;
+            console.log(message);
+            document.getElementById("idp_userinfo").innerHTML = message;
           } else {
             this.state.session
               .fetch(result.userinfo_endpoint)
@@ -446,7 +443,9 @@ class DemoClientApp extends Component {
             value={this.state.fetchRoute}
             onChange={(e) => this.setState({ fetchRoute: e.target.value })}
           />
-          <button id="fetch_button" onClick={this.handleFetch}>Fetch</button>
+          <button id="fetch_button" onClick={this.handleFetch}>
+            Fetch
+          </button>
         </div>
         <br></br>
         <div style={style}>

@@ -88,9 +88,6 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
         testUserName
       );
       const resourceToGet = data.resourceToGet.replace("<POD ROOT>", podRoot);
-      console.log(
-        `Pod root: [${podRoot}], resource to get: [${resourceToGet}]`
-      );
 
       await t
         .selectText(FetchPage.fetchUriTextbox)
@@ -99,7 +96,6 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
         .wait(parseInt(testCafeWaitTime, 10));
 
       const responseBody = await FetchPage.fetchResponseTextbox.textContent;
-      console.log(`Text: [${responseBody}]...`);
 
       const expected = data.expectResponseContainsAnyOf.some((option) =>
         responseBody.includes(option)
