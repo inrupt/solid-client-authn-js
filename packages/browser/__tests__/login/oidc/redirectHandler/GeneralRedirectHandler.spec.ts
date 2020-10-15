@@ -89,11 +89,11 @@ describe("GeneralRedirectHandler", () => {
   });
 
   describe("handle", () => {
-    it("Throws an error with invalid input", async () => {
-      const generalRedirectHandler = getGeneralRedirectHandler();
-      await expect(
-        generalRedirectHandler.handle("Bad Input")
-      ).rejects.toThrowError("Cannot handle redirect url [Bad Input]");
+    it("returns an unauthenticated session on non-redirect URL", async () => {
+      const authCodeRedirectHandler = getGeneralRedirectHandler();
+      const mySession = await authCodeRedirectHandler.handle("https://my.app");
+      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.webId).toBeUndefined();
     });
 
     it("Transfers the correct url component to the session creator", async () => {
