@@ -31,6 +31,18 @@ import {
   ISessionInfoManagerOptions,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { v4 } from "uuid";
+import { fetch } from "cross-fetch";
+
+export function getUnauthenticatedSession(): ISessionInfo & {
+  fetch: typeof fetch;
+} {
+  return {
+    isLoggedIn: false,
+    sessionId: v4(),
+    fetch: fetch,
+  };
+}
 
 /**
  * @param sessionId
