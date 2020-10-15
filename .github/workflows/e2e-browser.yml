@@ -23,8 +23,8 @@ jobs:
         uses: DevExpress/testcafe-action@latest
         env:
           DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
-          E2E_USER_NAME: ${{ secrets.E2E_USER_NAME }}
-          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+          E2E_ESS_USERNAME: ${{ secrets.E2E_ESS_USERNAME }}
+          E2E_ESS_PASSWORD: ${{ secrets.E2E_ESS_PASSWORD }}
           E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
           E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
         with:
