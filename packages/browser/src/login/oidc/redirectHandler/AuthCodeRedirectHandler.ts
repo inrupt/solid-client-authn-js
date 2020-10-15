@@ -25,7 +25,6 @@
  */
 
 import URL from "url-parse";
-import ConfigurationError from "../../../errors/ConfigurationError";
 import { inject, injectable } from "tsyringe";
 import {
   IClient,
@@ -48,6 +47,8 @@ import {
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { JSONWebKey } from "jose";
+import { v4 } from "uuid";
+import { fetch } from "cross-fetch";
 
 export async function exchangeDpopToken(
   sessionId: string,
@@ -98,9 +99,13 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
     redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
-      throw new ConfigurationError(
-        `Cannot handle redirect url [${redirectUrl}]`
-      );
+      // If the received IRI does not have redirection information, we can only
+      // return an unauthenticated session.
+      return {
+        isLoggedIn: false,
+        sessionId: v4(),
+        fetch: fetch,
+      };
     }
     const url = new URL(redirectUrl, true);
     const oauthState = url.query.state as string;
