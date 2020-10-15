@@ -14,7 +14,7 @@ export async function nssLogin(brokerURL, username, password) {
     .typeText("#password", password)
     .click("#login");
 
-  await t.wait(2000);
+  await t.wait(10000);
   await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }
 
@@ -97,6 +97,6 @@ export async function essGluuLogin(brokerURL, username, password) {
 
   // Authorize our client application to access Pod resources.
   await t.click("[name=authorize]");
-  await t.wait(1000);
+  await t.wait(10000);
   await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }

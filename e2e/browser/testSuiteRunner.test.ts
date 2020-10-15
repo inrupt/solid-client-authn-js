@@ -88,7 +88,7 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
         .selectText(FetchPage.fetchUriTextbox)
         .typeText(FetchPage.fetchUriTextbox, resourceToGet)
         .click(FetchPage.fetchButton)
-        .wait(2000);
+        .wait(10000);
 
       const responseBody = await FetchPage.fetchResponseTextbox.textContent;
       console.log(`Text: [${responseBody}]...`);
