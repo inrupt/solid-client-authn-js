@@ -216,11 +216,11 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   describe("handle", () => {
-    it("Throws an error with invalid input", async () => {
+    it("returns an unauthenticated session on non-redirect URL", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
-      await expect(
-        authCodeRedirectHandler.handle("Bad Input")
-      ).rejects.toThrowError("Cannot handle redirect url [Bad Input]");
+      const mySession = await authCodeRedirectHandler.handle("https://my.app");
+      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.webId).toBeUndefined();
     });
 
     it("Makes a code request to the correct place", async () => {
