@@ -93,7 +93,7 @@ class DemoClientApp extends Component {
     this.state = {
       status: "loading",
       loginIssuer: defaultIssuer,
-      clearClientRegistrationInfo: false,
+      clearClientRegistrationInfo: true,
       fetchRoute: defaultProtectedResource,
       fetchBody: "",
       session: session,

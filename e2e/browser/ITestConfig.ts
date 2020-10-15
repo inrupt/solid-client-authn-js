@@ -23,5 +23,5 @@ export default interface ITestConfig {
   name: string;
   performLogin: boolean;
   resourceToGet: string;
-  expectResponseContains: string;
+  expectResponseContainsAnyOf: string[];
 }

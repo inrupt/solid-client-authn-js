@@ -4,18 +4,26 @@ TestCafe end-to-end tests for [solid-client-authn.js](https://github.com/inrupt/
 
 ## Running locally
 
-The tests connect to a Solid Pod using credentials set as environment variables.
-The commands below assume they are executed in this directory, and that you have a recent version of Node/npm installed.
+The tests connect to Solid Pods using credentials set as environment variables.
+The commands below assume they are executed in this directory, and that you have
+a recent version of Node/npm installed.
 
-To run the ESS tests, insert your credentials into the following command:
+To run the tests, insert your credentials into the following command (replace
+`all` with e.g. `chrome` or `firefox` to only run the tests using a specific
+browser):
 
-E2E_GITHUB_USERNAME=<GitHub username> E2E_GITHUB_PASSWORD=<GitHub password> npx testcafe all ess.test.ts
+```
+E2E_ESS_USERNAME=<ESS username> E2E_ESS_PASSWORD=<ESS password> E2E_NSS_USERNAME=<NSS username> E2E_NSS_PASSWORD=<NSS password> npx testcafe all testSuiteRunner.test.ts
+```
 
-(Replace `all` with e.g. `chrome` or `firefox` to only run it in a specific browser.)
+To can also specify the location of a deployed demo client application - for
+example, if you were running that application on `localhost:3001` (which is the
+default used if no environment variable is set), then you could use that
+instance for the tests by including on your command line:
 
-Likewise, the NSS tests can be run by inserting your credentials in the following command:
-
-E2E_NSS_USERNAME=<NSS username> E2E_NSS_PASSWORD=<NSS password> npx testcafe all nss.test.ts
+```
+DEMO_CLIENT_APP_URL="http://localhost:3001"
+```
 
 ## Configuring CI
 

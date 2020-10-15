@@ -19,10 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ITestConfig from "./ITestConfig";
-import IPodServerConfig from "./IPodServerConfig";
+export default interface IPodServerConfig {
+  podResourceServer: string;
+  identityProvider: string;
+  envTestUserName: string;
+  envTestUserPassword: string;
 
-export default interface ITestSuiteConfig {
-  podServerList: IPodServerConfig[];
-  testList: ITestConfig[];
+  loginMechanism: string;
 }

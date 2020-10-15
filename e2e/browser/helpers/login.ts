@@ -2,6 +2,7 @@
 
 import { Selector, t } from "testcafe";
 import LoginPage from "../page-models/LoginPage";
+import FetchPage from "../page-models/FetchPage";
 
 // Login using NSS User
 export async function nssLogin(brokerURL, username, password) {
@@ -12,6 +13,9 @@ export async function nssLogin(brokerURL, username, password) {
     .typeText("#username", username)
     .typeText("#password", password)
     .click("#login");
+
+  await t.wait(2000);
+  await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }
 
 // Login using Google
@@ -90,4 +94,9 @@ export async function essGluuLogin(brokerURL, username, password) {
     .typeText("#loginForm\\:username", username)
     .typeText("#loginForm\\:password", password)
     .click("#loginForm\\:loginButton");
+
+  // Authorize our client application to access Pod resources.
+  await t.click("[name=authorize]");
+  await t.wait(1000);
+  await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }

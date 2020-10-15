@@ -1,37 +1,49 @@
 {
-  "podResourceServer": "https://ldp.pod.inrupt.com/",
-  "identityProvider": "https://broker.pod.inrupt.com",
+  "podServerList": [
+    {
+      "podResourceServer": "https://ldp.pod.inrupt.com/<TEST USER NAME>/",
+      "identityProvider": "https://broker.pod.inrupt.com",
+      "envTestUserName": "E2E_ESS_USERNAME",
+      "envTestUserPassword": "E2E_ESS_PASSWORD",
+      "loginMechanism": "essGluu"
+    },
+    {
+      "podResourceServer": "https://<TEST USER NAME>.inrupt.net/",
+      "identityProvider": "https://inrupt.net",
+      "envTestUserName": "E2E_NSS_USERNAME",
+      "envTestUserPassword": "E2E_NSS_PASSWORD",
+      "loginMechanism": "nss"
+    } ],
 
   "testList": [
-  {
-    "name": "Public resource in my Pod - not logged in",
-    "performLogin": false,
-    "resourceToGet": "<POD ROOT>/public/",
-    "expectResponseContains": "\"This is an LDP container.\"@en"
-  },
-  {
-    "name": "Private resource in my Pod - not logged in",
-    "performLogin": false,
-    "resourceToGet": "<POD ROOT>/private/",
-    "expectResponseContains": "\"Unauthorized\""
-  },
-  {
-    "name": "Private resource in my Pod - logged in",
-    "performLogin": true,
-    "resourceToGet": "<POD ROOT>/private/",
-    "expectResponseContains": "\"This is an LDP container.\"@en"
-  },
-  {
-    "name": "Public resource in my Pod - logged in",
-    "performLogin": true,
-    "resourceToGet": "<POD ROOT>/public/",
-    "expectResponseContains": "\"This is an LDP container.\"@en"
-  },
-  {
-    "name": "Private resource that doesn't exist - logged in",
-    "performLogin": true,
-    "resourceToGet": "<POD ROOT>/private/private-resource-that-does-not exist.ttl",
-    "expectResponseContains": "\"Not Found\""
-  }
-]
+    {
+      "name": "Public resource in my Pod - not logged in",
+      "performLogin": false,
+      "resourceToGet": "<POD ROOT>public/",
+      "expectResponseContainsAnyOf": [ "ldp:BasicContainer" ]
+    },
+    {
+      "name": "Private resource in my Pod - not logged in",
+      "performLogin": false,
+      "resourceToGet": "<POD ROOT>private/",
+      "expectResponseContainsAnyOf": [ "\"Unauthorized\"", "requires you to log" ]
+    },
+    {
+      "name": "Private resource in my Pod - logged in",
+      "performLogin": true,
+      "resourceToGet": "<POD ROOT>private/",
+      "expectResponseContainsAnyOf": [ "ldp:BasicContainer" ]
+    },
+    {
+      "name": "Public resource in my Pod - logged in",
+      "performLogin": true,
+      "resourceToGet": "<POD ROOT>public/",
+      "expectResponseContainsAnyOf": [ "ldp:BasicContainer" ]
+    },
+    {
+      "name": "Private resource that doesn't exist - logged in",
+      "performLogin": true,
+      "resourceToGet": "<POD ROOT>private/resource-that-does-not-exist.ttl",
+      "expectResponseContainsAnyOf": [ "\"Not Found\"", "Can't find file requested" ]
+    } ]
 }
