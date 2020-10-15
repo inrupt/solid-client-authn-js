@@ -35,7 +35,9 @@ const testSuite = require("./test-suite.json");
 // Instead, for running locally, it seems helpful to default to 'localhost'
 // instance.
 const clientApplicationUrl =
-  process.env.DEMO_CLIENT_APP_URL ?? "http://localhost:3001";
+  process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001";
+
+const testCafeWaitTime: string = process.env.E2E_TESTCAFE_WAIT_TIME ?? "1000";
 
 fixture(`Automated tests using client application: [${clientApplicationUrl}]`)
   //.disablePageCaching
@@ -50,12 +52,18 @@ async function performLogin(server: IPodServerConfig, testUserName: string) {
       await essGluuLogin(
         server.identityProvider,
         testUserName,
-        testUserPassword
+        testUserPassword,
+        parseInt(testCafeWaitTime, 10)
       );
       break;
 
     case "nss":
-      await nssLogin(server.identityProvider, testUserName, testUserPassword);
+      await nssLogin(
+        server.identityProvider,
+        testUserName,
+        testUserPassword,
+        parseInt(testCafeWaitTime, 10)
+      );
       break;
 
     default:
@@ -88,7 +96,7 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
         .selectText(FetchPage.fetchUriTextbox)
         .typeText(FetchPage.fetchUriTextbox, resourceToGet)
         .click(FetchPage.fetchButton)
-        .wait(10000);
+        .wait(parseInt(testCafeWaitTime, 10));
 
       const responseBody = await FetchPage.fetchResponseTextbox.textContent;
       console.log(`Text: [${responseBody}]...`);

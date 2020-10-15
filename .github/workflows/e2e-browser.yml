@@ -22,11 +22,12 @@ jobs:
       - name: Run tests
         uses: DevExpress/testcafe-action@latest
         env:
-          DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
           E2E_ESS_USERNAME: ${{ secrets.E2E_ESS_USERNAME }}
           E2E_ESS_PASSWORD: ${{ secrets.E2E_ESS_PASSWORD }}
           E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
           E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
+          E2E_TESTCAFE_WAIT_TIME: 10000
         with:
           version: 1.9.4
           args: "--skip-js-errors all e2e/browser/testSuiteRunner.test.ts"

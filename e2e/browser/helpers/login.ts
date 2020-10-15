@@ -5,24 +5,45 @@ import LoginPage from "../page-models/LoginPage";
 import FetchPage from "../page-models/FetchPage";
 
 // Login using NSS User
-export async function nssLogin(brokerURL, username, password) {
+export async function nssLogin(
+  brokerUrl: string,
+  username: string,
+  password: string,
+  waitTime: number
+) {
   // Log in via ESS Broker service
-  await LoginPage.submitLoginForm(brokerURL);
+  await LoginPage.submitLoginForm(brokerUrl);
 
   await t
     .typeText("#username", username)
     .typeText("#password", password)
     .click("#login");
 
-  await t.wait(10000);
+  // Authorize our client application to access Pod resources - but this will
+  // only be required the first time this app is seen at the Pod. So we need a
+  // conditional check here.
+  const authorizeButtonExists = await Selector("[name=consent]").exists;
+  if (authorizeButtonExists) {
+    // Click here to grant Control access to our app. Only certain apps may need
+    // that level of access, so don't provide by default.
+    // await t.click("#control");
+    await t.click("[name=consent]");
+  }
+
+  await t.wait(waitTime);
   await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }
 
 // Login using Google
-export async function essGoogleLogin(brokerURL, username, password) {
+export async function essGoogleLogin(
+  brokerUrl: string,
+  username: string,
+  password: string,
+  waitTime: number
+) {
   console.log("STARTING GOOGLE LOGIN");
   // Log in via ESS Broker service
-  await LoginPage.submitLoginForm(brokerURL);
+  await LoginPage.submitLoginForm(brokerUrl);
 
   // Select Google
   await t.click('#wrap [alt="Google"]');
@@ -39,9 +60,14 @@ export async function essGoogleLogin(brokerURL, username, password) {
 }
 
 // Login using Twitter
-export async function essTwitterLogin(brokerURL, username, password) {
+export async function essTwitterLogin(
+  brokerUrl: string,
+  username: string,
+  password: string,
+  waitTime: number
+) {
   // Log in via ESS Broker service
-  await LoginPage.submitLoginForm(brokerURL);
+  await LoginPage.submitLoginForm(brokerUrl);
 
   await t.click('#wrap [alt="Auth0"]');
 
@@ -62,9 +88,14 @@ export async function essTwitterLogin(brokerURL, username, password) {
 }
 
 // ESS (GitHub) User
-export async function essGithubLogin(brokerURL, username, password) {
+export async function essGithubLogin(
+  brokerUrl: string,
+  username: string,
+  password: string,
+  waitTime: number
+) {
   // Log in via ESS Broker service
-  await LoginPage.submitLoginForm(brokerURL);
+  await LoginPage.submitLoginForm(brokerUrl);
 
   await t.click('#wrap [alt="Auth0"]');
 
@@ -86,7 +117,12 @@ export async function essGithubLogin(brokerURL, username, password) {
 }
 
 // ESS (Gluu) User
-export async function essGluuLogin(brokerURL, username, password) {
+export async function essGluuLogin(
+  brokerURL: string,
+  username: string,
+  password: string,
+  waitTime: number
+) {
   // Log in via ESS Broker service
   await LoginPage.submitLoginForm(brokerURL);
 
@@ -97,6 +133,6 @@ export async function essGluuLogin(brokerURL, username, password) {
 
   // Authorize our client application to access Pod resources.
   await t.click("[name=authorize]");
-  await t.wait(10000);
+  await t.wait(waitTime);
   await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }
