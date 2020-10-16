@@ -180,7 +180,7 @@ describe("registerClient", () => {
   });
 
   it("throws if the redirect URI is undefined", async () => {
-    const myFetch = jest.fn(
+    global.fetch = jest.fn(
       async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
@@ -191,7 +191,6 @@ describe("registerClient", () => {
           { status: 400 }
         )
     );
-    global.fetch = myFetch;
     const options = getMockOptions();
 
     await expect(() =>
@@ -199,10 +198,24 @@ describe("registerClient", () => {
     ).rejects.toThrow(
       "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - some description"
     );
+    global.fetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            error: "invalid_redirect_uri",
+          }),
+          { status: 400 }
+        )
+    );
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - "
+    );
   });
 
   it("throws if the client metadata are invalid", async () => {
-    const myFetch = jest.fn(
+    global.fetch = jest.fn(
       async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
@@ -213,7 +226,6 @@ describe("registerClient", () => {
           { status: 400 }
         )
     );
-    global.fetch = myFetch;
     const options = getMockOptions();
 
     await expect(() =>
@@ -221,10 +233,25 @@ describe("registerClient", () => {
     ).rejects.toThrow(
       'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - some description'
     );
+
+    global.fetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            error: "invalid_client_metadata",
+          }),
+          { status: 400 }
+        )
+    );
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - '
+    );
   });
 
   it("throws if the IdP returns a custom error", async () => {
-    const myFetch = jest.fn(
+    global.fetch = jest.fn(
       async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
@@ -235,7 +262,6 @@ describe("registerClient", () => {
           { status: 400 }
         )
     );
-    global.fetch = myFetch;
     const options = getMockOptions();
 
     await expect(() =>
@@ -243,6 +269,19 @@ describe("registerClient", () => {
     ).rejects.toThrow(
       "Dynamic client registration failed: custom_error - some description"
     );
+
+    global.fetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            error: "custom_error",
+          }),
+          { status: 400 }
+        )
+    );
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow("Dynamic client registration failed: custom_error - ");
   });
 
   it("throws without parsing the response body as JSON on non-400 error", async () => {

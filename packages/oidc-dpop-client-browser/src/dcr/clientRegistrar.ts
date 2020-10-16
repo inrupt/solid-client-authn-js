@@ -41,7 +41,7 @@ function processErrorResponse(
   if (responseBody.error === "invalid_redirect_uri") {
     throw new Error(
       `Dynamic client registration failed: the provided redirect uri [${options.redirectUrl?.toString()}] is invalid - ${
-        responseBody.error_description
+        responseBody.error_description ?? ""
       }`
     );
   }
@@ -49,13 +49,15 @@ function processErrorResponse(
     throw new Error(
       `Dynamic client registration failed: the provided client metadata ${JSON.stringify(
         options
-      )} is invalid - ${responseBody.error_description}`
+      )} is invalid - ${responseBody.error_description ?? ""}`
     );
   }
   // We currently don't support software statements, so no related error should happen.
   // If an error outside of the spec happens, no additional context can be provided
   throw new Error(
-    `Dynamic client registration failed: ${responseBody.error} - ${responseBody.error_description}`
+    `Dynamic client registration failed: ${responseBody.error} - ${
+      responseBody.error_description ?? ""
+    }`
   );
 }
 
