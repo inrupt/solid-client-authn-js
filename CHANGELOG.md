@@ -15,6 +15,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 - The Authorization header was not set properly, which made it impossible to access private resources.
 - The types consumed/returned by the API are now exported for convenience.
+- The URL parsing library did not parse properly some redirection IRIs, this is now fixed.
+- The dynamic client registration could hang depending on the environment it was deployed in, this is now resolved.
 
 ## [0.2.0]
 
