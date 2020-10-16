@@ -239,14 +239,11 @@ export async function getTokens(
       /* eslint-enable @typescript-eslint/camelcase */
     }),
   };
-
   const rawTokenResponse = (await (
     await fetch(issuer.tokenEndpoint.toString(), tokenRequestInit)
   ).json()) as Record<string, unknown>;
-
   const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
   const webId = await deriveWebIdFromIdToken(tokenResponse.id_token);
-
   return {
     accessToken: tokenResponse.access_token,
     idToken: tokenResponse.id_token,

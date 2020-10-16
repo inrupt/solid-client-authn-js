@@ -161,10 +161,19 @@ const mockClient = (): IClient => {
   };
 };
 
-const mockFetch = (payload: string, status: number): typeof fetch => async (
-  _input: RequestInfo,
-  _init?: RequestInit
-): Promise<Response> => new Response(payload, { status });
+const mockFetch = (
+  payload: string,
+  status: number
+): jest.Mock<ReturnType<typeof window.fetch>, [RequestInfo, RequestInit?]> => {
+  const mockFetch = jest.fn(
+    async (
+      _url: RequestInfo,
+      _init?: RequestInit
+    ): ReturnType<typeof window.fetch> => new Response(payload, { status })
+  );
+  global.fetch = mockFetch;
+  return mockFetch;
+};
 
 describe("getTokens", () => {
   it("throws if the grant type isn't supported", async () => {
@@ -207,8 +216,7 @@ describe("getTokens", () => {
   });
 
   it("can request a key-bound token", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
       mockIssuer().tokenEndpoint.toString()
@@ -221,8 +229,7 @@ describe("getTokens", () => {
   });
 
   it("does not use basic auth if a client secret is not available", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
       mockIssuer().tokenEndpoint.toString()
@@ -232,8 +239,7 @@ describe("getTokens", () => {
   });
 
   it("uses basic auth if a client secret is available", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     const client = mockClient();
     client.clientSecret = "some secret";
     await getTokens(mockIssuer(), client, mockEndpointInput(), true);
@@ -252,8 +258,7 @@ describe("getTokens", () => {
   // https://github.com/solid/oidc-op/issues/26
   // Fixed, but unreleased for the ESS (current version: inrupt-oidc-server-0.5.2)
   it.skip("throws if a key-bound token was requested, but a bearer token is returned", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockBearerTokens()), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const request = getTokens(
       mockIssuer(),
       mockClient(),
@@ -266,8 +271,7 @@ describe("getTokens", () => {
   });
 
   it("throws if a bearer token was requested, but a dpop token is returned", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(mockDpopTokens()), 200);
     const request = getTokens(
       mockIssuer(),
       mockClient(),
@@ -284,8 +288,7 @@ describe("getTokens", () => {
       access_token: mockBearerAccessToken(),
       id_token: mockIdToken(),
     };
-    const myFetch = jest.fn(mockFetch(JSON.stringify(tokenResponse), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(tokenResponse), 200);
     const request = getTokens(
       mockIssuer(),
       mockClient(),
@@ -301,8 +304,7 @@ describe("getTokens", () => {
 
   // See https://tools.ietf.org/html/rfc6749#page-29 for the required parameters
   it("includes the mandatory parameters in the request body as an URL encoded form", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers["content-type"]).toEqual(
@@ -315,8 +317,7 @@ describe("getTokens", () => {
   });
 
   it("returns the generated key along with the tokens", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(mockDpopTokens()), 200);
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
@@ -327,8 +328,7 @@ describe("getTokens", () => {
   });
 
   it("returns the tokens provided by the IdP", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(mockDpopTokens()), 200);
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
@@ -343,8 +343,7 @@ describe("getTokens", () => {
   it("returns a refresh token if provided by the IdP", async () => {
     const idpResponse = mockDpopTokens();
     idpResponse.refresh_token = "some token";
-    const myFetch = jest.fn(mockFetch(JSON.stringify(idpResponse), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(idpResponse), 200);
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
@@ -358,10 +357,7 @@ describe("getTokens", () => {
     const tokenEndpointResponse = {
       id_token: mockIdToken(),
     };
-    const myFetch = jest.fn(
-      mockFetch(JSON.stringify(tokenEndpointResponse), 200)
-    );
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
     ).rejects.toThrow(
@@ -375,10 +371,7 @@ describe("getTokens", () => {
     const tokenEndpointResponse = {
       access_token: mockBearerAccessToken(),
     };
-    const myFetch = jest.fn(
-      mockFetch(JSON.stringify(tokenEndpointResponse), 200)
-    );
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
     ).rejects.toThrow(
@@ -389,8 +382,7 @@ describe("getTokens", () => {
   });
 
   it("does not return a key with regular bearer tokens", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockBearerTokens()), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
@@ -410,17 +402,14 @@ describe("getTokens", () => {
       algorithm: "ES256",
     });
 
-    const myFetch = jest.fn(
-      mockFetch(
-        JSON.stringify({
-          access_token: mockBearerAccessToken(),
-          id_token: idJwt,
-          token_type: "Bearer",
-        }),
-        200
-      )
+    mockFetch(
+      JSON.stringify({
+        access_token: mockBearerAccessToken(),
+        id_token: idJwt,
+        token_type: "Bearer",
+      }),
+      200
     );
-    global.fetch = myFetch;
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
@@ -439,17 +428,14 @@ describe("getTokens", () => {
       algorithm: "ES256",
     });
 
-    const myFetch = jest.fn(
-      mockFetch(
-        JSON.stringify({
-          access_token: mockBearerAccessToken(),
-          id_token: idJwt,
-          token_type: "Bearer",
-        }),
-        200
-      )
+    mockFetch(
+      JSON.stringify({
+        access_token: mockBearerAccessToken(),
+        id_token: idJwt,
+        token_type: "Bearer",
+      }),
+      200
     );
-    global.fetch = myFetch;
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
     ).rejects.toThrow(
@@ -465,17 +451,14 @@ describe("getTokens", () => {
       algorithm: "ES256",
     });
 
-    const myFetch = jest.fn(
-      mockFetch(
-        JSON.stringify({
-          access_token: mockBearerAccessToken(),
-          id_token: idJwt,
-          token_type: "Bearer",
-        }),
-        200
-      )
+    mockFetch(
+      JSON.stringify({
+        access_token: mockBearerAccessToken(),
+        id_token: idJwt,
+        token_type: "Bearer",
+      }),
+      200
     );
-    global.fetch = myFetch;
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
     ).rejects.toThrow(
@@ -491,17 +474,14 @@ describe("getTokens", () => {
       algorithm: "ES256",
     });
 
-    const myFetch = jest.fn(
-      mockFetch(
-        JSON.stringify({
-          access_token: mockBearerAccessToken(),
-          id_token: idJwt,
-          token_type: "Bearer",
-        }),
-        200
-      )
+    mockFetch(
+      JSON.stringify({
+        access_token: mockBearerAccessToken(),
+        id_token: idJwt,
+        token_type: "Bearer",
+      }),
+      200
     );
-    global.fetch = myFetch;
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
     ).rejects.toThrow(
@@ -512,8 +492,7 @@ describe("getTokens", () => {
 
 describe("getDpopToken", () => {
   it("requests a key-bound token, and returns the appropriate key with the token", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockDpopTokens()), 200));
-    global.fetch = myFetch;
+    const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     const tokens = await getDpopToken(
       mockIssuer(),
       mockClient(),
@@ -556,8 +535,7 @@ jest.mock("oidc-client", () => {
 
 describe("getBearerToken", () => {
   it("returns the tokens returned by the endpoint", async () => {
-    const myFetch = jest.fn(mockFetch(JSON.stringify(mockBearerTokens()), 200));
-    global.fetch = myFetch;
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const tokens = await getBearerToken(new URL("https://my.app/redirect"));
     expect(tokens.accessToken).toEqual(mockBearerAccessToken());
     expect(tokens.idToken).toEqual(mockIdToken());
@@ -565,8 +543,7 @@ describe("getBearerToken", () => {
   });
 
   it("wraps oidc-client errors", async () => {
-    const myFetch = jest.fn(mockFetch("", 200));
-    global.fetch = myFetch;
+    mockFetch("", 200);
     const tokenRequest = getBearerToken(new URL("https://invalid.url"));
     await expect(tokenRequest).rejects.toThrow(
       `Problem handling Auth Code Grant (Flow) redirect - URL [https://invalid.url]: Error: Dummy error`

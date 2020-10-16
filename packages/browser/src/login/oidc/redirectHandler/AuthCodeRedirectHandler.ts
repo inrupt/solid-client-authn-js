@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import URL from "url-parse";
+import UrlParse from "url-parse";
 import { inject, injectable } from "tsyringe";
 import {
   IClient,
@@ -47,16 +47,15 @@ import {
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { JSONWebKey } from "jose";
-import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 
 export async function exchangeDpopToken(
   sessionId: string,
-  issuer: URL,
+  issuer: UrlParse,
   issuerFetcher: IIssuerConfigFetcher,
   clientRegistrar: IClientRegistrar,
   code: string,
   codeVerifier: string,
-  redirectUrl: URL
+  redirectUrl: UrlParse
 ): Promise<TokenEndpointDpopResponse> {
   const issuerConfig: IIssuerConfig = await issuerFetcher.fetchConfig(issuer);
   const client: IClient = await clientRegistrar.getClient(
@@ -75,7 +74,7 @@ export async function exchangeDpopToken(
  * @hidden
  */
 @injectable()
-export default class AuthCodeRedirectHandler implements IRedirectHandler {
+export class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("sessionInfoManager")
@@ -86,23 +85,28 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
-    const url = new URL(redirectUrl, true);
-    return (
-      url.query !== undefined &&
-      url.query.code !== undefined &&
-      url.query.state !== undefined
-    );
+    try {
+      const myUrl = new URL(redirectUrl);
+      return (
+        myUrl.searchParams.get("code") !== null &&
+        myUrl.searchParams.get("state") !== null
+      );
+    } catch (e) {
+      throw new Error(
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
+      );
+    }
   }
 
   async handle(
     redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
-      // If the received IRI does not have redirection information, we can only
-      // return an unauthenticated session.
-      return getUnauthenticatedSession();
+      throw new Error(
+        `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
+      );
     }
-    const url = new URL(redirectUrl, true);
+    const url = new UrlParse(redirectUrl, true);
     const oauthState = url.query.state as string;
 
     const storedSessionId = (await this.storageUtility.getForUser(
@@ -112,7 +116,6 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
         errorIfNull: true,
       }
     )) as string;
-
     const isDpop =
       (await this.storageUtility.getForUser(storedSessionId, "dpop")) ===
       "true";
@@ -140,13 +143,13 @@ export default class AuthCodeRedirectHandler implements IRedirectHandler {
 
       tokens = await exchangeDpopToken(
         storedSessionId,
-        new URL(issuer),
+        new UrlParse(issuer),
         this.issuerConfigFetcher,
         this.clientRegistrar,
         // the canHandle function checks that the code is part of the query strings
         url.query["code"] as string,
         codeVerifier,
-        new URL(storedRedirectIri)
+        new UrlParse(storedRedirectIri)
       );
       // The type assertion should not be necessary
       authFetch = await buildDpopFetch(
