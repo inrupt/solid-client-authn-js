@@ -179,6 +179,28 @@ describe("registerClient", () => {
     );
   });
 
+  it("throws if the redirect URI is undefined", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            error: "invalid_redirect_uri",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            error_description: "some description",
+          }),
+          { status: 400 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - some description"
+    );
+  });
+
   it("throws if the client metadata are invalid", async () => {
     const myFetch = jest.fn(
       async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
