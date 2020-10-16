@@ -29,17 +29,16 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
+import UrlParse from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
 import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
-import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 
 /**
  * @hidden
  */
 @injectable()
-export default class GeneralRedirectHandler implements IRedirectHandler {
+export class ImplicitRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("tokenSaver") private tokenSaver: ITokenSaver,
     @inject("sessionInfoManager")
@@ -47,21 +46,26 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
-    const url = new URL(redirectUrl, true);
-    return !!(
-      url.query &&
-      url.query.id_token &&
-      url.query.access_token &&
-      url.query.state
-    );
+    try {
+      const myUrl = new URL(redirectUrl);
+      return (
+        myUrl.searchParams.get("id_token") !== null &&
+        myUrl.searchParams.get("access_token") !== null &&
+        myUrl.searchParams.get("state") !== null
+      );
+    } catch (e) {
+      throw new Error(
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
+      );
+    }
   }
   async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
     if (!(await this.canHandle(redirectUrl))) {
-      // If the received IRI does not have redirection information, we can only
-      // return an unauthenticated session.
-      return getUnauthenticatedSession();
+      throw new Error(
+        `ImplicitRedirectHandler cannot handle [${redirectUrl}]: it is missing one or more of [id_token, access_token, state].`
+      );
     }
-    const url = new URL(redirectUrl, true);
+    const url = new UrlParse(redirectUrl, true);
 
     await this.tokenSaver.saveTokenAndGetSession(
       url.query.state as string,
@@ -69,6 +73,10 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
       url.query.access_token
     );
     const sessionId = url.query.state as string;
-    return await this.sessionInfoManager.get(sessionId);
+    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    return Object.assign(sessionInfo, {
+      // The canHandle check at the top of the method makes this assertion valid.
+      fetch: buildBearerFetch(url.query.access_token as string),
+    });
   }
 }
