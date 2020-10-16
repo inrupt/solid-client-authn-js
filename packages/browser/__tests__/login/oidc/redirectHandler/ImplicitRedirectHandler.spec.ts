@@ -25,7 +25,7 @@ import {
   SessionInfoManagerMock,
   SessionCreatorCreateResponse,
 } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import GeneralRedirectHandler from "../../../../src/login/oidc/redirectHandler/GeneralRedirectHandler";
+import { ImplicitRedirectHandler } from "../../../../src/login/oidc/redirectHandler/ImplicitRedirectHandler";
 
 jest.mock("cross-fetch");
 
@@ -46,16 +46,16 @@ const _mockJWK = {
 const mockAccessToken =
   "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0Q2xhaW0iOiJ0ZXN0VmFsdWUiLCJpYXQiOjE2MDIxNTg2NDJ9.wGZ49jU3wNSAFvWvZsjjulmbfRjlIQMp0VY0Q5u2--5vyzeKwfGUmssOW8kftIXG1ikm2iqMb6YRXCO4KGEctQ";
 
-describe("GeneralRedirectHandler", () => {
+describe("ImplicitRedirectHandler", () => {
   const defaultMocks = {
     tokenSaver: TokenSaverMock,
     sessionInfoManager: SessionInfoManagerMock,
   };
 
-  function getGeneralRedirectHandler(
+  function getImplicitRedirectHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
-  ): GeneralRedirectHandler {
-    return new GeneralRedirectHandler(
+  ): ImplicitRedirectHandler {
+    return new ImplicitRedirectHandler(
       mocks.tokenSaver ?? defaultMocks.tokenSaver,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
     );
@@ -63,7 +63,7 @@ describe("GeneralRedirectHandler", () => {
 
   describe("canHandler", () => {
     it("Accepts a valid url with the correct query", async () => {
-      const generalRedirectHandler = getGeneralRedirectHandler();
+      const generalRedirectHandler = getImplicitRedirectHandler();
       expect(
         await generalRedirectHandler.canHandle(
           "https://coolparty.com/?id_token=token&access_token=otherToken&state=userId"
@@ -71,15 +71,17 @@ describe("GeneralRedirectHandler", () => {
       ).toBe(true);
     });
 
-    it("Rejects an invalid url", async () => {
-      const generalRedirectHandler = getGeneralRedirectHandler();
-      expect(
-        await generalRedirectHandler.canHandle("beep boop I am a robot")
-      ).toBe(false);
+    it("throws on invalid url", async () => {
+      const redirectHandler = getImplicitRedirectHandler();
+      await expect(() =>
+        redirectHandler.canHandle("beep boop I am a robot")
+      ).rejects.toThrow(
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL."
+      );
     });
 
     it("Accepts a valid url with the incorrect query", async () => {
-      const generalRedirectHandler = getGeneralRedirectHandler();
+      const generalRedirectHandler = getImplicitRedirectHandler();
       expect(
         await generalRedirectHandler.canHandle(
           "https://coolparty.com/?meep=mop"
@@ -89,15 +91,15 @@ describe("GeneralRedirectHandler", () => {
   });
 
   describe("handle", () => {
-    it("returns an unauthenticated session on non-redirect URL", async () => {
-      const authCodeRedirectHandler = getGeneralRedirectHandler();
-      const mySession = await authCodeRedirectHandler.handle("https://my.app");
-      expect(mySession.isLoggedIn).toEqual(false);
-      expect(mySession.webId).toBeUndefined();
+    it("throws on non-redirect URL", async () => {
+      const redirectHandler = getImplicitRedirectHandler();
+      await expect(redirectHandler.handle("https://my.app")).rejects.toThrow(
+        "ImplicitRedirectHandler cannot handle [https://my.app]"
+      );
     });
 
     it("Transfers the correct url component to the session creator", async () => {
-      const generalRedirectHandler = getGeneralRedirectHandler();
+      const generalRedirectHandler = getImplicitRedirectHandler();
       expect(
         await generalRedirectHandler.handle(
           "https://coolsite/?id_token=a&access_token=b&state=c"
@@ -124,7 +126,7 @@ describe("GeneralRedirectHandler", () => {
       redirectUrl.searchParams.append("id_token", "Some ID token");
       redirectUrl.searchParams.append("state", "Idaho");
 
-      const authCodeRedirectHandler = getGeneralRedirectHandler();
+      const authCodeRedirectHandler = getImplicitRedirectHandler();
       const redirectInfo = await authCodeRedirectHandler.handle(
         redirectUrl.toString()
       );
