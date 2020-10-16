@@ -44,7 +44,7 @@ describe("FallbackRedirectHandler", () => {
       await expect(
         redirectHandler.canHandle("beep boop I am a robot")
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL."
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot"
       );
     });
   });

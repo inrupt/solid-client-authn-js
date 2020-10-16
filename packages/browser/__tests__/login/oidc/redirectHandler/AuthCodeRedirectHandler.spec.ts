@@ -186,7 +186,7 @@ describe("AuthCodeRedirectHandler", () => {
       await expect(() =>
         authCodeRedirectHandler.canHandle("beep boop I am a robot")
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL."
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot"
       );
     });
 
@@ -224,7 +224,7 @@ describe("AuthCodeRedirectHandler", () => {
       await expect(
         authCodeRedirectHandler.handle("https://my.app")
       ).rejects.toThrow(
-        "AuthCodeRedirectHandler cannot handle [https://my.app]"
+        "AuthCodeRedirectHandler cannot handle [https://my.app]: it is missing one of [code, state]."
       );
     });
 

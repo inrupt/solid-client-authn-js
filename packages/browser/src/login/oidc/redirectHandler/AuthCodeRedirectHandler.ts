@@ -91,9 +91,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         myUrl.searchParams.get("code") !== null &&
         myUrl.searchParams.get("state") !== null
       );
-    } catch {
+    } catch (e) {
       throw new Error(
-        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL.`
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
       );
     }
   }
@@ -102,7 +102,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
-      throw new Error(`AuthCodeRedirectHandler cannot handle [${redirectUrl}]`);
+      throw new Error(
+        `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
+      );
     }
     const url = new UrlParse(redirectUrl, true);
     const oauthState = url.query.state as string;

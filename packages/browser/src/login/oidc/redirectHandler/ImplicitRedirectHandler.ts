@@ -53,9 +53,9 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
         myUrl.searchParams.get("access_token") !== null &&
         myUrl.searchParams.get("state") !== null
       );
-    } catch {
+    } catch (e) {
       throw new Error(
-        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL.`
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
       );
     }
   }
@@ -63,7 +63,9 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
     redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
-      throw new Error(`ImplicitRedirectHandler cannot handle [${redirectUrl}]`);
+      throw new Error(
+        `ImplicitRedirectHandler cannot handle [${redirectUrl}]: it is missing one or more of [id_token, access_token, state].`
+      );
     }
     const url = new UrlParse(redirectUrl, true);
 
@@ -74,13 +76,9 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
     );
     const sessionId = url.query.state as string;
     const sessionInfo = await this.sessionInfoManager.get(sessionId);
-    if (url.query.access_token === undefined) {
-      throw new Error(
-        `No access token is present in the redirect URL: [${url.toString()}]`
-      );
-    }
     return Object.assign(sessionInfo, {
-      fetch: buildBearerFetch(url.query.access_token),
+      // The canHandle check at the top of the method makes this assertion valid.
+      fetch: buildBearerFetch(url.query.access_token as string),
     });
   }
 }

@@ -76,7 +76,7 @@ describe("ImplicitRedirectHandler", () => {
       await expect(() =>
         redirectHandler.canHandle("beep boop I am a robot")
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL."
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot"
       );
     });
 
@@ -94,7 +94,7 @@ describe("ImplicitRedirectHandler", () => {
     it("throws on non-redirect URL", async () => {
       const redirectHandler = getImplicitRedirectHandler();
       await expect(redirectHandler.handle("https://my.app")).rejects.toThrow(
-        "ImplicitRedirectHandler cannot handle [https://my.app]"
+        "ImplicitRedirectHandler cannot handle [https://my.app]: it is missing one or more of [id_token, access_token, state]."
       );
     });
 
