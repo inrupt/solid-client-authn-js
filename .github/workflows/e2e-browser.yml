@@ -22,17 +22,15 @@ jobs:
       - name: Run tests
         uses: DevExpress/testcafe-action@latest
         env:
-          DEMO_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_ESS_USERNAME: ${{ secrets.E2E_ESS_USERNAME }}
+          E2E_ESS_PASSWORD: ${{ secrets.E2E_ESS_PASSWORD }}
           E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
           E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
-          E2E_GOOGLE_ACCOUNTID: ${{ secrets.E2E_GOOGLE_ACCOUNTID }}
-          E2E_GOOGLE_USERNAME: ${{ secrets.E2E_GOOGLE_USERNAME }}
-          E2E_GOOGLE_PASSWORD: ${{ secrets.E2E_GOOGLE_PASSWORD }}
-          E2E_GITHUB_USERNAME: ${{ secrets.E2E_GITHUB_USERNAME }}
-          E2E_GITHUB_PASSWORD: ${{ secrets.E2E_GITHUB_PASSWORD }}
+          E2E_TESTCAFE_WAIT_TIME: 10000
         with:
           version: 1.9.4
-          args: "all e2e/browser/ess.test.ts"
+          args: "--skip-js-errors all e2e/browser/testSuiteRunner.test.ts"
       - name: Add status check with successful test result
         id: set-status-check-success
         uses: octokit/request-action@v2.x
