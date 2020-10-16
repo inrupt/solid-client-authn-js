@@ -29,7 +29,8 @@ import {
   IClientRegistrarOptions,
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
-import AuthCodeRedirectHandler, {
+import {
+  AuthCodeRedirectHandler,
   exchangeDpopToken,
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
@@ -180,11 +181,13 @@ describe("AuthCodeRedirectHandler", () => {
       ).toBe(true);
     });
 
-    it("Rejects an invalid url", async () => {
+    it("throws on invalid url", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
-      expect(
-        await authCodeRedirectHandler.canHandle("beep boop I am a robot")
-      ).toBe(false);
+      await expect(() =>
+        authCodeRedirectHandler.canHandle("beep boop I am a robot")
+      ).rejects.toThrow(
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL."
+      );
     });
 
     it("Rejects a valid url with the incorrect query", async () => {
@@ -216,11 +219,13 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   describe("handle", () => {
-    it("returns an unauthenticated session on non-redirect URL", async () => {
+    it("throws on non-redirect URL", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
-      const mySession = await authCodeRedirectHandler.handle("https://my.app");
-      expect(mySession.isLoggedIn).toEqual(false);
-      expect(mySession.webId).toBeUndefined();
+      await expect(
+        authCodeRedirectHandler.handle("https://my.app")
+      ).rejects.toThrow(
+        "AuthCodeRedirectHandler cannot handle [https://my.app]"
+      );
     });
 
     it("Makes a code request to the correct place", async () => {

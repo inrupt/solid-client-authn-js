@@ -29,17 +29,16 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
+import UrlParse from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
 import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
-import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 
 /**
  * @hidden
  */
 @injectable()
-export default class GeneralRedirectHandler implements IRedirectHandler {
+export class ImplicitRedirectHandler implements IRedirectHandler {
   constructor(
     @inject("tokenSaver") private tokenSaver: ITokenSaver,
     @inject("sessionInfoManager")
@@ -47,23 +46,26 @@ export default class GeneralRedirectHandler implements IRedirectHandler {
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
-    const url = new URL(redirectUrl, true);
-    return !!(
-      url.query &&
-      url.query.id_token &&
-      url.query.access_token &&
-      url.query.state
-    );
+    try {
+      const myUrl = new URL(redirectUrl);
+      return (
+        myUrl.searchParams.get("id_token") !== null &&
+        myUrl.searchParams.get("access_token") !== null &&
+        myUrl.searchParams.get("state") !== null
+      );
+    } catch {
+      throw new Error(
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL.`
+      );
+    }
   }
   async handle(
     redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
-      // If the received IRI does not have redirection information, we can only
-      // return an unauthenticated session.
-      return getUnauthenticatedSession();
+      throw new Error(`ImplicitRedirectHandler cannot handle [${redirectUrl}]`);
     }
-    const url = new URL(redirectUrl, true);
+    const url = new UrlParse(redirectUrl, true);
 
     await this.tokenSaver.saveSession(
       url.query.state as string,
