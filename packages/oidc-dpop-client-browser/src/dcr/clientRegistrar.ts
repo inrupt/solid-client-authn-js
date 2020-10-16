@@ -114,7 +114,7 @@ export async function registerClient(
   if (options.registrationAccessToken) {
     headers["Authorization"] = `Bearer ${options.registrationAccessToken}`;
   }
-  const registerResponse = await window.fetch(
+  const registerResponse = await fetch(
     issuerConfig.registrationEndpoint.toString(),
     {
       method: "POST",

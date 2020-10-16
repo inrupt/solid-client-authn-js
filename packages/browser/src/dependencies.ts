@@ -55,7 +55,8 @@ import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImpli
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import Fetcher, { IFetcher } from "./util/Fetcher";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
-import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
+import { ImplicitRedirectHandler } from "./login/oidc/redirectHandler/ImplicitRedirectHandler";
+import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
 import EnvironmentDetector, {
   IEnvironmentDetector,
   detectEnvironment,
@@ -65,7 +66,7 @@ import UrlRepresenationConverter, {
   IUrlRepresentationConverter,
 } from "./util/UrlRepresenationConverter";
 import SessionInfoManager from "./sessionInfo/SessionInfoManager";
-import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
+import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
 import TokenSaver, {
@@ -176,13 +177,18 @@ container.register<IRedirectHandler>("redirectHandlers", {
   useClass: AuthCodeRedirectHandler,
 });
 container.register<IRedirectHandler>("redirectHandlers", {
-  useClass: GeneralRedirectHandler,
+  useClass: ImplicitRedirectHandler,
 });
 container.register<IRedirectHandler>("redirectHandlers", {
   useClass: InactionRedirectHandler,
 });
 container.register<ITokenSaver>("tokenSaver", {
   useClass: TokenSaver,
+});
+// This catch-all class will always be able to handle the
+// redirect IRI, so it must be registered last in the container
+container.register<IRedirectHandler>("redirectHandlers", {
+  useClass: FallbackRedirectHandler,
 });
 
 // Login/OIDC/Issuer
