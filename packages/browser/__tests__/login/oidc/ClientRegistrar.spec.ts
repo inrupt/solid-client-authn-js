@@ -168,7 +168,7 @@ describe("ClientRegistrar", () => {
           }
         )
       ).rejects.toThrowError(
-        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]"
+        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - undefined]"
       );
     });
 
