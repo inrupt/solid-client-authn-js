@@ -4,9 +4,13 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "test": "npx testcafe all ess.test.ts"
+    "test": "testcafe firefox:headless,chrome:headless testSuiteRunner.test.ts"
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "@testing-library/testcafe": "^4.2.3",
+    "testcafe": "^1.9.4"
+  }
 }
