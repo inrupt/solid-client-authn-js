@@ -19,6 +19,15 @@
       "authorizeClientAppMechanism": "ess"
     },
     {
+      "description": "ESS Demo - select: Gluu",
+      "podResourceServer": "https://ldp.demo-ess.inrupt.com/<TEST USER NAME>/",
+      "identityProvider": "https://broker.demo-ess.inrupt.com",
+      "envTestUserName": "E2E_ESS_DEMO_USERNAME",
+      "envTestUserPassword": "E2E_ESS_DEMO_PASSWORD",
+      "brokeredIdp": "Gluu",
+      "authorizeClientAppMechanism": "ess"
+    },
+    {
       "description": "NSS",
       "podResourceServer": "https://<TEST USER NAME>.inrupt.net/",
       "identityProvider": "https://inrupt.net",
