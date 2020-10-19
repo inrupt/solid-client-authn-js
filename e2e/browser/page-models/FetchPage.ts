@@ -1,5 +1,4 @@
 import { Selector } from "testcafe";
-// import { screen } from '@testing-library/testcafe';
 
 class FetchPage {
   fetchUriTextbox: Selector;
