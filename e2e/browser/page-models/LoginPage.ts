@@ -5,8 +5,11 @@ class LoginPage {
   identityProviderTextbox: Selector;
 
   constructor() {
-    this.loginButton = Selector("#login_button");
-    this.identityProviderTextbox = Selector("#identity_provider_textbox");
+    this.loginButton = Selector("button").withText("Log In");
+    this.identityProviderTextbox = Selector("*").withAttribute(
+      "data-testid",
+      "identity_provider_textbox"
+    );
   }
 
   async submitLoginForm(identityServerUri: string) {

@@ -1,5 +1,4 @@
 import { Selector } from "testcafe";
-import { screen } from '@testing-library/testcafe';
 
 class FetchPage {
   fetchUriTextbox: Selector;
@@ -8,10 +7,16 @@ class FetchPage {
   logoutButton: Selector;
 
   constructor() {
-    this.fetchUriTextbox = Selector("#fetch_uri_textbox");
-    this.fetchButton = screen.getByText("Fetch");
-    this.fetchResponseTextbox = Selector("#fetch_response_textbox");
-    this.logoutButton = Selector("logout_button");
+    this.fetchUriTextbox = Selector("*").withAttribute(
+      "data-testid",
+      "fetch_uri_textbox"
+    );
+    this.fetchResponseTextbox = Selector("*").withAttribute(
+      "data-testid",
+      "fetch_response_textbox"
+    );
+    this.fetchButton = Selector("button").withText("Fetch");
+    this.logoutButton = Selector("button").withText("Log Out");
   }
 }
 
