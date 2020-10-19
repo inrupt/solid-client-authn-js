@@ -289,14 +289,14 @@ class DemoClientApp extends Component {
           console.log(
             `Endpoint [${idpConfigEndpoint}] has 'end_session_endpoint' [${result.end_session_endpoint}]`
           );
-          document.getElementById("open_idp_button").disabled = false;
-          document.getElementById("logout_idp_button").disabled = false;
+          document.getElementById("#open_idp_button").disabled = false;
+          document.getElementById("#logout_idp_button").disabled = false;
         } else {
           console.log(
             `Endpoint [${idpConfigEndpoint}] is good, but doesn't provide an 'end_session_endpoint'`
           );
-          document.getElementById("open_idp_button").disabled = true;
-          document.getElementById("logout_idp_button").disabled = true;
+          document.getElementById("#open_idp_button").disabled = true;
+          document.getElementById("#logout_idp_button").disabled = true;
         }
 
         if (result.userinfo_endpoint) {
@@ -307,7 +307,7 @@ class DemoClientApp extends Component {
           if (result.userinfo_endpoint.startsWith("https://inrupt.net")) {
             const message = `Identity Provider is NSS, but it's support for user information is currently broken - so we can't verify the current \`id_token\` against the identity provider.`;
             console.log(message);
-            document.getElementById("idp_userinfo").innerHTML = message;
+            document.getElementById("idp_userinfo_text").innerHTML = message;
           } else {
             this.state.session
               .fetch(result.userinfo_endpoint)
@@ -326,7 +326,7 @@ class DemoClientApp extends Component {
                   `Currently logged into Identity Provider [${url}] as user [${loggedInAs}]`
                 );
                 document.getElementById(
-                  "idp_userinfo"
+                  "idp_userinfo_text"
                 ).innerHTML = `Logged into Identity Provider as user: [${loggedInAs}]`;
               })
               .catch((error) => {
@@ -334,7 +334,7 @@ class DemoClientApp extends Component {
                   `Seems we're not currently logged into our Identity Provider [${url}]: ${error}`
                 );
                 document.getElementById(
-                  "idp_userinfo"
+                  "idp_userinfo_text"
                 ).innerHTML = `Not logged into Identity Provider`;
               });
           }
@@ -343,7 +343,7 @@ class DemoClientApp extends Component {
             `Endpoint [${idpConfigEndpoint}] is good, but doesn't provide an 'userinfo_endpoint'`
           );
           document.getElementById(
-            "idp_userinfo"
+            "idp_userinfo_text"
           ).innerHTML = `Identity Provider doesn't provide access to currently logged-in user information`;
         }
 
@@ -353,8 +353,8 @@ class DemoClientApp extends Component {
         console.error(
           `It appears that [${idpConfigEndpoint}] is not a valid Identity Provider configuration endpoint: ${error}`
         );
-        document.getElementById("open_idp_button").disabled = true;
-        document.getElementById("logout_idp_button").disabled = true;
+        document.getElementById("#open_idp_button").disabled = true;
+        document.getElementById("#logout_idp_button").disabled = true;
         return undefined;
       });
   }
@@ -383,7 +383,7 @@ class DemoClientApp extends Component {
             </span>
           </div>
           <input
-            id="identity_provider_textbox"
+            data-testid="identity_provider_textbox"
             type="text"
             size="80"
             value={this.state.loginIssuer}
@@ -393,15 +393,12 @@ class DemoClientApp extends Component {
             }}
           />
           &nbsp;
-          <button id="login_button" onClick={this.handleLogin}>
-            Log In
-          </button>
+          <button onClick={this.handleLogin}>Log In</button>
         </div>
 
         <div className="tooltip">
           <div>
             <input
-              id="reauthorize_client_app"
               type="checkbox"
               checked={this.state.clearClientRegistrationInfo}
               onChange={(e) => {
@@ -415,7 +412,7 @@ class DemoClientApp extends Component {
                 );
               }}
             />
-            <label htmlFor="reauthorize_client_app">
+            <label>
               Re-authorize this client application on Login
             </label>
             &nbsp;<i className="fa fa-info-circle"></i>
@@ -437,20 +434,18 @@ class DemoClientApp extends Component {
       <form>
         <div style={style}>
           <input
-            id="fetch_uri_textbox"
+            data-testid="fetch_uri_textbox"
             size="80"
             type="text"
             value={this.state.fetchRoute}
             onChange={(e) => this.setState({ fetchRoute: e.target.value })}
           />
-          <button id="fetch_button" onClick={this.handleFetch}>
-            Fetch
-          </button>
+          <button onClick={this.handleFetch}>Fetch</button>
         </div>
         <br></br>
         <div style={style}>
           <strong>Resource:</strong>
-          <pre id="fetch_response_textbox">{this.state.fetchBody}</pre>
+          <pre data-testid="fetch_response_textbox">{this.state.fetchBody}</pre>
         </div>
       </form>
     );
@@ -468,7 +463,6 @@ class DemoClientApp extends Component {
           <div className="tooltip">
             <form>
               <button
-                id="logout_button"
                 onClick={this.handleLogout}
                 disabled={!this.state.session.info.isLoggedIn}
               >
@@ -527,7 +521,18 @@ class DemoClientApp extends Component {
         </div>
 
         <div>
-          <span id="idp_userinfo"></span>
+          <div className="tooltip">
+            <div>
+              UserInfo
+              &nbsp;<i className="fa fa-info-circle"></i>:&nbsp;
+              <span id="idp_userinfo_text"></span>
+            </div>
+
+            <span className="tooltiptext">
+              Information on the currently logged-in user (if logged in!) from
+              the 'UserInfo' endpoint of the Identity Provider.
+            </span>
+          </div>
         </div>
       </div>
     );
