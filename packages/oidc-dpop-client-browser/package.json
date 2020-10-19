@@ -25,11 +25,8 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^15.1.0",
-    "@rollup/plugin-node-resolve": "^9.0.0",
     "cross-fetch": "^3.0.6",
     "rollup": "^2.15.0",
-    "rollup-plugin-node-polyfills": "^0.2.1",
     "rollup-plugin-typescript2": "^0.27.1"
   },
   "dependencies": {
@@ -43,7 +40,6 @@
     "jsonwebtoken": "^8.5.1",
     "node-jose": "^2.0.0",
     "oidc-client": "^1.10.1",
-    "rollup-plugin-node-builtins": "^2.1.2",
     "url-parse": "^1.4.7",
     "uuid": "^8.3.1"
   },
