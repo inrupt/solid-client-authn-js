@@ -20,10 +20,11 @@
  */
 
 export default interface IPodServerConfig {
+  description: string;
   podResourceServer: string;
   identityProvider: string;
   envTestUserName: string;
   envTestUserPassword: string;
-
-  loginMechanism: "nss" | "essGluu";
+  brokeredIdp: "nss" | "Gluu" | "Google" | "Github" | "Auth0";
+  authorizeClientAppMechanism: "nss" | "ess";
 }

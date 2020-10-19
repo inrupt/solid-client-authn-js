@@ -2,14 +2,12 @@
 
 import { Selector, t } from "testcafe";
 import LoginPage from "../page-models/LoginPage";
-import FetchPage from "../page-models/FetchPage";
 
 // Login using NSS User
-export async function nssLogin(
+export async function loginNss(
   brokerUrl: string,
   username: string,
-  password: string,
-  waitTime: number
+  password: string
 ) {
   // Log in via ESS Broker service
   await LoginPage.submitLoginForm(brokerUrl);
@@ -18,28 +16,13 @@ export async function nssLogin(
     .typeText("#username", username)
     .typeText("#password", password)
     .click("#login");
-
-  // Authorize our client application to access Pod resources - but this will
-  // only be required the first time this app is seen at the Pod. So we need a
-  // conditional check here.
-  const authorizeButtonExists = await Selector("[name=consent]").exists;
-  if (authorizeButtonExists) {
-    // Click here to grant Control access to our app. Only certain apps may need
-    // that level of access, so don't provide by default.
-    // await t.click("#control");
-    await t.click("[name=consent]");
-  }
-
-  await t.wait(waitTime);
-  await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }
 
 // Login using Google
 export async function essGoogleLogin(
   brokerUrl: string,
   username: string,
-  password: string,
-  waitTime: number
+  password: string
 ) {
   console.log("STARTING GOOGLE LOGIN");
   // Log in via ESS Broker service
@@ -116,12 +99,17 @@ export async function essGithubLogin(
   await t.click("#wrap .btn.btn-success.btn-large");
 }
 
-// ESS (Gluu) User
-export async function essGluuLogin(
+/**
+ *
+ * @param brokerURL
+ * @param username
+ * @param password
+ * @param waitTime
+ */
+export async function loginGluu(
   brokerURL: string,
   username: string,
-  password: string,
-  waitTime: number
+  password: string
 ) {
   // Log in via ESS Broker service
   await LoginPage.submitLoginForm(brokerURL);
@@ -130,9 +118,4 @@ export async function essGluuLogin(
     .typeText("#loginForm\\:username", username)
     .typeText("#loginForm\\:password", password)
     .click("#loginForm\\:loginButton");
-
-  // Authorize our client application to access Pod resources.
-  await t.click("[name=authorize]");
-  await t.wait(waitTime);
-  await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
 }
