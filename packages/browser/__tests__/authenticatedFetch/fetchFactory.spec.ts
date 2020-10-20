@@ -43,7 +43,7 @@ describe("buildBearerFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const myFetch = buildBearerFetch("myToken");
+    const myFetch = buildBearerFetch("myToken", undefined);
     await myFetch("someUrl");
 
     expect(
@@ -59,7 +59,7 @@ describe("buildBearerFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const myFetch = buildBearerFetch("myToken");
+    const myFetch = buildBearerFetch("myToken", undefined);
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
     expect(
@@ -80,7 +80,7 @@ describe("buildBearerFetch", () => {
         [RequestInfo, RequestInit?]
       >;
     };
-    const myFetch = buildBearerFetch("myToken");
+    const myFetch = buildBearerFetch("myToken", undefined);
     await myFetch("someUrl", { headers: { Authorization: "some token" } });
 
     expect(
@@ -99,7 +99,7 @@ describe("buildDpopFetch", () => {
       >;
     };
     const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", key);
+    const myFetch = await buildDpopFetch("myToken", undefined, key);
     await myFetch("http://some.url");
 
     expect(
@@ -121,7 +121,7 @@ describe("buildDpopFetch", () => {
       >;
     };
     const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", key);
+    const myFetch = await buildDpopFetch("myToken", undefined, key);
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
 
     expect(
@@ -148,7 +148,7 @@ describe("buildDpopFetch", () => {
       >;
     };
     const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", key);
+    const myFetch = await buildDpopFetch("myToken", undefined, key);
     await myFetch("http://some.url", {
       headers: {
         Authorization: "some token",

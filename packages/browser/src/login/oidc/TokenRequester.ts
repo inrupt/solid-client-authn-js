@@ -152,7 +152,9 @@ export default class TokenRequester {
 
     const decoded = await decodeJwt(tokenResponse.access_token as string);
     if (!decoded || !decoded.sub) {
-      throw new Error("The idp returned a bad token without a sub.");
+      throw new Error(
+        "The Authorization Server returned a bad token (i.e. when decoded we did not find the required 'sub' claim)."
+      );
     }
 
     await this.storageUtility.setForUser(
