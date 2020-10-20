@@ -289,14 +289,14 @@ class DemoClientApp extends Component {
           console.log(
             `Endpoint [${idpConfigEndpoint}] has 'end_session_endpoint' [${result.end_session_endpoint}]`
           );
-          document.getElementById("#open_idp_button").disabled = false;
-          document.getElementById("#logout_idp_button").disabled = false;
+          document.getElementById("open_idp_button").disabled = false;
+          document.getElementById("logout_idp_button").disabled = false;
         } else {
           console.log(
             `Endpoint [${idpConfigEndpoint}] is good, but doesn't provide an 'end_session_endpoint'`
           );
-          document.getElementById("#open_idp_button").disabled = true;
-          document.getElementById("#logout_idp_button").disabled = true;
+          document.getElementById("open_idp_button").disabled = true;
+          document.getElementById("logout_idp_button").disabled = true;
         }
 
         if (result.userinfo_endpoint) {
@@ -353,8 +353,12 @@ class DemoClientApp extends Component {
         console.error(
           `It appears that [${idpConfigEndpoint}] is not a valid Identity Provider configuration endpoint: ${error}`
         );
-        document.getElementById("#open_idp_button").disabled = true;
-        document.getElementById("#logout_idp_button").disabled = true;
+        document.getElementById("open_idp_button").disabled = true;
+        document.getElementById("logout_idp_button").disabled = true;
+        document.getElementById(
+          "idp_userinfo_text"
+        ).innerHTML = `Endpoint does appear to be a valid Identity Provider`;
+
         return undefined;
       });
   }
@@ -412,9 +416,7 @@ class DemoClientApp extends Component {
                 );
               }}
             />
-            <label>
-              Re-authorize this client application on Login
-            </label>
+            <label>Re-authorize this client application on Login</label>
             &nbsp;<i className="fa fa-info-circle"></i>
           </div>
 
@@ -523,8 +525,7 @@ class DemoClientApp extends Component {
         <div>
           <div className="tooltip">
             <div>
-              UserInfo
-              &nbsp;<i className="fa fa-info-circle"></i>:&nbsp;
+              UserInfo&nbsp;<i className="fa fa-info-circle"></i>:&nbsp;
               <span id="idp_userinfo_text"></span>
             </div>
 
