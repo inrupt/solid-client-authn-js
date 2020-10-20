@@ -263,6 +263,6 @@ describe("TokenRequester", () => {
         refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable @typescript-eslint/camelcase */
-    ).rejects.toThrowError("The idp returned a bad token without a sub.");
+    ).rejects.toThrowError("The Authorization Server returned a bad token");
   });
 });

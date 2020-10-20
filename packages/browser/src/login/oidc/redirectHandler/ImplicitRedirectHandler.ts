@@ -78,7 +78,7 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
     const sessionInfo = await this.sessionInfoManager.get(sessionId);
     return Object.assign(sessionInfo, {
       // The canHandle check at the top of the method makes this assertion valid.
-      fetch: buildBearerFetch(url.query.access_token as string),
+      fetch: buildBearerFetch(url.query.access_token as string, undefined),
     });
   }
 }
