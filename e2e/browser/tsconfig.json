@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.build.json",
+
+  "compilerOptions": {
+    // For some reason, we need to override this setting - it just generates the
+    // type definitions that accompany the generated JS, so that (editors that
+    // understand) TypeScript can make more sense of the generated JS. Don't see
+    // how that should impact TestCafe, but without this we see the following
+    // error when running:
+    //    ERROR Cannot prepare tests due to an error.
+    //
+    //    /home/pmcb55/Work/Projects/Solid/solid-client-authn-js/e2e/browser/src/testSuiteRunner.test.ts:1
+    //    export {};
+    //    ^^^^^^
+    //
+    //    SyntaxError: Unexpected token export
+    "declaration": false,
+
+    // This is needed, otherwise we see this error:
+    //    ERROR Cannot prepare tests due to an error.
+    //
+    //    Error: TypeScript compilation failed.
+    //    Option 'sourceMap' cannot be specified with option 'inlineSourceMap'.
+    "sourceMap": false,
+
+    // This override is genuinely needed(!), just to allow our code read in it's
+    // JSON test fixture file.
+    "resolveJsonModule": true
+  }
+}

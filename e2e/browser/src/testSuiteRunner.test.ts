@@ -28,7 +28,7 @@ import IPodServerConfig from "./IPodServerConfig";
 import { authorizeEss, authorizeNss } from "./helpers/authorizeClientApp";
 
 // Could probably provide this via a system environment variable too...
-const testSuite = require("./test-suite.json");
+import * as testSuite from "./test-suite.json";
 
 // This is the deployed client application that we'll be using to exercise
 // various authentication scenarios. We expect the system environment value to
@@ -45,7 +45,7 @@ fixture(
   `Automated tests using client application: [${clientApplicationUrl}]`
 ).page(clientApplicationUrl);
 
-async function selectBrokeredIdp(brokeredIdp: string) {
+async function selectBrokeredIdp(brokeredIdp: string): Promise<void> {
   const selectIdp = await Selector("h2").withText(
     "How would you like to login?"
   ).exists;
@@ -58,7 +58,7 @@ async function selectBrokeredIdp(brokeredIdp: string) {
 async function performLogin(
   podServerConfig: IPodServerConfig,
   testUserName: string
-) {
+): Promise<void> {
   const testUserPassword = process.env[podServerConfig.envTestUserPassword];
 
   await selectBrokeredIdp(podServerConfig.brokeredIdp);
@@ -106,38 +106,46 @@ async function performLogin(
 }
 
 // Run through all the tests defined in our test suite.
-testSuite.podServerList.forEach((server: IPodServerConfig) => {
-  const testUserName = process.env[server.envTestUserName] as string;
+(testSuite.podServerList as IPodServerConfig[]).forEach(
+  (server: IPodServerConfig) => {
+    const testUserName = process.env[server.envTestUserName] as string;
 
-  if (!testUserName || testUserName.trim().length === 0) {
-      test(`Pod Server - IdP [${server.description}], no environment variable set for [${server.envTestUserName}], so skipping this server.`, async (t) => {});
-  } else {
-    testSuite.testList.forEach((data: ITestConfig) => {
-      test(`Pod Server - IdP [${server.description}], test [${data.name}]`, async (t) => {
-        if (data.performLogin) {
-          await performLogin(server, testUserName);
-        }
+    if (!testUserName || testUserName.trim().length === 0) {
+      // test(`Pod Server - IdP [${server.description}], no environment variable set for [${server.envTestUserName}], so skipping this server.`, async () => {});
+      console.log(
+        `Pod Server - IdP [${server.description}], no environment variable set for [${server.envTestUserName}], so skipping this server.`
+      );
+    } else {
+      testSuite.testList.forEach((data: ITestConfig) => {
+        test(`Pod Server - IdP [${server.description}], test [${data.name}]`, async (t) => {
+          if (data.performLogin) {
+            await performLogin(server, testUserName);
+          }
 
-        const podRoot = server.podResourceServer.replace(
-          "<TEST USER NAME>",
-          testUserName
-        );
-        const resourceToGet = data.resourceToGet.replace("<POD ROOT>", podRoot);
+          const podRoot = server.podResourceServer.replace(
+            "<TEST USER NAME>",
+            testUserName
+          );
+          const resourceToGet = data.resourceToGet.replace(
+            "<POD ROOT>",
+            podRoot
+          );
 
-        await t
-          .selectText(FetchPage.fetchUriTextbox)
-          .typeText(FetchPage.fetchUriTextbox, resourceToGet)
-          .click(FetchPage.fetchButton)
-          .wait(parseInt(testCafeWaitTime, 10));
+          await t
+            .selectText(FetchPage.fetchUriTextbox)
+            .typeText(FetchPage.fetchUriTextbox, resourceToGet)
+            .click(FetchPage.fetchButton)
+            .wait(parseInt(testCafeWaitTime, 10));
 
-        const responseBody = await FetchPage.fetchResponseTextbox.textContent;
+          const responseBody = await FetchPage.fetchResponseTextbox.textContent;
 
-        const expected = data.expectResponseContainsAnyOf.some((option) =>
-          responseBody.includes(option)
-        );
+          const expected = data.expectResponseContainsAnyOf.some((option) =>
+            responseBody.includes(option)
+          );
 
-        await t.expect(expected).ok();
+          await t.expect(expected).ok();
+        });
       });
-    });
+    }
   }
-});
+);
