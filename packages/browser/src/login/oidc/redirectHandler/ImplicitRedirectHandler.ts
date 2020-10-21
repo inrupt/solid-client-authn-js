@@ -59,7 +59,9 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
       );
     }
   }
-  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
+  async handle(
+    redirectUrl: string
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
         `ImplicitRedirectHandler cannot handle [${redirectUrl}]: it is missing one or more of [id_token, access_token, state].`
@@ -67,7 +69,7 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
     }
     const url = new UrlParse(redirectUrl, true);
 
-    await this.tokenSaver.saveTokenAndGetSession(
+    await this.tokenSaver.saveSession(
       url.query.state as string,
       url.query.id_token as string,
       url.query.access_token

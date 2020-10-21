@@ -30,13 +30,12 @@ import {
   ILoginInputOptions,
   ILoginHandler,
   ILogoutHandler,
-  IAuthenticatedFetcher,
   IRedirectHandler,
-  IRequestCredentials,
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
+import { IFetcher } from "./util/Fetcher";
 
 /**
  * @hidden
@@ -49,8 +48,8 @@ export default class ClientAuthentication {
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
-    @inject("authenticatedFetcher")
-    private authenticatedFetcher: IAuthenticatedFetcher,
+    @inject("fetcher")
+    private fetcher: IFetcher,
     @inject("environmentDetector")
     private environmentDetector: IEnvironmentDetector
   ) {}
@@ -71,15 +70,21 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<void> => {
-    // In order to get a clean start, make sure that the session is logged out on login.
+    // In order to get a clean start, make sure that the session is logged out
+    // on login.
+    // But we may want to preserve our client application info, particularly if
+    // we used Dynamic Client Registration to register (since we don't
+    // necessarily want the user to have to register this app each time they
+    // login).
     await this.sessionInfoManager.clear(sessionId);
+
     return this.loginHandler.handle({
       sessionId,
       oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
       redirectUrl: this.urlOptionToUrl(options.redirectUrl),
       clientId: options.clientId,
       clientSecret: options.clientSecret,
-      clientName: options.clientId,
+      clientName: options.clientName ?? options.clientId,
       popUp: options.popUp || false,
       handleRedirect: options.handleRedirect,
       // Defaults to DPoP

@@ -26,9 +26,11 @@ import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/Issue
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
+import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
+    storageUtility: StorageUtilityMock,
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
     clientRegistrar: ClientRegistrarMock,
@@ -37,6 +39,7 @@ describe("OidcLoginHandler", () => {
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): OidcLoginHandler {
     return new OidcLoginHandler(
+      mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
       mocks.clientRegistrar ?? defaultMocks.clientRegistrar

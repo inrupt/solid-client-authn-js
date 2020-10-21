@@ -37,10 +37,12 @@ import {
   ILoginHandler,
   IOidcHandler,
   IOidcOptions,
+  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 
 import ConfigurationError from "../../errors/ConfigurationError";
 import URL from "url-parse";
+import { IClient } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -48,6 +50,7 @@ import URL from "url-parse";
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
+    @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("oidcHandler") private oidcHandler: IOidcHandler,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
@@ -127,16 +130,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       dpop: options.tokenType.toLowerCase() === "dpop",
       redirectUrl: options.redirectUrl as URL,
       issuerConfiguration: issuerConfig,
-      client: await this.clientRegistrar.getClient(
-        {
-          sessionId: options.sessionId,
-          clientId: options.clientId,
-          clientSecret: options.clientSecret,
-          clientName: options.clientName,
-          redirectUrl: options.redirectUrl,
-        },
-        issuerConfig
-      ),
+      client: dynamicClientRegistration,
       sessionId: options.sessionId,
       handleRedirect: options.handleRedirect,
     };

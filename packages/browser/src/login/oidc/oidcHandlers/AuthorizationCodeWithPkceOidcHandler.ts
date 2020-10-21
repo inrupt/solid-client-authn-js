@@ -33,9 +33,8 @@ import {
   IRedirector,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
-import IJoseUtility from "../../../jose/IJoseUtility";
+import { OidcClient, SigninRequest } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -44,7 +43,6 @@ import IJoseUtility from "../../../jose/IJoseUtility";
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler {
   constructor(
-    @inject("joseUtility") private joseUtility: IJoseUtility,
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("redirector") private redirector: IRedirector
   ) {}
@@ -59,17 +57,18 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
-    const requestUrl = new URL(
-      oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
-    );
-    const codeVerifier = await this.joseUtility.generateCodeVerifier();
-    // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */
-    const query: { [key: string]: string } = {
-      response_type: "code id_token",
-      redirect_uri: oidcLoginOptions.redirectUrl.toString(),
-      // TODO: the 'webid' scope does not appear in the specification
-      // A question regarding its use has been filed https://github.com/solid/specification
+    const oidcOptions = {
+      authority: oidcLoginOptions.issuer?.toString(),
+      client_id: oidcLoginOptions.client.clientId,
+      client_secret: oidcLoginOptions.client.clientSecret,
+      redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
+      post_logout_redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
+      response_type: "code",
+      // TODO: The 'webid' scope is still a spec discussion topic
+      //  https://github.com/solid/specification/issues/203, i.e. the 'webid'
+      //  scope does not yet appear in the Solid specification (it's not even
+      //  mentioned in the WebID-OIDC spec).
       scope: "openid webid offline_access",
       filterProtocolClaims: true,
       // The userinfo endpoint on NSS fails, so disable this for now
@@ -79,13 +78,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
       code_verifier: true,
     };
     /* eslint-enable @typescript-eslint/camelcase */
-    requestUrl.set("query", query);
-    // TODO: This is inefficent, there should be a bulk
-    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-      codeVerifier,
-      issuer: oidcLoginOptions.issuer.toString(),
-      redirectUri: oidcLoginOptions.redirectUrl.toString(),
-    });
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
 

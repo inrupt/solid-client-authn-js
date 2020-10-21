@@ -176,7 +176,7 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode&state=userId"
+          "https://coolparty.com/?code=someCode&state=oauth2_state_value"
         )
       ).toBe(true);
     });
@@ -241,26 +241,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://coolsite.com/?code=someCode&state=userId"
-      );
-
-      expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith(
-        "userId",
-        /* eslint-disable @typescript-eslint/camelcase */
-        {
-          code: "someCode",
-          code_verifier: "a",
-          grant_type: "authorization_code",
-          redirect_uri: "b",
-        }
-        /* eslint-enable @typescript-eslint/camelcase */
-      );
-
-      expect(defaultMocks.redirector.redirect).toHaveBeenCalledWith(
-        "https://coolsite.com/",
-        {
-          redirectByReplacingState: true,
-        }
+        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
     });
 
@@ -270,7 +251,7 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
         authCodeRedirectHandler.handle(
-          "https://coolsite.com/?code=someCode&state=userId"
+          "https://coolsite.com/?code=someCode&state=oauth2_state_value"
         )
       ).rejects.toThrowError("Could not retrieve session");
     });
