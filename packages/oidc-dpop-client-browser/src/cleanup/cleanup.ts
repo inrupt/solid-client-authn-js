@@ -37,7 +37,6 @@ export function cleanupRedirectUrl(redirectUrl: string): string {
  * Clears any OIDC-related data lingering in the local storage.
  */
 export async function clearOidcPersistentStorage(): Promise<void> {
-  console.log("Clearing oidc-client local storage");
   const client = new OidcClient({
     // TODO: We should look at the various interfaces being used for storage,
     //  i.e. between oidc-client-js (WebStorageStoreState), localStorage

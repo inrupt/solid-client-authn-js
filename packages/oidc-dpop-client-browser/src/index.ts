@@ -52,7 +52,6 @@ export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGeneration";
 export {
   getDpopToken,
   getBearerToken,
-  clearOidcPersistentStorage,
   TokenEndpointInput,
   TokenEndpointResponse,
   TokenEndpointDpopResponse,
@@ -62,3 +61,7 @@ export {
   IClientRegistrarOptions,
   IIssuerConfig,
 } from "./common/types";
+export {
+  cleanupRedirectUrl,
+  clearOidcPersistentStorage,
+} from "./cleanup/cleanup";

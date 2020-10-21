@@ -67,7 +67,7 @@ export async function clear(
  * @hidden
  */
 @injectable()
-export default class SessionInfoManager implements ISessionInfoManager {
+export class SessionInfoManager implements ISessionInfoManager {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}

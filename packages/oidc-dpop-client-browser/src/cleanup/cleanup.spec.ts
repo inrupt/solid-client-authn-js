@@ -31,6 +31,7 @@ jest.mock("oidc-client", () => {
     OidcClient: jest.fn().mockImplementation(() => {
       return mockClient;
     }),
+    WebStorageStateStore: jest.fn().mockImplementation(),
   };
 });
 
@@ -64,9 +65,10 @@ describe("cleanupRedirectUrl", () => {
 
 describe("clearOidcPersistentStorage", () => {
   it("clears oidc-client storage", async () => {
-    // This is a bad test, but I can only test for internal behaviour of oidc-client,
+    // This is a bad test, but we can only test for internal behaviour of oidc-client,
     // or test that the 'clearStaleState' function is called, which is done here.
-    await expect(clearOidcPersistentStorage()).resolves;
-    expect(new OidcClient({})).toHaveBeenCalled();
+    const clearSpy = jest.spyOn(new OidcClient({}), "clearStaleState");
+    await clearOidcPersistentStorage();
+    expect(clearSpy).toHaveBeenCalled();
   });
 });

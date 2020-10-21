@@ -25,7 +25,7 @@ import { JSONWebKey } from "jose";
 import { createDpopHeader, decodeJwt } from "./dpop";
 import { generateJwkForDpop } from "./keyGeneration";
 import formurlencoded from "form-urlencoded";
-import { OidcClient, WebStorageStateStore } from "oidc-client";
+import { OidcClient } from "oidc-client";
 
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>

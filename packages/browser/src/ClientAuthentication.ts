@@ -81,7 +81,7 @@ export default class ClientAuthentication {
 
     // This workaround should no longer be necessary once no longer use "url-parse"
     let redirectUrl = options.redirectUrl
-      ? this.urlOptionToUrl(options.redirectUrl)?.toString()
+      ? (this.urlOptionToUrl(options.redirectUrl)?.toString() as string)
       : window.location.href;
     redirectUrl = cleanupRedirectUrl(redirectUrl);
 
