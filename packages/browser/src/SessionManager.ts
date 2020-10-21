@@ -25,16 +25,23 @@ import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { detectEnvironment } from "./util/EnvironmentDetector";
 import { ISessionInfo, IStorage } from "@inrupt/solid-client-authn-core";
+import { injectable } from "tsyringe";
 
 export interface ISessionManagerOptions {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }
 
+export interface ISessionManager {
+  getSession(sessionId?: string): Promise<Session>;
+}
+
 /**
- * A SessionManager instance can be used to manage all the sessions in an application, each session being associated to an individual user.
+ * A SessionManager instance can be used to manage all the sessions in an
+ * application, each session being associated with an individual user.
  */
-export class SessionManager extends EventEmitter {
+@injectable()
+export class SessionManager extends EventEmitter implements ISessionManager {
   private clientAuthn: ClientAuthentication;
   private sessionRecords: Record<
     string,
@@ -180,6 +187,7 @@ export class SessionManager extends EventEmitter {
    * it only removes references to it, so after this call the session will become unreachable.
    *
    * @param sessionId A unique session identifier.
+   * @since 0.2.0
    */
   detachSession(sessionId: string): void {
     const sessionRecord = this.sessionRecords[sessionId];

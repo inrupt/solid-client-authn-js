@@ -25,23 +25,23 @@ import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler"
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import URL from "url-parse";
-import { DpopClientKeyManagerMock } from "../../../src/dpop/__mocks__/DpopClientKeyManager";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
+import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
+    storageUtility: StorageUtilityMock,
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
-    dpopClientKeyManager: DpopClientKeyManagerMock,
     clientRegistrar: ClientRegistrarMock,
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): OidcLoginHandler {
     return new OidcLoginHandler(
+      mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-      mocks.dpopClientKeyManager ?? defaultMocks.dpopClientKeyManager,
       mocks.clientRegistrar ?? defaultMocks.clientRegistrar
     );
   }
@@ -54,6 +54,7 @@ describe("OidcLoginHandler", () => {
       oidcIssuer: new URL("https://arbitrary.url"),
       redirectUrl: new URL("https://app.com/redirect"),
       clientId: "coolApp",
+      tokenType: "DPoP",
     });
 
     expect(actualHandler.handle.mock.calls.length).toBe(1);
@@ -78,6 +79,7 @@ describe("OidcLoginHandler", () => {
         oidcIssuer: new URL("https://arbitrary.url"),
         redirectUrl: new URL("https://app.com/redirect"),
         clientId: "coolApp",
+        tokenType: "DPoP",
       })
     ).resolves.toBe(true);
   });

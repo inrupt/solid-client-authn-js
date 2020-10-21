@@ -28,8 +28,8 @@
  * Defines how OIDC login should proceed
  */
 import URL from "url-parse";
-import IIssuerConfig from "./IIssuerConfig";
-import IClient from "./IClient";
+import { IIssuerConfig } from "./IIssuerConfig";
+import { IClient } from "./IClient";
 
 /**
  * @issuer The URL of the IDP
