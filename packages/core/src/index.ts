@@ -19,11 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export { default as ILoginInputOptions } from "./ILoginInputOptions";
-
-export { default as ILoginHandler } from "./login/ILoginHandler";
 export { default as ILoginOptions } from "./login/ILoginOptions";
-
+export { default as ILoginHandler } from "./login/ILoginHandler";
 export { default as ILogoutHandler } from "./logout/ILogoutHandler";
 
 export { default as IHandleable } from "./util/handlerPattern/IHandleable";

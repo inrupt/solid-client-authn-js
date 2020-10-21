@@ -27,7 +27,7 @@ export { getClientAuthenticationWithDependencies } from "./dependencies";
 // Re-export of types defined in the core module and produced/consumed by our API
 
 export {
-  ILoginInputOptions,
+  ILoginOptions,
   ISessionInfo,
   IStorage,
 } from "@inrupt/solid-client-authn-core";

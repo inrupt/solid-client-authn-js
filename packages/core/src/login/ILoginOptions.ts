@@ -33,13 +33,13 @@ import URL from "url-parse";
  * @hidden
  */
 export default interface ILoginOptions {
-  sessionId: string;
+  sessionId?: string;
   oidcIssuer?: URL;
   redirectUrl?: URL;
   clientId?: string;
   clientSecret?: string;
   clientName?: string;
   popUp?: boolean;
-  tokenType: "DPoP" | "Bearer";
+  tokenType?: "DPoP" | "Bearer";
   handleRedirect?: (redirectUrl: string) => unknown;
 }

@@ -24,7 +24,7 @@
  */
 import { EventEmitter } from "events";
 import {
-  ILoginInputOptions,
+  ILoginOptions,
   ISessionInfo,
   IStorage,
 } from "@inrupt/solid-client-authn-core";
@@ -120,7 +120,7 @@ export class Session extends EventEmitter {
    */
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
-  login = async (options: ILoginInputOptions): Promise<void> => {
+  login = async (options: ILoginOptions): Promise<void> => {
     await this.clientAuthentication.login(this.info.sessionId, {
       ...options,
     });

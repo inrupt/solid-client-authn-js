@@ -27,7 +27,7 @@
 import { injectable, inject } from "tsyringe";
 import { IEnvironmentDetector } from "./util/EnvironmentDetector";
 import {
-  ILoginInputOptions,
+  ILoginOptions,
   ILoginHandler,
   ILogoutHandler,
   IRedirectHandler,
@@ -66,10 +66,7 @@ export default class ClientAuthentication {
 
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
-  login = async (
-    sessionId: string,
-    options: ILoginInputOptions
-  ): Promise<void> => {
+  login = async (sessionId: string, options: ILoginOptions): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
     // But we may want to preserve our client application info, particularly if

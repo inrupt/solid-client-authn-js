@@ -253,7 +253,7 @@ describe("StorageUtility", () => {
       expect(result).toEqual({ jsonKey: "some json value" });
     });
 
-    it("should invalidate bad data from the storage if passed a schema and remove it from stroage", async () => {
+    it("should invalidate bad data from the storage if passed a schema and remove it from storage", async () => {
       const storageUtility = getStorageUtility({
         storage: mockStorageUtility({}),
       });

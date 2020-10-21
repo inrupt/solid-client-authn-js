@@ -106,7 +106,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       } else {
         dynamicClientRegistration = await this.clientRegistrar.getClient(
           {
-            sessionId: options.sessionId,
+            sessionId: options.sessionId as string,
             clientName: options.clientName,
             redirectUrl: options.redirectUrl,
           },
@@ -127,11 +127,11 @@ export default class OidcLoginHandler implements ILoginHandler {
     const OidcOptions: IOidcOptions = {
       issuer: options.oidcIssuer as URL,
       // TODO: differentiate if DPoP should be true
-      dpop: options.tokenType.toLowerCase() === "dpop",
+      dpop: options.tokenType?.toLowerCase() === "dpop",
       redirectUrl: options.redirectUrl as URL,
       issuerConfiguration: issuerConfig,
       client: dynamicClientRegistration,
-      sessionId: options.sessionId,
+      sessionId: options.sessionId as string,
       handleRedirect: options.handleRedirect,
     };
 
