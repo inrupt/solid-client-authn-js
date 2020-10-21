@@ -26,7 +26,6 @@
 
 import UrlParse from "url-parse";
 import { inject, injectable } from "tsyringe";
-import { ITokenRequester } from "../TokenRequester";
 import {
   IClient,
   IClientRegistrar,
@@ -99,7 +98,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     }
   }
 
-  async handle(redirectUrl: string): Promise<ISessionInfo | undefined> {
+  async handle(
+    redirectUrl: string
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
@@ -176,16 +177,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
-      throw new Error("There was a problem creating a session.");
-    }
-    try {
-      this.redirector.redirect(url.toString(), {
-        redirectByReplacingState: true,
-      });
-    } catch (err) {
-      // Do nothing
-      // This step of the flow should happen in a browser, and redirection
-      // should never fail there.
+      throw new Error(`Could not retrieve session: [${storedSessionId}].`);
     }
 
     return Object.assign(sessionInfo, {

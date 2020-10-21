@@ -135,8 +135,9 @@ describe("ImplicitRedirectHandler", () => {
       const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
       // We test that the Authorization header matches the structure of a JWT.
       expect(
-        defaultMocks.tokenSaver.saveTokenAndGetSession
-      ).toHaveBeenCalledWith("c", "a", "b");
+        // @ts-ignore
+        header
+      ).toMatch(/^Bearer .+\..+\..+$/);
     });
   });
 });

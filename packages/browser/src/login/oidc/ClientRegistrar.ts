@@ -49,14 +49,6 @@ export default class ClientRegistrar implements IClientRegistrar {
     options: IClientRegistrarOptions,
     issuerConfig: IIssuerConfig
   ): Promise<IClient> {
-    // If client secret and/or client id are in options, use those
-    if (options.clientId) {
-      return {
-        clientId: options.clientId,
-        clientSecret: options.clientSecret,
-      };
-    }
-
     // If client secret and/or client id are stored in storage, use those.
     const [
       storedClientId,

@@ -21,11 +21,7 @@
 
 export { Session, ISessionOptions } from "./Session";
 
-export {
-  SessionManager,
-  ISessionManager,
-  ISessionManagerOptions,
-} from "./SessionManager";
+export { SessionManager, ISessionManagerOptions } from "./SessionManager";
 export { getClientAuthenticationWithDependencies } from "./dependencies";
 
 // Re-export of types defined in the core module and produced/consumed by our API
