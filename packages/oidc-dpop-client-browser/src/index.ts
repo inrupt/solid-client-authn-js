@@ -52,6 +52,7 @@ export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGeneration";
 export {
   getDpopToken,
   getBearerToken,
+  clearOidcPersistentStorage,
   TokenEndpointInput,
   TokenEndpointResponse,
   TokenEndpointDpopResponse,

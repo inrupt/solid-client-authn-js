@@ -33,6 +33,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { fetch } from "cross-fetch";
+import { clearOidcPersistentStorage } from "@inrupt/oidc-dpop-client-browser";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
@@ -59,6 +60,7 @@ export async function clear(
     // FIXME: This is needed until the DPoP key is stored safely
     storage.delete("clientKey", { secure: false }),
   ]);
+  await clearOidcPersistentStorage();
 }
 
 /**
