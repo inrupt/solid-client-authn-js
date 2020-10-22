@@ -26,7 +26,7 @@ import { OidcClient, WebStorageStateStore } from "oidc-client";
  * @param redirectUrl The URL to clean up.
  * @returns A copy of the URL, without OIDC-specific query params.
  */
-export function cleanupRedirectUrl(redirectUrl: string): string {
+export function removeOidcQueryParam(redirectUrl: string): string {
   const cleanedUrl = new URL(redirectUrl);
   cleanedUrl.searchParams.delete("code");
   cleanedUrl.searchParams.delete("state");

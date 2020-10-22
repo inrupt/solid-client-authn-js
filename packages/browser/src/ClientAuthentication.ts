@@ -36,7 +36,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import UrlParse from "url-parse";
 import { IFetcher } from "./util/Fetcher";
-import { cleanupRedirectUrl } from "@inrupt/oidc-dpop-client-browser";
+import { removeOidcQueryParam } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -83,7 +83,7 @@ export default class ClientAuthentication {
     let redirectUrl = options.redirectUrl
       ? (this.urlOptionToUrl(options.redirectUrl)?.toString() as string)
       : window.location.href;
-    redirectUrl = cleanupRedirectUrl(redirectUrl);
+    redirectUrl = removeOidcQueryParam(redirectUrl);
 
     return this.loginHandler.handle({
       sessionId,

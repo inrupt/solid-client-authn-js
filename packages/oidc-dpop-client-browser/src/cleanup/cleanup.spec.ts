@@ -20,7 +20,7 @@
  */
 
 import { it, describe, expect } from "@jest/globals";
-import { cleanupRedirectUrl, clearOidcPersistentStorage } from "./cleanup";
+import { removeOidcQueryParam, clearOidcPersistentStorage } from "./cleanup";
 import { OidcClient } from "oidc-client";
 
 jest.mock("oidc-client", () => {
@@ -35,28 +35,28 @@ jest.mock("oidc-client", () => {
   };
 });
 
-describe("cleanupRedirectUrl", () => {
+describe("removeOidcQueryParam", () => {
   it("removes the 'code' query string if present", () => {
-    expect(cleanupRedirectUrl("https://some.url/?code=aCode")).toEqual(
+    expect(removeOidcQueryParam("https://some.url/?code=aCode")).toEqual(
       "https://some.url/"
     );
   });
 
   it("removes the 'state' query string if present", () => {
-    expect(cleanupRedirectUrl("https://some.url/?state=arkansas")).toEqual(
+    expect(removeOidcQueryParam("https://some.url/?state=arkansas")).toEqual(
       "https://some.url/"
     );
   });
 
   it("returns an URL without query strings as is", () => {
-    expect(cleanupRedirectUrl("https://some.url/")).toEqual(
+    expect(removeOidcQueryParam("https://some.url/")).toEqual(
       "https://some.url/"
     );
   });
 
   it("preserves other query strings", () => {
     expect(
-      cleanupRedirectUrl(
+      removeOidcQueryParam(
         "https://some.url/?code=someCode&state=someState&otherQuery=aValue"
       )
     ).toEqual("https://some.url/?otherQuery=aValue");

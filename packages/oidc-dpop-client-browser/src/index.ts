@@ -62,6 +62,6 @@ export {
   IIssuerConfig,
 } from "./common/types";
 export {
-  cleanupRedirectUrl,
+  removeOidcQueryParam,
   clearOidcPersistentStorage,
 } from "./cleanup/cleanup";
