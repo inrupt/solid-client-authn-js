@@ -110,7 +110,7 @@ describe("SessionInfoManager", () => {
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorageUtility({}, true),
       });
-      await sessionManager.clear("mySession");
+      await sessionManager.clear("Value of sessionId doesn't matter");
       expect(mockClearFunction).toHaveBeenCalled();
     });
 
@@ -132,7 +132,7 @@ describe("SessionInfoManager", () => {
       ).toBeUndefined();
     });
 
-    it("clears local storage from user data", async () => {
+    it("clears local unsecure storage from user data", async () => {
       const mockStorage = mockStorageUtility(
         {
           mySession: {
