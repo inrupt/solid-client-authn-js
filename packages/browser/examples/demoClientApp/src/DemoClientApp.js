@@ -39,35 +39,16 @@ const defaultLocalClientAppSessionId = "my local session id";
 // const defaultClientEndpoint = "http://my-demo-app.com/";
 const defaultClientEndpoint = "http://localhost:3001/";
 
-// // ESS Broker - Demo (backed by GitHub)
-// // GitHub Test Account:
-// //   EMail: broker-demo@inrupt.com
-// //   Username: inrupt-broker-tester
-// //   Password: ?????
-// const defaultIssuer = "https://broker.demo-ess.inrupt.com/";
-// const defaultProtectedResource =
-//   "https://ldp.demo-ess.inrupt.com/github_961445/private/";
-//
-// // ESS Broker - Demo (backed by Google - patm@inrupt.com account)
-// // Google Test Account:
-// //   EMail: broker-demo@inrupt.com
-// //   Username: broker-demo@inrupt.com
-// //   Password: ????? (in 1Password)
-// const defaultIssuer = "https://broker.demo-ess.inrupt.com/";
-// const defaultProtectedResource =
-//   "https://ldp.demo-ess.inrupt.com/110592712913443799002/private/";
-//
-// ESS Broker - Prod (backed by Gluu)
-// Username: sdktestuser
-// Password: ????? (in 1Password - search for username, or 'Gluu')
+const preconfiguedIdpList = [
+  "https://broker.pod.inrupt.com",
+  "https://broker.dev-ess.inrupt.com",
+  "https://broker.demo-ess.inrupt.com",
+  "https://inrupt.net",
+];
+
 const defaultIssuer = "https://broker.pod.inrupt.com/";
 const defaultProtectedResource =
   "https://ldp.pod.inrupt.com/sdktestuser/private/";
-
-// // NSS
-// const defaultIssuer = "https://inrupt.net/";
-// const defaultProtectedResource =
-//   "https://pmcb55.inrupt.net/private/privateTest.ttl"; // NSS pmcb55 - Private resource
 
 const style = {
   display: "inline-block",
@@ -286,24 +267,14 @@ class DemoClientApp extends Component {
       .then((response) => response.json())
       .then((result) => {
         if (result.end_session_endpoint) {
-          console.log(
-            `Endpoint [${idpConfigEndpoint}] has 'end_session_endpoint' [${result.end_session_endpoint}]`
-          );
           document.getElementById("open_idp_button").disabled = false;
           document.getElementById("logout_idp_button").disabled = false;
         } else {
-          console.log(
-            `Endpoint [${idpConfigEndpoint}] is good, but doesn't provide an 'end_session_endpoint'`
-          );
           document.getElementById("open_idp_button").disabled = true;
           document.getElementById("logout_idp_button").disabled = true;
         }
 
         if (result.userinfo_endpoint) {
-          console.log(
-            `Endpoint [${idpConfigEndpoint}] has 'userinfo_endpoint' [${result.userinfo_endpoint}]`
-          );
-
           if (result.userinfo_endpoint.startsWith("https://inrupt.net")) {
             const message = `Identity Provider is NSS, but it's support for user information is currently broken - so we can't verify the current \`id_token\` against the identity provider.`;
             console.log(message);
@@ -322,26 +293,17 @@ class DemoClientApp extends Component {
               })
               .then((result) => {
                 const loggedInAs = result.sub;
-                console.log(
-                  `Currently logged into Identity Provider [${url}] as user [${loggedInAs}]`
-                );
                 document.getElementById(
                   "idp_userinfo_text"
                 ).innerHTML = `Logged into Identity Provider as user: [${loggedInAs}]`;
               })
               .catch((error) => {
-                console.log(
-                  `Seems we're not currently logged into our Identity Provider [${url}]: ${error}`
-                );
                 document.getElementById(
                   "idp_userinfo_text"
                 ).innerHTML = `Not logged into Identity Provider`;
               });
           }
         } else {
-          console.log(
-            `Endpoint [${idpConfigEndpoint}] is good, but doesn't provide an 'userinfo_endpoint'`
-          );
           document.getElementById(
             "idp_userinfo_text"
           ).innerHTML = `Identity Provider doesn't provide access to currently logged-in user information`;
@@ -388,7 +350,8 @@ class DemoClientApp extends Component {
           </div>
           <input
             data-testid="identity_provider_textbox"
-            type="text"
+            list="preconfigued_idp_list"
+            type="search"
             size="80"
             value={this.state.loginIssuer}
             onChange={(e) => {
@@ -396,6 +359,11 @@ class DemoClientApp extends Component {
               this.hasIdentityProviderLogout(e.target.value);
             }}
           />
+          <datalist id="preconfigued_idp_list">
+            {preconfiguedIdpList.map((idp) => (
+              <option value={idp} />
+            ))}
+          </datalist>
           &nbsp;
           <button onClick={this.handleLogin}>Log In</button>
         </div>
@@ -416,12 +384,12 @@ class DemoClientApp extends Component {
                 );
               }}
             />
-            <label>Re-authorize this client application on Login</label>
+            <label>Re-authorize this client application on login</label>
             &nbsp;<i className="fa fa-info-circle"></i>
           </div>
 
           <span className="tooltiptext">
-            Re-authorize this Client Application on Login.
+            Re-authorize this Client Application on login.
             <p></p>
             For example, to change the access permissions you may have already
             granted to this application.
