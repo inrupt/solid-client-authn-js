@@ -150,6 +150,9 @@ export class Session extends EventEmitter {
   handleIncomingRedirect = async (
     url: string
   ): Promise<ISessionInfo | undefined> => {
+    if (this.info.isLoggedIn) {
+      return this.info;
+    }
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url
     );
