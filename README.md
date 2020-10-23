@@ -15,7 +15,7 @@ The libraries share a common API and include different modules for different dep
 [@inrupt/solid-client](https://docs.inrupt.com/client-libraries/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
 
 ## Authentication - solid-client-authn-browser
-[@inrupt/solid-client-authn-browser](https://github.com/inrupt/solid-client-authn-browser) allows apps running on a browser to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
+[@inrupt/solid-client-authn-browser](https://www.npmjs.com/package/@inrupt/solid-client-authn-browser) allows apps running on a browser to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
 ## Vocabularies and interoperability - solid-common-vocab-rdf
 
