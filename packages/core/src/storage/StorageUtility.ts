@@ -62,9 +62,9 @@ export default class StorageUtility implements IStorageUtility {
       return JSON.parse(stored);
     } catch (err) {
       throw new Error(
-        `Data for user ${userId} in ${
+        `Data for user [${userId}] in [${
           secure ? "secure" : "unsecure"
-        } storage is corrupted: expected valid JSON, got :${stored}`
+        }] storage is corrupted - expected valid JSON, but got: ${stored}`
       );
     }
   }
@@ -202,7 +202,7 @@ export default class StorageUtility implements IStorageUtility {
         throw new Error(
           `Object ${JSON.stringify(
             invalidObject
-          )} does not match expected schema ${JSON.stringify(
+          )} does not match expected schema: ${JSON.stringify(
             options.schema
           )}: ${err.toString()}. Please clear your local storage.`
         );
