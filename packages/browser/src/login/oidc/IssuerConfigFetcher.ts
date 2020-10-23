@@ -31,7 +31,7 @@ import {
   IIssuerConfig,
   IIssuerConfigFetcher,
   IStorageUtility,
-  issuerConfigSchema,
+  // issuerConfigSchema,
 } from "@inrupt/solid-client-authn-core";
 import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
@@ -161,18 +161,18 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
-    // Try to look up the config in the cache
-    issuerConfig = (await this.storageUtility.safeGet(
-      IssuerConfigFetcher.getLocalStorageKey(issuer),
-      {
-        schema: issuerConfigSchema,
-      }
-    )) as IIssuerConfig;
+    // // Try to look up the config in the cache
+    // issuerConfig = (await this.storageUtility.safeGet(
+    //   IssuerConfigFetcher.getLocalStorageKey(issuer),
+    //   {
+    //     schema: issuerConfigSchema,
+    //   }
+    // )) as IIssuerConfig;
 
-    // If a local copy of the config is available, don't fetch it
-    if (issuerConfig !== undefined) {
-      return issuerConfig;
-    }
+    // // If a local copy of the config is available, don't fetch it
+    // if (issuerConfig !== undefined) {
+    //   return issuerConfig;
+    // }
 
     const wellKnownUrl = new URL(issuer.toString());
     wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
