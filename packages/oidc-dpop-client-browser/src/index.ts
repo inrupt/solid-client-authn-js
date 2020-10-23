@@ -61,3 +61,7 @@ export {
   IClientRegistrarOptions,
   IIssuerConfig,
 } from "./common/types";
+export {
+  removeOidcQueryParam,
+  clearOidcPersistentStorage,
+} from "./cleanup/cleanup";
