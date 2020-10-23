@@ -27,7 +27,7 @@
 /**
  * @hidden
  */
-export default interface IClient {
+export interface IClient {
   clientId: string;
   clientSecret?: string;
 }

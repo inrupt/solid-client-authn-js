@@ -8,6 +8,7 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
+    "demo-app": "concurrently \"npm run dev\" \"cd examples/demoClientApp; npm run start\"",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
     "clean-module": "rm -rf ./dist",
@@ -62,7 +63,7 @@
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^3.0.7",
+    "typedoc-plugin-markdown": "^3.0.11",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
     "webpack-bundle-analyzer": "^3.8.0",
@@ -71,11 +72,12 @@
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^0.2.1",
+    "@inrupt/oidc-dpop-client-browser": "^0.2.1",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash.clonedeep": "^4.5.6",
-    "@types/node": "^14.6.2",
+    "@types/node": "^14.14.2",
     "@types/node-jose": "^1.1.5",
     "@types/url-parse": "^1.4.3",
     "@types/uuid": "^8.3.0",

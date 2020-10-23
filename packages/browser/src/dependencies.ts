@@ -43,14 +43,7 @@ import {
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
-// import StorageUtility from "../../core/src/storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
-import AggregateAuthenticatedFetcher from "./authenticatedFetch/AggregateAuthenticatedFetcher";
-import DpopAuthenticatedFetcher from "./authenticatedFetch/dpop/DpopAuthenticatedFetcher";
-import UnauthenticatedFetcher from "./authenticatedFetch/unauthenticated/UnauthenticatedFetcher";
-import AggregateLoginHandler from "./login/AggregateLoginHandler";
-import IJoseUtility from "./jose/IJoseUtility";
-import IsomorphicJoseUtility from "./jose/IsomorphicJoseUtility";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeOidcHandler";
@@ -62,15 +55,8 @@ import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImpli
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import Fetcher, { IFetcher } from "./util/Fetcher";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
-import BearerAuthenticatedFetcher from "./authenticatedFetch/bearer/BearerAuthenticatedFetcher";
-import DpopHeaderCreator, {
-  IDpopHeaderCreator,
-} from "./dpop/DpopHeaderCreator";
-import DpopClientKeyManager, {
-  IDpopClientKeyManager,
-} from "./dpop/DpopClientKeyManager";
-import UuidGenerator, { IUuidGenerator } from "./util/UuidGenerator";
-import GeneralRedirectHandler from "./login/oidc/redirectHandler/GeneralRedirectHandler";
+import { ImplicitRedirectHandler } from "./login/oidc/redirectHandler/ImplicitRedirectHandler";
+import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
 import EnvironmentDetector, {
   IEnvironmentDetector,
   detectEnvironment,
@@ -79,15 +65,14 @@ import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import UrlRepresenationConverter, {
   IUrlRepresentationConverter,
 } from "./util/UrlRepresenationConverter";
-import SessionInfoManager from "./sessionInfo/SessionInfoManager";
-import AuthCodeRedirectHandler from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
+import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
+import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
 import TokenSaver, {
   ITokenSaver,
 } from "./login/oidc/redirectHandler/TokenSaver";
 import Redirector from "./login/oidc/Redirector";
-import InactionRedirectHandler from "./login/oidc/redirectHandler/InactionRedirectHandler";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
@@ -97,6 +82,8 @@ import TokenRefresher, {
 import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetcher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 import InMemoryStorage from "./storage/InMemoryStorage";
+import { ISessionManager, SessionManager } from "./SessionManager";
+import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
 const container = emptyContainer;
 
@@ -107,18 +94,6 @@ container.register<IStorageUtility>("storageUtility", {
 // Util
 container.register<IFetcher>("fetcher", {
   useClass: Fetcher,
-});
-container.register<IDpopHeaderCreator>("dpopHeaderCreator", {
-  useClass: DpopHeaderCreator,
-});
-container.register<IDpopClientKeyManager>("dpopClientKeyManager", {
-  useClass: DpopClientKeyManager,
-});
-container.register<IUuidGenerator>("uuidGenerator", {
-  useClass: UuidGenerator,
-});
-container.register<IJoseUtility>("joseUtility", {
-  useClass: IsomorphicJoseUtility,
 });
 container.register<IEnvironmentDetector>("environmentDetector", {
   useClass: EnvironmentDetector,
@@ -131,22 +106,13 @@ container.register<IUrlRepresentationConverter>("urlRepresentationConverter", {
 container.register<ISessionInfoManager>("sessionInfoManager", {
   useClass: SessionInfoManager,
 });
+container.register<ISessionManager>("sessionManager", {
+  useClass: SessionManager,
+});
 
 // Authenticated Fetcher
 container.register<IAuthenticatedFetcher>("authenticatedFetcher", {
   useClass: AutomaticRefreshFetcher,
-});
-container.register<IAuthenticatedFetcher>("aggregateAuthenticatedFetcher", {
-  useClass: AggregateAuthenticatedFetcher,
-});
-container.register<IAuthenticatedFetcher>("authenticatedFetchers", {
-  useClass: DpopAuthenticatedFetcher,
-});
-container.register<IAuthenticatedFetcher>("authenticatedFetchers", {
-  useClass: BearerAuthenticatedFetcher,
-});
-container.register<IAuthenticatedFetcher>("authenticatedFetchers", {
-  useClass: UnauthenticatedFetcher,
 });
 
 // Login
@@ -213,13 +179,15 @@ container.register<IRedirectHandler>("redirectHandlers", {
   useClass: AuthCodeRedirectHandler,
 });
 container.register<IRedirectHandler>("redirectHandlers", {
-  useClass: GeneralRedirectHandler,
-});
-container.register<IRedirectHandler>("redirectHandlers", {
-  useClass: InactionRedirectHandler,
+  useClass: ImplicitRedirectHandler,
 });
 container.register<ITokenSaver>("tokenSaver", {
   useClass: TokenSaver,
+});
+// This catch-all class will always be able to handle the
+// redirect IRI, so it must be registered last in the container
+container.register<IRedirectHandler>("redirectHandlers", {
+  useClass: FallbackRedirectHandler,
 });
 
 // Login/OIDC/Issuer
@@ -243,6 +211,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
 }): ClientAuthentication {
   let secureStorage;
   let insecureStorage;
+
   switch (detectEnvironment()) {
     case "browser":
     case "react-native":

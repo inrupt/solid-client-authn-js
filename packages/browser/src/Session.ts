@@ -73,7 +73,9 @@ export class Session extends EventEmitter {
    *   "mySession"
    * );
    * ```
-   * @param sessionOptions The options enabling the correct instanciation of the session. Either both storages or clientAuthentication are required. For more information, see {@link ISessionOptions}.
+   * @param sessionOptions The options enabling the correct instantiation of
+   * the session. Either both storages or clientAuthentication are required. For
+   * more information, see {@link ISessionOptions}.
    * @param sessionId A magic string uniquely identifying the session.
    *
    */
@@ -82,6 +84,7 @@ export class Session extends EventEmitter {
     sessionId?: string
   ) {
     super();
+
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -91,9 +94,10 @@ export class Session extends EventEmitter {
       });
     } else {
       throw new Error(
-        "Session requires either storage options or auth fetcher."
+        "Session requires either storage options, or a client authentication instance."
       );
     }
+
     if (sessionOptions.sessionInfo) {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,
@@ -130,7 +134,7 @@ export class Session extends EventEmitter {
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    return this.clientAuthentication.fetch(this.info.sessionId, url, init);
+    return this.clientAuthentication.fetch(url, init);
   };
 
   /**

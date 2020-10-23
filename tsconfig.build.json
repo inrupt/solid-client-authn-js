@@ -12,7 +12,7 @@
     "esModuleInterop": true,
     "target": "es2018",
     "sourceMap": true,
-    "lib": ["es2018"],
+    "lib": ["es2018", "dom"],
     "moduleResolution": "node",
     "outDir": "./dist"
   },
