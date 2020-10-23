@@ -30,5 +30,8 @@ import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 /**
  * @hidden
  */
-type IRedirectHandler = IHandleable<[string], ISessionInfo | undefined>;
+type IRedirectHandler = IHandleable<
+  [string],
+  ISessionInfo & { fetch: typeof fetch }
+>;
 export default IRedirectHandler;

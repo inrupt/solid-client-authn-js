@@ -32,9 +32,36 @@ export {
   CordovaPopupNavigator,
   CordovaIFrameNavigator,
   CheckSessionIFrame,
+  SigninRequest,
+  SigninResponse,
   // TODO: Investigate why this fails
   // TokenRevocationClient,
   SessionMonitor,
   // Global,
   User,
 } from "oidc-client";
+
+export { registerClient } from "./dcr/clientRegistrar";
+export {
+  decodeJwt,
+  signJwt,
+  createDpopHeader,
+  privateJwkToPublicJwk,
+} from "./dpop/dpop";
+export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGeneration";
+export {
+  getDpopToken,
+  getBearerToken,
+  TokenEndpointInput,
+  TokenEndpointResponse,
+  TokenEndpointDpopResponse,
+} from "./dpop/tokenExchange";
+export {
+  IClient,
+  IClientRegistrarOptions,
+  IIssuerConfig,
+} from "./common/types";
+export {
+  removeOidcQueryParam,
+  clearOidcPersistentStorage,
+} from "./cleanup/cleanup";

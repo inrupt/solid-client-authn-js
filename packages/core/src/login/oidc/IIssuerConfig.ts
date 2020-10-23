@@ -32,7 +32,7 @@ import URL from "url-parse";
 /**
  * @hidden
  */
-export default interface IIssuerConfig {
+export interface IIssuerConfig {
   issuer: URL;
   authorizationEndpoint: URL;
   tokenEndpoint: URL;

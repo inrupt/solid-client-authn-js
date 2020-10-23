@@ -25,7 +25,7 @@ import { ITokenSaver } from "../TokenSaver";
  * @hidden
  */
 export const TokenSaverMock: jest.Mocked<ITokenSaver> = {
-  saveTokenAndGetSession: jest.fn(
+  saveSession: jest.fn(
     (
       /* eslint-disable @typescript-eslint/no-unused-vars */
       sessionId: string,

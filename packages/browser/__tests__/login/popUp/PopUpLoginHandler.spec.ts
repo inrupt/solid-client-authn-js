@@ -51,6 +51,7 @@ describe("PopUpLoginHandler", () => {
           sessionId: "mySession",
           popUp: true,
           redirectUrl: new URL("/redirect"),
+          tokenType: "DPoP",
         })
       ).toBe(true);
     });
@@ -61,6 +62,7 @@ describe("PopUpLoginHandler", () => {
           sessionId: "mySession",
           popUp: false,
           redirectUrl: new URL("https://coolsite.com/redirect"),
+          tokenType: "DPoP",
         })
       ).toBe(false);
     });
@@ -73,6 +75,7 @@ describe("PopUpLoginHandler", () => {
         handler.handle({
           sessionId: "mySession",
           popUp: true,
+          tokenType: "DPoP",
         })
       ).rejects.toThrow("Popup login is not implemented yet");
     });
