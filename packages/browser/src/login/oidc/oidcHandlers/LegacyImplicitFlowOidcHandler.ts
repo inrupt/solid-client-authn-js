@@ -37,8 +37,10 @@ import {
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
-import { IDpopHeaderCreator } from "../../../dpop/DpopHeaderCreator";
-import { IDpopClientKeyManager } from "../../../dpop/DpopClientKeyManager";
+import {
+  generateJwkForDpop,
+  createDpopHeader,
+} from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -50,9 +52,6 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
     @inject("redirector") private redirector: IRedirector,
-    @inject("dpopClientKeyManager")
-    private dpopClientKeyManager: IDpopClientKeyManager,
-    @inject("dpopHeaderCreator") private dpopHeaderCreator: IDpopHeaderCreator,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
@@ -81,8 +80,8 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       state: oidcLoginOptions.sessionId,
     };
 
-    await Promise.all([
-      this.dpopClientKeyManager.generateClientKeyIfNotAlready(),
+    const [key] = await Promise.all([
+      generateJwkForDpop(),
       this.storageUtility.setForUser(
         oidcLoginOptions.sessionId,
         {
@@ -95,10 +94,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     /* eslint-enable @typescript-eslint/camelcase */
     // TODO: There is currently no secure storage of the DPoP key
     if (oidcLoginOptions.dpop) {
-      query.dpop = await this.dpopHeaderCreator.createHeaderToken(
-        oidcLoginOptions.issuer,
-        "GET"
-      );
+      query.dpop = await createDpopHeader(oidcLoginOptions.issuer, "GET", key);
     }
     requestUrl.set("query", query);
     const sessionInfo = await this.sessionInfoManager.get(

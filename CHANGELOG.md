@@ -7,9 +7,36 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+### Automated test suite
+
+- TestCafe test suite now tests with real tests against both NSS and ESS.
+
+### Security patches
+
+- The support for DPoP was re-implemented in @inrupt/oidc-client-dpop-browser, such that the DPoP JWK is never stored, and only kept inside the closure of the authenticated fetch.
+
+### Bugfixes
+
+- The Authorization header was not set properly, which made it impossible to access private resources.
+- The types consumed/returned by the API are now exported for convenience.
+- The URL parsing library did not parse properly some redirection IRIs, this is now fixed.
+- The dynamic client registration could hang depending on the environment it was deployed in, this is now resolved.
+
+## [0.2.0]
+
+### Breaking changes
+
+- Fixed typo in `detachSession` function name for the browser `SessionManager`.
+
+### Internal refactor:
+
+- Uses [oidc-client-js](https://github.com/IdentityModel/oidc-client-js) now to
+perform the Auth Code Flow (replacing lots of hand-rolled code).
+
 ### Bugfixes
 
 - Source files are now also published to npm, so source maps should work from now on.
+- Fixed typo in `detachSession` function name for the browser `SessionManager`.
 
 ## [0.1.4] - 2020-09-11
 
