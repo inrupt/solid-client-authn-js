@@ -23,7 +23,6 @@
 import "reflect-metadata";
 import StorageUtility from "../../src/storage/StorageUtility";
 import { mockStorageUtility } from "../../src";
-import { mockUserIdStoringInvalidData } from "../../src/storage/__mocks__/StorageUtility";
 
 describe("StorageUtility", () => {
   const defaultMocks = {
@@ -125,16 +124,28 @@ describe("StorageUtility", () => {
   });
 
   describe("getForUser", () => {
-    it("gets undefined item if data stored is invalid JSON", async () => {
+    it("throws if data stored is invalid JSON", async () => {
+      const mockedStorageUtility = mockStorageUtility({});
+      mockedStorageUtility.get = jest
+        .fn()
+        .mockReturnValue(
+          "This response deliberately cannot be parsed as JSON!"
+        );
       const storageUtility = getStorageUtility({
-        storage: mockStorageUtility({}),
+        storage: mockedStorageUtility,
       });
 
-      const value = await storageUtility.getForUser(
-        mockUserIdStoringInvalidData,
-        "Doesn't matter"
-      );
-      expect(value).toBe(undefined);
+      await expect(
+        storageUtility.getForUser("irrelevant for this test", "Doesn't matter")
+      ).rejects.toThrow("cannot be parsed as JSON!");
+
+      await expect(
+        storageUtility.getForUser(
+          "irrelevant for this test",
+          "Doesn't matter",
+          { secure: true }
+        )
+      ).rejects.toThrow("cannot be parsed as JSON!");
     });
 
     it("gets an item from storage for a user", async () => {
@@ -227,7 +238,7 @@ describe("StorageUtility", () => {
   });
 
   describe("deleteForUser", () => {
-    it("deletes a value for a user", async () => {
+    it("deletes a value for a user from unsecure storage", async () => {
       const userData = {
         jackie: "The Cat",
         sledge: "The Dog",
@@ -244,6 +255,28 @@ describe("StorageUtility", () => {
       ).resolves.toEqual(undefined);
       await expect(
         storageUtility.getForUser(userId, "sledge")
+      ).resolves.toEqual("The Dog");
+    });
+
+    it("deletes a value for a user from secure storage", async () => {
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({
+          "solidClientAuthenticationUser:someUser": {
+            jackie: "The Cat",
+            sledge: "The Dog",
+          },
+        }),
+      });
+
+      await storageUtility.deleteForUser("someUser", "jackie", {
+        secure: true,
+      });
+
+      await expect(
+        storageUtility.getForUser("someUser", "jackie", { secure: true })
+      ).resolves.toEqual(undefined);
+      await expect(
+        storageUtility.getForUser("someUser", "sledge", { secure: true })
       ).resolves.toEqual("The Dog");
     });
   });
