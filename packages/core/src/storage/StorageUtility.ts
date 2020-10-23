@@ -204,7 +204,7 @@ export default class StorageUtility implements IStorageUtility {
             invalidObject
           )} does not match expected schema: ${JSON.stringify(
             options.schema
-          )}: ${err.toString()}. Please clear your local storage.`
+          )}: ${err.toString()}. \n Please clear your local storage.`
         );
       }
     }

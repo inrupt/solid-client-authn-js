@@ -30,7 +30,6 @@
 import "reflect-metadata";
 import { container as emptyContainer } from "tsyringe";
 import {
-  IAuthenticatedFetcher,
   IClientRegistrar,
   IIssuerConfigFetcher,
   ILoginHandler,
