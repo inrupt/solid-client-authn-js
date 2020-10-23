@@ -1,6 +1,6 @@
 # oidc-dpop-client-browser
 
-This library is built on top of [oidc-client-js](https://github.com/IdentityModel/oidc-client-js), and adds the following features to it: 
+This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), and adds the following features to it: 
 - Dynamic client registration
 [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html) is part of the [OpenID](https://openid.net) specification and it allows OAuth client applications to dynamically register with an OAuth server.
 To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/openid-connect/openid-connect-understanding-dcr/)
@@ -12,7 +12,7 @@ This [proposed standard](https://tools.ietf.org/html/draft-fett-oauth-dpop-04) i
 To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/oauth/dpop-overview/)
 
 # Other Inrupt Solid JavaScript Libraries
-[@inrupt/oidc-dpop-client-browser](https://www.npmjs.com/package/@inrupt/oidc-dpop-client-browser )is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+[`@inrupt/oidc-dpop-client-browser`](https://www.npmjs.com/package/@inrupt/oidc-dpop-client-browser )is part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Solid JavaScript Authentication - solid-client-authn
 
@@ -28,15 +28,15 @@ The libraries share a common API and include different modules for different dep
 
 ### Data access and permissions management - solid-client
 
-[@inrupt/solid-client](https://docs.inrupt.com/client-libraries/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
+[`@inrupt/solid-client`](https://docs.inrupt.com/client-libraries/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
 
 ### Authentication - solid-client-authn
 
-[@inrupt/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
+[`@inrupt/solid-client-authn`](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
 ### Vocabularies and interoperability - solid-common-vocab-rdf
 
-[@inrupt/solid-common-vocab-rdf](https://github.com/inrupt/solid-common-vocab-rdf) allows developers to build interoperable apps by reusing well-known vocabularies. These libraries provide vocabularies available as constants that you just have to import.
+[`@inrupt/solid-common-vocab-rdf`](https://github.com/inrupt/solid-common-vocab-rdf) allows developers to build interoperable apps by reusing well-known vocabularies. These libraries provide vocabularies available as constants that you just have to import.
 
 # Issues & Help
 
