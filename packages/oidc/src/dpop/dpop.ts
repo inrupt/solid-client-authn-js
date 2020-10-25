@@ -119,7 +119,6 @@ export async function createDpopHeader(
         jwk: await privateJwkToPublicJwk(key),
         typ: "dpop+jwt",
       },
-      expiresIn: "1 hour",
       algorithm: "ES256",
     }
   );
