@@ -208,7 +208,7 @@ container.register<ILogoutHandler>("logoutHandler", {
 /**
  *
  * @param dependencies
- * @deprecated This function will be removed from the external API in an upcomiong release.
+ * @deprecated This function will be removed from the external API in an upcoming release.
  */
 export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;

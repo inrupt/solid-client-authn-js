@@ -40,7 +40,7 @@ describe("Session", () => {
       expect(mySession.info.sessionId).toBeDefined();
     });
 
-    it("does not generate a session id if one is provided", () => {
+    it("does not generate a session ID if one is provided", () => {
       const mySession = new Session({}, "mySession");
       expect(mySession.info.sessionId).toEqual("mySession");
     });
