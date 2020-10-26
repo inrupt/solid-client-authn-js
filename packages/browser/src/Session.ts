@@ -93,15 +93,13 @@ export class Session extends EventEmitter {
         insecureStorage: sessionOptions.insecureStorage,
       });
     } else {
-      throw new Error(
-        "Session requires either storage options, or a client authentication instance."
-      );
+      this.clientAuthentication = getClientAuthenticationWithDependencies({});
     }
 
     if (sessionOptions.sessionInfo) {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,
-        isLoggedIn: sessionOptions.sessionInfo.isLoggedIn,
+        isLoggedIn: false,
         webId: sessionOptions.sessionInfo.webId,
       };
     } else {
@@ -159,6 +157,7 @@ export class Session extends EventEmitter {
     if (sessionInfo) {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
+      this.info.sessionId = sessionInfo.sessionId;
     }
     return sessionInfo;
   };
