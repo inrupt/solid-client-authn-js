@@ -71,4 +71,21 @@ describe("clearOidcPersistentStorage", () => {
     await clearOidcPersistentStorage();
     expect(clearSpy).toHaveBeenCalled();
   });
+
+  it("removes keys matching expected patterns as a stopgap solution", async () => {
+    window.localStorage.setItem("oidc.someOidcState", "a value");
+    window.localStorage.setItem(
+      "solidClientAuthenticationUser:someSessionId",
+      "a value"
+    );
+    window.localStorage.setItem("anArbitraryKey", "a value");
+    await clearOidcPersistentStorage();
+    expect(window.localStorage.length).toEqual(1);
+  });
+
+  it("doesn't fail if localstorage is empty", async () => {
+    window.localStorage.clear();
+    await clearOidcPersistentStorage();
+    expect(window.localStorage.length).toEqual(0);
+  });
 });
