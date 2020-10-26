@@ -24,7 +24,15 @@ import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import SessionInfoManager from "../../src/sessionInfo/SessionInfoManager";
+import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";
+
+const mockClearFunction = jest.fn();
+
+jest.mock("@inrupt/oidc-dpop-client-browser", () => {
+  return {
+    clearOidcPersistentStorage: async (): Promise<void> => mockClearFunction(),
+  };
+});
 
 describe("SessionInfoManager", () => {
   const defaultMocks = {
@@ -94,6 +102,61 @@ describe("SessionInfoManager", () => {
       });
       const session = await sessionManager.get("commanderCool");
       expect(session).toBeUndefined();
+    });
+  });
+
+  describe("clear", () => {
+    it("clears oidc data", async () => {
+      const sessionManager = getSessionInfoManager({
+        storageUtility: mockStorageUtility({}, true),
+      });
+      await sessionManager.clear("Value of sessionId doesn't matter");
+      expect(mockClearFunction).toHaveBeenCalled();
+    });
+
+    it("clears local secure storage from user data", async () => {
+      const mockStorage = mockStorageUtility(
+        {
+          mySession: {
+            key: "value",
+          },
+        },
+        true
+      );
+      const sessionManager = getSessionInfoManager({
+        storageUtility: mockStorage,
+      });
+      await sessionManager.clear("mySession");
+      expect(
+        await mockStorage.getForUser("mySession", "key", { secure: true })
+      ).toBeUndefined();
+    });
+
+    it("clears local unsecure storage from user data", async () => {
+      const mockStorage = mockStorageUtility(
+        {
+          mySession: {
+            key: "value",
+          },
+        },
+        false
+      );
+      const sessionManager = getSessionInfoManager({
+        storageUtility: mockStorage,
+      });
+      await sessionManager.clear("mySession");
+      expect(
+        await mockStorage.getForUser("mySession", "key", { secure: false })
+      ).toBeUndefined();
+    });
+  });
+
+  describe("getAll", () => {
+    it("is not implemented", async () => {
+      const sessionManager = getSessionInfoManager({
+        storageUtility: mockStorageUtility({}),
+      });
+      await expect(sessionManager.getAll).rejects.toThrow("Not implemented");
     });
   });
 });

@@ -23,6 +23,7 @@
 import "reflect-metadata";
 import StorageUtility from "../../src/storage/StorageUtility";
 import { mockStorageUtility } from "../../src";
+import { mockUserIdStoringInvalidData } from "../../src/storage/__mocks__/StorageUtility";
 
 describe("StorageUtility", () => {
   const defaultMocks = {
@@ -50,6 +51,15 @@ describe("StorageUtility", () => {
       });
       await storageUtility.set(key, value);
       const result = await storageUtility.get(key);
+      expect(result).toBe(value);
+    });
+
+    it("gets an item from (secure) storage", async () => {
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}, true),
+      });
+      await storageUtility.set(key, value, { secure: true });
+      const result = await storageUtility.get(key, { secure: true });
       expect(result).toBe(value);
     });
 
@@ -93,9 +103,40 @@ describe("StorageUtility", () => {
       await storageUtility.delete(key);
       await expect(storageUtility.get(key)).resolves.toEqual(undefined);
     });
+
+    it("deletes an item (from secure storage)", async () => {
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}, true),
+      });
+
+      await expect(storageUtility.get(key, { secure: true })).resolves.toEqual(
+        undefined
+      );
+      await storageUtility.set(key, value, { secure: true });
+      await expect(storageUtility.get(key, { secure: true })).resolves.toEqual(
+        value
+      );
+
+      await storageUtility.delete(key, { secure: true });
+      await expect(storageUtility.get(key, { secure: true })).resolves.toEqual(
+        undefined
+      );
+    });
   });
 
   describe("getForUser", () => {
+    it("gets undefined item if data stored is invalid JSON", async () => {
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}),
+      });
+
+      const value = await storageUtility.getForUser(
+        mockUserIdStoringInvalidData,
+        "Doesn't matter"
+      );
+      expect(value).toBe(undefined);
+    });
+
     it("gets an item from storage for a user", async () => {
       const storageUtility = getStorageUtility({
         storage: mockStorageUtility({}),
@@ -107,6 +148,25 @@ describe("StorageUtility", () => {
       await storageUtility.setForUser(userId, userData);
 
       const value = await storageUtility.getForUser(userId, "jackie");
+
+      expect(value).toBe("The Cat");
+    });
+
+    it("gets an item from (secure) storage for a user", async () => {
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}, true),
+      });
+      const userData = {
+        jackie: "The Cat",
+        sledge: "The Dog",
+      };
+      await storageUtility.setForUser(userId, userData, {
+        secure: true,
+      });
+
+      const value = await storageUtility.getForUser(userId, "jackie", {
+        secure: true,
+      });
 
       expect(value).toBe("The Cat");
     });
@@ -208,6 +268,28 @@ describe("StorageUtility", () => {
       await storageUtility.deleteAllUserData(userId);
       await expect(
         storageUtility.getForUser(userId, "jackie")
+      ).resolves.toEqual(undefined);
+    });
+
+    it("deletes all data for a particular user (from secure storage)", async () => {
+      const storageUtility = getStorageUtility({
+        storage: mockStorageUtility({}, true),
+      });
+      const userData = {
+        jackie: "The Cat",
+        sledge: "The Dog",
+      };
+
+      // Write some user data, and make sure it's there.
+      await storageUtility.setForUser(userId, userData, { secure: true });
+      await expect(
+        storageUtility.getForUser(userId, "jackie", { secure: true })
+      ).resolves.toEqual("The Cat");
+
+      // Delete that user data, and make sure it's gone.
+      await storageUtility.deleteAllUserData(userId, { secure: true });
+      await expect(
+        storageUtility.getForUser(userId, "jackie", { secure: true })
       ).resolves.toEqual(undefined);
     });
   });

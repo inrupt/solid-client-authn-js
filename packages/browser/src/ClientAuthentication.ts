@@ -34,8 +34,9 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
+import UrlParse from "url-parse";
 import { IFetcher } from "./util/Fetcher";
+import { removeOidcQueryParam } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -54,12 +55,12 @@ export default class ClientAuthentication {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  private urlOptionToUrl(url?: URL | string): URL | undefined {
+  private urlOptionToUrl(url?: UrlParse | string): UrlParse | undefined {
     if (url) {
       if (typeof url !== "string") {
         return url;
       }
-      return new URL(url);
+      return new UrlParse(url);
     }
     return undefined;
   }
@@ -75,10 +76,16 @@ export default class ClientAuthentication {
     // login).
     await this.sessionInfoManager.clear(sessionId);
 
+    // This workaround should no longer be necessary once no longer use "url-parse"
+    let redirectUrl = options.redirectUrl
+      ? (this.urlOptionToUrl(options.redirectUrl)?.toString() as string)
+      : window.location.href;
+    redirectUrl = removeOidcQueryParam(redirectUrl);
+
     return this.loginHandler.handle({
       sessionId,
       oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
-      redirectUrl: this.urlOptionToUrl(options.redirectUrl),
+      redirectUrl: this.urlOptionToUrl(redirectUrl),
       clientId: options.clientId,
       clientSecret: options.clientSecret,
       clientName: options.clientName ?? options.clientId,
