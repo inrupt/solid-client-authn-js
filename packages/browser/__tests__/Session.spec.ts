@@ -153,11 +153,38 @@ describe("Session", () => {
           done();
         }
       };
-      const mySession = new Session({
-        clientAuthentication: mockClientAuthentication(),
-      });
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.handleIncomingRedirect = jest.fn(
+        async (_url: string) => {
+          return {
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          };
+        }
+      );
+      const mySession = new Session({ clientAuthentication });
       mySession.onLogin(myCallback);
-      await mySession.login({});
+      await mySession.handleIncomingRedirect("https://some.url");
+    });
+
+    it("does not call the registered callback if login isn't successful", async () => {
+      const failCallback = (): void => {
+        fail();
+      };
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.handleIncomingRedirect = jest.fn(
+        async (_url: string) => {
+          return {
+            isLoggedIn: false,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          };
+        }
+      );
+      const mySession = new Session({ clientAuthentication });
+      mySession.onLogin(failCallback);
+      await mySession.handleIncomingRedirect("https://some.url");
     });
   });
 
