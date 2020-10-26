@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+### New features
+
+## [0.2.2]
+
 ### Automated test suite
 
 - TestCafe test suite now tests with real tests against both NSS and ESS.
