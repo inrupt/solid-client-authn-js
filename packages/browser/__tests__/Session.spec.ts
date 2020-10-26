@@ -148,7 +148,9 @@ describe("Session", () => {
 
   describe("onLogin", () => {
     it("calls the registered callback on login", async (done) => {
+      let hasBeenCalled = false;
       const myCallback = (): void => {
+        hasBeenCalled = true;
         if (done) {
           done();
         }
@@ -166,11 +168,14 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       mySession.onLogin(myCallback);
       await mySession.handleIncomingRedirect("https://some.url");
+      expect(hasBeenCalled).toEqual(true);
     });
 
     it("does not call the registered callback if login isn't successful", async () => {
       const failCallback = (): void => {
-        fail();
+        throw new Error(
+          "Should *NOT* call callback - this means test has failed!"
+        );
       };
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest.fn(
@@ -184,7 +189,9 @@ describe("Session", () => {
       );
       const mySession = new Session({ clientAuthentication });
       mySession.onLogin(failCallback);
-      await mySession.handleIncomingRedirect("https://some.url");
+      await expect(
+        mySession.handleIncomingRedirect("https://some.url")
+      ).resolves.not.toThrow();
     });
   });
 
