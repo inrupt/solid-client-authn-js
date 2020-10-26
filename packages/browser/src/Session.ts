@@ -155,6 +155,8 @@ export class Session extends EventEmitter {
     );
     if (sessionInfo) {
       if (sessionInfo.isLoggedIn) {
+        // The login event can only be triggered **after** the user has been
+        // redirected from the IdP with access and ID tokens.
         this.emit("login");
       }
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
