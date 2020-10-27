@@ -93,15 +93,13 @@ export class Session extends EventEmitter {
         insecureStorage: sessionOptions.insecureStorage,
       });
     } else {
-      throw new Error(
-        "Session requires either storage options, or a client authentication instance."
-      );
+      this.clientAuthentication = getClientAuthenticationWithDependencies({});
     }
 
     if (sessionOptions.sessionInfo) {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,
-        isLoggedIn: sessionOptions.sessionInfo.isLoggedIn,
+        isLoggedIn: false,
         webId: sessionOptions.sessionInfo.webId,
       };
     } else {
@@ -124,7 +122,6 @@ export class Session extends EventEmitter {
     await this.clientAuthentication.login(this.info.sessionId, {
       ...options,
     });
-    this.emit("login");
   };
 
   /**
@@ -157,8 +154,14 @@ export class Session extends EventEmitter {
       url
     );
     if (sessionInfo) {
+      if (sessionInfo.isLoggedIn) {
+        // The login event can only be triggered **after** the user has been
+        // redirected from the IdP with access and ID tokens.
+        this.emit("login");
+      }
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
+      this.info.sessionId = sessionInfo.sessionId;
     }
     return sessionInfo;
   };

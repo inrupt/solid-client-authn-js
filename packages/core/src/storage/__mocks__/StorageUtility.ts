@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { IStorage } from "../..";
 import { default as IStorageUtility } from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
@@ -72,6 +73,24 @@ export const StorageUtilityMock: IStorageUtility = {
     }>
   ) => StorageUtilitySafeGetResponse,
   /* eslint-enable @typescript-eslint/no-unused-vars */
+};
+
+export const mockStorage = (
+  stored: Record<string, string | Record<string, string>>
+): IStorage => {
+  const store = stored;
+  return {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    get: async (key: string): Promise<string | undefined> => {
+      return store[key] ? (store[key] as string) : undefined;
+    },
+    set: async (key: string, value: string): Promise<void> => {
+      store[key] = value;
+    },
+    delete: async (key: string): Promise<void> => {
+      delete store[key];
+    },
+  };
 };
 
 export const mockStorageUtility = (
