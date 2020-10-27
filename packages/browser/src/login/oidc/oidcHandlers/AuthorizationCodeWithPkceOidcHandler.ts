@@ -34,7 +34,7 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { OidcClient, SigninRequest } from "@inrupt/oidc-dpop-client-browser";
+import { OidcClient, SigninRequest } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden

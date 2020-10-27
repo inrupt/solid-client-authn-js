@@ -31,5 +31,5 @@ export default {
   ],
   // external: ['crypto'],
   // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true
+  preserveSymlinks: true,
 };

@@ -71,7 +71,7 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "@inrupt/oidc-dpop-client-browser": "^0.2.2",
+    "@inrupt/oidc-client-ext": "^0.2.2",
     "@inrupt/solid-client-authn-core": "^0.2.2",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",

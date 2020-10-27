@@ -50,7 +50,7 @@ const mockJWK = {
   d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
 };
 
-jest.mock("@inrupt/oidc-dpop-client-browser", () => {
+jest.mock("@inrupt/oidc-client-ext", () => {
   return {
     generateJwkForDpop: async (): Promise<typeof mockJWK> => mockJWK,
     createDpopHeader: async (

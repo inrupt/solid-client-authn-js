@@ -41,7 +41,7 @@ import {
   getBearerToken,
   TokenEndpointResponse,
   TokenEndpointDpopResponse,
-} from "@inrupt/oidc-dpop-client-browser";
+} from "@inrupt/oidc-client-ext";
 import {
   buildBearerFetch,
   buildDpopFetch,

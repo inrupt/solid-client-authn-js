@@ -1,4 +1,4 @@
-# oidc-dpop-client-browser
+# oidc-client-ext
 
 This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), and adds the following features to it: 
 - Dynamic client registration
@@ -12,7 +12,7 @@ This [proposed standard](https://tools.ietf.org/html/draft-fett-oauth-dpop-04) i
 To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/oauth/dpop-overview/)
 
 # Other Inrupt Solid JavaScript Libraries
-[`@inrupt/oidc-dpop-client-browser`](https://www.npmjs.com/package/@inrupt/oidc-dpop-client-browser )is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+[`@inrupt/oidc-client-ext`](https://www.npmjs.com/package/@inrupt/oidc-client-ext) is part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Solid JavaScript Authentication - solid-client-authn
 
