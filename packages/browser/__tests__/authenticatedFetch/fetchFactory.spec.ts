@@ -42,7 +42,7 @@ const mockRedirectedResponse = (): MockedRedirectResponse => {
 const mockNotRedirectedResponse = (): MockedRedirectResponse => {
   return {
     redirected: false,
-    url: "https://my.pod/container/",
+    url: "http://some.url",
   };
 };
 
@@ -195,6 +195,10 @@ describe("buildDpopFetch", () => {
       // @ts-ignore
       fetch.fetch.mock.calls[1][0]
     ).toEqual("https://my.pod/container/");
+    // @ts-ignore
+    const dpopHeader = fetch.fetch.mock.calls[1][1].headers["DPoP"] as string;
+    const decodedHeader = await decodeJwt(dpopHeader, key);
+    expect(decodedHeader["htu"]).toEqual("https://my.pod/container/");
   });
 });
 /* eslint-enable @typescript-eslint/ban-ts-ignore */

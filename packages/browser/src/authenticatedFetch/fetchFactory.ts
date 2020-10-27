@@ -46,6 +46,26 @@ export function buildBearerFetch(
   };
 }
 
+async function buildDpopFetchOptions(
+  targetUrl: string,
+  authToken: string,
+  dpopKey: JSONWebKey,
+  defaultOptions?: RequestInit
+): Promise<RequestInit> {
+  return {
+    ...defaultOptions,
+    headers: {
+      ...defaultOptions?.headers,
+      Authorization: `DPoP ${authToken}`,
+      DPoP: await createDpopHeader(
+        targetUrl,
+        defaultOptions?.method ?? "get",
+        dpopKey
+      ),
+    },
+  };
+}
+
 /**
  * @param authToken a DPoP token.
  * @param _refreshToken An optional refresh token.
@@ -61,23 +81,17 @@ export async function buildDpopFetch(
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
   return async (init, options): Promise<Response> => {
-    const fetchOptions: RequestInit = {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Authorization: `DPoP ${authToken}`,
-        DPoP: await createDpopHeader(
-          init.toString(),
-          options?.method ?? "get",
-          dpopKey
-        ),
-      },
-      redirect: "manual",
-    };
-    const response = await fetch(init, fetchOptions);
-    if (!response.redirected) {
+    const response = await fetch(
+      init,
+      await buildDpopFetchOptions(init.toString(), authToken, dpopKey, options)
+    );
+    if (response.url === init.toString()) {
+      console.log(JSON.stringify(response, null, "  "));
       return response;
     }
-    return fetch(response.url, fetchOptions);
+    return fetch(
+      response.url,
+      await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
+    );
   };
 }
