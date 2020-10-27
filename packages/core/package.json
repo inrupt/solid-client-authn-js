@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-core",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -24,12 +24,12 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.14",
+    "@types/jest": "^26.0.15",
     "@types/node-fetch": "^2.5.6",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
     "eslint": "^6.1.0",
-    "eslint-config-prettier": "^6.12.0",
+    "eslint-config-prettier": "^6.14.0",
     "eslint-plugin-license-header": "^0.2.0",
     "eslint-plugin-prettier": "^3.1.4",
     "jest": "^25.1.0",
@@ -37,10 +37,10 @@
     "node-fetch": "^2.6.1",
     "prettier": "2.1.2",
     "ts-jest": "^25.5.1",
-    "ts-loader": "^8.0.4",
+    "ts-loader": "^8.0.7",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^3.0.3",
+    "typedoc-plugin-markdown": "^3.0.11",
     "typescript": "^3.9.7"
   },
   "dependencies": {
@@ -48,7 +48,7 @@
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash.clonedeep": "^4.5.6",
-    "@types/node": "^14.11.2",
+    "@types/node": "^14.14.5",
     "@types/node-jose": "^1.1.5",
     "@types/url-parse": "^1.4.3",
     "@types/uuid": "^8.3.0",
@@ -64,7 +64,7 @@
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.3.0",
     "url-parse": "^1.4.7",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.1"
   },
   "publishConfig": {
     "access": "public"

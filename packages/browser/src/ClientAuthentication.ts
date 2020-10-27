@@ -30,13 +30,13 @@ import {
   ILoginInputOptions,
   ILoginHandler,
   ILogoutHandler,
-  IAuthenticatedFetcher,
   IRedirectHandler,
-  IRequestCredentials,
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
+import UrlParse from "url-parse";
+import { IFetcher } from "./util/Fetcher";
+import { removeOidcQueryParam } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -49,18 +49,18 @@ export default class ClientAuthentication {
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
-    @inject("authenticatedFetcher")
-    private authenticatedFetcher: IAuthenticatedFetcher,
+    @inject("fetcher")
+    private fetcher: IFetcher,
     @inject("environmentDetector")
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  private urlOptionToUrl(url?: URL | string): URL | undefined {
+  private urlOptionToUrl(url?: UrlParse | string): UrlParse | undefined {
     if (url) {
       if (typeof url !== "string") {
         return url;
       }
-      return new URL(url);
+      return new UrlParse(url);
     }
     return undefined;
   }
@@ -71,35 +71,44 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<void> => {
-    // In order to get a clean start, make sure that the session is logged out on login.
+    // In order to get a clean start, make sure that the session is logged out
+    // on login.
+    // But we may want to preserve our client application info, particularly if
+    // we used Dynamic Client Registration to register (since we don't
+    // necessarily want the user to have to register this app each time they
+    // login).
     await this.sessionInfoManager.clear(sessionId);
+
+    // This workaround should no longer be necessary once no longer use "url-parse"
+    let redirectUrl = options.redirectUrl
+      ? (this.urlOptionToUrl(options.redirectUrl)?.toString() as string)
+      : window.location.href;
+    redirectUrl = removeOidcQueryParam(redirectUrl);
+
     return this.loginHandler.handle({
       sessionId,
       oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
-      redirectUrl: this.urlOptionToUrl(options.redirectUrl),
+      redirectUrl: this.urlOptionToUrl(redirectUrl),
       clientId: options.clientId,
       clientSecret: options.clientSecret,
-      clientName: options.clientId,
+      clientName: options.clientName ?? options.clientId,
       popUp: options.popUp || false,
       handleRedirect: options.handleRedirect,
+      // Defaults to DPoP
+      tokenType: options.tokenType ?? "DPoP",
     });
   };
 
-  fetch = async (
-    sessionId: string,
-    url: RequestInfo,
-    init?: RequestInit
-  ): Promise<Response> => {
-    const credentials: IRequestCredentials = {
-      localUserId: sessionId,
-      // TODO: This should not be hard-coded
-      type: "dpop",
-    };
-    return this.authenticatedFetcher.handle(credentials, url, init);
-  };
+  // By default, resolves our fetch() function to the environment fetch()
+  // function.
+  fetch: typeof global.fetch = this.fetcher.fetch;
 
   logout = async (sessionId: string): Promise<void> => {
     this.logoutHandler.handle(sessionId);
+
+    // Restore our fetch() function back to the environment fetch(), effectively
+    // leaving us with un-authenticated fetches from now on.
+    this.fetch = this.fetcher.fetch;
   };
 
   getSessionInfo = async (
@@ -116,6 +125,14 @@ export default class ClientAuthentication {
   handleIncomingRedirect = async (
     url: string
   ): Promise<ISessionInfo | undefined> => {
-    return this.redirectHandler.handle(url);
+    const redirectInfo = await this.redirectHandler.handle(url);
+
+    this.fetch = redirectInfo.fetch;
+
+    return {
+      isLoggedIn: redirectInfo.isLoggedIn,
+      webId: redirectInfo.webId,
+      sessionId: redirectInfo.sessionId,
+    };
   };
 }

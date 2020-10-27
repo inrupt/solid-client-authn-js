@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import SessionInfoManager from "../SessionInfoManager";
+import { SessionInfoManager } from "../SessionInfoManager";
 import {
   ISessionInfo,
   ISessionInfoManager,

@@ -53,13 +53,19 @@ export default class StorageUtility implements IStorageUtility {
       ? this.secureStorage
       : this.insecureStorage
     ).get(this.getKey(userId));
+
     if (stored === undefined) {
       return {};
     }
+
     try {
       return JSON.parse(stored);
     } catch (err) {
-      return {};
+      throw new Error(
+        `Data for user [${userId}] in [${
+          secure ? "secure" : "unsecure"
+        }] storage is corrupted - expected valid JSON, but got: ${stored}`
+      );
     }
   }
 
@@ -150,6 +156,16 @@ export default class StorageUtility implements IStorageUtility {
     );
   }
 
+  /**
+   * Get an object from storage with the guarantee that it matches a given schema.
+   *
+   * @param key The key to look up in storage.
+   * @param options Optional parameters:
+   *  - schema describing the expected JSON structure
+   *  - secure switch to specify the target storage
+   * @returns The storad object associated to the provided key iff it matches the
+   * provided schema.
+   */
   async safeGet(
     key: string,
     options: {
@@ -173,13 +189,23 @@ export default class StorageUtility implements IStorageUtility {
         }
         return parsedObject;
       } catch (err) {
+        let invalidObject;
         if (options.userId) {
-          await this.deleteForUser(options.userId, key, {
+          invalidObject = await this.getForUser(options.userId, key, {
             secure: options.secure,
           });
         } else {
-          await this.delete(key, { secure: options.secure });
+          invalidObject = await this.get(key, {
+            secure: options.secure,
+          });
         }
+        throw new Error(
+          `Object ${JSON.stringify(
+            invalidObject
+          )} does not match expected schema: ${JSON.stringify(
+            options.schema
+          )}: ${err.toString()}. \n Please clear your local storage.`
+        );
       }
     }
     return undefined;

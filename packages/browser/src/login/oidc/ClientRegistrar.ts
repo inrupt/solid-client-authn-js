@@ -27,12 +27,13 @@
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import {
-  IClient,
-  IClientRegistrar,
-  IClientRegistrarOptions,
-  IIssuerConfig,
   IStorageUtility,
+  IClientRegistrar,
+  IIssuerConfig,
+  IClient,
+  IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
+import { registerClient } from "@inrupt/oidc-dpop-client-browser";
 
 /**
  * @hidden
@@ -48,16 +49,12 @@ export default class ClientRegistrar implements IClientRegistrar {
     options: IClientRegistrarOptions,
     issuerConfig: IIssuerConfig
   ): Promise<IClient> {
-    // If client secret and/or client id are in options, use those
-    if (options.clientId) {
-      return {
-        clientId: options.clientId,
-        clientSecret: options.clientSecret,
-      };
-    }
-
-    // If client secret and/or client id are stored in storage, use those
-    const [storedClientId, storedClientSecret] = await Promise.all([
+    // If client secret and/or client id are stored in storage, use those.
+    const [
+      storedClientId,
+      storedClientSecret,
+      // storedClientName,
+    ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId", {
         // FIXME: figure out how to persist secure storage at reload
         secure: false,
@@ -66,6 +63,10 @@ export default class ClientRegistrar implements IClientRegistrar {
         // FIXME: figure out how to persist secure storage at reload
         secure: false,
       }),
+      // this.storageUtility.getForUser(options.sessionId, "clientName", {
+      //   // FIXME: figure out how to persist secure storage at reload
+      //   secure: false,
+      // }),
     ]);
     if (storedClientId) {
       return {
@@ -74,85 +75,32 @@ export default class ClientRegistrar implements IClientRegistrar {
       };
     }
 
-    // If registration access token is stored, use that
-    const [registrationAccessToken, registrationClientUri] = await Promise.all([
-      this.storageUtility.getForUser(
+    // If registration access token is stored, use that.
+    options.registrationAccessToken =
+      options.registrationAccessToken ??
+      (await this.storageUtility.getForUser(
         options.sessionId,
         "registrationAccessToken"
-      ),
-      this.storageUtility.getForUser(
-        options.sessionId,
-        "registrationClientUri"
-      ),
-    ]);
+      ));
 
-    let registerResponse: Response;
-    if (registrationAccessToken && registrationClientUri) {
-      registerResponse = await this.fetcher.fetch(registrationClientUri, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${registrationAccessToken}`,
-        },
-      });
-    } else {
-      // Else, begin the dynamic registration.
-      const config = {
-        /* eslint-disable @typescript-eslint/camelcase */
-        client_name: options.clientName,
-        application_type: "web",
-        redirect_uris: [options.redirectUrl?.toString()],
-        subject_type: "pairwise",
-        token_endpoint_auth_method: "client_secret_basic",
-        code_challenge_method: "S256",
-        /* eslint-enable @typescript-eslint/camelcase */
+    try {
+      const registeredClient = await registerClient(options, issuerConfig);
+      // Save info
+      const infoToSave: Record<string, string> = {
+        clientId: registeredClient.clientId,
       };
-      if (!issuerConfig.registrationEndpoint) {
-        throw new Error(
-          "Dynamic Registration could not be completed because the issuer has no registration endpoint."
-        );
+      if (registeredClient.clientSecret) {
+        infoToSave["clientSecret"] = registeredClient.clientSecret;
       }
-      registerResponse = await this.fetcher.fetch(
-        issuerConfig.registrationEndpoint,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(config),
-        }
-      );
-    }
-
-    if (!registerResponse.ok) {
-      throw new Error(
-        `Login Registration Error: ${await registerResponse.text()}`
-      );
-    }
-    const responseBody = await registerResponse.json();
-
-    // Save info
-    await this.storageUtility.setForUser(
-      options.sessionId,
-      {
-        clientId: responseBody.client_id,
-        clientSecret: responseBody.client_secret,
-      },
-      {
+      await this.storageUtility.setForUser(options.sessionId, infoToSave, {
         // FIXME: figure out how to persist secure storage at reload
         // Otherwise, the client info cannot be retrieved from storage, and
         // the lib tries to re-register the client on each fetch
         secure: false,
-      }
-    );
-    await this.storageUtility.setForUser(options.sessionId, {
-      registrationAccessToken: responseBody.registration_access_token,
-      registrationClientUri: responseBody.registration_client_uri,
-    });
-
-    return {
-      clientId: responseBody.client_id,
-      clientSecret: responseBody.client_secret,
-    };
+      });
+      return registeredClient;
+    } catch (error) {
+      throw new Error(`Client registration failed: [${error.toString()}]`);
+    }
   }
 }

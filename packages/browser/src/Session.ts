@@ -73,7 +73,9 @@ export class Session extends EventEmitter {
    *   "mySession"
    * );
    * ```
-   * @param sessionOptions The options enabling the correct instanciation of the session. Either both storages or clientAuthentication are required. For more information, see {@link ISessionOptions}.
+   * @param sessionOptions The options enabling the correct instantiation of
+   * the session. Either both storages or clientAuthentication are required. For
+   * more information, see {@link ISessionOptions}.
    * @param sessionId A magic string uniquely identifying the session.
    *
    */
@@ -82,6 +84,7 @@ export class Session extends EventEmitter {
     sessionId?: string
   ) {
     super();
+
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -90,14 +93,13 @@ export class Session extends EventEmitter {
         insecureStorage: sessionOptions.insecureStorage,
       });
     } else {
-      throw new Error(
-        "Session requires either storage options or auth fetcher."
-      );
+      this.clientAuthentication = getClientAuthenticationWithDependencies({});
     }
+
     if (sessionOptions.sessionInfo) {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,
-        isLoggedIn: sessionOptions.sessionInfo.isLoggedIn,
+        isLoggedIn: false,
         webId: sessionOptions.sessionInfo.webId,
       };
     } else {
@@ -120,7 +122,6 @@ export class Session extends EventEmitter {
     await this.clientAuthentication.login(this.info.sessionId, {
       ...options,
     });
-    this.emit("login");
   };
 
   /**
@@ -130,7 +131,7 @@ export class Session extends EventEmitter {
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    return this.clientAuthentication.fetch(this.info.sessionId, url, init);
+    return this.clientAuthentication.fetch(url, init);
   };
 
   /**
@@ -153,8 +154,14 @@ export class Session extends EventEmitter {
       url
     );
     if (sessionInfo) {
+      if (sessionInfo.isLoggedIn) {
+        // The login event can only be triggered **after** the user has been
+        // redirected from the IdP with access and ID tokens.
+        this.emit("login");
+      }
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
+      this.info.sessionId = sessionInfo.sessionId;
     }
     return sessionInfo;
   };

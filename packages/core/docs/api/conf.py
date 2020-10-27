@@ -93,6 +93,7 @@ html_theme_options = {
     'github_branch': 'master',
     'ess_docs': 'https://docs.inrupt.com/ess/',
     'clientlibjs_docs': 'https://docs.inrupt.com/developer-tools/javascript/client-libraries/',
+    'reactsdk_docs': 'https://docs.inrupt.com/developer-tools/javascript/react-sdk',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -100,6 +101,10 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+
+html_sidebars = {
+    '**': ['docs-sidebar.html'],
+}
 
 locale_dirs = ['locale/']   # path is example but recommended.
 gettext_compact = False     # optional.

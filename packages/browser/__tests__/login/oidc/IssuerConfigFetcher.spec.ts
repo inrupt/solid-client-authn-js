@@ -53,23 +53,6 @@ describe("IssuerConfigFetcher", () => {
     );
   }
 
-  it("should return the config stored in the storage", async () => {
-    const url = new URL("https://arbitrary.url");
-    const storageKey = IssuerConfigFetcher.getLocalStorageKey(url);
-
-    const storageMock = mockStorageUtility({
-      [storageKey]: { some: "config" },
-    });
-
-    const configFetcher = getIssuerConfigFetcher({
-      storageUtility: storageMock,
-    });
-
-    const fetchedConfig = await configFetcher.fetchConfig(url);
-
-    expect(fetchedConfig).toEqual({ some: "config" });
-  });
-
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
     const fetchResponse = (new NodeResponse(
       JSON.stringify({

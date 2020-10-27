@@ -31,6 +31,19 @@ import {
   ISessionInfoManagerOptions,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { v4 } from "uuid";
+import { fetch } from "cross-fetch";
+import { clearOidcPersistentStorage } from "@inrupt/oidc-dpop-client-browser";
+
+export function getUnauthenticatedSession(): ISessionInfo & {
+  fetch: typeof fetch;
+} {
+  return {
+    isLoggedIn: false,
+    sessionId: v4(),
+    fetch: fetch,
+  };
+}
 
 /**
  * @param sessionId
@@ -47,13 +60,14 @@ export async function clear(
     // FIXME: This is needed until the DPoP key is stored safely
     storage.delete("clientKey", { secure: false }),
   ]);
+  await clearOidcPersistentStorage();
 }
 
 /**
  * @hidden
  */
 @injectable()
-export default class SessionInfoManager implements ISessionInfoManager {
+export class SessionInfoManager implements ISessionInfoManager {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}

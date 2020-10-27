@@ -19,13 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export { Session } from "./Session";
-export { SessionManager } from "./SessionManager";
+export { Session, ISessionOptions } from "./Session";
+
+export { SessionManager, ISessionManagerOptions } from "./SessionManager";
 export { getClientAuthenticationWithDependencies } from "./dependencies";
 
-// Interfaces
-// TODO: PMcB - should we re-export these interfaces (now in 'core')?
-// export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";
-// export { default as IStorage } from "./storage/IStorage";
-export { ISessionOptions } from "./Session";
-export { ISessionManagerOptions } from "./SessionManager";
+// Re-export of types defined in the core module and produced/consumed by our API
+
+export {
+  ILoginInputOptions,
+  ISessionInfo,
+  IStorage,
+} from "@inrupt/solid-client-authn-core";
