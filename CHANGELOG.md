@@ -13,6 +13,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+### Bugfixes
+
+- If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
+
 ## [0.2.2]
 
 ### Automated test suite
@@ -33,7 +37,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - The types consumed/returned by the API are now exported for convenience.
 - The URL parsing library did not parse properly some redirection IRIs, this is now fixed.
 - The dynamic client registration could hang depending on the environment it was deployed in, this is now resolved.
-- If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
+- The `login` event was never actually fired because of a bug which is now fixed.
 
 ## [0.2.0]
 
