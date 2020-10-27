@@ -27,9 +27,6 @@ export const StorageUtilitySafeGetResponse = {
   someKey: "someValue",
 };
 
-export const mockUserIdStoringInvalidData =
-  "Mock user testing for invalid stored data (which should be impossible)...";
-
 export const StorageUtilityMock: IStorageUtility = {
   /* eslint-disable @typescript-eslint/no-unused-vars */
   get: async (key: string, options?: { errorIfNull?: boolean }) =>
@@ -112,16 +109,15 @@ export const mockStorageUtility = (
       options?: { errorIfNull?: boolean; secure?: boolean }
     ): Promise<string | undefined> => {
       const store = options?.secure ? secureStore : nonSecureStore;
-
-      if (key.endsWith(mockUserIdStoringInvalidData)) {
-        return new Promise((resolve) =>
-          resolve("This response deliberately cannot be parsed as JSON!")
-        );
-      }
-
-      return new Promise((resolve) =>
-        resolve(store[key] ? (store[key] as string) : undefined)
-      );
+      return new Promise((resolve) => {
+        if (!store[key]) {
+          resolve(undefined);
+        }
+        if (typeof store[key] === "string") {
+          resolve(store[key] as string);
+        }
+        resolve(JSON.stringify(store[key]));
+      });
     },
     set: async (
       key: string,
