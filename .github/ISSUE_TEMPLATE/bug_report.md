@@ -1,30 +1,36 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a bug report to help us improve
 title: ""
-labels: ""
+labels: "bug"
 assignees: ""
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+<!-- 
+Thank you for reporting an issue.
 
-**To Reproduce**
-Steps to reproduce the behavior:
+Please fill in as much of the template below as you're able. Feel free to delete any section you want to skip. 
+-->
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+### Search terms you've used
+<!-- What search terms have you used to check whether this bug was already reported? -->
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+### Bug description
+<!-- A short description of what the problem is. -->
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+### To Reproduce
+1. 
+2. 
+3. 
+4. 
 
-**Environment**
+### Expected result
+<!-- A clear and concise description of what you expected to happen -->
 
+### Actual result
+<!-- A description of what actually happened -->
+
+### Environment
 Please run
 
   npx envinfo --system --npmPackages --binaries --npmGlobalPackages --browsers
@@ -33,6 +39,7 @@ in your project folder and paste the output here:
 
 ```
 $ npx envinfo --system --npmPackages --binaries --npmGlobalPackages --browsers
+```
 
-**Additional context**
-Add any other context about the problem here.
+## Additional information
+<!-- Add any other relevant information that might be useful to understand and find a solution to the problem -->
