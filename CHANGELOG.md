@@ -7,7 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
-### New features
+### Bugfixes
+
+- If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
 
 ## [0.2.2]
 
