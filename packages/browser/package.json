@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -8,6 +8,7 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
+    "demo-app": "concurrently \"npm run dev\" \"cd examples/demoClientApp; npm run start\"",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
     "clean-module": "rm -rf ./dist",
@@ -62,7 +63,7 @@
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^3.0.7",
+    "typedoc-plugin-markdown": "^3.0.11",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
     "webpack-bundle-analyzer": "^3.8.0",
@@ -70,18 +71,19 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-core": "^0.2.1",
+    "@inrupt/oidc-dpop-client-browser": "^0.2.2",
+    "@inrupt/solid-client-authn-core": "^0.2.2",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash.clonedeep": "^4.5.6",
-    "@types/node": "^14.6.2",
+    "@types/node": "^14.14.5",
     "@types/node-jose": "^1.1.5",
     "@types/url-parse": "^1.4.3",
     "@types/uuid": "^8.3.0",
     "build-module": "^1.0.7",
     "cross-fetch": "^3.0.6",
-    "crypto-random-string": "^3.2.0",
+    "crypto-random-string": "^3.3.0",
     "form-urlencoded": "^4.2.1",
     "jose": "^2.0.2",
     "jsonwebtoken": "^8.5.1",
@@ -90,7 +92,7 @@
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.3.0",
     "url-parse": "^1.4.7",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.1"
   },
   "publishConfig": {
     "access": "public"

@@ -35,7 +35,7 @@ import { inject, injectable } from "tsyringe";
  * @hidden
  */
 @injectable()
-export default class LogoutHandler implements ILogoutHandler {
+export default class GeneralLogoutHandler implements ILogoutHandler {
   constructor(
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager

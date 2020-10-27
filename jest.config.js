@@ -1,7 +1,7 @@
 module.exports = {
   roots: ["<rootDir>"],
   clearMocks: true,
-  testMatch: ["**/__tests__/**/?(*.)+(spec|test).+(ts|tsx|js)"],
+  testMatch: ["**/(__tests__|src)/**/?(*.)+(spec|test).+(ts|tsx|js)"],
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
   },

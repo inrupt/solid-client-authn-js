@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { IStorage } from "../..";
 import { default as IStorageUtility } from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
@@ -71,6 +72,24 @@ export const StorageUtilityMock: IStorageUtility = {
   /* eslint-enable @typescript-eslint/no-unused-vars */
 };
 
+export const mockStorage = (
+  stored: Record<string, string | Record<string, string>>
+): IStorage => {
+  const store = stored;
+  return {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    get: async (key: string): Promise<string | undefined> => {
+      return store[key] ? (store[key] as string) : undefined;
+    },
+    set: async (key: string, value: string): Promise<void> => {
+      store[key] = value;
+    },
+    delete: async (key: string): Promise<void> => {
+      delete store[key];
+    },
+  };
+};
+
 export const mockStorageUtility = (
   stored: Record<string, string | Record<string, string>>,
   isSecure = false
@@ -90,9 +109,15 @@ export const mockStorageUtility = (
       options?: { errorIfNull?: boolean; secure?: boolean }
     ): Promise<string | undefined> => {
       const store = options?.secure ? secureStore : nonSecureStore;
-      return new Promise((resolve) =>
-        resolve(store[key] ? (store[key] as string) : undefined)
-      );
+      return new Promise((resolve) => {
+        if (!store[key]) {
+          resolve(undefined);
+        }
+        if (typeof store[key] === "string") {
+          resolve(store[key] as string);
+        }
+        resolve(JSON.stringify(store[key]));
+      });
     },
     set: async (
       key: string,

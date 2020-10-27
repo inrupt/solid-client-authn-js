@@ -21,6 +21,7 @@
 
 import { IFetcher } from "../Fetcher";
 import { Response as NodeResponse } from "node-fetch";
+import URLParse from "url-parse";
 
 export const FetcherMockResponse: Response = (new NodeResponse(
   JSON.stringify({ arbitrary: "response" })
@@ -54,4 +55,17 @@ export const FetcherMock: jest.Mocked<IFetcher> = {
 export const FetcherTokenMock: jest.Mocked<IFetcher> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetch: jest.fn(async (_url, _init) => FetchTokenResponse),
+};
+
+export const mockFetcher = (): IFetcher => {
+  return {
+    fetch: jest.fn(
+      async (
+        _url: string | Request | URLParse,
+        _init?: RequestInit
+      ): Promise<Response> => {
+        return (new NodeResponse() as unknown) as Response;
+      }
+    ),
+  };
 };

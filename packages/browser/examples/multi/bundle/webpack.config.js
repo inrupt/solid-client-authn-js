@@ -26,6 +26,9 @@ module.exports = {
       filename: "./index.html",
     }),
   ],
+  output: {
+    publicPath: process.env.ASSET_PATH || '/',
+  },
   devServer: {
     port: 3001,
     historyApiFallback: true,

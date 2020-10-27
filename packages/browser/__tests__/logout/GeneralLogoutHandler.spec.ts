@@ -24,7 +24,7 @@ import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { default as LogoutHandler } from "../../src/logout/GeneralLogoutHandler";
 import { mockSessionInfoManager } from "../../src/sessionInfo/__mocks__/SessionInfoManager";
 
-describe("OidcLoginHandler", () => {
+describe("GeneralLogoutHandler", () => {
   const defaultMocks = {
     sessionManager: mockSessionInfoManager(mockStorageUtility({})),
   };

@@ -48,33 +48,19 @@ describe("ClientRegistrar", () => {
   }
 
   describe("getClient", () => {
-    it("returns a formatted client object if the clientId is present", async () => {
-      const clientRegistrar = getClientRegistrar();
-      expect(
-        await clientRegistrar.getClient(
-          {
-            sessionId: "mySession",
-            redirectUrl: new URL("https://example.com"),
-            clientId: "coolApp",
-          },
-          IssuerConfigFetcherFetchConfigResponse
-        )
-      ).toMatchObject({
-        clientId: "coolApp",
-      });
-    });
-
     it("properly performs dynamic registration", async () => {
-      defaultMocks.fetcher.fetch.mockResolvedValueOnce(
+      const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable @typescript-eslint/camelcase */
         (new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
+            redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
+      global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
@@ -94,7 +80,7 @@ describe("ClientRegistrar", () => {
         clientId: "abcd",
         clientSecret: "1234",
       });
-      expect(defaultMocks.fetcher.fetch).toHaveBeenCalledWith(registrationUrl, {
+      expect(mockFetch).toHaveBeenCalledWith(registrationUrl.toString(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,6 +95,35 @@ describe("ClientRegistrar", () => {
           /* eslint-enable @typescript-eslint/camelcase */
         }),
       });
+    });
+
+    it("can register a public client without secret", async () => {
+      const mockFetch = jest.fn().mockResolvedValueOnce(
+        /* eslint-disable @typescript-eslint/camelcase */
+        (new NodeResponse(
+          JSON.stringify({
+            client_id: "abcd",
+            redirect_uris: ["https://example.com"],
+          })
+        ) as unknown) as Response
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      global.fetch = mockFetch;
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility({}),
+      });
+      const registrationUrl = new URL("https://idp.com/register");
+      const registeredClient = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: new URL("https://example.com"),
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+          registrationEndpoint: registrationUrl,
+        }
+      );
+      expect(registeredClient.clientSecret).toBeUndefined();
     });
 
     it("Fails if there is not registration endpoint", async () => {
@@ -129,13 +144,14 @@ describe("ClientRegistrar", () => {
     });
 
     it("handles a failure to dynamically register elegantly", async () => {
-      defaultMocks.fetcher.fetch.mockResolvedValueOnce(
+      const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable @typescript-eslint/camelcase */
-        (new NodeResponse("bad stuff that's an error", {
+        (new NodeResponse('{"error":"bad stuff that\'s an error"}', {
           status: 400,
         }) as unknown) as Response
         /* eslint-enable @typescript-eslint/camelcase */
       );
+      global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
@@ -152,8 +168,151 @@ describe("ClientRegistrar", () => {
           }
         )
       ).rejects.toThrowError(
-        "Login Registration Error: bad stuff that's an error"
+        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]"
       );
+    });
+
+    it("retrieves client id and secret from storage if they are present", async () => {
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            mySession: {
+              clientId: "an id",
+              clientSecret: "a secret",
+            },
+          },
+          false
+        ),
+      });
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: new URL("https://example.com"),
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      expect(client.clientId).toEqual("an id");
+      expect(client.clientSecret).toEqual("a secret");
+    });
+
+    it("passes the registration token if provided", async () => {
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility({}),
+      });
+
+      const mockFetch = jest.fn().mockResolvedValueOnce(
+        /* eslint-disable @typescript-eslint/camelcase */
+        (new NodeResponse(
+          JSON.stringify({
+            client_id: "abcd",
+            client_secret: "1234",
+            redirect_uris: ["https://example.com"],
+          })
+        ) as unknown) as Response
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      global.fetch = mockFetch;
+
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: new URL("https://example.com"),
+          registrationAccessToken: "some token",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+          registrationEndpoint: new URL("https://some.issuer/register"),
+        }
+      );
+
+      const registrationHeaders = mockFetch.mock.calls[0][1].headers as Record<
+        string,
+        string
+      >;
+      expect(registrationHeaders["Authorization"]).toEqual("Bearer some token");
+    });
+
+    it("retrieves the registration token from storage if present", async () => {
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            mySession: {
+              registrationAccessToken: "some token",
+            },
+          },
+          false
+        ),
+      });
+
+      const mockFetch = jest.fn().mockResolvedValueOnce(
+        /* eslint-disable @typescript-eslint/camelcase */
+        (new NodeResponse(
+          JSON.stringify({
+            client_id: "abcd",
+            client_secret: "1234",
+            redirect_uris: ["https://example.com"],
+          })
+        ) as unknown) as Response
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      global.fetch = mockFetch;
+
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: new URL("https://example.com"),
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+          registrationEndpoint: new URL("https://some.issuer/register"),
+        }
+      );
+
+      const registrationHeaders = mockFetch.mock.calls[0][1].headers as Record<
+        string,
+        string
+      >;
+      expect(registrationHeaders["Authorization"]).toEqual("Bearer some token");
+    });
+
+    it("saves dynamic registration information", async () => {
+      const mockFetch = jest.fn().mockResolvedValueOnce(
+        /* eslint-disable @typescript-eslint/camelcase */
+        (new NodeResponse(
+          JSON.stringify({
+            client_id: "some id",
+            client_secret: "some secret",
+            redirect_uris: ["https://example.com"],
+          })
+        ) as unknown) as Response
+        /* eslint-enable @typescript-eslint/camelcase */
+      );
+      global.fetch = mockFetch;
+      const myStorage = mockStorageUtility({});
+      const clientRegistrar = getClientRegistrar({
+        storage: myStorage,
+      });
+      const registrationUrl = new URL("https://idp.com/register");
+
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: new URL("https://example.com"),
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+          registrationEndpoint: registrationUrl,
+        }
+      );
+
+      await expect(
+        myStorage.getForUser("mySession", "clientId", { secure: false })
+      ).resolves.toEqual("some id");
+      await expect(
+        myStorage.getForUser("mySession", "clientSecret", { secure: false })
+      ).resolves.toEqual("some secret");
     });
   });
 });
