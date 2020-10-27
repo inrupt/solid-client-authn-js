@@ -19,12 +19,17 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 - The support for DPoP was re-implemented in @inrupt/oidc-client-dpop-browser, such that the DPoP JWK is never stored, and only kept inside the closure of the authenticated fetch.
 
+### Non-breaking changes
+
+- It is now possible to build a `Session` without calling `getClientAuthenticationWithDependencies`, which results in simpler code.
+
 ### Bugfixes
 
 - The Authorization header was not set properly, which made it impossible to access private resources.
 - The types consumed/returned by the API are now exported for convenience.
 - The URL parsing library did not parse properly some redirection IRIs, this is now fixed.
 - The dynamic client registration could hang depending on the environment it was deployed in, this is now resolved.
+- The `login` event was never actually fired because of a bug which is now fixed.
 
 ## [0.2.0]
 
