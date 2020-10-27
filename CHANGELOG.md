@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+### Breaking changes
+
+- The package `@inrupt/oidc-dpop-client-browser` is now called `@inrupt/oidc-client-ext`.
+
 ### Bugfixes
 
 - If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
