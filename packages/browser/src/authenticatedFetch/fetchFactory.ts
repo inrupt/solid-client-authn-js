@@ -61,7 +61,7 @@ export async function buildDpopFetch(
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
   return async (init, options): Promise<Response> => {
-    return fetch(init, {
+    const fetchOptions: RequestInit = {
       ...options,
       headers: {
         ...options?.headers,
@@ -72,6 +72,12 @@ export async function buildDpopFetch(
           dpopKey
         ),
       },
-    });
+      redirect: "manual",
+    };
+    const response = await fetch(init, fetchOptions);
+    if (!response.redirected) {
+      return response;
+    }
+    return fetch(response.url, fetchOptions);
   };
 }

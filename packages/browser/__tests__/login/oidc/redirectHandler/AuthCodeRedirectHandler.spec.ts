@@ -277,10 +277,34 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated dpop fetch if requested", async () => {
-      window.fetch = jest.fn() as jest.Mock<
+<<<<<<< HEAD
+      window.fetch = jest.fn().mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            redirected: true,
+            url: "https://my.pod/container/",
+          } as Response);
+        })
+      ) as jest.Mock<
         ReturnType<typeof window.fetch>,
         [RequestInfo, RequestInit?]
       >;
+=======
+      const fetch = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock<
+          ReturnType<typeof window.fetch>,
+          [RequestInfo, RequestInit?]
+        >;
+      };
+      fetch.fetch = jest.fn().mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            redirected: true,
+            url: "https://my.pod/container/",
+          } as Response);
+        })
+      );
+>>>>>>> DPoP-authenticated fetch manages redirection
 
       const storage = mockStorageUtility({
         oauth2StateValue: {

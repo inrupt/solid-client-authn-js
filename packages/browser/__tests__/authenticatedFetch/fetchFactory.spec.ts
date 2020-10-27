@@ -27,15 +27,45 @@ import {
 } from "../../src/authenticatedFetch/fetchFactory";
 import { decodeJwt, generateJwkForDpop } from "@inrupt/oidc-client-ext";
 
+type MockedRedirectResponse = {
+  redirected: boolean;
+  url: string;
+};
+
+const mockRedirectedResponse = (): MockedRedirectResponse => {
+  return {
+    redirected: true,
+    url: "https://my.pod/container/",
+  };
+};
+
+const mockNotRedirectedResponse = (): MockedRedirectResponse => {
+  return {
+    redirected: false,
+    url: "https://my.pod/container/",
+  };
+};
+
+const mockFetch = (
+  response: MockedRedirectResponse
+): typeof window.fetch => {
+  window.fetch = jest.fn().mockReturnValueOnce(
+    new Promise((resolve) => {
+      resolve(response as Response);
+    })
+  ) as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
+    return window.fetch;
+};
+
 // We use ts-ignore comments here only to access mock call arguments
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
-    window.fetch = jest.fn() as jest.Mock<
-      ReturnType<typeof window.fetch>,
-      [RequestInfo, RequestInit?]
-    >;
+    mockFetch(mockNotRedirectedResponse());
     const myFetch = buildBearerFetch("myToken", undefined);
     await myFetch("someUrl");
 
@@ -46,10 +76,7 @@ describe("buildBearerFetch", () => {
   });
 
   it("returns a fetch preserving the optional headers", async () => {
-    window.fetch = jest.fn() as jest.Mock<
-      ReturnType<typeof window.fetch>,
-      [RequestInfo, RequestInit?]
-    >;
+    mockFetch(mockNotRedirectedResponse());
     const myFetch = buildBearerFetch("myToken", undefined);
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
@@ -65,10 +92,7 @@ describe("buildBearerFetch", () => {
   });
 
   it("returns a fetch overriding any pre-existing authorization headers", async () => {
-    window.fetch = jest.fn() as jest.Mock<
-      ReturnType<typeof window.fetch>,
-      [RequestInfo, RequestInit?]
-    >;
+    mockFetch(mockNotRedirectedResponse());
     const myFetch = buildBearerFetch("myToken", undefined);
     await myFetch("someUrl", { headers: { Authorization: "some token" } });
 
@@ -80,11 +104,8 @@ describe("buildBearerFetch", () => {
 });
 
 describe("buildDpopFetch", () => {
-  it("returns a fetch holding the provided key and token", async () => {
-    window.fetch = jest.fn() as jest.Mock<
-      ReturnType<typeof window.fetch>,
-      [RequestInfo, RequestInit?]
-    >;
+  it("returns a fetch holding the provided token and key", async () => {
+    mockFetch(mockNotRedirectedResponse());
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined, key);
     await myFetch("http://some.url");
@@ -100,11 +121,27 @@ describe("buildDpopFetch", () => {
     expect(decodedHeader["htm"]).toEqual("GET");
   });
 
+  it("builds the appropriate DPoP header for a given HTTP verb.", async () => {
+    const fetch = mockFetch(mockNotRedirectedResponse());
+    const key = await generateJwkForDpop();
+    const myFetch = await buildDpopFetch("myToken", undefined,  key);
+    await myFetch("http://some.url", {
+      method: "POST",
+    });
+
+    expect(
+      // @ts-ignore
+      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+    ).toEqual("DPoP myToken");
+    // @ts-ignore
+    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
+    const decodedHeader = await decodeJwt(dpopHeader, key);
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
+    expect(decodedHeader["htm"]).toEqual("POST");
+  });
+
   it("returns a fetch preserving the provided optional headers", async () => {
-    window.fetch = jest.fn() as jest.Mock<
-      ReturnType<typeof window.fetch>,
-      [RequestInfo, RequestInit?]
-    >;
+    mockFetch(mockNotRedirectedResponse());
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined, key);
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
@@ -126,10 +163,7 @@ describe("buildDpopFetch", () => {
   });
 
   it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
-    window.fetch = jest.fn() as jest.Mock<
-      ReturnType<typeof window.fetch>,
-      [RequestInfo, RequestInit?]
-    >;
+    mockFetch(mockNotRedirectedResponse());
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined, key);
     await myFetch("http://some.url", {
@@ -148,6 +182,19 @@ describe("buildDpopFetch", () => {
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("GET");
+  });
+
+  it("returns a fetch that rebuilds the DPoP token if redirected", async () => {
+    const fetch = mockFetch(mockRedirectedResponse());
+
+    const key = await generateJwkForDpop();
+    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    await myFetch("https://my.pod/container");
+
+    expect(
+      // @ts-ignore
+      fetch.fetch.mock.calls[1][0]
+    ).toEqual("https://my.pod/container/");
   });
 });
 /* eslint-enable @typescript-eslint/ban-ts-ignore */
