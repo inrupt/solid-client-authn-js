@@ -61,6 +61,7 @@ export class Session extends EventEmitter {
   public readonly info: ISessionInfo;
 
   private clientAuthentication: ClientAuthentication;
+  private tokenRequestInProgress: boolean = false;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -153,6 +154,10 @@ export class Session extends EventEmitter {
     if (this.info.isLoggedIn) {
       return this.info;
     }
+    if (this.tokenRequestInProgress) {
+      return undefined;
+    }
+    this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url
     );
@@ -166,6 +171,7 @@ export class Session extends EventEmitter {
       this.info.webId = sessionInfo.webId;
       this.info.sessionId = sessionInfo.sessionId;
     }
+    this.tokenRequestInProgress = false;
     return sessionInfo;
   };
 

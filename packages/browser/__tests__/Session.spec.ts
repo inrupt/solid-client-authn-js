@@ -25,6 +25,8 @@ import { it, describe } from "@jest/globals";
 import { mockClientAuthentication } from "../src/__mocks__/ClientAuthentication";
 import { Session } from "../src/Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
+import { rejects } from "assert";
+import { ISessionInfo } from "@inrupt/solid-client-authn-core";
 
 describe("Session", () => {
   describe("constructor", () => {
@@ -143,6 +145,45 @@ describe("Session", () => {
       await mySession.handleIncomingRedirect("https://some.url");
       expect(mySession.info.isLoggedIn).toEqual(false);
       expect(mySession.info.sessionId).toEqual("mySession");
+    });
+
+    function sleep(ms: number): Promise<void> {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    it("prevents from hitting the token endpoint twice with the same auth code", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const obtainedSession: ISessionInfo = {
+        isLoggedIn: true,
+        sessionId: "mySession",
+      };
+      let secondRequestIssued = false;
+      const blockingRequest = async (): Promise<ISessionInfo> => {
+        while (!secondRequestIssued) {
+          await sleep(100);
+        }
+        return obtainedSession;
+      };
+      // The ClientAuthn's handleIncomingRedirect will only return when the
+      // second Session's handleIncomingRedirect has been called.
+      clientAuthentication.handleIncomingRedirect = jest.fn(
+        async (_url: string) => blockingRequest()
+      );
+      const mySession = new Session({ clientAuthentication });
+      const firstTokenRequest = mySession.handleIncomingRedirect(
+        "https://my.app/?code=someCode&state=arizona"
+      );
+      const secondTokenRequest = mySession.handleIncomingRedirect(
+        "https://my.app/?code=someCode&state=arizona"
+      );
+      secondRequestIssued = true;
+      const tokenRequests = await Promise.all([
+        firstTokenRequest,
+        secondTokenRequest,
+      ]);
+      // One of the two token requests should not have reached the token endpoint
+      // because the other was pending.
+      expect(tokenRequests).toContain(undefined);
     });
   });
 
