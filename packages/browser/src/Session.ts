@@ -61,7 +61,7 @@ export class Session extends EventEmitter {
   public readonly info: ISessionInfo;
 
   private clientAuthentication: ClientAuthentication;
-  private tokenRequestInProgress: boolean = false;
+  private tokenRequestInProgress = false;
 
   /**
    * Session object constructor. Typically called as follows:

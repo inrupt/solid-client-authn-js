@@ -25,7 +25,6 @@ import { it, describe } from "@jest/globals";
 import { mockClientAuthentication } from "../src/__mocks__/ClientAuthentication";
 import { Session } from "../src/Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
-import { rejects } from "assert";
 import { ISessionInfo } from "@inrupt/solid-client-authn-core";
 
 describe("Session", () => {
@@ -134,6 +133,27 @@ describe("Session", () => {
       expect(mySession.info.isLoggedIn).toEqual(true);
       expect(mySession.info.sessionId).toEqual("a session ID");
       expect(mySession.info.webId).toEqual("https://some.webid#them");
+    });
+
+    it("directly returns the session's info if already logged in", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.handleIncomingRedirect = jest.fn(
+        async (_url: string) => {
+          return {
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          };
+        }
+      );
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect("https://some.url");
+      expect(mySession.info.isLoggedIn).toEqual(true);
+      await mySession.handleIncomingRedirect("https://some.url");
+      // The second request should not hit the wrapped function
+      expect(clientAuthentication.handleIncomingRedirect).toHaveBeenCalledTimes(
+        1
+      );
     });
 
     it("leaves the session's info unchanged if no session is obtained after redirect", async () => {
