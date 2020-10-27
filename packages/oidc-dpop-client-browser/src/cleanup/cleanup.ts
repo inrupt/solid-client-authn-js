@@ -50,4 +50,17 @@ export async function clearOidcPersistentStorage(): Promise<void> {
     response_mode: "query",
   });
   await client.clearStaleState(new WebStorageStateStore({}));
+  const myStorage = window.localStorage;
+  const itemsToRemove = [];
+  for (let i = 0; i <= myStorage.length; i++) {
+    const key = myStorage.key(i);
+    if (
+      key &&
+      (key.match(/^oidc\..+$/) ||
+        key.match(/^solidClientAuthenticationUser:.+$/))
+    ) {
+      itemsToRemove.push(key);
+    }
+  }
+  itemsToRemove.forEach((key) => myStorage.removeItem(key));
 }

@@ -39,7 +39,7 @@ const testSuite = require("./test-suite.json");
 const clientApplicationUrl =
   process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001";
 
-const testCafeWaitTime: string = process.env.E2E_TESTCAFE_WAIT_TIME ?? "1000";
+const testCafeWaitTime: string = process.env.E2E_TESTCAFE_WAIT_TIME ?? "2000";
 
 fixture(
   `Automated tests using client application: [${clientApplicationUrl}]`
@@ -110,7 +110,7 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
   const testUserName = process.env[server.envTestUserName] as string;
 
   if (!testUserName || testUserName.trim().length === 0) {
-      test(`Pod Server - IdP [${server.description}], no environment variable set for [${server.envTestUserName}], so skipping this server.`, async (t) => {});
+    test(`Pod Server - IdP [${server.description}], no environment variable set for [${server.envTestUserName}], so skipping this server.`, async (t) => {});
   } else {
     testSuite.testList.forEach((data: ITestConfig) => {
       test(`Pod Server - IdP [${server.description}], test [${data.name}]`, async (t) => {
@@ -131,6 +131,10 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
           .wait(parseInt(testCafeWaitTime, 10));
 
         const responseBody = await FetchPage.fetchResponseTextbox.textContent;
+
+        // To help debug failing tests, it can be really useful to display what
+        // we actually got back from the server before we assert on it!
+        console.log(`Got response body: ${responseBody}`);
 
         const expected = data.expectResponseContainsAnyOf.some((option) =>
           responseBody.includes(option)

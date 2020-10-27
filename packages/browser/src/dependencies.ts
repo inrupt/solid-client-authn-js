@@ -30,7 +30,6 @@
 import "reflect-metadata";
 import { container as emptyContainer } from "tsyringe";
 import {
-  IAuthenticatedFetcher,
   IClientRegistrar,
   IIssuerConfigFetcher,
   ILoginHandler,
@@ -79,7 +78,6 @@ import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher, {
   ITokenRefresher,
 } from "./login/oidc/refresh/TokenRefresher";
-import AutomaticRefreshFetcher from "./authenticatedFetch/AutomaticRefreshFetcher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 import InMemoryStorage from "./storage/InMemoryStorage";
 import { ISessionManager, SessionManager } from "./SessionManager";
@@ -108,11 +106,6 @@ container.register<ISessionInfoManager>("sessionInfoManager", {
 });
 container.register<ISessionManager>("sessionManager", {
   useClass: SessionManager,
-});
-
-// Authenticated Fetcher
-container.register<IAuthenticatedFetcher>("authenticatedFetcher", {
-  useClass: AutomaticRefreshFetcher,
 });
 
 // Login
@@ -205,6 +198,11 @@ container.register<ILogoutHandler>("logoutHandler", {
   useClass: GeneralLogoutHandler,
 });
 
+/**
+ *
+ * @param dependencies
+ * @deprecated This function will be removed from the external API in an upcoming release.
+ */
 export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
