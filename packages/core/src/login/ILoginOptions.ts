@@ -24,22 +24,21 @@
  * @packageDocumentation
  */
 
-/**
- * Options dictating the kind of login needed
- */
-import URL from "url-parse";
+import ILoginInputOptions from "../ILoginInputOptions";
 
 /**
+ * We extend our public login option interface to add data and/or constraints
+ * necessary for our internal use.
+ *
  * @hidden
  */
-export default interface ILoginOptions {
+export default interface ILoginOptions extends ILoginInputOptions {
+  // This session ID is mandatory for internal use, so we could consider making
+  // it an explicit parameter on our login handler interface (rather than
+  // 'bundling' into this options interface), but it wouldn't be a significant
+  // improvement really...
   sessionId: string;
-  oidcIssuer?: URL;
-  redirectUrl?: URL;
-  clientId?: string;
-  clientSecret?: string;
-  clientName?: string;
-  popUp?: boolean;
+
+  // Force the token type to be required (i.e. no longer optional).
   tokenType: "DPoP" | "Bearer";
-  handleRedirect?: (redirectUrl: string) => unknown;
 }
