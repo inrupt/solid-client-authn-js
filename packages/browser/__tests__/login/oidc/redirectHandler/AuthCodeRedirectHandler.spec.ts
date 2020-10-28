@@ -35,10 +35,7 @@ import {
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import {
-  IIssuerConfig,
-  TokenEndpointResponse,
-} from "@inrupt/oidc-dpop-client-browser";
+import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
 
 jest.mock("cross-fetch");
@@ -117,10 +114,8 @@ const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
   };
 };
 
-jest.mock("@inrupt/oidc-dpop-client-browser", () => {
-  const { createDpopHeader } = jest.requireActual(
-    "@inrupt/oidc-dpop-client-browser"
-  );
+jest.mock("@inrupt/oidc-client-ext", () => {
+  const { createDpopHeader } = jest.requireActual("@inrupt/oidc-client-ext");
   return {
     getDpopToken: async (): Promise<TokenEndpointResponse> =>
       mockTokenEndpointDpopResponse(),
@@ -272,7 +267,7 @@ describe("AuthCodeRedirectHandler", () => {
       const redirectInfo = await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
-      // This will call the oidc-dpop-client-browser module, which is mocked at
+      // This will call the oidc-client-ext module, which is mocked at
       // the top of this file. The purpose of this test is to check that, if
       // no additional information is given, the `getBearerToken` method is called
       // (as opposed to the getDpopToken one), which here returns a mock token

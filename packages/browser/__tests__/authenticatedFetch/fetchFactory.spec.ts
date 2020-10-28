@@ -25,10 +25,7 @@ import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../src/authenticatedFetch/fetchFactory";
-import {
-  decodeJwt,
-  generateJwkForDpop,
-} from "@inrupt/oidc-dpop-client-browser";
+import { decodeJwt, generateJwkForDpop } from "@inrupt/oidc-client-ext";
 
 jest.mock("cross-fetch");
 

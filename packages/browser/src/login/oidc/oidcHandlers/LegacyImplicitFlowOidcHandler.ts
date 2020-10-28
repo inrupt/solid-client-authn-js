@@ -37,10 +37,7 @@ import {
 import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
-import {
-  generateJwkForDpop,
-  createDpopHeader,
-} from "@inrupt/oidc-dpop-client-browser";
+import { generateJwkForDpop, createDpopHeader } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden

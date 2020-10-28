@@ -33,7 +33,7 @@ import {
   IClient,
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
-import { registerClient } from "@inrupt/oidc-dpop-client-browser";
+import { registerClient } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden

@@ -28,7 +28,7 @@ import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";
 
 const mockClearFunction = jest.fn();
 
-jest.mock("@inrupt/oidc-dpop-client-browser", () => {
+jest.mock("@inrupt/oidc-client-ext", () => {
   return {
     clearOidcPersistentStorage: async (): Promise<void> => mockClearFunction(),
   };

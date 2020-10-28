@@ -26,7 +26,7 @@
 
 import { injectable, inject } from "tsyringe";
 import { IStorageUtility } from "@inrupt/solid-client-authn-core";
-import { decodeJwt } from "@inrupt/oidc-dpop-client-browser";
+import { decodeJwt } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden

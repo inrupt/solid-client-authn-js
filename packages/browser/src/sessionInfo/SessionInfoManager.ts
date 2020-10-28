@@ -33,7 +33,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { fetch } from "cross-fetch";
-import { clearOidcPersistentStorage } from "@inrupt/oidc-dpop-client-browser";
+import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;

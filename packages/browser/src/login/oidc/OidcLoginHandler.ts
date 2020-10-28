@@ -42,7 +42,7 @@ import {
 
 import ConfigurationError from "../../errors/ConfigurationError";
 import URL from "url-parse";
-import { IClient } from "@inrupt/oidc-dpop-client-browser";
+import { IClient } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden

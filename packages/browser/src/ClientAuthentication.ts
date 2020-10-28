@@ -36,7 +36,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import UrlParse from "url-parse";
 import { IFetcher } from "./util/Fetcher";
-import { removeOidcQueryParam } from "@inrupt/oidc-dpop-client-browser";
+import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden

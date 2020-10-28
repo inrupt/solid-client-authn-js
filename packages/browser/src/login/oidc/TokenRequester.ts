@@ -37,7 +37,7 @@ import {
   generateJwkForDpop,
   createDpopHeader,
   decodeJwt,
-} from "@inrupt/oidc-dpop-client-browser";
+} from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden
