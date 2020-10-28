@@ -76,7 +76,7 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Fetch OpenId Config
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      // We've already ensured that we have a value for the issuer, as this is
+      // We've already ensured that we have a value for the issuer, so this is
       // safe.
       options.oidcIssuer as string
     );

@@ -117,7 +117,7 @@ class DemoClientApp extends Component {
       } else {
         try {
           const sessionInfo = await this.state.session.handleIncomingRedirect(
-            new URL(window.location.href)
+            window.location.href
           );
 
           this.setState({
@@ -150,8 +150,8 @@ class DemoClientApp extends Component {
     }
 
     await this.state.session.login({
-      redirectUrl: new URL(document.location.href),
-      oidcIssuer: new URL(this.state.loginIssuer),
+      redirectUrl: document.location.href,
+      oidcIssuer: this.state.loginIssuer,
       clientName: clientApplicationName,
     });
   }
