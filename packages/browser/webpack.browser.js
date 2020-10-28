@@ -1,9 +1,9 @@
-const webpackMerge = require("webpack-merge");
+const { merge } = require("webpack-merge");
 
 const commonConfig = require("./webpack.common.js");
 
-module.exports = ({ env, addon }) => {
-  const envConfig = require(`./webpack.${env}.js`);
+module.exports = () => {
+  const envConfig = require(`./webpack.prod.js`);
 
   const browserConfig = {
     output: {
@@ -12,5 +12,5 @@ module.exports = ({ env, addon }) => {
     },
   };
 
-  return webpackMerge(commonConfig, envConfig, browserConfig);
+  return merge(commonConfig, envConfig, browserConfig);
 };
