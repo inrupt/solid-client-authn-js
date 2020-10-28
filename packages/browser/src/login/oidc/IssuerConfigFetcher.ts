@@ -147,11 +147,11 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     const parsedConfig: Record<string, string | string[]> = {};
     Object.keys(config).forEach((key) => {
       if (issuerConfigKeyMap[key]) {
+        // TODO: PMcB55: Validate URL if "issuerConfigKeyMap[key].convertToUrl"
+        //  if (issuerConfigKeyMap[key].convertToUrl) {
+        //   validateUrl(config[key]);
+        //  }
         parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
-        // issuerConfigKeyMap[key]
-        // .convertToUrl
-        // ? new URL(config[key] as string)
-        // : config[key];
       }
     });
 

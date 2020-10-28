@@ -55,7 +55,7 @@ export default class ClientAuthentication {
   ) {}
 
   private urlOptionToUrl(url?: string): string | undefined {
-    // TODO: Validate input as an URL.
+    // TODO: PMcB55: Validate URL.
     return url;
   }
 
