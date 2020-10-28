@@ -24,7 +24,6 @@ import "reflect-metadata";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
-import URL from "url-parse";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
@@ -51,8 +50,8 @@ describe("OidcLoginHandler", () => {
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
     await handler.handle({
       sessionId: "mySession",
-      oidcIssuer: new URL("https://arbitrary.url"),
-      redirectUrl: new URL("https://app.com/redirect"),
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
       clientId: "coolApp",
       tokenType: "DPoP",
     });
@@ -76,8 +75,8 @@ describe("OidcLoginHandler", () => {
     await expect(
       handler.canHandle({
         sessionId: "mySession",
-        oidcIssuer: new URL("https://arbitrary.url"),
-        redirectUrl: new URL("https://app.com/redirect"),
+        oidcIssuer: "https://arbitrary.url",
+        redirectUrl: "https://app.com/redirect",
         clientId: "coolApp",
         tokenType: "DPoP",
       })

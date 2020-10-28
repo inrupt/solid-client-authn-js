@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
 import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
 import { createDpopHeader, decodeJwt } from "./dpop";
@@ -127,14 +126,12 @@ function validatePreconditions(
       !issuer.grantTypesSupported.includes(data.grantType))
   ) {
     throw new Error(
-      `The issuer [${issuer.issuer.toString()}] does not support the [${
-        data.grantType
-      }] grant`
+      `The issuer [${issuer.issuer}] does not support the [${data.grantType}] grant`
     );
   }
   if (!issuer.tokenEndpoint) {
     throw new Error(
-      `This issuer [${issuer.issuer.toString()}] does not have a token endpoint`
+      `This issuer [${issuer.issuer}] does not have a token endpoint`
     );
   }
 }
@@ -240,7 +237,7 @@ export async function getTokens(
     }),
   };
   const rawTokenResponse = (await (
-    await fetch(issuer.tokenEndpoint.toString(), tokenRequestInit)
+    await fetch(issuer.tokenEndpoint, tokenRequestInit)
   ).json()) as Record<string, unknown>;
   const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
   const webId = await deriveWebIdFromIdToken(tokenResponse.id_token);
@@ -262,7 +259,7 @@ export async function getTokens(
  * @param redirectUrl The URL to which the user has been redirected
  */
 export async function getBearerToken(
-  redirectUrl: URL
+  redirectUrl: string
 ): Promise<TokenEndpointResponse> {
   let signinResponse;
   try {
@@ -288,7 +285,7 @@ export async function getBearerToken(
       // NSS, and not in general.
       // Issue tracker: https://github.com/solid/node-solid-server/issues/1490
       loadUserInfo: false,
-    }).processSigninResponse(redirectUrl.toString());
+    }).processSigninResponse(redirectUrl);
   } catch (err) {
     throw new Error(
       `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`

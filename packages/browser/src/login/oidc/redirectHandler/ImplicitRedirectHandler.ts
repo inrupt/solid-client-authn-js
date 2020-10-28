@@ -29,7 +29,7 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import UrlParse from "url-parse";
+import URLParse from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
 import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
@@ -67,7 +67,7 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
         `ImplicitRedirectHandler cannot handle [${redirectUrl}]: it is missing one or more of [id_token, access_token, state].`
       );
     }
-    const url = new UrlParse(redirectUrl, true);
+    const url = new URLParse(redirectUrl, true);
 
     await this.tokenSaver.saveSession(
       url.query.state as string,

@@ -27,7 +27,6 @@
 /**
  * Defines how OIDC login should proceed
  */
-import URL from "url-parse";
 import { IIssuerConfig } from "./IIssuerConfig";
 import { IClient } from "./IClient";
 
@@ -44,7 +43,7 @@ export default IOidcOptions;
  * @hidden
  */
 export interface ICoreOidcOptions {
-  issuer: URL;
+  issuer: string;
   issuerConfiguration: IIssuerConfig;
   client: IClient;
   sessionId: string;
@@ -55,6 +54,6 @@ export interface ICoreOidcOptions {
  */
 export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
   dpop: boolean;
-  redirectUrl: URL;
+  redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
 }

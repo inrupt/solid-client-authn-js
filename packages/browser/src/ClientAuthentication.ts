@@ -34,7 +34,6 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import UrlParse from "url-parse";
 import { IFetcher } from "./util/Fetcher";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 
@@ -55,14 +54,9 @@ export default class ClientAuthentication {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  private urlOptionToUrl(url?: UrlParse | string): UrlParse | undefined {
-    if (url) {
-      if (typeof url !== "string") {
-        return url;
-      }
-      return new UrlParse(url);
-    }
-    return undefined;
+  private urlOptionToUrl(url?: string): string | undefined {
+    // TODO: Validate input as an URL.
+    return url;
   }
 
   // Define these functions as properties so that they don't get accidentally re-bound.

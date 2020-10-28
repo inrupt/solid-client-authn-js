@@ -25,20 +25,19 @@
  */
 
 /**
- * Interface to define the configuration that an identity provider can return
+ * Interface to define the configuration that an identity provider can return.
  */
-import URL from "url-parse";
 
 /**
  * @hidden
  */
 export interface IIssuerConfig {
-  issuer: URL;
-  authorizationEndpoint: URL;
-  tokenEndpoint: URL;
-  userinfoEndpoint?: URL;
-  jwksUri: URL;
-  registrationEndpoint?: URL;
+  issuer: string;
+  authorizationEndpoint: string;
+  tokenEndpoint: string;
+  userinfoEndpoint?: string;
+  jwksUri: string;
+  registrationEndpoint?: string;
   scopesSupported?: string[];
   responseTypesSupported?: string[];
   responseModesSupported?: string[];
@@ -66,6 +65,6 @@ export interface IIssuerConfig {
   requestParameterSupported?: boolean;
   requestUriParameterSupported?: boolean;
   requireRequestUriRegistration?: boolean;
-  opPolicyUri?: URL;
-  opTosUri?: URL;
+  opPolicyUri?: string;
+  opTosUri?: string;
 }

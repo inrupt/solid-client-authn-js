@@ -19,15 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
-
 export interface IIssuerConfig {
-  issuer: URL;
-  authorizationEndpoint: URL;
-  tokenEndpoint: URL;
-  userinfoEndpoint?: URL;
-  jwksUri: URL;
-  registrationEndpoint?: URL;
+  issuer: string;
+  authorizationEndpoint: string;
+  tokenEndpoint: string;
+  userinfoEndpoint?: string;
+  jwksUri: string;
+  registrationEndpoint?: string;
   scopesSupported?: string[];
   responseTypesSupported?: string[];
   responseModesSupported?: string[];
@@ -55,8 +53,8 @@ export interface IIssuerConfig {
   requestParameterSupported?: boolean;
   requestUriParameterSupported?: boolean;
   requireRequestUriRegistration?: boolean;
-  opPolicyUri?: URL;
-  opTosUri?: URL;
+  opPolicyUri?: string;
+  opTosUri?: string;
 }
 
 export interface IClient {
@@ -68,6 +66,6 @@ export interface IClient {
 export interface IClientRegistrarOptions {
   sessionId: string;
   clientName?: string;
-  redirectUrl?: URL;
+  redirectUrl?: string;
   registrationAccessToken?: string;
 }

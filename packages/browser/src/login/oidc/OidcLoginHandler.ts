@@ -41,7 +41,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 import ConfigurationError from "../../errors/ConfigurationError";
-import URL from "url-parse";
 import { IClient } from "@inrupt/oidc-client-ext";
 
 /**
@@ -77,8 +76,9 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Fetch OpenId Config
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      // TODO: fix this with interface
-      options.oidcIssuer as URL
+      // We've already ensured that we have a value for the issuer, as this is
+      // safe.
+      options.oidcIssuer as string
     );
 
     let dynamicClientRegistration: IClient;
@@ -125,10 +125,10 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
-      issuer: options.oidcIssuer as URL,
+      issuer: options.oidcIssuer as string,
       // TODO: differentiate if DPoP should be true
       dpop: options.tokenType.toLowerCase() === "dpop",
-      redirectUrl: options.redirectUrl as URL,
+      redirectUrl: options.redirectUrl as string,
       issuerConfiguration: issuerConfig,
       client: dynamicClientRegistration,
       sessionId: options.sessionId,

@@ -27,22 +27,23 @@
 /**
  * A wrapper method to wrap the standard w3 fetch library
  */
-import URL from "url-parse";
 import _fetch from "cross-fetch";
 
 export interface IFetcher {
-  fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+  fetch(url: RequestInfo | string, init?: RequestInit): Promise<Response>;
 }
 
 /**
  * @hidden
  */
 export default class Fetcher implements IFetcher {
-  async fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    const fetchUrl = url instanceof URL ? url.toString() : url;
+  async fetch(
+    url: RequestInfo | string,
+    init?: RequestInit
+  ): Promise<Response> {
     if (typeof window !== "undefined" && typeof window.fetch !== "undefined") {
-      return window.fetch(fetchUrl, init);
+      return window.fetch(url, init);
     }
-    return _fetch(fetchUrl, init);
+    return _fetch(url, init);
   }
 }

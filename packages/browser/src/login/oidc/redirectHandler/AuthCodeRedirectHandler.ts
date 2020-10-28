@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import UrlParse from "url-parse";
+import URLParse from "url-parse";
 import { inject, injectable } from "tsyringe";
 import {
   IClient,
@@ -50,12 +50,12 @@ import { JSONWebKey } from "jose";
 
 export async function exchangeDpopToken(
   sessionId: string,
-  issuer: UrlParse,
+  issuer: string,
   issuerFetcher: IIssuerConfigFetcher,
   clientRegistrar: IClientRegistrar,
   code: string,
   codeVerifier: string,
-  redirectUrl: UrlParse
+  redirectUrl: string
 ): Promise<TokenEndpointDpopResponse> {
   const issuerConfig: IIssuerConfig = await issuerFetcher.fetchConfig(issuer);
   const client: IClient = await clientRegistrar.getClient(
@@ -66,7 +66,7 @@ export async function exchangeDpopToken(
     grantType: "authorization_code",
     code,
     codeVerifier,
-    redirectUri: redirectUrl.toString(),
+    redirectUri: redirectUrl,
   });
 }
 
@@ -106,7 +106,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
       );
     }
-    const url = new UrlParse(redirectUrl, true);
+    const url = new URLParse(redirectUrl, true);
     const oauthState = url.query.state as string;
 
     const storedSessionId = (await this.storageUtility.getForUser(
@@ -143,13 +143,13 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
       tokens = await exchangeDpopToken(
         storedSessionId,
-        new UrlParse(issuer),
+        issuer,
         this.issuerConfigFetcher,
         this.clientRegistrar,
         // the canHandle function checks that the code is part of the query strings
         url.query["code"] as string,
         codeVerifier,
-        new UrlParse(storedRedirectIri)
+        storedRedirectIri
       );
       // The type assertion should not be necessary
       authFetch = await buildDpopFetch(
@@ -157,7 +157,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         tokens.dpopJwk as JSONWebKey
       );
     } else {
-      tokens = await getBearerToken(url);
+      tokens = await getBearerToken(url.toString());
       authFetch = buildBearerFetch(tokens.accessToken);
     }
 
