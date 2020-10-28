@@ -19,134 +19,92 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import "regenerator-runtime/runtime";
 
-import {
-  Session,
-  getClientAuthenticationWithDependencies,
-} from "../../../../dist/index";
+import { Session } from "../../../../dist/index";
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    const session = new Session(
-      {
-        clientAuthentication: getClientAuthenticationWithDependencies({}),
-      },
-      "mySession"
-    );
-    this.state = {
-      status: "loading",
-      loginIssuer: "https://inrupt.net",
-      fetchRoute: "",
-      fetchBody: "",
-      session: session,
-      sessionInfo: session.info,
-    };
-    if (window.location.pathname === "/popup") {
-      this.state.status = "popup";
-    }
-    this.handleLogin = this.handleLogin.bind(this);
-    this.handleLogout = this.handleLogout.bind(this);
-    this.handleFetch = this.handleFetch.bind(this);
-  }
+const REDIRECT_URL = window.location;
 
-  async componentDidMount() {
-    if (window.location.pathname === "/popup") {
-      this.state.status = "popup";
-      setTimeout(() => window.close(), 2000);
-    } else if (this.state.session.isLoggedIn) {
-      this.setState({ status: "dashboard", session });
-    } else {
-      // Depending on which flow login uses, the response will either be "code" or "access_token".
-      const authCode =
-        new URL(window.location.href).searchParams.get("code") ||
-        // FIXME: Temporarily handle both autch code and implicit flow.
-        // Should be either removved or refactored.
-        new URL(window.location.href).searchParams.get("access_token");
-      if (!authCode) {
-        this.setState({ status: "login" });
-      } else {
-        const sessionInfo = await this.state.session.handleIncomingRedirect(
-          new URL(window.location.href)
-        );
-        this.setState({
-          status: "dashboard",
-          sessionInfo: sessionInfo,
-          fetchRoute: sessionInfo.webId,
-        });
-      }
-    }
-  }
+export default function App() {
+  const [session, setSession] = useState(new Session());
+  const [webId, setWebId] = useState(session.info.webId);
+  const [issuer, setIssuer] = useState("https://broker.demo-ess.inrupt.com/");
+  const [resource, setResource] = useState(webId);
+  const [data, setData] = useState(null);
 
-  async handleLogin(e, isPopup = false) {
+  // The useEffect hook is executed on page load, and in particular when the user
+  // is redirected to the page after logging in the identity provider.
+  useEffect(() => {
+    // After redirect, the current URL contains login information.
+    session
+      .handleIncomingRedirect(new URL(window.location.href))
+      .then((info) => {
+        setResource(info.webId);
+        setWebId(info.webId);
+      });
+  }, [session]);
+
+  const handleLogin = (e) => {
+    // The default behaviour of the button is to resubmit.
+    // This prevents the page from reloading.
     e.preventDefault();
-    this.setState({ status: "loading" });
-    await this.state.session.login({
-      redirectUrl: new URL("http://localhost:3001/"),
-      oidcIssuer: new URL(this.state.loginIssuer),
+    // Login will redirect the user away so that they can log in the OIDC issuer,
+    // and back to the provided redirect URL (which should be controlled by your app).
+    session.login({
+      redirectUrl: new URL(REDIRECT_URL),
+      oidcIssuer: new URL(issuer),
     });
-  }
+  };
 
-  async handleLogout(e) {
+  const handleLogout = (e) => {
     e.preventDefault();
-    this.setState({ status: "loading" });
-    await this.state.session.logout();
-    this.setState({
-      status: "login",
-      fetchBody: "",
-    });
-  }
+    session.logout();
+    // The following has no impact on the logout, it just resets the UI.
+    setWebId(undefined);
+    setData("");
+    setResource("");
+  };
 
-  async handleFetch(e) {
+  const handleFetch = (e) => {
     e.preventDefault();
-    this.setState({ status: "loading", fetchBody: "" });
-    const response = await (
-      await this.state.session.fetch(this.state.fetchRoute, {})
-    ).text();
-    this.setState({ status: "dashboard", fetchBody: response });
-  }
+    session
+      .fetch(resource)
+      .then((response) => response.text())
+      .then(setData);
+  };
 
-  render() {
-    switch (this.state.status) {
-      case "popup":
-        return <h1>Popup Redirected</h1>;
-      case "loading":
-        return <h1>Loading</h1>;
-      case "login":
-        return (
+  return (
+    <div>
+      <main>
+        <h1>Sandbox app</h1>
+        <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
+        <div>
           <form>
-            <h1>solid-client-authn Multi Session API Demo Login</h1>
             <input
               type="text"
-              value={this.state.loginIssuer}
-              onChange={(e) => this.setState({ loginIssuer: e.target.value })}
+              value={issuer}
+              onChange={(e) => {
+                setIssuer(e.target.value);
+              }}
             />
-            <button onClick={this.handleLogin}>Log In</button>
+            <button onClick={(e) => handleLogin(e)}>Log In</button>
+            <button onClick={(e) => handleLogout(e)}>Log Out</button>
           </form>
-        );
-      case "dashboard":
-        return (
-          <div>
-            <h1>solid-client-authn Multi Session API Demo Dashboad</h1>
-            <p>WebId: {this.state.sessionInfo.webId}</p>
-            <form>
-              <input
-                type="text"
-                value={this.state.fetchRoute}
-                onChange={(e) => this.setState({ fetchRoute: e.target.value })}
-              />
-              <button onClick={this.handleFetch}>Fetch</button>
-              <pre>{this.state.fetchBody}</pre>
-            </form>
-            <form>
-              <button onClick={this.handleLogout}>Log Out</button>
-            </form>
-          </div>
-        );
-    }
-  }
+        </div>
+        <hr />
+        <div>
+          <input
+            type="text"
+            value={resource}
+            onChange={(e) => {
+              setResource(e.target.value);
+            }}
+          />
+          <button onClick={(e) => handleFetch(e)}>Fetch</button>
+        </div>
+        <pre>{data}</pre>
+      </main>
+    </div>
+  );
 }
-
-export default App;
