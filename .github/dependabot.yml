@@ -16,7 +16,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
   - package-ecosystem: npm
-    directory: "/packages/oidc-dpop-client-browser"
+    directory: "/packages/oidc"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
