@@ -39,6 +39,6 @@ export interface IFetcher {
  */
 export default class Fetcher implements IFetcher {
   async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-    return global.fetch(url, init);
+    return window.fetch(url, init);
   }
 }
