@@ -27,13 +27,14 @@ import AuthFetcher from "./AuthFetcher";
 
 export async function getAuthFetcher(
   oidcIssuer: string,
-  oidcProviderCookie: string
+  oidcProviderCookie: string,
+  appOrigin: string
 ): Promise<AuthFetcher> {
   const authFetcher = await customAuthFetcher();
 
   const session = await authFetcher.login({
     oidcIssuer,
-    redirect: "https://tester/redirect"
+    redirect: appOrigin
   });
   let redirectedTo = (session.neededAction as any).redirectUrl;
   do {
@@ -44,10 +45,10 @@ export async function getAuthFetcher(
     redirectedTo = result.headers.get("location");
     if (redirectedTo === null) {
       throw new Error(
-        "Please make sure the cookie is valid, and add https://tester as a trusted app!"
+        `Please make sure the cookie is valid, and add "${appOrigin}" as a trusted app!`
       );
     }
-  } while (!redirectedTo?.startsWith("https://tester"));
+  } while (!redirectedTo?.startsWith(appOrigin));
 
   await authFetcher.handleRedirect(redirectedTo);
   return authFetcher;

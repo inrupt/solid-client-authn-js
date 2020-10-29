@@ -32,15 +32,16 @@ async function run(): Promise<void> {
   const serverRoot = "https://localhost:8443";
   const username = "alice";
   const password = "123";
+  const appOrigin = "https://mysite.com";
   const privateResource = "https://localhost:8443/private/";
   console.log(
-    "\n\nMake sure node-solid-server is running on https://localhost:8443, with single user 'alice' / '123' and https://mysite.com as a trusted app.\n\n\n"
+    `\n\nMake sure node-solid-server is running on https://localhost:8443, with single user '${username}' / '${password}' and ${appOrigin} as a trusted app.\n\n\n`
   );
   const cookie = await getNodeSolidServerCookie(serverRoot, username, password);
   if (!cookie) {
     throw new Error("Could not log in");
   }
-  const fetcher = await getAuthFetcher(serverRoot, cookie);
+  const fetcher = await getAuthFetcher(serverRoot, cookie, appOrigin);
   const result = await fetcher.fetch(privateResource);
   // You could use getAuthHeaders to subscribe to the WebSocket, see
   // https://github.com/solid/specification/issues/52#issuecomment-682491952
