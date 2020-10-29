@@ -43,6 +43,18 @@ import {
 import ConfigurationError from "../../errors/ConfigurationError";
 import { IClient } from "@inrupt/oidc-client-ext";
 
+function hasIssuer(
+  options: ILoginOptions
+): options is ILoginOptions & { oidcIssuer: string } {
+  return typeof options.oidcIssuer === "string";
+}
+
+function hasRedirectUrl(
+  options: ILoginOptions
+): options is ILoginOptions & { redirectUrl: string } {
+  return typeof options.redirectUrl === "string";
+}
+
 /**
  * @hidden
  */
@@ -69,16 +81,13 @@ export default class OidcLoginHandler implements ILoginHandler {
 
   async handle(options: ILoginOptions): Promise<void> {
     // Check to ensure the login options are correct
-    const optionsError: Error | null = this.checkOptions(options);
-    if (optionsError) {
-      throw optionsError;
+    if (!hasIssuer(options) || !hasRedirectUrl(options)) {
+      throw new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
     }
 
     // Fetch OpenId Config
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      // We've already ensured that we have a value for the issuer, so this is
-      // safe.
-      options.oidcIssuer as string
+      options.oidcIssuer
     );
 
     let dynamicClientRegistration: IClient;
@@ -125,10 +134,10 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
-      issuer: options.oidcIssuer as string,
+      issuer: options.oidcIssuer,
       // TODO: differentiate if DPoP should be true
       dpop: options.tokenType.toLowerCase() === "dpop",
-      redirectUrl: options.redirectUrl as string,
+      redirectUrl: options.redirectUrl,
       issuerConfiguration: issuerConfig,
       client: dynamicClientRegistration,
       sessionId: options.sessionId,
