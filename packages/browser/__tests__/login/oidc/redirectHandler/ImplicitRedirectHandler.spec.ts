@@ -27,8 +27,6 @@ import {
 } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { ImplicitRedirectHandler } from "../../../../src/login/oidc/redirectHandler/ImplicitRedirectHandler";
 
-jest.mock("cross-fetch");
-
 // The following key has been used to sign the mock access token. It is given
 // for an information purpose.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -115,12 +113,10 @@ describe("ImplicitRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-ignore */
     it("returns an authenticated fetch", async () => {
-      const fetch = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock<
-          ReturnType<typeof window.fetch>,
-          [RequestInfo, RequestInit?]
-        >;
-      };
+      window.fetch = jest.fn() as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
       const redirectUrl = new URL("http://some.url");
       redirectUrl.searchParams.append("access_token", mockAccessToken);
       redirectUrl.searchParams.append("id_token", "Some ID token");
@@ -132,7 +128,7 @@ describe("ImplicitRedirectHandler", () => {
       );
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
       // We test that the Authorization header matches the structure of a JWT.
       expect(
         // @ts-ignore

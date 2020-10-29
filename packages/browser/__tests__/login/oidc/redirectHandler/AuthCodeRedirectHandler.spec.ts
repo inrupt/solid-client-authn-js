@@ -37,8 +37,6 @@ import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/Se
 import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
 
-jest.mock("cross-fetch");
-
 const mockJwk = (): JSONWebKey => {
   return {
     kty: "EC",
@@ -253,12 +251,10 @@ describe("AuthCodeRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-ignore */
     it("returns an authenticated bearer fetch by default", async () => {
-      const fetch = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock<
-          ReturnType<typeof window.fetch>,
-          [RequestInfo, RequestInit?]
-        >;
-      };
+      window.fetch = jest.fn() as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockStorageUtility({}),
@@ -273,7 +269,7 @@ describe("AuthCodeRedirectHandler", () => {
       // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
       expect(
         // @ts-ignore
         header
@@ -281,12 +277,10 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated dpop fetch if requested", async () => {
-      const fetch = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock<
-          ReturnType<typeof window.fetch>,
-          [RequestInfo, RequestInit?]
-        >;
-      };
+      window.fetch = jest.fn() as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
 
       const storage = mockStorageUtility({
         oauth2StateValue: {
@@ -307,7 +301,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
       expect(
         // @ts-ignore
         header

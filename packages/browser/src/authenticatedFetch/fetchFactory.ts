@@ -21,7 +21,6 @@
 
 import { JSONWebKey } from "jose";
 import { createDpopHeader } from "@inrupt/oidc-client-ext";
-import { fetch } from "cross-fetch";
 
 /**
  * @param authToken A bearer token.
