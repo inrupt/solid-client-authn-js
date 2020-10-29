@@ -21,55 +21,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { customAuthFetcher } from "solid-auth-fetcher";
+import {
+  getAuthFetcher,
+  getAuthHeaders,
+  getNodeSolidServerCookie
+} from "solid-auth-fetcher";
 import fetch, { Response } from "node-fetch";
-
-async function getNodeSolidServerCookie(
-  serverRoot: string,
-  username: string,
-  password: string
-): Promise<string> {
-  const authFetcher = await customAuthFetcher();
-  const serverLoginResult = await authFetcher.fetch(
-    `${serverRoot}/login/password`,
-    {
-      headers: {
-        "content-type": "application/x-www-form-urlencoded"
-      },
-      body: `username=${username}&password=${password}`,
-      method: "POST",
-      redirect: "manual"
-    }
-  );
-  return serverLoginResult.headers.get("set-cookie");
-}
-
-async function authenticatedFetch(
-  serverRoot: string,
-  cookie: string,
-  url: string
-): Promise<Response> {
-  const authFetcher = await customAuthFetcher();
-  const appRedirectUrl = "https://mysite.com/";
-  const session = await authFetcher.login({
-    oidcIssuer: serverRoot,
-    redirect: appRedirectUrl
-  });
-  let redirectedTo = (session.neededAction as any).redirectUrl;
-  do {
-    const result = await fetch(redirectedTo, {
-      headers: {
-        cookie
-      },
-      redirect: "manual"
-    });
-    redirectedTo = result.headers.get("location");
-    console.log("Redirected to", redirectedTo);
-  } while (!redirectedTo?.startsWith(appRedirectUrl));
-
-  await authFetcher.handleRedirect(redirectedTo);
-  return authFetcher.fetch(url);
-}
 
 async function run(): Promise<void> {
   const serverRoot = "https://localhost:8443";
@@ -80,7 +37,24 @@ async function run(): Promise<void> {
     "\n\nMake sure node-solid-server is running on https://localhost:8443, with single user 'alice' / '123' and https://mysite.com as a trusted app.\n\n\n"
   );
   const cookie = await getNodeSolidServerCookie(serverRoot, username, password);
-  const result = await authenticatedFetch(serverRoot, cookie, privateResource);
+  if (!cookie) {
+    throw new Error("Could not log in");
+  }
+  const fetcher = await getAuthFetcher(serverRoot, cookie);
+  const result = await fetcher.fetch(privateResource);
+  // You could use getAuthHeaders to subscribe to the WebSocket, see
+  // https://github.com/solid/specification/issues/52#issuecomment-682491952
+  //
+  // const updatesVia = result.headers.get('Updates-Via');
+  // if (updatesVia) {
+  //   const authHeaders = getAuthHeaders(fetcher);
+  //   const ws = new WebSocket(updatesVia);
+  //   ws.on('connect', () => {
+  //     ws.write(`auth ${authHeaders.Authorization}`);
+  //     ws.write(`dpop ${authHeaders.DPop}`);
+  //     ws.write(`sub ${privateResource}`);
+  //   }
+  // }
   console.log(result.status);
   console.log(await result.text());
 }

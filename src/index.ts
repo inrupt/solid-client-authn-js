@@ -28,6 +28,12 @@ import AuthFetcher from "./AuthFetcher";
 import getAuthFetcherWithDependencies from "./dependencies";
 import IStorage from "./localStorage/IStorage";
 
+export {
+  getNodeSolidServerCookie,
+  getAuthFetcher,
+  getAuthHeaders
+} from "./obtain-auth-headers";
+
 export interface ICustomAuthFetcherOptions {
   storage?: IStorage;
   doNotAutoHandleRedirect?: boolean;

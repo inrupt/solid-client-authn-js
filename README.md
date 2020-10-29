@@ -2,8 +2,17 @@
 
 A client tool to login and make authenticated requests to Solid compliant servers.
 
-***NOTE: The interface documented here is the proposed interface not the one actually implemented yet. For the actually implemented interface see the "Example Usage". See [the Solid Crud tests](https://github.com/solid/solid-crud-tests/blob/master/test/helpers/obtain-auth-headers.ts for an example of how we're currently using solid-auth-fetcher from nodejs.
-***
+For use on the server-side (solid-node-client, solid-crud-tests, web-access-control-tests, etc.), we provide three special functions:
+*  `getNodeSolidServerCookie(serverRoot: string, username: string, password: string): Promise<string | null>`
+  - POSTs to /login/password to get a cookie
+  - NSS-specific
+*  `getAuthFetcher(oidcIssuer: string, oidcProviderCookie: string, appOrigin: string): Promise<AuthFetcher>`
+  - uses generic webid-oidc login
+  - relies on auth to IDP with cookie
+  - make sure the user has already authorized `appOrigin` as a trusted app
+*  `getAuthHeaders(urlStr: string, method: string, authFetcher): Promise<{ Authorization: string; DPop: string }>`
+  - will allow you to send the [WebSockets `auth` and `dpop` headers](https://github.com/solid/specification/issues/52#issuecomment-682491952)
+See ./examples/server for an example
 
 ## Installation
 
