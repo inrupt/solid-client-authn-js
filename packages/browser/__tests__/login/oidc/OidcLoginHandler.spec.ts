@@ -65,8 +65,19 @@ describe("OidcLoginHandler", () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     await expect(handler.handle({})).rejects.toThrowError(
-      "OidcLoginHandler requires an oidcIssuer"
+      "OidcLoginHandler requires an OIDC issuer"
     );
+  });
+
+  it("should throw an error when called without a redirect URL", async () => {
+    const handler = getInitialisedHandler();
+    await expect(
+      handler.handle({
+        sessionId: "doesn't matter",
+        tokenType: "DPoP",
+        oidcIssuer: "https://whatever.com",
+      })
+    ).rejects.toThrowError("OidcLoginHandler requires a redirect URL");
   });
 
   it("should indicate it when it can handle logins", async () => {

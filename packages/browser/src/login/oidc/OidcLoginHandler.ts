@@ -68,21 +68,20 @@ export default class OidcLoginHandler implements ILoginHandler {
     @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
-  checkOptions(options: ILoginOptions): Error | null {
-    if (!options.oidcIssuer || !options.redirectUrl) {
-      return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
-    }
-    return null;
-  }
-
   async canHandle(options: ILoginOptions): Promise<boolean> {
-    return !this.checkOptions(options);
+    return hasIssuer(options) && hasRedirectUrl(options);
   }
 
   async handle(options: ILoginOptions): Promise<void> {
-    // Check to ensure the login options are correct
-    if (!hasIssuer(options) || !hasRedirectUrl(options)) {
-      throw new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
+    if (!hasIssuer(options)) {
+      throw new ConfigurationError(
+        "OidcLoginHandler requires an OIDC issuer: 'oidcIssuer'"
+      );
+    }
+    if (!hasRedirectUrl(options)) {
+      throw new ConfigurationError(
+        "OidcLoginHandler requires a redirect URL: 'redirectUrl'"
+      );
     }
 
     // Fetch OpenId Config
