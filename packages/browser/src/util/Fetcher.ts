@@ -30,17 +30,14 @@
 import _fetch from "cross-fetch";
 
 export interface IFetcher {
-  fetch(url: RequestInfo | string, init?: RequestInit): Promise<Response>;
+  fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
 }
 
 /**
  * @hidden
  */
 export default class Fetcher implements IFetcher {
-  async fetch(
-    url: RequestInfo | string,
-    init?: RequestInit
-  ): Promise<Response> {
+  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
     if (typeof window !== "undefined" && typeof window.fetch !== "undefined") {
       return window.fetch(url, init);
     }

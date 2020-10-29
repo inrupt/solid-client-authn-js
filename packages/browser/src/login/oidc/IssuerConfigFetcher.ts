@@ -161,6 +161,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
+    // TODO: PMcB55: Use native URL lib to build URL instead of string concat.
     const wellKnownUrl = `${issuer}${
       issuer.endsWith("/") ? "" : "/"
     }.well-known/openid-configuration`;
