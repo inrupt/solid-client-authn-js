@@ -75,12 +75,16 @@ export default class OidcLoginHandler implements ILoginHandler {
   async handle(options: ILoginOptions): Promise<void> {
     if (!hasIssuer(options)) {
       throw new ConfigurationError(
-        `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(options)}`
+        `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(
+          options
+        )}`
       );
     }
     if (!hasRedirectUrl(options)) {
       throw new ConfigurationError(
-        `OidcLoginHandler requires a redirect URL: missing property 'redirectUrl' in ${JSON.stringify(options)}`
+        `OidcLoginHandler requires a redirect URL: missing property 'redirectUrl' in ${JSON.stringify(
+          options
+        )}`
       );
     }
 
