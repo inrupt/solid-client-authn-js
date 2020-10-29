@@ -80,7 +80,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     }
     if (!hasRedirectUrl(options)) {
       throw new ConfigurationError(
-        "OidcLoginHandler requires a redirect URL: 'redirectUrl'"
+        `OidcLoginHandler requires a redirect URL: missing property 'redirectUrl' in ${JSON.stringify(options)}`
       );
     }
 
