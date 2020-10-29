@@ -25,7 +25,7 @@ export default function Home() {
     if (authCode) {
       console.log("Being redirected from the IdP");
       session
-        .handleIncomingRedirect(new URL(window.location.href))
+        .handleIncomingRedirect(window.location.href)
         .then((info) => {
           setResource(info.webId);
         });
@@ -37,8 +37,8 @@ export default function Home() {
     // This prevents the page from reloading.
     e.preventDefault();
     session.login({
-      redirectUrl: new URL(REDIRECT_URL),
-      oidcIssuer: new URL(issuer)
+      redirectUrl: REDIRECT_URL,
+      oidcIssuer: issuer
     });
   };
 

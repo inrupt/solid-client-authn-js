@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
+import URLParse from "url-parse";
 import { JWK } from "node-jose";
 import { JSONWebKey, JWKECKey, JWKOctKey, JWKOKPKey, JWKRSAKey } from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
@@ -85,8 +85,8 @@ export async function privateJwkToPublicJwk(
  * @returns The normalized URL as a string.
  * @hidden
  */
-export function normalizeHttpUriClaim(audience: URL): string {
-  const cleanedAudience = new URL(audience.href);
+export function normalizeHttpUriClaim(audience: string): string {
+  const cleanedAudience = new URLParse(audience);
   cleanedAudience.set("hash", "");
   cleanedAudience.set("username", "");
   cleanedAudience.set("password", "");
@@ -102,7 +102,7 @@ export function normalizeHttpUriClaim(audience: URL): string {
  * @returns A JWT that can be used as a DPoP Authorization header.
  */
 export async function createDpopHeader(
-  audience: URL,
+  audience: string,
   method: string,
   key: JSONWebKey
 ): Promise<string> {

@@ -232,7 +232,7 @@ describe("validateSchema", () => {
           foo: "https://cool.com/nice",
         }
       );
-      expect(newObj.foo.origin).toBe("https://cool.com");
+      expect(newObj.foo.startsWith("https://cool.com")).toBeTruthy();
     });
 
     it("converts urls in a complex object", () => {
@@ -258,8 +258,8 @@ describe("validateSchema", () => {
           ],
         }
       );
-      expect(newObj.arr[0].url.origin).toBe("https://cool.com");
-      expect(newObj.arr[1].url.origin).toBe("https://lame.com");
+      expect(newObj.arr[0].url.startsWith("https://cool.com")).toBeTruthy();
+      expect(newObj.arr[1].url.startsWith("https://lame.com")).toBeTruthy();
     });
 
     it("is not tripped up by weird schema traversal", () => {

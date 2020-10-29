@@ -19,17 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
 import {
   IIssuerConfig,
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
 
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
-  issuer: new URL("https://idp.com"),
-  authorizationEndpoint: new URL("https://idp.com/auth"),
-  tokenEndpoint: new URL("https://idp.com/token"),
-  jwksUri: new URL("https://idp.com/jwks"),
+  issuer: "https://idp.com",
+  authorizationEndpoint: "https://idp.com/auth",
+  tokenEndpoint: "https://idp.com/token",
+  jwksUri: "https://idp.com/jwks",
   subjectTypesSupported: [],
   claimsSupported: [],
   grantTypesSupported: ["refresh_token"],
@@ -37,7 +36,7 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
 
 export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  fetchConfig: jest.fn((_issuer: URL) =>
+  fetchConfig: jest.fn((_issuer: string) =>
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
   ),
 };

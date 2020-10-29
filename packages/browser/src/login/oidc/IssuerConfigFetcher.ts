@@ -32,7 +32,6 @@ import {
   IIssuerConfigFetcher,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
 import { injectable, inject } from "tsyringe";
 import { IFetcher } from "../../util/Fetcher";
 import ConfigurationError from "../../errors/ConfigurationError";
@@ -138,30 +137,35 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
 
   // This method needs no state (so can be static), and can be exposed to allow
   // callers to know where this implementation puts state it needs.
-  public static getLocalStorageKey(issuer: URL): string {
-    return `issuerConfig:${issuer.toString()}`;
+  public static getLocalStorageKey(issuer: string): string {
+    return `issuerConfig:${issuer}`;
   }
 
   private processConfig(
     config: Record<string, string | string[]>
   ): IIssuerConfig {
-    const parsedConfig: Record<string, string | string[] | URL> = {};
+    const parsedConfig: Record<string, string | string[]> = {};
     Object.keys(config).forEach((key) => {
       if (issuerConfigKeyMap[key]) {
-        parsedConfig[issuerConfigKeyMap[key].toKey] = issuerConfigKeyMap[key]
-          .convertToUrl
-          ? new URL(config[key] as string)
-          : config[key];
+        // TODO: PMcB55: Validate URL if "issuerConfigKeyMap[key].convertToUrl"
+        //  if (issuerConfigKeyMap[key].convertToUrl) {
+        //   validateUrl(config[key]);
+        //  }
+        parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
       }
     });
+
     return (parsedConfig as unknown) as IIssuerConfig;
   }
 
-  async fetchConfig(issuer: URL): Promise<IIssuerConfig> {
+  async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
-    const wellKnownUrl = new URL(issuer.toString());
-    wellKnownUrl.set("pathname", "/.well-known/openid-configuration");
+    // TODO: PMcB55: Use native URL lib to build URL instead of string concat.
+    const wellKnownUrl = `${issuer}${
+      issuer.endsWith("/") ? "" : "/"
+    }.well-known/openid-configuration`;
+
     const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
     // Check the validity of the fetched config
     try {

@@ -34,7 +34,6 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import UrlParse from "url-parse";
 import { IFetcher } from "./util/Fetcher";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 
@@ -55,16 +54,6 @@ export default class ClientAuthentication {
     private environmentDetector: IEnvironmentDetector
   ) {}
 
-  private urlOptionToUrl(url?: UrlParse | string): UrlParse | undefined {
-    if (url) {
-      if (typeof url !== "string") {
-        return url;
-      }
-      return new UrlParse(url);
-    }
-    return undefined;
-  }
-
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (
@@ -79,16 +68,17 @@ export default class ClientAuthentication {
     // login).
     await this.sessionInfoManager.clear(sessionId);
 
-    // This workaround should no longer be necessary once no longer use "url-parse"
-    let redirectUrl = options.redirectUrl
-      ? (this.urlOptionToUrl(options.redirectUrl)?.toString() as string)
-      : window.location.href;
-    redirectUrl = removeOidcQueryParam(redirectUrl);
+    // In the case of the user hitting the 'back' button in their browser, they
+    // could return to a previous redirect URL that contains OIDC params that
+    // are now longer valid - so just to be safe, strip relevant params now.
+    const redirectUrl = removeOidcQueryParam(
+      options.redirectUrl ?? window.location.href
+    );
 
     return this.loginHandler.handle({
       sessionId,
-      oidcIssuer: this.urlOptionToUrl(options.oidcIssuer),
-      redirectUrl: this.urlOptionToUrl(redirectUrl),
+      oidcIssuer: options.oidcIssuer,
+      redirectUrl: redirectUrl,
       clientId: options.clientId,
       clientSecret: options.clientSecret,
       clientName: options.clientName ?? options.clientId,

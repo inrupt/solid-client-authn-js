@@ -21,19 +21,18 @@
 
 import { it, describe } from "@jest/globals";
 import { IIssuerConfig, IClientRegistrarOptions } from "../common/types";
-import URL from "url-parse";
 import { registerClient } from "./clientRegistrar";
 import { Response } from "cross-fetch";
 
 const getMockIssuer = (): IIssuerConfig => {
   return {
-    issuer: new URL("https://some.issuer"),
-    authorizationEndpoint: new URL("https://some.issuer/autorization"),
-    tokenEndpoint: new URL("https://some.issuer/token"),
-    jwksUri: new URL("https://some.issuer/keys"),
+    issuer: "https://some.issuer",
+    authorizationEndpoint: "https://some.issuer/autorization",
+    tokenEndpoint: "https://some.issuer/token",
+    jwksUri: "https://some.issuer/keys",
     claimsSupported: ["code", "openid"],
     subjectTypesSupported: ["public", "pairwise"],
-    registrationEndpoint: new URL("https://some.issuer/registration"),
+    registrationEndpoint: "https://some.issuer/registration",
   };
 };
 
@@ -96,7 +95,7 @@ describe("registerClient", () => {
 
   it("passes the specified redirection URL to the IdP", async () => {
     const options = getMockOptions();
-    options.redirectUrl = new URL("https://some.url");
+    options.redirectUrl = "https://some.url";
     const myFetch = getSuccessfulFetch();
     global.fetch = myFetch;
 
@@ -126,7 +125,7 @@ describe("registerClient", () => {
     );
     global.fetch = myFetch;
     const options = getMockOptions();
-    options.redirectUrl = new URL("https://some.url");
+    options.redirectUrl = "https://some.url";
 
     await expect(() =>
       registerClient(options, getMockIssuer())
@@ -170,7 +169,7 @@ describe("registerClient", () => {
     );
     global.fetch = myFetch;
     const options = getMockOptions();
-    options.redirectUrl = new URL("https://some.url");
+    options.redirectUrl = "https://some.url";
 
     await expect(() =>
       registerClient(options, getMockIssuer())

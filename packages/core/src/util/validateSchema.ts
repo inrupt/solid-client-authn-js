@@ -28,7 +28,6 @@
  * A wrapper function for AJV schema validation
  */
 import Ajv from "ajv";
-import URL from "url-parse";
 import cloneDeep from "lodash.clonedeep";
 
 /**
@@ -76,7 +75,7 @@ export function traverseObject(
     // Set custom rules here
     // Convert to URL
     if (schema.shouldConvertToUrl && parent && parentKey) {
-      parent[parentKey] = new URL(data);
+      parent[parentKey] = data;
     }
   }
 }

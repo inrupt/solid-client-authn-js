@@ -20,7 +20,6 @@
  */
 
 import "reflect-metadata";
-import URL from "url-parse";
 import {
   StorageUtilityMock,
   mockStorageUtility,
@@ -71,13 +70,13 @@ type AccessJwt = {
 
 const mockIssuer = (): IIssuerConfig => {
   return {
-    issuer: new URL("https://some.issuer"),
-    authorizationEndpoint: new URL("https://some.issuer/autorization"),
-    tokenEndpoint: new URL("https://some.issuer/token"),
-    jwksUri: new URL("https://some.issuer/keys"),
+    issuer: "https://some.issuer",
+    authorizationEndpoint: "https://some.issuer/autorization",
+    tokenEndpoint: "https://some.issuer/token",
+    jwksUri: "https://some.issuer/keys",
     claimsSupported: ["code", "openid"],
     subjectTypesSupported: ["public", "pairwise"],
-    registrationEndpoint: new URL("https://some.issuer/registration"),
+    registrationEndpoint: "https://some.issuer/registration",
     grantTypesSupported: ["authorization_code"],
   };
 };
@@ -327,7 +326,7 @@ describe("exchangeDpopToken", () => {
       mockClientRegistrar(mockClient()),
       "some code",
       "some pkce token",
-      new URL("https://my.app/redirect")
+      "https://my.app/redirect"
     );
     expect(tokens.accessToken).toEqual(
       mockTokenEndpointDpopResponse().accessToken

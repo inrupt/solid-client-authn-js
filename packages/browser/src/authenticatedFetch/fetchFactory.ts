@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
 import { JSONWebKey } from "jose";
 import { createDpopHeader } from "@inrupt/oidc-client-ext";
 import { fetch } from "cross-fetch";
@@ -59,7 +58,7 @@ export async function buildDpopFetch(
         ...options?.headers,
         Authorization: `DPoP ${authToken}`,
         DPoP: await createDpopHeader(
-          new URL(init.toString()),
+          init.toString(),
           options?.method ?? "get",
           dpopKey
         ),

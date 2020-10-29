@@ -30,7 +30,6 @@ import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
-import URL from "url-parse";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { mockFetcher } from "../src/util/__mocks__/Fetcher";
 
@@ -64,14 +63,14 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login("mySession", {
         clientId: "coolApp",
-        redirectUrl: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com"),
+        redirectUrl: "https://coolapp.com/redirect",
+        oidcIssuer: "https://idp.com",
       });
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
         clientId: "coolApp",
-        redirectUrl: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com"),
+        redirectUrl: "https://coolapp.com/redirect",
+        oidcIssuer: "https://idp.com",
         popUp: false,
         clientName: "coolApp",
         clientSecret: undefined,
@@ -84,15 +83,15 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login("mySession", {
         clientId: "coolApp",
-        redirectUrl: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com"),
+        redirectUrl: "https://coolapp.com/redirect",
+        oidcIssuer: "https://idp.com",
         tokenType: "Bearer",
       });
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
         clientId: "coolApp",
-        redirectUrl: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com"),
+        redirectUrl: "https://coolapp.com/redirect",
+        oidcIssuer: "https://idp.com",
         popUp: false,
         clientName: "coolApp",
         clientSecret: undefined,
@@ -115,8 +114,8 @@ describe("ClientAuthentication", () => {
       });
       await clientAuthn.login("someUser", {
         clientId: "coolApp",
-        redirectUrl: new URL("https://coolapp.com/redirect"),
-        oidcIssuer: new URL("https://idp.com"),
+        redirectUrl: "https://coolapp.com/redirect",
+        oidcIssuer: "https://idp.com",
       });
       await expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })

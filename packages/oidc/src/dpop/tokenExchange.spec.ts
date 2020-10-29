@@ -21,7 +21,6 @@
 
 import { it, describe } from "@jest/globals";
 
-import URL from "url-parse";
 import { IClient, IIssuerConfig } from "../common/types";
 
 import {
@@ -66,13 +65,13 @@ jest.mock("uuid", () => {
 
 const mockIssuer = (): IIssuerConfig => {
   return {
-    issuer: new URL("https://some.issuer"),
-    authorizationEndpoint: new URL("https://some.issuer/autorization"),
-    tokenEndpoint: new URL("https://some.issuer/token"),
-    jwksUri: new URL("https://some.issuer/keys"),
+    issuer: "https://some.issuer",
+    authorizationEndpoint: "https://some.issuer/autorization",
+    tokenEndpoint: "https://some.issuer/token",
+    jwksUri: "https://some.issuer/keys",
     claimsSupported: ["code", "openid"],
     subjectTypesSupported: ["public", "pairwise"],
-    registrationEndpoint: new URL("https://some.issuer/registration"),
+    registrationEndpoint: "https://some.issuer/registration",
     grantTypesSupported: ["authorization_code"],
   };
 };
@@ -195,12 +194,12 @@ describe("getTokens", () => {
 
   it("throws if the token endpoint is missing", async () => {
     const issuer = {
-      issuer: new URL("https://some.issuer"),
-      authorizationEndpoint: new URL("https://some.issuer/autorization"),
-      jwksUri: new URL("https://some.issuer/keys"),
+      issuer: "https://some.issuer",
+      authorizationEndpoint: "https://some.issuer/autorization",
+      jwksUri: "https://some.issuer/keys",
       claimsSupported: ["code", "openid"],
       subjectTypesSupported: ["public", "pairwise"],
-      registrationEndpoint: new URL("https://some.issuer/registration"),
+      registrationEndpoint: "https://some.issuer/registration",
       grantTypesSupported: ["authorization_code"],
       // Note that the token endpoint is missing, which mandates the type assertion
     } as IIssuerConfig;
@@ -536,7 +535,7 @@ jest.mock("oidc-client", () => {
 describe("getBearerToken", () => {
   it("returns the tokens returned by the endpoint", async () => {
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    const tokens = await getBearerToken(new URL("https://my.app/redirect"));
+    const tokens = await getBearerToken("https://my.app/redirect");
     expect(tokens.accessToken).toEqual(mockBearerAccessToken());
     expect(tokens.idToken).toEqual(mockIdToken());
     expect(tokens.dpopJwk).toBeUndefined();
@@ -544,7 +543,7 @@ describe("getBearerToken", () => {
 
   it("wraps oidc-client errors", async () => {
     mockFetch("", 200);
-    const tokenRequest = getBearerToken(new URL("https://invalid.url"));
+    const tokenRequest = getBearerToken("https://invalid.url");
     await expect(tokenRequest).rejects.toThrow(
       `Problem handling Auth Code Grant (Flow) redirect - URL [https://invalid.url]: Error: Dummy error`
     );
