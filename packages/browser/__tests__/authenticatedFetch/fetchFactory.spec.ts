@@ -27,123 +27,109 @@ import {
 } from "../../src/authenticatedFetch/fetchFactory";
 import { decodeJwt, generateJwkForDpop } from "@inrupt/oidc-client-ext";
 
-jest.mock("cross-fetch");
-
 // We use ts-ignore comments here only to access mock call arguments
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
-    const fetch = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
-    };
+    window.fetch = jest.fn() as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
     const myFetch = buildBearerFetch("myToken");
     await myFetch("someUrl");
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+      window.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("Bearer myToken");
   });
 
   it("returns a fetch preserving the optional headers", async () => {
-    const fetch = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
-    };
+    window.fetch = jest.fn() as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
     const myFetch = buildBearerFetch("myToken");
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+      window.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("Bearer myToken");
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["someHeader"]
+      window.fetch.mock.calls[0][1].headers["someHeader"]
     ).toEqual("SomeValue");
   });
 
   it("returns a fetch overriding any pre-existing authorization headers", async () => {
-    const fetch = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
-    };
+    window.fetch = jest.fn() as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
     const myFetch = buildBearerFetch("myToken");
     await myFetch("someUrl", { headers: { Authorization: "some token" } });
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+      window.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("Bearer myToken");
   });
 });
 
 describe("buildDpopFetch", () => {
-  it("returns a fetch holding the provided token and key", async () => {
-    const fetch = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
-    };
+  it("returns a fetch holding the provided key and token", async () => {
+    window.fetch = jest.fn() as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url");
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+      window.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
+    const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("GET");
   });
 
   it("returns a fetch preserving the provided optional headers", async () => {
-    const fetch = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
-    };
+    window.fetch = jest.fn() as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+      window.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
+    const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("GET");
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["someHeader"]
+      window.fetch.mock.calls[0][1].headers["someHeader"]
     ).toEqual("SomeValue");
   });
 
   it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
-    const fetch = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
-    };
+    window.fetch = jest.fn() as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", {
@@ -155,10 +141,10 @@ describe("buildDpopFetch", () => {
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+      window.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
+    const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("GET");
