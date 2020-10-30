@@ -5,15 +5,16 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
+
+### New features
+
+## 0.3.0
 
 ### Breaking changes
 
 - The package `@inrupt/oidc-dpop-client-browser` is now called `@inrupt/oidc-client-ext`.
-
-### Bugfixes
-
-- If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
+- The public API doesn't expect environement-specific types anymore. in particular, `URL` has been replaced with `string`.
 
 ### Non-breaking changes
 
@@ -21,6 +22,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Bugfixes
 
+- If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
 - A DPoP-authenticated request now follow redirects (in particular, forgetting the trailing `/` for a container no longer returns 401).
 
 ## [0.2.2]
