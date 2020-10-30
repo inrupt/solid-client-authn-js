@@ -63,7 +63,33 @@ async function buildDpopFetchOptions(
         dpopKey
       ),
     },
+    redirect: "manual",
   };
+}
+
+// If an IRI leads to more than MAX_HOPS redirections, we'll throw an error.
+export const MAX_HOPS = 20;
+
+async function retryDpopFetch(
+  url: RequestInfo,
+  authToken: string,
+  dpopKey: JSONWebKey,
+  hops: number,
+  init?: RequestInit
+): Promise<Response> {
+  if (hops >= MAX_HOPS) {
+    throw new Error(
+      `Too many redirects. Last IRI looked up: [${url.toString()}]`
+    );
+  }
+  const response = await fetch(
+    url,
+    await buildDpopFetchOptions(url.toString(), authToken, dpopKey, init)
+  );
+  if (response.type === "opaqueredirect") {
+    return retryDpopFetch(response.url, authToken, dpopKey, hops + 1, init);
+  }
+  return response;
 }
 
 /**
@@ -80,18 +106,7 @@ export async function buildDpopFetch(
   _refreshToken: string | undefined,
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
-  return async (init, options): Promise<Response> => {
-    const response = await fetch(
-      init,
-      await buildDpopFetchOptions(init.toString(), authToken, dpopKey, options)
-    );
-    if (response.url === init.toString()) {
-      console.log(JSON.stringify(response, null, "  "));
-      return response;
-    }
-    return fetch(
-      response.url,
-      await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
-    );
+  return async (url, options): Promise<Response> => {
+    return retryDpopFetch(url, authToken, dpopKey, 0, options);
   };
 }

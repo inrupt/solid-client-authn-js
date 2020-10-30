@@ -32,13 +32,6 @@ type MockedRedirectResponse = {
   url: string;
 };
 
-const mockRedirectedResponse = (): MockedRedirectResponse => {
-  return {
-    redirected: true,
-    url: "https://my.pod/container/",
-  };
-};
-
 const mockNotRedirectedResponse = (): MockedRedirectResponse => {
   return {
     redirected: false,
@@ -46,18 +39,13 @@ const mockNotRedirectedResponse = (): MockedRedirectResponse => {
   };
 };
 
-const mockFetch = (
-  response: MockedRedirectResponse
-): typeof window.fetch => {
+const mockFetch = (response: MockedRedirectResponse): typeof window.fetch => {
   window.fetch = jest.fn().mockReturnValueOnce(
     new Promise((resolve) => {
       resolve(response as Response);
     })
-  ) as jest.Mock<
-      ReturnType<typeof window.fetch>,
-      [RequestInfo, RequestInit?]
-    >;
-    return window.fetch;
+  );
+  return window.fetch;
 };
 
 // We use ts-ignore comments here only to access mock call arguments
@@ -122,7 +110,7 @@ describe("buildDpopFetch", () => {
   });
 
   it("builds the appropriate DPoP header for a given HTTP verb.", async () => {
-    const fetch = mockFetch(mockNotRedirectedResponse());
+    mockFetch(mockNotRedirectedResponse());
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined,  key);
     await myFetch("http://some.url", {
@@ -131,10 +119,10 @@ describe("buildDpopFetch", () => {
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[0][1].headers["Authorization"]
+      window.fetch.mock.calls[0][1].headers["Authorization"]
     ).toEqual("DPoP myToken");
     // @ts-ignore
-    const dpopHeader = fetch.fetch.mock.calls[0][1].headers["DPoP"] as string;
+    const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("POST");
@@ -185,7 +173,25 @@ describe("buildDpopFetch", () => {
   });
 
   it("returns a fetch that rebuilds the DPoP token if redirected", async () => {
-    const fetch = mockFetch(mockRedirectedResponse());
+    // Redirects once
+    window.fetch = jest
+      .fn()
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            type: "opaqueredirect",
+            url: "https://my.pod/container/",
+          } as Response);
+        })
+      )
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            type: "basic",
+            url: "https://my.pod/container/",
+          } as Response);
+        })
+      );
 
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined, key);
@@ -193,12 +199,30 @@ describe("buildDpopFetch", () => {
 
     expect(
       // @ts-ignore
-      fetch.fetch.mock.calls[1][0]
+      window.fetch.mock.calls[1][0]
     ).toEqual("https://my.pod/container/");
     // @ts-ignore
-    const dpopHeader = fetch.fetch.mock.calls[1][1].headers["DPoP"] as string;
+    const dpopHeader = window.fetch.mock.calls[1][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
     expect(decodedHeader["htu"]).toEqual("https://my.pod/container/");
+  });
+
+  it("throws if following redirects never returns a proper result", async () => {
+    // Always redirect
+    window.fetch = jest.fn().mockReturnValue(
+      new Promise((resolve) => {
+        resolve({
+          type: "opaqueredirect",
+          url: "https://my.pod/container/",
+        } as Response);
+      })
+    );
+
+    const key = await generateJwkForDpop();
+    const myFetch = await buildDpopFetch("myToken", key);
+    await expect(myFetch("https://my.pod/container")).rejects.toThrow(
+      "Too many redirects. Last IRI looked up: [https://my.pod/container/]"
+    );
   });
 });
 /* eslint-enable @typescript-eslint/ban-ts-ignore */
