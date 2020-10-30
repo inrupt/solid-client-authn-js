@@ -46,6 +46,33 @@ export function buildBearerFetch(
   };
 }
 
+async function buildDpopFetchOptions(
+  targetUrl: string,
+  authToken: string,
+  dpopKey: JSONWebKey,
+  defaultOptions?: RequestInit
+): Promise<RequestInit> {
+  return {
+    ...defaultOptions,
+    headers: {
+      ...defaultOptions?.headers,
+      Authorization: `DPoP ${authToken}`,
+      DPoP: await createDpopHeader(
+        targetUrl,
+        defaultOptions?.method ?? "get",
+        dpopKey
+      ),
+    },
+  };
+}
+
+function isExpectedAuthError(statusCode: number): boolean {
+  // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
+  // a response failing because the provided credentials aren't accepted by the
+  // server can get a 401 or a 403 response.
+  return [401, 403].includes(statusCode);
+}
+
 /**
  * @param authToken a DPoP token.
  * @param _refreshToken An optional refresh token.
@@ -60,18 +87,24 @@ export async function buildDpopFetch(
   _refreshToken: string | undefined,
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
-  return async (init, options): Promise<Response> => {
-    return fetch(init, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Authorization: `DPoP ${authToken}`,
-        DPoP: await createDpopHeader(
-          init.toString(),
-          options?.method ?? "get",
-          dpopKey
-        ),
-      },
-    });
+  return async (url, options): Promise<Response> => {
+    const response = await fetch(
+      url,
+      await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)
+    );
+    const failedButNotExpectedAuthError =
+      !response.ok && !isExpectedAuthError(response.status);
+    const hasBeenRedirected = response.url !== url;
+    if (response.ok || failedButNotExpectedAuthError || !hasBeenRedirected) {
+      // If there hasn't been a redirection, or if there has been a non-auth related
+      // issue, it should be handled at the application level
+      return response;
+    }
+    // If the request failed for auth reasons, and has been redirected, we should
+    // replay it with a new DPoP token.
+    return await fetch(
+      response.url,
+      await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
+    );
   };
 }

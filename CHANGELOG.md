@@ -15,6 +15,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 - If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
 
+### Non-breaking changes
+
+- It is now possible to build a `Session` without calling `getClientAuthenticationWithDependencies`, which results in simpler code.
+
+### Bugfixes
+
+- A DPoP-authenticated request now follow redirects (in particular, forgetting the trailing `/` for a container no longer returns 401).
+
 ## [0.2.2]
 
 ### Automated test suite
@@ -24,10 +32,6 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ### Security patches
 
 - The support for DPoP was re-implemented in @inrupt/oidc-client-dpop-browser, such that the DPoP JWK is never stored, and only kept inside the closure of the authenticated fetch.
-
-### Non-breaking changes
-
-- It is now possible to build a `Session` without calling `getClientAuthenticationWithDependencies`, which results in simpler code.
 
 ### Bugfixes
 
