@@ -179,16 +179,18 @@ describe("buildDpopFetch", () => {
       .mockReturnValueOnce(
         new Promise((resolve) => {
           resolve({
-            type: "opaqueredirect",
             url: "https://my.pod/container/",
+            status: 403,
+            ok: false,
           } as Response);
         })
       )
       .mockReturnValueOnce(
         new Promise((resolve) => {
           resolve({
-            type: "basic",
             url: "https://my.pod/container/",
+            ok: true,
+            status: 200,
           } as Response);
         })
       );
@@ -207,22 +209,50 @@ describe("buildDpopFetch", () => {
     expect(decodedHeader["htu"]).toEqual("https://my.pod/container/");
   });
 
-  it("throws if following redirects never returns a proper result", async () => {
-    // Always redirect
-    window.fetch = jest.fn().mockReturnValue(
+  it("does not retry a redirected fetch if the error is not auth-related", async () => {
+    // Mimics a redirect that lead to a non-auth error.
+    window.fetch = jest.fn().mockReturnValueOnce(
       new Promise((resolve) => {
         resolve({
-          type: "opaqueredirect",
           url: "https://my.pod/container/",
+          status: 400,
+          ok: false,
         } as Response);
       })
     );
 
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", key);
-    await expect(myFetch("https://my.pod/container")).rejects.toThrow(
-      "Too many redirects. Last IRI looked up: [https://my.pod/container/]"
+    const response = await myFetch("https://my.pod/container");
+
+    expect(
+      // @ts-ignore
+      window.fetch.mock.calls.length
+    ).toEqual(1);
+    expect(response.status).toEqual(400);
+  });
+
+  it("does not retry a **not** redirected fetch if there was an auth-related issue", async () => {
+    // Mimics a redirect that lead to a non-auth error.
+    window.fetch = jest.fn().mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolve({
+          url: "https://my.pod/resource",
+          status: 403,
+          ok: false,
+        } as Response);
+      })
     );
+
+    const key = await generateJwkForDpop();
+    const myFetch = await buildDpopFetch("myToken", key);
+    const response = await myFetch("https://my.pod/resource");
+
+    expect(
+      // @ts-ignore
+      window.fetch.mock.calls.length
+    ).toEqual(1);
+    expect(response.status).toEqual(403);
   });
 });
 /* eslint-enable @typescript-eslint/ban-ts-ignore */

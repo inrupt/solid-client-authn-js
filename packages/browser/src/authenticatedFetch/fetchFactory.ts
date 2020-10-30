@@ -67,29 +67,8 @@ async function buildDpopFetchOptions(
   };
 }
 
-// If an IRI leads to more than MAX_HOPS redirections, we'll throw an error.
-export const MAX_HOPS = 20;
-
-async function retryDpopFetch(
-  url: RequestInfo,
-  authToken: string,
-  dpopKey: JSONWebKey,
-  hops: number,
-  init?: RequestInit
-): Promise<Response> {
-  if (hops >= MAX_HOPS) {
-    throw new Error(
-      `Too many redirects. Last IRI looked up: [${url.toString()}]`
-    );
-  }
-  const response = await fetch(
-    url,
-    await buildDpopFetchOptions(url.toString(), authToken, dpopKey, init)
-  );
-  if (response.type === "opaqueredirect") {
-    return retryDpopFetch(response.url, authToken, dpopKey, hops + 1, init);
-  }
-  return response;
+function isAuthError(statusCode: number): boolean {
+  return [401, 403].includes(statusCode);
 }
 
 /**
@@ -107,6 +86,22 @@ export async function buildDpopFetch(
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
   return async (url, options): Promise<Response> => {
-    return retryDpopFetch(url, authToken, dpopKey, 0, options);
+    const response = await fetch(
+      url,
+      await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)
+    );
+    const nonAuthNotOk = !response.ok && !isAuthError(response.status);
+    const hasBeenRedirected = response.url !== url;
+    if (response.ok || nonAuthNotOk || !hasBeenRedirected) {
+      // If there hasn't been a redirection, or if there has been a non-auth related
+      // issue, it should be handled at the application level
+      return response;
+    }
+    // If the request failed for auth reasons, and has been redirected, we should
+    // replay it with a new DPoP token.
+    return await fetch(
+      response.url,
+      await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
+    );
   };
 }
