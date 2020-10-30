@@ -37,12 +37,10 @@ export default function App() {
   // is redirected to the page after logging in the identity provider.
   useEffect(() => {
     // After redirect, the current URL contains login information.
-    session
-      .handleIncomingRedirect(new URL(window.location.href))
-      .then((info) => {
-        setResource(info.webId);
-        setWebId(info.webId);
-      });
+    session.handleIncomingRedirect(window.location.href).then((info) => {
+      setResource(info.webId);
+      setWebId(info.webId);
+    });
   }, [session]);
 
   const handleLogin = (e) => {
@@ -52,8 +50,8 @@ export default function App() {
     // Login will redirect the user away so that they can log in the OIDC issuer,
     // and back to the provided redirect URL (which should be controlled by your app).
     session.login({
-      redirectUrl: new URL(REDIRECT_URL),
-      oidcIssuer: new URL(issuer),
+      redirectUrl: REDIRECT_URL,
+      oidcIssuer: issuer,
     });
   };
 
