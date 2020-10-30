@@ -112,7 +112,7 @@ describe("buildDpopFetch", () => {
   it("builds the appropriate DPoP header for a given HTTP verb.", async () => {
     mockFetch(mockNotRedirectedResponse());
     const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined,  key);
+    const myFetch = await buildDpopFetch("myToken", undefined, key);
     await myFetch("http://some.url", {
       method: "POST",
     });
@@ -222,7 +222,7 @@ describe("buildDpopFetch", () => {
     );
 
     const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", key);
+    const myFetch = await buildDpopFetch("myToken", undefined, key);
     const response = await myFetch("https://my.pod/container");
 
     expect(
@@ -245,7 +245,7 @@ describe("buildDpopFetch", () => {
     );
 
     const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", key);
+    const myFetch = await buildDpopFetch("myToken", undefined, key);
     const response = await myFetch("https://my.pod/resource");
 
     expect(
