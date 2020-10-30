@@ -27,7 +27,6 @@
 /**
  * Responsible for fetching an IDP configuration
  */
-import URL from "url-parse";
 import { IIssuerConfig } from "./IIssuerConfig";
 
 export interface IIssuerConfigFetcher {
@@ -35,5 +34,5 @@ export interface IIssuerConfigFetcher {
    * Fetches the configuration
    * @param issuer URL of the IDP
    */
-  fetchConfig(issuer: URL): Promise<IIssuerConfig>;
+  fetchConfig(issuer: string): Promise<IIssuerConfig>;
 }

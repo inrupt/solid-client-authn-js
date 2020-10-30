@@ -20,7 +20,6 @@
  */
 
 import "reflect-metadata";
-import URL from "url-parse";
 import {
   FetcherMock,
   FetcherMockResponse,
@@ -68,10 +67,10 @@ describe("IssuerConfigFetcher", () => {
     });
 
     const fetchedConfig = await configFetcher.fetchConfig(
-      new URL("https://arbitrary.url")
+      "https://arbitrary.url"
     );
-    expect(fetchedConfig.issuer.protocol).toBe("https:");
-    expect(fetchedConfig.issuer.toString()).toBe("https://example.com");
+    expect(fetchedConfig.issuer.startsWith("https:")).toBeTruthy();
+    expect(fetchedConfig.issuer).toBe("https://example.com");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((fetchedConfig as any).claim_types_supported).toBeUndefined();
     expect(fetchedConfig.claimTypesSupported).toBe("oidc");
@@ -98,22 +97,20 @@ describe("IssuerConfigFetcher", () => {
     });
 
     const fetchedConfig = await configFetcher.fetchConfig(
-      new URL("https://arbitrary.url")
+      "https://arbitrary.url"
     );
 
-    expect(fetchedConfig.issuer).toEqual(new URL("https://issuer.url"));
+    expect(fetchedConfig.issuer).toEqual("https://issuer.url");
     expect(fetchedConfig.authorizationEndpoint).toEqual(
-      new URL("https://authorization_endpoint.url")
+      "https://authorization_endpoint.url"
     );
-    expect(fetchedConfig.tokenEndpoint).toEqual(
-      new URL("https://token_endpoint.url")
-    );
+    expect(fetchedConfig.tokenEndpoint).toEqual("https://token_endpoint.url");
     expect(fetchedConfig.userinfoEndpoint).toEqual(
-      new URL("https://userinfo_endpoint.url")
+      "https://userinfo_endpoint.url"
     );
-    expect(fetchedConfig.jwksUri).toEqual(new URL("https://jwks_uri.url"));
+    expect(fetchedConfig.jwksUri).toEqual("https://jwks_uri.url");
     expect(fetchedConfig.registrationEndpoint).toEqual(
-      new URL("https://registration_endpoint.url")
+      "https://registration_endpoint.url"
     );
   });
 
@@ -132,7 +129,7 @@ describe("IssuerConfigFetcher", () => {
     );
 
     await expect(
-      configFetcher.fetchConfig(new URL("https://some.url"))
+      configFetcher.fetchConfig("https://some.url")
     ).rejects.toThrowError(
       "[https://some.url] has an invalid configuration: Some error"
     );

@@ -41,8 +41,19 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 import ConfigurationError from "../../errors/ConfigurationError";
-import URL from "url-parse";
 import { IClient } from "@inrupt/oidc-client-ext";
+
+function hasIssuer(
+  options: ILoginOptions
+): options is ILoginOptions & { oidcIssuer: string } {
+  return typeof options.oidcIssuer === "string";
+}
+
+function hasRedirectUrl(
+  options: ILoginOptions
+): options is ILoginOptions & { redirectUrl: string } {
+  return typeof options.redirectUrl === "string";
+}
 
 /**
  * @hidden
@@ -57,28 +68,29 @@ export default class OidcLoginHandler implements ILoginHandler {
     @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
-  checkOptions(options: ILoginOptions): Error | null {
-    if (!options.oidcIssuer || !options.redirectUrl) {
-      return new ConfigurationError("OidcLoginHandler requires an oidcIssuer");
-    }
-    return null;
-  }
-
   async canHandle(options: ILoginOptions): Promise<boolean> {
-    return !this.checkOptions(options);
+    return hasIssuer(options) && hasRedirectUrl(options);
   }
 
   async handle(options: ILoginOptions): Promise<void> {
-    // Check to ensure the login options are correct
-    const optionsError: Error | null = this.checkOptions(options);
-    if (optionsError) {
-      throw optionsError;
+    if (!hasIssuer(options)) {
+      throw new ConfigurationError(
+        `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(
+          options
+        )}`
+      );
+    }
+    if (!hasRedirectUrl(options)) {
+      throw new ConfigurationError(
+        `OidcLoginHandler requires a redirect URL: missing property 'redirectUrl' in ${JSON.stringify(
+          options
+        )}`
+      );
     }
 
     // Fetch OpenId Config
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      // TODO: fix this with interface
-      options.oidcIssuer as URL
+      options.oidcIssuer
     );
 
     let dynamicClientRegistration: IClient;
@@ -125,10 +137,10 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
-      issuer: options.oidcIssuer as URL,
+      issuer: options.oidcIssuer,
       // TODO: differentiate if DPoP should be true
       dpop: options.tokenType.toLowerCase() === "dpop",
-      redirectUrl: options.redirectUrl as URL,
+      redirectUrl: options.redirectUrl,
       issuerConfiguration: issuerConfig,
       client: dynamicClientRegistration,
       sessionId: options.sessionId,

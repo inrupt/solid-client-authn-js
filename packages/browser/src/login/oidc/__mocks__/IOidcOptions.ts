@@ -20,20 +20,19 @@
  */
 
 import { IOidcOptions } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
 
 export const standardOidcOptions: IOidcOptions = {
   sessionId: "mySession",
-  issuer: new URL("https://example.com"),
+  issuer: "https://example.com",
   dpop: true,
-  redirectUrl: new URL("https://app.example.com"),
+  redirectUrl: "https://app.example.com",
   handleRedirect: jest.fn((url) => url),
   // This will be fixed in a different pull request
   issuerConfiguration: {
-    issuer: new URL("https://example.com"),
-    authorizationEndpoint: new URL("https://example.com/auth"),
-    tokenEndpoint: new URL("https://example.com/token"),
-    jwksUri: new URL("https://example.com/jwks"),
+    issuer: "https://example.com",
+    authorizationEndpoint: "https://example.com/auth",
+    tokenEndpoint: "https://example.com/token",
+    jwksUri: "https://example.com/jwks",
     subjectTypesSupported: [],
     claimsSupported: [],
   },

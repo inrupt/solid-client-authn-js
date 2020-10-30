@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
 import { describe, it } from "@jest/globals";
 
 import {
@@ -68,47 +67,47 @@ describe("normalizeHttpUriClaim", () => {
   [
     {
       it: "should not add a / if not present at the end of the url",
-      url: new URL("https://audience.com"),
+      url: "https://audience.com",
       expected: "https://audience.com",
     },
     {
       it: "should not change a URL with a slash at the end",
-      url: new URL("https://audience.com/"),
+      url: "https://audience.com/",
       expected: "https://audience.com/",
     },
     {
       it: "should include queries",
-      url: new URL("https://audience.com?cool=stuff&dope=things"),
+      url: "https://audience.com?cool=stuff&dope=things",
       expected: "https://audience.com?cool=stuff&dope=things",
     },
     {
       it: "should include queries and a slash",
-      url: new URL("https://audience.com/?cool=stuff&dope=things"),
+      url: "https://audience.com/?cool=stuff&dope=things",
       expected: "https://audience.com/?cool=stuff&dope=things",
     },
     {
       it: "should not include hash",
-      url: new URL("https://audience.com#throwBackThursday"),
+      url: "https://audience.com#throwBackThursday",
       expected: "https://audience.com",
     },
     {
       it: "should not include hash but include the slash",
-      url: new URL("https://audience.com/#throwBackThursday"),
+      url: "https://audience.com/#throwBackThursday",
       expected: "https://audience.com/",
     },
     {
       it: "should include the path",
-      url: new URL("https://audience.com/path"),
+      url: "https://audience.com/path",
       expected: "https://audience.com/path",
     },
     {
       it: "should not include the username and password",
-      url: new URL("https://jackson:badpassword@audience.com"),
+      url: "https://jackson:badpassword@audience.com",
       expected: "https://audience.com",
     },
     {
       it: "should include ports",
-      url: new URL("https://localhost:8080/path"),
+      url: "https://localhost:8080/path",
       expected: "https://localhost:8080/path",
     },
   ].forEach((test) => {
@@ -122,11 +121,7 @@ describe("normalizeHttpUriClaim", () => {
 describe("createDpopHeader", () => {
   it("properly builds a token when given a key", async () => {
     const key = await generateJwk("EC", "P-256", { alg: "ES256" });
-    const token = await createDpopHeader(
-      new URL("https://audience.com/"),
-      "post",
-      key
-    );
+    const token = await createDpopHeader("https://audience.com/", "post", key);
     const decoded = await decodeJwt(token);
     expect(decoded.htu).toEqual("https://audience.com/");
     expect(decoded.htm).toEqual("POST");
@@ -135,11 +130,7 @@ describe("createDpopHeader", () => {
   it("create the correct JWT headers", async () => {
     const key = await generateJwk("EC", "P-256", { alg: "ES256" });
     const publicKey = { ...key, d: undefined };
-    const token = await createDpopHeader(
-      new URL("https://audience.com/"),
-      "post",
-      key
-    );
+    const token = await createDpopHeader("https://audience.com/", "post", key);
     const decoded = await decodeJwt(token, key, {
       complete: true,
     });

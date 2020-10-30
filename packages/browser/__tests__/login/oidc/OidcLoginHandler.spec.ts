@@ -24,7 +24,6 @@ import "reflect-metadata";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
-import URL from "url-parse";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
 import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
@@ -51,8 +50,8 @@ describe("OidcLoginHandler", () => {
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
     await handler.handle({
       sessionId: "mySession",
-      oidcIssuer: new URL("https://arbitrary.url"),
-      redirectUrl: new URL("https://app.com/redirect"),
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
       clientId: "coolApp",
       tokenType: "DPoP",
     });
@@ -66,8 +65,19 @@ describe("OidcLoginHandler", () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     await expect(handler.handle({})).rejects.toThrowError(
-      "OidcLoginHandler requires an oidcIssuer"
+      "OidcLoginHandler requires an OIDC issuer"
     );
+  });
+
+  it("should throw an error when called without a redirect URL", async () => {
+    const handler = getInitialisedHandler();
+    await expect(
+      handler.handle({
+        sessionId: "doesn't matter",
+        tokenType: "DPoP",
+        oidcIssuer: "https://whatever.com",
+      })
+    ).rejects.toThrowError("OidcLoginHandler requires a redirect URL");
   });
 
   it("should indicate it when it can handle logins", async () => {
@@ -76,8 +86,8 @@ describe("OidcLoginHandler", () => {
     await expect(
       handler.canHandle({
         sessionId: "mySession",
-        oidcIssuer: new URL("https://arbitrary.url"),
-        redirectUrl: new URL("https://app.com/redirect"),
+        oidcIssuer: "https://arbitrary.url",
+        redirectUrl: "https://app.com/redirect",
         clientId: "coolApp",
         tokenType: "DPoP",
       })

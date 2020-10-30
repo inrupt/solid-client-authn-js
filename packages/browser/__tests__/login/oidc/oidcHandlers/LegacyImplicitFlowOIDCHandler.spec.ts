@@ -33,7 +33,6 @@ import {
   IOidcOptions,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
 import { JSONWebKey } from "jose";
 
 const mockJWK = {
@@ -50,7 +49,7 @@ jest.mock("@inrupt/oidc-client-ext", () => {
   return {
     generateJwkForDpop: async (): Promise<typeof mockJWK> => mockJWK,
     createDpopHeader: async (
-      _audience: URL,
+      _audience: string,
       _method: string,
       _jwt: JSONWebKey
     ): Promise<string> => "someToken",
