@@ -24,11 +24,17 @@ import { createDpopHeader } from "@inrupt/oidc-client-ext";
 
 /**
  * @param authToken A bearer token.
+ * @param _refreshToken An optional refresh token.
  * @returns A fetch function that adds an Authorization header with the provided
  * bearer token.
  * @hidden
  */
-export function buildBearerFetch(authToken: string): typeof fetch {
+export function buildBearerFetch(
+  authToken: string,
+  // TODO: We need to push this refresh token into a wrapper around the fetch,
+  //  so dependent on that wrapper existing first!
+  _refreshToken: string | undefined
+): typeof fetch {
   return (init, options): Promise<Response> => {
     return fetch(init, {
       ...options,
@@ -42,12 +48,16 @@ export function buildBearerFetch(authToken: string): typeof fetch {
 
 /**
  * @param authToken a DPoP token.
+ * @param _refreshToken An optional refresh token.
  * @param dpopKey The private key the token is bound to.
  * @returns A fetch function that adds an Authorization header with the provided
  * DPoP token, and adds a dpop header.
  */
 export async function buildDpopFetch(
   authToken: string,
+  // TODO: We need to push this refresh token into a wrapper around the fetch,
+  //  so dependent on that wrapper existing first!
+  _refreshToken: string | undefined,
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
   return async (init, options): Promise<Response> => {

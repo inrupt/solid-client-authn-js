@@ -236,11 +236,14 @@ export async function getTokens(
       /* eslint-enable @typescript-eslint/camelcase */
     }),
   };
+
   const rawTokenResponse = (await (
     await fetch(issuer.tokenEndpoint, tokenRequestInit)
   ).json()) as Record<string, unknown>;
+
   const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
   const webId = await deriveWebIdFromIdToken(tokenResponse.id_token);
+
   return {
     accessToken: tokenResponse.access_token,
     idToken: tokenResponse.id_token,
@@ -297,8 +300,14 @@ export async function getBearerToken(
     accessToken: signinResponse.access_token,
     idToken: signinResponse.id_token,
     webId,
-    // TODO: Properly handle refresh token
-    // refreshToken: signinResponse.refresh_token
+    // Although not a field in the TypeScript response interface, the refresh
+    // token (which can optionally come back with the access token (if, as per
+    // the OAuth2 spec, we requested one using the scope of 'offline_access')
+    // will be included in the signin response object.
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    refreshToken: signinResponse.refresh_token,
   };
 }
 
