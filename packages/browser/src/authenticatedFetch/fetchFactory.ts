@@ -67,6 +67,9 @@ async function buildDpopFetchOptions(
 }
 
 function isExpectedAuthError(statusCode: number): boolean {
+  // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
+  // a response failing because the provided credentials aren't accepted by the
+  // server can get a 401 or a 403 response.
   return [401, 403].includes(statusCode);
 }
 
