@@ -63,11 +63,10 @@ async function buildDpopFetchOptions(
         dpopKey
       ),
     },
-    redirect: "manual",
   };
 }
 
-function isAuthError(statusCode: number): boolean {
+function isExpectedAuthError(statusCode: number): boolean {
   return [401, 403].includes(statusCode);
 }
 
@@ -90,9 +89,10 @@ export async function buildDpopFetch(
       url,
       await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)
     );
-    const nonAuthNotOk = !response.ok && !isAuthError(response.status);
+    const failedButNotExpectedAuthError =
+      !response.ok && !isExpectedAuthError(response.status);
     const hasBeenRedirected = response.url !== url;
-    if (response.ok || nonAuthNotOk || !hasBeenRedirected) {
+    if (response.ok || failedButNotExpectedAuthError || !hasBeenRedirected) {
       // If there hasn't been a redirection, or if there has been a non-auth related
       // issue, it should be handled at the application level
       return response;
