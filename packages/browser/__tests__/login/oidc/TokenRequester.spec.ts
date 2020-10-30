@@ -263,6 +263,6 @@ describe("TokenRequester", () => {
         refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable @typescript-eslint/camelcase */
-    ).rejects.toThrowError("The Authorization Server returned a bad token");
+    ).rejects.toThrowError("The Authorization Server returned a bad token (i.e. when decoded we did not find the required 'sub' claim).");
   });
 });
