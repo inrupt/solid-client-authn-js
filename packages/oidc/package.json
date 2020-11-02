@@ -27,7 +27,7 @@
   "devDependencies": {
     "cross-fetch": "^3.0.6",
     "rollup": "^2.15.0",
-    "rollup-plugin-typescript2": "^0.28.0"
+    "rollup-plugin-typescript2": "^0.29.0"
   },
   "dependencies": {
     "@types/form-urlencoded": "^2.0.1",
