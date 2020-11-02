@@ -1,7 +1,7 @@
 # `solid-client-authn-browser` sample app
 
 This application provides a snippet of code showcasing usage of the 
-`solid-client-authn-browser` library in React components, with a bundler.
+`solid-client-authn-browser` library in a `script` tag, without using a bundler.
 
 ## Install and run
 
