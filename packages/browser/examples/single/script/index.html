@@ -11,29 +11,22 @@
     <p id="WebId"></p>
     <script type="text/javascript" src="/solid-client-authn.bundle.js"></script>
     <script>
-      const session = new solidClientAuthentication.Session(
-        {
-          clientAuthentication: solidClientAuthentication.getClientAuthenticationWithDependencies(
-            {}
-          ),
-        },
-        "mySession"
-      );
-      const authCode = new URL(window.location.href).searchParams.get("code");
-      if (authCode) {
-        // Being redirected after requesting a token
-        session
-          .handleIncomingRedirect(new URL(window.location.href))
-          .then((sessionInfo) => {
+      const session = new solidClientAuthentication.Session();
+      // When loading the page, check if you are being redirected from the IdP
+      session
+        .handleIncomingRedirect(window.location.href)
+        .then((sessionInfo) => {
+          if(!sessionInfo.isLoggedIn) {
+            // If you are not logged in, initiate the login
+            session.login({
+              redirectUrl: "http://localhost:3001/",
+              oidcIssuer: document.getElementById("oidcIssuer").innerHTML,
+            });
+          } else {
+            // The page was loaded after a redirect from the IdP
             document.getElementById("WebId").innerHTML = sessionInfo.webId;
-          });
-      } else {
-        // Initiate the login
-        session.login({
-          redirectUrl: new URL("http://localhost:3001/"),
-          oidcIssuer: new URL(document.getElementById("oidcIssuer").innerHTML),
+          }
         });
-      }
     </script>
   </body>
 </html>
