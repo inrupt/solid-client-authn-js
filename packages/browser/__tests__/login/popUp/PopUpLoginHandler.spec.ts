@@ -25,7 +25,6 @@ import PopUpLoginHandler from "../../../src/login/popUp/PopUpLoginHandler";
 import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/EnvironmentDetector";
 import { SessionInfoManagerMock } from "../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { LoginHandlerMock } from "../../../src/login/__mocks__/LoginHandler";
-import URL from "url-parse";
 
 describe("PopUpLoginHandler", () => {
   const defaultMocks = {
@@ -50,7 +49,7 @@ describe("PopUpLoginHandler", () => {
         await handler.canHandle({
           sessionId: "mySession",
           popUp: true,
-          redirectUrl: new URL("/redirect"),
+          redirectUrl: "/redirect",
           tokenType: "DPoP",
         })
       ).toBe(true);
@@ -61,7 +60,7 @@ describe("PopUpLoginHandler", () => {
         await handler.canHandle({
           sessionId: "mySession",
           popUp: false,
-          redirectUrl: new URL("https://coolsite.com/redirect"),
+          redirectUrl: "https://coolsite.com/redirect",
           tokenType: "DPoP",
         })
       ).toBe(false);

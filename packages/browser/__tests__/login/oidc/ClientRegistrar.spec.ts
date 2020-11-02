@@ -28,7 +28,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { Response as NodeResponse } from "node-fetch";
-import URL from "url-parse";
 
 /**
  * Test for ClientRegistrar
@@ -64,12 +63,12 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
-      const registrationUrl = new URL("https://idp.com/register");
+      const registrationUrl = "https://idp.com/register";
       expect(
         await clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com"),
+            redirectUrl: "https://example.com",
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
@@ -112,11 +111,11 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
-      const registrationUrl = new URL("https://idp.com/register");
+      const registrationUrl = "https://idp.com/register";
       const registeredClient = await clientRegistrar.getClient(
         {
           sessionId: "mySession",
-          redirectUrl: new URL("https://example.com"),
+          redirectUrl: "https://example.com",
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
@@ -134,7 +133,7 @@ describe("ClientRegistrar", () => {
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com"),
+            redirectUrl: "https://example.com",
           },
           IssuerConfigFetcherFetchConfigResponse
         )
@@ -155,12 +154,12 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
-      const registrationUrl = new URL("https://idp.com/register");
+      const registrationUrl = "https://idp.com/register";
       await expect(
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
-            redirectUrl: new URL("https://example.com"),
+            redirectUrl: "https://example.com",
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
@@ -187,7 +186,7 @@ describe("ClientRegistrar", () => {
       const client = await clientRegistrar.getClient(
         {
           sessionId: "mySession",
-          redirectUrl: new URL("https://example.com"),
+          redirectUrl: "https://example.com",
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
@@ -218,12 +217,12 @@ describe("ClientRegistrar", () => {
       await clientRegistrar.getClient(
         {
           sessionId: "mySession",
-          redirectUrl: new URL("https://example.com"),
+          redirectUrl: "https://example.com",
           registrationAccessToken: "some token",
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-          registrationEndpoint: new URL("https://some.issuer/register"),
+          registrationEndpoint: "https://some.issuer/register",
         }
       );
 
@@ -262,11 +261,11 @@ describe("ClientRegistrar", () => {
       await clientRegistrar.getClient(
         {
           sessionId: "mySession",
-          redirectUrl: new URL("https://example.com"),
+          redirectUrl: "https://example.com",
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-          registrationEndpoint: new URL("https://some.issuer/register"),
+          registrationEndpoint: "https://some.issuer/register",
         }
       );
 
@@ -294,12 +293,12 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: myStorage,
       });
-      const registrationUrl = new URL("https://idp.com/register");
+      const registrationUrl = "https://idp.com/register";
 
       await clientRegistrar.getClient(
         {
           sessionId: "mySession",
-          redirectUrl: new URL("https://example.com"),
+          redirectUrl: "https://example.com",
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,

@@ -27,22 +27,18 @@
 /**
  * A wrapper method to wrap the standard w3 fetch library
  */
-import URL from "url-parse";
-import _fetch from "cross-fetch";
 
 export interface IFetcher {
-  fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+  fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
 }
 
+// TODO: This class should be removed altogether, and replaced by a direct call
+// to the environment's fetch.
 /**
  * @hidden
  */
 export default class Fetcher implements IFetcher {
-  async fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    const fetchUrl = url instanceof URL ? url.toString() : url;
-    if (typeof window !== "undefined" && typeof window.fetch !== "undefined") {
-      return window.fetch(fetchUrl, init);
-    }
-    return _fetch(fetchUrl, init);
+  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
+    return window.fetch(url, init);
   }
 }

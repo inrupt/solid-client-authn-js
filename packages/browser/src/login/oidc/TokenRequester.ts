@@ -30,7 +30,6 @@ import {
   IStorageUtility,
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
 import formurlencoded from "form-urlencoded";
 import { IFetcher } from "../../util/Fetcher";
 import {
@@ -73,7 +72,7 @@ export default class TokenRequester {
 
     // Get the issuer config to find the token url
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      new URL(issuer as string)
+      issuer as string
     );
 
     const client = await this.clientRegistrar.getClient(
@@ -145,7 +144,9 @@ export default class TokenRequester {
 
     const decoded = await decodeJwt(tokenResponse.access_token as string);
     if (!decoded || !decoded.sub) {
-      throw new Error("The idp returned a bad token without a sub.");
+      throw new Error(
+        "The Authorization Server returned a bad token (i.e. when decoded we did not find the required 'sub' claim)."
+      );
     }
 
     await this.storageUtility.setForUser(

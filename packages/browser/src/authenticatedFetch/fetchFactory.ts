@@ -19,18 +19,22 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
 import { JSONWebKey } from "jose";
 import { createDpopHeader } from "@inrupt/oidc-client-ext";
-import { fetch } from "cross-fetch";
 
 /**
  * @param authToken A bearer token.
+ * @param _refreshToken An optional refresh token.
  * @returns A fetch function that adds an Authorization header with the provided
  * bearer token.
  * @hidden
  */
-export function buildBearerFetch(authToken: string): typeof fetch {
+export function buildBearerFetch(
+  authToken: string,
+  // TODO: We need to push this refresh token into a wrapper around the fetch,
+  //  so dependent on that wrapper existing first!
+  _refreshToken: string | undefined
+): typeof fetch {
   return (init, options): Promise<Response> => {
     return fetch(init, {
       ...options,
@@ -42,28 +46,65 @@ export function buildBearerFetch(authToken: string): typeof fetch {
   };
 }
 
+async function buildDpopFetchOptions(
+  targetUrl: string,
+  authToken: string,
+  dpopKey: JSONWebKey,
+  defaultOptions?: RequestInit
+): Promise<RequestInit> {
+  return {
+    ...defaultOptions,
+    headers: {
+      ...defaultOptions?.headers,
+      Authorization: `DPoP ${authToken}`,
+      DPoP: await createDpopHeader(
+        targetUrl,
+        defaultOptions?.method ?? "get",
+        dpopKey
+      ),
+    },
+  };
+}
+
+function isExpectedAuthError(statusCode: number): boolean {
+  // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
+  // a response failing because the provided credentials aren't accepted by the
+  // server can get a 401 or a 403 response.
+  return [401, 403].includes(statusCode);
+}
+
 /**
  * @param authToken a DPoP token.
+ * @param _refreshToken An optional refresh token.
  * @param dpopKey The private key the token is bound to.
  * @returns A fetch function that adds an Authorization header with the provided
  * DPoP token, and adds a dpop header.
  */
 export async function buildDpopFetch(
   authToken: string,
+  // TODO: We need to push this refresh token into a wrapper around the fetch,
+  //  so dependent on that wrapper existing first!
+  _refreshToken: string | undefined,
   dpopKey: JSONWebKey
 ): Promise<typeof fetch> {
-  return async (init, options): Promise<Response> => {
-    return fetch(init, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Authorization: `DPoP ${authToken}`,
-        DPoP: await createDpopHeader(
-          new URL(init.toString()),
-          options?.method ?? "get",
-          dpopKey
-        ),
-      },
-    });
+  return async (url, options): Promise<Response> => {
+    const response = await fetch(
+      url,
+      await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)
+    );
+    const failedButNotExpectedAuthError =
+      !response.ok && !isExpectedAuthError(response.status);
+    const hasBeenRedirected = response.url !== url;
+    if (response.ok || failedButNotExpectedAuthError || !hasBeenRedirected) {
+      // If there hasn't been a redirection, or if there has been a non-auth related
+      // issue, it should be handled at the application level
+      return response;
+    }
+    // If the request failed for auth reasons, and has been redirected, we should
+    // replay it with a new DPoP token.
+    return await fetch(
+      response.url,
+      await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
+    );
   };
 }

@@ -34,10 +34,10 @@ import {
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import URL from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { generateJwkForDpop, createDpopHeader } from "@inrupt/oidc-client-ext";
+import URLParse from "url-parse";
 
 /**
  * @hidden
@@ -62,16 +62,13 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
-    const requestUrl = new URL(
-      oidcLoginOptions.issuerConfiguration.authorizationEndpoint.toString()
-    );
     // // TODO: include nonce
     // Disable camel case rule because this query requires camel case
     /* eslint-disable @typescript-eslint/camelcase */
     const query: Record<string, string> = {
       client_id: oidcLoginOptions.client.clientId,
       response_type: "id_token token",
-      redirect_uri: oidcLoginOptions.redirectUrl.toString(),
+      redirect_uri: oidcLoginOptions.redirectUrl,
       // The webid scope does not appear in the spec
       scope: "openid webid offline_access",
       state: oidcLoginOptions.sessionId,
@@ -93,13 +90,19 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     if (oidcLoginOptions.dpop) {
       query.dpop = await createDpopHeader(oidcLoginOptions.issuer, "GET", key);
     }
-    requestUrl.set("query", query);
+
     const sessionInfo = await this.sessionInfoManager.get(
       oidcLoginOptions.sessionId
     );
     if (!sessionInfo) {
       throw new Error("There was a problem creating a session.");
     }
+
+    const requestUrl = new URLParse(
+      oidcLoginOptions.issuerConfiguration.authorizationEndpoint
+    );
+    requestUrl.set("query", query);
+
     // This flow must happen in a browser, which means a redirection
     // should always be possible.
     this.redirector.redirect(requestUrl.toString(), {

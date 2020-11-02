@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URL from "url-parse";
 import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
 import { createDpopHeader, decodeJwt } from "./dpop";
@@ -127,14 +126,12 @@ function validatePreconditions(
       !issuer.grantTypesSupported.includes(data.grantType))
   ) {
     throw new Error(
-      `The issuer [${issuer.issuer.toString()}] does not support the [${
-        data.grantType
-      }] grant`
+      `The issuer [${issuer.issuer}] does not support the [${data.grantType}] grant`
     );
   }
   if (!issuer.tokenEndpoint) {
     throw new Error(
-      `This issuer [${issuer.issuer.toString()}] does not have a token endpoint`
+      `This issuer [${issuer.issuer}] does not have a token endpoint`
     );
   }
 }
@@ -239,11 +236,14 @@ export async function getTokens(
       /* eslint-enable @typescript-eslint/camelcase */
     }),
   };
+
   const rawTokenResponse = (await (
-    await fetch(issuer.tokenEndpoint.toString(), tokenRequestInit)
+    await fetch(issuer.tokenEndpoint, tokenRequestInit)
   ).json()) as Record<string, unknown>;
+
   const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
   const webId = await deriveWebIdFromIdToken(tokenResponse.id_token);
+
   return {
     accessToken: tokenResponse.access_token,
     idToken: tokenResponse.id_token,
@@ -262,7 +262,7 @@ export async function getTokens(
  * @param redirectUrl The URL to which the user has been redirected
  */
 export async function getBearerToken(
-  redirectUrl: URL
+  redirectUrl: string
 ): Promise<TokenEndpointResponse> {
   let signinResponse;
   try {
@@ -288,7 +288,7 @@ export async function getBearerToken(
       // NSS, and not in general.
       // Issue tracker: https://github.com/solid/node-solid-server/issues/1490
       loadUserInfo: false,
-    }).processSigninResponse(redirectUrl.toString());
+    }).processSigninResponse(redirectUrl);
   } catch (err) {
     throw new Error(
       `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
@@ -300,8 +300,14 @@ export async function getBearerToken(
     accessToken: signinResponse.access_token,
     idToken: signinResponse.id_token,
     webId,
-    // TODO: Properly handle refresh token
-    // refreshToken: signinResponse.refresh_token
+    // Although not a field in the TypeScript response interface, the refresh
+    // token (which can optionally come back with the access token (if, as per
+    // the OAuth2 spec, we requested one using the scope of 'offline_access')
+    // will be included in the signin response object.
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    refreshToken: signinResponse.refresh_token,
   };
 }
 

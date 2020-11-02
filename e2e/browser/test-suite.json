@@ -26,37 +26,54 @@
       "envTestUserPassword": "E2E_NSS_PASSWORD",
       "brokeredIdp": "nss",
       "authorizeClientAppMechanism": "nss"
-    } ],
+    }
+  ],
 
   "testList": [
     {
       "name": "Public resource in my Pod - not logged in",
       "performLogin": false,
       "resourceToGet": "<POD ROOT>public/",
-      "expectResponseContainsAnyOf": [ "ldp:BasicContainer" ]
+      "expectResponseContainsAnyOf": ["ldp:BasicContainer"]
+    },
+    {
+      "name": "Public resource in my Pod, redirected - not logged in",
+      "performLogin": false,
+      "resourceToGet": "<POD ROOT>public",
+      "expectResponseContainsAnyOf": ["ldp:BasicContainer"]
     },
     {
       "name": "Private resource in my Pod - not logged in",
       "performLogin": false,
       "resourceToGet": "<POD ROOT>private/",
-      "expectResponseContainsAnyOf": [ "\"Unauthorized\"", "requires you to log" ]
+      "expectResponseContainsAnyOf": ["\"Unauthorized\"", "requires you to log"]
     },
     {
       "name": "Private resource in my Pod - logged in",
       "performLogin": true,
       "resourceToGet": "<POD ROOT>private/",
-      "expectResponseContainsAnyOf": [ "ldp:BasicContainer" ]
+      "expectResponseContainsAnyOf": ["ldp:BasicContainer"]
+    },
+    {
+      "name": "Private resource in my Pod, redirected - logged in",
+      "performLogin": true,
+      "resourceToGet": "<POD ROOT>private",
+      "expectResponseContainsAnyOf": ["ldp:BasicContainer"]
     },
     {
       "name": "Public resource in my Pod - logged in",
       "performLogin": true,
       "resourceToGet": "<POD ROOT>public/",
-      "expectResponseContainsAnyOf": [ "ldp:BasicContainer" ]
+      "expectResponseContainsAnyOf": ["ldp:BasicContainer"]
     },
     {
       "name": "Private resource that doesn't exist - logged in",
       "performLogin": true,
       "resourceToGet": "<POD ROOT>private/resource-that-does-not-exist.ttl",
-      "expectResponseContainsAnyOf": [ "\"Not Found\"", "Can't find file requested" ]
-    } ]
+      "expectResponseContainsAnyOf": [
+        "\"Not Found\"",
+        "Can't find file requested"
+      ]
+    }
+  ]
 }

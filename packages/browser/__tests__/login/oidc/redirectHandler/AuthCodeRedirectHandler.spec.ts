@@ -20,7 +20,6 @@
  */
 
 import "reflect-metadata";
-import URL from "url-parse";
 import {
   StorageUtilityMock,
   mockStorageUtility,
@@ -37,8 +36,6 @@ import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector"
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
-
-jest.mock("cross-fetch");
 
 const mockJwk = (): JSONWebKey => {
   return {
@@ -71,13 +68,13 @@ type AccessJwt = {
 
 const mockIssuer = (): IIssuerConfig => {
   return {
-    issuer: new URL("https://some.issuer"),
-    authorizationEndpoint: new URL("https://some.issuer/autorization"),
-    tokenEndpoint: new URL("https://some.issuer/token"),
-    jwksUri: new URL("https://some.issuer/keys"),
+    issuer: "https://some.issuer",
+    authorizationEndpoint: "https://some.issuer/autorization",
+    tokenEndpoint: "https://some.issuer/token",
+    jwksUri: "https://some.issuer/keys",
     claimsSupported: ["code", "openid"],
     subjectTypesSupported: ["public", "pairwise"],
-    registrationEndpoint: new URL("https://some.issuer/registration"),
+    registrationEndpoint: "https://some.issuer/registration",
     grantTypesSupported: ["authorization_code"],
   };
 };
@@ -254,12 +251,10 @@ describe("AuthCodeRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-ignore */
     it("returns an authenticated bearer fetch by default", async () => {
-      const fetch = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock<
-          ReturnType<typeof window.fetch>,
-          [RequestInfo, RequestInit?]
-        >;
-      };
+      window.fetch = jest.fn() as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockStorageUtility({}),
@@ -274,7 +269,7 @@ describe("AuthCodeRedirectHandler", () => {
       // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
       expect(
         // @ts-ignore
         header
@@ -282,12 +277,17 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated dpop fetch if requested", async () => {
-      const fetch = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock<
-          ReturnType<typeof window.fetch>,
-          [RequestInfo, RequestInit?]
-        >;
-      };
+      window.fetch = jest.fn().mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            redirected: true,
+            url: "https://my.pod/container/",
+          } as Response);
+        })
+      ) as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
 
       const storage = mockStorageUtility({
         oauth2StateValue: {
@@ -308,7 +308,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = fetch.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
       expect(
         // @ts-ignore
         header
@@ -327,7 +327,7 @@ describe("exchangeDpopToken", () => {
       mockClientRegistrar(mockClient()),
       "some code",
       "some pkce token",
-      new URL("https://my.app/redirect")
+      "https://my.app/redirect"
     );
     expect(tokens.accessToken).toEqual(
       mockTokenEndpointDpopResponse().accessToken

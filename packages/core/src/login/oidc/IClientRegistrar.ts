@@ -27,12 +27,10 @@
 import { IClient } from "./IClient";
 import { IIssuerConfig } from "./IIssuerConfig";
 
-import URL from "url-parse";
-
 export interface IClientRegistrarOptions {
   sessionId: string;
   clientName?: string;
-  redirectUrl?: URL;
+  redirectUrl?: string;
   registrationAccessToken?: string;
 }
 
