@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -58,7 +58,7 @@
     "eslint-plugin-prettier": "^3.1.4",
     "jest": "^25.1.0",
     "license-checker": "^25.0.1",
-    "prettier": "2.1.1",
+    "prettier": "2.1.2",
     "ts-jest": "^25.5.1",
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
@@ -71,8 +71,8 @@
     "webpack-merge": "^5.2.0"
   },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^0.2.2",
-    "@inrupt/solid-client-authn-core": "^0.2.2",
+    "@inrupt/oidc-client-ext": "^0.3.0",
+    "@inrupt/solid-client-authn-core": "^0.3.0",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",
