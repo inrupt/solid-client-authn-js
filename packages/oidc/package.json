@@ -24,11 +24,6 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/prose; make html; cd ../api; make html; cd ../; rm -r dist || true; mkdir -p dist/prose dist/api; cp -r prose/build/html/. dist/prose/; cp -r api/build/html/. dist/api/; echo 'Draft documentation: <a href=\"./prose/\">Prose</a>, <a href=\"./api/\">API docs</a>.' >> dist/index.html"
   },
   "license": "MIT",
-  "devDependencies": {
-    "cross-fetch": "^3.0.6",
-    "rollup": "^2.15.0",
-    "rollup-plugin-typescript2": "^0.29.0"
-  },
   "dependencies": {
     "@types/form-urlencoded": "^2.0.1",
     "@types/jsonwebtoken": "^8.5.0",

@@ -22,26 +22,6 @@
     "build-api-docs": "npx typedoc --out docs/api/source/api --readme none",
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
-  "devDependencies": {
-    "@types/jest": "^26.0.15",
-    "@types/node-fetch": "^2.5.6",
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
-    "eslint": "^6.1.0",
-    "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-license-header": "^0.2.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "jest": "^25.1.0",
-    "license-checker": "^25.0.1",
-    "node-fetch": "^2.6.1",
-    "prettier": "2.1.2",
-    "ts-jest": "^25.5.1",
-    "ts-loader": "^8.0.7",
-    "tsc-watch": "^4.2.9",
-    "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^3.0.11",
-    "typescript": "^3.9.7"
-  },
   "dependencies": {
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
