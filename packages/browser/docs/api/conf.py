@@ -78,12 +78,12 @@ html_theme_path = ['./themes']
 
 html_copy_source = False
 
-html_title = 'Inrupt {0} Documentation'.format(name)
+html_title = 'Inrupt {0} API Documentation'.format(name)
 
 # These theme options are declared in ./themes/inrupt/theme.conf
 
 html_theme_options = {
-    'project_title': 'Inrupt {0} Documentation'.format(name),
+    'project_title': 'Inrupt {0} API Documentation'.format(name),
     'banner': True,
     'banner_msg': 'This is a Beta (i.e. in progress) version of the manual. Content and features are subject to change.',
     'robots_index': True,

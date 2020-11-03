@@ -105,7 +105,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url");
+    expect(decodedHeader["htu"]).toEqual("http://some.url/");
     expect(decodedHeader["htm"]).toEqual("GET");
   });
 
@@ -124,7 +124,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url");
+    expect(decodedHeader["htu"]).toEqual("http://some.url/");
     expect(decodedHeader["htm"]).toEqual("POST");
   });
 
@@ -141,7 +141,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url");
+    expect(decodedHeader["htu"]).toEqual("http://some.url/");
     expect(decodedHeader["htm"]).toEqual("GET");
 
     expect(
@@ -168,7 +168,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url");
+    expect(decodedHeader["htu"]).toEqual("http://some.url/");
     expect(decodedHeader["htm"]).toEqual("GET");
   });
 

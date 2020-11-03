@@ -78,42 +78,6 @@ describe("IssuerConfigFetcher", () => {
     expect((fetchedConfig as any).bleepBloop).toBeUndefined();
   });
 
-  it("should wrap URLs in url-parse's URL object", async () => {
-    const fetchResponse = (new NodeResponse(
-      /* eslint-disable @typescript-eslint/camelcase */
-      JSON.stringify({
-        issuer: "https://issuer.url",
-        authorization_endpoint: "https://authorization_endpoint.url",
-        token_endpoint: "https://token_endpoint.url",
-        userinfo_endpoint: "https://userinfo_endpoint.url",
-        jwks_uri: "https://jwks_uri.url",
-        registration_endpoint: "https://registration_endpoint.url",
-      })
-      /* eslint-enable @typescript-eslint/camelcase */
-    ) as unknown) as Response;
-    const configFetcher = getIssuerConfigFetcher({
-      storageUtility: mockStorageUtility({}),
-      fetchResponse: fetchResponse,
-    });
-
-    const fetchedConfig = await configFetcher.fetchConfig(
-      "https://arbitrary.url"
-    );
-
-    expect(fetchedConfig.issuer).toEqual("https://issuer.url");
-    expect(fetchedConfig.authorizationEndpoint).toEqual(
-      "https://authorization_endpoint.url"
-    );
-    expect(fetchedConfig.tokenEndpoint).toEqual("https://token_endpoint.url");
-    expect(fetchedConfig.userinfoEndpoint).toEqual(
-      "https://userinfo_endpoint.url"
-    );
-    expect(fetchedConfig.jwksUri).toEqual("https://jwks_uri.url");
-    expect(fetchedConfig.registrationEndpoint).toEqual(
-      "https://registration_endpoint.url"
-    );
-  });
-
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
     const mockFetcher = {
       fetch: (): Promise<Response> =>

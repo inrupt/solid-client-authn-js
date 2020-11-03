@@ -49,7 +49,6 @@
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/node": "^14.14.6",
     "@types/node-jose": "^1.1.5",
-    "@types/url-parse": "^1.4.3",
     "@types/uuid": "^8.3.0",
     "build-module": "^1.0.7",
     "crypto-random-string": "^3.2.0",
@@ -61,7 +60,6 @@
     "node-jose": "^2.0.0",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.3.0",
-    "url-parse": "^1.4.7",
     "uuid": "^8.3.1"
   },
   "publishConfig": {

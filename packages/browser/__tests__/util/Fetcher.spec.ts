@@ -19,9 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import Fetcher from "../../src/util/Fetcher";
+import Fetcher, { appendToUrlPathname } from "../../src/util/Fetcher";
 
-describe("UuidGenerator", () => {
+describe("Fetcher", () => {
   it("should make a fetch given a string", async () => {
     window.fetch = jest
       .fn()
@@ -44,5 +44,35 @@ describe("UuidGenerator", () => {
 
     const fetcher = new Fetcher();
     expect(await fetcher.fetch("https://someurl.com")).toBe("some response");
+  });
+
+  describe("append to URL path", () => {
+    it("should concatenate path to just domain", async () => {
+      expect(appendToUrlPathname("https://test.com", "more")).toEqual(
+        "https://test.com/more"
+      );
+
+      expect(appendToUrlPathname("https://test.com/", "more")).toEqual(
+        "https://test.com/more"
+      );
+
+      expect(appendToUrlPathname("https://test.com", "/more")).toEqual(
+        "https://test.com/more"
+      );
+
+      expect(appendToUrlPathname("https://test.com/", "/more")).toEqual(
+        "https://test.com/more"
+      );
+    });
+
+    it("should concatenate to existing path", async () => {
+      expect(appendToUrlPathname("https://test.com/some/path", "more")).toEqual(
+        "https://test.com/some/path/more"
+      );
+
+      expect(
+        appendToUrlPathname("https://test.com/some/path", "/more")
+      ).toEqual("https://test.com/some/path/more");
+    });
   });
 });

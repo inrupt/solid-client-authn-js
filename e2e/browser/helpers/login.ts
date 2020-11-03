@@ -1,17 +1,29 @@
-// Login via ESS Broker using various Auth0 workflows.
+/*
+ * Copyright 2020 Inrupt Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+ * Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 import { Selector, t } from "testcafe";
 import LoginPage from "../page-models/LoginPage";
 
 // Login using NSS User
-export async function loginNss(
-  brokerUrl: string,
-  username: string,
-  password: string
-) {
-  // Log in via ESS Broker service
-  await LoginPage.submitLoginForm(brokerUrl);
-
+export async function loginNss(username: string, password: string) {
   await t
     .typeText("#username", username)
     .typeText("#password", password)
@@ -106,14 +118,7 @@ export async function essGithubLogin(
  * @param password
  * @param waitTime
  */
-export async function loginGluu(
-  brokerURL: string,
-  username: string,
-  password: string
-) {
-  // Log in via ESS Broker service
-  await LoginPage.submitLoginForm(brokerURL);
-
+export async function loginGluu(username: string, password: string) {
   await t
     .typeText("#loginForm\\:username", username)
     .typeText("#loginForm\\:password", password)

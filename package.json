@@ -44,7 +44,7 @@
     "node-fetch": "^2.6.1",
     "prettier": "2.1.2",
     "rollup": "^2.26.11",
-    "rollup-plugin-typescript2": "^0.28.0",
+    "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^25.5.1",
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
