@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import URLParse from "url-parse";
 import { JWK } from "node-jose";
 import { JSONWebKey, JWKECKey, JWKOctKey, JWKOKPKey, JWKRSAKey } from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
@@ -86,11 +85,11 @@ export async function privateJwkToPublicJwk(
  * @hidden
  */
 export function normalizeHttpUriClaim(audience: string): string {
-  const cleanedAudience = new URLParse(audience);
-  cleanedAudience.set("hash", "");
-  cleanedAudience.set("username", "");
-  cleanedAudience.set("password", "");
-  return cleanedAudience.href;
+  const cleanedAudience = new URL(audience);
+  cleanedAudience.hash = "";
+  cleanedAudience.username = "";
+  cleanedAudience.password = "";
+  return cleanedAudience.toString();
 }
 
 /**

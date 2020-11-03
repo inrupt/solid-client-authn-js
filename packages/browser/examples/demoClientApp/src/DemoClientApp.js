@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,6 +34,8 @@ let snackBarTimeout = undefined;
 let identityProviderLogoutEndpointTimeout = null;
 
 const defaultLocalClientAppSessionId = "my local session id";
+
+const NSS_SERVER_URL = "https://inrupt.net/";
 
 // TODO: PMCB55: make demo's 'prettier' by avoiding 'localhost'...
 // const defaultClientEndpoint = "http://my-demo-app.com/";
@@ -275,7 +277,7 @@ class DemoClientApp extends Component {
         }
 
         if (result.userinfo_endpoint) {
-          if (result.userinfo_endpoint.startsWith("https://inrupt.net")) {
+          if (result.userinfo_endpoint.startsWith(NSS_SERVER_URL)) {
             const message = `Identity Provider is NSS, but it's support for user information is currently broken - so we can't verify the current \`id_token\` against the identity provider.`;
             console.log(message);
             document.getElementById("idp_userinfo_text").innerHTML = message;

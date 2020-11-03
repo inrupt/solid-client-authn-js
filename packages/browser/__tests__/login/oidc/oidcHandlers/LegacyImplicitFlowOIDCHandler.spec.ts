@@ -96,7 +96,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
-        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession&dpop=someToken",
+        "https://example.com/auth?client_id=coolApp&response_type=id_token+token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid+webid+offline_access&state=mySession&dpop=someToken",
         { handleRedirect: standardOidcOptions.handleRedirect }
       );
     });
@@ -111,7 +111,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
       expect(
         defaultMocks.redirector.redirect
       ).toHaveBeenCalledWith(
-        "https://example.com/auth?client_id=coolApp&response_type=id_token%20token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid%20webid%20offline_access&state=mySession",
+        "https://example.com/auth?client_id=coolApp&response_type=id_token+token&redirect_uri=https%3A%2F%2Fapp.example.com&scope=openid+webid+offline_access&state=mySession",
         { handleRedirect: standardOidcOptions.handleRedirect }
       );
     });

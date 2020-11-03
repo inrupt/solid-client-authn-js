@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import URLParse from "url-parse";
 import { inject, injectable } from "tsyringe";
 import {
   IClient,
@@ -106,8 +105,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
       );
     }
-    const url = new URLParse(redirectUrl, true);
-    const oauthState = url.query.state as string;
+
+    const url = new URL(redirectUrl);
+    const oauthState = url.searchParams.get("state") as string;
 
     const storedSessionId = (await this.storageUtility.getForUser(
       oauthState,
@@ -147,7 +147,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         this.issuerConfigFetcher,
         this.clientRegistrar,
         // the canHandle function checks that the code is part of the query strings
-        url.query["code"] as string,
+        url.searchParams.get("code") as string,
         codeVerifier,
         storedRedirectIri
       );

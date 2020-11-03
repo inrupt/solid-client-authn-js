@@ -33,14 +33,12 @@
     "@types/form-urlencoded": "^2.0.1",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node-jose": "^1.1.5",
-    "@types/url-parse": "^1.4.3",
     "@types/uuid": "^8.3.0",
     "form-urlencoded": "^4.2.1",
     "jose": "^2.0.2",
     "jsonwebtoken": "^8.5.1",
     "node-jose": "^2.0.0",
     "oidc-client": "^1.10.1",
-    "url-parse": "^1.4.7",
     "uuid": "^8.3.1"
   },
   "publishConfig": {
