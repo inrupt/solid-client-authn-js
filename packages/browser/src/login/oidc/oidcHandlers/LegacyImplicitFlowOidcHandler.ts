@@ -63,7 +63,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
     // // TODO: include nonce
     // Disable camel case rule because this query requires camel case
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
     const query: Record<string, string> = {
       client_id: oidcLoginOptions.client.clientId,
       response_type: "id_token token",
@@ -84,7 +84,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
         { secure: true }
       ),
     ]);
-    /* eslint-enable @typescript-eslint/camelcase */
+    /* eslint-enable camelcase */
     // TODO: There is currently no secure storage of the DPoP key
     if (oidcLoginOptions.dpop) {
       query.dpop = await createDpopHeader(oidcLoginOptions.issuer, "GET", key);

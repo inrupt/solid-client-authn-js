@@ -46,7 +46,7 @@ export async function clearOidcPersistentStorage(): Promise<void> {
     // We are instantiating a new instance here, so the only value we need to
     // explicitly provide is the response mode (default otherwise will look
     // for a hash '#' fragment!).
-    // eslint-disable-next-line @typescript-eslint/camelcase
+    // eslint-disable-next-line camelcase
     response_mode: "query",
   });
   await client.clearStaleState(new WebStorageStateStore({}));

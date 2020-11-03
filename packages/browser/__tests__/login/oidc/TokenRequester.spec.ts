@@ -99,11 +99,11 @@ describe("TokenRequester", () => {
     },
 
     responseBody: JSON.stringify({
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-disable camelcase */
       id_token: "abcd",
       access_token: "1234",
       refresh_token: "!@#$",
-      /* eslint-enable @typescript-eslint/camelcase */
+      /* eslint-enable camelcase */
     }),
 
     jwt: {
@@ -136,12 +136,12 @@ describe("TokenRequester", () => {
     const TokenRefresher = getTokenRequester({
       clientRegistrar: PublicClientRegistrarMock,
     });
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
     await TokenRefresher.request("global", {
       grant_type: "refresh_token",
       refresh_token: "thisIsARefreshToken",
     });
-    /* eslint-enable @typescript-eslint/camelcase */
+    /* eslint-enable camelcase */
     expect(defaultMocks.fetcher.fetch).toBeCalledWith(
       IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
       {
@@ -160,12 +160,12 @@ describe("TokenRequester", () => {
     const TokenRefresher = getTokenRequester({
       fetcher: FetcherTokenMock,
     });
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
     await TokenRefresher.request("global", {
       grant_type: "refresh_token",
       refresh_token: "thisIsARefreshToken",
     });
-    /* eslint-enable @typescript-eslint/camelcase */
+    /* eslint-enable camelcase */
     expect(FetcherTokenMock.fetch).toBeCalledWith(
       IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
       {
@@ -184,18 +184,18 @@ describe("TokenRequester", () => {
   it("Fails elegantly if the idp returns a bad value", async () => {
     setUpMockedReturnValues({
       responseBody: JSON.stringify({
-        // eslint-disable-next-line @typescript-eslint/camelcase
+        // eslint-disable-next-line camelcase
         id_token: "ohNoThereIsNoAccessToken",
       }),
     });
     const TokenRefresher = getTokenRequester();
     await expect(
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-disable camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
         refresh_token: "thisIsARefreshToken",
       })
-      /* eslint-enable @typescript-eslint/camelcase */
+      /* eslint-enable camelcase */
     ).rejects.toThrowError("IDP token route returned an invalid response.");
   });
 
@@ -203,18 +203,18 @@ describe("TokenRequester", () => {
     setUpMockedReturnValues({
       issuerConfig: {
         ...IssuerConfigFetcherFetchConfigResponse,
-        // eslint-disable-next-line @typescript-eslint/camelcase
+        // eslint-disable-next-line camelcase
         grantTypesSupported: ["id_token"],
       },
     });
     const TokenRefresher = getTokenRequester();
     await expect(
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-disable camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
         refresh_token: "thisIsARefreshToken",
       })
-      /* eslint-enable @typescript-eslint/camelcase */
+      /* eslint-enable camelcase */
     ).rejects.toThrowError(
       "The issuer [https://idp.com] does not support the [refresh_token] grant"
     );
@@ -224,11 +224,11 @@ describe("TokenRequester", () => {
     const mockIssuerConfig = {
       ...IssuerConfigFetcherFetchConfigResponse,
       tokenEndpoint: null,
-      // eslint-disable-next-line @typescript-eslint/camelcase
+      // eslint-disable-next-line camelcase
       grantTypesSupported: ["refresh_token"],
     };
     const mockIssuerConfigFetcher = defaultMocks.issueConfigFetcher;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore This is ignored to test an edge case: tokenEndpoint should not be null
     mockIssuerConfigFetcher.fetchConfig.mockResolvedValueOnce(mockIssuerConfig);
 
@@ -236,12 +236,12 @@ describe("TokenRequester", () => {
       issueConfigFetcher: mockIssuerConfigFetcher,
     });
     await expect(
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-disable camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
         refresh_token: "thisIsARefreshToken",
       })
-      /* eslint-enable @typescript-eslint/camelcase */
+      /* eslint-enable camelcase */
       // TODO: Should be This issuer https://idp.com does not have a token endpoint"
       // Figure out why the test suite shuffles the issuer.
     ).rejects.toThrowError("does not have a token endpoint");
@@ -257,12 +257,12 @@ describe("TokenRequester", () => {
     });
     const TokenRefresher = getTokenRequester();
     await expect(
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-disable camelcase */
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
         refresh_token: "thisIsARefreshToken",
       })
-      /* eslint-enable @typescript-eslint/camelcase */
+      /* eslint-enable camelcase */
     ).rejects.toThrowError(
       "The Authorization Server returned a bad token (i.e. when decoded we did not find the required 'sub' claim)."
     );

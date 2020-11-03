@@ -249,7 +249,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     // We use ts-ignore comments here only to access mock call arguments
-    /* eslint-disable @typescript-eslint/ban-ts-ignore */
+    /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
       window.fetch = jest.fn() as jest.Mock<
         ReturnType<typeof window.fetch>,

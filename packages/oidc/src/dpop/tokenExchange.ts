@@ -227,13 +227,13 @@ export async function getTokens(
     method: "POST",
     headers,
     body: formurlencoded({
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-disable camelcase */
       grant_type: data.grantType,
       redirect_uri: data.redirectUri,
       code: data.code,
       code_verifier: data.codeVerifier,
       client_id: client.clientId,
-      /* eslint-enable @typescript-eslint/camelcase */
+      /* eslint-enable camelcase */
     }),
   };
 
@@ -276,7 +276,7 @@ export async function getBearerToken(
       // We are instantiating a new instance here, so the only value we need to
       // explicitly provide is the response mode (default otherwise will look
       // for a hash '#' fragment!).
-      // eslint-disable-next-line @typescript-eslint/camelcase
+      // eslint-disable-next-line camelcase
       response_mode: "query",
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the
@@ -304,8 +304,8 @@ export async function getBearerToken(
     // token (which can optionally come back with the access token (if, as per
     // the OAuth2 spec, we requested one using the scope of 'offline_access')
     // will be included in the signin response object.
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line camelcase
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     refreshToken: signinResponse.refresh_token,
   };

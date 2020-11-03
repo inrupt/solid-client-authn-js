@@ -32,7 +32,7 @@
 // TODO: REQUIRED elements are not specified
 
 // Disable camelcase linter because issuers must have snake-case
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable camelcase */
 const issuerConfigSchema = {
   type: "object",
   properties: {

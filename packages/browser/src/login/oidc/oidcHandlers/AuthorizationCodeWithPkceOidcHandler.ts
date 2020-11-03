@@ -57,7 +57,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
     const oidcOptions = {
       authority: oidcLoginOptions.issuer?.toString(),
       client_id: oidcLoginOptions.client.clientId,
@@ -77,7 +77,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       loadUserInfo: false,
       code_verifier: true,
     };
-    /* eslint-enable @typescript-eslint/camelcase */
+    /* eslint-enable camelcase */
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
 

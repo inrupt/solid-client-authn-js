@@ -111,7 +111,7 @@ describe("ImplicitRedirectHandler", () => {
     });
 
     // We use ts-ignore comments here only to access mock call arguments
-    /* eslint-disable @typescript-eslint/ban-ts-ignore */
+    /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated fetch", async () => {
       window.fetch = jest.fn() as jest.Mock<
         ReturnType<typeof window.fetch>,

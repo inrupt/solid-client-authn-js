@@ -52,11 +52,11 @@ export default class TokenRefresher implements ITokenRefresher {
       "refreshToken",
       { errorIfNull: true, secure: true }
     );
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
     await this.tokenRequester.request(localUserId, {
       grant_type: "refresh_token",
       refresh_token: refreshToken as string, // This cast can be safely made because getForUser will error if refreshToken is null
     });
-    /* eslint-enable @typescript-eslint/camelcase */
+    /* eslint-enable camelcase */
   }
 }

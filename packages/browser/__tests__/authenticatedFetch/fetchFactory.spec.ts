@@ -49,7 +49,7 @@ const mockFetch = (response: MockedRedirectResponse): typeof window.fetch => {
 };
 
 // We use ts-ignore comments here only to access mock call arguments
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
@@ -105,7 +105,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url/");
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("GET");
   });
 
@@ -124,7 +124,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url/");
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("POST");
   });
 
@@ -141,7 +141,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url/");
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("GET");
 
     expect(
@@ -168,7 +168,7 @@ describe("buildDpopFetch", () => {
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers["DPoP"] as string;
     const decodedHeader = await decodeJwt(dpopHeader, key);
-    expect(decodedHeader["htu"]).toEqual("http://some.url/");
+    expect(decodedHeader["htu"]).toEqual("http://some.url");
     expect(decodedHeader["htm"]).toEqual("GET");
   });
 
@@ -255,4 +255,4 @@ describe("buildDpopFetch", () => {
     expect(response.status).toEqual(403);
   });
 });
-/* eslint-enable @typescript-eslint/ban-ts-ignore */
+/* eslint-enable @typescript-eslint/ban-ts-comment */

@@ -111,7 +111,7 @@ export default class TokenRequester {
       },
       body: formurlencoded({
         ...body,
-        // eslint-disable-next-line @typescript-eslint/camelcase
+        // eslint-disable-next-line camelcase
         client_id: client.clientId,
       }),
     };

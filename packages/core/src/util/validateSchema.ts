@@ -30,11 +30,13 @@
 import Ajv from "ajv";
 import cloneDeep from "lodash.clonedeep";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 /**
  * @hidden
  */
 export function compileTypeof(type: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data: any): boolean => {
     return typeof data === type; // eslint-disable-line valid-typeof
   };
@@ -52,7 +54,6 @@ export function compileJoinedStringOf(strings: string[]) {
 /**
  * @hidden
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export function traverseObject(
   data: any,
   schema: any,
