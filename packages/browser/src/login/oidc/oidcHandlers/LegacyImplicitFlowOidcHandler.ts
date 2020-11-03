@@ -37,7 +37,6 @@ import {
 import { inject, injectable } from "tsyringe";
 import { IFetcher } from "../../../util/Fetcher";
 import { generateJwkForDpop, createDpopHeader } from "@inrupt/oidc-client-ext";
-import URLParse from "url-parse";
 
 /**
  * @hidden
@@ -98,10 +97,12 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
       throw new Error("There was a problem creating a session.");
     }
 
-    const requestUrl = new URLParse(
+    const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint
     );
-    requestUrl.set("query", query);
+    for (const key in query) {
+      requestUrl.searchParams.set(key, query[key]);
+    }
 
     // This flow must happen in a browser, which means a redirection
     // should always be possible.

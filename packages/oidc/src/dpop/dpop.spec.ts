@@ -68,7 +68,7 @@ describe("normalizeHttpUriClaim", () => {
     {
       it: "should not add a / if not present at the end of the url",
       url: "https://audience.com",
-      expected: "https://audience.com",
+      expected: "https://audience.com/",
     },
     {
       it: "should not change a URL with a slash at the end",
@@ -78,7 +78,7 @@ describe("normalizeHttpUriClaim", () => {
     {
       it: "should include queries",
       url: "https://audience.com?cool=stuff&dope=things",
-      expected: "https://audience.com?cool=stuff&dope=things",
+      expected: "https://audience.com/?cool=stuff&dope=things",
     },
     {
       it: "should include queries and a slash",
@@ -88,7 +88,7 @@ describe("normalizeHttpUriClaim", () => {
     {
       it: "should not include hash",
       url: "https://audience.com#throwBackThursday",
-      expected: "https://audience.com",
+      expected: "https://audience.com/",
     },
     {
       it: "should not include hash but include the slash",
@@ -103,7 +103,7 @@ describe("normalizeHttpUriClaim", () => {
     {
       it: "should not include the username and password",
       url: "https://jackson:badpassword@audience.com",
-      expected: "https://audience.com",
+      expected: "https://audience.com/",
     },
     {
       it: "should include ports",

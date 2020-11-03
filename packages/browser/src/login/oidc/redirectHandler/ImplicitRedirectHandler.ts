@@ -29,7 +29,6 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import URLParse from "url-parse";
 import { inject, injectable } from "tsyringe";
 import { ITokenSaver } from "./TokenSaver";
 import { buildBearerFetch } from "../../../authenticatedFetch/fetchFactory";
@@ -67,18 +66,26 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
         `ImplicitRedirectHandler cannot handle [${redirectUrl}]: it is missing one or more of [id_token, access_token, state].`
       );
     }
-    const url = new URLParse(redirectUrl, true);
+
+    const url = new URL(redirectUrl);
 
     await this.tokenSaver.saveSession(
-      url.query.state as string,
-      url.query.id_token as string,
-      url.query.access_token
+      url.searchParams.get("state") as string,
+      url.searchParams.get("id_token") as string,
+      url.searchParams.get("access_token") as string
     );
-    const sessionId = url.query.state as string;
+
+    // TODO: PMcB55: We don't use this flow, but *if* we do, then this should be
+    //  brought back into line with the Auth Code Flow (and use a crypto-random
+    //  value for 'state').
+    const sessionId = url.searchParams.get("state") as string;
     const sessionInfo = await this.sessionInfoManager.get(sessionId);
     return Object.assign(sessionInfo, {
       // The canHandle check at the top of the method makes this assertion valid.
-      fetch: buildBearerFetch(url.query.access_token as string, undefined),
+      fetch: buildBearerFetch(
+        url.searchParams.get("access_token") as string,
+        undefined
+      ),
     });
   }
 }

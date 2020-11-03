@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "solid-client-auth-browser demo app",
   "main": "build/index.html",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/inrupt/solid-client-authn"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

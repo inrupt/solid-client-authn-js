@@ -26,6 +26,7 @@ import { loginGluu, loginNss } from "./helpers/login";
 import ITestConfig from "./ITestConfig";
 import IPodServerConfig from "./IPodServerConfig";
 import { authorizeEss, authorizeNss } from "./helpers/authorizeClientApp";
+import LoginPage from "./page-models/LoginPage";
 
 // Could probably provide this via a system environment variable too...
 const testSuite = require("./test-suite.json");
@@ -46,12 +47,18 @@ fixture(
 ).page(clientApplicationUrl);
 
 async function selectBrokeredIdp(brokeredIdp: string) {
-  const selectIdp = await Selector("h2").withText(
-    "How would you like to login?"
-  ).exists;
+  const selectIdp = await Selector("h2").withText("How would you like to login")
+    .exists;
 
   if (selectIdp) {
+    console.log(
+      `Got multiple Identity Providers to choose from: trying [${brokeredIdp}]...`
+    );
     await t.click(`[alt=${brokeredIdp}]`);
+  } else {
+    console.log(
+      `No Identity Provider selections offered - assuming provider is [${brokeredIdp}]!`
+    );
   }
 }
 
@@ -61,23 +68,18 @@ async function performLogin(
 ) {
   const testUserPassword = process.env[podServerConfig.envTestUserPassword];
 
+  await LoginPage.submitLoginForm(podServerConfig.identityProvider);
+
+  await t.wait(parseInt(testCafeWaitTime, 10));
   await selectBrokeredIdp(podServerConfig.brokeredIdp);
 
   switch (podServerConfig.brokeredIdp) {
     case "Gluu":
-      await loginGluu(
-        podServerConfig.identityProvider,
-        testUserName,
-        testUserPassword as string
-      );
+      await loginGluu(testUserName, testUserPassword as string);
       break;
 
     case "nss":
-      await loginNss(
-        podServerConfig.identityProvider,
-        testUserName,
-        testUserPassword as string
-      );
+      await loginNss(testUserName, testUserPassword as string);
       break;
 
     default:

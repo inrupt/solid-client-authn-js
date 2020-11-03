@@ -1,7 +1,7 @@
 {
   "name": "demoApp",
   "version": "1.0.0",
-  "description": "",
+  "description": "Demo client application for authentication testing",
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf ./dist",
@@ -10,8 +10,12 @@
     "build": "ASSET_PATH=\"/demo/\" webpack --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "url": "https://github.com/inrupt/solid-client-authn"
+  },
   "keywords": [],
-  "author": "",
+  "author": "Inrupt, Inc.",
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",

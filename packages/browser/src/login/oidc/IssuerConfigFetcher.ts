@@ -33,8 +33,10 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { IFetcher } from "../../util/Fetcher";
+import { appendToUrlPathname, IFetcher } from "../../util/Fetcher";
 import ConfigurationError from "../../errors/ConfigurationError";
+
+export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
 /* eslint-disable @typescript-eslint/camelcase */
 const issuerConfigKeyMap: Record<
@@ -161,12 +163,12 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
-    // TODO: PMcB55: Use native URL lib to build URL instead of string concat.
-    const wellKnownUrl = `${issuer}${
-      issuer.endsWith("/") ? "" : "/"
-    }.well-known/openid-configuration`;
+    const openIdConfigUrl = appendToUrlPathname(
+      issuer,
+      WELL_KNOWN_OPENID_CONFIG
+    );
 
-    const issuerConfigRequestBody = await this.fetcher.fetch(wellKnownUrl);
+    const issuerConfigRequestBody = await this.fetcher.fetch(openIdConfigUrl);
     // Check the validity of the fetched config
     try {
       issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
