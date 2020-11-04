@@ -47,11 +47,11 @@ const getSuccessfulFetch = (): typeof fetch =>
     async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
       new Response(
         JSON.stringify({
-          // eslint-disable-next-line @typescript-eslint/camelcase
+          // eslint-disable-next-line camelcase
           client_id: "some id",
-          // eslint-disable-next-line @typescript-eslint/camelcase
+          // eslint-disable-next-line camelcase
           client_secret: "some secret",
-          // eslint-disable-next-line @typescript-eslint/camelcase
+          // eslint-disable-next-line camelcase
           redirect_uris: ["https://some.url"],
         }),
         { status: 200 }
@@ -77,7 +77,7 @@ describe("registerClient", () => {
     const options = getMockOptions();
     options.registrationAccessToken = "some token";
     await registerClient(options, getMockIssuer());
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     expect(myFetch.mock.calls[0][1]?.headers["Authorization"]).toEqual(
       "Bearer some token"
@@ -101,7 +101,7 @@ describe("registerClient", () => {
 
     await registerClient(options, getMockIssuer());
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const rawBody = myFetch.mock.calls[0][1].body;
     const parsedBody = JSON.parse(rawBody);
@@ -113,11 +113,11 @@ describe("registerClient", () => {
       async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             client_id: "some id",
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             client_secret: "some secret",
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             redirect_uris: ["https://some.other.url"],
           }),
           { status: 200 }
@@ -139,7 +139,7 @@ describe("registerClient", () => {
       async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             some_key: "some value",
           }),
           { status: 200 }
@@ -161,7 +161,7 @@ describe("registerClient", () => {
         new Response(
           JSON.stringify({
             error: "invalid_redirect_uri",
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             error_description: "some description",
           }),
           { status: 400 }
@@ -184,7 +184,7 @@ describe("registerClient", () => {
         new Response(
           JSON.stringify({
             error: "invalid_redirect_uri",
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             error_description: "some description",
           }),
           { status: 400 }
@@ -219,7 +219,7 @@ describe("registerClient", () => {
         new Response(
           JSON.stringify({
             error: "invalid_client_metadata",
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             error_description: "some description",
           }),
           { status: 400 }
@@ -255,7 +255,7 @@ describe("registerClient", () => {
         new Response(
           JSON.stringify({
             error: "custom_error",
-            // eslint-disable-next-line @typescript-eslint/camelcase
+            // eslint-disable-next-line camelcase
             error_description: "some description",
           }),
           { status: 400 }

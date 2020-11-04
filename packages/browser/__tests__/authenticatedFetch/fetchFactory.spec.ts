@@ -49,7 +49,7 @@ const mockFetch = (response: MockedRedirectResponse): typeof window.fetch => {
 };
 
 // We use ts-ignore comments here only to access mock call arguments
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
@@ -255,4 +255,4 @@ describe("buildDpopFetch", () => {
     expect(response.status).toEqual(403);
   });
 });
-/* eslint-enable @typescript-eslint/ban-ts-ignore */
+/* eslint-enable @typescript-eslint/ban-ts-comment */

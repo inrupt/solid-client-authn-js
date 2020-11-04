@@ -12,8 +12,17 @@ module.exports = {
   },
   rules: {
     "prettier/prettier": "error",
-    "@typescript-eslint/interface-name-prefix": ["error", "always"],
-    "import/no-unresolved": 0,
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        selector: "interface",
+        format: ["PascalCase"],
+        custom: {
+          regex: "^I[A-Z]",
+          match: true,
+        },
+      },
+    ],
     "license-header/header": ["error", "./resources/license-header.js"],
     "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
   },

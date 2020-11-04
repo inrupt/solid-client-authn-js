@@ -49,7 +49,7 @@ describe("ClientRegistrar", () => {
   describe("getClient", () => {
     it("properly performs dynamic registration", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable camelcase */
         (new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
@@ -57,7 +57,7 @@ describe("ClientRegistrar", () => {
             redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
@@ -85,27 +85,27 @@ describe("ClientRegistrar", () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          /* eslint-disable @typescript-eslint/camelcase */
+          /* eslint-disable camelcase */
           application_type: "web",
           redirect_uris: ["https://example.com"],
           subject_type: "pairwise",
           token_endpoint_auth_method: "client_secret_basic",
           code_challenge_method: "S256",
-          /* eslint-enable @typescript-eslint/camelcase */
+          /* eslint-enable camelcase */
         }),
       });
     });
 
     it("can register a public client without secret", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable camelcase */
         (new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
             redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
@@ -144,11 +144,11 @@ describe("ClientRegistrar", () => {
 
     it("handles a failure to dynamically register elegantly", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable camelcase */
         (new NodeResponse('{"error":"bad stuff that\'s an error"}', {
           status: 400,
         }) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
       const clientRegistrar = getClientRegistrar({
@@ -202,7 +202,7 @@ describe("ClientRegistrar", () => {
       });
 
       const mockFetch = jest.fn().mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable camelcase */
         (new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
@@ -210,7 +210,7 @@ describe("ClientRegistrar", () => {
             redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
 
@@ -246,7 +246,7 @@ describe("ClientRegistrar", () => {
       });
 
       const mockFetch = jest.fn().mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable camelcase */
         (new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
@@ -254,7 +254,7 @@ describe("ClientRegistrar", () => {
             redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
 
@@ -278,7 +278,7 @@ describe("ClientRegistrar", () => {
 
     it("saves dynamic registration information", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
-        /* eslint-disable @typescript-eslint/camelcase */
+        /* eslint-disable camelcase */
         (new NodeResponse(
           JSON.stringify({
             client_id: "some id",
@@ -286,7 +286,7 @@ describe("ClientRegistrar", () => {
             redirect_uris: ["https://example.com"],
           })
         ) as unknown) as Response
-        /* eslint-enable @typescript-eslint/camelcase */
+        /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
       const myStorage = mockStorageUtility({});

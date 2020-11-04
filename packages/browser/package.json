@@ -26,7 +26,7 @@
     "lint": "eslint \"src/**/*.ts\" && eslint \"__tests__/**/*.ts\"",
     "lint-fix": "eslint --fix \"src/**\" && eslint --fix \"__tests__/**/*.ts\"",
     "format": "prettier --write \"src/**\" \"__tests__/**\"",
-    "licenses": "license-checker --production --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
+    "licenses": "license-checker --production --out license.csv --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
     "dev": "tsc-watch --preserveWatchOutput --noClear",
     "dev-server": "concurrently \"npm run dev\" \"npm run dev-test-helper\" \"cd examples/server && npm run dev\"",
     "dev-script": "concurrently \"npm run dev\" \"npm run dev-test-helper\" \"cd examples/script && npm run dev\"",
@@ -49,11 +49,8 @@
   "devDependencies": {
     "@types/jest": "^26.0.12",
     "@types/node-fetch": "^2.5.6",
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
     "concurrently": "^5.3.0",
     "eslint": "^6.1.0",
-    "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-license-header": "^0.2.0",
     "eslint-plugin-prettier": "^3.1.4",
     "jest": "^25.1.0",
@@ -65,7 +62,7 @@
     "typedoc": "^0.19.2",
     "typedoc-plugin-markdown": "^3.0.11",
     "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
+    "webpack": "^5.3.2",
     "webpack-bundle-analyzer": "^3.8.0",
     "webpack-cli": "^4.1.0",
     "webpack-merge": "^5.2.0"
@@ -81,6 +78,7 @@
     "@types/node-jose": "^1.1.5",
     "@types/uuid": "^8.3.0",
     "build-module": "^1.0.7",
+    "crypto-browserify": "^3.12.0",
     "crypto-random-string": "^3.3.0",
     "form-urlencoded": "^4.2.1",
     "jose": "^2.0.2",
@@ -88,7 +86,9 @@
     "lodash.clonedeep": "^4.5.0",
     "node-jose": "^2.0.0",
     "reflect-metadata": "^0.1.13",
+    "stream-browserify": "^3.0.0",
     "tsyringe": "^4.3.0",
+    "util": "^0.12.3",
     "uuid": "^8.3.1"
   },
   "publishConfig": {

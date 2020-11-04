@@ -94,14 +94,14 @@ export async function registerClient(
   issuerConfig: IIssuerConfig
 ): Promise<IClient> {
   const config = {
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
     client_name: options.clientName,
     application_type: "web",
     redirect_uris: [options.redirectUrl?.toString()],
     subject_type: "pairwise",
     token_endpoint_auth_method: "client_secret_basic",
     code_challenge_method: "S256",
-    /* eslint-enable @typescript-eslint/camelcase */
+    /* eslint-enable camelcase */
   };
   if (!issuerConfig.registrationEndpoint) {
     throw new Error(

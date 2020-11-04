@@ -9,7 +9,7 @@
     "clean": "rm --recursive --force packages/*/dist/ packages/*/node_modules/ packages/*/coverage/ packages/*/umd/",
     "build-api-docs": "lerna run build-api-docs",
     "format-all": "prettier --write \"packages/*/src/**\" \"packages/*/__tests__/**\"",
-    "licenses-all": "license-checker --production --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
+    "licenses-all": "license-checker --production --out license.csv --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
     "lint": "lerna run lint",
     "postinstall": "lerna bootstrap",
     "prepublish": "npm run build",
@@ -28,10 +28,11 @@
     "lerna": "^3.22.1"
   },
   "devDependencies": {
+    "@types/estree": "0.0.45",
     "@types/jest": "^26.0.13",
     "@types/node-fetch": "^2.5.6",
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-license-header": "^0.2.0",
@@ -50,8 +51,8 @@
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.1",
     "typedoc-plugin-markdown": "^3.0.7",
-    "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
+    "typescript": "^4.0.5",
+    "webpack": "^5.3.2",
     "webpack-bundle-analyzer": "^3.8.0",
     "webpack-cli": "^4.1.0",
     "webpack-merge": "^5.2.0"

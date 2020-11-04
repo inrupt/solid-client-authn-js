@@ -37,12 +37,12 @@ export const FetcherMockResponse: Response = (new NodeResponse(
 
 export const FetchTokenResponse: Response = (new NodeResponse(
   JSON.stringify({
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
     access_token:
       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJodHRwczovL3NvbWUucG9kL3dlYmlkI21lIiwianRpIjoiMjFiNDhlOTgtNzA4YS00Y2UzLTk2NmMtYTk2M2UwMDM2ZDBiIiwiaWF0IjoxNTk1ODQxODAxLCJleHAiOjE1OTU4NDU0MDF9.MGqDiny3pzhlSOJ52cJWJA84J47b9p5kkuuJVPB-dVg",
     id_token: "myIdToken",
     refresh_token: "myResfreshToken",
-    /* eslint-disable @typescript-eslint/camelcase */
+    /* eslint-disable camelcase */
   })
 ) as unknown) as Response;
 

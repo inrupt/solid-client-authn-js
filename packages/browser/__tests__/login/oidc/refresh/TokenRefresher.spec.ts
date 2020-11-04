@@ -58,10 +58,10 @@ describe("TokenRefresher", () => {
     const tokenRefresher = getTokenRefresher({ storageUtility: storageMock });
     await tokenRefresher.refresh(key);
     expect(defaultMocks.tokenRequester.request).toHaveBeenCalledWith("global", {
-      /* eslint-disable @typescript-eslint/camelcase */
+      /* eslint-disable camelcase */
       grant_type: "refresh_token",
       refresh_token: refreshTokenValue,
-      /* eslint-enable @typescript-eslint/camelcase */
+      /* eslint-enable camelcase */
     });
   });
 });

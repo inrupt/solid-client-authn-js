@@ -37,15 +37,15 @@ export interface IEnvironmentDetector {
  * @hidden
  */
 export function detectEnvironment(): "browser" | "react-native" | "server" {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore Ignore because document might not be present
   if (typeof document != "undefined") {
     return "browser";
   } else if (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     typeof navigator != "undefined" &&
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     navigator.product == "ReactNative"
   ) {

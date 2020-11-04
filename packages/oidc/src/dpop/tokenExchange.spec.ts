@@ -34,7 +34,7 @@ import { JWKECKey } from "jose";
 import { Response } from "cross-fetch";
 
 // Some spec-compliant claims are camel-cased.
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable camelcase */
 
 const mockJwk = (): JWKECKey => {
   return {
@@ -520,7 +520,7 @@ jest.mock("oidc-client", () => {
           if (redirectUrl === "https://invalid.url") {
             throw new Error("Dummy error");
           }
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore Ignore because we don't need to mock out all data fields.
           return Promise.resolve({
             access_token: mockBearerAccessToken(),

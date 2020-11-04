@@ -62,7 +62,7 @@ describe("OidcLoginHandler", () => {
   it("should throw an error when called without an issuer", async () => {
     const handler = getInitialisedHandler();
     // TS Ignore because bad input is purposely given here for the purpose of testing
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     await expect(handler.handle({})).rejects.toThrowError(
       "OidcLoginHandler requires an OIDC issuer"

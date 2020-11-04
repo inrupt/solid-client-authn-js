@@ -56,7 +56,7 @@ describe("IssuerConfigFetcher", () => {
     const fetchResponse = (new NodeResponse(
       JSON.stringify({
         issuer: "https://example.com",
-        // eslint-disable-next-line @typescript-eslint/camelcase
+        // eslint-disable-next-line camelcase
         claim_types_supported: "oidc",
         bleepBloop: "Meep Moop",
       })
