@@ -84,8 +84,8 @@ html_title = 'Inrupt {0} API Documentation'.format(name)
 
 html_theme_options = {
     'project_title': 'Inrupt {0} API Documentation'.format(name),
-    'banner': True,
-    'banner_msg': 'This is a Beta (i.e. in progress) version of the manual. Content and features are subject to change.',
+    'banner': False,
+    'banner_msg': '',
     'robots_index': True,
     'github_editable': False,
     'github_org': 'inrupt',
