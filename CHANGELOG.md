@@ -9,6 +9,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+## 1.0.0 - 2020-11-04
+
+There is no breaking change in this release, but from now on, as per semantic versioning,
+we will bump the major version when we change our publicly documented interface.
+
+### Bugfixes
+
+- The expiration claim has been removed from the DPoP token, where it is not needed.
+- There were dependency upgrades.
+
 ## 0.3.0
 
 ### Breaking changes
