@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -68,8 +68,8 @@
     "webpack-merge": "^5.2.0"
   },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^0.3.0",
-    "@inrupt/solid-client-authn-core": "^0.3.0",
+    "@inrupt/oidc-client-ext": "^1.0.0",
+    "@inrupt/solid-client-authn-core": "^1.0.0",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",
