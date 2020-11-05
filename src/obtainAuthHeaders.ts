@@ -29,7 +29,10 @@ export async function getAuthFetcher(
   oidcIssuer: string,
   oidcProviderCookie: string,
   appOrigin: string
-): Promise<AuthFetcher> {
+): Promise<AuthFetcher | { fetch: any }> {
+  if (!oidcProviderCookie.length) {
+    return { fetch };
+  }
   const authFetcher = await customAuthFetcher();
 
   const session = await authFetcher.login({
