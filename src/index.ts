@@ -30,9 +30,10 @@ import IStorage from "./localStorage/IStorage";
 
 export {
   getNodeSolidServerCookie,
+  getPhpSolidServerCookie,
   getAuthFetcher,
   getAuthHeaders
-} from "./obtain-auth-headers";
+} from "./obtainAuthHeaders";
 
 export interface ICustomAuthFetcherOptions {
   storage?: IStorage;

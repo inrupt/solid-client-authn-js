@@ -74,6 +74,23 @@ export async function getNodeSolidServerCookie(
   return serverLoginResult.headers.get("set-cookie");
 }
 
+export async function getPhpSolidServerCookie(
+  serverRoot: string,
+  username: string,
+  password: string
+): Promise<string | null> {
+  const authFetcher = await customAuthFetcher();
+  const serverLoginResult = await authFetcher.fetch(`${serverRoot}/login`, {
+    headers: {
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    body: `username=${username}&password=${password}`,
+    method: "POST",
+    redirect: "manual"
+  });
+  return serverLoginResult.headers.get("set-cookie");
+}
+
 // FIXME: This is a total hack, obviously, second-guessing the
 // DI architecture of solid-auth-fetcher:
 export async function getAuthHeaders(
