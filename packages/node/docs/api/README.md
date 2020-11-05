@@ -1,6 +1,6 @@
 # apidocs
 
-Builds the API docs site from generated api \*.md files.
+Builds the API docs site from generated API `\*.md` files.
 
 ## To Build
 
