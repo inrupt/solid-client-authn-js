@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.build.json",
+
+  "compilerOptions": {
+    "lib": ["es2018"],
+    "outDir": "./dist"
+  },
+
+  "typedocOptions": {
+    "out": "website/docs/api/node"
+  },
+
+  "include": ["src/**/*"]
+}
