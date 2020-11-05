@@ -20,11 +20,12 @@
  */
 
 import { EventEmitter } from "events";
-import { ISessionInfo, IStorage } from "@inrupt/solid-client-authn-core";
+import { IStorage } from "@inrupt/solid-client-authn-core";
 import { injectable } from "tsyringe";
 import { Session } from "./Session";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
+import { ISessionInfo } from ".";
 
 export interface ISessionManagerOptions {
   secureStorage?: IStorage;

@@ -30,10 +30,10 @@ import {
   ILoginHandler,
   ILogoutHandler,
   IRedirectHandler,
-  ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
+import { ISessionInfo } from ".";
 
 /**
  * @hidden
