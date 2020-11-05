@@ -26,6 +26,7 @@
   "license": "MIT",
   "devDependencies": {
     "cross-fetch": "^3.0.6",
+    "eslint": "^7.12.1",
     "rollup": "^2.15.0",
     "rollup-plugin-typescript2": "^0.29.0"
   },
