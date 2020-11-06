@@ -20,14 +20,14 @@
  */
 
 import "reflect-metadata";
-import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
-import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
 import {
   StorageUtilityMock,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { Response as NodeResponse } from "node-fetch";
+import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
+import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
+import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 
 /**
  * Test for ClientRegistrar
@@ -137,7 +137,7 @@ describe("ClientRegistrar", () => {
           },
           IssuerConfigFetcherFetchConfigResponse
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         "Dynamic Registration could not be completed because the issuer has no registration endpoint."
       );
     });
@@ -166,7 +166,7 @@ describe("ClientRegistrar", () => {
             registrationEndpoint: registrationUrl,
           }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]"
       );
     });
@@ -230,7 +230,7 @@ describe("ClientRegistrar", () => {
         string,
         string
       >;
-      expect(registrationHeaders["Authorization"]).toEqual("Bearer some token");
+      expect(registrationHeaders.Authorization).toEqual("Bearer some token");
     });
 
     it("retrieves the registration token from storage if present", async () => {
@@ -273,7 +273,7 @@ describe("ClientRegistrar", () => {
         string,
         string
       >;
-      expect(registrationHeaders["Authorization"]).toEqual("Bearer some token");
+      expect(registrationHeaders.Authorization).toEqual("Bearer some token");
     });
 
     it("saves dynamic registration information", async () => {

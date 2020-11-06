@@ -23,16 +23,16 @@
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
 import "reflect-metadata";
-import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
-import canHandleTests from "./OidcHandlerCanHandleTests";
-import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
-import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import {
   IOidcOptions,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
 import { SigninRequest } from "@inrupt/oidc-client-ext";
+import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
+import canHandleTests from "./OidcHandlerCanHandleTests";
+import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
+import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
+import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 
 const expectedSigninRedirectUrl = "https://test";
 jest.mock("@inrupt/oidc-client-ext", () => {
@@ -67,8 +67,9 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
   describe("canHandle", () => {
     const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
-    canHandleTests["authorizationCodeWithPkceOidcHandler"].forEach(
+    canHandleTests.authorizationCodeWithPkceOidcHandler.forEach(
       (testConfig) => {
+        // eslint-disable-next-line jest/valid-title
         it(testConfig.message, async () => {
           const value = await authorizationCodeWithPkceOidcHandler.canHandle(
             testConfig.oidcOptions

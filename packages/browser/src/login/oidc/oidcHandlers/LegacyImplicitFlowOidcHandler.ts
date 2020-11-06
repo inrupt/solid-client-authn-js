@@ -35,8 +35,8 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { inject, injectable } from "tsyringe";
-import { IFetcher } from "../../../util/Fetcher";
 import { generateJwkForDpop, createDpopHeader } from "@inrupt/oidc-client-ext";
+import { IFetcher } from "../../../util/Fetcher";
 
 /**
  * @hidden
@@ -100,8 +100,8 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     const requestUrl = new URL(
       oidcLoginOptions.issuerConfiguration.authorizationEndpoint
     );
-    for (const key in query) {
-      requestUrl.searchParams.set(key, query[key]);
+    for (const queryParamkey of Object.keys(query)) {
+      requestUrl.searchParams.set(queryParamkey, query[queryParamkey]);
     }
 
     // This flow must happen in a browser, which means a redirection

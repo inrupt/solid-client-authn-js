@@ -23,17 +23,17 @@
  * Test for LegacyImplicitFlowOidcHandler
  */
 import "reflect-metadata";
+import {
+  IOidcOptions,
+  StorageUtilityMock,
+} from "@inrupt/solid-client-authn-core";
+import { JSONWebKey } from "jose";
 import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
-import {
-  IOidcOptions,
-  StorageUtilityMock,
-} from "@inrupt/solid-client-authn-core";
-import { JSONWebKey } from "jose";
 
 const mockJWK = {
   kty: "EC",
@@ -76,7 +76,8 @@ describe("LegacyImplicitFlowOidcHandler", () => {
 
   describe("canHandle", () => {
     const legacyImplicitFlowOidcHandler = getLegacyImplicitFlowOidcHandler();
-    canHandleTests["legacyImplicitFlowOidcHandler"].forEach((testConfig) => {
+    canHandleTests.legacyImplicitFlowOidcHandler.forEach((testConfig) => {
+      // eslint-disable-next-line jest/valid-title
       it(testConfig.message, async () => {
         const value = await legacyImplicitFlowOidcHandler.canHandle(
           testConfig.oidcOptions
@@ -87,7 +88,7 @@ describe("LegacyImplicitFlowOidcHandler", () => {
   });
 
   describe("handle", () => {
-    it("Creates the right session with dpop ", async () => {
+    it("Creates the right session with dpop", async () => {
       const legacyImplicitFlowOidcHandler = getLegacyImplicitFlowOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,

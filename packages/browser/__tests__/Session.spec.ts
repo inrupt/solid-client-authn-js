@@ -22,10 +22,10 @@
 // The following is required by tsyringe
 import "reflect-metadata";
 import { it, describe } from "@jest/globals";
+import { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import { mockClientAuthentication } from "../src/__mocks__/ClientAuthentication";
 import { Session } from "../src/Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
-import { ISessionInfo } from "@inrupt/solid-client-authn-core";
 
 describe("Session", () => {
   describe("constructor", () => {
@@ -180,6 +180,7 @@ describe("Session", () => {
       let secondRequestIssued = false;
       const blockingRequest = async (): Promise<ISessionInfo> => {
         while (!secondRequestIssued) {
+          // eslint-disable-next-line no-await-in-loop
           await sleep(100);
         }
         return obtainedSession;
@@ -208,6 +209,9 @@ describe("Session", () => {
   });
 
   describe("onLogin", () => {
+    // The `done` callback is used in order to make sure the callback passed to
+    // onLogin is called.
+    // eslint-disable-next-line jest/no-done-callback
     it("calls the registered callback on login", async (done) => {
       let hasBeenCalled = false;
       const myCallback = (): void => {
@@ -257,6 +261,10 @@ describe("Session", () => {
   });
 
   describe("onLogout", () => {
+    // The `done` callback is used in order to make sure the callback passed to
+    // onLogin is called. If it is not, the test times out, which is why
+    // no additional assertion is required.
+    // eslint-disable-next-line jest/expect-expect, jest/no-done-callback
     it("calls the registered callback on logout", async (done) => {
       const myCallback = (): void => {
         if (done) {

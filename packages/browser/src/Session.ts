@@ -28,9 +28,9 @@ import {
   ISessionInfo,
   IStorage,
 } from "@inrupt/solid-client-authn-core";
+import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
-import { v4 } from "uuid";
 
 export interface ISessionOptions {
   /**
@@ -61,6 +61,7 @@ export class Session extends EventEmitter {
   public readonly info: ISessionInfo;
 
   private clientAuthentication: ClientAuthentication;
+
   private tokenRequestInProgress = false;
 
   /**

@@ -40,6 +40,7 @@ export interface IUuidGenerator {
  * @hidden
  */
 export default class UuidGenerator {
+  // eslint-disable-next-line class-methods-use-this
   v4(): string {
     return v4();
   }

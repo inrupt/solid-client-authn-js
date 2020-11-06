@@ -20,12 +20,12 @@
  */
 
 import "reflect-metadata";
-import TokenRefresher from "../../../../src/login/oidc/refresh/TokenRefresher";
-import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
 import {
   mockStorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
+import TokenRefresher from "../../../../src/login/oidc/refresh/TokenRefresher";
+import { TokenRequesterMock } from "../../../../src/login/oidc/__mocks__/TokenRequester";
 
 describe("TokenRefresher", () => {
   const defaultMocks = {

@@ -27,9 +27,9 @@
 /**
  * Responsible for deciding which Login Handler should be used inside a popup window
  */
-import AggregateHandler from "../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
 import { ILoginOptions, ILoginHandler } from "@inrupt/solid-client-authn-core";
+import AggregateHandler from "../../util/handlerPattern/AggregateHandler";
 
 /**
  * @hidden

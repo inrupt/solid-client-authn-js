@@ -19,8 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IFetcher } from "../Fetcher";
 import { Response as NodeResponse } from "node-fetch";
+import { IFetcher } from "../Fetcher";
 
 export const FetcherMockResponse: Response = (new NodeResponse(
   JSON.stringify({ arbitrary: "response" })

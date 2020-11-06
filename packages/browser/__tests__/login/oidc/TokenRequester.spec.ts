@@ -20,6 +20,12 @@
  */
 
 import "reflect-metadata";
+import { Response as NodeResponse } from "node-fetch";
+import {
+  IIssuerConfig,
+  mockStorageUtility,
+} from "@inrupt/solid-client-authn-core";
+import { JSONWebKey } from "jose";
 import {
   FetcherMock,
   FetcherTokenMock,
@@ -28,17 +34,11 @@ import {
   IssuerConfigFetcherMock,
   IssuerConfigFetcherFetchConfigResponse,
 } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import { Response as NodeResponse } from "node-fetch";
 import TokenRequester from "../../../src/login/oidc/TokenRequester";
 import {
   ClientRegistrarMock,
   PublicClientRegistrarMock,
 } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
-import {
-  IIssuerConfig,
-  mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
-import { JSONWebKey } from "jose";
 
 const mockJWK = {
   kty: "EC",
@@ -111,10 +111,10 @@ describe("TokenRequester", () => {
     },
   };
 
-  function setUpMockedReturnValues(
+  async function setUpMockedReturnValues(
     values: Partial<typeof defaultReturnValues>
-  ): void {
-    defaultMocks.storageUtility.setForUser("global", {
+  ): Promise<void> {
+    await defaultMocks.storageUtility.setForUser("global", {
       issuer: values.storageIdp ?? defaultReturnValues.storageIdp,
     });
 
@@ -132,7 +132,7 @@ describe("TokenRequester", () => {
   }
 
   it("Properly follows the refresh flow", async () => {
-    setUpMockedReturnValues({});
+    await setUpMockedReturnValues({});
     const TokenRefresher = getTokenRequester({
       clientRegistrar: PublicClientRegistrarMock,
     });
@@ -142,7 +142,7 @@ describe("TokenRequester", () => {
       refresh_token: "thisIsARefreshToken",
     });
     /* eslint-enable camelcase */
-    expect(defaultMocks.fetcher.fetch).toBeCalledWith(
+    expect(defaultMocks.fetcher.fetch).toHaveBeenCalledWith(
       IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
       {
         method: "POST",
@@ -166,7 +166,7 @@ describe("TokenRequester", () => {
       refresh_token: "thisIsARefreshToken",
     });
     /* eslint-enable camelcase */
-    expect(FetcherTokenMock.fetch).toBeCalledWith(
+    expect(FetcherTokenMock.fetch).toHaveBeenCalledWith(
       IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
       {
         method: "POST",
@@ -182,7 +182,7 @@ describe("TokenRequester", () => {
   });
 
   it("Fails elegantly if the idp returns a bad value", async () => {
-    setUpMockedReturnValues({
+    await setUpMockedReturnValues({
       responseBody: JSON.stringify({
         // eslint-disable-next-line camelcase
         id_token: "ohNoThereIsNoAccessToken",
@@ -196,11 +196,11 @@ describe("TokenRequester", () => {
         refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable camelcase */
-    ).rejects.toThrowError("IDP token route returned an invalid response.");
+    ).rejects.toThrow("IDP token route returned an invalid response.");
   });
 
   it("Fails elegantly if the issuer does not support refresh tokens", async () => {
-    setUpMockedReturnValues({
+    await setUpMockedReturnValues({
       issuerConfig: {
         ...IssuerConfigFetcherFetchConfigResponse,
         // eslint-disable-next-line camelcase
@@ -215,7 +215,7 @@ describe("TokenRequester", () => {
         refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable camelcase */
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       "The issuer [https://idp.com] does not support the [refresh_token] grant"
     );
   });
@@ -244,13 +244,13 @@ describe("TokenRequester", () => {
       /* eslint-enable camelcase */
       // TODO: Should be This issuer https://idp.com does not have a token endpoint"
       // Figure out why the test suite shuffles the issuer.
-    ).rejects.toThrowError("does not have a token endpoint");
+    ).rejects.toThrow("does not have a token endpoint");
   });
 
   // This test fails with the current mock, but since the whole tokenrequester class is
   // going to be removed soon, it's not a priority to fix this now.
   it.skip("Fails elegantly if the access token does not have a sub claim", async () => {
-    setUpMockedReturnValues({
+    await setUpMockedReturnValues({
       jwt: {
         iss: "https://idp.com",
       },
@@ -263,7 +263,7 @@ describe("TokenRequester", () => {
         refresh_token: "thisIsARefreshToken",
       })
       /* eslint-enable camelcase */
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       "The Authorization Server returned a bad token (i.e. when decoded we did not find the required 'sub' claim)."
     );
   });

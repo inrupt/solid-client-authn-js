@@ -21,23 +21,11 @@
 
 import "reflect-metadata";
 import Redirector from "../../../src/login/oidc/Redirector";
-import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/EnvironmentDetector";
 
 /**
  * Test for Redirector
  */
 describe("Redirector", () => {
-  const defaultMocks = {
-    environmentDetector: EnvironmentDetectorMock,
-  };
-  function getRedirector(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
-  ): Redirector {
-    return new Redirector(
-      mocks.environmentDetector ?? defaultMocks.environmentDetector
-    );
-  }
-
   describe("Redirect", () => {
     const {
       location,
@@ -58,25 +46,15 @@ describe("Redirector", () => {
       window.history.replaceState = replaceState;
     });
 
-    it("does not redirect if the environment is not browser", () => {
-      defaultMocks.environmentDetector.detect.mockReturnValueOnce("server");
-      const redirector = getRedirector();
-      expect(() => redirector.redirect("https://someUrl.com/redirect")).toThrow(
-        "A redirectHandler must be provided in any environment other than the web browser"
-      );
-      expect(window.history.replaceState).not.toHaveBeenCalled();
-      expect(window.location.href).toBe("https://coolSite.com");
-    });
-
     it("browser redirection defaults to using using href", () => {
-      const redirector = getRedirector();
+      const redirector = new Redirector();
       redirector.redirect("https://someUrl.com/redirect");
       expect(window.history.replaceState).not.toHaveBeenCalled();
       expect(window.location.href).toBe("https://someUrl.com/redirect");
     });
 
     it("browser redirection uses replaceState if specified", () => {
-      const redirector = getRedirector();
+      const redirector = new Redirector();
       redirector.redirect("https://someUrl.com/redirect", {
         redirectByReplacingState: true,
       });

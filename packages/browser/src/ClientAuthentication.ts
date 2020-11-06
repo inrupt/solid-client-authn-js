@@ -25,7 +25,6 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import { IEnvironmentDetector } from "./util/EnvironmentDetector";
 import {
   ILoginInputOptions,
   ILoginHandler,
@@ -34,8 +33,8 @@ import {
   ISessionInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
-import { IFetcher } from "./util/Fetcher";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
+import { IFetcher } from "./util/Fetcher";
 
 /**
  * @hidden
@@ -49,9 +48,7 @@ export default class ClientAuthentication {
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
     @inject("fetcher")
-    private fetcher: IFetcher,
-    @inject("environmentDetector")
-    private environmentDetector: IEnvironmentDetector
+    private fetcher: IFetcher
   ) {}
 
   // Define these functions as properties so that they don't get accidentally re-bound.
@@ -78,7 +75,7 @@ export default class ClientAuthentication {
     return this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
-      redirectUrl: redirectUrl,
+      redirectUrl,
       clientId: options.clientId,
       clientSecret: options.clientSecret,
       clientName: options.clientName ?? options.clientId,
@@ -94,7 +91,7 @@ export default class ClientAuthentication {
   fetch: typeof global.fetch = this.fetcher.fetch;
 
   logout = async (sessionId: string): Promise<void> => {
-    this.logoutHandler.handle(sessionId);
+    await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.

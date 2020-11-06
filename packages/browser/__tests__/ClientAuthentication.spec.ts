@@ -21,6 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
@@ -28,9 +29,7 @@ import {
 } from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
-import { EnvironmentDetectorMock } from "../src/util/__mocks__/EnvironmentDetector";
 import ClientAuthentication from "../src/ClientAuthentication";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { mockFetcher } from "../src/util/__mocks__/Fetcher";
 
 describe("ClientAuthentication", () => {
@@ -40,7 +39,6 @@ describe("ClientAuthentication", () => {
     logoutHandler: LogoutHandlerMock,
     sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
     fetcher: mockFetcher(),
-    environmentDetector: EnvironmentDetectorMock,
   };
 
   function getClientAuthentication(
@@ -51,8 +49,7 @@ describe("ClientAuthentication", () => {
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
-      mocks.fetcher ?? defaultMocks.fetcher,
-      mocks.environmentDetector ?? defaultMocks.environmentDetector
+      mocks.fetcher ?? defaultMocks.fetcher
     );
   }
 
@@ -102,7 +99,7 @@ describe("ClientAuthentication", () => {
       const nonEmptyStorage = mockStorageUtility({
         someUser: { someKey: "someValue" },
       });
-      nonEmptyStorage.setForUser(
+      await nonEmptyStorage.setForUser(
         "someUser",
         { someKey: "someValue" },
         { secure: true }

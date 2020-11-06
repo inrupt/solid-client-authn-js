@@ -10,5 +10,5 @@
     "out": "website/docs/api/browser"
   },
 
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "__tests__/**/*"]
 }

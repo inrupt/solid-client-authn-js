@@ -19,8 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { flattenHeaders } from "../../../src/authenticatedFetch/headers/HeadersUtils";
 import { Headers as NodeHeaders } from "node-fetch";
+import { flattenHeaders } from "../../../src/authenticatedFetch/headers/HeadersUtils";
 
 describe("Headers interoperability function", () => {
   it("transforms an incoming Headers object into a flat headers structure", () => {
@@ -43,7 +43,7 @@ describe("Headers interoperability function", () => {
   it("supports non-iterable headers if they provide a reasonably standard way of browsing them", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const myHeaders: any = {};
-    myHeaders["forEach"] = (
+    myHeaders.forEach = (
       callback: (value: string, key: string) => void
     ): void => {
       callback("application/json", "accept");

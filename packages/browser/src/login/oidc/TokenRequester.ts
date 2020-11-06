@@ -31,18 +31,22 @@ import {
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
 import formurlencoded from "form-urlencoded";
-import { IFetcher } from "../../util/Fetcher";
 import {
   generateJwkForDpop,
   createDpopHeader,
   decodeJwt,
 } from "@inrupt/oidc-client-ext";
+import { IFetcher } from "../../util/Fetcher";
 
 /**
  * @hidden
  */
 export interface ITokenRequester {
   request(localUserId: string, body: Record<string, string>): Promise<void>;
+}
+
+function btoa(str: string): string {
+  return Buffer.from(str.toString(), "binary").toString("base64");
 }
 
 // NOTE: The code from this class will soon move to oidc-client-dpop-browser
@@ -118,7 +122,7 @@ export default class TokenRequester {
 
     if (client.clientSecret) {
       // TODO: Support DPoP-bound refresh tokens
-      tokenRequestInit.headers.Authorization = `Basic ${this.btoa(
+      tokenRequestInit.headers.Authorization = `Basic ${btoa(
         `${client.clientId}:${client.clientSecret}`
       )}`;
     }
@@ -160,9 +164,5 @@ export default class TokenRequester {
       },
       { secure: true }
     );
-  }
-
-  private btoa(str: string): string {
-    return Buffer.from(str.toString(), "binary").toString("base64");
   }
 }

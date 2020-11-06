@@ -40,8 +40,8 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 
-import ConfigurationError from "../../errors/ConfigurationError";
 import { IClient } from "@inrupt/oidc-client-ext";
+import ConfigurationError from "../../errors/ConfigurationError";
 
 function hasIssuer(
   options: ILoginOptions
@@ -102,7 +102,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       };
     } else {
       const clientId = await this.storageUtility.getForUser(
-        "clientApplicationRegistrationInfo", //options.sessionId,
+        "clientApplicationRegistrationInfo", // options.sessionId,
         "clientId"
       );
 

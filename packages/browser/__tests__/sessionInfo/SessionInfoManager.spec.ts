@@ -20,10 +20,10 @@
  */
 
 import "reflect-metadata";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";
 
 const mockClearFunction = jest.fn();
@@ -56,8 +56,8 @@ describe("SessionInfoManager", () => {
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorageUtility({}),
       });
-      expect(
-        async () => await sessionManager.update("commanderCool", {})
+      await expect(async () =>
+        sessionManager.update("commanderCool", {})
       ).rejects.toThrow("Not Implemented");
     });
   });
@@ -71,7 +71,7 @@ describe("SessionInfoManager", () => {
       const storageMock = mockStorageUtility(
         {
           [sessionId]: {
-            webId: webId,
+            webId,
             isLoggedIn: "true",
           },
         },
@@ -90,8 +90,8 @@ describe("SessionInfoManager", () => {
       });
       const session = await sessionManager.get(sessionId);
       expect(session).toMatchObject({
-        sessionId: sessionId,
-        webId: webId,
+        sessionId,
+        webId,
         isLoggedIn: true,
       });
     });

@@ -127,6 +127,23 @@ const issuerConfigKeyMap: Record<
 };
 /* eslint-enable camelcase */
 
+function processConfig(
+  config: Record<string, string | string[]>
+): IIssuerConfig {
+  const parsedConfig: Record<string, string | string[]> = {};
+  Object.keys(config).forEach((key) => {
+    if (issuerConfigKeyMap[key]) {
+      // TODO: PMcB55: Validate URL if "issuerConfigKeyMap[key].convertToUrl"
+      //  if (issuerConfigKeyMap[key].convertToUrl) {
+      //   validateUrl(config[key]);
+      //  }
+      parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
+    }
+  });
+
+  return (parsedConfig as unknown) as IIssuerConfig;
+}
+
 /**
  * @hidden
  */
@@ -143,23 +160,6 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     return `issuerConfig:${issuer}`;
   }
 
-  private processConfig(
-    config: Record<string, string | string[]>
-  ): IIssuerConfig {
-    const parsedConfig: Record<string, string | string[]> = {};
-    Object.keys(config).forEach((key) => {
-      if (issuerConfigKeyMap[key]) {
-        // TODO: PMcB55: Validate URL if "issuerConfigKeyMap[key].convertToUrl"
-        //  if (issuerConfigKeyMap[key].convertToUrl) {
-        //   validateUrl(config[key]);
-        //  }
-        parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
-      }
-    });
-
-    return (parsedConfig as unknown) as IIssuerConfig;
-  }
-
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
@@ -171,7 +171,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     const issuerConfigRequestBody = await this.fetcher.fetch(openIdConfigUrl);
     // Check the validity of the fetched config
     try {
-      issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
+      issuerConfig = processConfig(await issuerConfigRequestBody.json());
     } catch (err) {
       throw new ConfigurationError(
         `[${issuer.toString()}] has an invalid configuration: ${err.message}`

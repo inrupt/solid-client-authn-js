@@ -20,15 +20,15 @@
  */
 
 import "reflect-metadata";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { Response as NodeResponse } from "node-fetch";
 import {
   FetcherMock,
   FetcherMockResponse,
 } from "../../../src/util/__mocks__/Fetcher";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
-import { Response as NodeResponse } from "node-fetch";
 
 /**
  * Test for IssuerConfigFetcher
@@ -63,7 +63,7 @@ describe("IssuerConfigFetcher", () => {
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
-      fetchResponse: fetchResponse,
+      fetchResponse,
     });
 
     const fetchedConfig = await configFetcher.fetchConfig(
@@ -92,9 +92,7 @@ describe("IssuerConfigFetcher", () => {
       mockStorageUtility({})
     );
 
-    await expect(
-      configFetcher.fetchConfig("https://some.url")
-    ).rejects.toThrowError(
+    await expect(configFetcher.fetchConfig("https://some.url")).rejects.toThrow(
       "[https://some.url] has an invalid configuration: Some error"
     );
   });
