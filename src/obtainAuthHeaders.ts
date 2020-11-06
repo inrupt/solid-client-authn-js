@@ -28,9 +28,10 @@ import AuthFetcher from "./AuthFetcher";
 export async function getAuthFetcher(
   oidcIssuer: string,
   oidcProviderCookie: string,
-  appOrigin: string
+  appOrigin: string,
+  allowUnauthenticated = true
 ): Promise<AuthFetcher | { fetch: any }> {
-  if (!oidcProviderCookie.length) {
+  if (!oidcProviderCookie.length && allowUnauthenticated) {
     return { fetch };
   }
   const authFetcher = await customAuthFetcher();
