@@ -32,7 +32,7 @@ export async function getAuthFetcher(
   allowUnauthenticated = true
 ): Promise<AuthFetcher | { fetch: any }> {
   if (!oidcProviderCookie.length && allowUnauthenticated) {
-    return { fetch, authenticated: false };
+    return { fetch } as { fetch: any };
   }
   const authFetcher = await customAuthFetcher();
 
@@ -55,8 +55,7 @@ export async function getAuthFetcher(
   } while (!redirectedTo?.startsWith(appOrigin));
 
   await authFetcher.handleRedirect(redirectedTo);
-  authFetcher.authenticated = true;
-  return authFetcher;
+  return authFetcher as AuthFetcher;
 }
 
 export async function getNodeSolidServerCookie(
@@ -101,22 +100,22 @@ export async function getPhpSolidServerCookie(
 export async function getAuthHeaders(
   urlStr: string,
   method: string,
-  authFetcher: AuthFetcher
+  authFetcher: AuthFetcher | { fetch: any }
 ): Promise<{ Authorization: string; DPop: string }> {
-  if (!authFetcher.authenticated) {
+  if (authFetcher instanceof AuthFetcher) {
     return {
-      Authorization: '',
-      DPop: ''
+      Authorization: JSON.parse(
+        (authFetcher as any).authenticatedFetcher.tokenRefresher.storageUtility
+          .storage.map["solidAuthFetcherUser:global"]
+      ).accessToken,
+      DPop: await (authFetcher as any).authenticatedFetcher.tokenRefresher.tokenRequester.dpopHeaderCreator.createHeaderToken(
+        new URL(urlStr),
+        method
+      )
     };
   }
   return {
-    Authorization: JSON.parse(
-      (authFetcher as any).authenticatedFetcher.tokenRefresher.storageUtility
-        .storage.map["solidAuthFetcherUser:global"]
-    ).accessToken,
-    DPop: await (authFetcher as any).authenticatedFetcher.tokenRefresher.tokenRequester.dpopHeaderCreator.createHeaderToken(
-      new URL(urlStr),
-      method
-    )
+    Authorization: "",
+    DPop: ""
   };
 }
