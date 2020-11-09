@@ -68,7 +68,7 @@ export async function getNodeSolidServerCookie(
     `${serverRoot}/login/password`,
     {
       headers: {
-        "content-type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded"
       },
       body: `username=${username}&password=${password}`,
       method: "POST",
