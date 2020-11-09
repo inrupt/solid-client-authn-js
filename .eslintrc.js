@@ -5,12 +5,20 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
     "plugin:prettier/recommended",
+    "@inrupt/eslint-config-lib",
   ],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module",
   },
+  overrides: [
+    {
+      files: ["**/__mocks__/**"],
+    },
+  ],
   rules: {
+    // The DI framework uses empty constructors to inject dependencies
+    "no-useless-constructor": "off",
     "prettier/prettier": "error",
     "@typescript-eslint/naming-convention": [
       "error",
@@ -25,5 +33,10 @@ module.exports = {
     ],
     "license-header/header": ["error", "./resources/license-header.js"],
     "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    // The following rules are disabled until the overall testing strategy is improved
+    "jest/no-mocks-import": "off",
+    "import/prefer-default-export": "off",
+    // The following rule should be re-enabled after a refactoring of the handler pattern
+    "class-methods-use-this": "off",
   },
 };
