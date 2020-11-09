@@ -32,7 +32,7 @@ export async function getAuthFetcher(
   allowUnauthenticated = true
 ): Promise<AuthFetcher | { fetch: any }> {
   if (!oidcProviderCookie.length && allowUnauthenticated) {
-    return { fetch };
+    return { fetch, allowUnauthenticated };
   }
   const authFetcher = await customAuthFetcher();
 
@@ -102,6 +102,12 @@ export async function getAuthHeaders(
   method: string,
   authFetcher: AuthFetcher
 ): Promise<{ Authorization: string; DPop: string }> {
+  if (authFetcher.allowUnauthenticated) {
+    return {
+      Authorization: '',
+      DPop: ''
+    };
+  }
   return {
     Authorization: JSON.parse(
       (authFetcher as any).authenticatedFetcher.tokenRefresher.storageUtility
