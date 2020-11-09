@@ -67,7 +67,7 @@ describe("validateSchema", () => {
       },
     };
 
-    expect(() => validateSchema(schema, { foo: "Not a number" })).toThrowError(
+    expect(() => validateSchema(schema, { foo: "Not a number" })).toThrow(
       "schema is invalid:\n.foo should be number"
     );
   });
@@ -81,7 +81,7 @@ describe("validateSchema", () => {
       },
     };
 
-    expect(() => validateSchema(schema, { foo: "Not a number" })).toThrowError(
+    expect(() => validateSchema(schema, { foo: "Not a number" })).toThrow(
       "Some schema is invalid:\n.foo should be number"
     );
   });
@@ -284,7 +284,7 @@ describe("validateSchema", () => {
             },
           }
         )
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 });
