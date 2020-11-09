@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-20.04
     if: github.event.deployment_status.state == 'success'
     steps:
-      - uses: actions/checkout@v2.1.0
+      - uses: actions/checkout@v2.3.4
       - name: Use Node.js 12.x
         uses: actions/setup-node@v2.1.2
       - name: Cache node modules
