@@ -2,8 +2,8 @@
   "name": "@inrupt/solid-client-authn-core",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index",
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },
