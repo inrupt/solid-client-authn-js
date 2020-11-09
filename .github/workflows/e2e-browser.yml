@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.1.0
       - name: Use Node.js 12.x
-        uses: actions/setup-node@v1.4.1
+        uses: actions/setup-node@v2.1.2
       - name: Cache node modules
         uses: actions/cache@v1.1.2
         env:
