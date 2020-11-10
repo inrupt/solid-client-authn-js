@@ -33,7 +33,6 @@ import {
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "@inrupt/oidc-client-ext";
-import { IFetcher } from "../../util/Fetcher";
 
 /**
  * @hidden
@@ -41,7 +40,6 @@ import { IFetcher } from "../../util/Fetcher";
 @injectable()
 export default class ClientRegistrar implements IClientRegistrar {
   constructor(
-    @inject("fetcher") private fetcher: IFetcher,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 

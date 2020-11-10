@@ -52,7 +52,6 @@ import PrimaryDeviceOidcHandler from "./login/oidc/oidcHandlers/PrimaryDeviceOid
 import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDeviceOidcHandler";
 import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
-import Fetcher, { IFetcher } from "./util/Fetcher";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { ImplicitRedirectHandler } from "./login/oidc/redirectHandler/ImplicitRedirectHandler";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
@@ -80,11 +79,6 @@ const container = emptyContainer;
 
 container.register<IStorageUtility>("storageUtility", {
   useClass: StorageUtilityBrowser,
-});
-
-// Util
-container.register<IFetcher>("fetcher", {
-  useClass: Fetcher,
 });
 
 // Session

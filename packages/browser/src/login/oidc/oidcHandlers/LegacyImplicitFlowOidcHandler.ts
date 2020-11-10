@@ -36,7 +36,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { inject, injectable } from "tsyringe";
 import { generateJwkForDpop, createDpopHeader } from "@inrupt/oidc-client-ext";
-import { IFetcher } from "../../../util/Fetcher";
 
 /**
  * @hidden
@@ -44,7 +43,6 @@ import { IFetcher } from "../../../util/Fetcher";
 @injectable()
 export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
   constructor(
-    @inject("fetcher") private fetcher: IFetcher,
     @inject("sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
     @inject("redirector") private redirector: IRedirector,

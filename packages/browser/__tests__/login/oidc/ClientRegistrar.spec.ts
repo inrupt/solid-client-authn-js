@@ -25,7 +25,6 @@ import {
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { Response as NodeResponse } from "node-fetch";
-import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
 import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 
@@ -34,16 +33,12 @@ import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/
  */
 describe("ClientRegistrar", () => {
   const defaultMocks = {
-    fetcher: FetcherMock,
     storage: StorageUtilityMock,
   };
   function getClientRegistrar(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): ClientRegistrar {
-    return new ClientRegistrar(
-      mocks.fetcher ?? defaultMocks.fetcher,
-      mocks.storage ?? defaultMocks.storage
-    );
+    return new ClientRegistrar(mocks.storage ?? defaultMocks.storage);
   }
 
   describe("getClient", () => {

@@ -36,7 +36,6 @@ import {
   createDpopHeader,
   decodeJwt,
 } from "@inrupt/oidc-client-ext";
-import { IFetcher } from "../../util/Fetcher";
 
 /**
  * @hidden
@@ -60,7 +59,6 @@ export default class TokenRequester {
     @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("fetcher") private fetcher: IFetcher,
     @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
@@ -128,7 +126,7 @@ export default class TokenRequester {
     }
 
     const tokenResponse = await (
-      await this.fetcher.fetch(issuerConfig.tokenEndpoint, tokenRequestInit)
+      await window.fetch(issuerConfig.tokenEndpoint, tokenRequestInit)
     ).json();
 
     // Check the response

@@ -27,10 +27,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { JSONWebKey } from "jose";
 import {
-  FetcherMock,
-  FetcherTokenMock,
-} from "../../../src/util/__mocks__/Fetcher";
-import {
   IssuerConfigFetcherMock,
   IssuerConfigFetcherFetchConfigResponse,
 } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
@@ -70,7 +66,6 @@ describe("TokenRequester", () => {
   const defaultMocks = {
     storageUtility: mockStorageUtility({}),
     issueConfigFetcher: IssuerConfigFetcherMock,
-    fetcher: FetcherMock,
     clientRegistrar: ClientRegistrarMock,
   };
 
@@ -80,7 +75,6 @@ describe("TokenRequester", () => {
     return new TokenRequester(
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.issueConfigFetcher ?? defaultMocks.issueConfigFetcher,
-      mocks.fetcher ?? defaultMocks.fetcher,
       mocks.clientRegistrar ?? ClientRegistrarMock
     );
   }
@@ -124,11 +118,14 @@ describe("TokenRequester", () => {
       issuerConfig
     );
 
-    defaultMocks.fetcher.fetch.mockResolvedValueOnce(
-      (new NodeResponse(
-        values.responseBody ?? defaultReturnValues.responseBody
-      ) as unknown) as Response
-    );
+    const mockedFetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        (new NodeResponse(
+          values.responseBody ?? defaultReturnValues.responseBody
+        ) as unknown) as Response
+      );
+    window.fetch = mockedFetch;
   }
 
   it("Properly follows the refresh flow", async () => {
@@ -142,7 +139,7 @@ describe("TokenRequester", () => {
       refresh_token: "thisIsARefreshToken",
     });
     /* eslint-enable camelcase */
-    expect(defaultMocks.fetcher.fetch).toHaveBeenCalledWith(
+    expect(window.fetch).toHaveBeenCalledWith(
       IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
       {
         method: "POST",
@@ -157,16 +154,26 @@ describe("TokenRequester", () => {
   });
 
   it("Adds an authorization header if a client secret is present", async () => {
-    const TokenRefresher = getTokenRequester({
-      fetcher: FetcherTokenMock,
-    });
+    const TokenRefresher = getTokenRequester();
+    window.fetch = jest.fn().mockResolvedValueOnce(
+      new NodeResponse(
+        JSON.stringify({
+          /* eslint-disable camelcase */
+          access_token:
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJodHRwczovL3NvbWUucG9kL3dlYmlkI21lIiwianRpIjoiMjFiNDhlOTgtNzA4YS00Y2UzLTk2NmMtYTk2M2UwMDM2ZDBiIiwiaWF0IjoxNTk1ODQxODAxLCJleHAiOjE1OTU4NDU0MDF9.MGqDiny3pzhlSOJ52cJWJA84J47b9p5kkuuJVPB-dVg",
+          id_token: "myIdToken",
+          refresh_token: "myResfreshToken",
+          /* eslint-disable camelcase */
+        })
+      )
+    );
     /* eslint-disable camelcase */
     await TokenRefresher.request("global", {
       grant_type: "refresh_token",
       refresh_token: "thisIsARefreshToken",
     });
     /* eslint-enable camelcase */
-    expect(FetcherTokenMock.fetch).toHaveBeenCalledWith(
+    expect(window.fetch).toHaveBeenCalledWith(
       IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
       {
         method: "POST",

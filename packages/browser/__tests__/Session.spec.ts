@@ -96,6 +96,7 @@ describe("Session", () => {
 
   describe("fetch", () => {
     it("wraps up ClientAuthentication fetch", async () => {
+      window.fetch = jest.fn();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });

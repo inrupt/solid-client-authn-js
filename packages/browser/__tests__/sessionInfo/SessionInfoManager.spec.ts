@@ -22,7 +22,6 @@
 import "reflect-metadata";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
-import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";
 
@@ -37,7 +36,6 @@ jest.mock("@inrupt/oidc-client-ext", () => {
 describe("SessionInfoManager", () => {
   const defaultMocks = {
     uuidGenerator: UuidGeneratorMock,
-    authenticatedFetcher: AuthenticatedFetcherMock,
     logoutHandler: LogoutHandlerMock,
     storageUtility: mockStorageUtility({}),
   };

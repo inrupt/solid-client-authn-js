@@ -30,7 +30,6 @@ import {
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "../src/ClientAuthentication";
-import { mockFetcher } from "../src/util/__mocks__/Fetcher";
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {
@@ -38,7 +37,6 @@ describe("ClientAuthentication", () => {
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
     sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
-    fetcher: mockFetcher(),
   };
 
   function getClientAuthentication(
@@ -48,8 +46,7 @@ describe("ClientAuthentication", () => {
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
-      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
-      mocks.fetcher ?? defaultMocks.fetcher
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
     );
   }
 
@@ -127,11 +124,10 @@ describe("ClientAuthentication", () => {
 
   describe("fetch", () => {
     it("calls fetch", async () => {
+      window.fetch = jest.fn();
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
-      expect(defaultMocks.fetcher.fetch).toHaveBeenCalledWith(
-        "https://html5zombo.com"
-      );
+      expect(window.fetch).toHaveBeenCalledWith("https://html5zombo.com");
     });
   });
 

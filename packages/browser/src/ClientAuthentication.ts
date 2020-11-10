@@ -34,7 +34,6 @@ import {
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
-import { IFetcher } from "./util/Fetcher";
 
 /**
  * @hidden
@@ -46,9 +45,7 @@ export default class ClientAuthentication {
     @inject("redirectHandler") private redirectHandler: IRedirectHandler,
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionInfoManager")
-    private sessionInfoManager: ISessionInfoManager,
-    @inject("fetcher")
-    private fetcher: IFetcher
+    private sessionInfoManager: ISessionInfoManager
   ) {}
 
   // Define these functions as properties so that they don't get accidentally re-bound.
@@ -88,14 +85,14 @@ export default class ClientAuthentication {
 
   // By default, resolves our fetch() function to the environment fetch()
   // function.
-  fetch: typeof global.fetch = this.fetcher.fetch;
+  fetch: typeof global.fetch = window.fetch;
 
   logout = async (sessionId: string): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
-    this.fetch = this.fetcher.fetch;
+    this.fetch = window.fetch;
   };
 
   getSessionInfo = async (

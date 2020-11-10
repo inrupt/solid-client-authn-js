@@ -33,7 +33,7 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { appendToUrlPathname, IFetcher } from "../../util/Fetcher";
+import { appendToUrlPathname } from "../../util/urlPath";
 import ConfigurationError from "../../errors/ConfigurationError";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
@@ -150,7 +150,6 @@ function processConfig(
 @injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   constructor(
-    @inject("fetcher") private fetcher: IFetcher,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
@@ -167,8 +166,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       issuer,
       WELL_KNOWN_OPENID_CONFIG
     );
-
-    const issuerConfigRequestBody = await this.fetcher.fetch(openIdConfigUrl);
+    const issuerConfigRequestBody = await window.fetch(openIdConfigUrl);
     // Check the validity of the fetched config
     try {
       issuerConfig = processConfig(await issuerConfigRequestBody.json());

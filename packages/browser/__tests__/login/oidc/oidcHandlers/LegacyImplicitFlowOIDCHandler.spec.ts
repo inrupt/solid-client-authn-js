@@ -29,7 +29,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { JSONWebKey } from "jose";
 import LegacyImplicitFlowOidcHandler from "../../../../src/login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
-import { FetcherMock } from "../../../../src/util/__mocks__/Fetcher";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
@@ -58,7 +57,6 @@ jest.mock("@inrupt/oidc-client-ext", () => {
 
 describe("LegacyImplicitFlowOidcHandler", () => {
   const defaultMocks = {
-    fetcher: FetcherMock,
     sessionInfoManager: SessionInfoManagerMock,
     redirector: RedirectorMock,
     storageUtility: StorageUtilityMock,
@@ -67,7 +65,6 @@ describe("LegacyImplicitFlowOidcHandler", () => {
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): LegacyImplicitFlowOidcHandler {
     return new LegacyImplicitFlowOidcHandler(
-      mocks.fetcher ?? defaultMocks.fetcher,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
       mocks.redirector ?? defaultMocks.redirector,
       mocks.storageUtility ?? defaultMocks.storageUtility
