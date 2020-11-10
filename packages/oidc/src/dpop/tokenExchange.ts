@@ -111,9 +111,13 @@ export async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
   if (decoded.webid) {
     return decoded.webid;
   }
-  if (!decoded.sub.match(/^https?:\/\/.+\..+$/)) {
+  try {
+    // The constructor is here only used to verify that the URL is valid.
+    // eslint-disable-next-line no-new
+    new URL(decoded.sub);
+  } catch (error) {
     throw new Error(
-      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]`
+      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]. Attempting to construct a URL from the 'sub' claim threw: ${error}`
     );
   }
   return decoded.sub;
