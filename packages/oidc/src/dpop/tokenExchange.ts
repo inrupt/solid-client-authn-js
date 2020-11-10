@@ -114,7 +114,7 @@ export async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
     new URL(decoded.sub);
   } catch (error) {
     throw new Error(
-      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]. Parsing the sub claim threw ${error}`
+      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]. Attempting to construct a URL from the 'sub' claim threw: ${error}`
     );
   }
   return decoded.sub;

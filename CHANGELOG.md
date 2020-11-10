@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Bugfixes
 
-- Deriving the WebID from the ID token did not accept some valid IRIs in the subject claim, i.e. issued by a local instance of NSS.
+- Deriving the WebID from the ID token did not accept some valid IRIs in the subject claim, i.e. issued by a local instance of Node Solid Server.
 
 ## 1.0.0 - 2020-11-04
 
