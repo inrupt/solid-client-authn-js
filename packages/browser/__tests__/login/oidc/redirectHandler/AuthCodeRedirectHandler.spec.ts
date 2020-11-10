@@ -220,7 +220,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
-    it("Retrieves the code verifier from memory", async () => {
+    it("retrieves the code verifier from memory", async () => {
       const storage = mockStorageUtility({
         oauth2_state_value: {
           sessionId: "userId",
