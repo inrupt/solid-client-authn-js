@@ -24,7 +24,7 @@ import InMemoryStorage from "../../src/storage/InMemoryStorage";
 describe("InMemoryStorage", () => {
   const nodeStorage = new InMemoryStorage();
   it("can set an item", async () => {
-    expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
+    await expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
   });
   it("can get an item", async () => {
     expect(await nodeStorage.get("a")).toEqual("A");

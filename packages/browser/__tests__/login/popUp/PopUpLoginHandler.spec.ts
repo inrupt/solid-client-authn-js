@@ -22,13 +22,11 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import PopUpLoginHandler from "../../../src/login/popUp/PopUpLoginHandler";
-import { EnvironmentDetectorMock } from "../../../src/util/__mocks__/EnvironmentDetector";
 import { SessionInfoManagerMock } from "../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { LoginHandlerMock } from "../../../src/login/__mocks__/LoginHandler";
 
 describe("PopUpLoginHandler", () => {
   const defaultMocks = {
-    environmentDetector: EnvironmentDetectorMock,
     loginHandler: LoginHandlerMock,
     sessionCreator: SessionInfoManagerMock,
   };
@@ -36,7 +34,6 @@ describe("PopUpLoginHandler", () => {
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): PopUpLoginHandler {
     return new PopUpLoginHandler(
-      mocks.environmentDetector ?? defaultMocks.environmentDetector,
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.sessionCreator ?? defaultMocks.sessionCreator
     );

@@ -33,7 +33,6 @@ import {
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 
 /**
  * @hidden
@@ -46,18 +45,12 @@ import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 @injectable()
 export default class PopUpLoginHandler implements ILoginHandler {
   constructor(
-    @inject("environmentDetector")
-    private environmentDetector: IEnvironmentDetector,
     @inject("postPopUpLoginHandler") private loginHandler: ILoginHandler,
     @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager
   ) {}
 
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
-    return !!(
-      loginOptions.popUp &&
-      loginOptions.redirectUrl &&
-      this.environmentDetector.detect() === "browser"
-    );
+    return !!(loginOptions.popUp && loginOptions.redirectUrl);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -20,8 +20,8 @@
  */
 
 import { it, describe, expect } from "@jest/globals";
-import { removeOidcQueryParam, clearOidcPersistentStorage } from "./cleanup";
 import { OidcClient } from "oidc-client";
+import { removeOidcQueryParam, clearOidcPersistentStorage } from "./cleanup";
 
 jest.mock("oidc-client", () => {
   const mockClient = {
@@ -80,12 +80,12 @@ describe("clearOidcPersistentStorage", () => {
     );
     window.localStorage.setItem("anArbitraryKey", "a value");
     await clearOidcPersistentStorage();
-    expect(window.localStorage.length).toEqual(1);
+    expect(window.localStorage).toHaveLength(1);
   });
 
   it("doesn't fail if localstorage is empty", async () => {
     window.localStorage.clear();
     await clearOidcPersistentStorage();
-    expect(window.localStorage.length).toEqual(0);
+    expect(window.localStorage).toHaveLength(0);
   });
 });

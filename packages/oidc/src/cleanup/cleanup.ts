@@ -52,7 +52,7 @@ export async function clearOidcPersistentStorage(): Promise<void> {
   await client.clearStaleState(new WebStorageStateStore({}));
   const myStorage = window.localStorage;
   const itemsToRemove = [];
-  for (let i = 0; i <= myStorage.length; i++) {
+  for (let i = 0; i <= myStorage.length; i += 1) {
     const key = myStorage.key(i);
     if (
       key &&

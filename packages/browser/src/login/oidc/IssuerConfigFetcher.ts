@@ -33,7 +33,7 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { appendToUrlPathname, IFetcher } from "../../util/Fetcher";
+import { appendToUrlPathname } from "../../util/urlPath";
 import ConfigurationError from "../../errors/ConfigurationError";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
@@ -127,13 +127,29 @@ const issuerConfigKeyMap: Record<
 };
 /* eslint-enable camelcase */
 
+function processConfig(
+  config: Record<string, string | string[]>
+): IIssuerConfig {
+  const parsedConfig: Record<string, string | string[]> = {};
+  Object.keys(config).forEach((key) => {
+    if (issuerConfigKeyMap[key]) {
+      // TODO: PMcB55: Validate URL if "issuerConfigKeyMap[key].convertToUrl"
+      //  if (issuerConfigKeyMap[key].convertToUrl) {
+      //   validateUrl(config[key]);
+      //  }
+      parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
+    }
+  });
+
+  return (parsedConfig as unknown) as IIssuerConfig;
+}
+
 /**
  * @hidden
  */
 @injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   constructor(
-    @inject("fetcher") private fetcher: IFetcher,
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
@@ -143,23 +159,6 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     return `issuerConfig:${issuer}`;
   }
 
-  private processConfig(
-    config: Record<string, string | string[]>
-  ): IIssuerConfig {
-    const parsedConfig: Record<string, string | string[]> = {};
-    Object.keys(config).forEach((key) => {
-      if (issuerConfigKeyMap[key]) {
-        // TODO: PMcB55: Validate URL if "issuerConfigKeyMap[key].convertToUrl"
-        //  if (issuerConfigKeyMap[key].convertToUrl) {
-        //   validateUrl(config[key]);
-        //  }
-        parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
-      }
-    });
-
-    return (parsedConfig as unknown) as IIssuerConfig;
-  }
-
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
@@ -167,11 +166,10 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       issuer,
       WELL_KNOWN_OPENID_CONFIG
     );
-
-    const issuerConfigRequestBody = await this.fetcher.fetch(openIdConfigUrl);
+    const issuerConfigRequestBody = await window.fetch(openIdConfigUrl);
     // Check the validity of the fetched config
     try {
-      issuerConfig = this.processConfig(await issuerConfigRequestBody.json());
+      issuerConfig = processConfig(await issuerConfigRequestBody.json());
     } catch (err) {
       throw new ConfigurationError(
         `[${issuer.toString()}] has an invalid configuration: ${err.message}`

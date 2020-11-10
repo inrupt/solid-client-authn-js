@@ -27,9 +27,9 @@
 /**
  * Responsible for decided which Login Handler should be used given the Login Options
  */
-import AggregateHandler from "../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
 import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
+import AggregateHandler from "../util/handlerPattern/AggregateHandler";
 
 /**
  * @hidden

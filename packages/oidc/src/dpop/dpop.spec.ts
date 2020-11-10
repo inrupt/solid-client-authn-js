@@ -25,6 +25,7 @@ import {
   createDpopHeader,
   decodeJwt,
   normalizeHttpUriClaim,
+  privateJwkToPublicJwk,
   signJwt,
 } from "./dpop";
 import { generateJwk, generateJwkForDpop } from "./keyGeneration";
@@ -46,7 +47,9 @@ describe("signJwt/decodeJwt", () => {
     const jwt = await signJwt(payload, key, {
       algorithm: "ES256",
     });
-    const decoded = await decodeJwt(jwt, key, { algorithms: ["ES256"] });
+    const decoded = await decodeJwt(jwt, await privateJwkToPublicJwk(key), {
+      algorithms: ["ES256"],
+    });
     expect(decoded.testClaim).toEqual(payload.testClaim);
   });
 
@@ -111,6 +114,8 @@ describe("normalizeHttpUriClaim", () => {
       expected: "https://localhost:8080/path",
     },
   ].forEach((test) => {
+    // The titles are provided in the test array
+    // eslint-disable-next-line jest/valid-title
     it(test.it, () => {
       const htu = normalizeHttpUriClaim(test.url);
       expect(htu).toBe(test.expected);

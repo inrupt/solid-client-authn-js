@@ -20,10 +20,9 @@
  */
 
 import "reflect-metadata";
-import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
-import { AuthenticatedFetcherMock } from "../../src/authenticatedFetch/__mocks__/AuthenticatedFetcher";
-import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
+import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";
 
 const mockClearFunction = jest.fn();
@@ -37,7 +36,6 @@ jest.mock("@inrupt/oidc-client-ext", () => {
 describe("SessionInfoManager", () => {
   const defaultMocks = {
     uuidGenerator: UuidGeneratorMock,
-    authenticatedFetcher: AuthenticatedFetcherMock,
     logoutHandler: LogoutHandlerMock,
     storageUtility: mockStorageUtility({}),
   };
@@ -56,8 +54,8 @@ describe("SessionInfoManager", () => {
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorageUtility({}),
       });
-      expect(
-        async () => await sessionManager.update("commanderCool", {})
+      await expect(async () =>
+        sessionManager.update("commanderCool", {})
       ).rejects.toThrow("Not Implemented");
     });
   });
@@ -71,7 +69,7 @@ describe("SessionInfoManager", () => {
       const storageMock = mockStorageUtility(
         {
           [sessionId]: {
-            webId: webId,
+            webId,
             isLoggedIn: "true",
           },
         },
@@ -90,8 +88,8 @@ describe("SessionInfoManager", () => {
       });
       const session = await sessionManager.get(sessionId);
       expect(session).toMatchObject({
-        sessionId: sessionId,
-        webId: webId,
+        sessionId,
+        webId,
         isLoggedIn: true,
       });
     });

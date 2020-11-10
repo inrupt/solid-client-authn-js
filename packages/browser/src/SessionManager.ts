@@ -19,13 +19,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { Session } from "./Session";
 import { EventEmitter } from "events";
-import ClientAuthentication from "./ClientAuthentication";
-import { getClientAuthenticationWithDependencies } from "./dependencies";
-import { detectEnvironment } from "./util/EnvironmentDetector";
 import { ISessionInfo, IStorage } from "@inrupt/solid-client-authn-core";
 import { injectable } from "tsyringe";
+import { Session } from "./Session";
+import ClientAuthentication from "./ClientAuthentication";
+import { getClientAuthenticationWithDependencies } from "./dependencies";
 
 export interface ISessionManagerOptions {
   secureStorage?: IStorage;
@@ -43,11 +42,14 @@ export interface ISessionManager {
 @injectable()
 export class SessionManager extends EventEmitter implements ISessionManager {
   private clientAuthn: ClientAuthentication;
+
   private sessionRecords: Record<
     string,
     { session: Session; logoutCallback: () => unknown }
   > = {};
+
   private isInitialized = false;
+
   private handledIncomingRedirect = false;
 
   /**
@@ -75,10 +77,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
 
   private async init(): Promise<void> {
     if (!this.isInitialized) {
-      const env = detectEnvironment();
-      if (env === "browser") {
-        await this.handleIncomingRedirect(window.location.href);
-      }
+      await this.handleIncomingRedirect(window.location.href);
       this.isInitialized = true;
     }
   }
@@ -101,14 +100,13 @@ export class SessionManager extends EventEmitter implements ISessionManager {
       sessionRecord.session.info.webId = sessionInfo.webId;
       sessionRecord.session.info.isLoggedIn = sessionInfo.isLoggedIn;
       return sessionRecord.session;
-    } else {
-      return this.addNewSessionRecord(
-        new Session({
-          clientAuthentication: this.clientAuthn,
-          sessionInfo: sessionInfo,
-        })
-      );
     }
+    return this.addNewSessionRecord(
+      new Session({
+        clientAuthentication: this.clientAuthn,
+        sessionInfo,
+      })
+    );
   }
 
   /**

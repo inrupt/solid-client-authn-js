@@ -20,9 +20,9 @@
  */
 
 import { it, describe } from "@jest/globals";
+import { Response } from "cross-fetch";
 import { IIssuerConfig, IClientRegistrarOptions } from "../common/types";
 import { registerClient } from "./clientRegistrar";
-import { Response } from "cross-fetch";
 
 const getMockIssuer = (): IIssuerConfig => {
   return {
@@ -79,7 +79,7 @@ describe("registerClient", () => {
     await registerClient(options, getMockIssuer());
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    expect(myFetch.mock.calls[0][1]?.headers["Authorization"]).toEqual(
+    expect(myFetch.mock.calls[0][1]?.headers.Authorization).toEqual(
       "Bearer some token"
     );
   });
@@ -105,7 +105,7 @@ describe("registerClient", () => {
     // @ts-ignore
     const rawBody = myFetch.mock.calls[0][1].body;
     const parsedBody = JSON.parse(rawBody);
-    expect(parsedBody["redirect_uris"]).toEqual(["https://some.url"]);
+    expect(parsedBody.redirect_uris).toEqual(["https://some.url"]);
   });
 
   it("throws if the IdP returns a mismatching redirect URL", async () => {
