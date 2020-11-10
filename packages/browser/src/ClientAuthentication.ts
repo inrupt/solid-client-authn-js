@@ -83,9 +83,8 @@ export default class ClientAuthentication {
     });
   };
 
-  // By default, resolves our fetch() function to the environment fetch()
-  // function.
-  fetch: typeof global.fetch = window.fetch;
+  // By default, our fetch() resolves to the environment fetch() function.
+  fetch = window.fetch;
 
   logout = async (sessionId: string): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
