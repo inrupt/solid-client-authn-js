@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+### Bugfixes
+
+- Deriving the WebID from the ID token did not accept some valid IRIs in the subject claim, i.e. issued by a local instance of NSS.
+
 ## 1.0.0 - 2020-11-04
 
 There is no breaking change in this release, but from now on, as per semantic versioning,
