@@ -102,7 +102,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       };
     } else {
       const clientId = await this.storageUtility.getForUser(
-        "clientApplicationRegistrationInfo", // options.sessionId,
+        "clientApplicationRegistrationInfo",
         "clientId"
       );
 
