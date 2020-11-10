@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import { default as ISessionInfo } from "./ISessionInfo";
+import ISessionInfo from "./ISessionInfo";
 
 /**
  * @hidden

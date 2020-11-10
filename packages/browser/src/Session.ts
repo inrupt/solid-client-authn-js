@@ -28,9 +28,9 @@ import {
   ISessionInfo,
   IStorage,
 } from "@inrupt/solid-client-authn-core";
+import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
-import { v4 } from "uuid";
 
 export interface ISessionOptions {
   /**
@@ -61,6 +61,7 @@ export class Session extends EventEmitter {
   public readonly info: ISessionInfo;
 
   private clientAuthentication: ClientAuthentication;
+
   private tokenRequestInProgress = false;
 
   /**
@@ -132,6 +133,12 @@ export class Session extends EventEmitter {
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
+    if (!this.info.isLoggedIn) {
+      // TODO: why does this.clientAuthentication.fetch return throws
+      // ""'fetch' called on an object that does not implement interface Window"
+      // when unauthenticated ?
+      return window.fetch(url, init);
+    }
     return this.clientAuthentication.fetch(url, init);
   };
 

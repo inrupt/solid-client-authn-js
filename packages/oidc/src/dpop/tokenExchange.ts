@@ -19,12 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
-import { createDpopHeader, decodeJwt } from "./dpop";
-import { generateJwkForDpop } from "./keyGeneration";
 import formurlencoded from "form-urlencoded";
 import { OidcClient } from "oidc-client";
+import { IClient, IIssuerConfig } from "../common/types";
+import { createDpopHeader, decodeJwt } from "./dpop";
+import { generateJwkForDpop } from "./keyGeneration";
+
+// Identifiers in camelcase are mandated by the OAuth spec.
+/* eslint-disable camelcase */
 
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>
@@ -208,10 +211,10 @@ export async function getTokens(
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
   };
-  let dpopJwk: JSONWebKey | undefined = undefined;
+  let dpopJwk: JSONWebKey | undefined;
   if (dpop) {
     dpopJwk = await generateJwkForDpop();
-    headers["DPoP"] = await createDpopHeader(
+    headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
       dpopJwk
@@ -220,7 +223,7 @@ export async function getTokens(
 
   // TODO: Find out where this is specified.
   if (client.clientSecret) {
-    headers["Authorization"] = `Basic ${btoa(
+    headers.Authorization = `Basic ${btoa(
       `${client.clientId}:${client.clientSecret}`
     )}`;
   }

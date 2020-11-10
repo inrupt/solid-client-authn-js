@@ -19,9 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { getClientAuthenticationWithDependencies } from "../src/dependencies";
 import ClientAuthentication from "../src/ClientAuthentication";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 
 describe("dependencies", () => {
   it("performs dependency injection", () => {

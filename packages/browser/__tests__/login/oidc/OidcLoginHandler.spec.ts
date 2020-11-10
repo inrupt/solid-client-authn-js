@@ -21,11 +21,11 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
+import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
 import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
-import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
@@ -56,7 +56,7 @@ describe("OidcLoginHandler", () => {
       tokenType: "DPoP",
     });
 
-    expect(actualHandler.handle.mock.calls.length).toBe(1);
+    expect(actualHandler.handle.mock.calls).toHaveLength(1);
   });
 
   it("should throw an error when called without an issuer", async () => {
@@ -64,7 +64,7 @@ describe("OidcLoginHandler", () => {
     // TS Ignore because bad input is purposely given here for the purpose of testing
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    await expect(handler.handle({})).rejects.toThrowError(
+    await expect(handler.handle({})).rejects.toThrow(
       "OidcLoginHandler requires an OIDC issuer"
     );
   });
@@ -77,7 +77,7 @@ describe("OidcLoginHandler", () => {
         tokenType: "DPoP",
         oidcIssuer: "https://whatever.com",
       })
-    ).rejects.toThrowError("OidcLoginHandler requires a redirect URL");
+    ).rejects.toThrow("OidcLoginHandler requires a redirect URL");
   });
 
   it("should indicate it when it can handle logins", async () => {

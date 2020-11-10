@@ -5,11 +5,13 @@ module.exports = {
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
   },
+  modulePathIgnorePatterns: ["dist/"],
   collectCoverageFrom: [
     "**/src/**/*.ts",
     "!**/node_modules/**",
     "!**/__tests__/**",
     "!**/src/external-types/**",
     "!**/src/index.ts",
+    "!**/dist/**",
   ],
 };

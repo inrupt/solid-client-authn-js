@@ -25,25 +25,6 @@
  */
 
 /**
- * A wrapper method to wrap the standard w3 fetch library
- */
-
-export interface IFetcher {
-  fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-}
-
-// TODO: This class should be removed altogether, and replaced by a direct call
-// to the environment's fetch.
-/**
- * @hidden
- */
-export default class Fetcher implements IFetcher {
-  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-    return window.fetch(url, init);
-  }
-}
-
-/**
  * Utility that appends the specified value to end of the specified URL's path.
  *
  * @param url  the URL to whose path we append the specified value

@@ -58,6 +58,7 @@ export class ImplicitRedirectHandler implements IRedirectHandler {
       );
     }
   }
+
   async handle(
     redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {

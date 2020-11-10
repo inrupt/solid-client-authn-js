@@ -24,36 +24,24 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
+import { injectable } from "tsyringe";
 import {
   IRedirector,
   IRedirectorOptions,
 } from "@inrupt/solid-client-authn-core";
-import { IEnvironmentDetector } from "../../util/EnvironmentDetector";
 
 /**
  * @hidden
  */
 @injectable()
 export default class Redirector implements IRedirector {
-  constructor(
-    @inject("environmentDetector")
-    private environmentDetector: IEnvironmentDetector
-  ) {}
-
   redirect(redirectUrl: string, options?: IRedirectorOptions): void {
     if (options && options.handleRedirect) {
       options.handleRedirect(redirectUrl);
-    } else if (this.environmentDetector.detect() === "browser") {
-      if (options && options.redirectByReplacingState) {
-        window.history.replaceState({}, "", redirectUrl);
-      } else {
-        window.location.href = redirectUrl;
-      }
+    } else if (options && options.redirectByReplacingState) {
+      window.history.replaceState({}, "", redirectUrl);
     } else {
-      throw new Error(
-        "A redirectHandler must be provided in any environment other than the web browser"
-      );
+      window.location.href = redirectUrl;
     }
   }
 }

@@ -19,16 +19,18 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-jest.mock("../../src/util/handlerPattern/AggregateHandler");
-
 // Required by TSyringe:
 import "reflect-metadata";
+import { ILoginHandler } from "@inrupt/solid-client-authn-core";
 import AggregateLoginHandler from "../../src/login/AggregateLoginHandler";
 import AggregateHandler from "../../src/util/handlerPattern/AggregateHandler";
-import { ILoginHandler } from "@inrupt/solid-client-authn-core";
+
+jest.mock("../../src/util/handlerPattern/AggregateHandler");
 
 describe("AggregateLoginHandler", () => {
   it("should pass injected handlers to its superclass", () => {
+    // We just test if the parent is called.
+    // eslint-disable-next-line no-new
     new AggregateLoginHandler((["Some handler"] as unknown) as ILoginHandler[]);
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([

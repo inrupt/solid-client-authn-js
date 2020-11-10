@@ -40,7 +40,7 @@ export function getUnauthenticatedSession(): ISessionInfo & {
   return {
     isLoggedIn: false,
     sessionId: v4(),
-    fetch: fetch,
+    fetch,
   };
 }
 
@@ -71,11 +71,10 @@ export class SessionInfoManager implements ISessionInfoManager {
     @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
+  // eslint-disable-next-line class-methods-use-this
   update(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    sessionId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    options: ISessionInfoManagerOptions
+    _sessionId: string,
+    _options: ISessionInfoManagerOptions
   ): Promise<void> {
     // const localUserId: string = options.localUserId || this.uuidGenerator.v4();
     // if (options.loggedIn) {
@@ -125,13 +124,14 @@ export class SessionInfoManager implements ISessionInfoManager {
     if (isLoggedIn !== undefined) {
       return {
         sessionId,
-        webId: webId,
+        webId,
         isLoggedIn: isLoggedIn === "true",
       };
     }
     return undefined;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async getAll(): Promise<ISessionInfo[]> {
     throw new Error("Not implemented");
   }

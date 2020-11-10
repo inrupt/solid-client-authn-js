@@ -66,8 +66,8 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({
         storage: mockStorageUtility({}),
       });
-      const value = await storageUtility.get("key");
-      expect(value).toBeUndefined();
+      const retrievedValue = await storageUtility.get("key");
+      expect(retrievedValue).toBeUndefined();
     });
 
     it("throws an error if the item is not in storage and errorOnNull is true", async () => {
@@ -75,7 +75,7 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({ storage: storageMock });
       await expect(
         storageUtility.get("key", { errorIfNull: true })
-      ).rejects.toThrowError("[key] is not stored");
+      ).rejects.toThrow("[key] is not stored");
     });
   });
 
@@ -95,12 +95,12 @@ describe("StorageUtility", () => {
         storage: mockStorageUtility({}),
       });
 
-      await expect(storageUtility.get(key)).resolves.toEqual(undefined);
+      await expect(storageUtility.get(key)).resolves.toBeUndefined();
       await storageUtility.set(key, value);
       await expect(storageUtility.get(key)).resolves.toEqual(value);
 
       await storageUtility.delete(key);
-      await expect(storageUtility.get(key)).resolves.toEqual(undefined);
+      await expect(storageUtility.get(key)).resolves.toBeUndefined();
     });
 
     it("deletes an item (from secure storage)", async () => {
@@ -108,18 +108,18 @@ describe("StorageUtility", () => {
         storage: mockStorageUtility({}, true),
       });
 
-      await expect(storageUtility.get(key, { secure: true })).resolves.toEqual(
-        undefined
-      );
+      await expect(
+        storageUtility.get(key, { secure: true })
+      ).resolves.toBeUndefined();
       await storageUtility.set(key, value, { secure: true });
       await expect(storageUtility.get(key, { secure: true })).resolves.toEqual(
         value
       );
 
       await storageUtility.delete(key, { secure: true });
-      await expect(storageUtility.get(key, { secure: true })).resolves.toEqual(
-        undefined
-      );
+      await expect(
+        storageUtility.get(key, { secure: true })
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -158,9 +158,9 @@ describe("StorageUtility", () => {
       };
       await storageUtility.setForUser(userId, userData);
 
-      const value = await storageUtility.getForUser(userId, "jackie");
+      const retrievedValue = await storageUtility.getForUser(userId, "jackie");
 
-      expect(value).toBe("The Cat");
+      expect(retrievedValue).toBe("The Cat");
     });
 
     it("gets an item from (secure) storage for a user", async () => {
@@ -175,28 +175,30 @@ describe("StorageUtility", () => {
         secure: true,
       });
 
-      const value = await storageUtility.getForUser(userId, "jackie", {
+      const retrievedValue = await storageUtility.getForUser(userId, "jackie", {
         secure: true,
       });
 
-      expect(value).toBe("The Cat");
+      expect(retrievedValue).toBe("The Cat");
     });
 
     it("returns undefined if no item is in storage", async () => {
       const storageUtility = getStorageUtility({
         storage: mockStorageUtility({}),
       });
-      const value = await storageUtility.getForUser(userId, "jackie");
-      expect(value).toBeUndefined();
+      const retrievedValue = await storageUtility.getForUser(userId, "jackie");
+      expect(retrievedValue).toBeUndefined();
     });
 
     it("returns null if the item in storage is corrupted", async () => {
       const storageUtility = getStorageUtility({
         storage: mockStorageUtility({}),
       });
-      storageUtility.setForUser(userId, { cool: "bleep bloop not parsable" });
-      const value = await storageUtility.getForUser(userId, "jackie");
-      expect(value).toBe(undefined);
+      await storageUtility.setForUser(userId, {
+        cool: "bleep bloop not parsable",
+      });
+      const retrievedValue = await storageUtility.getForUser(userId, "jackie");
+      expect(retrievedValue).toBeUndefined();
     });
 
     it("throws an error if the item is not in storage and errorOnNull is true", async () => {
@@ -205,9 +207,7 @@ describe("StorageUtility", () => {
       });
       await expect(
         storageUtility.getForUser(userId, "jackie", { errorIfNull: true })
-      ).rejects.toThrowError(
-        `Field [jackie] for user [${userId}] is not stored`
-      );
+      ).rejects.toThrow(`Field [jackie] for user [${userId}] is not stored`);
     });
   });
 
@@ -220,20 +220,22 @@ describe("StorageUtility", () => {
         jackie: "The Pretty Kitty",
       });
 
-      const value = await storageUtility.getForUser(userId, "jackie");
-      expect(value).toBe("The Pretty Kitty");
+      const retrievedValue = await storageUtility.getForUser(userId, "jackie");
+      expect(retrievedValue).toBe("The Pretty Kitty");
     });
 
     it("sets a value for a user if the original data was corrupted", async () => {
       const storageMock = defaultMocks.storage;
-      storageMock.setForUser(userId, { cool: "bleep bloop not parsable" });
+      await storageMock.setForUser(userId, {
+        cool: "bleep bloop not parsable",
+      });
 
       const storageUtility = getStorageUtility({ storage: storageMock });
       await storageUtility.setForUser(userId, {
         jackie: "The Pretty Kitty",
       });
-      const value = await storageUtility.getForUser(userId, "jackie");
-      expect(value).toBe("The Pretty Kitty");
+      const retrievedValue = await storageUtility.getForUser(userId, "jackie");
+      expect(retrievedValue).toBe("The Pretty Kitty");
     });
   });
 
@@ -252,7 +254,7 @@ describe("StorageUtility", () => {
 
       await expect(
         storageUtility.getForUser(userId, "jackie")
-      ).resolves.toEqual(undefined);
+      ).resolves.toBeUndefined();
       await expect(
         storageUtility.getForUser(userId, "sledge")
       ).resolves.toEqual("The Dog");
@@ -274,7 +276,7 @@ describe("StorageUtility", () => {
 
       await expect(
         storageUtility.getForUser("someUser", "jackie", { secure: true })
-      ).resolves.toEqual(undefined);
+      ).resolves.toBeUndefined();
       await expect(
         storageUtility.getForUser("someUser", "sledge", { secure: true })
       ).resolves.toEqual("The Dog");
@@ -301,7 +303,7 @@ describe("StorageUtility", () => {
       await storageUtility.deleteAllUserData(userId);
       await expect(
         storageUtility.getForUser(userId, "jackie")
-      ).resolves.toEqual(undefined);
+      ).resolves.toBeUndefined();
     });
 
     it("deletes all data for a particular user (from secure storage)", async () => {
@@ -323,7 +325,7 @@ describe("StorageUtility", () => {
       await storageUtility.deleteAllUserData(userId, { secure: true });
       await expect(
         storageUtility.getForUser(userId, "jackie", { secure: true })
-      ).resolves.toEqual(undefined);
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -413,7 +415,7 @@ describe("StorageUtility", () => {
         userId: "someUser",
         secure: false,
       });
-      await expect(async () => await result).rejects.toThrow(
+      await expect(async () => result).rejects.toThrow(
         "does not match expected schema"
       );
     });
@@ -427,7 +429,7 @@ describe("StorageUtility", () => {
         [key]: '   {   "jsonKey":   "some json value"   }',
       });
 
-      const result = await storageUtility.safeGet(key, { userId: userId });
+      const result = await storageUtility.safeGet(key, { userId });
       expect(result).toEqual({ jsonKey: "some json value" });
     });
   });

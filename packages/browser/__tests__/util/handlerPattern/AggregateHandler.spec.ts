@@ -20,8 +20,8 @@
  */
 
 import "reflect-metadata";
-import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
 import { IHandleable } from "@inrupt/solid-client-authn-core";
+import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
 
 describe("AggregateHandler", () => {
   // Set up mock extension
@@ -115,13 +115,9 @@ describe("AggregateHandler", () => {
         { canHandle: false, executeTime: 0, toReturn: "" },
         { canHandle: false, executeTime: 0, toReturn: "" },
       ]);
-      // For some reason the test didn't show up in coverage logs if I didn't do it like this
-      try {
-        await mocks.aggregateMockHandler.handle("something");
-        expect(false).toBe(true);
-      } catch (error) {
-        expect(true).toBe(true);
-      }
+      await expect(() =>
+        mocks.aggregateMockHandler.handle("something")
+      ).rejects.toThrow();
     });
   });
 });

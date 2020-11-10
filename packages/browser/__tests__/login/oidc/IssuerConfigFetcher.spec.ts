@@ -20,34 +20,22 @@
  */
 
 import "reflect-metadata";
-import {
-  FetcherMock,
-  FetcherMockResponse,
-} from "../../../src/util/__mocks__/Fetcher";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-
-import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
-import { IFetcher } from "../../../src/util/Fetcher";
 import { Response as NodeResponse } from "node-fetch";
+import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 
 /**
  * Test for IssuerConfigFetcher
  */
 describe("IssuerConfigFetcher", () => {
   const defaultMocks = {
-    fetchResponse: FetcherMockResponse,
     storageUtility: mockStorageUtility({}),
   };
 
   function getIssuerConfigFetcher(
     mocks: Partial<typeof defaultMocks> = defaultMocks
   ): IssuerConfigFetcher {
-    FetcherMock.fetch.mockReturnValue(
-      Promise.resolve(mocks.fetchResponse ?? defaultMocks.fetchResponse)
-    );
-
     return new IssuerConfigFetcher(
-      FetcherMock,
       mocks.storageUtility ?? defaultMocks.storageUtility
     );
   }
@@ -63,9 +51,9 @@ describe("IssuerConfigFetcher", () => {
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
-      fetchResponse: fetchResponse,
     });
-
+    const mockFetch = jest.fn().mockResolvedValueOnce(fetchResponse);
+    window.fetch = mockFetch;
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );
@@ -79,22 +67,16 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
-    const mockFetcher = {
-      fetch: (): Promise<Response> =>
-        Promise.resolve(({
-          json: () => {
-            throw new Error("Some error");
-          },
-        } as unknown) as Response),
-    };
-    const configFetcher = new IssuerConfigFetcher(
-      mockFetcher as IFetcher,
-      mockStorageUtility({})
-    );
+    const mockFetch = (): Promise<Response> =>
+      Promise.resolve(({
+        json: () => {
+          throw new Error("Some error");
+        },
+      } as unknown) as Response);
+    window.fetch = mockFetch;
+    const configFetcher = new IssuerConfigFetcher(mockStorageUtility({}));
 
-    await expect(
-      configFetcher.fetchConfig("https://some.url")
-    ).rejects.toThrowError(
+    await expect(configFetcher.fetchConfig("https://some.url")).rejects.toThrow(
       "[https://some.url] has an invalid configuration: Some error"
     );
   });

@@ -28,8 +28,7 @@
  * A helper class that will validate items taken from local storage
  */
 import { injectable, inject } from "tsyringe";
-import { IStorage } from "@inrupt/solid-client-authn-core";
-import { StorageUtility } from "@inrupt/solid-client-authn-core";
+import { IStorage, StorageUtility } from "@inrupt/solid-client-authn-core";
 
 /**
  * This class in a no-value-added extension of StorageUtility from the core module.

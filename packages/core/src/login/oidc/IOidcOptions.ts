@@ -31,15 +31,6 @@ import { IIssuerConfig } from "./IIssuerConfig";
 import { IClient } from "./IClient";
 
 /**
- * @issuer The URL of the IDP
- * @dpop True if a dpop compatible auth_token should be fetched
- * @redirectUrl The URL to which the user should be redirected after authorizing
- * @issuerConfiguration The openid-configuration of the issuer
- */
-type IOidcOptions = IAccessTokenOidcOptions;
-export default IOidcOptions;
-
-/**
  * @hidden
  */
 export interface ICoreOidcOptions {
@@ -57,3 +48,12 @@ export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
 }
+
+/**
+ * @issuer The URL of the IDP
+ * @dpop True if a dpop compatible auth_token should be fetched
+ * @redirectUrl The URL to which the user should be redirected after authorizing
+ * @issuerConfiguration The openid-configuration of the issuer
+ */
+type IOidcOptions = IAccessTokenOidcOptions;
+export default IOidcOptions;
