@@ -2,8 +2,8 @@
   "name": "@inrupt/solid-client-authn-browser",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index",
+  "main": "dist/index.js",
+  "types": "dist/index",
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },
