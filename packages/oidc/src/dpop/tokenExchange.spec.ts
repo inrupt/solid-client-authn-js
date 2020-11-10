@@ -418,6 +418,32 @@ describe("getTokens", () => {
     expect(result?.webId).toEqual(payload.webid);
   });
 
+  it("derives a WebID from a localhost IRI in the sub", async () => {
+    const payload = {
+      sub: "https://localhost:8443/profile/card#me",
+      iss: mockIssuer().issuer.toString(),
+    };
+    const idJwt = await signJwt(payload, mockJwk(), {
+      algorithm: "ES256",
+    });
+
+    mockFetch(
+      JSON.stringify({
+        access_token: mockBearerAccessToken(),
+        id_token: idJwt,
+        token_type: "Bearer",
+      }),
+      200
+    );
+    const result = await getTokens(
+      mockIssuer(),
+      mockClient(),
+      mockEndpointInput(),
+      false
+    );
+    expect(result?.webId).toEqual(payload.sub);
+  });
+
   it("throws if no webid can be derived from the ID token", async () => {
     const payload = {
       sub: "some subject",
