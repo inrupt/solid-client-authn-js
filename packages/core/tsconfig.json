@@ -10,5 +10,5 @@
     "out": "website/docs/api/core"
   },
 
-  "include": ["src/**/*", "__tests__/**/*.ts"]
+  "include": ["src/**/*"]
 }
