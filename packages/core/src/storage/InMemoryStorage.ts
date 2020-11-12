@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import { IStorage } from "@inrupt/solid-client-authn-core";
+import IStorage from "./IStorage";
 
 /**
  * @hidden
