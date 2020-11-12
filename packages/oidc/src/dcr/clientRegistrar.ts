@@ -112,7 +112,7 @@ export async function registerClient(
     "Content-Type": "application/json",
   };
   if (options.registrationAccessToken) {
-    headers["Authorization"] = `Bearer ${options.registrationAccessToken}`;
+    headers.Authorization = `Bearer ${options.registrationAccessToken}`;
   }
   const registerResponse = await fetch(
     issuerConfig.registrationEndpoint.toString(),

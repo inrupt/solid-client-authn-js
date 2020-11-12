@@ -28,14 +28,14 @@ import {
   IClientRegistrarOptions,
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
+import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
+import { JSONWebKey } from "jose";
 import {
   AuthCodeRedirectHandler,
   exchangeDpopToken,
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
-import { JSONWebKey } from "jose";
 
 const mockJwk = (): JSONWebKey => {
   return {
@@ -118,7 +118,7 @@ jest.mock("@inrupt/oidc-client-ext", () => {
       mockTokenEndpointDpopResponse(),
     getBearerToken: async (): Promise<TokenEndpointResponse> =>
       mockTokenEndpointBearerResponse(),
-    createDpopHeader: createDpopHeader,
+    createDpopHeader,
   };
 });
 
@@ -220,13 +220,20 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
-    it("Makes a code request to the correct place", async () => {
+    it("retrieves the code verifier from memory", async () => {
       const storage = mockStorageUtility({
+        oauth2_state_value: {
+          sessionId: "userId",
+        },
         userId: {
           codeVerifier: "a",
           redirectUri: "b",
+          issuer: "someIssuer",
+          dpop: "true",
         },
       });
+
+      const spyStorage = jest.spyOn(storage, "getForUser");
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: storage,
@@ -235,6 +242,10 @@ describe("AuthCodeRedirectHandler", () => {
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
+
+      expect(spyStorage).toHaveBeenCalledWith("userId", "codeVerifier", {
+        errorIfNull: true,
+      });
     });
 
     it("Fails if a session was not retrieved", async () => {
@@ -245,7 +256,7 @@ describe("AuthCodeRedirectHandler", () => {
         authCodeRedirectHandler.handle(
           "https://coolsite.com/?code=someCode&state=oauth2_state_value"
         )
-      ).rejects.toThrowError("Could not retrieve session");
+      ).rejects.toThrow("Could not retrieve session");
     });
 
     // We use ts-ignore comments here only to access mock call arguments
@@ -269,7 +280,7 @@ describe("AuthCodeRedirectHandler", () => {
       // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers.Authorization;
       expect(
         // @ts-ignore
         header
@@ -308,7 +319,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers.Authorization;
       expect(
         // @ts-ignore
         header

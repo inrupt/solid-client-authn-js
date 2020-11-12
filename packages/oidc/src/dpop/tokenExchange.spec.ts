@@ -21,6 +21,8 @@
 
 import { it, describe } from "@jest/globals";
 
+import { JWKECKey } from "jose";
+import { Response } from "cross-fetch";
 import { IClient, IIssuerConfig } from "../common/types";
 
 import {
@@ -30,8 +32,6 @@ import {
   TokenEndpointInput,
 } from "./tokenExchange";
 import { decodeJwt, signJwt } from "./dpop";
-import { JWKECKey } from "jose";
-import { Response } from "cross-fetch";
 
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
@@ -98,6 +98,8 @@ async function generateMockJwt(): Promise<void> {
   const jwt = await signJwt(payload, mockJwk(), {
     algorithm: "ES256",
   });
+  // This is for manual use.
+  // eslint-disable-next-line no-console
   console.log(jwt.toString());
 }
 
@@ -131,7 +133,7 @@ const mockKeyBoundToken = (): AccessJwt => {
 
 const mockBearerAccessToken = (): string => "some token";
 
-export type TokenEndpointRawResponse = {
+type TokenEndpointRawResponse = {
   access_token: string;
   id_token: string;
   refresh_token?: string;
@@ -164,14 +166,14 @@ const mockFetch = (
   payload: string,
   status: number
 ): jest.Mock<ReturnType<typeof window.fetch>, [RequestInfo, RequestInit?]> => {
-  const mockFetch = jest.fn(
+  const mockedFetch = jest.fn(
     async (
       _url: RequestInfo,
       _init?: RequestInit
     ): ReturnType<typeof window.fetch> => new Response(payload, { status })
   );
-  global.fetch = mockFetch;
-  return mockFetch;
+  global.fetch = mockedFetch;
+  return mockedFetch;
 };
 
 describe("getTokens", () => {
@@ -221,7 +223,7 @@ describe("getTokens", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const dpopJwt = await decodeJwt(headers["DPoP"], mockJwk());
+    const dpopJwt = await decodeJwt(headers.DPoP, mockJwk());
     expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
     expect(dpopJwt.htm).toEqual("POST");
     expect(dpopJwt.jti).toEqual("1234");
@@ -234,7 +236,7 @@ describe("getTokens", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    expect(headers["Authorization"]).toBeUndefined();
+    expect(headers.Authorization).toBeUndefined();
   });
 
   it("uses basic auth if a client secret is available", async () => {
@@ -247,7 +249,7 @@ describe("getTokens", () => {
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     // c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ= is 'some client:some secret' encoded in base 64
-    expect(headers["Authorization"]).toEqual(
+    expect(headers.Authorization).toEqual(
       "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ="
     );
   });
@@ -388,7 +390,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       false
     );
-    expect(result?.dpopJwk).toBe(undefined);
+    expect(result?.dpopJwk).toBeUndefined();
   });
 
   it("derives a WebId from the custom claim if available", async () => {
@@ -416,6 +418,32 @@ describe("getTokens", () => {
       false
     );
     expect(result?.webId).toEqual(payload.webid);
+  });
+
+  it("derives a WebID from a localhost IRI in the sub", async () => {
+    const payload = {
+      sub: "https://localhost:8443/profile/card#me",
+      iss: mockIssuer().issuer.toString(),
+    };
+    const idJwt = await signJwt(payload, mockJwk(), {
+      algorithm: "ES256",
+    });
+
+    mockFetch(
+      JSON.stringify({
+        access_token: mockBearerAccessToken(),
+        id_token: idJwt,
+        token_type: "Bearer",
+      }),
+      200
+    );
+    const result = await getTokens(
+      mockIssuer(),
+      mockClient(),
+      mockEndpointInput(),
+      false
+    );
+    expect(result?.webId).toEqual(payload.sub);
   });
 
   it("throws if no webid can be derived from the ID token", async () => {
@@ -501,7 +529,7 @@ describe("getDpopToken", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const dpopJwt = await decodeJwt(headers["DPoP"], mockJwk());
+    const dpopJwt = await decodeJwt(headers.DPoP, mockJwk());
     expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
     expect(dpopJwt.htm).toEqual("POST");
     expect(dpopJwt.jti).toEqual("1234");

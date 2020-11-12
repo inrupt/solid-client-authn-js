@@ -41,11 +41,11 @@ import {
   TokenEndpointResponse,
   TokenEndpointDpopResponse,
 } from "@inrupt/oidc-client-ext";
+import { JSONWebKey } from "jose";
 import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
-import { JSONWebKey } from "jose";
 
 export async function exchangeDpopToken(
   sessionId: string,

@@ -27,11 +27,11 @@
 /**
  * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
-import AggregateHandler from "../../../util/handlerPattern/AggregateHandler";
 import { injectable, injectAll } from "tsyringe";
 import {
   IRedirectHandler,
   ISessionInfo,
+  AggregateHandler,
 } from "@inrupt/solid-client-authn-core";
 
 /**

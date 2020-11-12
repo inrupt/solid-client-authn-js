@@ -57,9 +57,10 @@ describe("errors", () => {
   errors.forEach((err) => {
     it(`Should throw [${err.name}]`, () => {
       expect(() => {
+        // eslint-disable-next-line new-cap
         const error = new err.class(...err.params);
         throw error;
-      }).toThrowError(err.message);
+      }).toThrow(err.message);
     });
   });
 });

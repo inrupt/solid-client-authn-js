@@ -27,7 +27,7 @@
 /**
  * An abstract class that will select the first handler that can handle certain parameters
  */
-import { IHandleable } from "@inrupt/solid-client-authn-core";
+import IHandleable from "./IHandleable";
 import HandlerNotFoundError from "../../errors/HandlerNotFoundError";
 
 /**
@@ -64,15 +64,16 @@ export default class AggregateHandler<P extends Array<unknown>, R>
     //   })
     // })
 
-    let rightOne: IHandleable<P, R> | null = null;
-    for (let i = 0; i < this.handleables.length; i++) {
-      const canHandle = await this.handleables[i].canHandle(...params);
-      if (canHandle) {
-        rightOne = this.handleables[i];
-        break;
+    const canHandleList = await Promise.all(
+      this.handleables.map((handleable) => handleable.canHandle(...params))
+    );
+
+    for (let i = 0; i < canHandleList.length; i += 1) {
+      if (canHandleList[i]) {
+        return this.handleables[i];
       }
     }
-    return rightOne;
+    return null;
   }
 
   async canHandle(...params: P): Promise<boolean> {
@@ -83,8 +84,7 @@ export default class AggregateHandler<P extends Array<unknown>, R>
     const handler = await this.getProperHandler(params);
     if (handler) {
       return handler.handle(...params);
-    } else {
-      throw new HandlerNotFoundError(this.constructor.name, params);
     }
+    throw new HandlerNotFoundError(this.constructor.name, params);
   }
 }

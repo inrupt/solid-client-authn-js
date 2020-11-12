@@ -30,7 +30,7 @@ import { ImplicitRedirectHandler } from "../../../../src/login/oidc/redirectHand
 // The following key has been used to sign the mock access token. It is given
 // for an information purpose.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _mockJWK = {
+const mockJWK = {
   kty: "EC",
   kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
   alg: "ES256",
@@ -128,7 +128,7 @@ describe("ImplicitRedirectHandler", () => {
       );
       await redirectInfo.fetch("https://some.other.url");
       // @ts-ignore
-      const header = window.fetch.mock.calls[0][1].headers["Authorization"];
+      const header = window.fetch.mock.calls[0][1].headers.Authorization;
       // We test that the Authorization header matches the structure of a JWT.
       expect(
         // @ts-ignore

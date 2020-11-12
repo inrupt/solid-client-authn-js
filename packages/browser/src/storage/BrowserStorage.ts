@@ -30,13 +30,17 @@ import { IStorage } from "@inrupt/solid-client-authn-core";
  * @hidden
  */
 export default class BrowserStorage implements IStorage {
+  private storage = window.localStorage;
+
   async get(key: string): Promise<string | undefined> {
-    return window.localStorage.getItem(key) || undefined;
+    return this.storage.getItem(key) || undefined;
   }
+
   async set(key: string, value: string): Promise<void> {
-    window.localStorage.setItem(key, value);
+    this.storage.setItem(key, value);
   }
+
   async delete(key: string): Promise<void> {
-    window.localStorage.removeItem(key);
+    this.storage.removeItem(key);
   }
 }

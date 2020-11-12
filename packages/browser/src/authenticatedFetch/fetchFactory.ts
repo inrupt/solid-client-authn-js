@@ -102,7 +102,7 @@ export async function buildDpopFetch(
     }
     // If the request failed for auth reasons, and has been redirected, we should
     // replay it with a new DPoP token.
-    return await fetch(
+    return fetch(
       response.url,
       await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
     );

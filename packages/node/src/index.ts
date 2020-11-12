@@ -19,42 +19,4 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-/**
- * A wrapper method to wrap the standard w3 fetch library
- */
-
-export interface IFetcher {
-  fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-}
-
-// TODO: This class should be removed altogether, and replaced by a direct call
-// to the environment's fetch.
-/**
- * @hidden
- */
-export default class Fetcher implements IFetcher {
-  async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
-    return window.fetch(url, init);
-  }
-}
-
-/**
- * Utility that appends the specified value to end of the specified URL's path.
- *
- * @param url  the URL to whose path we append the specified value
- * @param append  the value to append to the URL's path
- */
-export function appendToUrlPathname(url: string, append: string): string {
-  const parsedUrl = new URL(url);
-  const path = parsedUrl.pathname;
-  parsedUrl.pathname = `${path}${path.endsWith("/") ? "" : "/"}${
-    append.startsWith("/") ? append.substring(1) : append
-  }`;
-
-  return parsedUrl.toString();
-}
+// Nothing in there yet, but node-compatible !

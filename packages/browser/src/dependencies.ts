@@ -40,6 +40,7 @@ import {
   IStorage,
   IStorageUtility,
   ISessionInfoManager,
+  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
@@ -52,14 +53,9 @@ import PrimaryDeviceOidcHandler from "./login/oidc/oidcHandlers/PrimaryDeviceOid
 import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDeviceOidcHandler";
 import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
-import Fetcher, { IFetcher } from "./util/Fetcher";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { ImplicitRedirectHandler } from "./login/oidc/redirectHandler/ImplicitRedirectHandler";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
-import EnvironmentDetector, {
-  IEnvironmentDetector,
-  detectEnvironment,
-} from "./util/EnvironmentDetector";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
@@ -76,7 +72,6 @@ import TokenRefresher, {
   ITokenRefresher,
 } from "./login/oidc/refresh/TokenRefresher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
-import InMemoryStorage from "./storage/InMemoryStorage";
 import { ISessionManager, SessionManager } from "./SessionManager";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
@@ -84,14 +79,6 @@ const container = emptyContainer;
 
 container.register<IStorageUtility>("storageUtility", {
   useClass: StorageUtilityBrowser,
-});
-
-// Util
-container.register<IFetcher>("fetcher", {
-  useClass: Fetcher,
-});
-container.register<IEnvironmentDetector>("environmentDetector", {
-  useClass: EnvironmentDetector,
 });
 
 // Session
@@ -201,21 +188,9 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }): ClientAuthentication {
-  let secureStorage;
-  let insecureStorage;
+  const secureStorage = dependencies.secureStorage || new InMemoryStorage();
+  const insecureStorage = dependencies.insecureStorage || new BrowserStorage();
 
-  switch (detectEnvironment()) {
-    case "browser":
-    case "react-native":
-      // TODO: change this to be secure
-      secureStorage = dependencies.secureStorage || new InMemoryStorage();
-      insecureStorage = dependencies.insecureStorage || new BrowserStorage();
-      break;
-    case "server":
-      secureStorage = dependencies.secureStorage || new InMemoryStorage();
-      insecureStorage = dependencies.insecureStorage || new InMemoryStorage();
-      break;
-  }
   const authenticatorContainer = container.createChildContainer();
   authenticatorContainer.register<IStorage>("secureStorage", {
     useValue: secureStorage,

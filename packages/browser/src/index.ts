@@ -30,4 +30,8 @@ export {
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
+  NotImplementedError,
+  ConfigurationError,
+  HandlerNotFoundError,
+  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";

@@ -21,7 +21,7 @@
 
 import "reflect-metadata";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { default as LogoutHandler } from "../../src/logout/GeneralLogoutHandler";
+import LogoutHandler from "../../src/logout/GeneralLogoutHandler";
 import { mockSessionInfoManager } from "../../src/sessionInfo/__mocks__/SessionInfoManager";
 
 describe("GeneralLogoutHandler", () => {
@@ -48,7 +48,7 @@ describe("GeneralLogoutHandler", () => {
       const nonEmptyStorage = mockStorageUtility({
         someUser: { someKey: "someValue" },
       });
-      nonEmptyStorage.setForUser(
+      await nonEmptyStorage.setForUser(
         "someUser",
         { someKey: "someValue" },
         { secure: true }
@@ -56,7 +56,7 @@ describe("GeneralLogoutHandler", () => {
       const logoutHandler = getInitialisedHandler({
         sessionManager: mockSessionInfoManager(nonEmptyStorage),
       });
-      logoutHandler.handle("someUser");
+      await logoutHandler.handle("someUser");
       await expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
       ).resolves.toBeUndefined();

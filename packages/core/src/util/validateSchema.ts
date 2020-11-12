@@ -72,12 +72,12 @@ export function traverseObject(
         traverseObject(item, schema.items, data, index);
       }
     });
-  } else {
+  } else if (schema.shouldConvertToUrl && parent && parentKey) {
     // Set custom rules here
     // Convert to URL
-    if (schema.shouldConvertToUrl && parent && parentKey) {
-      parent[parentKey] = data;
-    }
+    // TODO: Fix this properly
+    // eslint-disable-next-line no-param-reassign
+    parent[parentKey] = data;
   }
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

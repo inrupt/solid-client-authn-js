@@ -1,5 +1,13 @@
 version: 2
 updates:
+  # Enable version updates for our CI github-actions.
+  - package-ecosystem: "github-actions"
+    # For GitHub Actions, setting the directory to / will check for workflow
+    # files in .github/workflows.
+    directory: "/"
+    schedule:
+      interval: "daily"
+
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -7,6 +15,11 @@ updates:
     open-pull-requests-limit: 10
   - package-ecosystem: npm
     directory: "/packages/browser"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/packages/node"
     schedule:
       interval: daily
     open-pull-requests-limit: 10

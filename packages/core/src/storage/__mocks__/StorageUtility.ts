@@ -20,7 +20,7 @@
  */
 
 import { IStorage } from "../..";
-import { default as IStorageUtility } from "../IStorageUtility";
+import IStorageUtility from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
 export const StorageUtilitySafeGetResponse = {
@@ -94,7 +94,8 @@ export const mockStorageUtility = (
   stored: Record<string, string | Record<string, string>>,
   isSecure = false
 ): IStorageUtility => {
-  let nonSecureStore: typeof stored, secureStore: typeof stored;
+  let nonSecureStore: typeof stored;
+  let secureStore: typeof stored;
   if (isSecure) {
     secureStore = { ...stored };
     nonSecureStore = {};

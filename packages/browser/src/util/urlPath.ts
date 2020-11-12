@@ -24,42 +24,18 @@
  * @packageDocumentation
  */
 
-export type environmentName = "browser" | "server" | "react-native";
-
 /**
- * @hidden
+ * Utility that appends the specified value to end of the specified URL's path.
+ *
+ * @param url  the URL to whose path we append the specified value
+ * @param append  the value to append to the URL's path
  */
-export interface IEnvironmentDetector {
-  detect(): environmentName;
-}
+export function appendToUrlPathname(url: string, append: string): string {
+  const parsedUrl = new URL(url);
+  const path = parsedUrl.pathname;
+  parsedUrl.pathname = `${path}${path.endsWith("/") ? "" : "/"}${
+    append.startsWith("/") ? append.substring(1) : append
+  }`;
 
-/**
- * @hidden
- */
-export function detectEnvironment(): "browser" | "react-native" | "server" {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore Ignore because document might not be present
-  if (typeof document != "undefined") {
-    return "browser";
-  } else if (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    typeof navigator != "undefined" &&
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    navigator.product == "ReactNative"
-  ) {
-    return "react-native";
-  } else {
-    return "server";
-  }
-}
-
-/**
- * @hidden
- */
-export default class EnvironmentDetector {
-  detect(): environmentName {
-    return detectEnvironment();
-  }
+  return parsedUrl.toString();
 }

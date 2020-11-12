@@ -27,6 +27,7 @@ export { default as ILoginOptions } from "./login/ILoginOptions";
 export { default as ILogoutHandler } from "./logout/ILogoutHandler";
 
 export { default as IHandleable } from "./util/handlerPattern/IHandleable";
+export { default as AggregateHandler } from "./util/handlerPattern/AggregateHandler";
 
 export { default as IAuthenticatedFetcher } from "./authenticatedFetch/IAuthenticatedFetcher";
 export { default as IRequestCredentials } from "./authenticatedFetch/IRequestCredentials";
@@ -62,6 +63,11 @@ export { default as validateSchema } from "./util/validateSchema";
 
 export { default as IStorageUtility } from "./storage/IStorageUtility";
 export { default as StorageUtility } from "./storage/StorageUtility";
+export { default as InMemoryStorage } from "./storage/InMemoryStorage";
+
+export { default as ConfigurationError } from "./errors/ConfigurationError";
+export { default as HandlerNotFoundError } from "./errors/HandlerNotFoundError";
+export { default as NotImplementedError } from "./errors/NotImplementedError";
 
 // Mocks.
 export {

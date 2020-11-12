@@ -88,7 +88,7 @@ export default class StorageUtility implements IStorageUtility {
       ? this.secureStorage
       : this.insecureStorage
     ).get(key);
-    if (value == undefined && options?.errorIfNull) {
+    if (value === undefined && options?.errorIfNull) {
       throw new Error(`[${key}] is not stored`);
     }
     return value;
@@ -122,7 +122,7 @@ export default class StorageUtility implements IStorageUtility {
       value = undefined;
     }
     value = userData[key];
-    if (value == undefined && options?.errorIfNull) {
+    if (value === undefined && options?.errorIfNull) {
       throw new Error(`Field [${key}] for user [${userId}] is not stored`);
     }
     return value || undefined;

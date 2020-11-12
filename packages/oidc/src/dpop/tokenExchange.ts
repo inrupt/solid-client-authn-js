@@ -19,12 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IClient, IIssuerConfig } from "../common/types";
 import { JSONWebKey } from "jose";
-import { createDpopHeader, decodeJwt } from "./dpop";
-import { generateJwkForDpop } from "./keyGeneration";
 import formurlencoded from "form-urlencoded";
 import { OidcClient } from "oidc-client";
+import { IClient, IIssuerConfig } from "../common/types";
+import { createDpopHeader, decodeJwt } from "./dpop";
+import { generateJwkForDpop } from "./keyGeneration";
+
+// Identifiers in camelcase are mandated by the OAuth spec.
+/* eslint-disable camelcase */
 
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>
@@ -108,9 +111,13 @@ export async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
   if (decoded.webid) {
     return decoded.webid;
   }
-  if (!decoded.sub.match(/^https?:\/\/.+\..+$/)) {
+  try {
+    // The constructor is here only used to verify that the URL is valid.
+    // eslint-disable-next-line no-new
+    new URL(decoded.sub);
+  } catch (error) {
     throw new Error(
-      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]`
+      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]. Attempting to construct a URL from the 'sub' claim threw: ${error}`
     );
   }
   return decoded.sub;
@@ -204,10 +211,10 @@ export async function getTokens(
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
   };
-  let dpopJwk: JSONWebKey | undefined = undefined;
+  let dpopJwk: JSONWebKey | undefined;
   if (dpop) {
     dpopJwk = await generateJwkForDpop();
-    headers["DPoP"] = await createDpopHeader(
+    headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
       dpopJwk
@@ -216,7 +223,7 @@ export async function getTokens(
 
   // TODO: Find out where this is specified.
   if (client.clientSecret) {
-    headers["Authorization"] = `Basic ${btoa(
+    headers.Authorization = `Basic ${btoa(
       `${client.clientId}:${client.clientSecret}`
     )}`;
   }

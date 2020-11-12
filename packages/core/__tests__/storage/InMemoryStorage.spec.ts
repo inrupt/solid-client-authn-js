@@ -19,10 +19,21 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IEnvironmentDetector } from "../EnvironmentDetector";
+import InMemoryStorage from "../../src/storage/InMemoryStorage";
 
-export const EnvironmentDectorMockResponse = "browser";
-
-export const EnvironmentDetectorMock: jest.Mocked<IEnvironmentDetector> = {
-  detect: jest.fn(() => EnvironmentDectorMockResponse),
-};
+describe("InMemoryStorage", () => {
+  const nodeStorage = new InMemoryStorage();
+  it("can set an item", async () => {
+    await expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
+  });
+  it("can get an item", async () => {
+    expect(await nodeStorage.get("a")).toEqual("A");
+  });
+  it("returns undefined if the key does not exist", async () => {
+    expect(await nodeStorage.get("doesNotExist")).toBeUndefined();
+  });
+  it("can delete an item", async () => {
+    await nodeStorage.delete("a");
+    expect(await nodeStorage.get("a")).toBeUndefined();
+  });
+});
