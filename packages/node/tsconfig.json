@@ -10,5 +10,6 @@
     "out": "website/docs/api/node"
   },
 
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.spec.ts"]
 }

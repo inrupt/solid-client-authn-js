@@ -3,4 +3,7 @@ module.exports = {
   rules: {
     "license-header/header": ["error", "../../resources/license-header.js"],
   },
+  parserOptions: {
+    project: "./tsconfig.eslint.json",
+  },
 };
