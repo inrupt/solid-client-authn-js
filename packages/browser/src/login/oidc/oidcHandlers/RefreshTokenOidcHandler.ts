@@ -27,8 +27,11 @@
 /**
  * Handler for the Refresh Token Flow
  */
-import { IOidcHandler, IOidcOptions } from "@inrupt/solid-client-authn-core";
-import NotImplementedError from "../../../errors/NotImplementedError";
+import {
+  IOidcHandler,
+  IOidcOptions,
+  NotImplementedError,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

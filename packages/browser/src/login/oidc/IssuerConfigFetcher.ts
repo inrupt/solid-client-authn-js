@@ -31,10 +31,10 @@ import {
   IIssuerConfig,
   IIssuerConfigFetcher,
   IStorageUtility,
+  ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
 import { appendToUrlPathname } from "../../util/urlPath";
-import ConfigurationError from "../../errors/ConfigurationError";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
