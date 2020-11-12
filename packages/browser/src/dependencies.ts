@@ -40,6 +40,7 @@ import {
   IStorage,
   IStorageUtility,
   ISessionInfoManager,
+  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
@@ -71,7 +72,6 @@ import TokenRefresher, {
   ITokenRefresher,
 } from "./login/oidc/refresh/TokenRefresher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
-import InMemoryStorage from "./storage/InMemoryStorage";
 import { ISessionManager, SessionManager } from "./SessionManager";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
