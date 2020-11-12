@@ -19,4 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+export { Session, ISessionOptions } from "./Session";
+
+export { SessionManager, ISessionManagerOptions } from "./SessionManager";
+export { getClientAuthenticationWithDependencies } from "./dependencies";
+
+// Re-export of types defined in the core module and produced/consumed by our API
+
+export {
+  ILoginInputOptions,
+  ISessionInfo,
+  IStorage,
+} from "@inrupt/solid-client-authn-core";
