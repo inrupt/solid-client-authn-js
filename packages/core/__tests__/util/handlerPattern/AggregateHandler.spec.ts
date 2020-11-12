@@ -20,7 +20,7 @@
  */
 
 import "reflect-metadata";
-import { IHandleable } from "@inrupt/solid-client-authn-core";
+import IHandleable from "../../../src/util/handlerPattern/IHandleable";
 import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
 
 describe("AggregateHandler", () => {

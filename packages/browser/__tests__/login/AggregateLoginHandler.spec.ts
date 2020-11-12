@@ -21,11 +21,13 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { ILoginHandler } from "@inrupt/solid-client-authn-core";
+import {
+  ILoginHandler,
+  AggregateHandler,
+} from "@inrupt/solid-client-authn-core";
 import AggregateLoginHandler from "../../src/login/AggregateLoginHandler";
-import AggregateHandler from "../../src/util/handlerPattern/AggregateHandler";
 
-jest.mock("../../src/util/handlerPattern/AggregateHandler");
+jest.mock("@inrupt/solid-client-authn-core");
 
 describe("AggregateLoginHandler", () => {
   it("should pass injected handlers to its superclass", () => {

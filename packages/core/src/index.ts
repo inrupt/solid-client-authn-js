@@ -27,6 +27,7 @@ export { default as ILoginOptions } from "./login/ILoginOptions";
 export { default as ILogoutHandler } from "./logout/ILogoutHandler";
 
 export { default as IHandleable } from "./util/handlerPattern/IHandleable";
+export { default as AggregateHandler } from "./util/handlerPattern/AggregateHandler";
 
 export { default as IAuthenticatedFetcher } from "./authenticatedFetch/IAuthenticatedFetcher";
 export { default as IRequestCredentials } from "./authenticatedFetch/IRequestCredentials";
