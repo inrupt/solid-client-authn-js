@@ -27,10 +27,8 @@
 /**
  * An abstract class that will select the first handler that can handle certain parameters
  */
-import {
-  IHandleable,
-  HandlerNotFoundError,
-} from "@inrupt/solid-client-authn-core";
+import IHandleable from "./IHandleable";
+import HandlerNotFoundError from "../../errors/HandlerNotFoundError";
 
 /**
  * @hidden

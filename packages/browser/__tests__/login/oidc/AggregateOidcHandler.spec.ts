@@ -21,11 +21,13 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { IOidcHandler } from "@inrupt/solid-client-authn-core";
+import {
+  IOidcHandler,
+  AggregateHandler,
+} from "@inrupt/solid-client-authn-core";
 import AggregateOidcHandler from "../../../src/login/oidc/AggregateOidcHandler";
-import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
 
-jest.mock("../../../src/util/handlerPattern/AggregateHandler");
+jest.mock("@inrupt/solid-client-authn-core");
 
 describe("AggregateOidcHandler", () => {
   it("should pass injected handlers to its superclass", () => {
