@@ -38,10 +38,10 @@ import {
   IOidcHandler,
   IOidcOptions,
   IStorageUtility,
+  ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
 
 import { IClient } from "@inrupt/oidc-client-ext";
-import ConfigurationError from "../../errors/ConfigurationError";
 
 function hasIssuer(
   options: ILoginOptions
