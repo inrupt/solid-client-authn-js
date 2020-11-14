@@ -19,20 +19,25 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+import { URL } from "url";
 
-export { Session, ISessionOptions } from "./Session";
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
+/**
+ * Utility that appends the specified value to end of the specified URL's path.
+ *
+ * @param url  the URL to whose path we append the specified value
+ * @param append  the value to append to the URL's path
+ */
+export function appendToUrlPathname(url: string, append: string): string {
+  const parsedUrl = new URL(url);
+  const path = parsedUrl.pathname;
+  parsedUrl.pathname = `${path}${path.endsWith("/") ? "" : "/"}${
+    append.startsWith("/") ? append.substring(1) : append
+  }`;
 
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+  return parsedUrl.toString();
+}

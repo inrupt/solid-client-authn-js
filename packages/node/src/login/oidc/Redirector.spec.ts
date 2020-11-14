@@ -19,20 +19,28 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+import "reflect-metadata";
+import Redirector from "./Redirector";
 
-export { Session, ISessionOptions } from "./Session";
+/**
+ * Test for Redirector
+ */
+describe("Redirector", () => {
+  describe("Redirect", () => {
+    it("calls the provided redirect callback", () => {
+      const redirector = new Redirector();
+      const redirectCallback = jest.fn();
+      redirector.redirect("https://someUrl.com/redirect", {
+        handleRedirect: redirectCallback,
+      });
+      expect(redirectCallback).toHaveBeenCalled();
+    });
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+    it("throws if no handler is provided", () => {
+      const redirector = new Redirector();
+      expect(() =>
+        redirector.redirect("https://someUrl.com/redirect")
+      ).toThrow();
+    });
+  });
+});

@@ -19,20 +19,31 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
+/**
+ * Handler for the Device Flow on the Secondary Device
+ */
+import {
+  IOidcHandler,
+  IOidcOptions,
   NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
+
+/**
+ * @hidden
+ */
+export default class SecondaryDeviceOidcHandler implements IOidcHandler {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
+    return false;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+    throw new NotImplementedError("SecondaryDeviceOidcHandler handle");
+  }
+}

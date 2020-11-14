@@ -19,20 +19,26 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
-
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
+import {
+  IRedirectHandler,
   ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
+
+import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
+
+/**
+ * @hidden
+ */
+export const RedirectHandlerResponse: ISessionInfo = SessionCreatorCreateResponse;
+
+/**
+ * @hidden
+ */
+export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  canHandle: jest.fn((url: string) => Promise.resolve(true)),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handle: jest.fn((url: string) =>
+    Promise.resolve({ ...RedirectHandlerResponse, fetch: jest.fn() })
+  ),
+};

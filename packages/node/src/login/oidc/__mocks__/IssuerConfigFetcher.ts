@@ -19,20 +19,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
-
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
+import {
+  IIssuerConfig,
+  IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
+
+export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
+  issuer: "https://idp.com",
+  authorizationEndpoint: "https://idp.com/auth",
+  tokenEndpoint: "https://idp.com/token",
+  jwksUri: "https://idp.com/jwks",
+  subjectTypesSupported: [],
+  claimsSupported: [],
+  grantTypesSupported: ["refresh_token"],
+};
+
+export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  fetchConfig: jest.fn((_issuer: string) =>
+    Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
+  ),
+};

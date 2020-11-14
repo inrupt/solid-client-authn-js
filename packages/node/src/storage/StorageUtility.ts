@@ -19,20 +19,30 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { Session, ISessionOptions } from "./Session";
+/**
+ * A helper class that will validate items taken from local storage
+ */
+import { injectable, inject } from "tsyringe";
+import { IStorage, StorageUtility } from "@inrupt/solid-client-authn-core";
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+/**
+ * This class in a no-value-added extension of StorageUtility from the core module.
+ * The reason it has to be declared is for TSyringe to find the decorators in the
+ * same modules as where the dependency container is declared (in this case,
+ * the browser module, with the dependancy container in dependencies.ts).
+ * @hidden
+ */
+@injectable()
+export default class StorageUtilityBrowser extends StorageUtility {
+  constructor(
+    @inject("secureStorage") secureStorage: IStorage,
+    @inject("insecureStorage") insecureStorage: IStorage
+  ) {
+    super(secureStorage, insecureStorage);
+  }
+}

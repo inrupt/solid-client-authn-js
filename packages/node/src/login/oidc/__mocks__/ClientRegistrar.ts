@@ -19,20 +19,34 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
-
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
+import {
+  IClient,
+  IClientRegistrar,
+  IClientRegistrarOptions,
+  IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
+
+export const ClientRegistrarResponse: IClient = {
+  clientId: "abcde",
+  clientSecret: "12345",
+};
+
+export const PublicClientRegistrarResponse: IClient = {
+  clientId: "abcde",
+};
+
+export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
+  getClient: jest.fn(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
+      Promise.resolve(ClientRegistrarResponse)
+  ),
+};
+
+export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
+  getClient: jest.fn(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
+      Promise.resolve(PublicClientRegistrarResponse)
+  ),
+};

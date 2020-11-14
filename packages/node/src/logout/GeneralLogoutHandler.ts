@@ -19,20 +19,33 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
+import {
+  ILogoutHandler,
+  ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
+
+import { inject, injectable } from "tsyringe";
+
+/**
+ * @hidden
+ */
+@injectable()
+export default class GeneralLogoutHandler implements ILogoutHandler {
+  constructor(
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager
+  ) {}
+
+  async canHandle(): Promise<boolean> {
+    return true;
+  }
+
+  async handle(userId: string): Promise<void> {
+    await this.sessionInfoManager.clear(userId);
+  }
+}

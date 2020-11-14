@@ -19,20 +19,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+import { IOidcOptions } from "@inrupt/solid-client-authn-core";
 
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+export const standardOidcOptions: IOidcOptions = {
+  sessionId: "mySession",
+  issuer: "https://example.com",
+  dpop: true,
+  redirectUrl: "https://app.example.com",
+  handleRedirect: jest.fn((url) => url),
+  // This will be fixed in a different pull request
+  issuerConfiguration: {
+    issuer: "https://example.com",
+    authorizationEndpoint: "https://example.com/auth",
+    tokenEndpoint: "https://example.com/token",
+    jwksUri: "https://example.com/jwks",
+    subjectTypesSupported: [],
+    claimsSupported: [],
+  },
+  client: {
+    clientId: "coolApp",
+  },
+};
