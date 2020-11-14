@@ -26,6 +26,7 @@
 
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
+import { fetch } from "cross-fetch";
 
 /**
  * @hidden
