@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.12",
-    "eslint": "^7.13.1",
+    "eslint": "^7.13.0",
     "jest": "^25.1.0",
     "license-checker": "^25.0.1",
     "ts-jest": "^25.5.1",
