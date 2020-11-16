@@ -46,7 +46,7 @@
     "crypto-random-string": "^3.2.0",
     "form-urlencoded": "^4.2.1",
     "jest": "^25.1.0",
-    "jose": "^2.0.3",
+    "jose": "^3.0.2",
     "jsonwebtoken": "^8.5.1",
     "lodash.clonedeep": "^4.5.0",
     "node-jose": "^2.0.0",
