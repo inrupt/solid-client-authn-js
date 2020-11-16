@@ -19,20 +19,44 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
+/**
+ * Handler for the Authorization Code with PKCE Flow
+ */
+import {
+  IOidcHandler,
+  IOidcOptions,
+  IRedirector,
+  IStorageUtility,
   NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
+import { injectable, inject } from "tsyringe";
+
+/**
+ * @hidden
+ */
+@injectable()
+export default class AuthorizationCodeWithPkceOidcHandler
+  implements IOidcHandler {
+  constructor(
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("redirector") private redirector: IRedirector
+  ) {}
+
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
+    return !!(
+      oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
+      oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
+        "authorization_code"
+      ) > -1
+    );
+  }
+
+  async handle(_oidcLoginOptions: IOidcOptions): Promise<void> {
+    throw new NotImplementedError("Not implemented for Node");
+  }
+}

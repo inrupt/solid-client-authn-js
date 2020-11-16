@@ -19,20 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+import UuidGenerator from "./UuidGenerator";
 
-export { Session, ISessionOptions } from "./Session";
+jest.mock("uuid");
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
+describe("UuidGenerator", () => {
+  it("should simply wrap the `uuid` module", () => {
+    const uuidMock: { v4: jest.Mock } = jest.requireMock("uuid");
+    uuidMock.v4.mockReturnValueOnce("some uuid");
 
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+    const generator = new UuidGenerator();
+    expect(generator.v4()).toBe("some uuid");
+  });
+});

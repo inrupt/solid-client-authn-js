@@ -24,15 +24,39 @@
  * @packageDocumentation
  */
 
-import type { fetch } from "cross-fetch";
-import IHandleable from "../../../util/handlerPattern/IHandleable";
-import ISessionInfo from "../../../sessionInfo/ISessionInfo";
+import { injectable, inject } from "tsyringe";
+import { IStorageUtility } from "@inrupt/solid-client-authn-core";
+import { ITokenRequester } from "../TokenRequester";
 
 /**
  * @hidden
  */
-type IRedirectHandler = IHandleable<
-  [string],
-  ISessionInfo & { fetch: typeof fetch }
->;
-export default IRedirectHandler;
+export interface ITokenRefresher {
+  refresh(localUserId: string): Promise<void>;
+}
+
+/**
+ * @hidden
+ */
+@injectable()
+export default class TokenRefresher implements ITokenRefresher {
+  constructor(
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("tokenRequester") private tokenRequester: ITokenRequester
+  ) {}
+
+  async refresh(localUserId: string): Promise<void> {
+    // Get the refresh token and the issuer
+    const refreshToken = await this.storageUtility.getForUser(
+      localUserId,
+      "refreshToken",
+      { errorIfNull: true, secure: true }
+    );
+    /* eslint-disable camelcase */
+    await this.tokenRequester.request(localUserId, {
+      grant_type: "refresh_token",
+      refresh_token: refreshToken as string, // This cast can be safely made because getForUser will error if refreshToken is null
+    });
+    /* eslint-enable camelcase */
+  }
+}

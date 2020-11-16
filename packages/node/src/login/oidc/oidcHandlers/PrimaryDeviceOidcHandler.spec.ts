@@ -19,20 +19,30 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { Session, ISessionOptions } from "./Session";
+import { standardOidcOptions } from "../__mocks__/IOidcOptions";
+import PrimaryDeviceOidcHandler from "./PrimaryDeviceOidcHandler";
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
+describe("PrimaryDeviceOidcHandler", () => {
+  describe("canHandle", () => {
+    it("doesn't handle anything", async () => {
+      const primaryDeviceOidcHandler = new PrimaryDeviceOidcHandler();
+      await expect(
+        primaryDeviceOidcHandler.canHandle(standardOidcOptions)
+      ).resolves.toEqual(false);
+    });
+  });
 
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+  describe("handle", () => {
+    it("isn't implemented yet", async () => {
+      const primaryDeviceOidcHandler = new PrimaryDeviceOidcHandler();
+      await expect(() =>
+        primaryDeviceOidcHandler.handle(standardOidcOptions)
+      ).rejects.toThrow("not implemented");
+    });
+  });
+});

@@ -19,20 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @jest-environment node
+ */
+import { getClientAuthenticationWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
 
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+describe("dependencies.node", () => {
+  it("performs dependency injection in a node environment", () => {
+    const clientAuthn = getClientAuthenticationWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+  });
+});

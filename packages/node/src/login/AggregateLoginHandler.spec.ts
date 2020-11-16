@@ -19,20 +19,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
-
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
+// Required by TSyringe:
+import "reflect-metadata";
+import {
+  ILoginHandler,
+  AggregateHandler,
 } from "@inrupt/solid-client-authn-core";
+import AggregateLoginHandler from "./AggregateLoginHandler";
+
+jest.mock("@inrupt/solid-client-authn-core");
+
+describe("AggregateLoginHandler", () => {
+  it("should pass injected handlers to its superclass", () => {
+    // We just test if the parent is called.
+    // eslint-disable-next-line no-new
+    new AggregateLoginHandler((["Some handler"] as unknown) as ILoginHandler[]);
+
+    expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
+      [["Some handler"]],
+    ]);
+  });
+});

@@ -19,20 +19,42 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
+import { inject, injectable } from "tsyringe";
+import {
+  IClientRegistrar,
+  IStorageUtility,
+  IIssuerConfigFetcher,
   NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
+
+/**
+ * @hidden
+ */
+export interface ITokenRequester {
+  request(localUserId: string, body: Record<string, string>): Promise<void>;
+}
+
+/**
+ * @hidden
+ */
+@injectable()
+export default class TokenRequester {
+  constructor(
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("issuerConfigFetcher")
+    private issuerConfigFetcher: IIssuerConfigFetcher,
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+  ) {}
+
+  async request(
+    _sessionId: string,
+    _body: Record<string, string>
+  ): Promise<void> {
+    throw new NotImplementedError("TokenRequester not implemented for Node");
+  }
+}

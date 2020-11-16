@@ -19,20 +19,29 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export { Session, ISessionOptions } from "./Session";
+/**
+ * A wrapper class for uuid
+ */
+import { v4 } from "uuid";
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
+/**
+ * @hidden
+ */
+export interface IUuidGenerator {
+  v4(): string;
+}
 
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+/**
+ * @hidden
+ */
+export default class UuidGenerator {
+  // eslint-disable-next-line class-methods-use-this
+  v4(): string {
+    return v4();
+  }
+}

@@ -19,20 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
-
-export { Session, ISessionOptions } from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
+import {
+  ILoginOptions,
+  ILoginHandler,
   ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  HandlerNotFoundError,
-  InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
+
+export const LoginHandlerResponse: ISessionInfo = {
+  isLoggedIn: false,
+  sessionId: "global",
+};
+
+export const LoginHandlerMock: jest.Mocked<ILoginHandler> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  canHandle: jest.fn((options: ILoginOptions) => Promise.resolve(true)),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handle: jest.fn((options: ILoginOptions) => Promise.resolve()),
+};
