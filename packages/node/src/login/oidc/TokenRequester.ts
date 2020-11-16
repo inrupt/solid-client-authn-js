@@ -52,8 +52,8 @@ export default class TokenRequester {
   ) {}
 
   async request(
-    sessionId: string,
-    body: Record<string, string>
+    _sessionId: string,
+    _body: Record<string, string>
   ): Promise<void> {
     throw new NotImplementedError("TokenRequester not implemented for Node");
   }

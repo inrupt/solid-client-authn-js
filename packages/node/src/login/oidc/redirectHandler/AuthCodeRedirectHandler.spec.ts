@@ -22,46 +22,15 @@
 import "reflect-metadata";
 import {
   StorageUtilityMock,
-  mockStorageUtility,
   IClient,
   IClientRegistrar,
   IClientRegistrarOptions,
   IIssuerConfigFetcher,
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
-import { JSONWebKey } from "jose";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
-
-const mockJwk = (): JSONWebKey => {
-  return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
-};
-
-const mockWebId = (): string => "https://my.webid";
-
-// result of generateMockJwt()
-const mockIdToken = (): string =>
-  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9zb21lLmlzc3VlciIsImlhdCI6MTYwMjQ5MTk5N30.R0hNKpCR3J8fS6JkTGTuFdz43_2zBMAQvCejSEO5S88DEaMQ4ktOYT__VfPmS7DHLt6Mju-J9bEc4twCnPxXjA";
-
-type AccessJwt = {
-  sub: string;
-  iss: string;
-  aud: string;
-  nbf: number;
-  exp: number;
-  cnf: {
-    jkt: string;
-  };
-};
 
 const mockIssuer = (): IIssuerConfig => {
   return {
@@ -73,19 +42,6 @@ const mockIssuer = (): IIssuerConfig => {
     subjectTypesSupported: ["public", "pairwise"],
     registrationEndpoint: "https://some.issuer/registration",
     grantTypesSupported: ["authorization_code"],
-  };
-};
-
-const mockAccessTokenDpop = (): AccessJwt => {
-  return {
-    sub: mockWebId(),
-    iss: mockIssuer().issuer.toString(),
-    aud: "https://resource.example.org",
-    nbf: 1562262611,
-    exp: 1562266216,
-    cnf: {
-      jkt: mockJwk().kid as string,
-    },
   };
 };
 

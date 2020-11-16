@@ -25,8 +25,6 @@ import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "./SessionInfoManager";
 
-const mockClearFunction = jest.fn();
-
 describe("SessionInfoManager", () => {
   const defaultMocks = {
     uuidGenerator: UuidGeneratorMock,

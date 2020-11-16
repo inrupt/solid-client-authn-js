@@ -21,7 +21,6 @@
 
 import "reflect-metadata";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { Response as NodeResponse } from "cross-fetch";
 import IssuerConfigFetcher from "./IssuerConfigFetcher";
 
 jest.mock("cross-fetch");

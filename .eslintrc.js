@@ -33,7 +33,7 @@ module.exports = {
       },
     ],
     "license-header/header": ["error", "./resources/license-header.js"],
-    "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     // The following rules are disabled until the overall testing strategy is improved
     "jest/no-mocks-import": "off",
     "import/prefer-default-export": "off",

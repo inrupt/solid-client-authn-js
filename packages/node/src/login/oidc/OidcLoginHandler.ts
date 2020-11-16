@@ -31,7 +31,6 @@
 import { injectable, inject } from "tsyringe";
 import {
   IClientRegistrar,
-  IIssuerConfig,
   IIssuerConfigFetcher,
   ILoginOptions,
   ILoginHandler,
