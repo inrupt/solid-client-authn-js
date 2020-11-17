@@ -21,9 +21,30 @@
 
 import "reflect-metadata";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { IssuerMetadata } from "openid-client";
 import IssuerConfigFetcher from "./IssuerConfigFetcher";
 
-jest.mock("cross-fetch");
+jest.mock("openid-client");
+
+const mockDefaultIssuerConfig = (): IssuerMetadata => {
+  return {
+    issuer: "https://my.idp/",
+    authorization_endpoint: "https://my.idp/auth",
+    token_endpoint: "https://my.idp/token",
+    jwks_uri: "https://my.idp/jwks",
+    claims_supported: ["sub"],
+    subject_types_supported: ["public", "pairwise"],
+  };
+};
+
+const mockIssuerConfig = (
+  config: Record<string, string | undefined>
+): IssuerMetadata => {
+  return {
+    ...mockDefaultIssuerConfig(),
+    ...config,
+  };
+};
 
 /**
  * Test for IssuerConfigFetcher
@@ -42,42 +63,119 @@ describe("IssuerConfigFetcher", () => {
   }
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    const { Response } = jest.requireActual("cross-fetch");
-    const fetchResponse = (new Response(
-      JSON.stringify({
-        issuer: "https://example.com",
-        // eslint-disable-next-line camelcase
-        claim_types_supported: "oidc",
-        bleepBloop: "Meep Moop",
-      })
-    ) as unknown) as Response;
+    const { Issuer } = jest.requireMock("openid-client");
+    const mockedIssuerConfig = mockDefaultIssuerConfig();
+    Issuer.discover = jest.fn().mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
+
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    jest.requireMock("cross-fetch").mockResolvedValueOnce(fetchResponse);
-    const fetchedConfig = await configFetcher.fetchConfig(
-      "https://arbitrary.url"
+
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(fetchedConfig.issuer).toBe(mockedIssuerConfig.issuer);
+    expect(fetchedConfig.authorizationEndpoint).toBe(
+      mockedIssuerConfig.authorization_endpoint
     );
-    expect(fetchedConfig.issuer.startsWith("https:")).toBeTruthy();
-    expect(fetchedConfig.issuer).toBe("https://example.com");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((fetchedConfig as any).claim_types_supported).toBeUndefined();
-    expect(fetchedConfig.claimTypesSupported).toBe("oidc");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((fetchedConfig as any).bleepBloop).toBeUndefined();
+    expect(fetchedConfig.claimsSupported).toBe(
+      mockedIssuerConfig.claims_supported
+    );
+    expect(fetchedConfig.issuer).toBe(mockedIssuerConfig.issuer);
+    expect(fetchedConfig.jwksUri).toBe(mockedIssuerConfig.jwks_uri);
+    expect(fetchedConfig.tokenEndpoint).toBe(mockedIssuerConfig.token_endpoint);
+    expect(fetchedConfig.subjectTypesSupported).toBe(
+      mockedIssuerConfig.subject_types_supported
+    );
   });
 
-  it("should throw an error if the fetched config could not be converted to JSON", async () => {
-    const fetchResponse = {
-      json: async () => {
-        throw new Error("Some error");
-      },
-    };
-    jest.requireMock("cross-fetch").mockResolvedValueOnce(fetchResponse);
-    const configFetcher = new IssuerConfigFetcher(mockStorageUtility({}));
+  it("throws an error if authorization_endpoint is missing", async () => {
+    const { Issuer } = jest.requireMock("openid-client");
+    const mockedIssuerConfig = mockIssuerConfig({
+      authorization_endpoint: undefined,
+    });
+    Issuer.discover = jest.fn().mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
 
-    await expect(configFetcher.fetchConfig("https://some.url")).rejects.toThrow(
-      "[https://some.url] has an invalid configuration: Some error"
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Issuer metadata is missing an authorization endpoint"
+    );
+  });
+
+  it("throws an error if token_endpoint is missing", async () => {
+    const { Issuer } = jest.requireMock("openid-client");
+    const mockedIssuerConfig = mockIssuerConfig({
+      token_endpoint: undefined,
+    });
+    Issuer.discover = jest.fn().mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Issuer metadata is missing an token endpoint"
+    );
+  });
+
+  it("throws an error if jwks_uri is missing", async () => {
+    const { Issuer } = jest.requireMock("openid-client");
+    const mockedIssuerConfig = mockIssuerConfig({
+      jwks_uri: undefined,
+    });
+    Issuer.discover = jest.fn().mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Issuer metadata is missing a keyset URI"
+    );
+  });
+
+  it("throws an error if claims_supported is missing", async () => {
+    const { Issuer } = jest.requireMock("openid-client");
+    const mockedIssuerConfig = mockIssuerConfig({
+      claims_supported: undefined,
+    });
+    Issuer.discover = jest.fn().mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Issuer metadata is missing supported claims:"
+    );
+  });
+
+  it("throws an error if subject_types_supported is missing", async () => {
+    const { Issuer } = jest.requireMock("openid-client");
+    const mockedIssuerConfig = mockIssuerConfig({
+      subject_types_supported: undefined,
+    });
+    Issuer.discover = jest.fn().mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Issuer metadata is missing supported subject types:"
     );
   });
 });

@@ -34,115 +34,67 @@ import {
   ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { fetch } from "cross-fetch";
-import { appendToUrlPathname } from "../../util/urlPath";
+import { Issuer, IssuerMetadata } from "openid-client";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
-/* eslint-disable camelcase */
-const issuerConfigKeyMap: Record<
-  string,
-  { toKey: string; convertToUrl?: boolean }
-> = {
-  issuer: {
-    toKey: "issuer",
-    convertToUrl: true,
-  },
-  authorization_endpoint: {
-    toKey: "authorizationEndpoint",
-    convertToUrl: true,
-  },
-  token_endpoint: {
-    toKey: "tokenEndpoint",
-    convertToUrl: true,
-  },
-  userinfo_endpoint: {
-    toKey: "userinfoEndpoint",
-    convertToUrl: true,
-  },
-  jwks_uri: {
-    toKey: "jwksUri",
-    convertToUrl: true,
-  },
-  registration_endpoint: {
-    toKey: "registrationEndpoint",
-    convertToUrl: true,
-  },
-  scopes_supported: { toKey: "scopesSupported" },
-  response_types_supported: { toKey: "responseTypesSupported" },
-  response_modes_supported: { toKey: "responseModesSupported" },
-  grant_types_supported: { toKey: "grantTypesSupported" },
-  acr_values_supported: { toKey: "acrValuesSupported" },
-  subject_types_supported: { toKey: "subjectTypesSupported" },
-  id_token_signing_alg_values_supported: {
-    toKey: "idTokenSigningAlgValuesSupported",
-  },
-  id_token_encryption_alg_values_supported: {
-    toKey: "idTokenEncryptionAlgValuesSupported",
-  },
-  id_token_encryption_enc_values_supported: {
-    toKey: "idTokenEncryptionEncValuesSupported",
-  },
-  userinfo_signing_alg_values_supported: {
-    toKey: "userinfoSigningAlgValuesSupported",
-  },
-  userinfo_encryption_alg_values_supported: {
-    toKey: "userinfoEncryptionAlgValuesSupported",
-  },
-  userinfo_encryption_enc_values_supported: {
-    toKey: "userinfoEncryptionEncValuesSupported",
-  },
-  request_object_signing_alg_values_supported: {
-    toKey: "requestObjectSigningAlgValuesSupported",
-  },
-  request_object_encryption_alg_values_supported: {
-    toKey: "requestObjectEncryptionAlgValuesSupported",
-  },
-  request_object_encryption_enc_values_supported: {
-    toKey: "requestObjectEncryptionEncValuesSupported",
-  },
-  token_endpoint_auth_methods_supported: {
-    toKey: "tokenEndpointAuthMethodsSupported",
-  },
-  token_endpoint_auth_signing_alg_values_supported: {
-    toKey: "tokenEndpointAuthSigningAlgValuesSupported",
-  },
-  display_values_supported: { toKey: "displayValuesSupported" },
-  claim_types_supported: { toKey: "claimTypesSupported" },
-  claims_supported: { toKey: "claimsSupported" },
-  service_documentation: { toKey: "serviceDocumentation" },
-  claims_locales_supported: { toKey: "claimsLocalesSupported" },
-  ui_locales_supported: { toKey: "uiLocalesSupported" },
-  claims_parameter_supported: { toKey: "claimsParameterSupported" },
-  request_parameter_supported: { toKey: "requestParameterSupported" },
-  request_uri_parameter_supported: { toKey: "requestUriParameterSupported" },
-  require_request_uri_registration: { toKey: "requireRequestUriRegistration" },
-  op_policy_uri: {
-    toKey: "opPolicyUri",
-    convertToUrl: true,
-  },
-  op_tos_uri: {
-    toKey: "opTosUri",
-    convertToUrl: true,
-  },
-};
-/* eslint-enable camelcase */
+function configFromIssuerMetadata(metadata: IssuerMetadata): IIssuerConfig {
+  // If the fields required as per https://openid.net/specs/openid-connect-discovery-1_0.html are missing,
+  // throw an error.
+  if (metadata.authorization_endpoint === undefined) {
+    throw new ConfigurationError(
+      `Issuer metadata is missing an authorization endpoint: ${JSON.stringify(
+        metadata
+      )}`
+    );
+  }
+  if (metadata.token_endpoint === undefined) {
+    throw new ConfigurationError(
+      `Issuer metadata is missing an token endpoint: ${JSON.stringify(
+        metadata
+      )}`
+    );
+  }
+  if (metadata.jwks_uri === undefined) {
+    throw new ConfigurationError(
+      `Issuer metadata is missing a keyset URI: ${JSON.stringify(metadata)}`
+    );
+  }
+  if (metadata.claims_supported === undefined) {
+    throw new ConfigurationError(
+      `Issuer metadata is missing supported claims: ${JSON.stringify(metadata)}`
+    );
+  }
+  if (metadata.subject_types_supported === undefined) {
+    throw new ConfigurationError(
+      `Issuer metadata is missing supported subject types: ${JSON.stringify(
+        metadata
+      )}`
+    );
+  }
+  return {
+    issuer: metadata.issuer,
+    authorizationEndpoint: metadata.authorization_endpoint,
+    subjectTypesSupported: metadata.subject_types_supported as string[],
+    claimsSupported: metadata.claims_supported as string[],
+    tokenEndpoint: metadata.token_endpoint,
+    jwksUri: metadata.jwks_uri,
+    userinfoEndpoint: metadata.userinfo_endpoint,
+    registrationEndpoint: metadata.registration_endpoint,
+    tokenEndpointAuthMethodsSupported:
+      metadata.token_endpoint_auth_methods_supported,
+    tokenEndpointAuthSigningAlgValuesSupported:
+      metadata.token_endpoint_auth_signing_alg_values_supported,
+    requestObjectSigningAlgValuesSupported:
+      metadata.request_object_signing_alg_values_supported,
+    // TODO: add revocation_endpoint, end_session_endpoint, introspection_endpoint_auth_methods_supported, introspection_endpoint_auth_signing_alg_values_supported, revocation_endpoint_auth_methods_supported, revocation_endpoint_auth_signing_alg_values_supported, mtls_endpoint_aliases to IIssuerConfig
 
-function processConfig(
-  config: Record<string, string | string[]>
-): IIssuerConfig {
-  const parsedConfig: Record<string, string | string[]> = {};
-  Object.keys(config).forEach((key) => {
-    if (issuerConfigKeyMap[key]) {
-      // TODO: PMcB55: Validate URL if "issuerConfigKeyMap[key].convertToUrl"
-      //  if (issuerConfigKeyMap[key].convertToUrl) {
-      //   validateUrl(config[key]);
-      //  }
-      parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
-    }
-  });
-
-  return (parsedConfig as unknown) as IIssuerConfig;
+    // The following properties may be captured as "unkown" entries in the metadata object.
+    grantTypesSupported: metadata.grant_types_supported as string[] | undefined,
+    responseTypesSupported: metadata.response_types_supported as
+      | string[]
+      | undefined,
+  };
 }
 
 /**
@@ -161,21 +113,13 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   }
 
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
-    let issuerConfig: IIssuerConfig;
-
-    const openIdConfigUrl = appendToUrlPathname(
-      issuer,
-      WELL_KNOWN_OPENID_CONFIG
+    // TODO: The issuer config discovery happens in multiple places in the current
+    // codebase, because in openid-client the Client is built based on the Issuer.
+    // The codebase could be refactored so that issuer discovery only happens once.
+    const oidcIssuer = await Issuer.discover(issuer);
+    const issuerConfig: IIssuerConfig = configFromIssuerMetadata(
+      oidcIssuer.metadata
     );
-    const issuerConfigRequestBody = await fetch(openIdConfigUrl);
-    // Check the validity of the fetched config
-    try {
-      issuerConfig = processConfig(await issuerConfigRequestBody.json());
-    } catch (err) {
-      throw new ConfigurationError(
-        `[${issuer.toString()}] has an invalid configuration: ${err.message}`
-      );
-    }
 
     // Update store with fetched config
     await this.storageUtility.set(
