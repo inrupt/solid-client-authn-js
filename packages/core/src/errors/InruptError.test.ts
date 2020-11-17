@@ -43,6 +43,29 @@ describe("InruptError", () => {
       expect(error.name).toEqual("Error");
       expect(error.toString()).toContain(message);
     });
+
+    it("treats a message as a simple message having params", () => {
+      const error = new InruptError(
+        "Normal [{{1}}] error string with [{{0}}]...",
+        ["one", "two"]
+      );
+
+      expect(error.name).toEqual("Error");
+      expect(error.toString()).toContain(
+        "Error: Normal [two] error string with [one]..."
+      );
+    });
+
+    it("fails if message has incorrect number of params", () => {
+      expect(
+        () =>
+          new InruptError("Normal [{{1}}] error string with [{{0}}]...", [
+            "one",
+            "two",
+            "three",
+          ])
+      ).toThrow("requires [2] params and we received [3]");
+    });
   });
 
   describe("errors that include HTTP response meta-data", () => {

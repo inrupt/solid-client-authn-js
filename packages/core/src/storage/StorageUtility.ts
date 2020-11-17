@@ -202,7 +202,7 @@ export default class StorageUtility implements IStorageUtility {
             secure: options.secure,
           });
         }
-        throw new Error(
+        throw new InruptError(
           `Object ${JSON.stringify(
             invalidObject
           )} does not match expected schema: ${JSON.stringify(

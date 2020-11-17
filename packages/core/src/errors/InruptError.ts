@@ -27,6 +27,21 @@
  * @packageDocumentation
  */
 
+/**
+ * In a subsequent PR, just re-export needed implementations from generated
+ * artifacts directly, e.g. like @inrupt/solid-common-vocab, e.g. in the
+ * `index.hbs` template of RDF/JS artifacts include this:
+ // Re-export some of the basic RDF/JS implementations that we use ourselves -
+ // allows users of our generated artifacts to easily import these
+ // implementations if they want (e.g. in their tests, or to instantiate
+ // hard-coded IRIs for convenience (as they shouldn't really need to do that
+ // much, instead using our generated constants in most cases)).
+ export { NamedNode } from "rdf-js";
+ *  Then we can either import that implementation in this code, or just import
+ *  the types when needed here, e.g.:
+ import type { NamedNode } from "rdf/js";
+ *
+ */
 import { NamedNode } from "n3";
 
 import { VocabTerm } from "@inrupt/solid-common-vocab";
@@ -46,7 +61,7 @@ export default class InruptError extends Error {
     super(
       InruptError.appendResponseDetails(
         typeof messageOrIri === "string"
-          ? messageOrIri
+          ? InruptError.substituteParams(messageOrIri, messageParams)
           : InruptError.appendErrorIri(
               InruptError.lookupErrorIri(messageOrIri, messageParams),
               appendErrorIriToMessage,
@@ -112,5 +127,24 @@ export default class InruptError extends Error {
     iri: NamedNode
   ): string {
     return appendErrorIri ? `${message} Error IRI: [${iri.value}].` : message;
+  }
+
+  static substituteParams(message: string, params?: string[]): string {
+    let fullMessage = message;
+    if (params !== undefined) {
+      const paramsRequired = message.split("{{").length - 1;
+      if (paramsRequired !== params.length) {
+        throw new Error(
+          `Setting parameters on message [${message}], but it requires [${paramsRequired}] params and we received [${params.length}].`
+        );
+      }
+
+      for (let i = 0; i < params.length; i += 1) {
+        const marker = `{{${i}}}`;
+        fullMessage = fullMessage.replace(marker, params[i]);
+      }
+    }
+
+    return fullMessage;
   }
 }
