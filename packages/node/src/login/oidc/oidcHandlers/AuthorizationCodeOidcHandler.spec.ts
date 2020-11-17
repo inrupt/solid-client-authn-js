@@ -24,23 +24,23 @@
  */
 import "reflect-metadata";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
-import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
+import AuthorizationCodeOidcHandler from "./AuthorizationCodeOidcHandler";
 
-describe("ClientCredentialsOidcHandler", () => {
+describe("AuthorizationCodeOidcHandler", () => {
   describe("canHandle", () => {
     it("doesn't handle anything", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const authCodeOidcHandler = new AuthorizationCodeOidcHandler();
       await expect(
-        clientCredentialsOidcHandler.canHandle(standardOidcOptions)
+        authCodeOidcHandler.canHandle(standardOidcOptions)
       ).resolves.toEqual(false);
     });
   });
 
   describe("handle", () => {
     it("isn't implemented yet", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const authCodeOidcHandler = new AuthorizationCodeOidcHandler();
       await expect(() =>
-        clientCredentialsOidcHandler.handle(standardOidcOptions)
+        authCodeOidcHandler.handle(standardOidcOptions)
       ).rejects.toThrow("not implemented");
     });
   });

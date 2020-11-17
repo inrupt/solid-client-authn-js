@@ -38,6 +38,11 @@ import { Issuer, IssuerMetadata } from "openid-client";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
+/**
+ * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]
+ * @param metadata the object to transform.
+ * @returns an [[IIssuerConfig]] initialized from the metadata.
+ */
 function configFromIssuerMetadata(metadata: IssuerMetadata): IIssuerConfig {
   // If the fields required as per https://openid.net/specs/openid-connect-discovery-1_0.html are missing,
   // throw an error.
@@ -94,6 +99,31 @@ function configFromIssuerMetadata(metadata: IssuerMetadata): IIssuerConfig {
     responseTypesSupported: metadata.response_types_supported as
       | string[]
       | undefined,
+  };
+}
+
+/**
+ * Transforms an [[IIssuerConfig]] into an openid-client IssuerMetadata
+ * @param config the IIssuerConfig to convert.
+ * @returns an IssuerMetadata object initialized from the [[IIssuerConfig]].
+ */
+export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
+  return {
+    issuer: config.issuer,
+    authorization_endpoint: config.authorizationEndpoint,
+    jwks_uri: config.jwksUri,
+    token_endpoint: config.tokenEndpoint,
+    subject_types_supported: config.subjectTypesSupported,
+    claims_supported: config.claimsSupported,
+    token_endpoint_auth_signing_alg_values_supported:
+      config.tokenEndpointAuthSigningAlgValuesSupported,
+    userinfo_endpoint: config.userinfoEndpoint,
+    token_endpoint_auth_methods_supported:
+      config.tokenEndpointAuthMethodsSupported,
+    request_object_signing_alg_values_supported:
+      config.requestObjectSigningAlgValuesSupported,
+    grant_types_supported: config.grantTypesSupported,
+    response_types_supported: config.responseTypesSupported,
   };
 }
 

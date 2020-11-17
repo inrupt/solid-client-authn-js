@@ -23,18 +23,25 @@
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
 import "reflect-metadata";
-import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
+import {
+  mockStorageUtility,
+  StorageUtilityMock,
+} from "@inrupt/solid-client-authn-core";
+import { URL } from "url";
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
-import { standardOidcOptions } from "../__mocks__/IOidcOptions";
-import { RedirectorMock } from "../__mocks__/Redirector";
+import {
+  mockDefaultOidcOptions,
+  mockOidcOptions,
+} from "../__mocks__/IOidcOptions";
+import { mockRedirector } from "../__mocks__/Redirector";
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
     sessionCreator: SessionInfoManagerMock,
     storageUtility: StorageUtilityMock,
-    redirector: RedirectorMock,
+    redirector: mockRedirector(),
   };
 
   function getAuthorizationCodeWithPkceOidcHandler(
@@ -62,11 +69,89 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   });
 
   describe("handle", () => {
-    it("isn't implemented yet", async () => {
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
-      await expect(() =>
-        authorizationCodeWithPkceOidcHandler.handle(standardOidcOptions)
-      ).rejects.toThrow("Not implemented");
+    it("redirects the user to the specified IdP", async () => {
+      const mockedRedirector = mockRedirector();
+      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
+        {
+          redirector: mockedRedirector,
+        }
+      );
+
+      await authorizationCodeWithPkceOidcHandler.handle(
+        mockDefaultOidcOptions()
+      );
+      const mockRedirect = mockedRedirector.redirect as jest.Mock;
+
+      const builtUrl = new URL(mockRedirect.mock.calls[0][0]);
+      expect(builtUrl.hostname).toEqual(
+        new URL(mockDefaultOidcOptions().issuer).hostname
+      );
+    });
+
+    it("sets the specified options in the query params", async () => {
+      const mockedRedirector = mockRedirector();
+      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
+        {
+          redirector: mockedRedirector,
+        }
+      );
+      const oidcOptions = mockDefaultOidcOptions();
+
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+      const mockRedirect = mockedRedirector.redirect as jest.Mock;
+
+      const builtUrl = new URL(mockRedirect.mock.calls[0][0]);
+      expect(builtUrl.searchParams.get("client_id")).toEqual(
+        oidcOptions.client.clientId
+      );
+      expect(builtUrl.searchParams.get("response_type")).toEqual("code");
+      expect(builtUrl.searchParams.get("redirect_uri")).toEqual(
+        oidcOptions.redirectUrl
+      );
+      expect(builtUrl.searchParams.get("code_challenge")).not.toBeNull();
+    });
+
+    it("saves relevant information in storage", async () => {
+      const mockedStorage = mockStorageUtility({});
+      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
+        {
+          storageUtility: mockedStorage,
+        }
+      );
+      const oidcOptions = mockDefaultOidcOptions();
+
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+
+      await expect(
+        mockedStorage.getForUser(oidcOptions.sessionId, "codeVerifier")
+      ).resolves.not.toBeNull();
+      await expect(
+        mockedStorage.getForUser(oidcOptions.sessionId, "issuer")
+      ).resolves.toEqual(oidcOptions.issuer);
+      await expect(
+        mockedStorage.getForUser(oidcOptions.sessionId, "redirectUri")
+      ).resolves.toEqual(oidcOptions.redirectUrl);
+      await expect(
+        mockedStorage.getForUser(oidcOptions.sessionId, "dpop")
+      ).resolves.toEqual("true");
+    });
+
+    it("serializes the token type boolean appropriately", async () => {
+      const mockedStorage = mockStorageUtility({});
+      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
+        {
+          storageUtility: mockedStorage,
+        }
+      );
+      const oidcOptions = mockOidcOptions({
+        dpop: false,
+      });
+
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+
+      await expect(
+        mockedStorage.getForUser(oidcOptions.sessionId, "dpop")
+      ).resolves.toEqual("false");
     });
   });
 });
