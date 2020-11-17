@@ -61,7 +61,6 @@ export { default as StorageUtility } from "./storage/StorageUtility";
 export { default as InMemoryStorage } from "./storage/InMemoryStorage";
 
 export { default as ConfigurationError } from "./errors/ConfigurationError";
-export { default as HandlerNotFoundError } from "./errors/HandlerNotFoundError";
 export { default as NotImplementedError } from "./errors/NotImplementedError";
 
 // Mocks.

@@ -28,7 +28,7 @@
  * An abstract class that will select the first handler that can handle certain parameters
  */
 import IHandleable from "./IHandleable";
-import HandlerNotFoundError from "../../errors/HandlerNotFoundError";
+import InruptError from "../../errors/InruptError";
 
 /**
  * @hidden
@@ -85,6 +85,17 @@ export default class AggregateHandler<P extends Array<unknown>, R>
     if (handler) {
       return handler.handle(...params);
     }
-    throw new HandlerNotFoundError(this.constructor.name, params);
+
+    throw new InruptError(
+      `[${this.constructor.name}] cannot find a suitable handler for: ${params
+        .map((param) => {
+          try {
+            return JSON.stringify(param);
+          } catch (err) {
+            return (param as any).toString();
+          }
+        })
+        .join(", ")}`
+    );
   }
 }

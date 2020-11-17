@@ -23,7 +23,6 @@
  * Test for all custom errors
  */
 import ConfigurationError from "../../src/errors/ConfigurationError";
-import HandlerNotFoundError from "../../src/errors/HandlerNotFoundError";
 import NotImplementedError from "../../src/errors/NotImplementedError";
 
 describe("errors", () => {
@@ -39,12 +38,6 @@ describe("errors", () => {
       class: ConfigurationError,
       params: ["Bad Config"],
       message: "Bad Config",
-    },
-    {
-      name: "HandlerNotFoundError",
-      class: HandlerNotFoundError,
-      params: ["HandlerName", [1, 2]],
-      message: "[HandlerName] cannot find a suitable handler for: 1, 2",
     },
     {
       name: "NotImplementedError",

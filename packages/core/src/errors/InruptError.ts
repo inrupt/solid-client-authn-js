@@ -21,26 +21,76 @@
 
 /**
  * @hidden
+ * Extends the regular JavaScript error object with extra meta-data (e.g.
+ * potentially data from a HTTP response, or with data from an RDF vocabulary
+ * (which may be imported locally, or looked up dynamically at runtime)).
  * @packageDocumentation
  */
 
-/**
- * Extends the regular JavaScript error object with access to the status code and status message.
- */
+import { NamedNode } from "n3";
 
-// TODO: Intent is to pull in the RDF/JS 'Iri' type, and also the Solid Client
-//  Vocab Term type (which just extends 'Iri') and allow us use the bundled
-//  error message value if included, or look it up dynamically if not (as a last
-//  resort!).
-type Iri = string;
+import { VocabTerm } from "@inrupt/solid-common-vocab";
 
 export default class InruptError extends Error {
   public readonly statusCode?: number;
+
   public readonly statusText?: string;
 
-  static lookupErrorMessage(iri: Iri, messageParams?: string[]): string {
-    return `Error message looked up at: [${iri.toString()}]${
-      messageParams ? `, with params [${messageParams?.toString()}]` : ""
+  constructor(
+    messageOrIri: string | NamedNode | VocabTerm,
+    messageParams?: string[],
+    httpResponse?: Response & { ok: false },
+    appendHttpDetailsToMessage = true,
+    appendErrorIriToMessage = true
+  ) {
+    super(
+      InruptError.appendResponseDetails(
+        typeof messageOrIri === "string"
+          ? messageOrIri
+          : InruptError.appendErrorIri(
+              InruptError.lookupErrorIri(messageOrIri, messageParams),
+              appendErrorIriToMessage,
+              messageOrIri as NamedNode
+            ),
+        appendHttpDetailsToMessage,
+        httpResponse
+      )
+    );
+
+    if (typeof httpResponse !== "undefined") {
+      this.statusCode = httpResponse.status;
+      this.statusText = httpResponse.statusText;
+    }
+  }
+
+  static determineIfVocabTerm(
+    value: NamedNode | VocabTerm
+  ): value is VocabTerm {
+    if ((value as VocabTerm).strict !== undefined) {
+      return true;
+    }
+    return false;
+  }
+
+  static lookupErrorIri(
+    iri: NamedNode | VocabTerm,
+    messageParams?: string[]
+  ): string {
+    if (InruptError.determineIfVocabTerm(iri)) {
+      const message =
+        messageParams === undefined
+          ? iri.message
+          : iri.messageParams(...messageParams);
+
+      return message === undefined
+        ? `Looked up error message IRI [${iri.value}], but found no message value.`
+        : message;
+    }
+
+    return `Error message looked up at: [${iri.value}]${
+      messageParams === undefined
+        ? ""
+        : `, with params [${messageParams.toString()}]`
     }`;
   }
 
@@ -48,33 +98,19 @@ export default class InruptError extends Error {
     message: string,
     appendContextToMessage: boolean,
     errorResponse?: Response
-  ) {
+  ): string {
     if (appendContextToMessage && typeof errorResponse !== "undefined") {
-      return `${message} Details: status code [${errorResponse.status}], status text [${errorResponse.statusText}].`;
+      return `${message} HTTP details: status code [${errorResponse.status}], status text [${errorResponse.statusText}].`;
     }
 
     return message;
   }
 
-  constructor(
-    messageOrIri: string | Iri,
-    errorResponse?: Response & { ok: false },
-    appendContextToMessage: boolean = true,
-    messageParams?: string[]
-  ) {
-    super(
-      InruptError.appendResponseDetails(
-        typeof messageOrIri === "string"
-          ? messageOrIri
-          : InruptError.lookupErrorMessage(messageOrIri, messageParams),
-        appendContextToMessage,
-        errorResponse
-      )
-    );
-
-    if (typeof errorResponse !== "undefined") {
-      this.statusCode = errorResponse.status;
-      this.statusText = errorResponse.statusText;
-    }
+  static appendErrorIri(
+    message: string,
+    appendErrorIri: boolean,
+    iri: NamedNode
+  ): string {
+    return appendErrorIri ? `${message} Error IRI: [${iri.value}].` : message;
   }
 }
