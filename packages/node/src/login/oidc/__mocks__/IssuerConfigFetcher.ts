@@ -23,6 +23,7 @@ import {
   IIssuerConfig,
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
+import { IssuerMetadata } from "openid-client";
 
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: "https://idp.com",
@@ -39,4 +40,25 @@ export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
   fetchConfig: jest.fn((_issuer: string) =>
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
   ),
+};
+
+export const mockDefaultIssuerConfig = (): IssuerMetadata => {
+  return {
+    issuer: "https://my.idp/",
+    authorization_endpoint: "https://my.idp/auth",
+    token_endpoint: "https://my.idp/token",
+    registration_endpoint: "https://my.idp/register",
+    jwks_uri: "https://my.idp/jwks",
+    claims_supported: ["sub"],
+    subject_types_supported: ["public", "pairwise"],
+  };
+};
+
+export const mockIssuerConfig = (
+  config: Record<string, string | undefined>
+): IssuerMetadata => {
+  return {
+    ...mockDefaultIssuerConfig(),
+    ...config,
+  };
 };

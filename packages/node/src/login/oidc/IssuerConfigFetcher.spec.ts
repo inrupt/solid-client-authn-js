@@ -21,30 +21,13 @@
 
 import "reflect-metadata";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { IssuerMetadata } from "openid-client";
 import IssuerConfigFetcher from "./IssuerConfigFetcher";
+import {
+  mockDefaultIssuerConfig,
+  mockIssuerConfig,
+} from "./__mocks__/IssuerConfigFetcher";
 
 jest.mock("openid-client");
-
-const mockDefaultIssuerConfig = (): IssuerMetadata => {
-  return {
-    issuer: "https://my.idp/",
-    authorization_endpoint: "https://my.idp/auth",
-    token_endpoint: "https://my.idp/token",
-    jwks_uri: "https://my.idp/jwks",
-    claims_supported: ["sub"],
-    subject_types_supported: ["public", "pairwise"],
-  };
-};
-
-const mockIssuerConfig = (
-  config: Record<string, string | undefined>
-): IssuerMetadata => {
-  return {
-    ...mockDefaultIssuerConfig(),
-    ...config,
-  };
-};
 
 /**
  * Test for IssuerConfigFetcher

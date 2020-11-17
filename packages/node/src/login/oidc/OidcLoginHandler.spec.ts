@@ -25,14 +25,17 @@ import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
 import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "./__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "./OidcLoginHandler";
-import { ClientRegistrarMock } from "./__mocks__/ClientRegistrar";
+import {
+  mockDefaultClient,
+  mockDefaultClientRegistrar,
+} from "./__mocks__/ClientRegistrar";
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
     storageUtility: StorageUtilityMock,
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
-    clientRegistrar: ClientRegistrarMock,
+    clientRegistrar: mockDefaultClientRegistrar(),
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -45,17 +48,97 @@ describe("OidcLoginHandler", () => {
     );
   }
 
-  it("isn't implemented", async () => {
-    const actualHandler = defaultMocks.oidcHandler;
-    const handler = getInitialisedHandler({ oidcHandler: actualHandler });
-    await expect(
-      handler.handle({
+  describe("canHandle", () => {
+    it("cannot handle options without an issuer", async () => {
+      const handler = getInitialisedHandler();
+      await expect(
+        handler.canHandle({
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          redirectUrl: "https://my.app/redirect",
+        })
+      ).resolves.toEqual(false);
+    });
+
+    it("cannot handle options without an redirect url", async () => {
+      const handler = getInitialisedHandler();
+      await expect(
+        handler.canHandle({
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          oidcIssuer: "https://my.idp/",
+        })
+      ).resolves.toEqual(false);
+    });
+
+    it("can handle options with both a redirect url and an issuer", async () => {
+      const handler = getInitialisedHandler();
+      await expect(
+        handler.canHandle({
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          oidcIssuer: "https://my.idp/",
+          redirectUrl: "https://my.app/redirect",
+        })
+      ).resolves.toEqual(true);
+    });
+  });
+
+  describe("handle", () => {
+    it("throws if config misses an issuer", async () => {
+      const handler = getInitialisedHandler();
+      await expect(
+        handler.handle({
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          redirectUrl: "https://my.app/redirect",
+        })
+      ).rejects.toThrow("OidcLoginHandler requires an OIDC issuer");
+    });
+
+    it("throws if config misses a redirect URL", async () => {
+      const handler = getInitialisedHandler();
+      await expect(
+        handler.handle({
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          oidcIssuer: "https://my.idp/",
+        })
+      ).rejects.toThrow("OidcLoginHandler requires a redirect URL");
+    });
+
+    it("performs DCR if client ID and secret aren't specified", async () => {
+      const { oidcHandler } = defaultMocks;
+      const clientRegistrar = mockDefaultClientRegistrar();
+      clientRegistrar.getClient = jest
+        .fn()
+        .mockResolvedValueOnce(mockDefaultClient());
+      const handler = getInitialisedHandler({ oidcHandler, clientRegistrar });
+      await handler.handle({
         sessionId: "mySession",
         oidcIssuer: "https://arbitrary.url",
         redirectUrl: "https://app.com/redirect",
-        clientId: "coolApp",
         tokenType: "DPoP",
-      })
-    ).rejects.toThrow();
+      });
+      expect(clientRegistrar.getClient).toHaveBeenCalled();
+    });
+
+    it("does not perform DCR if client ID and secret are specified", async () => {
+      const { oidcHandler } = defaultMocks;
+      const clientRegistrar = mockDefaultClientRegistrar();
+      clientRegistrar.getClient = jest
+        .fn()
+        .mockResolvedValueOnce(mockDefaultClient());
+      const handler = getInitialisedHandler({ oidcHandler, clientRegistrar });
+      await handler.handle({
+        sessionId: "mySession",
+        oidcIssuer: "https://arbitrary.url",
+        redirectUrl: "https://app.com/redirect",
+        clientId: "some pre-registered client id",
+        clientSecret: "some pre-registered client secret",
+        tokenType: "DPoP",
+      });
+      expect(clientRegistrar.getClient).not.toHaveBeenCalled();
+    });
   });
 });
