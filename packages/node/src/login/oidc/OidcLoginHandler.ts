@@ -96,8 +96,8 @@ export default class OidcLoginHandler implements ILoginHandler {
         clientSecret: options.clientSecret,
       };
     } else {
-      // If client id and secret aren't specified in the options, performe dynamic
-      // client registration.
+      // If 'client_id' and 'client_secret' aren't specified in the options,
+      // perform dynamic client registration.
       clientInfo = await this.clientRegistrar.getClient(options, issuerConfig);
     }
 

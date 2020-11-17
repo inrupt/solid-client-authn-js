@@ -30,4 +30,5 @@
 export interface IClient {
   clientId: string;
   clientSecret?: string;
+  clientName?: string;
 }

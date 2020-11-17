@@ -48,7 +48,7 @@ describe("ClientRegistrar", () => {
   }
 
   describe("getClient", () => {
-    it("Fails if there is not registration endpoint", async () => {
+    it("fails if there is not registration endpoint", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
       const mockedIssuerConfig = mockIssuerConfig({
@@ -76,13 +76,14 @@ describe("ClientRegistrar", () => {
       );
     });
 
-    it("retrieves client id and secret from storage if they are present", async () => {
+    it("retrieves client information from storage if they are present", async () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
             mySession: {
               clientId: "an id",
               clientSecret: "a secret",
+              clientName: "my client name",
             },
           },
           false
@@ -99,9 +100,10 @@ describe("ClientRegistrar", () => {
       );
       expect(client.clientId).toEqual("an id");
       expect(client.clientSecret).toEqual("a secret");
+      expect(client.clientName).toEqual("my client name");
     });
 
-    it("properly performs dynamic registration", async () => {
+    it("properly performs dynamic registration and saves client information", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
       const mockedIssuer = {
@@ -113,9 +115,12 @@ describe("ClientRegistrar", () => {
         },
       };
       Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
 
       // Run the test
-      const clientRegistrar = getClientRegistrar();
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
       const client = await clientRegistrar.getClient(
         {
           sessionId: "mySession",
@@ -125,10 +130,20 @@ describe("ClientRegistrar", () => {
           ...IssuerConfigFetcherFetchConfigResponse,
         }
       );
+
+      // Check that the returned value is what we expect
       expect(client.clientId).toEqual(mockDefaultClientConfig().client_id);
       expect(client.clientSecret).toEqual(
         mockDefaultClientConfig().client_secret
       );
+
+      // Check that the client information have been saved in storage
+      await expect(
+        mockStorage.getForUser("mySession", "clientId", { secure: true })
+      ).resolves.toEqual(mockDefaultClientConfig().client_id);
+      await expect(
+        mockStorage.getForUser("mySession", "clientSecret", { secure: true })
+      ).resolves.toEqual(mockDefaultClientConfig().client_secret);
     });
 
     it("retrieves a registration bearer token if present in storage", async () => {
@@ -208,41 +223,6 @@ describe("ClientRegistrar", () => {
           initialAccessToken: "a token",
         }
       );
-    });
-
-    it("saves the registered client information in storage", async () => {
-      // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
-      const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
-        Client: {
-          register: jest.fn().mockResolvedValueOnce({
-            metadata: mockDefaultClientConfig(),
-          }),
-        },
-      };
-      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
-      const mockStorage = mockStorageUtility({});
-
-      // Run the test
-      const clientRegistrar = getClientRegistrar({
-        storage: mockStorage,
-      });
-      await clientRegistrar.getClient(
-        {
-          sessionId: "mySession",
-          redirectUrl: "https://example.com",
-        },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        }
-      );
-      await expect(
-        mockStorage.getForUser("mySession", "clientId", { secure: true })
-      ).resolves.toEqual(mockDefaultClientConfig().client_id);
-      await expect(
-        mockStorage.getForUser("mySession", "clientSecret", { secure: true })
-      ).resolves.toEqual(mockDefaultClientConfig().client_secret);
     });
 
     it("saves the registered client information for a public client in storage", async () => {

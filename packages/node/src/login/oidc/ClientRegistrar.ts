@@ -52,25 +52,23 @@ export default class ClientRegistrar implements IClientRegistrar {
     const [
       storedClientId,
       storedClientSecret,
-      // storedClientName,
+      storedClientName,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId", {
-        // FIXME: figure out how to persist secure storage at reload
         secure: false,
       }),
       this.storageUtility.getForUser(options.sessionId, "clientSecret", {
-        // FIXME: figure out how to persist secure storage at reload
         secure: false,
       }),
-      // this.storageUtility.getForUser(options.sessionId, "clientName", {
-      //   // FIXME: figure out how to persist secure storage at reload
-      //   secure: false,
-      // }),
+      this.storageUtility.getForUser(options.sessionId, "clientName", {
+        secure: false,
+      }),
     ]);
     if (storedClientId) {
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
+        clientName: storedClientName as string | undefined,
       };
     }
     const extendedOptions = { ...options };
@@ -122,6 +120,7 @@ export default class ClientRegistrar implements IClientRegistrar {
     return {
       clientId: registeredClient.metadata.client_id,
       clientSecret: registeredClient.metadata.client_secret,
+      clientName: registeredClient.metadata.client_name as string | undefined,
     };
   }
 }
