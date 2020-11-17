@@ -31,8 +31,9 @@ import {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
-  NotImplementedError,
+  ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
+import { Client, Issuer } from "openid-client";
 
 /**
  * @hidden
@@ -45,7 +46,7 @@ export default class ClientRegistrar implements IClientRegistrar {
 
   async getClient(
     options: IClientRegistrarOptions,
-    _issuerConfig: IIssuerConfig
+    issuerConfig: IIssuerConfig
   ): Promise<IClient> {
     // If client secret and/or client id are stored in storage, use those.
     const [
@@ -80,6 +81,47 @@ export default class ClientRegistrar implements IClientRegistrar {
         options.sessionId,
         "registrationAccessToken"
       ));
-    throw new NotImplementedError("getClient not implemented for Node");
+
+    // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
+    const issuer = await Issuer.discover(issuerConfig.issuer);
+
+    if (issuer.metadata.registration_endpoint === undefined) {
+      throw new ConfigurationError(
+        `Dynamic client registration cannot be performed, because issuer does not have a registration endpoint: ${JSON.stringify(
+          issuer.metadata
+        )}`
+      );
+    }
+
+    // The following is compliant with the example code, but seems to mismatch the
+    // type annotations.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const registeredClient: Client = await issuer.Client.register(
+      {
+        redirect_uris: [options.redirectUrl],
+        client_name: options.clientName,
+      },
+      {
+        initialAccessToken: extendedOptions.registrationAccessToken,
+      }
+    );
+    const infoToSave: Record<string, string> = {
+      clientId: registeredClient.metadata.client_id,
+    };
+    if (registeredClient.metadata.client_secret) {
+      infoToSave.clientSecret = registeredClient.metadata.client_secret;
+    }
+    await this.storageUtility.setForUser(
+      extendedOptions.sessionId,
+      infoToSave,
+      {
+        secure: true,
+      }
+    );
+    return {
+      clientId: registeredClient.metadata.client_id,
+      clientSecret: registeredClient.metadata.client_secret,
+    };
   }
 }

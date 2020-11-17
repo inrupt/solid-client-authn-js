@@ -37,7 +37,8 @@ import {
   IOidcHandler,
   IStorageUtility,
   ConfigurationError,
-  NotImplementedError,
+  IClient,
+  IOidcOptions,
 } from "@inrupt/solid-client-authn-core";
 
 function hasIssuer(
@@ -59,10 +60,10 @@ function hasRedirectUrl(
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
     @inject("storageUtility") private _storageUtility: IStorageUtility,
-    @inject("oidcHandler") private _oidcHandler: IOidcHandler,
+    @inject("oidcHandler") private oidcHandler: IOidcHandler,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private _clientRegistrar: IClientRegistrar
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async canHandle(options: ILoginOptions): Promise<boolean> {
@@ -84,6 +85,35 @@ export default class OidcLoginHandler implements ILoginHandler {
         )}`
       );
     }
-    throw new NotImplementedError("getClient not implemented for Node");
+
+    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
+      options.oidcIssuer
+    );
+    let clientInfo: IClient;
+    if (options.clientId !== undefined && options.clientId !== undefined) {
+      clientInfo = {
+        clientId: options.clientId,
+        clientSecret: options.clientSecret,
+      };
+    } else {
+      // If client id and secret aren't specified in the options, performe dynamic
+      // client registration.
+      clientInfo = await this.clientRegistrar.getClient(options, issuerConfig);
+    }
+
+    // Construct OIDC Options
+    const OidcOptions: IOidcOptions = {
+      issuer: options.oidcIssuer,
+      // TODO: differentiate if DPoP should be true
+      dpop: options.tokenType.toLowerCase() === "dpop",
+      redirectUrl: options.redirectUrl,
+      issuerConfiguration: issuerConfig,
+      client: clientInfo,
+      sessionId: options.sessionId,
+      handleRedirect: options.handleRedirect,
+    };
+
+    // Call proper OIDC Handler
+    await this.oidcHandler.handle(OidcOptions);
   }
 }

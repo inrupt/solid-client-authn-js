@@ -20,19 +20,26 @@
  */
 
 import "reflect-metadata";
-import {
-  StorageUtilityMock,
-  mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import ClientRegistrar from "./ClientRegistrar";
-import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfigFetcher";
+import {
+  IssuerConfigFetcherFetchConfigResponse,
+  mockDefaultIssuerConfig,
+  mockIssuerConfig,
+} from "./__mocks__/IssuerConfigFetcher";
+import {
+  mockClientConfig,
+  mockDefaultClientConfig,
+} from "./__mocks__/ClientRegistrar";
+
+jest.mock("openid-client");
 
 /**
  * Test for ClientRegistrar
  */
 describe("ClientRegistrar", () => {
   const defaultMocks = {
-    storage: StorageUtilityMock,
+    storage: mockStorageUtility({}),
   };
   function getClientRegistrar(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -41,23 +48,239 @@ describe("ClientRegistrar", () => {
   }
 
   describe("getClient", () => {
-    it("isn't implemented", async () => {
+    it("Fails if there is not registration endpoint", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuerConfig = mockIssuerConfig({
+        registration_endpoint: undefined,
+      });
+      const mockedIssuer = {
+        metadata: mockedIssuerConfig,
+      };
+      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+
+      // Run the test
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
-      const registrationUrl = "https://idp.com/register";
       await expect(
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          {
-            ...IssuerConfigFetcherFetchConfigResponse,
-            registrationEndpoint: registrationUrl,
-          }
+          IssuerConfigFetcherFetchConfigResponse
         )
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        "Dynamic client registration cannot be performed, because issuer does not have a registration endpoint"
+      );
+    });
+
+    it("retrieves client id and secret from storage if they are present", async () => {
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            mySession: {
+              clientId: "an id",
+              clientSecret: "a secret",
+            },
+          },
+          false
+        ),
+      });
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      expect(client.clientId).toEqual("an id");
+      expect(client.clientSecret).toEqual("a secret");
+    });
+
+    it("properly performs dynamic registration", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: {
+          register: jest.fn().mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar();
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      expect(client.clientId).toEqual(mockDefaultClientConfig().client_id);
+      expect(client.clientSecret).toEqual(
+        mockDefaultClientConfig().client_secret
+      );
+    });
+
+    it("retrieves a registration bearer token if present in storage", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: {
+          register: jest.fn().mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      const mockStorage = mockStorageUtility(
+        {
+          mySession: {
+            registrationAccessToken: "a token",
+          },
+        },
+        false
+      );
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      expect(mockedIssuer.Client.register).toHaveBeenCalledWith(
+        {
+          redirect_uris: ["https://example.com"],
+        },
+        {
+          initialAccessToken: "a token",
+        }
+      );
+    });
+
+    it("uses a registration bearer token if provided", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: {
+          register: jest.fn().mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar();
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+          registrationAccessToken: "a token",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      expect(mockedIssuer.Client.register).toHaveBeenCalledWith(
+        {
+          redirect_uris: ["https://example.com"],
+        },
+        {
+          initialAccessToken: "a token",
+        }
+      );
+    });
+
+    it("saves the registered client information in storage", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: {
+          register: jest.fn().mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      await expect(
+        mockStorage.getForUser("mySession", "clientId", { secure: true })
+      ).resolves.toEqual(mockDefaultClientConfig().client_id);
+      await expect(
+        mockStorage.getForUser("mySession", "clientSecret", { secure: true })
+      ).resolves.toEqual(mockDefaultClientConfig().client_secret);
+    });
+
+    it("saves the registered client information for a public client in storage", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedClientConfig = mockClientConfig({
+        client_secret: undefined,
+      });
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: {
+          register: jest.fn().mockResolvedValueOnce({
+            metadata: mockedClientConfig,
+          }),
+        },
+      };
+      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      await expect(
+        mockStorage.getForUser("mySession", "clientId", { secure: true })
+      ).resolves.toEqual(mockDefaultClientConfig().client_id);
+      await expect(
+        mockStorage.getForUser("mySession", "clientSecret", { secure: true })
+      ).resolves.toBeUndefined();
     });
   });
 });
