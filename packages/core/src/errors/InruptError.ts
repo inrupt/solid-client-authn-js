@@ -39,8 +39,7 @@
  export { NamedNode } from "rdf-js";
  *  Then we can either import that implementation in this code, or just import
  *  the types when needed here, e.g.:
- import type { NamedNode } from "rdf/js";
- *
+ import type { NamedNode } from "rdf-js";
  */
 import { NamedNode } from "n3";
 
@@ -55,20 +54,20 @@ export default class InruptError extends Error {
     messageOrIri: string | NamedNode | VocabTerm,
     messageParams?: string[],
     httpResponse?: Response & { ok: false },
-    appendHttpDetailsToMessage = true,
-    appendErrorIriToMessage = true
+    appendHttpDetails = true,
+    appendErrorIri = true
   ) {
     super(
-      InruptError.appendResponseDetails(
+      InruptError.appendHttpResponseDetails(
         typeof messageOrIri === "string"
           ? InruptError.substituteParams(messageOrIri, messageParams)
           : InruptError.appendErrorIri(
               InruptError.lookupErrorIri(messageOrIri, messageParams),
-              appendErrorIriToMessage,
-              messageOrIri as NamedNode
+              messageOrIri as NamedNode,
+              appendErrorIri
             ),
-        appendHttpDetailsToMessage,
-        httpResponse
+        httpResponse,
+        appendHttpDetails
       )
     );
 
@@ -87,6 +86,23 @@ export default class InruptError extends Error {
     return false;
   }
 
+  /**
+   * Given the IRI for an error message term, first check if it's a local
+   * Vocab Term (in which case we expect the error messages (in potentially
+   * multiple languages) to be accessible directly.
+   * If however the IRI is just a raw IRI, then attempt to lookup the term
+   * dynamically by simply de-referencing it and asking for RDF back (which we
+   * then need to parse and extract the relevant message string).
+   *
+   * NOTE: if we find the referenced term, but it has no explicit message
+   * values associated with it (e.g. the term `https://schema.org/Person` would
+   * resolve, but it has no Vocab Term-defined 'message' triples associated with
+   * it), then we return a fixed message string explaining this, but that
+   * includes the error IRI and the provided parameters.
+   *
+   * @param iri the IRI of the error message term from an RDF vocabulary
+   * @param messageParams parameters to replace expected placeholders in the message string
+   */
   static lookupErrorIri(
     iri: NamedNode | VocabTerm,
     messageParams?: string[]
@@ -109,26 +125,54 @@ export default class InruptError extends Error {
     }`;
   }
 
-  static appendResponseDetails(
+  /**
+   * Convenience method to append certain HTTP response details to our error
+   * message (e.g. the HTTP status code, or the status text).
+   *
+   * @param message the message string to append to
+   * @param response the optional HTTP response
+   * @param append flag telling us to append or not
+   */
+  static appendHttpResponseDetails(
     message: string,
-    appendContextToMessage: boolean,
-    errorResponse?: Response
+    response: Response | undefined,
+    append: boolean
   ): string {
-    if (appendContextToMessage && typeof errorResponse !== "undefined") {
-      return `${message} HTTP details: status code [${errorResponse.status}], status text [${errorResponse.statusText}].`;
+    if (append && typeof response !== "undefined") {
+      return `${message} HTTP details: status code [${response.status}], status text [${response.statusText}].`;
     }
 
     return message;
   }
 
+  /**
+   * Convenience method to append the error term's IRI value to our error
+   * message (which can be a very helpful reference, since it's basically the ID
+   * of the error message itself).
+   *
+   * @param message the message string to append to
+   * @param iri the IRI of the error term
+   * @param append flag telling us to append or not
+   */
   static appendErrorIri(
     message: string,
-    appendErrorIri: boolean,
-    iri: NamedNode
+    iri: NamedNode,
+    append: boolean
   ): string {
-    return appendErrorIri ? `${message} Error IRI: [${iri.value}].` : message;
+    return append ? `${message} Error IRI: [${iri.value}].` : message;
   }
 
+  /**
+   * Scans the specified message returning a copy with all placeholders replaced
+   * with their corresponding parameter value.
+   *
+   * Note: If the number of parameters provided does not exactly match the
+   * number of placeholders, we throw an exception explaining this (as we
+   * consider it a programmer error).
+   *
+   * @param message the message within which to replace placeholders
+   * @param params the parameters to replaces the placeholders
+   */
   static substituteParams(message: string, params?: string[]): string {
     let fullMessage = message;
     if (params !== undefined) {
