@@ -21,6 +21,7 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
+    "@inrupt/vocab-inrupt-common": "^0.6.3",
     "@types/jest": "^26.0.15",
     "@types/node-fetch": "^2.5.6",
     "eslint": "^7.13.0",
@@ -35,10 +36,12 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
+    "@inrupt/solid-common-vocab": "^0.5.1",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jjv": "^1.0.29",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash.clonedeep": "^4.5.6",
+    "@types/n3": "^1.4.4",
     "@types/node-jose": "^1.1.5",
     "@types/uuid": "^8.3.0",
     "build-module": "^1.0.7",
@@ -49,6 +52,7 @@
     "jose": "^3.0.2",
     "jsonwebtoken": "^8.5.1",
     "lodash.clonedeep": "^4.5.0",
+    "n3": "^1.6.4",
     "node-jose": "^2.0.0",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.4.0",

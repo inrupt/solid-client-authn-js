@@ -29,6 +29,7 @@
  */
 import Ajv from "ajv";
 import cloneDeep from "lodash.clonedeep";
+import InruptError from "../errors/InruptError";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
@@ -95,12 +96,14 @@ export default function validateSchema(
   /* eslint-enable @typescript-eslint/no-explicit-any */
   const item = cloneDeep(inputItem);
   const ajv = new Ajv();
+
   ajv.addKeyword("typeof", {
     compile: compileTypeof,
   });
   ajv.addKeyword("joinedStringOf", {
     compile: compileJoinedStringOf,
   });
+
   if (!ajv.validate(schema, item)) {
     let message = `${schema.title ? schema.title : "schema"} is invalid`;
     // istanbul ignore else: AJV's docs say this should always be set when validation fails,
@@ -111,7 +114,8 @@ export default function validateSchema(
         .map((err) => `\n${err.dataPath} ${err.message}`)
         .toString();
     }
-    throw new Error(message);
+
+    throw new InruptError(message);
   }
 
   // If all is true, apply modifications

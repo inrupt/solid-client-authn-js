@@ -119,5 +119,23 @@ describe("AggregateHandler", () => {
         mocks.aggregateMockHandler.handle("something")
       ).rejects.toThrow();
     });
+
+    it("should error when there is no correct handler, and handle invalid JSON", async () => {
+      const mocks = initMocks([
+        { canHandle: false, executeTime: 0, toReturn: "" },
+        { canHandle: false, executeTime: 0, toReturn: "" },
+      ]);
+
+      // Cyclical object that references itself causes JSON.stringify to throw!
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const obj: any = {
+        prop: {},
+      };
+      obj.prop = obj;
+
+      await expect(() =>
+        mocks.aggregateMockHandler.handle(obj)
+      ).rejects.toThrow();
+    });
   });
 });
