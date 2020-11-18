@@ -42,8 +42,11 @@ export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
  * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]
  * @param metadata the object to transform.
  * @returns an [[IIssuerConfig]] initialized from the metadata.
+ * @internal
  */
-function configFromIssuerMetadata(metadata: IssuerMetadata): IIssuerConfig {
+export function configFromIssuerMetadata(
+  metadata: IssuerMetadata
+): IIssuerConfig {
   // If the fields required as per https://openid.net/specs/openid-connect-discovery-1_0.html are missing,
   // throw an error.
   if (metadata.authorization_endpoint === undefined) {

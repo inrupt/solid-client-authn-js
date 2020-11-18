@@ -22,56 +22,101 @@
 import "reflect-metadata";
 import {
   StorageUtilityMock,
-  IClient,
-  IClientRegistrar,
-  IClientRegistrarOptions,
-  IIssuerConfigFetcher,
-  IIssuerConfig,
+  mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { JWK } from "jose/webcrypto/types";
+import { IdTokenClaims, TokenSet } from "openid-client";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
-import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
+import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
+import {
+  mockIssuerConfigFetcher,
+  mockDefaultIssuerConfig,
+} from "../__mocks__/IssuerConfigFetcher";
+import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 
-const mockIssuer = (): IIssuerConfig => {
+jest.mock("jose/util/generate_key_pair", () => {});
+jest.mock("openid-client");
+
+const mockJwk = (): JWK => {
   return {
-    issuer: "https://some.issuer",
-    authorizationEndpoint: "https://some.issuer/autorization",
-    tokenEndpoint: "https://some.issuer/token",
-    jwksUri: "https://some.issuer/keys",
-    claimsSupported: ["code", "openid"],
-    subjectTypesSupported: ["public", "pairwise"],
-    registrationEndpoint: "https://some.issuer/registration",
-    grantTypesSupported: ["authorization_code"],
+    kty: "EC",
+    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+    alg: "ES256",
+    crv: "P-256",
+    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
+    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
   };
 };
 
-function mockIssuerConfigFetcher(config: IIssuerConfig): IIssuerConfigFetcher {
-  return {
-    fetchConfig: async (): Promise<IIssuerConfig> => config,
-  };
-}
+const mockWebId = (): string => "https://my.webid/";
 
-const mockClient = (): IClient => {
+const mockIdTokenPayload = (): IdTokenClaims => {
   return {
-    clientId: "some client",
+    sub: "https://my.webid",
+    iss: "https://my.idp/",
+    aud: "https://resource.example.org",
+    exp: 1662266216,
+    iat: 1462266216,
+  };
+};
+// The key is the one returned by mockJwk(), and the payload is mockIdTokenPayload()
+const mockIdToken = (): string =>
+  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw";
+
+type AccessJwt = {
+  sub: string;
+  iss: string;
+  aud: string;
+  nbf: number;
+  exp: number;
+  cnf: {
+    jkt: string;
   };
 };
 
-function mockClientRegistrar(client: IClient): IClientRegistrar {
+const mockKeyBoundToken = (): AccessJwt => {
   return {
-    getClient: async (
-      _options: IClientRegistrarOptions,
-      _issuer: IIssuerConfig
-    ): Promise<IClient> => client,
+    sub: mockWebId(),
+    iss: mockDefaultIssuerConfig().issuer.toString(),
+    aud: "https://resource.example.org",
+    nbf: 1562262611,
+    exp: 1562266216,
+    cnf: {
+      jkt: mockJwk().kid as string,
+    },
   };
-}
+};
+
+const mockBearerAccessToken = (): string => "some token";
+
+const mockBearerTokens = (): TokenSet => {
+  return {
+    access_token: mockBearerAccessToken(),
+    id_token: mockIdToken(),
+    token_type: "Bearer",
+    expired: () => false,
+    claims: mockIdTokenPayload,
+  };
+};
+
+const mockDpopTokens = (): TokenSet => {
+  return {
+    access_token: JSON.stringify(mockKeyBoundToken()),
+    id_token: mockIdToken(),
+    token_type: "DPoP",
+    expired: () => false,
+    claims: mockIdTokenPayload,
+  };
+};
 
 const defaultMocks = {
   storageUtility: StorageUtilityMock,
   redirector: RedirectorMock,
-  sessionInfoManager: SessionInfoManagerMock,
-  clientRegistrar: mockClientRegistrar(mockClient()),
-  issuerConfigFetcher: mockIssuerConfigFetcher(mockIssuer()),
+  sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
+  clientRegistrar: mockDefaultClientRegistrar(),
+  issuerConfigFetcher: mockIssuerConfigFetcher(mockDefaultIssuerConfig()),
 };
 
 function getAuthCodeRedirectHandler(
@@ -133,6 +178,19 @@ describe("AuthCodeRedirectHandler", () => {
     });
   });
 
+  const mockDefaultRedirectStorage = () =>
+    mockStorageUtility({
+      someState: {
+        sessionId: "mySession",
+      },
+      mySession: {
+        issuer: "https://my.idp/",
+        codeVerifier: "some code verifier",
+        redirectUri: "https://my.app/redirect",
+        dpop: "true",
+      },
+    });
+
   describe("handle", () => {
     it("throws on non-redirect URL", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
@@ -143,14 +201,37 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
-    it("isn't implemented", async () => {
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler();
+    it("properly performs DPoP token exchange", async () => {
+      // Sets up the mock-up for token exchange
+      const { Issuer } = jest.requireMock("openid-client");
+      function clientConstructor() {
+        // @ts-ignore
+        (this.callbackParams = jest.fn().mockReturnValueOnce({
+          code: "someCode",
+          state: "someState",
+        })),
+          // @ts-ignore
+          (this.callback = jest.fn().mockResolvedValueOnce(mockDpopTokens()));
+      }
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: clientConstructor,
+      };
+      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedStorage = mockDefaultRedirectStorage();
 
-      await expect(
-        authCodeRedirectHandler.handle(
-          "https://coolsite.com/?code=someCode&state=oauth2_state_value"
-        )
-      ).rejects.toThrow("not implemented");
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      expect(result.sessionId).toEqual("mySession");
+      expect(result.isLoggedIn).toEqual(true);
+      expect(result.webId).toEqual(mockWebId());
     });
   });
 });

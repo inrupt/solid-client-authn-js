@@ -24,6 +24,7 @@ import {
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
 import { IssuerMetadata } from "openid-client";
+import { configFromIssuerMetadata } from "../IssuerConfigFetcher";
 
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: "https://idp.com",
@@ -42,7 +43,7 @@ export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
   ),
 };
 
-export const mockDefaultIssuerConfig = (): IssuerMetadata => {
+export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
   return {
     issuer: "https://my.idp/",
     authorization_endpoint: "https://my.idp/auth",
@@ -54,11 +55,30 @@ export const mockDefaultIssuerConfig = (): IssuerMetadata => {
   };
 };
 
-export const mockIssuerConfig = (
-  config: Record<string, string | undefined>
+export const mockIssuerMetadata = (
+  config: Partial<IssuerMetadata>
 ): IssuerMetadata => {
   return {
-    ...mockDefaultIssuerConfig(),
+    ...mockDefaultIssuerMetadata(),
     ...config,
   };
 };
+
+export const mockDefaultIssuerConfig = (): IIssuerConfig =>
+  configFromIssuerMetadata(mockDefaultIssuerMetadata());
+export const mockIssuerConfig = (
+  config: Partial<IIssuerConfig>
+): IIssuerConfig => {
+  return {
+    ...configFromIssuerMetadata(mockDefaultIssuerMetadata()),
+    ...config,
+  };
+};
+
+export function mockIssuerConfigFetcher(
+  config: IIssuerConfig
+): IIssuerConfigFetcher {
+  return {
+    fetchConfig: async (): Promise<IIssuerConfig> => config,
+  };
+}
