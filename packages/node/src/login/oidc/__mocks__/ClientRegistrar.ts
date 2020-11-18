@@ -25,6 +25,7 @@ import {
   IClientRegistrarOptions,
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
+import { ClientMetadata } from "openid-client";
 
 export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",
@@ -49,4 +50,41 @@ export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
     (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(PublicClientRegistrarResponse)
   ),
+};
+
+export const mockDefaultClientConfig = (): ClientMetadata => {
+  return {
+    client_id: "some client",
+    client_secret: "some secret",
+    redirect_uris: ["https://my.app/redirect"],
+    response_types: ["code"],
+  };
+};
+
+export const mockClientConfig = (
+  config: Record<string, string | undefined>
+): ClientMetadata => {
+  return {
+    ...mockDefaultClientConfig(),
+    ...config,
+  };
+};
+
+export const mockDefaultClient = (): IClient => {
+  return {
+    clientId: "a client id",
+    clientSecret: "a client secret",
+  };
+};
+
+export const mockDefaultClientRegistrar = (): IClientRegistrar => {
+  return {
+    getClient: async () => mockDefaultClient(),
+  };
+};
+
+export const mockClientRegistrar = (client: IClient): IClientRegistrar => {
+  return {
+    getClient: async () => client,
+  };
 };
