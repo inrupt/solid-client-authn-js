@@ -30,6 +30,7 @@
 import validateSchema from "../util/validateSchema";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
+import InruptError from "../errors/InruptError";
 
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
@@ -61,7 +62,7 @@ export default class StorageUtility implements IStorageUtility {
     try {
       return JSON.parse(stored);
     } catch (err) {
-      throw new Error(
+      throw new InruptError(
         `Data for user [${userId}] in [${
           secure ? "secure" : "unsecure"
         }] storage is corrupted - expected valid JSON, but got: ${stored}`
@@ -89,7 +90,7 @@ export default class StorageUtility implements IStorageUtility {
       : this.insecureStorage
     ).get(key);
     if (value === undefined && options?.errorIfNull) {
-      throw new Error(`[${key}] is not stored`);
+      throw new InruptError(`[${key}] is not stored`);
     }
     return value;
   }
@@ -123,7 +124,9 @@ export default class StorageUtility implements IStorageUtility {
     }
     value = userData[key];
     if (value === undefined && options?.errorIfNull) {
-      throw new Error(`Field [${key}] for user [${userId}] is not stored`);
+      throw new InruptError(
+        `Field [${key}] for user [${userId}] is not stored`
+      );
     }
     return value || undefined;
   }
@@ -199,7 +202,7 @@ export default class StorageUtility implements IStorageUtility {
             secure: options.secure,
           });
         }
-        throw new Error(
+        throw new InruptError(
           `Object ${JSON.stringify(
             invalidObject
           )} does not match expected schema: ${JSON.stringify(
