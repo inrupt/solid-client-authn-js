@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JSONWebKey } from "jose";
+import { JWK } from "jose/webcrypto/types";
 import { fetch } from "cross-fetch";
 import { NotImplementedError } from "@inrupt/solid-client-authn-core";
 
@@ -64,7 +64,7 @@ export async function buildDpopFetch(
   // TODO: We need to push this refresh token into a wrapper around the fetch,
   //  so dependent on that wrapper existing first!
   _refreshToken: string | undefined,
-  _dpopKey: JSONWebKey
+  _dpopKey: JWK
 ): Promise<fetchType> {
-  throw new NotImplementedError("buildDpopFetch not implemented for Node");
+  return fetch;
 }
