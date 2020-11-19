@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IStorage } from "../..";
+import { IStorage, StorageUtility } from "../..";
 import IStorageUtility from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
@@ -77,9 +77,14 @@ export const mockStorage = (
 ): IStorage => {
   const store = stored;
   return {
-    /* eslint-disable @typescript-eslint/no-unused-vars */
     get: async (key: string): Promise<string | undefined> => {
-      return store[key] ? (store[key] as string) : undefined;
+      if (store[key] === undefined) {
+        return undefined;
+      }
+      if (typeof store[key] === "string") {
+        return store[key] as string;
+      }
+      return JSON.stringify(store[key]);
     },
     set: async (key: string, value: string): Promise<void> => {
       store[key] = value;
@@ -94,91 +99,8 @@ export const mockStorageUtility = (
   stored: Record<string, string | Record<string, string>>,
   isSecure = false
 ): IStorageUtility => {
-  let nonSecureStore: typeof stored;
-  let secureStore: typeof stored;
   if (isSecure) {
-    secureStore = { ...stored };
-    nonSecureStore = {};
-  } else {
-    nonSecureStore = { ...stored };
-    secureStore = {};
+    return new StorageUtility(mockStorage(stored), mockStorage({}));
   }
-  return {
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    get: async (
-      key: string,
-      options?: { errorIfNull?: boolean; secure?: boolean }
-    ): Promise<string | undefined> => {
-      const store = options?.secure ? secureStore : nonSecureStore;
-      return new Promise((resolve) => {
-        if (!store[key]) {
-          resolve(undefined);
-        }
-        if (typeof store[key] === "string") {
-          resolve(store[key] as string);
-        }
-        resolve(JSON.stringify(store[key]));
-      });
-    },
-    set: async (
-      key: string,
-      value: string,
-      options?: { secure?: boolean }
-    ): Promise<void> => {
-      const store = options?.secure ? secureStore : nonSecureStore;
-      store[key] = value;
-    },
-    delete: async (
-      key: string,
-      options?: { secure?: boolean }
-    ): Promise<void> => {
-      const store = options?.secure ? secureStore : nonSecureStore;
-      delete store[key];
-    },
-    getForUser: async (
-      userId: string,
-      key: string,
-      options?: { errorIfNull?: boolean; secure?: boolean }
-    ): Promise<string | undefined> => {
-      const store = options?.secure ? secureStore : nonSecureStore;
-      return store[userId]
-        ? (store[userId] as Record<string, string>)[key]
-        : undefined;
-    },
-    setForUser: async (
-      userId: string,
-      values: Record<string, string>,
-      options?: { secure?: boolean }
-    ): Promise<void> => {
-      const store = options?.secure ? secureStore : nonSecureStore;
-      store[userId] = values;
-    },
-    deleteForUser: async (
-      userId: string,
-      key: string,
-      options?: { secure?: boolean }
-    ): Promise<void> => {
-      const store = options?.secure ? secureStore : nonSecureStore;
-      delete (store[userId] as Record<string, string>)[key];
-    },
-    deleteAllUserData: async (
-      userId: string,
-      options?: { secure?: boolean }
-    ): Promise<void> => {
-      const store = options?.secure ? secureStore : nonSecureStore;
-      delete store[userId];
-    },
-    safeGet: async (
-      key: string,
-      options?: Partial<{
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        schema?: Record<string, any>;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        postProcess?: (retrievedObject: any) => any;
-        userId?: string;
-      }>
-    ): Promise<string | undefined> =>
-      nonSecureStore[key] ? (nonSecureStore[key] as string) : undefined,
-    /* eslint-enable @typescript-eslint/no-unused-vars */
-  };
+  return new StorageUtility(mockStorage({}), mockStorage(stored));
 };

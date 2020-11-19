@@ -80,7 +80,7 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
-            mySession: {
+            "solidClientAuthenticationUser:mySession": {
               clientId: "an id",
               clientSecret: "a secret",
               clientName: "my client name",
@@ -160,7 +160,7 @@ describe("ClientRegistrar", () => {
       Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
       const mockStorage = mockStorageUtility(
         {
-          mySession: {
+          "solidClientAuthenticationUser:mySession": {
             registrationAccessToken: "a token",
           },
         },
