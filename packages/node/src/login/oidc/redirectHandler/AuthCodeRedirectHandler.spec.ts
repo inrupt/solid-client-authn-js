@@ -24,9 +24,12 @@ import {
   StorageUtilityMock,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { JWK } from "jose/webcrypto/types";
 import { IdTokenClaims, TokenSet } from "openid-client";
-import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
+import { JWK } from "jose";
+import {
+  AuthCodeRedirectHandler,
+  deriveWebidFromTokenPayload,
+} from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import {
@@ -35,11 +38,10 @@ import {
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 
-jest.mock("jose/util/generate_key_pair", () => {});
 jest.mock("openid-client");
 
-const mockJwk = (): JWK => {
-  return {
+const mockJwk = (): JWK.ECKey =>
+  JWK.asKey({
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
     alg: "ES256",
@@ -47,8 +49,7 @@ const mockJwk = (): JWK => {
     x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
     y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
     d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
-};
+  });
 
 const mockWebId = (): string => "https://my.webid/";
 
@@ -180,10 +181,10 @@ describe("AuthCodeRedirectHandler", () => {
 
   const mockDefaultRedirectStorage = () =>
     mockStorageUtility({
-      someState: {
+      "solidClientAuthenticationUser:someState": {
         sessionId: "mySession",
       },
-      mySession: {
+      "solidClientAuthenticationUser:mySession": {
         issuer: "https://my.idp/",
         codeVerifier: "some code verifier",
         redirectUri: "https://my.app/redirect",
@@ -202,16 +203,19 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("properly performs DPoP token exchange", async () => {
-      // Sets up the mock-up for token exchange
       const { Issuer } = jest.requireMock("openid-client");
       function clientConstructor() {
+        // this is untyped, which makes TS complain
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        (this.callbackParams = jest.fn().mockReturnValueOnce({
+        this.callbackParams = jest.fn().mockReturnValueOnce({
           code: "someCode",
           state: "someState",
-        })),
-          // @ts-ignore
-          (this.callback = jest.fn().mockResolvedValueOnce(mockDpopTokens()));
+        });
+        // this is untyped, which makes TS complain
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callback = jest.fn().mockResolvedValueOnce(mockDpopTokens());
       }
       const mockedIssuer = {
         metadata: mockDefaultIssuerConfig(),
@@ -229,9 +233,377 @@ describe("AuthCodeRedirectHandler", () => {
         "https://my.app/redirect?code=someCode&state=someState"
       );
 
+      // Check that the returned session is the one we expected
       expect(result.sessionId).toEqual("mySession");
       expect(result.isLoggedIn).toEqual(true);
       expect(result.webId).toEqual(mockWebId());
+
+      // Check that the session information is stored in the provided storage
+      await expect(
+        mockedStorage.getForUser("mySession", "webId", { secure: true })
+      ).resolves.toEqual(mockWebId());
+      await expect(
+        mockedStorage.getForUser("mySession", "isLoggedIn", { secure: true })
+      ).resolves.toEqual("true");
+
+      // TODO: test the fetch function once it is implemented.
+    });
+
+    it("properly performs Bearer token exchange", async () => {
+      // Sets up the mock-up for token exchange
+      const { Issuer } = jest.requireMock("openid-client");
+      function clientConstructor() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callbackParams = jest.fn().mockReturnValueOnce({
+          code: "someCode",
+          state: "someState",
+        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callback = jest.fn().mockResolvedValueOnce(
+          // NB: Here, a bearer token is returned
+          mockBearerTokens()
+        );
+      }
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: clientConstructor,
+      };
+      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedStorage = mockDefaultRedirectStorage();
+      await mockedStorage.setForUser("mySession", {
+        dpop: "false",
+      });
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      // TODO: test the fetch function once it is implemented.
+    });
+
+    it("stores the refresh token if one is returned", async () => {
+      // Sets up the mock-up for token exchange
+      const { Issuer } = jest.requireMock("openid-client");
+      function clientConstructor() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callbackParams = jest.fn().mockReturnValueOnce({
+          code: "someCode",
+          state: "someState",
+        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callback = jest.fn().mockResolvedValueOnce({
+          ...mockDpopTokens(),
+          // NB: a refresh token is returned, unlike in the default case.
+          refresh_token: "some refresh token",
+        });
+      }
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: clientConstructor,
+      };
+      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      // Check that the session information is stored in the provided storage
+      await expect(
+        mockedStorage.getForUser("mySession", "refreshToken", { secure: true })
+      ).resolves.toEqual("some refresh token");
+    });
+
+    it("throws if the IdP does not return an access token", async () => {
+      // Sets up the mock-up for token exchange
+      const { Issuer } = jest.requireMock("openid-client");
+      function clientConstructor() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callbackParams = jest.fn().mockReturnValueOnce({
+          code: "someCode",
+          state: "someState",
+        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callback = jest.fn().mockResolvedValueOnce({
+          ...mockDpopTokens(),
+          // NB: This overrides the expected value
+          access_token: undefined,
+        });
+      }
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: clientConstructor,
+      };
+      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow("The IdP did not return the expected tokens.");
+    });
+
+    it("throws if the IdP does not return an ID token", async () => {
+      // Sets up the mock-up for token exchange
+      const { Issuer } = jest.requireMock("openid-client");
+      function clientConstructor() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callbackParams = jest.fn().mockReturnValueOnce({
+          code: "someCode",
+          state: "someState",
+        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callback = jest.fn().mockResolvedValueOnce({
+          ...mockDpopTokens(),
+          // NB: This overrides the expected value
+          id_token: undefined,
+        });
+      }
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: clientConstructor,
+      };
+      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow("The IdP did not return the expected tokens.");
+    });
+
+    it("throws if no stored state matches the current request's", async () => {
+      const mockedStorage = mockStorageUtility({
+        "solidClientAuthenticationUser:mySession": {
+          issuer: "https://my.idp/",
+          codeVerifier: "some code verifier",
+          redirectUri: "https://my.app/redirect",
+          dpop: "true",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow(
+        "Could not retrieve the OIDC context from storage for request associated to state"
+      );
+    });
+
+    it("throws if no issuer is stored for the user", async () => {
+      const mockedStorage = mockStorageUtility({
+        "solidClientAuthenticationUser:someState": {
+          sessionId: "mySession",
+        },
+        "solidClientAuthenticationUser:mySession": {
+          codeVerifier: "some code verifier",
+          redirectUri: "https://my.app/redirect",
+          dpop: "true",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow(
+        "Could not retrieve the OIDC context from storage for request associated to state"
+      );
+    });
+
+    it("throws if no code verifier is stored for the user", async () => {
+      const mockedStorage = mockStorageUtility({
+        "solidClientAuthenticationUser:someState": {
+          sessionId: "mySession",
+        },
+        "solidClientAuthenticationUser:mySession": {
+          issuer: "https://my.idp/",
+          redirectUri: "https://my.app/redirect",
+          dpop: "true",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow(
+        "Could not retrieve the OIDC context from storage for request associated to state"
+      );
+    });
+
+    it("throws if no redirect uri is stored for the user", async () => {
+      const mockedStorage = mockStorageUtility({
+        "solidClientAuthenticationUser:someState": {
+          sessionId: "mySession",
+        },
+        "solidClientAuthenticationUser:mySession": {
+          issuer: "https://my.idp/",
+          codeVerifier: "some code verifier",
+          dpop: "true",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow(
+        "Could not retrieve the OIDC context from storage for request associated to state"
+      );
+    });
+
+    it("throws if no token type is stored for the user", async () => {
+      const mockedStorage = mockStorageUtility({
+        "solidClientAuthenticationUser:someState": {
+          sessionId: "mySession",
+        },
+        "solidClientAuthenticationUser:mySession": {
+          issuer: "https://my.idp/",
+          codeVerifier: "some code verifier",
+          redirectUri: "https://my.app/redirect",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow(
+        "Could not retrieve the OIDC context from storage for request associated to state"
+      );
+    });
+
+    it("throws if the Session manager cannot retrieve the session info", async () => {
+      // Sets up the mock-up for token exchange
+      const { Issuer } = jest.requireMock("openid-client");
+      function clientConstructor() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callbackParams = jest.fn().mockReturnValueOnce({
+          code: "someCode",
+          state: "someState",
+        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.callback = jest.fn().mockResolvedValueOnce(mockDpopTokens());
+      }
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerConfig(),
+        Client: clientConstructor,
+      };
+      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedStorage = mockDefaultRedirectStorage();
+      const mockedSessionManager = mockSessionInfoManager(mockedStorage);
+      mockedSessionManager.get = jest.fn().mockReturnValue(undefined);
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockedSessionManager,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow("Could not retrieve session: [mySession]");
+    });
+  });
+
+  describe("deriveWebidFromTokenPayload", () => {
+    it("extracts a WebID from a custom webid claim", async () => {
+      await expect(
+        deriveWebidFromTokenPayload({
+          webid: "https://my.webid/",
+          sub: "some sub",
+          iss: "https://my.idp/",
+          aud: "https://resource.example.org",
+          exp: 1662266216,
+          iat: 1462266216,
+        })
+      ).resolves.toEqual("https://my.webid/");
+    });
+
+    it("extracts a WebID from an IRI-like sub claim", async () => {
+      await expect(
+        deriveWebidFromTokenPayload({
+          sub: "https://my.webid/",
+          iss: "https://my.idp/",
+          aud: "https://resource.example.org",
+          exp: 1662266216,
+          iat: 1462266216,
+        })
+      ).resolves.toEqual("https://my.webid/");
+    });
+
+    it("throws if a WebID cannot be extracted", async () => {
+      await expect(
+        deriveWebidFromTokenPayload({
+          sub: "some sub",
+          iss: "https://my.idp/",
+          aud: "https://resource.example.org",
+          exp: 1662266216,
+          iat: 1462266216,
+        })
+      ).rejects.toThrow(
+        "The ID token has a malformed 'sub' claim ([some sub]), and no 'webid' claim."
+      );
     });
   });
 });

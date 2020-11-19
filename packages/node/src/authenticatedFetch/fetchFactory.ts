@@ -19,9 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JWK } from "jose/webcrypto/types";
+import { JWK } from "jose";
 import { fetch } from "cross-fetch";
-import { NotImplementedError } from "@inrupt/solid-client-authn-core";
 
 // node-fetch fetch has an additional property (isRedirect) which prevents using
 // `typeof fetch`.
@@ -64,7 +63,7 @@ export async function buildDpopFetch(
   // TODO: We need to push this refresh token into a wrapper around the fetch,
   //  so dependent on that wrapper existing first!
   _refreshToken: string | undefined,
-  _dpopKey: JWK
+  _dpopKey: JWK.ECKey
 ): Promise<fetchType> {
   return fetch;
 }
