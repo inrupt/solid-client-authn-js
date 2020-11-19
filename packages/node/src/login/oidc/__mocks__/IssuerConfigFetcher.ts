@@ -43,6 +43,8 @@ export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
   ),
 };
 
+// Note that this returns an instance of IssuerMetadata, which is the equivalent
+// of our IIssuerConfig for openid-client
 export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
   return {
     issuer: "https://my.idp/",

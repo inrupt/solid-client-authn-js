@@ -36,17 +36,14 @@ import {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
-import { Issuer, TokenSet } from "openid-client";
-import type { KeyObject } from "crypto";
-import { JWTPayload } from "jose/jwt/verify";
+import { IdTokenClaims, Issuer, TokenSet } from "openid-client";
+import { JWK } from "jose";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
   buildBearerFetch,
   buildDpopFetch,
   fetchType,
 } from "../../../authenticatedFetch/fetchFactory";
-// import generateKeyPair from "jose/util/generate_key_pair";
-const { default: generateKeyPair } = require("jose/util/generate_key_pair");
 
 type OidcContext = {
   sessionId: string;
@@ -64,43 +61,56 @@ type OidcContext = {
  * @param configFetcher
  * @returns Information stored about the client issuing the request
  */
-async function retrieveContextFromStorage(
+async function loadOidcContextFromStorage(
   oauthState: string,
   storageUtility: IStorageUtility,
   configFetcher: IIssuerConfigFetcher
 ): Promise<OidcContext> {
-  // Since we throw if not found, the type assertion are ok too
-  const storedSessionId = (await storageUtility.getForUser(
-    oauthState,
-    "sessionId",
-    {
-      errorIfNull: true,
-    }
-  )) as string;
+  try {
+    // Since we throw if not found, the type assertion are ok too
+    const storedSessionId = (await storageUtility.getForUser(
+      oauthState,
+      "sessionId",
+      {
+        errorIfNull: true,
+      }
+    )) as string;
 
-  const [issueIri, codeVerifier, storedRedirectIri, dpop] = (await Promise.all([
-    storageUtility.getForUser(storedSessionId, "issuer", { errorIfNull: true }),
-    storageUtility.getForUser(storedSessionId, "codeVerifier", {
-      errorIfNull: true,
-    }),
-    storageUtility.getForUser(storedSessionId, "redirectUri", {
-      errorIfNull: true,
-    }),
-    storageUtility.getForUser(storedSessionId, "dpop", { errorIfNull: true }),
-  ])) as string[];
+    const [
+      issuerIri,
+      codeVerifier,
+      storedRedirectIri,
+      dpop,
+    ] = (await Promise.all([
+      storageUtility.getForUser(storedSessionId, "issuer", {
+        errorIfNull: true,
+      }),
+      storageUtility.getForUser(storedSessionId, "codeVerifier", {
+        errorIfNull: true,
+      }),
+      storageUtility.getForUser(storedSessionId, "redirectUri", {
+        errorIfNull: true,
+      }),
+      storageUtility.getForUser(storedSessionId, "dpop", { errorIfNull: true }),
+    ])) as string[];
 
-  // Unlike openid-client, this looks up the configuration from storage
-  const issuerConfig = await configFetcher.fetchConfig(issueIri);
-  return {
-    sessionId: storedSessionId,
-    codeVerifier,
-    redirectUri: storedRedirectIri,
-    issuerConfig,
-    dpop: dpop === "true",
-  };
+    // Unlike openid-client, this looks up the configuration from storage
+    const issuerConfig = await configFetcher.fetchConfig(issuerIri);
+    return {
+      sessionId: storedSessionId,
+      codeVerifier,
+      redirectUri: storedRedirectIri,
+      issuerConfig,
+      dpop: dpop === "true",
+    };
+  } catch (e) {
+    throw new Error(
+      `Failed to retrieve OIDC context from storage for login request associated with state [${oauthState}]: ${e.toString()}`
+    );
+  }
 }
 
-async function saveSessionInfoInStorage(
+async function saveSessionInfoToStorage(
   storageUtility: IStorageUtility,
   sessionId: string,
   idToken: string,
@@ -134,24 +144,20 @@ async function saveSessionInfoInStorage(
  *
  * @param idToken the payload of the ID token from which the WebID can be extracted.
  * @returns a WebID extracted from the ID token.
+ * @internal
  */
-async function deriveWebidFromTokenPayload(
-  idToken: JWTPayload
+export async function getWebidFromTokenPayload(
+  idToken: IdTokenClaims
 ): Promise<string> {
-  if (idToken.webid !== undefined) {
+  if (idToken.webid !== undefined && typeof idToken.webid === "string") {
     return idToken.webid;
   }
   try {
-    if (idToken.sub === undefined) {
-      throw new Error(
-        `Bad ID token, missing a 'sub' claim: ${JSON.stringify(idToken)}`
-      );
-    }
     const webid = new URL(idToken.sub);
     return webid.href;
   } catch (e) {
     throw new Error(
-      `The ID token has a malformed 'sub' claim (${idToken.sub}), and no 'webid' claim.`
+      `The ID token has no 'webid' claim, and its 'sub' claim of [${idToken.sub}] is invalid as a URL - error [${e}].`
     );
   }
 }
@@ -203,7 +209,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       codeVerifier,
       redirectUri,
       dpop,
-    } = await retrieveContextFromStorage(
+    } = await loadOidcContextFromStorage(
       oauthState,
       this.storageUtility,
       this.issuerConfigFetcher
@@ -223,53 +229,65 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     });
 
     const params = client.callbackParams(redirectUrl);
-    let dpopKey: KeyObject;
-    let tokens: TokenSet;
+    let dpopKey: JWK.ECKey;
+    let tokenSet: TokenSet;
     let authFetch: typeof fetch;
 
     if (dpop) {
-      // const { privateKey } = await generateKeyPair('PS256');
-      // FIXME
-      dpopKey = (undefined as unknown) as KeyObject; // privateKey as KeyObject;
-      tokens = await client.callback(
+      dpopKey = await JWK.generate("EC", "P-256");
+      tokenSet = await client.callback(
         redirectUri,
         params,
         { code_verifier: codeVerifier },
-        { DPoP: dpopKey }
+        { DPoP: dpopKey.toJWK(true) }
       );
-      if (tokens.access_token === undefined || tokens.id_token === undefined) {
-        throw new Error("The IdP did not return the expected tokens.");
-      }
+    } else {
+      tokenSet = await client.callback(redirectUri, params, {
+        code_verifier: codeVerifier,
+      });
+    }
+    if (
+      tokenSet.access_token === undefined ||
+      tokenSet.id_token === undefined
+    ) {
+      // The error message is left minimal on purpose not to leak the tokens.
+      throw new Error("The IdP did not return the expected tokens.");
+    }
+    if (dpop) {
       authFetch = await buildDpopFetch(
-        tokens.access_token,
-        tokens.refresh_token,
+        tokenSet.access_token,
+        tokenSet.refresh_token,
         // TODO: buildDpopFetch isn't implemented yet
+        // TS thinks dpopKey isn't initialized, when it is.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         dpopKey as any
       );
     } else {
-      tokens = await client.callback(redirectUri, params, {
-        code_verifier: codeVerifier,
-      });
-      if (tokens.access_token === undefined || tokens.id_token === undefined) {
-        throw new Error("The IdP did not return the expected tokens.");
-      }
-      authFetch = buildBearerFetch(tokens.access_token, tokens.refresh_token);
+      authFetch = buildBearerFetch(
+        tokenSet.access_token,
+        tokenSet.refresh_token
+      );
     }
 
-    const webid = await deriveWebidFromTokenPayload(tokens.claims());
+    // tokenSet.claims() parses the ID token, validates its signature, and returns
+    // its payload as a JSON object.
+    const webid = await getWebidFromTokenPayload(tokenSet.claims());
 
-    await saveSessionInfoInStorage(
+    await saveSessionInfoToStorage(
       this.storageUtility,
       sessionId,
-      tokens.id_token,
+      tokenSet.id_token,
       webid,
       "true",
-      tokens.refresh_token
+      tokenSet.refresh_token
     );
 
     const sessionInfo = await this.sessionInfoManager.get(sessionId);
     if (!sessionInfo) {
-      throw new Error(`Could not retrieve session: [${sessionId}].`);
+      throw new Error(
+        `Could not find any session information associated with SessionID [${sessionId}] in our storage.`
+      );
     }
 
     return Object.assign(sessionInfo, {

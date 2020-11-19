@@ -90,7 +90,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       options.oidcIssuer
     );
     let clientInfo: IClient;
-    if (options.clientId !== undefined && options.clientId !== undefined) {
+    if (options.clientId !== undefined) {
       clientInfo = {
         clientId: options.clientId,
         clientSecret: options.clientSecret,

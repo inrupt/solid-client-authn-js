@@ -23,8 +23,8 @@ import "reflect-metadata";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import IssuerConfigFetcher from "./IssuerConfigFetcher";
 import {
-  mockDefaultIssuerConfig,
-  mockIssuerConfig,
+  mockDefaultIssuerMetadata,
+  mockIssuerMetadata,
 } from "./__mocks__/IssuerConfigFetcher";
 
 jest.mock("openid-client");
@@ -47,7 +47,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
     const { Issuer } = jest.requireMock("openid-client");
-    const mockedIssuerConfig = mockDefaultIssuerConfig();
+    const mockedIssuerConfig = mockDefaultIssuerMetadata();
     Issuer.discover = jest.fn().mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });
@@ -74,7 +74,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("throws an error if authorization_endpoint is missing", async () => {
     const { Issuer } = jest.requireMock("openid-client");
-    const mockedIssuerConfig = mockIssuerConfig({
+    const mockedIssuerConfig = mockIssuerMetadata({
       authorization_endpoint: undefined,
     });
     Issuer.discover = jest.fn().mockResolvedValueOnce({
@@ -92,7 +92,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("throws an error if token_endpoint is missing", async () => {
     const { Issuer } = jest.requireMock("openid-client");
-    const mockedIssuerConfig = mockIssuerConfig({
+    const mockedIssuerConfig = mockIssuerMetadata({
       token_endpoint: undefined,
     });
     Issuer.discover = jest.fn().mockResolvedValueOnce({
@@ -110,7 +110,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("throws an error if jwks_uri is missing", async () => {
     const { Issuer } = jest.requireMock("openid-client");
-    const mockedIssuerConfig = mockIssuerConfig({
+    const mockedIssuerConfig = mockIssuerMetadata({
       jwks_uri: undefined,
     });
     Issuer.discover = jest.fn().mockResolvedValueOnce({
@@ -128,7 +128,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("throws an error if claims_supported is missing", async () => {
     const { Issuer } = jest.requireMock("openid-client");
-    const mockedIssuerConfig = mockIssuerConfig({
+    const mockedIssuerConfig = mockIssuerMetadata({
       claims_supported: undefined,
     });
     Issuer.discover = jest.fn().mockResolvedValueOnce({
@@ -146,7 +146,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("throws an error if subject_types_supported is missing", async () => {
     const { Issuer } = jest.requireMock("openid-client");
-    const mockedIssuerConfig = mockIssuerConfig({
+    const mockedIssuerConfig = mockIssuerMetadata({
       subject_types_supported: undefined,
     });
     Issuer.discover = jest.fn().mockResolvedValueOnce({
