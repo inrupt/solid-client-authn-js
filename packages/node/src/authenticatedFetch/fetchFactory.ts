@@ -19,8 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JWK } from "jose";
+import { JWK, JWT } from "jose";
 import { fetch } from "cross-fetch";
+import { v4 } from "uuid";
 
 // node-fetch fetch has an additional property (isRedirect) which prevents using
 // `typeof fetch`.
@@ -51,6 +52,85 @@ export function buildBearerFetch(
   };
 }
 
+export type DpopHeaderPayload = {
+  htu: string;
+  htm: string;
+  jti: string;
+};
+
+/**
+ * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
+ *
+ * @param audience The URL to normalize.
+ * @returns The normalized URL as a string.
+ * @hidden
+ */
+export function normalizeHttpUriClaim(audience: string): string {
+  const cleanedAudience = new URL(audience);
+  cleanedAudience.hash = "";
+  cleanedAudience.username = "";
+  cleanedAudience.password = "";
+  return cleanedAudience.toString();
+}
+
+/**
+ * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
+ * based on the target URL and method, using the provided key.
+ *
+ * @param audience Target URL.
+ * @param method HTTP method allowed.
+ * @param key Key used to sign the token.
+ * @returns A JWT that can be used as a DPoP Authorization header.
+ */
+export function createDpopHeader(
+  audience: string,
+  method: string,
+  key: JWK.ECKey
+): string {
+  return JWT.sign(
+    {
+      htu: normalizeHttpUriClaim(audience),
+      htm: method.toUpperCase(),
+      jti: v4(),
+    },
+    key,
+    {
+      header: {
+        jwk: key.toJWK(false),
+        typ: "dpop+jwt",
+      },
+      algorithm: "ES256",
+    }
+  );
+}
+
+async function buildDpopFetchOptions(
+  targetUrl: string,
+  authToken: string,
+  dpopKey: JWK.ECKey,
+  defaultOptions?: RequestInit
+): Promise<RequestInit> {
+  return {
+    ...defaultOptions,
+    headers: {
+      ...defaultOptions?.headers,
+      Authorization: `DPoP ${authToken}`,
+      DPoP: createDpopHeader(
+        targetUrl,
+        defaultOptions?.method ?? "get",
+        dpopKey
+      ),
+    },
+  };
+}
+
+function isExpectedAuthError(statusCode: number): boolean {
+  // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
+  // a response failing because the provided credentials aren't accepted by the
+  // server can get a 401 or a 403 response.
+  return [401, 403].includes(statusCode);
+}
+
 /**
  * @param authToken a DPoP token.
  * @param _refreshToken An optional refresh token.
@@ -59,11 +139,30 @@ export function buildBearerFetch(
  * DPoP token, and adds a dpop header.
  */
 export async function buildDpopFetch(
-  _authToken: string,
+  authToken: string,
   // TODO: We need to push this refresh token into a wrapper around the fetch,
   //  so dependent on that wrapper existing first!
   _refreshToken: string | undefined,
-  _dpopKey: JWK.ECKey
+  dpopKey: JWK.ECKey
 ): Promise<fetchType> {
-  return fetch;
+  return async (url, options): Promise<Response> => {
+    const response = await fetch(
+      url,
+      await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)
+    );
+    const failedButNotExpectedAuthError =
+      !response.ok && !isExpectedAuthError(response.status);
+    const hasBeenRedirected = response.url !== url;
+    if (response.ok || failedButNotExpectedAuthError || !hasBeenRedirected) {
+      // If there hasn't been a redirection, or if there has been a non-auth related
+      // issue, it should be handled at the application level
+      return response;
+    }
+    // If the request failed for auth reasons, and has been redirected, we should
+    // replay it with a new DPoP token.
+    return fetch(
+      response.url,
+      await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
+    );
+  };
 }
