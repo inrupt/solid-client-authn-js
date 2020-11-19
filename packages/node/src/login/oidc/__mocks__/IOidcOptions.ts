@@ -40,3 +40,16 @@ export const standardOidcOptions: IOidcOptions = {
     clientId: "coolApp",
   },
 };
+
+export const mockDefaultOidcOptions = (): IOidcOptions => {
+  return { ...standardOidcOptions };
+};
+
+export const mockOidcOptions = (
+  overriddenOptions: Partial<IOidcOptions>
+): IOidcOptions => {
+  return {
+    ...standardOidcOptions,
+    ...overriddenOptions,
+  };
+};

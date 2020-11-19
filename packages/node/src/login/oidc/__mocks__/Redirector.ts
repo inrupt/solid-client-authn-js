@@ -32,3 +32,9 @@ export const RedirectorMock: jest.Mocked<IRedirector> = {
     }
   ),
 };
+
+export const mockRedirector = (): IRedirector => {
+  return {
+    redirect: jest.fn(),
+  };
+};

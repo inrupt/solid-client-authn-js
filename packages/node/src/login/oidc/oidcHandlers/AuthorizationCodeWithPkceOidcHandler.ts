@@ -32,9 +32,10 @@ import {
   IOidcOptions,
   IRedirector,
   IStorageUtility,
-  NotImplementedError,
 } from "@inrupt/solid-client-authn-core";
+import { Issuer, generators } from "openid-client";
 import { injectable, inject } from "tsyringe";
+import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
  * @hidden
@@ -56,7 +57,40 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
   }
 
-  async handle(_oidcLoginOptions: IOidcOptions): Promise<void> {
-    throw new NotImplementedError("Not implemented for Node");
+  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+    const issuer = new Issuer(
+      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration)
+    );
+    const client = new issuer.Client({
+      client_id: oidcLoginOptions.client.clientId,
+      client_secret: oidcLoginOptions.client.clientSecret,
+    });
+    const codeVerifier = generators.codeVerifier();
+    const codeChallenge = generators.codeChallenge(codeVerifier);
+    const state = generators.state();
+
+    const targetUrl = client.authorizationUrl({
+      code_challenge: codeChallenge,
+      state,
+      response_type: "code",
+      redirect_uri: oidcLoginOptions.redirectUrl,
+    });
+
+    // Stores information to be reused after reload
+    await Promise.all([
+      this.storageUtility.setForUser(state, {
+        sessionId: oidcLoginOptions.sessionId,
+      }),
+      this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+        codeVerifier,
+        issuer: oidcLoginOptions.issuer,
+        redirectUri: oidcLoginOptions.redirectUrl,
+        dpop: oidcLoginOptions.dpop ? "true" : "false",
+      }),
+    ]);
+
+    this.redirector.redirect(targetUrl, {
+      handleRedirect: oidcLoginOptions.handleRedirect,
+    });
   }
 }
