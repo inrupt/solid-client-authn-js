@@ -21,7 +21,7 @@
 
 import "reflect-metadata";
 import { describe, it } from "@jest/globals";
-import { JSONWebKey } from "jose";
+import { JWK } from "jose";
 import { fetch as crossFetch } from "cross-fetch";
 import { buildBearerFetch, buildDpopFetch } from "./fetchFactory";
 
@@ -94,9 +94,12 @@ describe("buildBearerFetch", () => {
 
 describe("buildDpopFetch", () => {
   it("isn't implemented", async () => {
-    await expect(
-      buildDpopFetch("myToken", undefined, (undefined as unknown) as JSONWebKey)
-    ).rejects.toThrow();
+    // TODO: buildDpopFetch isn't implemented
+    await buildDpopFetch(
+      "myToken",
+      undefined,
+      (undefined as unknown) as JWK.ECKey
+    );
   });
 });
 /* eslint-enable @typescript-eslint/ban-ts-comment */

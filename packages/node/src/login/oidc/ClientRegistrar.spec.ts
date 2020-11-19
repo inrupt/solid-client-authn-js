@@ -24,8 +24,8 @@ import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import ClientRegistrar from "./ClientRegistrar";
 import {
   IssuerConfigFetcherFetchConfigResponse,
-  mockDefaultIssuerConfig,
-  mockIssuerConfig,
+  mockDefaultIssuerMetadata,
+  mockIssuerMetadata,
 } from "./__mocks__/IssuerConfigFetcher";
 import {
   mockClientConfig,
@@ -51,7 +51,7 @@ describe("ClientRegistrar", () => {
     it("fails if there is not registration endpoint", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
-      const mockedIssuerConfig = mockIssuerConfig({
+      const mockedIssuerConfig = mockIssuerMetadata({
         registration_endpoint: undefined,
       });
       const mockedIssuer = {
@@ -107,7 +107,7 @@ describe("ClientRegistrar", () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
       const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
+        metadata: mockDefaultIssuerMetadata(),
         Client: {
           register: jest.fn().mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
@@ -150,7 +150,7 @@ describe("ClientRegistrar", () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
       const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
+        metadata: mockDefaultIssuerMetadata(),
         Client: {
           register: jest.fn().mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
@@ -194,7 +194,7 @@ describe("ClientRegistrar", () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
       const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
+        metadata: mockDefaultIssuerMetadata(),
         Client: {
           register: jest.fn().mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
@@ -232,7 +232,7 @@ describe("ClientRegistrar", () => {
         client_secret: undefined,
       });
       const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
+        metadata: mockDefaultIssuerMetadata(),
         Client: {
           register: jest.fn().mockResolvedValueOnce({
             metadata: mockedClientConfig,
