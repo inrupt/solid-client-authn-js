@@ -60,7 +60,7 @@ describe("SessionInfoManager", () => {
 
       const storageMock = mockStorageUtility(
         {
-          [sessionId]: {
+          [`solidClientAuthenticationUser:${sessionId}`]: {
             webId,
             isLoggedIn: "true",
           },

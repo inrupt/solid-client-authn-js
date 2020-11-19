@@ -222,10 +222,10 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("retrieves the code verifier from memory", async () => {
       const storage = mockStorageUtility({
-        oauth2_state_value: {
+        "solidClientAuthenticationUser:oauth2_state_value": {
           sessionId: "userId",
         },
-        userId: {
+        "solidClientAuthenticationUser:userId": {
           codeVerifier: "a",
           redirectUri: "b",
           issuer: "someIssuer",
@@ -268,7 +268,11 @@ describe("AuthCodeRedirectHandler", () => {
       >;
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockStorageUtility({}),
+        storageUtility: mockStorageUtility({
+          "solidClientAuthenticationUser:oauth2_state_value": {
+            sessionId: "mySession",
+          },
+        }),
       });
       const redirectInfo = await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
@@ -301,13 +305,14 @@ describe("AuthCodeRedirectHandler", () => {
       >;
 
       const storage = mockStorageUtility({
-        oauth2StateValue: {
+        "solidClientAuthenticationUser:oauth2StateValue": {
           sessionId: "mySession",
         },
-        mySession: {
+        "solidClientAuthenticationUser:mySession": {
           dpop: "true",
           issuer: mockIssuer().issuer.toString(),
           codeVerifier: "some code verifier",
+          redirectUri: "https://some.redirect.uri",
         },
       });
 

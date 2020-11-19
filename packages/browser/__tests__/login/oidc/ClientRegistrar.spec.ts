@@ -170,7 +170,7 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
-            mySession: {
+            "solidClientAuthenticationUser:mySession": {
               clientId: "an id",
               clientSecret: "a secret",
             },
@@ -232,7 +232,7 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
-            mySession: {
+            "solidClientAuthenticationUser:mySession": {
               registrationAccessToken: "some token",
             },
           },

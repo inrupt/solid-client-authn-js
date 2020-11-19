@@ -163,7 +163,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(
           mockStorageUtility(
             {
-              mySession: { ...sessionInfo },
+              "solidClientAuthenticationUser:mySession": { ...sessionInfo },
             },
             true
           )

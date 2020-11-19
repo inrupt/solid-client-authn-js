@@ -136,7 +136,14 @@ export default class StorageUtility implements IStorageUtility {
     values: Record<string, string>,
     options?: { secure?: boolean }
   ): Promise<void> {
-    const userData = await this.getUserData(userId, options?.secure);
+    let userData: Record<string, string>;
+    try {
+      userData = await this.getUserData(userId, options?.secure);
+    } catch {
+      // if reading the user data throws, the data is corrupted, and we want to write over it
+      userData = {};
+    }
+
     await this.setUserData(userId, { ...userData, ...values }, options?.secure);
   }
 
