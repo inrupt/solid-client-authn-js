@@ -39,6 +39,7 @@ import {
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 
 jest.mock("openid-client");
+jest.mock("cross-fetch");
 
 const mockJwk = (): JWK.ECKey =>
   JWK.asKey({
@@ -246,7 +247,13 @@ describe("AuthCodeRedirectHandler", () => {
         mockedStorage.getForUser("mySession", "isLoggedIn", { secure: true })
       ).resolves.toEqual("true");
 
-      // TODO: test the fetch function once it is implemented.
+      // Check that the returned fetch function is authenticated
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValueOnce({} as Response);
+      await result.fetch("https://some.url");
+      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
+        "DPoP"
+      );
     });
 
     it("properly performs Bearer token exchange", async () => {
@@ -282,11 +289,17 @@ describe("AuthCodeRedirectHandler", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await authCodeRedirectHandler.handle(
+      const result = await authCodeRedirectHandler.handle(
         "https://my.app/redirect?code=someCode&state=someState"
       );
 
-      // TODO: test the fetch function once it is implemented.
+      // Check that the returned fetch function is authenticated
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValueOnce({} as Response);
+      await result.fetch("https://some.url");
+      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
+        "Bearer"
+      );
     });
 
     it("stores the refresh token if one is returned", async () => {
