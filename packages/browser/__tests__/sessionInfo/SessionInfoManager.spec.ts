@@ -68,7 +68,7 @@ describe("SessionInfoManager", () => {
 
       const storageMock = mockStorageUtility(
         {
-          [sessionId]: {
+          [`solidClientAuthenticationUser:${sessionId}`]: {
             webId,
             isLoggedIn: "true",
           },
@@ -115,7 +115,7 @@ describe("SessionInfoManager", () => {
     it("clears local secure storage from user data", async () => {
       const mockStorage = mockStorageUtility(
         {
-          mySession: {
+          "solidClientAuthenticationUser:mySession": {
             key: "value",
           },
         },
@@ -133,7 +133,7 @@ describe("SessionInfoManager", () => {
     it("clears local unsecure storage from user data", async () => {
       const mockStorage = mockStorageUtility(
         {
-          mySession: {
+          "solidClientAuthenticationUser:mySession": {
             key: "value",
           },
         },
