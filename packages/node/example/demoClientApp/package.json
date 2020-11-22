@@ -1,7 +1,7 @@
 {
-  "name": "solid-client-authn-node-demo",
+  "name": "@inrupt/demo-app-authn-node",
   "version": "1.0.0",
-  "description": "Demo showing how to use the Solid Client AuthN Node library",
+  "description": "Demo client application for authentication in NodeJS",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint \\\"src/**/*.js\\\"",
@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/inrupt/solid-client-authn#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "cross-fetch": "^3.0.6",
+    "express": "^4.17.1",
+    "loglevel": "^1.7.0"
   },
   "devDependencies": {
     "@inrupt/eslint-config-base": "0.0.4",

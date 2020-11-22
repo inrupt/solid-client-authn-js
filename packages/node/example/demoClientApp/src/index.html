@@ -30,7 +30,16 @@
         background: #e6f4f9;
       }
 
-      #labelStatus[role="alert"] {
+      #logout {
+        background: lightblue;
+      }
+
+      #labelLoginStatus[role="alert"] {
+        padding-left: 1rem;
+        color: purple;
+      }
+
+      #labelLogoutStatus[role="alert"] {
         padding-left: 1rem;
         color: purple;
       }
@@ -57,103 +66,46 @@
       <h1>Demo Client Application: solid-client-authn-node
         <span class=logo>   <img src="https://docs.inrupt.com/images/inrupt-logo.svg" loading="lazy" width="120" alt="Inrupt Logo" class="image"> </span>
       </h1>
-      <h3>Showing how to log into a Solid Pod and fetch protected resources</h3>
+      <h3>Showing how to log into a Solid Pod and fetch protected resources using NodeJS</h3>
     </header>
 
     <section id="login" class="panel">
       <div class="row">
-        <label id="labelLogin" for="btnLogin">1. Click the button to log into
+        <label id="labelLogin" for="btnLogin">1. Click the button to log into Identity Provider
           <span id="identity_provider">[<a id="oidcIssuer" target="_blank" href="{{oidcIssuer}}">{{oidcIssuer}}</a>]</span>:
         </label>
         <button onclick="location.href = '/login?oidcIssuer={{oidcIssuer}}';" name="btnLogin" id="btnLogin">Login</button>
-        <p id="labelStatus">{{labelStatus}}</p>
+        <p id="labelLoginStatus"><strong>{{labelLoginStatus}}</strong></p>
       </div>
     </section>
 
     <div id="read" class="panel">
       <div class="row">
-        <label id="writelabel" for="name">2. Write your name: </label>
-        <input
-                type="text"
-                id="input_name"
-                name="name"
-                size="50"
-                value="Your name here"
-        />
-        <button name="btnWrite" id="btnWrite">Write to Profile</button>
-      </div>
-
-      <dl class="display">
-        <dt>Writing status:&nbsp</dt>
-        <strong><span id="labelWriteStatus">[...not written yet...]</span></strong>
-      </dl>
-    </div>
-
-    <div id="read" class="panel">
-      <div class="row">
-        <label id="readlabel" for="webID"
-        >3. Read back name (anyone's!) from their WebID:
+        <label id="labelReadProfile" for="webID"
+        >2. Read private folder from (anyone's!) WebID:
         </label>
         <input
                 type="url"
                 id="webID"
                 name="webID"
                 size="50"
-                value="...not logged in yet - but enter any WebID to read from its profile..."
+                value="{{webIdToRead}}"
         />
-        <button name="btnRead" id="btnRead">Read Profile</button>
+        <button onclick="const resource = document.getElementById('webID').value; location.href = `/fetch?resource=${resource}`;" name="btnRead" id="btnRead">Read Profile</button>
       </div>
       <dl class="display">
-        <dt>Formatted Name (FN) read from Pod:&nbsp</dt>
-        <strong><span id="labelFN">[...not read yet...]</span></strong>
+        <dt>Response from Pod:&nbsp</dt>
+        <strong><span id="labelResponse">[{{resourceValueRetrieved}}]</span></strong>
       </dl>
     </div>
+
+    <section id="logout" class="panel">
+      <div class="row">
+        <label id="labelLogout" for="btnLogin">3. Click the button to logout:
+        </label>
+        <button onclick="location.href = '/logout';" name="btnLogout" id="btnLogout">Logout</button>
+        <p id="labelLogoutStatus">{{labelLogoutStatus}}</p>
+      </div>
+    </section>
   </body>
-
-
-<!--  <body>-->
-
-<!--    <section id="login" class="panel">-->
-<!--      <div class="row">-->
-<!--        <label id="labelLogin" for="btnLogin">1. Click the button to log into Identity Provider <a id="oidcIssuer" href="https://broker.demo-ess.inrupt.com/">https://broker.demo-ess.inrupt.com/</a>: </label>-->
-<!--        <button name="btnLogin" id="btnLogin">Login</button>-->
-<!--        <p id="labelStatus"></p>-->
-<!--      </div>-->
-<!--    </section>-->
-
-<!--    <p>-->
-<!--      Logging in to-->
-<!--      <a id="oidcIssuer" href="https://broker.demo-ess.inrupt.com/"-->
-<!--        >https://broker.demo-ess.inrupt.com/</a-->
-<!--      >:-->
-<!--      <-->
-<!--    </p>-->
-
-<!--    <div>-->
-<!--      WebID of the user you just logged in as:-->
-<!--      <strong><span id="WebId"></span></strong>-->
-<!--    </div>-->
-
-<!--&lt;!&ndash;    <script type="text/javascript" src="/solid-client-authn.bundle.js"></script>&ndash;&gt;-->
-<!--&lt;!&ndash;    <script type="text/javascript" src="/Session.js"></script>&ndash;&gt;-->
-<!--    <script>-->
-<!--      // const session = new Session();-->
-<!--      //-->
-<!--      // // When loading the page, check if you are being redirected from the IdP-->
-<!--      // session-->
-<!--      //   .handleIncomingRedirect(window.location.href)-->
-<!--      //   .then((sessionInfo) => {-->
-<!--      //     if(!sessionInfo.isLoggedIn) {-->
-<!--      //       // If you are not logged in, initiate the login-->
-<!--      //       session.login({-->
-<!--      //         redirectUrl: "http://localhost:3001/",-->
-<!--      //         oidcIssuer: document.getElementById("oidcIssuer").innerHTML,-->
-<!--      //       });-->
-<!--      //     } else {-->
-<!--      //       // The page was loaded after a redirect from the IdP-->
-<!--      //       document.getElementById("WebId").innerHTML = sessionInfo.webId;-->
-<!--      //     }-->
-<!--      //   });-->
-<!--    </script>-->
-<!--  </body>-->
 </html>

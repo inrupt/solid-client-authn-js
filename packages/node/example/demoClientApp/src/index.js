@@ -21,6 +21,12 @@
 
 const fs = require("fs");
 const path = require("path");
+const log = require("loglevel");
+const fetch = require("cross-fetch");
+
+log.setLevel("TRACE");
+
+// The only import we need from the Node AuthN library is the Session class.
 const { Session } = require("../../../dist/Session");
 
 const clientApplicationName = "S-C-A Node Demo Client App";
@@ -34,27 +40,29 @@ const PORT = 3001;
 const indexHtml = "./src/index.html";
 
 const markerOidcIssuer = "{{oidcIssuer}}";
+const markerLoginStatus = "{{labelLoginStatus}}";
+const markerLogoutStatus = "{{labelLogoutStatus}}";
+const markerWebIdToRead = "{{webIdToRead}}";
+const markerResourceValueRetrieved = "{{resourceValueRetrieved}}";
+
 const oidcIssuer = "https://broker.demo-ess.inrupt.com/";
 
-const markerStatus = "{{labelStatus}}";
+// We expect these values to be overwritten as the users interacts!
+let loggedOutStatus = "";
+let webIdToRead =
+  "...not logged in yet - but enter any WebID to read from its profile...";
+let resourceValueRetrieved = "...not read yet...";
+let loginStatus = "Not logged in yet.";
 
 // Initialised when the server comes up and is running...
 let session;
 
 app.get("/", (req, res) => {
-  res
-    .writeHead(200, { "Content-Type": "text/html" })
-    .write(statusIndexHtml(""));
-  res.end();
-});
+  loginStatus = session.info.isLoggedIn
+    ? `Logged in as [${session.info.webId}]`
+    : `Not logged in`;
 
-app.get("/Session.js", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../../dist/Session.js"));
-});
-
-app.get("/redirect", (req, res) => {
-  // The page was loaded after a redirect from the IdP.
-  document.getElementById("WebId").innerHTML = session.info.webId;
+  sendHtmlResponse(res);
 });
 
 app.get("/login", async (req, res, next) => {
@@ -63,40 +71,127 @@ app.get("/login", async (req, res, next) => {
   if (!session.info.isLoggedIn) {
     if (oidcIssuer) {
       try {
-
-        const x = await session.login({
+        await session.login({
           redirectUrl: "http://localhost:3001/redirect",
           oidcIssuer,
           clientName: clientApplicationName,
+          handleRedirect: (data) => {
+            res.writeHead(302, {
+              location: data,
+            });
+            res.end();
+          },
         });
 
-        console.log(`Node login returned: [${x}]`);
-        res.writeHead(302, {
-          Location: 'your/404/path.html'
-        });
-        res.end();
+        log.info(
+          `SCA Node 'login()' called, expect redirect function to redirect the user's browser now...`
+        );
       } catch (error) {
-        res
-          .writeHead(200, { "Content-Type": "text/html" })
-          .write(statusIndexHtml(`Login attempt failed: ${error}`));
-        res.end();
+        log.error(`SCA Node 'login()' failed: [${error}]`);
+        loginStatus = `Login attempt failed: [${error}]`;
+        sendHtmlResponse();
       }
     } else {
-      next(new Error("No OIDC issuer provided to login API (expected 'oidcIssuer' query parameter)!"));
+      next(
+        new Error(
+          "No OIDC issuer provided to login API (expected 'oidcIssuer' query parameter)!"
+        )
+      );
     }
   } else {
   }
 });
 
-app.get("/fetch", (req, res) => {});
+app.get("/redirect", async (req, res) => {
+  try {
+    log.debug(`Got redirect: [${getRequestFullUrl(req)}]`);
+    await session
+      .handleIncomingRedirect(getRequestFullUrl(req))
+      .then((info) => {
+        log.info(`Got INFO: [${JSON.stringify(info, null, 2)}]`);
+        if (info === undefined) {
+          loginStatus = `Received another redirect, but we are already handling a previous redirect request - so ignoring this one!`;
+          sendHtmlResponse(res);
+        } else if (info.isLoggedIn) {
+          webIdToRead = info.webId;
+          loginStatus = `Successfully logged in with WebID: [${info.webId}].`
+          sendHtmlResponse(res);
+        } else {
+          loginStatus = `Got redirect, but not logged in.`;
+          sendHtmlResponse(res);
+        }
+      });
+  } catch (error) {
+    log.error(`Error processing redirect: [${error}]`);
+
+    // TODO: PMcB55: Remove this when Login works! Just hard-coding this to test
+    //  rendering valid response.
+    webIdToRead = "https://pmcb55x.solidcommunity.net/profile/card#me";
+
+    loginStatus = `Redirected, but failed to handle this as an OAuth2 redirect: [${error}]`;
+    sendHtmlResponse(res);
+  }
+});
+
+app.get("/fetch", async (req, res) => {
+  const resourceToFetch = req.query.resource;
+  // Update our state with whatever was in the query param.
+  webIdToRead = resourceToFetch;
+
+  try {
+    // Validate our input as a URL first.
+    new URL(resourceToFetch);
+
+    try {
+      const response = await fetch(resourceToFetch, {
+        method: 'GET',
+        // headers: {
+        //   'Content-Type': 'text/turtle'
+        // }
+      });
+
+      resourceValueRetrieved = await response.text();
+    } catch (error) {
+      resourceValueRetrieved = `Failed to fetch from resource [${resourceToFetch}]: ${error}`;
+    }
+  } catch (error) {
+    resourceValueRetrieved = `Resource to fetch must be a valid URL - got an error parsing [${resourceToFetch}]: ${error}`;
+  }
+
+  log.info(`Fetch response: [${resourceValueRetrieved}]`);
+  sendHtmlResponse(res);
+});
+
+app.get("/logout", async (req, res, next) => {
+  try {
+    await session.logout();
+    webIdToRead =
+      "...logged out - WebID will be initialized when you log in again...";
+    resourceValueRetrieved = "...not read yet...";
+
+    loginStatus = `Logged out.`;
+    sendHtmlResponse(res);
+  } catch (error) {
+    log.error(`Logout processing failed: [${error}]`);
+    loginStatus = `Logout processing failed: [${error}]`;
+    sendHtmlResponse(res);
+  }
+});
 
 app.listen(PORT, async () => {
   session = new Session();
 
-  console.log(
+  log.info(
     `[${clientApplicationName}] successfully initialized - listening at: [http://localhost:${PORT}]`
   );
 });
+
+function sendHtmlResponse(response) {
+  response
+    .writeHead(200, { "Content-Type": "text/html" })
+    .write(statusIndexHtml());
+  response.end();
+}
 
 function getRequestFullUrl(request) {
   return request.protocol + "://" + request.get("host") + request.originalUrl;
@@ -106,11 +201,21 @@ function getRequestQueryParam(request, param) {
   return request.protocol + "://" + request.get("host") + request.originalUrl;
 }
 
-function updateIndexHtml(search, replace) {
-  const data = fs.readFileSync(indexHtml, "utf8");
-  return search ? data.split(search).join(replace) : data;
-}
+function statusIndexHtml() {
+  return fs
+    .readFileSync(indexHtml, "utf8")
+    .split(markerOidcIssuer)
+    .join(oidcIssuer)
 
-function statusIndexHtml(status) {
-  return updateIndexHtml(markerOidcIssuer, oidcIssuer).split(markerStatus).join(status);
+    .split(markerLoginStatus)
+    .join(loginStatus)
+
+    .split(markerLogoutStatus)
+    .join(loggedOutStatus)
+
+    .split(markerWebIdToRead)
+    .join(webIdToRead)
+
+    .split(markerResourceValueRetrieved)
+    .join(resourceValueRetrieved);
 }
