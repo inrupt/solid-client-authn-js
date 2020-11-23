@@ -74,6 +74,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       state,
       response_type: "code",
       redirect_uri: oidcLoginOptions.redirectUrl,
+      code_challenge_method: "S256",
     });
 
     // Stores information to be reused after reload

@@ -216,19 +216,18 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     );
 
     const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
-
     // This should also retrieve the client from storage
     const clientInfo: IClient = await this.clientRegistrar.getClient(
       { sessionId },
       issuerConfig
     );
-
     const client = new issuer.Client({
       client_id: clientInfo.clientId,
       client_secret: clientInfo.clientSecret,
     });
 
     const params = client.callbackParams(redirectUrl);
+
     let dpopKey: JWK.ECKey;
     let tokenSet: TokenSet;
     let authFetch: typeof fetch;
@@ -238,12 +237,13 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       tokenSet = await client.callback(
         redirectUri,
         params,
-        { code_verifier: codeVerifier },
+        { code_verifier: codeVerifier, state: oauthState },
         { DPoP: dpopKey.toJWK(true) }
       );
     } else {
       tokenSet = await client.callback(redirectUri, params, {
         code_verifier: codeVerifier,
+        state: oauthState,
       });
     }
     if (
