@@ -19,29 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// The following "empty" extensions ensure self-containment of the "browser" module
-// documentation. Type annotations are available on the core interface at compile
-// time, which ensures they are properly referenced in the documentation.
-// Additionnally, users don't need to import anything from the "core" module.
-
-import {
-  ILoginInputOptions as ILoginInputOptionsCore,
-  ISessionInfo as ISessionInfoCore,
-  IStorage as IStorageCore,
-} from "@inrupt/solid-client-authn-core";
-
 export { Session, ISessionOptions } from "./Session";
 
 export { SessionManager, ISessionManagerOptions } from "./SessionManager";
 export { getClientAuthenticationWithDependencies } from "./dependencies";
 
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
+export type {
+  ILoginInputOptions,
+  ISessionInfo,
+  IStorage,
   NotImplementedError,
   ConfigurationError,
   InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
-export type ILoginInputOptions = ILoginInputOptionsCore;
-export type ISessionInfo = ISessionInfoCore;
-export type IStorage = IStorageCore;
