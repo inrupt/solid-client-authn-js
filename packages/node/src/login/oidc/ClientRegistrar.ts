@@ -34,6 +34,7 @@ import {
   ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
 import { Client, Issuer } from "openid-client";
+import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 
 /**
  * @hidden
@@ -54,15 +55,9 @@ export default class ClientRegistrar implements IClientRegistrar {
       storedClientSecret,
       storedClientName,
     ] = await Promise.all([
-      this.storageUtility.getForUser(options.sessionId, "clientId", {
-        secure: false,
-      }),
-      this.storageUtility.getForUser(options.sessionId, "clientSecret", {
-        secure: false,
-      }),
-      this.storageUtility.getForUser(options.sessionId, "clientName", {
-        secure: false,
-      }),
+      this.storageUtility.getForUser(options.sessionId, "clientId"),
+      this.storageUtility.getForUser(options.sessionId, "clientSecret"),
+      this.storageUtility.getForUser(options.sessionId, "clientName"),
     ]);
     if (storedClientId) {
       return {
@@ -81,7 +76,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       ));
 
     // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
-    const issuer = await Issuer.discover(issuerConfig.issuer);
+    const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
 
     if (issuer.metadata.registration_endpoint === undefined) {
       throw new ConfigurationError(
@@ -110,13 +105,7 @@ export default class ClientRegistrar implements IClientRegistrar {
     if (registeredClient.metadata.client_secret) {
       infoToSave.clientSecret = registeredClient.metadata.client_secret;
     }
-    await this.storageUtility.setForUser(
-      extendedOptions.sessionId,
-      infoToSave,
-      {
-        secure: true,
-      }
-    );
+    await this.storageUtility.setForUser(extendedOptions.sessionId, infoToSave);
     return {
       clientId: registeredClient.metadata.client_id,
       clientSecret: registeredClient.metadata.client_secret,
