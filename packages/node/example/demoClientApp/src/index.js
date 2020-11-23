@@ -20,9 +20,7 @@
  */
 
 const fs = require("fs");
-const path = require("path");
 const log = require("loglevel");
-const fetch = require("cross-fetch");
 
 log.setLevel("TRACE");
 
@@ -57,7 +55,7 @@ let loginStatus = "Not logged in yet.";
 // Initialised when the server comes up and is running...
 let session;
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   loginStatus = session.info.isLoggedIn
     ? `Logged in as [${session.info.webId}]`
     : `Not logged in`;
@@ -114,7 +112,7 @@ app.get("/redirect", async (req, res) => {
           sendHtmlResponse(res);
         } else if (info.isLoggedIn) {
           webIdToRead = info.webId;
-          loginStatus = `Successfully logged in with WebID: [${info.webId}].`
+          loginStatus = `Successfully logged in with WebID: [${info.webId}].`;
           sendHtmlResponse(res);
         } else {
           loginStatus = `Got redirect, but not logged in.`;
@@ -143,8 +141,8 @@ app.get("/fetch", async (req, res) => {
     new URL(resourceToFetch);
 
     try {
-      const response = await fetch(resourceToFetch, {
-        method: 'GET',
+      const response = await session.fetch(resourceToFetch, {
+        method: "GET",
         // headers: {
         //   'Content-Type': 'text/turtle'
         // }
@@ -162,7 +160,7 @@ app.get("/fetch", async (req, res) => {
   sendHtmlResponse(res);
 });
 
-app.get("/logout", async (req, res, next) => {
+app.get("/logout", async (_req, res, next) => {
   try {
     await session.logout();
     webIdToRead =
