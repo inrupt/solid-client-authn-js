@@ -116,6 +116,7 @@ export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
     authorization_endpoint: config.authorizationEndpoint,
     jwks_uri: config.jwksUri,
     token_endpoint: config.tokenEndpoint,
+    registration_endpoint: config.registrationEndpoint,
     subject_types_supported: config.subjectTypesSupported,
     claims_supported: config.claimsSupported,
     token_endpoint_auth_signing_alg_values_supported:
@@ -153,7 +154,6 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     const issuerConfig: IIssuerConfig = configFromIssuerMetadata(
       oidcIssuer.metadata
     );
-
     // Update store with fetched config
     await this.storageUtility.set(
       IssuerConfigFetcher.getLocalStorageKey(issuer),

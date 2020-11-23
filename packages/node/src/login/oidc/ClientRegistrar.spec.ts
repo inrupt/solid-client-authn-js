@@ -57,7 +57,7 @@ describe("ClientRegistrar", () => {
       const mockedIssuer = {
         metadata: mockedIssuerConfig,
       };
-      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      Issuer.mockReturnValue(mockedIssuer);
 
       // Run the test
       const clientRegistrar = getClientRegistrar({
@@ -114,7 +114,7 @@ describe("ClientRegistrar", () => {
           }),
         },
       };
-      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      Issuer.mockReturnValue(mockedIssuer);
       const mockStorage = mockStorageUtility({});
 
       // Run the test
@@ -139,11 +139,56 @@ describe("ClientRegistrar", () => {
 
       // Check that the client information have been saved in storage
       await expect(
-        mockStorage.getForUser("mySession", "clientId", { secure: true })
+        mockStorage.getForUser("mySession", "clientId")
       ).resolves.toEqual(mockDefaultClientConfig().client_id);
       await expect(
-        mockStorage.getForUser("mySession", "clientSecret", { secure: true })
+        mockStorage.getForUser("mySession", "clientSecret")
       ).resolves.toEqual(mockDefaultClientConfig().client_secret);
+    });
+
+    it("retrieves client information from storage after dynamic registration", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerMetadata(),
+        Client: {
+          register: jest
+            .fn()
+            .mockResolvedValueOnce({
+              metadata: mockDefaultClientConfig(),
+            })
+            .mockRejectedValue("Cannot register more than once"),
+        },
+      };
+      Issuer.mockReturnValue(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      let client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      // Re-request for the client. If not returned from memory, the mock throws.
+      client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+
+      // Check that the returned value is what we expect
+      expect(client.clientId).toEqual(mockDefaultClientConfig().client_id);
     });
 
     it("retrieves a registration bearer token if present in storage", async () => {
@@ -157,7 +202,7 @@ describe("ClientRegistrar", () => {
           }),
         },
       };
-      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      Issuer.mockReturnValue(mockedIssuer);
       const mockStorage = mockStorageUtility(
         {
           "solidClientAuthenticationUser:mySession": {
@@ -201,7 +246,7 @@ describe("ClientRegistrar", () => {
           }),
         },
       };
-      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      Issuer.mockReturnValue(mockedIssuer);
 
       // Run the test
       const clientRegistrar = getClientRegistrar();
@@ -239,7 +284,7 @@ describe("ClientRegistrar", () => {
           }),
         },
       };
-      Issuer.discover = jest.fn().mockResolvedValueOnce(mockedIssuer);
+      Issuer.mockReturnValue(mockedIssuer);
       const mockStorage = mockStorageUtility({});
 
       // Run the test
@@ -256,10 +301,10 @@ describe("ClientRegistrar", () => {
         }
       );
       await expect(
-        mockStorage.getForUser("mySession", "clientId", { secure: true })
+        mockStorage.getForUser("mySession", "clientId")
       ).resolves.toEqual(mockDefaultClientConfig().client_id);
       await expect(
-        mockStorage.getForUser("mySession", "clientSecret", { secure: true })
+        mockStorage.getForUser("mySession", "clientSecret")
       ).resolves.toBeUndefined();
     });
   });
