@@ -193,6 +193,32 @@ describe("AuthCodeRedirectHandler", () => {
       },
     });
 
+  const setupOidcClientMock = (tokenSet: TokenSet) => {
+    const { Issuer } = jest.requireMock("openid-client");
+    function clientConstructor() {
+      // this is untyped, which makes TS complain
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.callbackParams = jest.fn().mockReturnValueOnce({
+        code: "someCode",
+        state: "someState",
+      });
+      // this is untyped, which makes TS complain
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.callback = jest.fn().mockResolvedValueOnce(tokenSet);
+    }
+    const mockedIssuer = {
+      metadata: mockDefaultIssuerConfig(),
+      Client: clientConstructor,
+    };
+    Issuer.mockReturnValueOnce(mockedIssuer);
+  };
+
+  const setupDefaultOidcClientMock = () => {
+    setupOidcClientMock(mockDpopTokens());
+  };
+
   describe("handle", () => {
     it("throws on non-redirect URL", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
@@ -204,25 +230,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("properly performs DPoP token exchange", async () => {
-      const { Issuer } = jest.requireMock("openid-client");
-      function clientConstructor() {
-        // this is untyped, which makes TS complain
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callbackParams = jest.fn().mockReturnValueOnce({
-          code: "someCode",
-          state: "someState",
-        });
-        // this is untyped, which makes TS complain
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callback = jest.fn().mockResolvedValueOnce(mockDpopTokens());
-      }
-      const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
-        Client: clientConstructor,
-      };
-      Issuer.mockReturnValueOnce(mockedIssuer);
+      setupDefaultOidcClientMock();
       const mockedStorage = mockDefaultRedirectStorage();
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -257,27 +265,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("properly performs Bearer token exchange", async () => {
-      // Sets up the mock-up for token exchange
-      const { Issuer } = jest.requireMock("openid-client");
-      function clientConstructor() {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callbackParams = jest.fn().mockReturnValueOnce({
-          code: "someCode",
-          state: "someState",
-        });
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callback = jest.fn().mockResolvedValueOnce(
-          // NB: Here, a bearer token is returned
-          mockBearerTokens()
-        );
-      }
-      const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
-        Client: clientConstructor,
-      };
-      Issuer.mockReturnValueOnce(mockedIssuer);
+      setupOidcClientMock(mockBearerTokens());
       const mockedStorage = mockDefaultRedirectStorage();
       await mockedStorage.setForUser("mySession", {
         dpop: "false",
@@ -303,28 +291,9 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("stores the refresh token if one is returned", async () => {
-      // Sets up the mock-up for token exchange
-      const { Issuer } = jest.requireMock("openid-client");
-      function clientConstructor() {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callbackParams = jest.fn().mockReturnValueOnce({
-          code: "someCode",
-          state: "someState",
-        });
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callback = jest.fn().mockResolvedValueOnce({
-          ...mockDpopTokens(),
-          // NB: a refresh token is returned, unlike in the default case.
-          refresh_token: "some refresh token",
-        });
-      }
-      const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
-        Client: clientConstructor,
-      };
-      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedTokens = mockDpopTokens();
+      mockedTokens.refresh_token = "some refresh token";
+      setupOidcClientMock(mockedTokens);
       const mockedStorage = mockDefaultRedirectStorage();
 
       // Run the test
@@ -344,28 +313,9 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("throws if the IdP does not return an access token", async () => {
-      // Sets up the mock-up for token exchange
-      const { Issuer } = jest.requireMock("openid-client");
-      function clientConstructor() {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callbackParams = jest.fn().mockReturnValueOnce({
-          code: "someCode",
-          state: "someState",
-        });
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callback = jest.fn().mockResolvedValueOnce({
-          ...mockDpopTokens(),
-          // NB: This overrides the expected value
-          access_token: undefined,
-        });
-      }
-      const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
-        Client: clientConstructor,
-      };
-      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedTokens = mockDpopTokens();
+      mockedTokens.access_token = undefined;
+      setupOidcClientMock(mockedTokens);
       const mockedStorage = mockDefaultRedirectStorage();
 
       // Run the test
@@ -382,28 +332,9 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("throws if the IdP does not return an ID token", async () => {
-      // Sets up the mock-up for token exchange
-      const { Issuer } = jest.requireMock("openid-client");
-      function clientConstructor() {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callbackParams = jest.fn().mockReturnValueOnce({
-          code: "someCode",
-          state: "someState",
-        });
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callback = jest.fn().mockResolvedValueOnce({
-          ...mockDpopTokens(),
-          // NB: This overrides the expected value
-          id_token: undefined,
-        });
-      }
-      const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
-        Client: clientConstructor,
-      };
-      Issuer.mockReturnValueOnce(mockedIssuer);
+      const mockedTokens = mockDpopTokens();
+      mockedTokens.id_token = undefined;
+      setupOidcClientMock(mockedTokens);
       const mockedStorage = mockDefaultRedirectStorage();
 
       // Run the test
@@ -420,24 +351,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("throws if the Session manager cannot retrieve the session info", async () => {
-      // Sets up the mock-up for token exchange
-      const { Issuer } = jest.requireMock("openid-client");
-      function clientConstructor() {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callbackParams = jest.fn().mockReturnValueOnce({
-          code: "someCode",
-          state: "someState",
-        });
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.callback = jest.fn().mockResolvedValueOnce(mockDpopTokens());
-      }
-      const mockedIssuer = {
-        metadata: mockDefaultIssuerConfig(),
-        Client: clientConstructor,
-      };
-      Issuer.mockReturnValueOnce(mockedIssuer);
+      setupDefaultOidcClientMock();
       const mockedStorage = mockDefaultRedirectStorage();
       const mockedSessionManager = mockSessionInfoManager(mockedStorage);
       mockedSessionManager.get = jest.fn().mockReturnValue(undefined);
@@ -454,6 +368,24 @@ describe("AuthCodeRedirectHandler", () => {
         )
       ).rejects.toThrow(
         "Could not find any session information associated with SessionID [mySession] in our storage"
+      );
+    });
+
+    it("throws if no session ID matches the request state", async () => {
+      setupDefaultOidcClientMock();
+      const mockedStorage = mockStorageUtility({});
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState"
+        )
+      ).rejects.toThrow(
+        "No stored session is associated to the state [someState]"
       );
     });
   });

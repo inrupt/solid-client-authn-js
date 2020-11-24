@@ -25,14 +25,22 @@
  */
 
 import { injectable, inject } from "tsyringe";
-import { IStorageUtility } from "@inrupt/solid-client-authn-core";
-import { ITokenRequester } from "../TokenRequester";
+import {
+  IClient,
+  IClientRegistrar,
+  IIssuerConfigFetcher,
+  IStorageUtility,
+  loadOidcContextFromStorage,
+} from "@inrupt/solid-client-authn-core";
+import { Issuer, TokenSet } from "openid-client";
+import { JWK } from "jose";
+import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
  * @hidden
  */
 export interface ITokenRefresher {
-  refresh(localUserId: string): Promise<void>;
+  refresh(localUserId: string, refreshToken?: string): Promise<TokenSet>;
 }
 
 /**
@@ -42,21 +50,65 @@ export interface ITokenRefresher {
 export default class TokenRefresher implements ITokenRefresher {
   constructor(
     @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("tokenRequester") private tokenRequester: ITokenRequester
+    @inject("issuerConfigFetcher")
+    private issuerConfigFetcher: IIssuerConfigFetcher,
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
-  async refresh(localUserId: string): Promise<void> {
-    // Get the refresh token and the issuer
-    const refreshToken = await this.storageUtility.getForUser(
-      localUserId,
-      "refreshToken",
-      { errorIfNull: true, secure: true }
+  async refresh(
+    sessionId: string,
+    refreshToken?: string,
+    dpopKey?: JWK.ECKey
+  ): Promise<TokenSet> {
+    const oidcContext = await loadOidcContextFromStorage(
+      sessionId,
+      this.storageUtility,
+      this.issuerConfigFetcher
     );
-    /* eslint-disable camelcase */
-    await this.tokenRequester.request(localUserId, {
-      grant_type: "refresh_token",
-      refresh_token: refreshToken as string, // This cast can be safely made because getForUser will error if refreshToken is null
+    const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
+    // This should also retrieve the client from storage
+    const clientInfo: IClient = await this.clientRegistrar.getClient(
+      { sessionId },
+      oidcContext.issuerConfig
+    );
+    const client = new issuer.Client({
+      client_id: clientInfo.clientId,
+      client_secret: clientInfo.clientSecret,
     });
-    /* eslint-enable camelcase */
+
+    if (refreshToken === undefined) {
+      // TODO: in a next PR, look up storage for a refresh token
+      throw new Error(
+        `Missing a refresh token to refresh the access token associated to the session [${sessionId}]`
+      );
+    }
+
+    if (oidcContext.dpop && dpopKey === undefined) {
+      throw new Error(
+        `The key bound to the access token associated to the session [${sessionId}] must be provided to refresh it.`
+      );
+    }
+
+    const tokenSet = await client.refresh(refreshToken, {
+      DPoP: dpopKey?.toJWK(true),
+    });
+
+    if (
+      tokenSet.access_token === undefined ||
+      tokenSet.id_token === undefined
+    ) {
+      // The error message is left minimal on purpose not to leak the tokens.
+      throw new Error("The IdP did not return the expected tokens.");
+    }
+
+    if (tokenSet.refresh_token !== undefined) {
+      await this.storageUtility.setForUser(
+        sessionId,
+        { refreshToken: tokenSet.refresh_token },
+        { secure: true }
+      );
+    }
+
+    return tokenSet;
   }
 }

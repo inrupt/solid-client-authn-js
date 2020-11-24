@@ -128,7 +128,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       redirectUri,
       dpop,
     } = await loadOidcContextFromStorage(
-      oauthState,
+      sessionId,
       this.storageUtility,
       this.issuerConfigFetcher
     );
