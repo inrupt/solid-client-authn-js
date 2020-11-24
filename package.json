@@ -51,7 +51,7 @@
     "prettier": "2.2.0",
     "rollup": "^2.26.11",
     "rollup-plugin-typescript2": "^0.29.0",
-    "ts-jest": "^25.5.1",
+    "ts-jest": "^26.4.4",
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.1",
