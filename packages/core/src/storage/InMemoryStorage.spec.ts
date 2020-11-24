@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import InMemoryStorage from "../../src/storage/InMemoryStorage";
+import InMemoryStorage from "./InMemoryStorage";
 
 describe("InMemoryStorage", () => {
   const nodeStorage = new InMemoryStorage();

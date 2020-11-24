@@ -21,8 +21,13 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import StorageUtility from "../../src/storage/StorageUtility";
-import { mockStorage } from "../../src/storage/__mocks__/StorageUtility";
+import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
+import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
+import StorageUtility, {
+  loadOidcContextFromStorage,
+  saveSessionInfoToStorage,
+} from "./StorageUtility";
+import { mockStorage, mockStorageUtility } from "./__mocks__/StorageUtility";
 
 describe("StorageUtility", () => {
   const defaultMocks = {
@@ -436,5 +441,187 @@ describe("StorageUtility", () => {
       const result = await storageUtility.safeGet(key, { userId });
       expect(result).toEqual({ jsonKey: "some json value" });
     });
+  });
+});
+
+describe("loadOidcContextFromStorage", () => {
+  it("throws if no stored state matches the current request's", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "https://my.idp/",
+        codeVerifier: "some code verifier",
+        redirectUri: "https://my.app/redirect",
+        dpop: "true",
+      },
+    });
+
+    await expect(
+      loadOidcContextFromStorage(
+        "some unexisting state",
+        mockedStorage,
+        mockIssuerConfigFetcher(mockIssuerConfig())
+      )
+    ).rejects.toThrow(
+      "Failed to retrieve OIDC context from storage for login request associated with state"
+    );
+  });
+
+  it("throws if no issuer is stored for the user", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:someState": {
+        sessionId: "mySession",
+      },
+      "solidClientAuthenticationUser:mySession": {
+        codeVerifier: "some code verifier",
+        redirectUri: "https://my.app/redirect",
+        dpop: "true",
+      },
+    });
+
+    await expect(
+      loadOidcContextFromStorage(
+        "someState",
+        mockedStorage,
+        mockIssuerConfigFetcher(mockIssuerConfig())
+      )
+    ).rejects.toThrow(
+      "Failed to retrieve OIDC context from storage for login request associated with state"
+    );
+  });
+
+  it("throws if no code verifier is stored for the user", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:someState": {
+        sessionId: "mySession",
+      },
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "https://my.idp/",
+        redirectUri: "https://my.app/redirect",
+        dpop: "true",
+      },
+    });
+
+    await expect(
+      loadOidcContextFromStorage(
+        "someState",
+        mockedStorage,
+        mockIssuerConfigFetcher(mockIssuerConfig())
+      )
+    ).rejects.toThrow(
+      "Failed to retrieve OIDC context from storage for login request associated with state"
+    );
+  });
+
+  it("throws if no redirect uri is stored for the user", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:someState": {
+        sessionId: "mySession",
+      },
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "https://my.idp/",
+        codeVerifier: "some code verifier",
+        dpop: "true",
+      },
+    });
+
+    await expect(
+      loadOidcContextFromStorage(
+        "someState",
+        mockedStorage,
+        mockIssuerConfigFetcher(mockIssuerConfig())
+      )
+    ).rejects.toThrow(
+      "Failed to retrieve OIDC context from storage for login request associated with state"
+    );
+  });
+
+  it("throws if no token type is stored for the user", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:someState": {
+        sessionId: "mySession",
+      },
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "https://my.idp/",
+        codeVerifier: "some code verifier",
+        redirectUri: "https://my.app/redirect",
+      },
+    });
+
+    await expect(
+      loadOidcContextFromStorage(
+        "someState",
+        mockedStorage,
+        mockIssuerConfigFetcher(mockIssuerConfig())
+      )
+    ).rejects.toThrow(
+      "Failed to retrieve OIDC context from storage for login request associated with state"
+    );
+  });
+
+  it("Returns the value in storage if available", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:someState": {
+        sessionId: "mySession",
+      },
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "https://my.idp/",
+        codeVerifier: "some code verifier",
+        redirectUri: "https://my.app/redirect",
+        dpop: "true",
+      },
+    });
+
+    await expect(
+      loadOidcContextFromStorage(
+        "someState",
+        mockedStorage,
+        mockIssuerConfigFetcher(mockIssuerConfig())
+      )
+    ).resolves.toEqual({
+      sessionId: "mySession",
+      issuerConfig: mockIssuerConfig(),
+      codeVerifier: "some code verifier",
+      redirectUri: "https://my.app/redirect",
+      dpop: true,
+    });
+  });
+});
+
+describe("saveSessionInfoToStorage", () => {
+  it("saves the provided session info in the provided storage", async () => {
+    const mockedStorage = mockStorageUtility({});
+    await saveSessionInfoToStorage(
+      mockedStorage,
+      "some session",
+      "an ID token",
+      "https://my.webid",
+      "true"
+    );
+
+    await expect(
+      mockedStorage.getForUser("some session", "idToken", { secure: true })
+    ).resolves.toEqual("an ID token");
+    await expect(
+      mockedStorage.getForUser("some session", "webId", { secure: true })
+    ).resolves.toEqual("https://my.webid");
+    await expect(
+      mockedStorage.getForUser("some session", "isLoggedIn", { secure: true })
+    ).resolves.toEqual("true");
+  });
+
+  it("saves the refresh token if provided in the given storage", async () => {
+    const mockedStorage = mockStorageUtility({});
+    await saveSessionInfoToStorage(
+      mockedStorage,
+      "some session",
+      "an ID token",
+      "https://my.webid",
+      "true",
+      "a refresh token"
+    );
+
+    await expect(
+      mockedStorage.getForUser("some session", "refreshToken", { secure: true })
+    ).resolves.toEqual("a refresh token");
   });
 });
