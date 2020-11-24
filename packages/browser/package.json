@@ -51,7 +51,7 @@
     "eslint": "^7.12.1",
     "jest": "^26.6.3",
     "license-checker": "^25.0.1",
-    "ts-jest": "^25.5.1",
+    "ts-jest": "^26.4.4",
     "ts-loader": "^8.0.10",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
