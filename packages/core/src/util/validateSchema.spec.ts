@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import validateSchema from "../../src/util/validateSchema";
+import validateSchema from "./validateSchema";
 
 describe("validateSchema", () => {
   it("should return true if the given data matches the given schema", () => {
