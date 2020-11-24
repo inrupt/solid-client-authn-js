@@ -24,6 +24,7 @@ import "reflect-metadata";
 import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
 import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
 import StorageUtility, {
+  getSessionIdFromOauthState,
   loadOidcContextFromStorage,
   saveSessionInfoToStorage,
 } from "./StorageUtility";
@@ -444,33 +445,19 @@ describe("StorageUtility", () => {
   });
 });
 
-describe("loadOidcContextFromStorage", () => {
-  it("throws if no stored state matches the current request's", async () => {
-    const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:mySession": {
-        issuer: "https://my.idp/",
-        codeVerifier: "some code verifier",
-        redirectUri: "https://my.app/redirect",
-        dpop: "true",
-      },
-    });
+describe("getSessionIdFromOauthState", () => {
+  it("returns undefined if no stored state matches the current request's", async () => {
+    const mockedStorage = mockStorageUtility({});
 
     await expect(
-      loadOidcContextFromStorage(
-        "some unexisting state",
-        mockedStorage,
-        mockIssuerConfigFetcher(mockIssuerConfig())
-      )
-    ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage for login request associated with state"
-    );
+      getSessionIdFromOauthState(mockedStorage, "some unexisting state")
+    ).resolves.toBeUndefined();
   });
+});
 
+describe("loadOidcContextFromStorage", () => {
   it("throws if no issuer is stored for the user", async () => {
     const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:someState": {
-        sessionId: "mySession",
-      },
       "solidClientAuthenticationUser:mySession": {
         codeVerifier: "some code verifier",
         redirectUri: "https://my.app/redirect",
@@ -480,20 +467,17 @@ describe("loadOidcContextFromStorage", () => {
 
     await expect(
       loadOidcContextFromStorage(
-        "someState",
+        "mySession",
         mockedStorage,
         mockIssuerConfigFetcher(mockIssuerConfig())
       )
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage for login request associated with state"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]"
     );
   });
 
   it("throws if no code verifier is stored for the user", async () => {
     const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:someState": {
-        sessionId: "mySession",
-      },
       "solidClientAuthenticationUser:mySession": {
         issuer: "https://my.idp/",
         redirectUri: "https://my.app/redirect",
@@ -503,20 +487,17 @@ describe("loadOidcContextFromStorage", () => {
 
     await expect(
       loadOidcContextFromStorage(
-        "someState",
+        "mySession",
         mockedStorage,
         mockIssuerConfigFetcher(mockIssuerConfig())
       )
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage for login request associated with state"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]"
     );
   });
 
   it("throws if no redirect URI is stored for the user", async () => {
     const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:someState": {
-        sessionId: "mySession",
-      },
       "solidClientAuthenticationUser:mySession": {
         issuer: "https://my.idp/",
         codeVerifier: "some code verifier",
@@ -526,20 +507,17 @@ describe("loadOidcContextFromStorage", () => {
 
     await expect(
       loadOidcContextFromStorage(
-        "someState",
+        "mySession",
         mockedStorage,
         mockIssuerConfigFetcher(mockIssuerConfig())
       )
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage for login request associated with state"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]"
     );
   });
 
   it("throws if no token type is stored for the user", async () => {
     const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:someState": {
-        sessionId: "mySession",
-      },
       "solidClientAuthenticationUser:mySession": {
         issuer: "https://my.idp/",
         codeVerifier: "some code verifier",
@@ -549,20 +527,17 @@ describe("loadOidcContextFromStorage", () => {
 
     await expect(
       loadOidcContextFromStorage(
-        "someState",
+        "mySession",
         mockedStorage,
         mockIssuerConfigFetcher(mockIssuerConfig())
       )
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage for login request associated with state"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]"
     );
   });
 
   it("Returns the value in storage if available", async () => {
     const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:someState": {
-        sessionId: "mySession",
-      },
       "solidClientAuthenticationUser:mySession": {
         issuer: "https://my.idp/",
         codeVerifier: "some code verifier",
@@ -573,12 +548,11 @@ describe("loadOidcContextFromStorage", () => {
 
     await expect(
       loadOidcContextFromStorage(
-        "someState",
+        "mySession",
         mockedStorage,
         mockIssuerConfigFetcher(mockIssuerConfig())
       )
     ).resolves.toEqual({
-      sessionId: "mySession",
       issuerConfig: mockIssuerConfig(),
       codeVerifier: "some code verifier",
       redirectUri: "https://my.app/redirect",
