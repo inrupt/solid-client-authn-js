@@ -512,7 +512,7 @@ describe("loadOidcContextFromStorage", () => {
     );
   });
 
-  it("throws if no redirect uri is stored for the user", async () => {
+  it("throws if no redirect URI is stored for the user", async () => {
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:someState": {
         sessionId: "mySession",
