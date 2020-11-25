@@ -148,6 +148,7 @@ export class Session extends EventEmitter {
    */
   logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
+    this.info.isLoggedIn = false;
     this.emit("logout");
   };
 

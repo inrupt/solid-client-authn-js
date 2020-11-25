@@ -96,8 +96,9 @@ app.get("/login", async (req, res, next) => {
         )
       );
     }
-  } else {
   }
+  log.info("Already logged in.");
+  sendHtmlResponse();
 });
 
 app.get("/redirect", async (req, res) => {
