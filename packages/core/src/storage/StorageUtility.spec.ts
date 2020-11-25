@@ -446,11 +446,14 @@ describe("StorageUtility", () => {
 });
 
 describe("getSessionIdFromOauthState", () => {
-  it("returns undefined if no stored state matches the current request's", async () => {
+  it("returns undefined if no stored OIDC 'state' matches the current request's OIDC 'state' value", async () => {
     const mockedStorage = mockStorageUtility({});
 
     await expect(
-      getSessionIdFromOauthState(mockedStorage, "some unexisting state")
+      getSessionIdFromOauthState(
+        mockedStorage,
+        "some non-existent 'state' value"
+      )
     ).resolves.toBeUndefined();
   });
 });
