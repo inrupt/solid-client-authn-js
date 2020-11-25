@@ -1,0 +1,22 @@
+{
+  "podServerList": [
+    {
+      "description": "ESS Prod - Gluu (default)",
+      "podResourceServer": "https://ldp.pod.inrupt.com/<TEST USER NAME>/",
+      "identityProvider": "https://broker.pod.inrupt.com",
+      "envTestUserName": "E2E_ESS_USERNAME",
+      "envTestUserPassword": "E2E_ESS_PASSWORD",
+      "brokeredIdp": "Gluu",
+      "authorizeClientAppMechanism": "ess"
+    },
+    {
+      "description": "ESS Dev - select: Gluu",
+      "podResourceServer": "https://ldp.dev-ess.inrupt.com/<TEST USER NAME>/",
+      "identityProvider": "https://broker.dev-ess.inrupt.com",
+      "envTestUserName": "E2E_ESS_DEV_USERNAME",
+      "envTestUserPassword": "E2E_ESS_DEV_PASSWORD",
+      "brokeredIdp": "Gluu",
+      "authorizeClientAppMechanism": "ess"
+    }
+  ]
+}

@@ -48,7 +48,7 @@ describe("TokenRefresher", () => {
 
     const storageMock = mockStorageUtility(
       {
-        [key]: {
+        [`solidClientAuthenticationUser:${key}`]: {
           refreshToken: refreshTokenValue,
         },
       },

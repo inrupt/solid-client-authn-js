@@ -30,6 +30,102 @@
 import validateSchema from "../util/validateSchema";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
+import InruptError from "../errors/InruptError";
+import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
+import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
+
+export type OidcContext = {
+  sessionId: string;
+  issuerConfig: IIssuerConfig;
+  codeVerifier: string;
+  redirectUri: string;
+  dpop: boolean;
+};
+
+/**
+ * Based on the provided state, this looks up contextual information stored
+ * before redirecting the user to the OIDC issuer.
+ * @param oauthState The state (~ correlation ID) of the OIDC request
+ * @param storageUtility
+ * @param configFetcher
+ * @returns Information stored about the client issuing the request
+ */
+export async function loadOidcContextFromStorage(
+  oauthState: string,
+  storageUtility: IStorageUtility,
+  configFetcher: IIssuerConfigFetcher
+): Promise<OidcContext> {
+  try {
+    // Since we throw if not found, the type assertion are ok too
+    const storedSessionId = (await storageUtility.getForUser(
+      oauthState,
+      "sessionId",
+      {
+        errorIfNull: true,
+      }
+    )) as string;
+
+    const [
+      issuerIri,
+      codeVerifier,
+      storedRedirectIri,
+      dpop,
+    ] = (await Promise.all([
+      storageUtility.getForUser(storedSessionId, "issuer", {
+        errorIfNull: true,
+      }),
+      storageUtility.getForUser(storedSessionId, "codeVerifier", {
+        errorIfNull: true,
+      }),
+      storageUtility.getForUser(storedSessionId, "redirectUri", {
+        errorIfNull: true,
+      }),
+      storageUtility.getForUser(storedSessionId, "dpop", { errorIfNull: true }),
+    ])) as string[];
+
+    // Unlike openid-client, this looks up the configuration from storage
+    const issuerConfig = await configFetcher.fetchConfig(issuerIri);
+    return {
+      sessionId: storedSessionId,
+      codeVerifier,
+      redirectUri: storedRedirectIri,
+      issuerConfig,
+      dpop: dpop === "true",
+    };
+  } catch (e) {
+    throw new Error(
+      `Failed to retrieve OIDC context from storage for login request associated with state [${oauthState}]: ${e.toString()}`
+    );
+  }
+}
+
+export async function saveSessionInfoToStorage(
+  storageUtility: IStorageUtility,
+  sessionId: string,
+  idToken: string,
+  webId: string,
+  isLoggedIn: string,
+  refreshToken?: string
+): Promise<void> {
+  if (refreshToken !== undefined) {
+    await storageUtility.setForUser(
+      sessionId,
+      {
+        refreshToken,
+      },
+      { secure: true }
+    );
+  }
+  await storageUtility.setForUser(
+    sessionId,
+    {
+      idToken,
+      webId,
+      isLoggedIn,
+    },
+    { secure: true }
+  );
+}
 
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
@@ -61,7 +157,7 @@ export default class StorageUtility implements IStorageUtility {
     try {
       return JSON.parse(stored);
     } catch (err) {
-      throw new Error(
+      throw new InruptError(
         `Data for user [${userId}] in [${
           secure ? "secure" : "unsecure"
         }] storage is corrupted - expected valid JSON, but got: ${stored}`
@@ -89,7 +185,7 @@ export default class StorageUtility implements IStorageUtility {
       : this.insecureStorage
     ).get(key);
     if (value === undefined && options?.errorIfNull) {
-      throw new Error(`[${key}] is not stored`);
+      throw new InruptError(`[${key}] is not stored`);
     }
     return value;
   }
@@ -123,7 +219,9 @@ export default class StorageUtility implements IStorageUtility {
     }
     value = userData[key];
     if (value === undefined && options?.errorIfNull) {
-      throw new Error(`Field [${key}] for user [${userId}] is not stored`);
+      throw new InruptError(
+        `Field [${key}] for user [${userId}] is not stored`
+      );
     }
     return value || undefined;
   }
@@ -133,7 +231,14 @@ export default class StorageUtility implements IStorageUtility {
     values: Record<string, string>,
     options?: { secure?: boolean }
   ): Promise<void> {
-    const userData = await this.getUserData(userId, options?.secure);
+    let userData: Record<string, string>;
+    try {
+      userData = await this.getUserData(userId, options?.secure);
+    } catch {
+      // if reading the user data throws, the data is corrupted, and we want to write over it
+      userData = {};
+    }
+
     await this.setUserData(userId, { ...userData, ...values }, options?.secure);
   }
 
@@ -199,7 +304,7 @@ export default class StorageUtility implements IStorageUtility {
             secure: options.secure,
           });
         }
-        throw new Error(
+        throw new InruptError(
           `Object ${JSON.stringify(
             invalidObject
           )} does not match expected schema: ${JSON.stringify(

@@ -1,0 +1,204 @@
+/*
+ * Copyright 2020 Inrupt Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+ * Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+ * @hidden
+ * @packageDocumentation
+ */
+
+import { inject, injectable } from "tsyringe";
+import {
+  IClient,
+  IClientRegistrar,
+  IIssuerConfigFetcher,
+  IRedirectHandler,
+  ISessionInfo,
+  ISessionInfoManager,
+  IStorageUtility,
+  loadOidcContextFromStorage,
+  saveSessionInfoToStorage,
+} from "@inrupt/solid-client-authn-core";
+import { URL } from "url";
+import { IdTokenClaims, Issuer, TokenSet } from "openid-client";
+import { JWK } from "jose";
+import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+import {
+  buildBearerFetch,
+  buildDpopFetch,
+  fetchType,
+} from "../../../authenticatedFetch/fetchFactory";
+
+/**
+ * Extract a WebID from an ID token payload. Note that this does not yet implement the
+ * user endpoint lookup, and only checks for webid or IRI-like sub claims.
+ *
+ * @param idToken the payload of the ID token from which the WebID can be extracted.
+ * @returns a WebID extracted from the ID token.
+ * @internal
+ */
+export async function getWebidFromTokenPayload(
+  idToken: IdTokenClaims
+): Promise<string> {
+  if (idToken.webid !== undefined && typeof idToken.webid === "string") {
+    return idToken.webid;
+  }
+  try {
+    const webid = new URL(idToken.sub);
+    return webid.href;
+  } catch (e) {
+    throw new Error(
+      `The ID token has no 'webid' claim, and its 'sub' claim of [${idToken.sub}] is invalid as a URL - error [${e}].`
+    );
+  }
+}
+
+/**
+ * @hidden
+ */
+@injectable()
+export class AuthCodeRedirectHandler implements IRedirectHandler {
+  constructor(
+    @inject("storageUtility") private storageUtility: IStorageUtility,
+    @inject("sessionInfoManager")
+    private sessionInfoManager: ISessionInfoManager,
+    @inject("issuerConfigFetcher")
+    private issuerConfigFetcher: IIssuerConfigFetcher,
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+  ) {}
+
+  async canHandle(redirectUrl: string): Promise<boolean> {
+    try {
+      const myUrl = new URL(redirectUrl);
+      return (
+        myUrl.searchParams.get("code") !== null &&
+        myUrl.searchParams.get("state") !== null
+      );
+    } catch (e) {
+      throw new Error(
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
+      );
+    }
+  }
+
+  async handle(
+    redirectUrl: string
+  ): Promise<ISessionInfo & { fetch: fetchType }> {
+    if (!(await this.canHandle(redirectUrl))) {
+      throw new Error(
+        `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
+      );
+    }
+
+    const url = new URL(redirectUrl);
+    // The type assertion is ok, because we checked in canHandle for the presence of a state
+    const oauthState = url.searchParams.get("state") as string;
+
+    const {
+      sessionId,
+      issuerConfig,
+      codeVerifier,
+      redirectUri,
+      dpop,
+    } = await loadOidcContextFromStorage(
+      oauthState,
+      this.storageUtility,
+      this.issuerConfigFetcher
+    );
+
+    const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
+    // This should also retrieve the client from storage
+    const clientInfo: IClient = await this.clientRegistrar.getClient(
+      { sessionId },
+      issuerConfig
+    );
+    const client = new issuer.Client({
+      client_id: clientInfo.clientId,
+      client_secret: clientInfo.clientSecret,
+    });
+
+    const params = client.callbackParams(redirectUrl);
+
+    let dpopKey: JWK.ECKey;
+    let tokenSet: TokenSet;
+    let authFetch: typeof fetch;
+
+    if (dpop) {
+      dpopKey = await JWK.generate("EC", "P-256");
+      tokenSet = await client.callback(
+        redirectUri,
+        params,
+        { code_verifier: codeVerifier, state: oauthState },
+        { DPoP: dpopKey.toJWK(true) }
+      );
+    } else {
+      tokenSet = await client.callback(redirectUri, params, {
+        code_verifier: codeVerifier,
+        state: oauthState,
+      });
+    }
+    if (
+      tokenSet.access_token === undefined ||
+      tokenSet.id_token === undefined
+    ) {
+      // The error message is left minimal on purpose not to leak the tokens.
+      throw new Error("The IdP did not return the expected tokens.");
+    }
+    if (dpop) {
+      authFetch = await buildDpopFetch(
+        tokenSet.access_token,
+        tokenSet.refresh_token,
+        // TS thinks dpopKey isn't initialized, when it is.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        dpopKey as any
+      );
+    } else {
+      authFetch = buildBearerFetch(
+        tokenSet.access_token,
+        tokenSet.refresh_token
+      );
+    }
+
+    // tokenSet.claims() parses the ID token, validates its signature, and returns
+    // its payload as a JSON object.
+    const webid = await getWebidFromTokenPayload(tokenSet.claims());
+
+    await saveSessionInfoToStorage(
+      this.storageUtility,
+      sessionId,
+      tokenSet.id_token,
+      webid,
+      "true",
+      tokenSet.refresh_token
+    );
+
+    const sessionInfo = await this.sessionInfoManager.get(sessionId);
+    if (!sessionInfo) {
+      throw new Error(
+        `Could not find any session information associated with SessionID [${sessionId}] in our storage.`
+      );
+    }
+
+    return Object.assign(sessionInfo, {
+      fetch: authFetch,
+    });
+  }
+}

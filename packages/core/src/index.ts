@@ -29,11 +29,6 @@ export { default as ILogoutHandler } from "./logout/ILogoutHandler";
 export { default as IHandleable } from "./util/handlerPattern/IHandleable";
 export { default as AggregateHandler } from "./util/handlerPattern/AggregateHandler";
 
-export { default as IAuthenticatedFetcher } from "./authenticatedFetch/IAuthenticatedFetcher";
-export { default as IRequestCredentials } from "./authenticatedFetch/IRequestCredentials";
-
-export { default as IDpopRequestCredentials } from "./dpop/IDpopRequestCredentials";
-
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 
@@ -62,11 +57,15 @@ export { default as IStorage } from "./storage/IStorage";
 export { default as validateSchema } from "./util/validateSchema";
 
 export { default as IStorageUtility } from "./storage/IStorageUtility";
-export { default as StorageUtility } from "./storage/StorageUtility";
+export {
+  default as StorageUtility,
+  OidcContext,
+  loadOidcContextFromStorage,
+  saveSessionInfoToStorage,
+} from "./storage/StorageUtility";
 export { default as InMemoryStorage } from "./storage/InMemoryStorage";
 
 export { default as ConfigurationError } from "./errors/ConfigurationError";
-export { default as HandlerNotFoundError } from "./errors/HandlerNotFoundError";
 export { default as NotImplementedError } from "./errors/NotImplementedError";
 
 // Mocks.

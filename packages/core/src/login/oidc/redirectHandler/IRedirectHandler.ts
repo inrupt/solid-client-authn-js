@@ -24,6 +24,7 @@
  * @packageDocumentation
  */
 
+import type { fetch } from "cross-fetch";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 

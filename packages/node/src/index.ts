@@ -20,3 +20,18 @@
  */
 
 // Nothing in there yet, but node-compatible !
+
+export { Session, ISessionOptions } from "./Session";
+
+export { SessionManager, ISessionManagerOptions } from "./SessionManager";
+
+// Re-export of types defined in the core module and produced/consumed by our API
+
+export {
+  ILoginInputOptions,
+  ISessionInfo,
+  IStorage,
+  NotImplementedError,
+  ConfigurationError,
+  InMemoryStorage,
+} from "@inrupt/solid-client-authn-core";
