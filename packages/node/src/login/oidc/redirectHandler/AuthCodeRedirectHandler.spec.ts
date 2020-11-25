@@ -293,6 +293,34 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
+    it("returns a fetch that supports the refresh flow", async () => {
+      const tokenSet = mockBearerTokens();
+      tokenSet.refresh_token = "some refresh token";
+      setupOidcClientMock(tokenSet);
+      const mockedStorage = mockDefaultRedirectStorage();
+      await mockedStorage.setForUser("mySession", {
+        dpop: "false",
+      });
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      // Check that the returned fetch function is authenticated
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValueOnce({ status: 401 } as Response);
+      await result.fetch("https://some.url");
+      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+        "Bearer some refreshed access token"
+      );
+    });
+
     it("stores the refresh token if one is returned", async () => {
       const mockedTokens = mockDpopTokens();
       mockedTokens.refresh_token = "some refresh token";
