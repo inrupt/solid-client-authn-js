@@ -60,13 +60,6 @@ export default class TokenRefresher implements ITokenRefresher {
     refreshToken?: string,
     dpopKey?: JWK.ECKey
   ): Promise<TokenSet> {
-    if (refreshToken === undefined) {
-      // TODO: in a next PR, look up storage for a refresh token
-      throw new Error(
-        `Session [${sessionId}] has no refresh token to allow it to refresh its access token.`
-      );
-    }
-
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
       this.storageUtility,
@@ -83,6 +76,13 @@ export default class TokenRefresher implements ITokenRefresher {
       client_id: clientInfo.clientId,
       client_secret: clientInfo.clientSecret,
     });
+
+    if (refreshToken === undefined) {
+      // TODO: in a next PR, look up storage for a refresh token
+      throw new Error(
+        `Session [${sessionId}] has no refresh token to allow it to refresh its access token.`
+      );
+    }
 
     if (oidcContext.dpop && dpopKey === undefined) {
       throw new Error(

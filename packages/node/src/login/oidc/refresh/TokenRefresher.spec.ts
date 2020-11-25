@@ -154,7 +154,9 @@ describe("TokenRefresher", () => {
       storageUtility: mockedStorage,
     });
 
-    await expect(refresher.refresh("mySession")).rejects.toThrow(
+    await expect(
+      refresher.refresh("mySession", "some refresh token")
+    ).rejects.toThrow(
       "Failed to retrieve OIDC context from storage associated with session [mySession]"
     );
   });
@@ -170,7 +172,9 @@ describe("TokenRefresher", () => {
       storageUtility: mockedStorage,
     });
 
-    await expect(refresher.refresh("mySession")).rejects.toThrow(
+    await expect(
+      refresher.refresh("mySession", "some refresh token")
+    ).rejects.toThrow(
       "Failed to retrieve OIDC context from storage associated with session [mySession]"
     );
   });
@@ -259,7 +263,6 @@ describe("TokenRefresher", () => {
       "some old refresh token",
       mockJwk()
     );
-
     expect(refreshedTokens.refresh_token).toEqual("some new refresh token");
 
     // Check that the session information is stored in the provided storage
