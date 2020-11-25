@@ -37,6 +37,7 @@ import {
   mockDefaultIssuerConfig,
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
+import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 
 jest.mock("openid-client");
 jest.mock("cross-fetch");
@@ -119,6 +120,7 @@ const defaultMocks = {
   sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
   clientRegistrar: mockDefaultClientRegistrar(),
   issuerConfigFetcher: mockIssuerConfigFetcher(mockDefaultIssuerConfig()),
+  tokenRefresher: mockDefaultTokenRefresher(),
 };
 
 function getAuthCodeRedirectHandler(
@@ -128,7 +130,8 @@ function getAuthCodeRedirectHandler(
     mocks.storageUtility ?? defaultMocks.storageUtility,
     mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
     mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-    mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+    mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
+    mocks.tokenRefresher ?? defaultMocks.tokenRefresher
   );
 }
 
