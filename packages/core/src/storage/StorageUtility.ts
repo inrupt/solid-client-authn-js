@@ -35,58 +35,54 @@ import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 
 export type OidcContext = {
-  sessionId: string;
   issuerConfig: IIssuerConfig;
   codeVerifier: string;
   redirectUri: string;
   dpop: boolean;
 };
 
+export async function getSessionIdFromOauthState(
+  storageUtility: IStorageUtility,
+  oauthState: string
+): Promise<string | undefined> {
+  return storageUtility.getForUser(oauthState, "sessionId");
+}
+
 /**
  * Based on the provided state, this looks up contextual information stored
  * before redirecting the user to the OIDC issuer.
- * @param oauthState The state (~ correlation ID) of the OIDC request
+ * @param sessionId The state (~ correlation ID) of the OIDC request
  * @param storageUtility
  * @param configFetcher
  * @returns Information stored about the client issuing the request
  */
 export async function loadOidcContextFromStorage(
-  oauthState: string,
+  sessionId: string,
   storageUtility: IStorageUtility,
   configFetcher: IIssuerConfigFetcher
 ): Promise<OidcContext> {
   try {
-    // Since we throw if not found, the type assertion are ok too
-    const storedSessionId = (await storageUtility.getForUser(
-      oauthState,
-      "sessionId",
-      {
-        errorIfNull: true,
-      }
-    )) as string;
-
     const [
       issuerIri,
       codeVerifier,
       storedRedirectIri,
       dpop,
     ] = (await Promise.all([
-      storageUtility.getForUser(storedSessionId, "issuer", {
+      storageUtility.getForUser(sessionId, "issuer", {
         errorIfNull: true,
       }),
-      storageUtility.getForUser(storedSessionId, "codeVerifier", {
+      storageUtility.getForUser(sessionId, "codeVerifier", {
         errorIfNull: true,
       }),
-      storageUtility.getForUser(storedSessionId, "redirectUri", {
+      storageUtility.getForUser(sessionId, "redirectUri", {
         errorIfNull: true,
       }),
-      storageUtility.getForUser(storedSessionId, "dpop", { errorIfNull: true }),
+      storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
     ])) as string[];
 
     // Unlike openid-client, this looks up the configuration from storage
     const issuerConfig = await configFetcher.fetchConfig(issuerIri);
     return {
-      sessionId: storedSessionId,
       codeVerifier,
       redirectUri: storedRedirectIri,
       issuerConfig,
@@ -94,7 +90,7 @@ export async function loadOidcContextFromStorage(
     };
   } catch (e) {
     throw new Error(
-      `Failed to retrieve OIDC context from storage for login request associated with state [${oauthState}]: ${e.toString()}`
+      `Failed to retrieve OIDC context from storage associated with session [${sessionId}]: ${e.toString()}`
     );
   }
 }

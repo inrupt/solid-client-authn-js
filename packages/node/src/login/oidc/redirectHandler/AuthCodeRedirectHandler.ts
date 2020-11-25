@@ -35,6 +35,7 @@ import {
   IStorageUtility,
   loadOidcContextFromStorage,
   saveSessionInfoToStorage,
+  getSessionIdFromOauthState,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
 import { IdTokenClaims, Issuer, TokenSet } from "openid-client";
@@ -111,14 +112,23 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     // The type assertion is ok, because we checked in canHandle for the presence of a state
     const oauthState = url.searchParams.get("state") as string;
 
+    const sessionId = await getSessionIdFromOauthState(
+      this.storageUtility,
+      oauthState
+    );
+    if (sessionId === undefined) {
+      throw new Error(
+        `No stored session is associated to the state [${oauthState}]`
+      );
+    }
+
     const {
-      sessionId,
       issuerConfig,
       codeVerifier,
       redirectUri,
       dpop,
     } = await loadOidcContextFromStorage(
-      oauthState,
+      sessionId,
       this.storageUtility,
       this.issuerConfigFetcher
     );
@@ -159,7 +169,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       tokenSet.id_token === undefined
     ) {
       // The error message is left minimal on purpose not to leak the tokens.
-      throw new Error("The IdP did not return the expected tokens.");
+      throw new Error(
+        `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`
+      );
     }
     if (dpop) {
       authFetch = await buildDpopFetch(

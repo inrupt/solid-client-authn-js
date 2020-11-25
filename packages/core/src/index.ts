@@ -62,6 +62,7 @@ export {
   OidcContext,
   loadOidcContextFromStorage,
   saveSessionInfoToStorage,
+  getSessionIdFromOauthState,
 } from "./storage/StorageUtility";
 export { default as InMemoryStorage } from "./storage/InMemoryStorage";
 
