@@ -169,7 +169,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       tokenSet.id_token === undefined
     ) {
       // The error message is left minimal on purpose not to leak the tokens.
-      throw new Error("The IdP did not return the expected tokens.");
+      throw new Error(
+        `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`
+      );
     }
     if (dpop) {
       authFetch = await buildDpopFetch(

@@ -35,6 +35,7 @@ import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionIn
 import {
   mockIssuerConfigFetcher,
   mockDefaultIssuerConfig,
+  mockIssuerConfig,
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 
@@ -328,7 +329,11 @@ describe("AuthCodeRedirectHandler", () => {
         authCodeRedirectHandler.handle(
           "https://my.app/redirect?code=someCode&state=someState"
         )
-      ).rejects.toThrow("The IdP did not return the expected tokens.");
+      ).rejects.toThrow(
+        `The Identity Provider [${
+          mockDefaultIssuerConfig().issuer
+        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`
+      );
     });
 
     it("throws if the IdP does not return an ID token", async () => {

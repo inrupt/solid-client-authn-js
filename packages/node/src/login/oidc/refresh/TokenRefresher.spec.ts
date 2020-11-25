@@ -141,7 +141,7 @@ describe("TokenRefresher", () => {
     );
   }
 
-  it("throws if no oidc issuer can be retrieved from storage", async () => {
+  it("throws if no OIDC issuer can be retrieved from storage", async () => {
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:mySession": {
         codeVerifier: "some code verifier",
@@ -184,11 +184,11 @@ describe("TokenRefresher", () => {
     });
 
     await expect(refresher.refresh("mySession")).rejects.toThrow(
-      "Missing a refresh token to refresh the access token associated to the session [mySession]"
+      "Session [mySession] has no refresh token to allow it to refresh its access token."
     );
   });
 
-  it("throws if a dpop token is expected, but no dpop key is provided", async () => {
+  it("throws if a DPoP token is expected, but no DPoP key is provided", async () => {
     setupDefaultOidcClientMock();
     const mockedStorage = mockRefresherDefaultStorageUtility();
 
@@ -199,11 +199,11 @@ describe("TokenRefresher", () => {
     await expect(
       refresher.refresh("mySession", "some refresh token")
     ).rejects.toThrow(
-      "The key bound to the access token associated to the session [mySession] must be provided to refresh it."
+      "For session [mySession], the key bound to the DPoP access token must be provided to refresh said access token."
     );
   });
 
-  it("Refreshes a dpop token properly", async () => {
+  it("refreshes a DPoP token properly", async () => {
     setupDefaultOidcClientMock();
     const mockedStorage = mockRefresherDefaultStorageUtility();
 
@@ -220,7 +220,7 @@ describe("TokenRefresher", () => {
     expect(refreshedTokens.access_token).toEqual(mockDpopTokens().access_token);
   });
 
-  it("Refreshes a bearer token properly", async () => {
+  it("refreshes a bearer token properly", async () => {
     setupDefaultOidcClientMock();
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:mySession": {
@@ -281,22 +281,10 @@ describe("TokenRefresher", () => {
 
     await expect(
       refresher.refresh("mySession", "some old refresh token", mockJwk())
-    ).rejects.toThrow("The IdP did not return the expected tokens.");
-  });
-
-  it("throws if the IdP does not return an id token", async () => {
-    const mockedTokens = mockDpopTokens();
-    mockedTokens.id_token = undefined;
-    setupOidcClientMock(mockedTokens);
-
-    const mockedStorage = mockRefresherDefaultStorageUtility();
-
-    const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
-    });
-
-    await expect(
-      refresher.refresh("mySession", "some old refresh token", mockJwk())
-    ).rejects.toThrow("The IdP did not return the expected tokens.");
+    ).rejects.toThrow(
+      `The Identity Provider [${
+        mockDefaultIssuerConfig().issuer
+      }] did not return an access token on refresh`
+    );
   });
 });

@@ -60,11 +60,19 @@ export default class TokenRefresher implements ITokenRefresher {
     refreshToken?: string,
     dpopKey?: JWK.ECKey
   ): Promise<TokenSet> {
+    if (refreshToken === undefined) {
+      // TODO: in a next PR, look up storage for a refresh token
+      throw new Error(
+        `Session [${sessionId}] has no refresh token to allow it to refresh its access token.`
+      );
+    }
+
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
       this.storageUtility,
       this.issuerConfigFetcher
     );
+
     const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
     // This should also retrieve the client from storage
     const clientInfo: IClient = await this.clientRegistrar.getClient(
@@ -76,16 +84,9 @@ export default class TokenRefresher implements ITokenRefresher {
       client_secret: clientInfo.clientSecret,
     });
 
-    if (refreshToken === undefined) {
-      // TODO: in a next PR, look up storage for a refresh token
-      throw new Error(
-        `Missing a refresh token to refresh the access token associated to the session [${sessionId}]`
-      );
-    }
-
     if (oidcContext.dpop && dpopKey === undefined) {
       throw new Error(
-        `The key bound to the access token associated to the session [${sessionId}] must be provided to refresh it.`
+        `For session [${sessionId}], the key bound to the DPoP access token must be provided to refresh said access token.`
       );
     }
 
@@ -93,12 +94,11 @@ export default class TokenRefresher implements ITokenRefresher {
       DPoP: dpopKey?.toJWK(true),
     });
 
-    if (
-      tokenSet.access_token === undefined ||
-      tokenSet.id_token === undefined
-    ) {
+    if (tokenSet.access_token === undefined) {
       // The error message is left minimal on purpose not to leak the tokens.
-      throw new Error("The IdP did not return the expected tokens.");
+      throw new Error(
+        `The Identity Provider [${issuer.metadata.issuer}] did not return an access token on refresh.`
+      );
     }
 
     if (tokenSet.refresh_token !== undefined) {
