@@ -48,8 +48,8 @@ export function buildBearerFetch(
   accessToken: string,
   refreshOptions?: RefreshOptions
 ): typeof fetch {
-  // currentAccessToken and currentRefreshOptions are initialized with the provided
-  // parameters, but they may be mutated in the authenticated fetch closure.
+  // These local copies of the the provided parameters may be mutated in the
+  // authenticated fetch closure.
   let currentAccessToken = accessToken;
   const currentRefreshOptions: RefreshOptions | undefined = refreshOptions
     ? { ...refreshOptions }
@@ -81,7 +81,7 @@ export function buildBearerFetch(
       currentAccessToken = tokenSet.access_token;
       if (tokenSet.refresh_token) {
         // If the refresh token is rotated, update it in the closure.
-        // TODO: Plug this in an external storage if one is provided.
+        // TODO: Plug this into external storage, if one is provided.
         currentRefreshOptions.refreshToken = tokenSet.refresh_token;
       }
       // Once the token has been refreshed, re-issue the authenticated request.

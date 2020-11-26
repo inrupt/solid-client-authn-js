@@ -36,7 +36,8 @@ import { Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
-// Some identifiers are in camelcase on purpose.
+// Some identifiers are not in camelcase on purpose, as they are named using the
+// official names from the OIDC/OAuth2 specifications.
 /* eslint-disable camelcase */
 
 /**
