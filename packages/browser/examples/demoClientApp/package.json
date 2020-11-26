@@ -1,7 +1,7 @@
 {
-  "name": "demoApp",
+  "name": "@inrupt/demo-app-authn-browser",
   "version": "1.0.0",
-  "description": "Demo client application for authentication testing",
+  "description": "Demo client application for authentication in a browser",
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf ./dist",
