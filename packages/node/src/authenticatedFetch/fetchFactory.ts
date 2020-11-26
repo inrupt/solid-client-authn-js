@@ -24,11 +24,6 @@ import { fetch } from "cross-fetch";
 import { v4 } from "uuid";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
 
-// node-fetch fetch has an additional property (isRedirect) which prevents using
-// `typeof fetch`.
-// export type fetchType = (info: RequestInfo, init?: RequestInit) => Promise<Response>;
-export type fetchType = typeof fetch;
-
 export type RefreshOptions = {
   sessionId: string;
   refreshToken: string;
@@ -52,7 +47,7 @@ function isExpectedAuthError(statusCode: number): boolean {
 export function buildBearerFetch(
   accessToken: string,
   refreshOptions?: RefreshOptions
-): fetchType {
+): typeof fetch {
   // currentAccessToken and currentRefreshOptions are initialized with the provided
   // parameters, but they may be mutated in the authenticated fetch closure.
   let currentAccessToken = accessToken;
@@ -193,8 +188,8 @@ export async function buildDpopFetch(
   //  so dependent on that wrapper existing first!
   _refreshToken: string | undefined,
   dpopKey: JWK.ECKey
-): Promise<fetchType> {
-  return async (url, options): Promise<Response> => {
+): Promise<typeof fetch> {
+  return async (url: RequestInfo, options?: RequestInit): Promise<Response> => {
     const response = await fetch(
       url,
       await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)

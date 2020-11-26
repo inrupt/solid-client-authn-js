@@ -32,7 +32,6 @@ import {
 import { URL } from "url";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
-import { fetchType } from "../../../authenticatedFetch/fetchFactory";
 
 /**
  * This class handles redirect IRIs without any query params, and returns an unauthenticated
@@ -58,7 +57,7 @@ export class FallbackRedirectHandler implements IRedirectHandler {
   async handle(
     // The argument is ignored, but must be present to implement the interface
     _redirectUrl: string
-  ): Promise<ISessionInfo & { fetch: fetchType }> {
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     return getUnauthenticatedSession();
   }
 }

@@ -44,7 +44,6 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
   buildBearerFetch,
   buildDpopFetch,
-  fetchType,
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
@@ -104,7 +103,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
   async handle(
     redirectUrl: string
-  ): Promise<ISessionInfo & { fetch: fetchType }> {
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`

@@ -116,7 +116,7 @@ describe("buildBearerFetch", () => {
     expect(fetch.mock.calls[0][1].headers.someHeader).toEqual("SomeValue");
   });
 
-  it("rotates the refresh tokens if a new one is issued", async () => {
+  it("rotates the refresh token if a new one is issued", async () => {
     const fetch = jest.requireMock("cross-fetch");
     fetch.mockResolvedValue({ status: 401 });
     const tokenSet = mockDefaultTokenSet();
