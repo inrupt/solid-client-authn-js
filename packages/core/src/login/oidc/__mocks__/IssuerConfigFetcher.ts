@@ -19,31 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { IIssuerConfig } from "../IIssuerConfig";
+import { IIssuerConfigFetcher } from "../IIssuerConfigFetcher";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import { injectable, injectAll } from "tsyringe";
-import {
-  IRedirectHandler,
-  ISessionInfo,
-  AggregateHandler,
-} from "@inrupt/solid-client-authn-core";
-
-/**
- * @hidden
- */
-@injectable()
-export default class AggregateRedirectHandler
-  extends AggregateHandler<[string], ISessionInfo & { fetch: typeof fetch }>
-  implements IRedirectHandler {
-  constructor(
-    @injectAll("redirectHandlers") redirectHandlers: IRedirectHandler[]
-  ) {
-    super(redirectHandlers);
-  }
+export function mockIssuerConfigFetcher(
+  config: IIssuerConfig
+): IIssuerConfigFetcher {
+  return {
+    fetchConfig: async (): Promise<IIssuerConfig> => config,
+  };
 }

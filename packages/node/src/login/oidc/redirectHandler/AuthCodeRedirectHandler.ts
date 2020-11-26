@@ -28,12 +28,14 @@ import { inject, injectable } from "tsyringe";
 import {
   IClient,
   IClientRegistrar,
-  IIssuerConfig,
   IIssuerConfigFetcher,
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
+  loadOidcContextFromStorage,
+  saveSessionInfoToStorage,
+  getSessionIdFromOauthState,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
 import { IdTokenClaims, Issuer, TokenSet } from "openid-client";
@@ -42,101 +44,9 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
   buildBearerFetch,
   buildDpopFetch,
-  fetchType,
+  RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
-
-type OidcContext = {
-  sessionId: string;
-  issuerConfig: IIssuerConfig;
-  codeVerifier: string;
-  redirectUri: string;
-  dpop: boolean;
-};
-
-/**
- * Based on the provided state, this looks up contextual information stored
- * before redirecting the user to the OIDC issuer.
- * @param oauthState The state (~ correlation ID) of the OIDC request
- * @param storageUtility
- * @param configFetcher
- * @returns Information stored about the client issuing the request
- */
-async function loadOidcContextFromStorage(
-  oauthState: string,
-  storageUtility: IStorageUtility,
-  configFetcher: IIssuerConfigFetcher
-): Promise<OidcContext> {
-  try {
-    // Since we throw if not found, the type assertion are ok too
-    const storedSessionId = (await storageUtility.getForUser(
-      oauthState,
-      "sessionId",
-      {
-        errorIfNull: true,
-      }
-    )) as string;
-
-    const [
-      issuerIri,
-      codeVerifier,
-      storedRedirectIri,
-      dpop,
-    ] = (await Promise.all([
-      storageUtility.getForUser(storedSessionId, "issuer", {
-        errorIfNull: true,
-      }),
-      storageUtility.getForUser(storedSessionId, "codeVerifier", {
-        errorIfNull: true,
-      }),
-      storageUtility.getForUser(storedSessionId, "redirectUri", {
-        errorIfNull: true,
-      }),
-      storageUtility.getForUser(storedSessionId, "dpop", { errorIfNull: true }),
-    ])) as string[];
-
-    // Unlike openid-client, this looks up the configuration from storage
-    const issuerConfig = await configFetcher.fetchConfig(issuerIri);
-    return {
-      sessionId: storedSessionId,
-      codeVerifier,
-      redirectUri: storedRedirectIri,
-      issuerConfig,
-      dpop: dpop === "true",
-    };
-  } catch (e) {
-    throw new Error(
-      `Failed to retrieve OIDC context from storage for login request associated with state [${oauthState}]: ${e.toString()}`
-    );
-  }
-}
-
-async function saveSessionInfoToStorage(
-  storageUtility: IStorageUtility,
-  sessionId: string,
-  idToken: string,
-  webId: string,
-  isLoggedIn: string,
-  refreshToken?: string
-): Promise<void> {
-  if (refreshToken !== undefined) {
-    await storageUtility.setForUser(
-      sessionId,
-      {
-        refreshToken,
-      },
-      { secure: true }
-    );
-  }
-  await storageUtility.setForUser(
-    sessionId,
-    {
-      idToken,
-      webId,
-      isLoggedIn,
-    },
-    { secure: true }
-  );
-}
+import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 /**
  * Extract a WebID from an ID token payload. Note that this does not yet implement the
@@ -173,7 +83,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     private sessionInfoManager: ISessionInfoManager,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar,
+    @inject("tokenRefresher") private tokenRefresher: ITokenRefresher
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -192,7 +103,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
   async handle(
     redirectUrl: string
-  ): Promise<ISessionInfo & { fetch: fetchType }> {
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
@@ -203,14 +114,23 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     // The type assertion is ok, because we checked in canHandle for the presence of a state
     const oauthState = url.searchParams.get("state") as string;
 
+    const sessionId = await getSessionIdFromOauthState(
+      this.storageUtility,
+      oauthState
+    );
+    if (sessionId === undefined) {
+      throw new Error(
+        `No stored session is associated to the state [${oauthState}]`
+      );
+    }
+
     const {
-      sessionId,
       issuerConfig,
       codeVerifier,
       redirectUri,
       dpop,
     } = await loadOidcContextFromStorage(
-      oauthState,
+      sessionId,
       this.storageUtility,
       this.issuerConfigFetcher
     );
@@ -251,23 +171,29 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       tokenSet.id_token === undefined
     ) {
       // The error message is left minimal on purpose not to leak the tokens.
-      throw new Error("The IdP did not return the expected tokens.");
+      throw new Error(
+        `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`
+      );
     }
     if (dpop) {
       authFetch = await buildDpopFetch(
         tokenSet.access_token,
         tokenSet.refresh_token,
-        // TODO: buildDpopFetch isn't implemented yet
         // TS thinks dpopKey isn't initialized, when it is.
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         dpopKey as any
       );
     } else {
-      authFetch = buildBearerFetch(
-        tokenSet.access_token,
-        tokenSet.refresh_token
-      );
+      let refreshOptions: RefreshOptions | undefined;
+      if (tokenSet.refresh_token !== undefined) {
+        refreshOptions = {
+          refreshToken: tokenSet.refresh_token,
+          sessionId,
+          tokenRefresher: this.tokenRefresher,
+        };
+      }
+      authFetch = buildBearerFetch(tokenSet.access_token, refreshOptions);
     }
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns

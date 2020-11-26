@@ -20,8 +20,8 @@
  */
 
 import "reflect-metadata";
-import IHandleable from "../../../src/util/handlerPattern/IHandleable";
-import AggregateHandler from "../../../src/util/handlerPattern/AggregateHandler";
+import IHandleable from "./IHandleable";
+import AggregateHandler from "./AggregateHandler";
 
 describe("AggregateHandler", () => {
   // Set up mock extension

@@ -33,10 +33,9 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { fetch } from "cross-fetch";
-import { fetchType } from "../authenticatedFetch/fetchFactory";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
-  fetch: fetchType;
+  fetch: typeof fetch;
 } {
   return {
     isLoggedIn: false,

@@ -22,8 +22,8 @@
 /**
  * Test for all custom errors
  */
-import ConfigurationError from "../../src/errors/ConfigurationError";
-import NotImplementedError from "../../src/errors/NotImplementedError";
+import ConfigurationError from "./ConfigurationError";
+import NotImplementedError from "./NotImplementedError";
 
 describe("errors", () => {
   const errors: {

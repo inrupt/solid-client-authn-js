@@ -19,31 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { IIssuerConfig } from "../../..";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import { injectable, injectAll } from "tsyringe";
-import {
-  IRedirectHandler,
-  ISessionInfo,
-  AggregateHandler,
-} from "@inrupt/solid-client-authn-core";
-
-/**
- * @hidden
- */
-@injectable()
-export default class AggregateRedirectHandler
-  extends AggregateHandler<[string], ISessionInfo & { fetch: typeof fetch }>
-  implements IRedirectHandler {
-  constructor(
-    @injectAll("redirectHandlers") redirectHandlers: IRedirectHandler[]
-  ) {
-    super(redirectHandlers);
-  }
-}
+export const mockIssuerConfig = (): IIssuerConfig => {
+  return {
+    issuer: "https://idp.com",
+    authorizationEndpoint: "https://idp.com/auth",
+    tokenEndpoint: "https://idp.com/token",
+    jwksUri: "https://idp.com/jwks",
+    subjectTypesSupported: [],
+    claimsSupported: [],
+    grantTypesSupported: ["refresh_token"],
+  };
+};

@@ -19,10 +19,21 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ITokenRequester } from "../TokenRequester";
+import InMemoryStorage from "./InMemoryStorage";
 
-export const TokenRequesterMock: jest.Mocked<ITokenRequester> = {
-  request: jest.fn((_localUserId: string, _body: Record<string, string>) => {
-    return Promise.resolve();
-  }),
-};
+describe("InMemoryStorage", () => {
+  const nodeStorage = new InMemoryStorage();
+  it("can set an item", async () => {
+    await expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
+  });
+  it("can get an item", async () => {
+    expect(await nodeStorage.get("a")).toEqual("A");
+  });
+  it("returns undefined if the key does not exist", async () => {
+    expect(await nodeStorage.get("doesNotExist")).toBeUndefined();
+  });
+  it("can delete an item", async () => {
+    await nodeStorage.delete("a");
+    expect(await nodeStorage.get("a")).toBeUndefined();
+  });
+});

@@ -33,7 +33,14 @@ describe("Redirector", () => {
     } = window;
 
     beforeEach(() => {
+      // location and history aren't optional on window, which makes TS complain
+      // (rightfully) when we delete them. However, they are deleted on purpose
+      // here just for testing.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       delete window.location;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       delete window.history.replaceState;
       window.location = {
         href: "https://coolSite.com",
@@ -46,7 +53,7 @@ describe("Redirector", () => {
       window.history.replaceState = replaceState;
     });
 
-    it("browser redirection defaults to using using href", () => {
+    it("browser redirection defaults to using href", () => {
       const redirector = new Redirector();
       redirector.redirect("https://someUrl.com/redirect");
       expect(window.history.replaceState).not.toHaveBeenCalled();

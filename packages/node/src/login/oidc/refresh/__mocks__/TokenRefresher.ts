@@ -19,21 +19,37 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import InMemoryStorage from "../../src/storage/InMemoryStorage";
+import { IdTokenClaims, TokenSet } from "openid-client";
+import { ITokenRefresher } from "../TokenRefresher";
 
-describe("InMemoryStorage", () => {
-  const nodeStorage = new InMemoryStorage();
-  it("can set an item", async () => {
-    await expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
-  });
-  it("can get an item", async () => {
-    expect(await nodeStorage.get("a")).toEqual("A");
-  });
-  it("returns undefined if the key does not exist", async () => {
-    expect(await nodeStorage.get("doesNotExist")).toBeUndefined();
-  });
-  it("can delete an item", async () => {
-    await nodeStorage.delete("a");
-    expect(await nodeStorage.get("a")).toBeUndefined();
-  });
-});
+// Some identifiers are in camelcase on purpose.
+/* eslint-disable camelcase */
+
+export const mockTokenRefresher = (
+  tokenSet: TokenSet & { access_token: string }
+): ITokenRefresher => {
+  return {
+    refresh: async () => tokenSet,
+  };
+};
+
+const mockIdTokenPayload = (): IdTokenClaims => {
+  return {
+    sub: "https://my.webid",
+    iss: "https://my.idp/",
+    aud: "https://resource.example.org",
+    exp: 1662266216,
+    iat: 1462266216,
+  };
+};
+
+export const mockDefaultTokenSet = (): TokenSet & { access_token: string } => {
+  return {
+    access_token: "some refreshed access token",
+    expired: () => false,
+    claims: mockIdTokenPayload,
+  };
+};
+
+export const mockDefaultTokenRefresher = (): ITokenRefresher =>
+  mockTokenRefresher(mockDefaultTokenSet());
