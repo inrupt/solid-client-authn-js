@@ -148,6 +148,7 @@ export class Session extends EventEmitter {
    */
   logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
+    this.info.isLoggedIn = false;
     this.emit("logout");
   };
 
@@ -159,27 +160,38 @@ export class Session extends EventEmitter {
   handleIncomingRedirect = async (
     url: string
   ): Promise<ISessionInfo | undefined> => {
+    let sessionInfo;
+
     if (this.info.isLoggedIn) {
-      return this.info;
-    }
-    if (this.tokenRequestInProgress) {
-      return undefined;
-    }
-    this.tokenRequestInProgress = true;
-    const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
-      url
-    );
-    if (sessionInfo) {
-      if (sessionInfo.isLoggedIn) {
-        // The login event can only be triggered **after** the user has been
-        // redirected from the IdP with access and ID tokens.
-        this.emit("login");
+      sessionInfo = this.info;
+    } else if (this.tokenRequestInProgress) {
+      // TODO: PMcB55:  Add this logging once we start using LogLevel.
+      // Log the interesting fact that (we think!) we're already requesting
+      // the token...
+      // log.debug(`Handle incoming request called, but we're already requesting our token`);
+    } else {
+      try {
+        this.tokenRequestInProgress = true;
+        sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
+          url
+        );
+
+        if (sessionInfo) {
+          if (sessionInfo.isLoggedIn) {
+            // The login event can only be triggered **after** the user has been
+            // redirected from the IdP with access and ID tokens.
+            this.emit("login");
+          }
+
+          this.info.isLoggedIn = sessionInfo.isLoggedIn;
+          this.info.webId = sessionInfo.webId;
+          this.info.sessionId = sessionInfo.sessionId;
+        }
+      } finally {
+        this.tokenRequestInProgress = false;
       }
-      this.info.isLoggedIn = sessionInfo.isLoggedIn;
-      this.info.webId = sessionInfo.webId;
-      this.info.sessionId = sessionInfo.sessionId;
     }
-    this.tokenRequestInProgress = false;
+
     return sessionInfo;
   };
 

@@ -1,0 +1,38 @@
+{
+  "name": "@inrupt/demo-app-authn-node",
+  "version": "1.0.0",
+  "description": "Demo client application for authentication in NodeJS",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint \\\"src/**/*.js\\\"",
+    "start": "./node_modules/.bin/nodemon src/index.js",
+    "dev": "npm run start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inrupt/solid-client-authn.git"
+  },
+  "author": "Inrupt, Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inrupt/solid-client-authn/issues"
+  },
+  "homepage": "https://github.com/inrupt/solid-client-authn#readme",
+  "dependencies": {
+    "cross-fetch": "^3.0.6",
+    "express": "^4.17.1",
+    "loglevel": "^1.7.0"
+  },
+  "devDependencies": {
+    "@inrupt/eslint-config-base": "0.0.4",
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-license-header": "^0.2.0",
+    "license-checker": "^25.0.1",
+    "nodemon": "^2.0.6",
+    "prettier": "2.1.2"
+  }
+}
