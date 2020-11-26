@@ -175,17 +175,24 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`
       );
     }
+    let refreshOptions: RefreshOptions | undefined;
+    if (tokenSet.refresh_token !== undefined) {
+      refreshOptions = {
+        refreshToken: tokenSet.refresh_token,
+        sessionId,
+        tokenRefresher: this.tokenRefresher,
+      };
+    }
     if (dpop) {
       authFetch = await buildDpopFetch(
         tokenSet.access_token,
-        tokenSet.refresh_token,
         // TS thinks dpopKey isn't initialized, when it is.
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        dpopKey as any
+        dpopKey as any,
+        refreshOptions
       );
     } else {
-      let refreshOptions: RefreshOptions | undefined;
       if (tokenSet.refresh_token !== undefined) {
         refreshOptions = {
           refreshToken: tokenSet.refresh_token,

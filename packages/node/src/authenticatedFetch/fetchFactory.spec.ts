@@ -187,7 +187,7 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch");
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", undefined, mockJwk());
+    const myFetch = await buildDpopFetch("myToken", mockJwk());
     await myFetch("http://some.url");
 
     expect(mockedFetch.mock.calls[0][1].headers.Authorization).toEqual(
@@ -207,7 +207,7 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch");
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", undefined, mockJwk());
+    const myFetch = await buildDpopFetch("myToken", mockJwk());
     await myFetch("http://some.url", {
       method: "POST",
     });
@@ -225,7 +225,7 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch");
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", undefined, mockJwk());
+    const myFetch = await buildDpopFetch("myToken", mockJwk());
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
 
     expect(mockedFetch.mock.calls[0][1].headers.someHeader).toEqual(
@@ -237,7 +237,7 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch");
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", undefined, mockJwk());
+    const myFetch = await buildDpopFetch("myToken", mockJwk());
     await myFetch("http://some.url", {
       headers: {
         Authorization: "some token",
@@ -266,7 +266,7 @@ describe("buildDpopFetch", () => {
         status: 200,
       } as Response);
 
-    const myFetch = await buildDpopFetch("myToken", undefined, mockJwk());
+    const myFetch = await buildDpopFetch("myToken", mockJwk());
     await myFetch("https://my.pod/container");
 
     expect(mockedFetch.mock.calls[1][0]).toEqual("https://my.pod/container/");
@@ -288,7 +288,7 @@ describe("buildDpopFetch", () => {
       ok: false,
     } as Response);
 
-    const myFetch = await buildDpopFetch("myToken", undefined, mockJwk());
+    const myFetch = await buildDpopFetch("myToken", mockJwk());
     const response = await myFetch("https://my.pod/container");
 
     expect(mockedFetch.mock.calls).toHaveLength(1);
@@ -304,10 +304,115 @@ describe("buildDpopFetch", () => {
       ok: false,
     } as Response);
 
-    const myFetch = await buildDpopFetch("myToken", undefined, mockJwk());
+    const myFetch = await buildDpopFetch("myToken", mockJwk());
     const response = await myFetch("https://my.pod/resource");
 
     expect(mockedFetch.mock.calls).toHaveLength(1);
     expect(response.status).toEqual(403);
+  });
+
+  it("returns a fetch that refreshes the access token on 401", async () => {
+    const fetch = jest.requireMock("cross-fetch");
+    fetch.mockResolvedValueOnce({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const myFetch = await buildDpopFetch("myToken", mockJwk(), {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: mockDefaultTokenRefresher(),
+    });
+    await myFetch("https://my.pod/resource");
+    // The mocked fetch will 401, which triggers the refresh flow.
+    // The test checks that the mocked refreshed token is used silently.
+    expect(fetch.mock.calls[1][1].headers.Authorization).toEqual(
+      "DPoP some refreshed access token"
+    );
+  });
+
+  it("returns a fetch preserving the optional headers even after refresh", async () => {
+    const fetch = jest.requireMock("cross-fetch");
+    fetch.mockResolvedValueOnce({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const myFetch = await buildDpopFetch("myToken", mockJwk(), {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: mockDefaultTokenRefresher(),
+    });
+    await myFetch("https://my.pod/resource", {
+      headers: { someHeader: "SomeValue" },
+    });
+
+    expect(fetch.mock.calls[1][1].headers.Authorization).toEqual(
+      "DPoP some refreshed access token"
+    );
+
+    expect(fetch.mock.calls[1][1].headers.someHeader).toEqual("SomeValue");
+  });
+
+  it("rotates the refresh tokens if a new one is issued", async () => {
+    const fetch = jest.requireMock("cross-fetch");
+    fetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const tokenSet = mockDefaultTokenSet();
+    tokenSet.refresh_token = "some refreshed refresh token";
+    const mockedFreshener = mockTokenRefresher(tokenSet);
+    const refreshCall = jest.spyOn(mockedFreshener, "refresh");
+
+    const myFetch = await buildDpopFetch("myToken", mockJwk(), {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: mockedFreshener,
+    });
+
+    await myFetch("https://my.pod/resource");
+    // We make two requests in a row to see that the second uses a different refresh token
+    await myFetch("https://my.pod/resource");
+    expect(refreshCall.mock.calls[1][1]).toEqual(
+      "some refreshed refresh token"
+    );
+  });
+
+  it("does not try to refresh on a non-auth error", async () => {
+    const fetch = jest.requireMock("cross-fetch");
+    fetch.mockResolvedValue({
+      status: 418,
+      url: "https://my.pod/resource",
+    });
+    const mockedFreshener = mockDefaultTokenRefresher();
+    const refreshCall = jest.spyOn(mockedFreshener, "refresh");
+
+    const myFetch = await buildDpopFetch("myToken", mockJwk(), {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: mockedFreshener,
+    });
+    await myFetch("https://my.pod/resource");
+    expect(refreshCall).not.toHaveBeenCalled();
+  });
+
+  it("returns the initial response when the refresh flow fails", async () => {
+    const fetch = jest.requireMock("cross-fetch");
+    fetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const myFetch = await buildDpopFetch("myToken", mockJwk(), {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: {
+        refresh: () => {
+          throw new Error("Some error");
+        },
+      },
+    });
+    const response = await myFetch("https://my.pod/resource");
+    // The mocked fetch will 401, which triggers the refresh flow.
+    // The test checks that the refresh failure is silent.
+    expect(response.status).toEqual(401);
   });
 });
