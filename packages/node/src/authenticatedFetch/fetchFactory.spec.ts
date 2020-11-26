@@ -47,16 +47,6 @@ const mockNotRedirectedResponse = (): MockedRedirectResponse => {
   };
 };
 
-type MockedStatusResponse = {
-  status: number;
-};
-
-const mockStatusResponse = (status: number): MockedStatusResponse => {
-  return {
-    status,
-  };
-};
-
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
     const fetch = jest.requireMock("cross-fetch");
@@ -95,7 +85,7 @@ describe("buildBearerFetch", () => {
 
   it("returns a fetch that refreshes the token on 401", async () => {
     const fetch = jest.requireMock("cross-fetch");
-    fetch.mockResolvedValueOnce(mockStatusResponse(401));
+    fetch.mockResolvedValueOnce({ status: 401 });
     const myFetch = buildBearerFetch("myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
@@ -111,7 +101,7 @@ describe("buildBearerFetch", () => {
 
   it("returns a fetch preserving the optional headers even after refresh", async () => {
     const fetch = jest.requireMock("cross-fetch");
-    fetch.mockResolvedValueOnce(mockStatusResponse(401));
+    fetch.mockResolvedValueOnce({ status: 401 });
     const myFetch = buildBearerFetch("myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
@@ -128,7 +118,7 @@ describe("buildBearerFetch", () => {
 
   it("rotates the refresh tokens if a new one is issued", async () => {
     const fetch = jest.requireMock("cross-fetch");
-    fetch.mockResolvedValue(mockStatusResponse(401));
+    fetch.mockResolvedValue({ status: 401 });
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refresh_token = "some refreshed refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
@@ -149,7 +139,7 @@ describe("buildBearerFetch", () => {
 
   it("does not try to refresh on a non-auth error", async () => {
     const fetch = jest.requireMock("cross-fetch");
-    fetch.mockResolvedValue(mockStatusResponse(418));
+    fetch.mockResolvedValue({ status: 418 });
     const mockedRefresher = mockDefaultTokenRefresher();
     const refreshCall = jest.spyOn(mockedRefresher, "refresh");
 
@@ -164,7 +154,7 @@ describe("buildBearerFetch", () => {
 
   it("returns the initial response when the refresh flow fails", async () => {
     const fetch = jest.requireMock("cross-fetch");
-    fetch.mockResolvedValueOnce(mockStatusResponse(401));
+    fetch.mockResolvedValueOnce({ status: 401 });
     const myFetch = buildBearerFetch("myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
