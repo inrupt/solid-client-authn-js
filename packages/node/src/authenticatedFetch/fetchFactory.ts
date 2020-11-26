@@ -183,30 +183,76 @@ async function buildDpopFetchOptions(
  * DPoP token, and adds a dpop header.
  */
 export async function buildDpopFetch(
-  authToken: string,
-  // TODO: We need to push this refresh token into a wrapper around the fetch,
-  //  so dependent on that wrapper existing first!
-  _refreshToken: string | undefined,
-  dpopKey: JWK.ECKey
+  accessToken: string,
+  dpopKey: JWK.ECKey,
+  refreshOptions?: RefreshOptions
 ): Promise<typeof fetch> {
-  return async (url: RequestInfo, options?: RequestInit): Promise<Response> => {
-    const response = await fetch(
+  let currentAccessToken = accessToken;
+  const currentRefreshOptions: RefreshOptions | undefined = refreshOptions;
+  return async (url, options): Promise<Response> => {
+    let response = await fetch(
       url,
-      await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)
+      await buildDpopFetchOptions(url.toString(), accessToken, dpopKey, options)
     );
     const failedButNotExpectedAuthError =
       !response.ok && !isExpectedAuthError(response.status);
     const hasBeenRedirected = response.url !== url;
-    if (response.ok || failedButNotExpectedAuthError || !hasBeenRedirected) {
+    if (response.ok || failedButNotExpectedAuthError) {
       // If there hasn't been a redirection, or if there has been a non-auth related
       // issue, it should be handled at the application level
       return response;
     }
-    // If the request failed for auth reasons, and has been redirected, we should
-    // replay it with a new DPoP token.
-    return fetch(
-      response.url,
-      await buildDpopFetchOptions(response.url, authToken, dpopKey, options)
-    );
+    if (hasBeenRedirected) {
+      // If the request failed for auth reasons, and has been redirected, we should
+      // replay it with a new DPoP token.
+      response = await fetch(
+        response.url,
+        await buildDpopFetchOptions(
+          response.url,
+          currentAccessToken,
+          dpopKey,
+          options
+        )
+      );
+    }
+    // If the redirected request has an auth issue, the access token may
+    // need to be refreshed.
+    if (
+      currentRefreshOptions !== undefined &&
+      isExpectedAuthError(response.status)
+    ) {
+      try {
+        const tokenSet = await currentRefreshOptions.tokenRefresher.refresh(
+          currentRefreshOptions.sessionId,
+          currentRefreshOptions.refreshToken
+        );
+        currentAccessToken = tokenSet.access_token;
+        if (tokenSet.refresh_token) {
+          // If the refresh token is rotated, update it in the closure.
+          // TODO: Plug this in an external storage if one is provided.
+          currentRefreshOptions.refreshToken = tokenSet.refresh_token;
+        }
+        // Once the token has been refreshed, re-issue the authenticated request.
+        // If it has an auth failure again, the user legitimately doesn't have access
+        // to the target resource.
+        return fetch(
+          url.toString(),
+          await buildDpopFetchOptions(
+            url.toString(),
+            currentAccessToken,
+            dpopKey,
+            options
+          )
+        );
+      } catch (e) {
+        // If we used a log framework, the error could be logged at the `debug` level,
+        // but otherwise the failure of the refresh flow should not blow up in the user's
+        // face, and returning the original authentication error is better.
+        return response;
+      }
+    }
+    // If there was an auth error, but no refresh token is provided, the response
+    // should simply be returned
+    return response;
   };
 }
