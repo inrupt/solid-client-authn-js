@@ -36,11 +36,18 @@ import { Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
+// Some identifiers are not in camelcase on purpose, as they are named using the
+// official names from the OIDC/OAuth2 specifications.
+/* eslint-disable camelcase */
+
 /**
  * @hidden
  */
 export interface ITokenRefresher {
-  refresh(localUserId: string, refreshToken?: string): Promise<TokenSet>;
+  refresh(
+    localUserId: string,
+    refreshToken?: string
+  ): Promise<TokenSet & { access_token: string }>;
 }
 
 /**
@@ -59,7 +66,7 @@ export default class TokenRefresher implements ITokenRefresher {
     sessionId: string,
     refreshToken?: string,
     dpopKey?: JWK.ECKey
-  ): Promise<TokenSet> {
+  ): Promise<TokenSet & { access_token: string }> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
       this.storageUtility,
@@ -108,7 +115,7 @@ export default class TokenRefresher implements ITokenRefresher {
         { secure: true }
       );
     }
-
-    return tokenSet;
+    // The type assertion is fine, since we throw on undefined access_token
+    return tokenSet as TokenSet & { access_token: string };
   }
 }

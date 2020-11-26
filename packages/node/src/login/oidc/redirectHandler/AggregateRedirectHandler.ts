@@ -33,14 +33,13 @@ import {
   ISessionInfo,
   AggregateHandler,
 } from "@inrupt/solid-client-authn-core";
-import { fetchType } from "../../../authenticatedFetch/fetchFactory";
 
 /**
  * @hidden
  */
 @injectable()
 export default class AggregateRedirectHandler
-  extends AggregateHandler<[string], ISessionInfo & { fetch: fetchType }>
+  extends AggregateHandler<[string], ISessionInfo & { fetch: typeof fetch }>
   implements IRedirectHandler {
   constructor(
     @injectAll("redirectHandlers") redirectHandlers: IRedirectHandler[]

@@ -22,33 +22,84 @@
 import { JWK, JWT } from "jose";
 import { fetch } from "cross-fetch";
 import { v4 } from "uuid";
+import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
 
-// node-fetch fetch has an additional property (isRedirect) which prevents using
-// `typeof fetch`.
-// export type fetchType = (info: RequestInfo, init?: RequestInit) => Promise<Response>;
-export type fetchType = typeof fetch;
+export type RefreshOptions = {
+  sessionId: string;
+  refreshToken: string;
+  tokenRefresher: ITokenRefresher;
+};
+
+function isExpectedAuthError(statusCode: number): boolean {
+  // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
+  // a response failing because the provided credentials aren't accepted by the
+  // server can get a 401 or a 403 response.
+  return [401, 403].includes(statusCode);
+}
 
 /**
- * @param authToken A bearer token.
- * @param _refreshToken An optional refresh token.
+ * @param accessToken A bearer token.
+ * @param refreshToken An optional refresh token.
  * @returns A fetch function that adds an Authorization header with the provided
  * bearer token.
  * @hidden
  */
 export function buildBearerFetch(
-  authToken: string,
-  // TODO: We need to push this refresh token into a wrapper around the fetch,
-  //  so dependent on that wrapper existing first!
-  _refreshToken: string | undefined
-): fetchType {
-  return (init: RequestInfo, options?: RequestInit): Promise<Response> => {
-    return fetch(init, {
+  accessToken: string,
+  refreshOptions?: RefreshOptions
+): typeof fetch {
+  // These local copies of the the provided parameters may be mutated in the
+  // authenticated fetch closure.
+  let currentAccessToken = accessToken;
+  const currentRefreshOptions: RefreshOptions | undefined = refreshOptions
+    ? { ...refreshOptions }
+    : undefined;
+  return async (
+    init: RequestInfo,
+    options?: RequestInit
+  ): Promise<Response> => {
+    const response = await fetch(init, {
       ...options,
       headers: {
         ...options?.headers,
-        Authorization: `Bearer ${authToken}`,
+        Authorization: `Bearer ${currentAccessToken}`,
       },
     });
+    if (
+      !isExpectedAuthError(response.status) ||
+      currentRefreshOptions === undefined
+    ) {
+      // Either the request succeeded, or its failure isn't auth-related, or
+      // no refresh token has been provided.
+      return response;
+    }
+    try {
+      const tokenSet = await currentRefreshOptions.tokenRefresher.refresh(
+        currentRefreshOptions.sessionId,
+        currentRefreshOptions.refreshToken
+      );
+      currentAccessToken = tokenSet.access_token;
+      if (tokenSet.refresh_token) {
+        // If the refresh token is rotated, update it in the closure.
+        // TODO: Plug this into external storage, if one is provided.
+        currentRefreshOptions.refreshToken = tokenSet.refresh_token;
+      }
+      // Once the token has been refreshed, re-issue the authenticated request.
+      // If it has an auth failure again, the user legitimately doesn't have access
+      // to the target resource.
+      return fetch(init, {
+        ...options,
+        headers: {
+          ...options?.headers,
+          Authorization: `Bearer ${currentAccessToken}`,
+        },
+      });
+    } catch (e) {
+      // If we used a log framework, the error could be logged at the `debug` level,
+      // but otherwise the failure of the refresh flow should not blow up in the user's
+      // face, and returning the original authentication error is better.
+      return response;
+    }
   };
 }
 
@@ -124,13 +175,6 @@ async function buildDpopFetchOptions(
   };
 }
 
-function isExpectedAuthError(statusCode: number): boolean {
-  // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
-  // a response failing because the provided credentials aren't accepted by the
-  // server can get a 401 or a 403 response.
-  return [401, 403].includes(statusCode);
-}
-
 /**
  * @param authToken a DPoP token.
  * @param _refreshToken An optional refresh token.
@@ -144,8 +188,8 @@ export async function buildDpopFetch(
   //  so dependent on that wrapper existing first!
   _refreshToken: string | undefined,
   dpopKey: JWK.ECKey
-): Promise<fetchType> {
-  return async (url, options): Promise<Response> => {
+): Promise<typeof fetch> {
+  return async (url: RequestInfo, options?: RequestInit): Promise<Response> => {
     const response = await fetch(
       url,
       await buildDpopFetchOptions(url.toString(), authToken, dpopKey, options)

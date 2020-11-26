@@ -37,6 +37,7 @@ import {
   mockDefaultIssuerConfig,
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
+import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 
 jest.mock("openid-client");
 jest.mock("cross-fetch");
@@ -119,6 +120,7 @@ const defaultMocks = {
   sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
   clientRegistrar: mockDefaultClientRegistrar(),
   issuerConfigFetcher: mockIssuerConfigFetcher(mockDefaultIssuerConfig()),
+  tokenRefresher: mockDefaultTokenRefresher(),
 };
 
 function getAuthCodeRedirectHandler(
@@ -128,7 +130,8 @@ function getAuthCodeRedirectHandler(
     mocks.storageUtility ?? defaultMocks.storageUtility,
     mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
     mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-    mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+    mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
+    mocks.tokenRefresher ?? defaultMocks.tokenRefresher
   );
 }
 
@@ -287,6 +290,34 @@ describe("AuthCodeRedirectHandler", () => {
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
         "Bearer"
+      );
+    });
+
+    it("returns a fetch that supports the refresh flow", async () => {
+      const tokenSet = mockBearerTokens();
+      tokenSet.refresh_token = "some refresh token";
+      setupOidcClientMock(tokenSet);
+      const mockedStorage = mockDefaultRedirectStorage();
+      await mockedStorage.setForUser("mySession", {
+        dpop: "false",
+      });
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      // Check that the returned fetch function is authenticated
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValueOnce({ status: 401 } as Response);
+      await result.fetch("https://some.url");
+      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+        "Bearer some refreshed access token"
       );
     });
 

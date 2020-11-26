@@ -44,8 +44,9 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
   buildBearerFetch,
   buildDpopFetch,
-  fetchType,
+  RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
+import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 /**
  * Extract a WebID from an ID token payload. Note that this does not yet implement the
@@ -82,7 +83,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     private sessionInfoManager: ISessionInfoManager,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar,
+    @inject("tokenRefresher") private tokenRefresher: ITokenRefresher
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -101,7 +103,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
   async handle(
     redirectUrl: string
-  ): Promise<ISessionInfo & { fetch: fetchType }> {
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
@@ -183,10 +185,15 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         dpopKey as any
       );
     } else {
-      authFetch = buildBearerFetch(
-        tokenSet.access_token,
-        tokenSet.refresh_token
-      );
+      let refreshOptions: RefreshOptions | undefined;
+      if (tokenSet.refresh_token !== undefined) {
+        refreshOptions = {
+          refreshToken: tokenSet.refresh_token,
+          sessionId,
+          tokenRefresher: this.tokenRefresher,
+        };
+      }
+      authFetch = buildBearerFetch(tokenSet.access_token, refreshOptions);
     }
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns

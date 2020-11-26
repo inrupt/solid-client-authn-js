@@ -19,10 +19,37 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ITokenRequester } from "../TokenRequester";
+import { IdTokenClaims, TokenSet } from "openid-client";
+import { ITokenRefresher } from "../TokenRefresher";
 
-export const TokenRequesterMock: jest.Mocked<ITokenRequester> = {
-  request: jest.fn((_localUserId: string, _body: Record<string, string>) => {
-    return Promise.resolve();
-  }),
+// Some identifiers are in camelcase on purpose.
+/* eslint-disable camelcase */
+
+export const mockTokenRefresher = (
+  tokenSet: TokenSet & { access_token: string }
+): ITokenRefresher => {
+  return {
+    refresh: async () => tokenSet,
+  };
 };
+
+const mockIdTokenPayload = (): IdTokenClaims => {
+  return {
+    sub: "https://my.webid",
+    iss: "https://my.idp/",
+    aud: "https://resource.example.org",
+    exp: 1662266216,
+    iat: 1462266216,
+  };
+};
+
+export const mockDefaultTokenSet = (): TokenSet & { access_token: string } => {
+  return {
+    access_token: "some refreshed access token",
+    expired: () => false,
+    claims: mockIdTokenPayload,
+  };
+};
+
+export const mockDefaultTokenRefresher = (): ITokenRefresher =>
+  mockTokenRefresher(mockDefaultTokenSet());
