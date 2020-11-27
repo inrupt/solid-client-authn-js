@@ -20,7 +20,6 @@
  */
 
 // Required by TSyringe:
-import "reflect-metadata";
 import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
 import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
 import StorageUtility, {

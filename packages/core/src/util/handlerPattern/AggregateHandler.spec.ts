@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import "reflect-metadata";
 import IHandleable from "./IHandleable";
 import AggregateHandler from "./AggregateHandler";
 
