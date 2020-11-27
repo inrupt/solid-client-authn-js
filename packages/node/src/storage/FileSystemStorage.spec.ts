@@ -22,14 +22,16 @@
 import { it, describe } from "@jest/globals";
 import { get } from "./FileSystemStorage";
 
-jest.mock("fs/promises");
+jest.mock("fs");
 
 describe("FileSystemStorage", () => {
   describe("get", () => {
     it("retrieves an element from a JSON file", async () => {
       const data = { someKey: "some value" };
-      const mockedFs = jest.requireMock("fs/promises");
-      mockedFs.readFile = jest.fn().mockResolvedValueOnce(JSON.stringify(data));
+      const mockedFs = jest.requireMock("fs");
+      mockedFs.promises = {
+        readFile: jest.fn().mockResolvedValue(JSON.stringify(data)),
+      };
       await expect(get("some file", "someKey")).resolves.toEqual("some value");
     });
   });

@@ -25,15 +25,17 @@
  */
 
 import { IStorage, NotImplementedError } from "@inrupt/solid-client-authn-core";
-import { readFile } from "fs/promises";
-import { existsSync, writeFileSync } from "fs";
+// Note that currently, the jest runner doesn't support ES modules, so the following
+// does not work, and the "promise" import on the line after that is required instead.
+// import { readFile } from "fs/promises";
+import { existsSync, writeFileSync, promises } from "fs";
 
 export const get = async (
   path: string,
   key: string
 ): Promise<string | undefined> => {
   try {
-    const rawData = await readFile(path, {
+    const rawData = await promises.readFile(path, {
       encoding: "utf-8",
     });
     const parsedData = JSON.parse(rawData);
