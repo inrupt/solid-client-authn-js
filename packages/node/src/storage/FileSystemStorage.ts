@@ -63,11 +63,11 @@ export default class FileSystemStorage implements IStorage {
 
   get = (key: string): Promise<string | undefined> => get(this.path, key);
 
-  async set(key: string, value: string): Promise<void> {
+  async set(_key: string, _value: string): Promise<void> {
     throw new NotImplementedError("FileSystemStorage.set not implemented yet");
   }
 
-  async delete(key: string): Promise<void> {
+  async delete(_key: string): Promise<void> {
     throw new NotImplementedError(
       "FileSystemStorage.delete not implemented yet"
     );
