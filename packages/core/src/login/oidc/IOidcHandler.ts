@@ -27,11 +27,15 @@
 /**
  * OidcHandlers handle the login process for a given IDP (as defined by the OIDC Options)
  */
+import ISessionInfo from "../../sessionInfo/ISessionInfo";
 import IHandleable from "../../util/handlerPattern/IHandleable";
 import IOidcOptions from "./IOidcOptions";
 
 /**
  * @hidden
  */
-type IOidcHandler = IHandleable<[IOidcOptions], void>;
+type IOidcHandler = IHandleable<
+  [IOidcOptions],
+  (ISessionInfo & { fetch: typeof fetch }) | undefined
+>;
 export default IOidcHandler;

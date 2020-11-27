@@ -39,7 +39,9 @@ import {
   ConfigurationError,
   IClient,
   IOidcOptions,
+  ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
+import { fetch } from "cross-fetch";
 
 function hasIssuer(
   options: ILoginOptions
@@ -70,7 +72,9 @@ export default class OidcLoginHandler implements ILoginHandler {
     return hasIssuer(options) && hasRedirectUrl(options);
   }
 
-  async handle(options: ILoginOptions): Promise<void> {
+  async handle(
+    options: ILoginOptions
+  ): Promise<(ISessionInfo & { fetch: typeof fetch }) | undefined> {
     if (!hasIssuer(options)) {
       throw new ConfigurationError(
         `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(
@@ -114,6 +118,6 @@ export default class OidcLoginHandler implements ILoginHandler {
     };
 
     // Call proper OIDC Handler
-    await this.oidcHandler.handle(OidcOptions);
+    return this.oidcHandler.handle(OidcOptions);
   }
 }

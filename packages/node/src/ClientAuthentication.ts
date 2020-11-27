@@ -67,7 +67,7 @@ export default class ClientAuthentication {
     // are now longer valid - so just to be safe, strip relevant params now.
     const { redirectUrl } = options;
 
-    return this.loginHandler.handle({
+    const loginReturn = await this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
       redirectUrl,
@@ -79,6 +79,9 @@ export default class ClientAuthentication {
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
     });
+    if (loginReturn !== undefined) {
+      this.fetch = loginReturn.fetch;
+    }
   };
 
   // By default, our fetch() resolves to the environment fetch() function.

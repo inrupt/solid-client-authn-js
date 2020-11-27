@@ -24,25 +24,199 @@
  * @packageDocumentation
  */
 
-import { standardOidcOptions } from "../__mocks__/IOidcOptions";
+import "reflect-metadata";
+import { mockOidcOptions } from "../__mocks__/IOidcOptions";
 import RefreshTokenOidcHandler from "./RefreshTokenOidcHandler";
+import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 
-describe("PrimaryDeviceOidcHandler", () => {
+jest.mock("cross-fetch");
+
+describe("RefreshTokenOidcHandler", () => {
   describe("canHandle", () => {
-    it("doesn't handle anything", async () => {
-      const refreshTokenOidcHandler = new RefreshTokenOidcHandler();
+    it("doesn't handle options missing a refresh token", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher()
+      );
       await expect(
-        refreshTokenOidcHandler.canHandle(standardOidcOptions)
+        refreshTokenOidcHandler.canHandle(
+          mockOidcOptions({
+            refreshToken: undefined,
+            client: {
+              clientId: "some client id",
+              clientSecret: "some client secret",
+            },
+          })
+        )
+      ).resolves.toEqual(false);
+    });
+
+    it("doesn't handle options missing a client ID", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher()
+      );
+      await expect(
+        refreshTokenOidcHandler.canHandle(
+          mockOidcOptions({
+            refreshToken: "some refresh token",
+            client: {
+              // TS would prevent this configuration
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              clientId: undefined,
+              clientSecret: "some client secret",
+            },
+          })
+        )
+      ).resolves.toEqual(false);
+    });
+
+    it("doesn't handle options missing a client secret", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher()
+      );
+      await expect(
+        refreshTokenOidcHandler.canHandle(
+          mockOidcOptions({
+            refreshToken: "some refresh token",
+            client: {
+              clientId: "some client id",
+              clientSecret: undefined,
+            },
+          })
+        )
       ).resolves.toEqual(false);
     });
   });
 
   describe("handle", () => {
-    it("isn't implemented yet", async () => {
-      const refreshTokenOidcHandler = new RefreshTokenOidcHandler();
+    it("throws if the refresh token is missing", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher()
+      );
       await expect(() =>
-        refreshTokenOidcHandler.handle(standardOidcOptions)
-      ).rejects.toThrow("not implemented");
+        refreshTokenOidcHandler.handle(
+          mockOidcOptions({
+            refreshToken: undefined,
+            client: {
+              clientId: "some client id",
+              clientSecret: "some client secret",
+            },
+          })
+        )
+      ).rejects.toThrow(
+        "missing one of 'refreshToken', 'clientId', 'clientSecret'"
+      );
+    });
+
+    it("throws if the client secret is missing", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher()
+      );
+      await expect(() =>
+        refreshTokenOidcHandler.handle(
+          mockOidcOptions({
+            refreshToken: "some refresh token",
+            client: {
+              clientId: "some client id",
+              clientSecret: undefined,
+            },
+          })
+        )
+      ).rejects.toThrow(
+        "missing one of 'refreshToken', 'clientId', 'clientSecret'"
+      );
+    });
+
+    it("uses the refresh token to get an access token", async () => {
+      const mockedTokenRefresher = mockDefaultTokenRefresher();
+      const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
+
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockedTokenRefresher
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+          },
+        })
+      );
+      expect(result).not.toBeUndefined();
+
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://my.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      expect(mockedRefreshFunction).toHaveBeenCalled();
+    });
+
+    it("returns an authenticated fetch if the credentials are valid", async () => {
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher()
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+          },
+        })
+      );
+      expect(result).not.toBeUndefined();
+
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://some.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+        "DPoP some refreshed access token"
+      );
+    });
+
+    it("returns a bearer-authenticated fetch if the credentials are valid", async () => {
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher()
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+          },
+          dpop: false,
+        })
+      );
+      expect(result).not.toBeUndefined();
+
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://some.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+        "Bearer some refreshed access token"
+      );
     });
   });
 });

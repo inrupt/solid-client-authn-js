@@ -32,14 +32,19 @@ import {
   IOidcHandler,
   IOidcOptions,
   AggregateHandler,
+  ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
+import fetch from "cross-fetch";
 
 /**
  * @hidden
  */
 @injectable()
 export default class AggregateOidcHandler
-  extends AggregateHandler<[IOidcOptions], void>
+  extends AggregateHandler<
+    [IOidcOptions],
+    (ISessionInfo & { fetch: typeof fetch }) | undefined
+  >
   implements IOidcHandler {
   constructor(@injectAll("oidcHandlers") oidcLoginHandlers: IOidcHandler[]) {
     super(oidcLoginHandlers);
