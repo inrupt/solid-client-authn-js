@@ -20,19 +20,88 @@
  */
 
 import { it, describe } from "@jest/globals";
-import { get } from "./FileSystemStorage";
+import FileSystemStorage, { get } from "./FileSystemStorage";
 
 jest.mock("fs");
 
+describe("get", () => {
+  it("retrieves an element from a JSON file", async () => {
+    const data = { someKey: "some value" };
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.promises = {
+      readFile: jest.fn().mockResolvedValue(JSON.stringify(data)),
+    };
+    await expect(get("some file", "someKey")).resolves.toEqual("some value");
+  });
+
+  it("returns undefined if the key isn't present in storage", async () => {
+    const data = { someKey: "some value" };
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.promises = {
+      readFile: jest.fn().mockResolvedValue(JSON.stringify(data)),
+    };
+    await expect(get("some file", "someOtherKey")).resolves.toBeUndefined();
+  });
+
+  it("throws on file system error", async () => {
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.promises = {
+      readFile: () => {
+        throw new Error("Some file system error");
+      },
+    };
+    await expect(get("some file", "someKey")).rejects.toThrow(
+      "An error happened while parsing JSON content of [some file]: Error: Some file system error"
+    );
+  });
+
+  it("throws if the file isn't JSON", async () => {
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.promises = {
+      readFile: jest.fn().mockResolvedValue("Something that isn't JSON"),
+    };
+    await expect(get("some file", "someKey")).rejects.toThrow(
+      "An error happened while parsing JSON content of [some file]: SyntaxError:"
+    );
+  });
+});
+
 describe("FileSystemStorage", () => {
-  describe("get", () => {
-    it("retrieves an element from a JSON file", async () => {
-      const data = { someKey: "some value" };
-      const mockedFs = jest.requireMock("fs");
-      mockedFs.promises = {
-        readFile: jest.fn().mockResolvedValue(JSON.stringify(data)),
-      };
-      await expect(get("some file", "someKey")).resolves.toEqual("some value");
-    });
+  it("creates a file if the given path does not resolve", () => {
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.existsSync = jest.fn().mockReturnValueOnce(false);
+    const mockedFileCreation = jest.spyOn(mockedFs, "writeFileSync");
+    // ESLint prevents from using new for side-effect, which we want to
+    // do here for test purpose.
+    // eslint-disable-next-line no-new
+    new FileSystemStorage("some file");
+    expect(mockedFileCreation).toHaveBeenCalled();
+  });
+
+  it("does not overwrite an existing file", () => {
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.existsSync = jest.fn().mockReturnValueOnce(true);
+    const mockedFileCreation = jest.spyOn(mockedFs, "writeFileSync");
+    // ESLint prevents from using new for side-effect, which we want to
+    // do here for test purpose.
+    // eslint-disable-next-line no-new
+    new FileSystemStorage("some file");
+    expect(mockedFileCreation).not.toHaveBeenCalled();
+  });
+
+  it("does not implement set yet", async () => {
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.existsSync = jest.fn().mockReturnValueOnce(true);
+    const store = new FileSystemStorage("some file");
+    await expect(store.set("someKey", "some value")).rejects.toThrow(
+      "not implemented"
+    );
+  });
+
+  it("does not implement delete yet", async () => {
+    const mockedFs = jest.requireMock("fs");
+    mockedFs.existsSync = jest.fn().mockReturnValueOnce(true);
+    const store = new FileSystemStorage("some file");
+    await expect(store.delete("someKey")).rejects.toThrow("not implemented");
   });
 });

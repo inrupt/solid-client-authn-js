@@ -42,7 +42,7 @@ export const get = async (
     return parsedData[key] || undefined;
   } catch (e) {
     throw new Error(
-      `An error happened while parsing JSON content of ${path}: ${e}`
+      `An error happened while parsing JSON content of [${path}]: ${e}`
     );
   }
 };
@@ -63,13 +63,11 @@ export default class FileSystemStorage implements IStorage {
 
   get = (key: string): Promise<string | undefined> => get(this.path, key);
 
-  async set(_key: string, _value: string): Promise<void> {
-    throw new NotImplementedError("FileSystemStorage.set not implemented yet");
-  }
+  set = async (_key: string, _value: string): Promise<void> => {
+    throw new NotImplementedError("FileSystemStorage.set");
+  };
 
-  async delete(_key: string): Promise<void> {
-    throw new NotImplementedError(
-      "FileSystemStorage.delete not implemented yet"
-    );
-  }
+  delete = async (_key: string): Promise<void> => {
+    throw new NotImplementedError("FileSystemStorage.delete");
+  };
 }
