@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+## 1.1.0 - 2020-11-27
+
+### New features
+
 - NodeJS support: a new NPM package, `@inrupt/solid-client-authn-node`, is now available to use authentication in a server environment. 
 - In addition to the features supported by the browser version, `@inrupt/solid-client-authn-node` supports the refresh token grant, which 
 makes it possible to maintain long-lived sessions without re-involving the user.
