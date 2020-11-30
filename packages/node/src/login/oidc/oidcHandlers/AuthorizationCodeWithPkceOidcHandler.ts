@@ -32,6 +32,7 @@ import {
   IOidcOptions,
   IRedirector,
   IStorageUtility,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { injectable, inject } from "tsyringe";
@@ -57,7 +58,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     const issuer = new Issuer(
       configToIssuerMetadata(oidcLoginOptions.issuerConfiguration)
     );
@@ -95,5 +96,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     this.redirector.redirect(targetUrl, {
       handleRedirect: oidcLoginOptions.handleRedirect,
     });
+    // The login is only completed AFTER redirect, so there is nothing to return.
+    return undefined;
   }
 }

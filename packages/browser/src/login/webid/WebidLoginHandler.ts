@@ -27,7 +27,11 @@
 /**
  * Handles login if a user's webid was provided
  */
-import { ILoginOptions, ILoginHandler } from "@inrupt/solid-client-authn-core";
+import {
+  ILoginOptions,
+  ILoginHandler,
+  LoginResult,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden
@@ -43,7 +47,7 @@ export default class WebidLoginHandler implements ILoginHandler {
    * 'oidcIssuer' triple, it will create login credentials to match that
    * @param loginOptions
    */
-  async handle(_loginOptions: ILoginOptions): Promise<void> {
+  async handle(_loginOptions: ILoginOptions): Promise<LoginResult> {
     // TODO: implement
     throw new Error("Not Implemented");
   }

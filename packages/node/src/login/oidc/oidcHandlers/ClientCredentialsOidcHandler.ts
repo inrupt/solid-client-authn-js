@@ -31,6 +31,7 @@ import {
   IOidcHandler,
   IOidcOptions,
   NotImplementedError,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 
 /**
@@ -41,7 +42,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     return false;
   }
 
-  async handle(_oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(_oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     throw new NotImplementedError("ClientCredentialsOidcHandler handle");
   }
 }

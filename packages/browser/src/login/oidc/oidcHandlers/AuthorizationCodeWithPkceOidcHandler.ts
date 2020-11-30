@@ -32,6 +32,7 @@ import {
   IOidcOptions,
   IRedirector,
   IStorageUtility,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
 import { OidcClient, SigninRequest } from "@inrupt/oidc-client-ext";
@@ -56,7 +57,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     /* eslint-disable camelcase */
     const oidcOptions = {
       authority: oidcLoginOptions.issuer?.toString(),
@@ -84,43 +85,43 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const { redirector } = this;
     const storage = this.storageUtility;
 
-    return oidcClientLibrary
-      .createSigninRequest()
-      .then((req: SigninRequest) => {
-        // We use the OAuth 'state' value (which should be crypto-random) as
-        // the key in our storage to store our actual SessionID. We do this 'cos
-        // we'll need to lookup our session information again when the browser
-        // is redirected back to us (i.e. the OAuth client application) from the
-        // Authorization Server.
-        // We don't want to use our session ID as the OAuth 'state' value, as
-        // that session ID can be any developer-specified value, and therefore
-        // may not be appropriate (since the OAuth 'state' value should really
-        // be an unguessable crypto-random value).
-        return (
-          Promise.all([
+    oidcClientLibrary.createSigninRequest().then((req: SigninRequest) => {
+      // We use the OAuth 'state' value (which should be crypto-random) as
+      // the key in our storage to store our actual SessionID. We do this 'cos
+      // we'll need to lookup our session information again when the browser
+      // is redirected back to us (i.e. the OAuth client application) from the
+      // Authorization Server.
+      // We don't want to use our session ID as the OAuth 'state' value, as
+      // that session ID can be any developer-specified value, and therefore
+      // may not be appropriate (since the OAuth 'state' value should really
+      // be an unguessable crypto-random value).
+      return (
+        Promise.all([
+          // eslint-disable-next-line no-underscore-dangle
+          storage.setForUser(req.state._id, {
+            sessionId: oidcLoginOptions.sessionId,
+          }),
+          storage.setForUser(oidcLoginOptions.sessionId, {
             // eslint-disable-next-line no-underscore-dangle
-            storage.setForUser(req.state._id, {
-              sessionId: oidcLoginOptions.sessionId,
-            }),
-            storage.setForUser(oidcLoginOptions.sessionId, {
-              // eslint-disable-next-line no-underscore-dangle
-              codeVerifier: req.state._code_verifier,
-              issuer: oidcLoginOptions.issuer.toString(),
-              redirectUri: oidcLoginOptions.redirectUrl.toString(),
-              dpop: oidcLoginOptions.dpop ? "true" : "false",
-            }),
-          ])
-            .then(() => {
-              redirector.redirect(req.url.toString(), {
-                handleRedirect: oidcLoginOptions.handleRedirect,
-              });
-            })
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .catch((err: unknown) => {
-              // eslint-disable-next-line no-console
-              console.error(err);
-            })
-        );
-      });
+            codeVerifier: req.state._code_verifier,
+            issuer: oidcLoginOptions.issuer.toString(),
+            redirectUri: oidcLoginOptions.redirectUrl.toString(),
+            dpop: oidcLoginOptions.dpop ? "true" : "false",
+          }),
+        ])
+          .then(() => {
+            redirector.redirect(req.url.toString(), {
+              handleRedirect: oidcLoginOptions.handleRedirect,
+            });
+          })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .catch((err: unknown) => {
+            // eslint-disable-next-line no-console
+            console.error(err);
+          })
+      );
+    });
+    // The login is only completed AFTER redirect, so nothin to return here.
+    return undefined;
   }
 }

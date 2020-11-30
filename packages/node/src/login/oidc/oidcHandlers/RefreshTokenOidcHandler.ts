@@ -27,7 +27,11 @@
 /**
  * Handler for the Refresh Token Flow
  */
-import { IOidcHandler, IOidcOptions } from "@inrupt/solid-client-authn-core";
+import {
+  IOidcHandler,
+  IOidcOptions,
+  LoginResult,
+} from "@inrupt/solid-client-authn-core";
 import { JWK } from "jose";
 import { inject, injectable } from "tsyringe";
 import { ISessionInfo } from "../../../../../core/dist";
@@ -64,9 +68,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     return validateOptions(oidcLoginOptions);
   }
 
-  async handle(
-    oidcLoginOptions: IOidcOptions
-  ): Promise<(ISessionInfo & { fetch: typeof fetch }) | undefined> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     if (!(await this.canHandle(oidcLoginOptions))) {
       throw new Error(
         `RefreshTokenOidcHandler cannot handle the provided options, missing one of 'refreshToken', 'clientId', 'clientSecret' in: ${JSON.stringify(

@@ -31,6 +31,7 @@ import {
   IOidcHandler,
   IOidcOptions,
   NotImplementedError,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 
 /**
@@ -43,7 +44,7 @@ export default class PrimaryDeviceOidcHandler implements IOidcHandler {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     throw new NotImplementedError("PrimaryDeviceOidcHandler handle");
   }
 }

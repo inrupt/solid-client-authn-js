@@ -33,6 +33,7 @@ import {
   IRedirector,
   ISessionInfoManager,
   IStorageUtility,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { inject, injectable } from "tsyringe";
 import { generateJwkForDpop, createDpopHeader } from "@inrupt/oidc-client-ext";
@@ -58,7 +59,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     // // TODO: include nonce
     // Disable camel case rule because this query requires camel case
     /* eslint-disable camelcase */
@@ -107,5 +108,7 @@ export default class LegacyImplicitFlowOidcHandler implements IOidcHandler {
     this.redirector.redirect(requestUrl.toString(), {
       handleRedirect: oidcLoginOptions.handleRedirect,
     });
+    // The login is only completed AFTER redirect, so nothing to return here.
+    return undefined;
   }
 }
