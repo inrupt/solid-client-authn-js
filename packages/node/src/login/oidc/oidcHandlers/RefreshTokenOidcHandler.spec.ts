@@ -25,7 +25,11 @@
  */
 
 import "reflect-metadata";
-import { mockOidcOptions } from "../__mocks__/IOidcOptions";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  mockDefaultOidcOptions,
+  mockOidcOptions,
+} from "../__mocks__/IOidcOptions";
 import RefreshTokenOidcHandler from "./RefreshTokenOidcHandler";
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 
@@ -35,7 +39,8 @@ describe("RefreshTokenOidcHandler", () => {
   describe("canHandle", () => {
     it("doesn't handle options missing a refresh token", async () => {
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockDefaultTokenRefresher()
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
       );
       await expect(
         refreshTokenOidcHandler.canHandle(
@@ -52,7 +57,8 @@ describe("RefreshTokenOidcHandler", () => {
 
     it("doesn't handle options missing a client ID", async () => {
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockDefaultTokenRefresher()
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
       );
       await expect(
         refreshTokenOidcHandler.canHandle(
@@ -69,29 +75,13 @@ describe("RefreshTokenOidcHandler", () => {
         )
       ).resolves.toEqual(false);
     });
-
-    it("doesn't handle options missing a client secret", async () => {
-      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockDefaultTokenRefresher()
-      );
-      await expect(
-        refreshTokenOidcHandler.canHandle(
-          mockOidcOptions({
-            refreshToken: "some refresh token",
-            client: {
-              clientId: "some client id",
-              clientSecret: undefined,
-            },
-          })
-        )
-      ).resolves.toEqual(false);
-    });
   });
 
   describe("handle", () => {
     it("throws if the refresh token is missing", async () => {
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockDefaultTokenRefresher()
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
       );
       await expect(() =>
         refreshTokenOidcHandler.handle(
@@ -103,28 +93,7 @@ describe("RefreshTokenOidcHandler", () => {
             },
           })
         )
-      ).rejects.toThrow(
-        "missing one of 'refreshToken', 'clientId', 'clientSecret'"
-      );
-    });
-
-    it("throws if the client secret is missing", async () => {
-      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockDefaultTokenRefresher()
-      );
-      await expect(() =>
-        refreshTokenOidcHandler.handle(
-          mockOidcOptions({
-            refreshToken: "some refresh token",
-            client: {
-              clientId: "some client id",
-              clientSecret: undefined,
-            },
-          })
-        )
-      ).rejects.toThrow(
-        "missing one of 'refreshToken', 'clientId', 'clientSecret'"
-      );
+      ).rejects.toThrow("missing one of 'refreshToken', 'clientId'");
     });
 
     it("uses the refresh token to get an access token", async () => {
@@ -133,7 +102,8 @@ describe("RefreshTokenOidcHandler", () => {
 
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockedTokenRefresher
+        mockedTokenRefresher,
+        mockStorageUtility({})
       );
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -161,7 +131,8 @@ describe("RefreshTokenOidcHandler", () => {
     it("returns an authenticated fetch if the credentials are valid", async () => {
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockDefaultTokenRefresher()
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
       );
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -191,7 +162,8 @@ describe("RefreshTokenOidcHandler", () => {
     it("returns a bearer-authenticated fetch if the credentials are valid", async () => {
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-        mockDefaultTokenRefresher()
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
       );
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -218,5 +190,60 @@ describe("RefreshTokenOidcHandler", () => {
         "Bearer some refreshed access token"
       );
     });
+
+    it("stores OIDC context in storage so that refreshing the token succeeds later", async () => {
+      const mockedStorage = mockStorageUtility({});
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockedStorage
+      );
+      await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+            clientName: "some client name",
+          },
+        })
+      );
+      await expect(
+        mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "clientId")
+      ).resolves.toEqual("some client id");
+      await expect(
+        mockedStorage.getForUser(
+          mockDefaultOidcOptions().sessionId,
+          "clientSecret"
+        )
+      ).resolves.toEqual("some client secret");
+      await expect(
+        mockedStorage.getForUser(
+          mockDefaultOidcOptions().sessionId,
+          "clientName"
+        )
+      ).resolves.toEqual("some client name");
+      await expect(
+        mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "issuer")
+      ).resolves.toEqual(mockDefaultOidcOptions().issuer);
+    });
+  });
+
+  it("supports a public client without a secret", async () => {
+    const mockedStorage = mockStorageUtility({});
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      mockDefaultTokenRefresher(),
+      mockedStorage
+    );
+    const result = await refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: undefined,
+          clientName: "some client name",
+        },
+      })
+    );
+    expect(result).not.toBeUndefined();
   });
 });

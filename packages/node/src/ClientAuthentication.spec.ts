@@ -21,7 +21,12 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  ILoginHandler,
+  mockStorageUtility,
+  LoginResult,
+  ILoginOptions,
+} from "@inrupt/solid-client-authn-core";
 import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
@@ -71,6 +76,28 @@ describe("ClientAuthentication", () => {
         handleRedirect: undefined,
         tokenType: "DPoP",
       });
+    });
+
+    it("may return after login if no redirect is required", async () => {
+      const mockedAuthFetch = jest.fn();
+      const mockedLoginHandler: jest.Mocked<ILoginHandler> = {
+        canHandle: jest.fn((_options: ILoginOptions) => Promise.resolve(true)),
+        handle: jest.fn((_options: ILoginOptions) =>
+          Promise.resolve(({
+            fetch: mockedAuthFetch,
+          } as unknown) as LoginResult)
+        ),
+      };
+      const clientAuthn = getClientAuthentication({
+        loginHandler: mockedLoginHandler,
+      });
+      const loginResult = await clientAuthn.login("mySession", {
+        refreshToken: "some refresh token",
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+      });
+      expect(loginResult).not.toBeUndefined();
+      expect(clientAuthn.fetch).toBe(mockedAuthFetch);
     });
 
     it("request a bearer token if specified", async () => {

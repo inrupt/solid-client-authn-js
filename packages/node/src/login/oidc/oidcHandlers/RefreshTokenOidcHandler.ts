@@ -30,7 +30,9 @@
 import {
   IOidcHandler,
   IOidcOptions,
+  IStorageUtility,
   LoginResult,
+  saveSessionInfoToStorage,
 } from "@inrupt/solid-client-authn-core";
 import { JWK } from "jose";
 import { inject, injectable } from "tsyringe";
@@ -50,8 +52,7 @@ function validateOptions(
 } {
   return (
     oidcLoginOptions.refreshToken !== undefined &&
-    oidcLoginOptions.client.clientId !== undefined &&
-    oidcLoginOptions.client.clientSecret !== undefined
+    oidcLoginOptions.client.clientId !== undefined
   );
 }
 
@@ -61,7 +62,8 @@ function validateOptions(
 @injectable()
 export default class RefreshTokenOidcHandler implements IOidcHandler {
   constructor(
-    @inject("tokenRefresher") private tokenRefresher: ITokenRefresher
+    @inject("tokenRefresher") private tokenRefresher: ITokenRefresher,
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -71,7 +73,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     if (!(await this.canHandle(oidcLoginOptions))) {
       throw new Error(
-        `RefreshTokenOidcHandler cannot handle the provided options, missing one of 'refreshToken', 'clientId', 'clientSecret' in: ${JSON.stringify(
+        `RefreshTokenOidcHandler cannot handle the provided options, missing one of 'refreshToken', 'clientId' in: ${JSON.stringify(
           oidcLoginOptions
         )}`
       );
@@ -104,6 +106,31 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
     };
+
+    await saveSessionInfoToStorage(
+      this.storageUtility,
+      oidcLoginOptions.sessionId,
+      undefined,
+      undefined,
+      "true",
+      oidcLoginOptions.refreshToken as string
+    );
+    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+      issuer: oidcLoginOptions.issuer,
+      dpop: oidcLoginOptions.dpop ? "true" : "false",
+      clientId: oidcLoginOptions.client.clientId,
+    });
+    if (oidcLoginOptions.client.clientSecret) {
+      await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+        clientSecret: oidcLoginOptions.client.clientSecret,
+      });
+    }
+    if (oidcLoginOptions.client.clientName) {
+      await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+        clientName: oidcLoginOptions.client.clientName,
+      });
+    }
+
     return Object.assign(sessionInfo, {
       fetch: authFetch,
     });

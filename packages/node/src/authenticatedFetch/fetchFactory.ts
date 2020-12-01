@@ -161,9 +161,9 @@ async function buildDpopFetchOptions(
   dpopKey: JWK.ECKey,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
-  return {
-    ...defaultOptions,
-    headers: {
+  const options: RequestInit = { ...defaultOptions };
+  if (authToken !== "") {
+    options.headers = {
       ...defaultOptions?.headers,
       Authorization: `DPoP ${authToken}`,
       DPoP: createDpopHeader(
@@ -171,8 +171,9 @@ async function buildDpopFetchOptions(
         defaultOptions?.method ?? "get",
         dpopKey
       ),
-    },
-  };
+    };
+  }
+  return options;
 }
 
 /**
@@ -192,7 +193,12 @@ export async function buildDpopFetch(
   return async (url, options): Promise<Response> => {
     let response = await fetch(
       url,
-      await buildDpopFetchOptions(url.toString(), accessToken, dpopKey, options)
+      await buildDpopFetchOptions(
+        url.toString(),
+        currentAccessToken,
+        dpopKey,
+        options
+      )
     );
     const failedButNotExpectedAuthError =
       !response.ok && !isExpectedAuthError(response.status);
@@ -224,7 +230,8 @@ export async function buildDpopFetch(
       try {
         const tokenSet = await currentRefreshOptions.tokenRefresher.refresh(
           currentRefreshOptions.sessionId,
-          currentRefreshOptions.refreshToken
+          currentRefreshOptions.refreshToken,
+          dpopKey
         );
         currentAccessToken = tokenSet.access_token;
         if (tokenSet.refresh_token) {

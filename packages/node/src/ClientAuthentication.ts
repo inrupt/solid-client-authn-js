@@ -53,7 +53,7 @@ export default class ClientAuthentication {
   login = async (
     sessionId: string,
     options: ILoginInputOptions
-  ): Promise<void> => {
+  ): Promise<ISessionInfo | undefined> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
     // But we may want to preserve our client application info, particularly if
@@ -75,13 +75,21 @@ export default class ClientAuthentication {
       clientSecret: options.clientSecret,
       clientName: options.clientName ?? options.clientId,
       popUp: options.popUp || false,
+      refreshToken: options.refreshToken,
       handleRedirect: options.handleRedirect,
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
     });
     if (loginReturn !== undefined) {
       this.fetch = loginReturn.fetch;
+      return {
+        isLoggedIn: true,
+        sessionId,
+      };
     }
+    // undefined is returned in the case when the login must be completed
+    // after redirect.
+    return undefined;
   };
 
   // By default, our fetch() resolves to the environment fetch() function.

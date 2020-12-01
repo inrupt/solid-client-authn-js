@@ -84,6 +84,18 @@ describe("Session", () => {
       await mySession.login({});
       expect(clientAuthnLogin).toHaveBeenCalled();
     });
+
+    it("updates the session info with the login return value", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.login = jest.fn().mockResolvedValueOnce({
+        isLoggedIn: true,
+        sessionId: "mySession",
+      });
+      const mySession = new Session({ clientAuthentication });
+      await mySession.login({});
+      expect(mySession.info.isLoggedIn).toEqual(true);
+      expect(mySession.info.sessionId).toEqual("mySession");
+    });
   });
 
   describe("logout", () => {
@@ -97,12 +109,25 @@ describe("Session", () => {
   });
 
   describe("fetch", () => {
-    it("wraps up ClientAuthentication fetch", async () => {
+    it("wraps up ClientAuthentication fetch if logged in", async () => {
       const clientAuthentication = mockClientAuthentication();
-      const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
+      clientAuthentication.login = jest.fn().mockResolvedValueOnce({
+        isLoggedIn: true,
+        sessionId: "mySession",
+      });
+      clientAuthentication.fetch = jest.fn().mockResolvedValueOnce({});
+      const mySession = new Session({ clientAuthentication });
+      await mySession.login({});
+      await mySession.fetch("https://some.url");
+      expect(clientAuthentication.fetch).toHaveBeenCalled();
+    });
+
+    it("defaults to non-authenticated fetch if not logged in", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const mockedFetch = jest.requireMock("cross-fetch");
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url");
-      expect(clientAuthnFetch).toHaveBeenCalled();
+      expect(mockedFetch).toHaveBeenCalled();
     });
   });
 
