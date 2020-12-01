@@ -149,6 +149,6 @@ export default class OidcLoginHandler implements ILoginHandler {
     };
 
     // Call proper OIDC Handler
-    return await this.oidcHandler.handle(OidcOptions);
+    return this.oidcHandler.handle(OidcOptions);
   }
 }

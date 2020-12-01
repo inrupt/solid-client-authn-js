@@ -85,7 +85,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const { redirector } = this;
     const storage = this.storageUtility;
 
-    oidcClientLibrary.createSigninRequest().then((req: SigninRequest) => {
+    await oidcClientLibrary.createSigninRequest().then((req: SigninRequest) => {
       // We use the OAuth 'state' value (which should be crypto-random) as
       // the key in our storage to store our actual SessionID. We do this 'cos
       // we'll need to lookup our session information again when the browser
