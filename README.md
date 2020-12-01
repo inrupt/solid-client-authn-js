@@ -63,7 +63,7 @@ The `solid-client-authn` libraries are compatible with [NSS](https://github.com/
 
 ## How to run the test client login app?
 
-```bash
+```shell
 git clone https://github.com/inrupt/solid-client-authn-js
 cd solid-client-authn-js
 npm ci
