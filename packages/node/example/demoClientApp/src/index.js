@@ -121,7 +121,7 @@ app.get("/redirect", async (req, res) => {
           // shouldn't alter it, and the user is free to enter whatever resource
           // URI they actually want anyway, so it's just a convenience in the
           // 'common' case.
-          resourceToRead = info.webId.replace("/profile/card#me", "/private");
+          resourceToRead = info.webId.replace("/profile/card#me", "/private/");
 
           loginStatus = `Successfully logged in with WebID: [${info.webId}].`;
           resourceValueRetrieved = `...logged in successfully - now fetch a resource.`;
@@ -174,7 +174,7 @@ app.get("/logout", async (_req, res, next) => {
   try {
     await session.logout();
     resourceToRead = enterResourceUriMessage
-    resourceValueRetrieved = "...not read yet...";
+    resourceValueRetrieved = "...nothing read yet - click 'Read Pod Resource' button above...";
 
     loginStatus = `Logged out successfully.`;
     sendHtmlResponse(res);
