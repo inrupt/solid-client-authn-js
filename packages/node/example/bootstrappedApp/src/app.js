@@ -17,6 +17,7 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
     "oidcIssuer",
     "resource",
   ])
+  .locale("en")
   .help().argv;
 
 async function main() {

@@ -24,10 +24,11 @@ const { Session } = require("../../../dist/Session");
 const { InMemoryStorage } = require("@inrupt/solid-client-authn-core");
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
-  .describe("oidcProvider", "The provider where the user should authenticate.")
-  .alias("provider", "oidcProvider")
+  .describe("oidcIssuer", "The provider where the user should authenticate.")
+  .alias("issuer", "oidcIssuer")
   .describe("clientName", "The name of the bootstrapped app.")
-  .demandOption(["oidcProvider"])
+  .demandOption(["oidcIssuer"])
+  .locale("en")
   .help().argv;
 
 const express = require("express");
@@ -38,9 +39,10 @@ const storage = new InMemoryStorage();
 
 // Initialised when the server comes up and is running...
 let session;
+let server;
 
 app.get("/", async (_req, res) => {
-  console.log(_req.url);
+  console.log("Login successful.");
   await session.handleIncomingRedirect(`${iriBase}${_req.url}`);
   // NB: This is a temporary approach, and we have work planned to properly
   // collect the token. Please note that the next line is not part of the public
@@ -50,25 +52,26 @@ app.get("/", async (_req, res) => {
   );
   const storedSession = JSON.parse(rawStoredSession);
   console.log(`\nRefresh token: [${storedSession.refreshToken}]`);
-  console.log(`\nClient ID: [${storedSession.clientId}]`);
-  console.log(`\nClient Secret: [${storedSession.clientSecret}]`);
+  console.log(`Client ID: [${storedSession.clientId}]`);
+  console.log(`Client Secret: [${storedSession.clientSecret}]`);
 
   res.send(
     "The tokens have been sent to the bootstraping app. You can close this window."
   );
+  server.close();
 });
 
-app.listen(PORT, async () => {
+server = app.listen(PORT, async () => {
   session = new Session({
     insecureStorage: storage,
     secureStorage: storage,
   });
 
-  console.log(`Listening at: [http://localhost:${PORT}]`);
-
+  console.log(`Listening at: [http://localhost:${PORT}].`);
+  console.log(`Logging in ${argv.oidcIssuer} to get a refresh token.`);
   session.login({
     clientName: argv.clientName,
-    oidcIssuer: argv.identityProvider,
+    oidcIssuer: argv.oidcIssuer,
     redirectUrl: iriBase,
     tokenType: "DPoP",
     handleRedirect: (url) => {
