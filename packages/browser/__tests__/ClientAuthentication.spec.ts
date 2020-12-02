@@ -188,5 +188,44 @@ describe("ClientAuthentication", () => {
       // Calling handleredirect should have updated the fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
     });
+
+    it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
+      history.replaceState = jest.fn();
+      const clientAuthn = getClientAuthentication();
+      const url =
+        "https://coolapp.com/redirect?state=someState&code=someAuthCode";
+      await clientAuthn.handleIncomingRedirect(url);
+      expect(history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "https://coolapp.com/redirect"
+      );
+    });
+
+    it("clears the current IRI from OAuth query parameters in the implicit flow", async () => {
+      history.replaceState = jest.fn();
+      const clientAuthn = getClientAuthentication();
+      const url =
+        "https://coolapp.com/redirect?state=someState&id_token=idToken&access_token=accessToken";
+      await clientAuthn.handleIncomingRedirect(url);
+      expect(history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "https://coolapp.com/redirect"
+      );
+    });
+
+    it("preserves non-OAuth query strings", async () => {
+      history.replaceState = jest.fn();
+      const clientAuthn = getClientAuthentication();
+      const url =
+        "https://coolapp.com/redirect?state=someState&code=someAuthCode&someQuery=someValue";
+      await clientAuthn.handleIncomingRedirect(url);
+      expect(history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "https://coolapp.com/redirect?someQuery=someValue"
+      );
+    });
   });
 });

@@ -112,6 +112,16 @@ export default class ClientAuthentication {
 
     this.fetch = redirectInfo.fetch;
 
+    const cleanedUpUrl = new URL(url);
+    cleanedUpUrl.searchParams.delete("state");
+    // For auth code flow
+    cleanedUpUrl.searchParams.delete("code");
+    // For implicit flow
+    cleanedUpUrl.searchParams.delete("id_token");
+    cleanedUpUrl.searchParams.delete("access_token");
+
+    window.history.replaceState(null, "", cleanedUpUrl.toString());
+
     return {
       isLoggedIn: redirectInfo.isLoggedIn,
       webId: redirectInfo.webId,
