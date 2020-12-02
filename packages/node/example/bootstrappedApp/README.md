@@ -3,7 +3,7 @@
 This demo shows how you can run an authenticated script to interact with your Pod.
 Check out the code in `src/app.js` for more details.
 
-Note that until [this issure](https://github.com/solid/node-solid-server/issues/1533)
+Note that until [this issue](https://github.com/solid/node-solid-server/issues/1533)
 is resolved, this does not work against NSS, and only works against a compliant
 OIDC implementation, such as Inrupt's ESS (e.g. deployed at `https://pod.inrupt.com`).
 
