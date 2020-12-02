@@ -252,10 +252,10 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the session information is stored in the provided storage
       await expect(
-        mockedStorage.getForUser("mySession", "webId", { secure: true })
+        mockedStorage.getForUser("mySession", "webId")
       ).resolves.toEqual(mockWebId());
       await expect(
-        mockedStorage.getForUser("mySession", "isLoggedIn", { secure: true })
+        mockedStorage.getForUser("mySession", "isLoggedIn")
       ).resolves.toEqual("true");
 
       // Check that the returned fetch function is authenticated
@@ -339,7 +339,7 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the session information is stored in the provided storage
       await expect(
-        mockedStorage.getForUser("mySession", "refreshToken", { secure: true })
+        mockedStorage.getForUser("mySession", "refreshToken")
       ).resolves.toEqual("some refresh token");
     });
 

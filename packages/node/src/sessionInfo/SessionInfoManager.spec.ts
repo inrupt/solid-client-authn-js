@@ -58,15 +58,12 @@ describe("SessionInfoManager", () => {
 
       const webId = "https://zoomies.com/commanderCool#me";
 
-      const storageMock = mockStorageUtility(
-        {
-          [`solidClientAuthenticationUser:${sessionId}`]: {
-            webId,
-            isLoggedIn: "true",
-          },
+      const storageMock = mockStorageUtility({
+        [`solidClientAuthenticationUser:${sessionId}`]: {
+          webId,
+          isLoggedIn: "true",
         },
-        true
-      );
+      });
 
       // const storageUtility = defaultMocks.storageUtility;
       // storageUtility.getForUser
@@ -88,7 +85,7 @@ describe("SessionInfoManager", () => {
 
     it("returns undefined if the specified storage does not contain the user", async () => {
       const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({}, true),
+        storageUtility: mockStorageUtility({}),
       });
       const session = await sessionManager.get("commanderCool");
       expect(session).toBeUndefined();
