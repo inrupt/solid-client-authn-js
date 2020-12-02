@@ -212,9 +212,22 @@ class DemoClientApp extends Component {
     // this.lookupIdentityProviderConfig(this.state.loginIssuer);
   }
 
-  highlightPartOfWebId(webId, part) {
-    // Example: https://ldp.demo-ess.inrupt.com/110592712913443799002/profile/card#me
+  /**
+   * Very hacky attempt at splitting a WebID into 'components', such that:
+   *  Component 0 is up to, but not including, the username part of the WebID.
+   *  Component 1 is just the username part of the WebID.
+   *  Component 2 is everything after the username part of the WebID.
+   *
+   * Example: https://ldp.demo-ess.inrupt.com/110592712913443799002/profile/card#me
+   *  Component 0 is "https://ldp.demo-ess.inrupt.com/".
+   *  Component 1 is "110592712913443799002".
+   *  Component 2 is "/profile/card#me".
+   */
+  extractComponentOfWebId(webId, part) {
     let result;
+
+
+
     switch (part) {
       case 0:
         result = webId.substring(0, webId.indexOf(".com/") + 5);
@@ -339,15 +352,20 @@ class DemoClientApp extends Component {
     return (
       <div style={style}>
         <div>
-          <div className="tooltip">
+          <div class="tooltip">
             <div>
               <span>Login with your Identity Provider:</span>
-              &nbsp;<i className="fa fa-info-circle"></i>
+              &nbsp;<i class="fa fa-info-circle"></i>
               &nbsp;
             </div>
 
-            <span className="tooltiptext">
+            <span class="tooltiptext">
               Your Identity Provider is who you trust to manage your identity.
+              <p></p>
+              Hover your mouse over the editbox and click the 'x' on the
+              right-hand side of the field to clear it, and then use the
+              'down arrow' icon to select from various public Identity
+              Provider options.
             </span>
           </div>
           <input
@@ -370,7 +388,7 @@ class DemoClientApp extends Component {
           <button onClick={this.handleLogin}>Log In</button>
         </div>
 
-        <div className="tooltip">
+        <div class="tooltip">
           <div>
             <input
               type="checkbox"
@@ -387,10 +405,10 @@ class DemoClientApp extends Component {
               }}
             />
             <label>Re-authorize this client application on login</label>
-            &nbsp;<i className="fa fa-info-circle"></i>
+            &nbsp;<i class="fa fa-info-circle"></i>
           </div>
 
-          <span className="tooltiptext">
+          <span class="tooltiptext">
             Re-authorize this Client Application on login.
             <p></p>
             For example, to change the access permissions you may have already
@@ -432,7 +450,7 @@ class DemoClientApp extends Component {
       <div style={style}>
         <p></p>
         <div>
-          <div className="tooltip">
+          <div class="tooltip">
             <form>
               <button
                 onClick={this.handleLogout}
@@ -440,9 +458,9 @@ class DemoClientApp extends Component {
               >
                 Log Out
               </button>
-              &nbsp;<i className="fa fa-info-circle"></i>
+              &nbsp;<i class="fa fa-info-circle"></i>
             </form>
-            <span className="tooltiptext">
+            <span class="tooltiptext">
               Log out of this client application.
               <p></p>
               NOTE: This button is only enabled if you are currently logged in.
@@ -450,7 +468,7 @@ class DemoClientApp extends Component {
           </div>
         </div>
 
-        <div className="tooltip">
+        <div class="tooltip">
           <div>
             Popup Identity Provider:{" "}
             {/*<a target="_blank" href={this.state.loginIssuer}>*/}
@@ -462,17 +480,17 @@ class DemoClientApp extends Component {
             >
               Open Identity Provider
             </button>
-            &nbsp;<i className="fa fa-info-circle"></i>
+            &nbsp;<i class="fa fa-info-circle"></i>
             &nbsp;
           </div>
 
-          <span className="tooltiptext">
+          <span class="tooltiptext">
             Allows you to see authorizations you've granted, and to log out
             (maybe you'd like to log in again using a different account).
           </span>
         </div>
 
-        <div className="tooltip">
+        <div class="tooltip">
           <div>
             <button
               id="logout_idp_button"
@@ -480,10 +498,10 @@ class DemoClientApp extends Component {
             >
               Logout from Identity Provider
             </button>
-            &nbsp;<i className="fa fa-info-circle"></i>
+            &nbsp;<i class="fa fa-info-circle"></i>
           </div>
 
-          <span className="tooltiptext">
+          <span class="tooltiptext">
             Jump to 'Logout' endpoint for currently entered Identity Provider.
             <p></p>
             NOTE: This button is only enabled if the currently entered Identity
@@ -493,13 +511,13 @@ class DemoClientApp extends Component {
         </div>
 
         <div>
-          <div className="tooltip">
+          <div class="tooltip">
             <div>
-              UserInfo&nbsp;<i className="fa fa-info-circle"></i>:&nbsp;
+              UserInfo&nbsp;<i class="fa fa-info-circle"></i>:&nbsp;
               <span id="idp_userinfo_text"></span>
             </div>
 
-            <span className="tooltiptext">
+            <span class="tooltiptext">
               Information on the currently logged-in user (if logged in!) from
               the 'UserInfo' endpoint of the Identity Provider.
             </span>
@@ -543,13 +561,13 @@ class DemoClientApp extends Component {
             </h1>
             <p>
               <strong>WebID:</strong>{" "}
-              {this.highlightPartOfWebId(this.state.sessionInfo.webId, 0)}
+              {this.extractComponentOfWebId(this.state.sessionInfo.webId, 0)}
               <span style={{ color: "red", fontSize: "18px" }}>
                 <strong>
-                  {this.highlightPartOfWebId(this.state.sessionInfo.webId, 1)}
+                  {this.extractComponentOfWebId(this.state.sessionInfo.webId, 1)}
                 </strong>
               </span>
-              {this.highlightPartOfWebId(this.state.sessionInfo.webId, 2)}
+              {this.extractComponentOfWebId(this.state.sessionInfo.webId, 2)}
             </p>
 
             {this.htmlFetchResource()}

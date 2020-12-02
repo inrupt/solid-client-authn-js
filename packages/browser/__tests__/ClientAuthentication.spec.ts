@@ -133,6 +133,8 @@ describe("ClientAuthentication", () => {
 
   describe("logout", () => {
     it("reverts back to un-authenticated fetch on logout", async () => {
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState = jest.fn();
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
 
@@ -175,6 +177,8 @@ describe("ClientAuthentication", () => {
 
   describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState = jest.fn();
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
       const url =
@@ -187,6 +191,51 @@ describe("ClientAuthentication", () => {
 
       // Calling handleredirect should have updated the fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
+    });
+
+    it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState = jest.fn();
+      const clientAuthn = getClientAuthentication();
+      const url =
+        "https://coolapp.com/redirect?state=someState&code=someAuthCode";
+      await clientAuthn.handleIncomingRedirect(url);
+      // eslint-disable-next-line no-restricted-globals
+      expect(history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "https://coolapp.com/redirect"
+      );
+    });
+
+    it("clears the current IRI from OAuth query parameters in the implicit flow", async () => {
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState = jest.fn();
+      const clientAuthn = getClientAuthentication();
+      const url =
+        "https://coolapp.com/redirect?state=someState&id_token=idToken&access_token=accessToken";
+      await clientAuthn.handleIncomingRedirect(url);
+      // eslint-disable-next-line no-restricted-globals
+      expect(history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "https://coolapp.com/redirect"
+      );
+    });
+
+    it("preserves non-OAuth query strings", async () => {
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState = jest.fn();
+      const clientAuthn = getClientAuthentication();
+      const url =
+        "https://coolapp.com/redirect?state=someState&code=someAuthCode&someQuery=someValue";
+      await clientAuthn.handleIncomingRedirect(url);
+      // eslint-disable-next-line no-restricted-globals
+      expect(history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "https://coolapp.com/redirect?someQuery=someValue"
+      );
     });
   });
 });

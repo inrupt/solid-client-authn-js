@@ -109,11 +109,9 @@ export default class TokenRefresher implements ITokenRefresher {
     }
 
     if (tokenSet.refresh_token !== undefined) {
-      await this.storageUtility.setForUser(
-        sessionId,
-        { refreshToken: tokenSet.refresh_token },
-        { secure: true }
-      );
+      await this.storageUtility.setForUser(sessionId, {
+        refreshToken: tokenSet.refresh_token,
+      });
     }
     // The type assertion is fine, since we throw on undefined access_token
     return tokenSet as TokenSet & { access_token: string };

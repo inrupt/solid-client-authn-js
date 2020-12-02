@@ -101,7 +101,8 @@ export async function saveSessionInfoToStorage(
   idToken: string,
   webId: string,
   isLoggedIn: string,
-  refreshToken?: string
+  refreshToken?: string,
+  secure?: boolean
 ): Promise<void> {
   if (refreshToken !== undefined) {
     await storageUtility.setForUser(
@@ -109,7 +110,7 @@ export async function saveSessionInfoToStorage(
       {
         refreshToken,
       },
-      { secure: true }
+      { secure }
     );
   }
   await storageUtility.setForUser(
@@ -119,7 +120,7 @@ export async function saveSessionInfoToStorage(
       webId,
       isLoggedIn,
     },
-    { secure: true }
+    { secure }
   );
 }
 

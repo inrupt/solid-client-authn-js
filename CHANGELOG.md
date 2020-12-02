@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### New features
 
+### Bugfixes
+
+- issue #685 fixed by removing all URL query params.
+
 ## 1.1.0 - 2020-11-27
 
 ### New features

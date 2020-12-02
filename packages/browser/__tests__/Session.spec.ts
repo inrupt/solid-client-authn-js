@@ -107,6 +107,8 @@ describe("Session", () => {
 
   describe("handleincomingRedirect", () => {
     it("wraps up ClientAuthentication handleIncomingRedirect", async () => {
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState = jest.fn();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnHandle = jest.spyOn(
         clientAuthentication,

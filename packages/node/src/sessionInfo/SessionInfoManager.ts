@@ -112,15 +112,10 @@ export class SessionInfoManager implements ISessionInfoManager {
   }
 
   async get(sessionId: string): Promise<ISessionInfo | undefined> {
-    const webId = await this.storageUtility.getForUser(sessionId, "webId", {
-      secure: true,
-    });
+    const webId = await this.storageUtility.getForUser(sessionId, "webId");
     const isLoggedIn = await this.storageUtility.getForUser(
       sessionId,
-      "isLoggedIn",
-      {
-        secure: true,
-      }
+      "isLoggedIn"
     );
     if (isLoggedIn !== undefined) {
       return {
