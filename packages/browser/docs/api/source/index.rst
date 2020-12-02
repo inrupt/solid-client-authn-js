@@ -1,8 +1,8 @@
 :orphan:
 
-======================
-solid-client-authn API
-======================
+==============================
+solid-client-authn-browser API
+==============================
 
 .. toctree::
    :glob:
