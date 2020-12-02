@@ -45,7 +45,7 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.12",
+    "@types/jest": "^26.0.16",
     "@types/node-fetch": "^2.5.6",
     "concurrently": "^5.3.0",
     "eslint": "^7.12.1",
