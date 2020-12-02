@@ -31,13 +31,6 @@
             document.getElementById("WebId").innerHTML = sessionInfo.webId;
           }
         });
-
-      // Remove all query params (since the correct login flow finishes with the
-      // browser being redirected back with OAuth2 query params (e.g. for 'code'
-      // and 'state'), and so if the user simply refreshes this page our
-      // authentication library will be called again with what are now invalid
-      // query parameters!).
-      history.replaceState(null, null, window.location.pathname);
     </script>
   </body>
 </html>
