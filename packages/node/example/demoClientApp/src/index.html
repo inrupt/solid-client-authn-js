@@ -82,20 +82,20 @@
     <div id="read" class="panel">
       <div class="row">
         <label id="labelReadProfile" for="webID"
-        >2. Read private folder from (anyone's!) WebID:
+        >2. Read resource from (anyone's!) Pod:
         </label>
         <input
                 type="url"
                 id="webID"
                 name="webID"
                 size="50"
-                value="{{webIdToRead}}"
+                value="{{resourceToRead}}"
         />
-        <button onclick="const resource = document.getElementById('webID').value; location.href = `/fetch?resource=${resource}`;" name="btnRead" id="btnRead">Read Profile</button>
+        <button onclick="const resource = document.getElementById('webID').value; location.href = `/fetch?resource=${resource}`;" name="btnRead" id="btnRead">Read Pod Resource</button>
       </div>
       <dl class="display">
         <dt>Response from Pod:&nbsp</dt>
-        <strong><span id="labelResponse">[{{resourceValueRetrieved}}]</span></strong>
+        <textarea id="textareaResponse" readonly rows='20' cols='120' wrap='off'>{{resourceValueRetrieved}}</textarea>
       </dl>
     </div>
 

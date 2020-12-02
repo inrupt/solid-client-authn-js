@@ -40,15 +40,16 @@ const indexHtml = "./src/index.html";
 const markerOidcIssuer = "{{oidcIssuer}}";
 const markerLoginStatus = "{{labelLoginStatus}}";
 const markerLogoutStatus = "{{labelLogoutStatus}}";
-const markerWebIdToRead = "{{webIdToRead}}";
+const markerResourceToRead = "{{resourceToRead}}";
 const markerResourceValueRetrieved = "{{resourceValueRetrieved}}";
 
 const oidcIssuer = "https://broker.demo-ess.inrupt.com/";
 
+const enterResourceUriMessage = "...but enter any resource URI to attempt to read it...";
+
 // We expect these values to be overwritten as the users interacts!
 let loggedOutStatus = "";
-let webIdToRead =
-  "...not logged in yet - but enter any WebID to read from its profile...";
+let resourceToRead = enterResourceUriMessage;
 let resourceValueRetrieved = "...not read yet...";
 let loginStatus = "Not logged in yet.";
 
@@ -66,7 +67,11 @@ app.get("/", (_req, res) => {
 app.get("/login", async (req, res, next) => {
   const oidcIssuer = req.query.oidcIssuer;
 
-  if (!session.info.isLoggedIn) {
+  if (session.info.isLoggedIn) {
+    loginStatus = `Already logged in with WebID [${session.info.webId}].`;
+    log.info(loginStatus);
+    sendHtmlResponse(res);
+  } else {
     if (oidcIssuer) {
       try {
         await session.login({
@@ -81,13 +86,12 @@ app.get("/login", async (req, res, next) => {
           },
         });
 
-        log.info(
-          `SCA Node 'login()' called, expect redirect function to redirect the user's browser now...`
-        );
+        loginStatus = `Login called, expecting redirect function to redirect the user's browser now...`;
+        log.info(loginStatus);
       } catch (error) {
-        log.error(`SCA Node 'login()' failed: [${error}]`);
         loginStatus = `Login attempt failed: [${error}]`;
-        sendHtmlResponse();
+        log.error(loginStatus);
+        sendHtmlResponse(res);
       }
     } else {
       next(
@@ -97,8 +101,6 @@ app.get("/login", async (req, res, next) => {
       );
     }
   }
-  log.info("Already logged in.");
-  sendHtmlResponse();
 });
 
 app.get("/redirect", async (req, res) => {
@@ -112,8 +114,17 @@ app.get("/redirect", async (req, res) => {
           loginStatus = `Received another redirect, but we are already handling a previous redirect request - so ignoring this one!`;
           sendHtmlResponse(res);
         } else if (info.isLoggedIn) {
-          webIdToRead = info.webId;
+
+          // This is deliberately making a big assumption about the structure of
+          // the logged-in WebID, but if the WebID does have a different
+          // structure, which is perfectly valid of course, then this code
+          // shouldn't alter it, and the user is free to enter whatever resource
+          // URI they actually want anyway, so it's just a convenience in the
+          // 'common' case.
+          resourceToRead = info.webId.replace("/profile/card#me", "/private/");
+
           loginStatus = `Successfully logged in with WebID: [${info.webId}].`;
+          resourceValueRetrieved = `...logged in successfully - now fetch a resource.`;
           sendHtmlResponse(res);
         } else {
           loginStatus = `Got redirect, but not logged in.`;
@@ -123,10 +134,6 @@ app.get("/redirect", async (req, res) => {
   } catch (error) {
     log.error(`Error processing redirect: [${error}]`);
 
-    // TODO: PMcB55: Remove this when Login works! Just hard-coding this to test
-    //  rendering valid response.
-    webIdToRead = "https://pmcb55x.solidcommunity.net/profile/card#me";
-
     loginStatus = `Redirected, but failed to handle this as an OAuth2 redirect: [${error}]`;
     sendHtmlResponse(res);
   }
@@ -134,41 +141,43 @@ app.get("/redirect", async (req, res) => {
 
 app.get("/fetch", async (req, res) => {
   const resourceToFetch = req.query.resource;
-  // Update our state with whatever was in the query param.
-  webIdToRead = resourceToFetch;
 
-  try {
-    // Validate our input as a URL first.
-    new URL(resourceToFetch);
+  // Only attempt to fetch if the resource is not our message to enter a URI!
+  if (resourceToFetch === enterResourceUriMessage) {
+    resourceValueRetrieved = "Please enter a resource URI in the edit box above!";
+  } else {
+      // Update our state with whatever was in the query param.
+    resourceToRead = resourceToFetch;
 
     try {
-      const response = await session.fetch(resourceToFetch, {
-        method: "GET",
-        // headers: {
-        //   'Content-Type': 'text/turtle'
-        // }
-      });
+      // Validate our input as a URL first.
+      new URL(resourceToFetch);
 
-      resourceValueRetrieved = await response.text();
+      try {
+        const response = await session.fetch(resourceToFetch);
+
+        resourceValueRetrieved = await response.text();
+        log.info(`Fetch response: [${resourceValueRetrieved}]`);
+      } catch (error) {
+        resourceValueRetrieved = `Failed to fetch from resource [${resourceToFetch}]: ${error}`;
+        log.error(resourceValueRetrieved);
+      }
     } catch (error) {
-      resourceValueRetrieved = `Failed to fetch from resource [${resourceToFetch}]: ${error}`;
+      resourceValueRetrieved = `Resource to fetch must be a valid URL - got an error parsing [${resourceToFetch}]: ${error}`;
+      log.error(resourceValueRetrieved);
     }
-  } catch (error) {
-    resourceValueRetrieved = `Resource to fetch must be a valid URL - got an error parsing [${resourceToFetch}]: ${error}`;
   }
 
-  log.info(`Fetch response: [${resourceValueRetrieved}]`);
   sendHtmlResponse(res);
 });
 
 app.get("/logout", async (_req, res, next) => {
   try {
     await session.logout();
-    webIdToRead =
-      "...logged out - WebID will be initialized when you log in again...";
-    resourceValueRetrieved = "...not read yet...";
+    resourceToRead = enterResourceUriMessage
+    resourceValueRetrieved = "...nothing read yet - click 'Read Pod Resource' button above...";
 
-    loginStatus = `Logged out.`;
+    loginStatus = `Logged out successfully.`;
     sendHtmlResponse(res);
   } catch (error) {
     log.error(`Logout processing failed: [${error}]`);
@@ -212,8 +221,8 @@ function statusIndexHtml() {
     .split(markerLogoutStatus)
     .join(loggedOutStatus)
 
-    .split(markerWebIdToRead)
-    .join(webIdToRead)
+    .split(markerResourceToRead)
+    .join(resourceToRead)
 
     .split(markerResourceValueRetrieved)
     .join(resourceValueRetrieved);
