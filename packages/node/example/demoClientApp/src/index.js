@@ -157,14 +157,15 @@ app.get("/fetch", async (req, res) => {
         const response = await session.fetch(resourceToFetch);
 
         resourceValueRetrieved = await response.text();
+        log.info(`Fetch response: [${resourceValueRetrieved}]`);
       } catch (error) {
         resourceValueRetrieved = `Failed to fetch from resource [${resourceToFetch}]: ${error}`;
+        log.error(resourceValueRetrieved);
       }
     } catch (error) {
       resourceValueRetrieved = `Resource to fetch must be a valid URL - got an error parsing [${resourceToFetch}]: ${error}`;
+      log.error(resourceValueRetrieved);
     }
-
-    log.info(`Fetch response: [${resourceValueRetrieved}]`);
   }
 
   sendHtmlResponse(res);
