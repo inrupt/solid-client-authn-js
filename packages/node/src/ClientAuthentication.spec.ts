@@ -161,12 +161,9 @@ describe("ClientAuthentication", () => {
       };
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(
-          mockStorageUtility(
-            {
-              "solidClientAuthenticationUser:mySession": { ...sessionInfo },
-            },
-            true
-          )
+          mockStorageUtility({
+            "solidClientAuthenticationUser:mySession": { ...sessionInfo },
+          })
         ),
       });
       const session = await clientAuthn.getSessionInfo("mySession");

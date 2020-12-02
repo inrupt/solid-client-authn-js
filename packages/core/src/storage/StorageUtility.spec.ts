@@ -575,13 +575,13 @@ describe("saveSessionInfoToStorage", () => {
     );
 
     await expect(
-      mockedStorage.getForUser("some session", "idToken", { secure: true })
+      mockedStorage.getForUser("some session", "idToken")
     ).resolves.toEqual("an ID token");
     await expect(
-      mockedStorage.getForUser("some session", "webId", { secure: true })
+      mockedStorage.getForUser("some session", "webId")
     ).resolves.toEqual("https://my.webid");
     await expect(
-      mockedStorage.getForUser("some session", "isLoggedIn", { secure: true })
+      mockedStorage.getForUser("some session", "isLoggedIn")
     ).resolves.toEqual("true");
   });
 
@@ -593,7 +593,8 @@ describe("saveSessionInfoToStorage", () => {
       "an ID token",
       "https://my.webid",
       "true",
-      "a refresh token"
+      "a refresh token",
+      true
     );
 
     await expect(
