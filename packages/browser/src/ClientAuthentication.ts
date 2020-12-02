@@ -120,6 +120,11 @@ export default class ClientAuthentication {
     cleanedUpUrl.searchParams.delete("id_token");
     cleanedUpUrl.searchParams.delete("access_token");
 
+    // Remove OAuth-specific query params (since the login flow finishes with the
+    // browser being redirected back with OAuth2 query params (e.g. for 'code'
+    // and 'state'), and so if the user simply refreshes this page our
+    // authentication library will be called again with what are now invalid
+    // query parameters!).
     window.history.replaceState(null, "", cleanedUpUrl.toString());
 
     return {
