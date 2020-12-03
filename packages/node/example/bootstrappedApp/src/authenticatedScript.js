@@ -5,9 +5,14 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
   .alias("id", "clientId")
   .describe("clientSecret", "The secret associated with the client ID.")
   .alias("secret", "clientSecret")
-  .describe("refreshToken", "The OAuth refresh token (in our case, can be thought of as an API token).")
-  .alias("token", "refreshToken")
-  .describe("oidcIssuer", "The identity provider that issued the token (i.e. the OIDC issuer).")
+  .describe(
+    "refreshToken",
+    "The OAuth refresh token (in our case, can be thought of as an API token)."
+  )
+  .describe(
+    "oidcIssuer",
+    "The identity provider that issued the token (i.e. the OIDC issuer)."
+  )
   .alias("oidcIssuer", "issuer")
   .describe("resource", "The resource to fetch")
   .demandOption([

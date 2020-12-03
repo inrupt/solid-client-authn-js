@@ -27,9 +27,9 @@ your client ID, client secret and refresh token. Save these values for use in th
 ## Using the token
 
 All you need to do now is to use the credentials obtained from the previous step to get an
-access token. `app.js` shows a minimal app issuing an authenticated request. It
-expects a number of arguments: 
+access token. `authenticatedScript.js` shows a minimal app issuing an authenticated
+request. It expects a number of arguments: 
 
 ```
-node app.js --id <the client id> --secret <the client secret>  --token <the refresh token> --issuer <the issuer that issued the token> --resource <the private resource you want to access>
+node app.js --clientId <the client id> --clientSecret <the client secret>  --refreshToken <the refresh token> --oidcIssuer <the issuer that issued the token> --resource <the private resource you want to access>
 ```
