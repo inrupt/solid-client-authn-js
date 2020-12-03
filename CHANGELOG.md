@@ -14,6 +14,8 @@ from being possible, and now after a login that does not require a redirect, the
 
 ### New features
 
+## 1.1.1 - 2020-12-01
+
 ### Bugfixes
 
 - issue #685 fixed by removing all URL query params.

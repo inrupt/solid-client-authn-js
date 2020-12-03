@@ -60,3 +60,15 @@ The `solid-client-authn` libraries are compatible with [NSS](https://github.com/
 
 - [Using Inrupt Solid JavaScript Client Libraries to authenticate](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/)
 - [Inrupt documentation Homepage](https://docs.inrupt.com/)
+
+## How to run the test client login app?
+
+```shell
+git clone https://github.com/inrupt/solid-client-authn-js
+cd solid-client-authn-js
+npm ci
+cd packages/browser/examples/single/bundle/
+npm run start
+```
+
+Go to http://localhost:3001/.
