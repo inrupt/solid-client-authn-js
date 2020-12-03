@@ -21,60 +21,107 @@
 
 /**
  * @hidden
- * Extends the regular JavaScript error object with extra meta-data (e.g.
+ * The generic Inrupt error class, that simply extends the regular JavaScript
+ * [[Error]] object but provides extra capabilities and meta-data (e.g.
  * potentially data from a HTTP response, or with data from an RDF vocabulary
  * (which may be imported locally, or looked up dynamically at runtime)).
+ *
+ * Error Identifiers
+ *   Our error class supports the notion of globally unique, dereferenceable
+ *   error identifiers in the form of IRIs.
+ *
+ * Parameterized error messages
+ *   This class supports error messages with positional placeholders that can be
+ *   replaced by developer-provided parameter values at runtime.
+ *
+ * Wrapped Errors (Coming soon!)
+ *   Similar to how Java supports the notion of wrapped exceptions, our error
+ *   class implementation supports the ability to wrap [[Error]]s.
+ *
+ * HTTP errors:
+ *   This class provides a very convenient means to provide a HTTP response,
+ *   the details from which can be appended to error message strings, and the
+ *   response itself retrieved directly by consumers of instances of this class.
  * @packageDocumentation
  */
 
-/**
- * In a subsequent PR, just re-export needed implementations from generated
- * artifacts directly, e.g. like @inrupt/solid-common-vocab, e.g. in the
- * `index.hbs` template of RDF/JS artifacts include this:
- // Re-export some of the basic RDF/JS implementations that we use ourselves -
- // allows users of our generated artifacts to easily import these
- // implementations if they want (e.g. in their tests, or to instantiate
- // hard-coded IRIs for convenience (as they shouldn't really need to do that
- // much, instead using our generated constants in most cases)).
- export { NamedNode } from "rdf-js";
- *  Then we can either import that implementation in this code, or just import
- *  the types when needed here, e.g.:
- import type { NamedNode } from "rdf-js";
- */
-import { NamedNode } from "n3";
-
-import { VocabTerm } from "@inrupt/solid-common-vocab";
+import { VocabTerm, NamedNode } from "@inrupt/solid-common-vocab";
 
 export default class InruptError extends Error {
-  public readonly statusCode?: number;
-
-  public readonly statusText?: string;
+  // For the common case of HTTP errors, we can store the HTTP response to allow
+  // consumers of this error instance to access it directly.
+  // NOTE: we specifically stipulate that we expect the HTTP response to be an
+  // error response!
+  private httpErrorResponse?: Response & { ok: false };
 
   constructor(
     messageOrIri: string | NamedNode | VocabTerm,
     messageParams?: string[],
-    httpResponse?: Response & { ok: false },
-    appendHttpDetails = true,
     appendErrorIri = true
   ) {
     super(
-      InruptError.appendHttpResponseDetails(
-        typeof messageOrIri === "string"
-          ? InruptError.substituteParams(messageOrIri, messageParams)
-          : InruptError.appendErrorIri(
-              InruptError.lookupErrorIri(messageOrIri, messageParams),
-              messageOrIri as NamedNode,
-              appendErrorIri
-            ),
-        httpResponse,
-        appendHttpDetails
-      )
+      typeof messageOrIri === "string"
+        ? InruptError.substituteParams(messageOrIri, messageParams)
+        : InruptError.appendErrorIri(
+            InruptError.lookupErrorIri(messageOrIri, messageParams),
+            messageOrIri as NamedNode,
+            appendErrorIri
+          )
+    );
+  }
+
+  /**
+   * Allows us provide a HTTP response, and to specify if we want details from
+   * that response to be appended to our error message string. We also preserve
+   * specific state from that response object to allow consumers of this error
+   * to directly access those if they wish.
+   *
+   * @param httpErrorResponse
+   * @param appendHttpDetails
+   */
+  public httpResponse(
+    httpErrorResponse: Response & { ok: false },
+    appendHttpDetails = true
+  ): InruptError {
+    this.message = InruptError.appendHttpResponseDetails(
+      this.message,
+      httpErrorResponse,
+      appendHttpDetails
     );
 
-    if (typeof httpResponse !== "undefined") {
-      this.statusCode = httpResponse.status;
-      this.statusText = httpResponse.statusText;
+    // Preserve the HTTP response (in case the consumer of this error wishes to
+    // it's details directly themselves).
+    this.httpErrorResponse = httpErrorResponse;
+
+    return this;
+  }
+
+  hasHttpResponse(): boolean {
+    return this.httpErrorResponse !== undefined;
+  }
+
+  getHttpResponse(): (Response & { ok: false }) | undefined {
+    return this.httpErrorResponse;
+  }
+
+  getHttpStatusCode(): number {
+    if (!this.hasHttpResponse()) {
+      throw new InruptError(
+        "This InruptError was not provided with a HTTP response - so we can't get it's HTTP Status Code!"
+      );
     }
+
+    return this.httpErrorResponse!.status;
+  }
+
+  getHttpStatusText(): string {
+    if (!this.hasHttpResponse()) {
+      throw new InruptError(
+        "This InruptError was not provided with a HTTP response - so we can't get it's HTTP Status Text!"
+      );
+    }
+
+    return this.httpErrorResponse!.statusText;
   }
 
   static determineIfVocabTerm(

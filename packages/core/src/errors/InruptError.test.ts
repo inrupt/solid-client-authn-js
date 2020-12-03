@@ -27,9 +27,10 @@
 import { describe, it, expect } from "@jest/globals";
 
 import { Response } from "cross-fetch";
-import { NamedNode } from "n3";
 import { INRUPT_TEST, UI_COMMON } from "@inrupt/vocab-inrupt-common";
 
+// Just for our tests we need to import an implementation of RDF/JS types.
+import { NamedNode } from "n3";
 import { getLocalStore, CONTEXT_KEY_LOCALE } from "@inrupt/solid-common-vocab";
 
 import InruptError from "./InruptError";
@@ -75,11 +76,15 @@ describe("InruptError", () => {
       }) as Response & { ok: false };
 
       const message = "Normal error string...";
-      const error = new InruptError(message, undefined, failedResponse, false);
+      const error = new InruptError(message).httpResponse(
+        failedResponse,
+        false
+      );
 
       expect(error.name).toEqual("Error");
-      expect(error.statusCode).toEqual(404);
-      expect(error.statusText).toEqual("Not Found");
+      expect(error.hasHttpResponse()).toBeTruthy();
+      expect(error.getHttpStatusCode()).toEqual(404);
+      expect(error.getHttpStatusText()).toEqual("Not Found");
       expect(error.toString()).toContain(message);
       expect(error.toString()).not.toContain("404");
     });
@@ -90,13 +95,45 @@ describe("InruptError", () => {
       }) as Response & { ok: false };
 
       const message = "Normal error string...";
-      const error = new InruptError(message, undefined, failedResponse);
+      const error = new InruptError(message).httpResponse(failedResponse);
 
       expect(error.name).toEqual("Error");
-      expect(error.statusCode).toEqual(404);
-      expect(error.statusText).toEqual("Not Found");
+      expect(error.hasHttpResponse()).toBeTruthy();
+      expect(error.getHttpStatusCode()).toEqual(404);
+      expect(error.getHttpStatusText()).toEqual("Not Found");
       expect(error.toString()).toContain(message);
       expect(error.toString()).toContain("404");
+    });
+
+    it("throws if no HTTP response", () => {
+      const message = "Normal error string...";
+      const error = new InruptError(message);
+
+      expect(error.hasHttpResponse()).toBeFalsy();
+      expect(() => error.getHttpStatusCode()).toThrow(
+        "can't get it's HTTP Status Code!"
+      );
+      expect(() => error.getHttpStatusText()).toThrow(
+        "can't get it's HTTP Status Text!"
+      );
+    });
+
+    it("get HTTP response returns undefined if no HTTP response", () => {
+      const message = "Normal error string...";
+      const error = new InruptError(message);
+
+      expect(error.getHttpResponse()).toBeUndefined();
+    });
+
+    it("gets the specified HTTP response if it was provided", () => {
+      const failedResponse = new Response(undefined, {
+        status: 404,
+      }) as Response & { ok: false };
+
+      const message = "Normal error string...";
+      const error = new InruptError(message).httpResponse(failedResponse);
+
+      expect(error.getHttpResponse()).toEqual(failedResponse);
     });
   });
 
@@ -145,8 +182,7 @@ describe("InruptError", () => {
         const error = new InruptError(vocabError, params);
 
         expect(error.name).toEqual("Error");
-        expect(error.statusCode).toBeUndefined();
-        expect(error.statusText).toBeUndefined();
+        expect(error.hasHttpResponse()).toBeFalsy();
         expect(error.toString()).toContain(params[0]);
         expect(error.toString()).toContain(params[1]);
         expect(error.toString()).toContain(params[2]);
@@ -167,8 +203,7 @@ describe("InruptError", () => {
           const error = new InruptError(errorIri, params);
 
           expect(error.name).toEqual("Error");
-          expect(error.statusCode).toBeUndefined();
-          expect(error.statusText).toBeUndefined();
+          expect(error.hasHttpResponse()).toBeFalsy();
           expect(error.toString()).toContain(params[0]);
           expect(error.toString()).toContain(params[1]);
           expect(error.toString()).toContain(params[2]);
@@ -193,17 +228,15 @@ describe("InruptError", () => {
             status: 404,
           }) as Response & { ok: false };
 
-          const error = new InruptError(
-            errorIri,
-            params,
+          const error = new InruptError(errorIri, params, false).httpResponse(
             failedResponse,
-            true,
-            false
+            true
           );
 
           expect(error.name).toEqual("Error");
-          expect(error.statusCode).toEqual(404);
-          expect(error.statusText).toEqual("Not Found");
+          expect(error.hasHttpResponse()).toBeTruthy();
+          expect(error.getHttpStatusCode()).toEqual(404);
+          expect(error.getHttpStatusText()).toEqual("Not Found");
           expect(error.toString()).toContain(params[0]);
           expect(error.toString()).toContain(params[1]);
           expect(error.toString()).toContain(params[2]);
