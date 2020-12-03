@@ -85,9 +85,6 @@ describe("Authenticated fetch", () => {
       "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
     );
     expect(response.status).toEqual(200);
-    await expect(response.text()).resolves.toContain(
-      "foaf:PersonalProfileDocument"
-    );
 
     await session.logout();
     response = await session.fetch(
