@@ -78,7 +78,6 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         )}`
       );
     }
-    // throw new NotImplementedError("RefreshTokenOidcHandler handle");
     const refreshOptions: RefreshOptions = {
       // The type assertion is okay, because it is tested for in canHandle.
       refreshToken: oidcLoginOptions.refreshToken as string,
