@@ -66,6 +66,57 @@ describe("Authenticated fetch", () => {
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain("ldp:BasicContainer");
   });
+
+  it("can fetch a private resource when logged in after the same fetch failed", async () => {
+    const session = new Session();
+    let response = await session.fetch(
+      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
+    );
+    expect(response.status).toEqual(401);
+
+    await session.login({
+      clientId: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      refreshToken: process.env.REFRESH_TOKEN,
+      oidcIssuer: OIDC_ISSUER,
+    });
+
+    response = await session.fetch(
+      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
+    );
+    expect(response.status).toEqual(200);
+    await expect(response.text()).resolves.toContain(
+      "foaf:PersonalProfileDocument"
+    );
+
+    await session.logout();
+    response = await session.fetch(
+      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
+    );
+    expect(response.status).toEqual(401);
+  });
+
+  it("only logs the requested session", async () => {
+    const authenticatedSession = new Session();
+
+    await authenticatedSession.login({
+      clientId: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      refreshToken: process.env.REFRESH_TOKEN,
+      oidcIssuer: OIDC_ISSUER,
+    });
+
+    let response = await authenticatedSession.fetch(
+      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
+    );
+    expect(response.status).toEqual(200);
+
+    const nonAuthenticatedSession = new Session();
+    response = await nonAuthenticatedSession.fetch(
+      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
+    );
+    expect(response.status).toEqual(401);
+  });
 });
 
 describe("Unauthenticated fetch", () => {
