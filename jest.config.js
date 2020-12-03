@@ -6,6 +6,11 @@ module.exports = {
     "^.+\\.(ts|tsx)?$": "ts-jest",
   },
   modulePathIgnorePatterns: ["dist/"],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    // By default we only run unit tests:
+    "e2e/*",
+  ],
   collectCoverageFrom: [
     "**/src/**/*.ts",
     "!**/node_modules/**",
