@@ -9,7 +9,9 @@ OIDC implementation, such as Inrupt's ESS (e.g. deployed at `https://pod.inrupt.
 
 ## Installing the app
 
-To use the app, first run `npm ci` in the root repository.
+To use the app, first run `npm ci` at the root of the repository: it will trigger
+the build of the library. Then, run `npm ci` again, this time in
+`packages/node/example/bootstrappedApp/`. You should be all set.
 
 ## Getting a token
 
