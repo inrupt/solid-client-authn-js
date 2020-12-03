@@ -24,7 +24,7 @@ const { Session } = require("../../../dist/Session");
 const { InMemoryStorage } = require("@inrupt/solid-client-authn-core");
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
-  .describe("oidcIssuer", "The provider where the user should authenticate.")
+  .describe("oidcIssuer", "The identity provider at which the user should authenticate.")
   .alias("issuer", "oidcIssuer")
   .describe("clientName", "The name of the bootstrapped app.")
   .demandOption(["oidcIssuer"])
