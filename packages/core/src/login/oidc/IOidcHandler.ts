@@ -28,10 +28,11 @@
  * OidcHandlers handle the login process for a given IDP (as defined by the OIDC Options)
  */
 import IHandleable from "../../util/handlerPattern/IHandleable";
+import { LoginResult } from "../ILoginHandler";
 import IOidcOptions from "./IOidcOptions";
 
 /**
  * @hidden
  */
-type IOidcHandler = IHandleable<[IOidcOptions], void>;
+type IOidcHandler = IHandleable<[IOidcOptions], LoginResult>;
 export default IOidcHandler;

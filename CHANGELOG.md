@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+## Bugfixes
+
+- In some use cases (e.g. authenticating a script), logging in happens without a redirection. The architecture so far prevented this
+from being possible, and now after a login that does not require a redirect, the current session may be authenticated.
+
 ### New features
 
 ## 1.1.1 - 2020-12-01

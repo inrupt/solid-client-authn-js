@@ -46,7 +46,8 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 export interface ITokenRefresher {
   refresh(
     localUserId: string,
-    refreshToken?: string
+    refreshToken?: string,
+    dpopKey?: JWK.ECKey
   ): Promise<TokenSet & { access_token: string }>;
 }
 

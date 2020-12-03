@@ -29,9 +29,12 @@
  */
 import IHandleable from "../util/handlerPattern/IHandleable";
 import ILoginOptions from "./ILoginOptions";
+import { RedirectResult } from "./oidc/redirectHandler/IRedirectHandler";
+
+export type LoginResult = RedirectResult | undefined;
 
 /**
  * @hidden
  */
-type ILoginHandler = IHandleable<[ILoginOptions], void>;
+type ILoginHandler = IHandleable<[ILoginOptions], LoginResult>;
 export default ILoginHandler;

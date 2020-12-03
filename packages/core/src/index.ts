@@ -21,7 +21,7 @@
 
 export { default as ILoginInputOptions } from "./ILoginInputOptions";
 
-export { default as ILoginHandler } from "./login/ILoginHandler";
+export { default as ILoginHandler, LoginResult } from "./login/ILoginHandler";
 export { default as ILoginOptions } from "./login/ILoginOptions";
 
 export { default as ILogoutHandler } from "./logout/ILogoutHandler";
@@ -32,7 +32,10 @@ export { default as AggregateHandler } from "./util/handlerPattern/AggregateHand
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 
-export { default as IRedirectHandler } from "./login/oidc/redirectHandler/IRedirectHandler";
+export {
+  default as IRedirectHandler,
+  RedirectResult,
+} from "./login/oidc/redirectHandler/IRedirectHandler";
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 
 export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";

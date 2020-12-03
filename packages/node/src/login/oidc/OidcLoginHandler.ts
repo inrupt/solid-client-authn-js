@@ -39,6 +39,7 @@ import {
   ConfigurationError,
   IClient,
   IOidcOptions,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 
 function hasIssuer(
@@ -47,11 +48,12 @@ function hasIssuer(
   return typeof options.oidcIssuer === "string";
 }
 
-function hasRedirectUrl(
-  options: ILoginOptions
-): options is ILoginOptions & { redirectUrl: string } {
-  return typeof options.redirectUrl === "string";
-}
+// TODO: the following code must be pushed to the handlers that actually need redirection
+// function hasRedirectUrl(
+//   options: ILoginOptions
+// ): options is ILoginOptions & { redirectUrl: string } {
+//   return typeof options.redirectUrl === "string";
+// }
 
 /**
  * @hidden
@@ -67,10 +69,10 @@ export default class OidcLoginHandler implements ILoginHandler {
   ) {}
 
   async canHandle(options: ILoginOptions): Promise<boolean> {
-    return hasIssuer(options) && hasRedirectUrl(options);
+    return hasIssuer(options);
   }
 
-  async handle(options: ILoginOptions): Promise<void> {
+  async handle(options: ILoginOptions): Promise<LoginResult> {
     if (!hasIssuer(options)) {
       throw new ConfigurationError(
         `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(
@@ -78,13 +80,14 @@ export default class OidcLoginHandler implements ILoginHandler {
         )}`
       );
     }
-    if (!hasRedirectUrl(options)) {
-      throw new ConfigurationError(
-        `OidcLoginHandler requires a redirect URL: missing property 'redirectUrl' in ${JSON.stringify(
-          options
-        )}`
-      );
-    }
+    // TODO: the following code must be pushed to the handlers that actually need redirection
+    // if (!hasRedirectUrl(options)) {
+    //   throw new ConfigurationError(
+    //     `OidcLoginHandler requires a redirect URL: missing property 'redirectUrl' in ${JSON.stringify(
+    //       options
+    //     )}`
+    //   );
+    // }
 
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
       options.oidcIssuer
@@ -102,18 +105,19 @@ export default class OidcLoginHandler implements ILoginHandler {
     }
 
     // Construct OIDC Options
-    const OidcOptions: IOidcOptions = {
+    const oidcOptions: IOidcOptions = {
       issuer: options.oidcIssuer,
       // TODO: differentiate if DPoP should be true
       dpop: options.tokenType.toLowerCase() === "dpop",
-      redirectUrl: options.redirectUrl,
+      // TODO Cleanup to remove the type assertion
+      redirectUrl: options.redirectUrl as string,
       issuerConfiguration: issuerConfig,
       client: clientInfo,
       sessionId: options.sessionId,
+      refreshToken: options.refreshToken,
       handleRedirect: options.handleRedirect,
     };
-
     // Call proper OIDC Handler
-    await this.oidcHandler.handle(OidcOptions);
+    return this.oidcHandler.handle(oidcOptions);
   }
 }

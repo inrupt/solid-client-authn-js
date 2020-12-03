@@ -31,6 +31,7 @@ import {
   ILoginOptions,
   ILoginHandler,
   ISessionInfoManager,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
 
@@ -54,7 +55,7 @@ export default class PopUpLoginHandler implements ILoginHandler {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async handle(loginOptions: ILoginOptions): Promise<void> {
+  async handle(loginOptions: ILoginOptions): Promise<LoginResult> {
     throw new Error("Popup login is not implemented yet");
   }
 }

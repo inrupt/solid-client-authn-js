@@ -189,17 +189,10 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         // TS thinks dpopKey isn't initialized, when it is.
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        dpopKey as any,
+        dpopKey,
         refreshOptions
       );
     } else {
-      if (tokenSet.refresh_token !== undefined) {
-        refreshOptions = {
-          refreshToken: tokenSet.refresh_token,
-          sessionId,
-          tokenRefresher: this.tokenRefresher,
-        };
-      }
       authFetch = buildBearerFetch(tokenSet.access_token, refreshOptions);
     }
 

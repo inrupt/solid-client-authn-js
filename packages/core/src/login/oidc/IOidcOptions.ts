@@ -38,6 +38,7 @@ export interface ICoreOidcOptions {
   issuerConfiguration: IIssuerConfig;
   client: IClient;
   sessionId: string;
+  refreshToken?: string;
 }
 
 /**

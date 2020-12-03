@@ -32,6 +32,7 @@ import {
   IOidcHandler,
   IOidcOptions,
   AggregateHandler,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 
 /**
@@ -39,7 +40,7 @@ import {
  */
 @injectable()
 export default class AggregateOidcHandler
-  extends AggregateHandler<[IOidcOptions], void>
+  extends AggregateHandler<[IOidcOptions], LoginResult>
   implements IOidcHandler {
   constructor(@injectAll("oidcHandlers") oidcLoginHandlers: IOidcHandler[]) {
     super(oidcLoginHandlers);

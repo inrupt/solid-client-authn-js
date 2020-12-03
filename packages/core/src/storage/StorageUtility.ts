@@ -36,8 +36,8 @@ import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 
 export type OidcContext = {
   issuerConfig: IIssuerConfig;
-  codeVerifier: string;
-  redirectUri: string;
+  codeVerifier?: string;
+  redirectUri?: string;
   dpop: boolean;
 };
 
@@ -67,21 +67,17 @@ export async function loadOidcContextFromStorage(
       codeVerifier,
       storedRedirectIri,
       dpop,
-    ] = (await Promise.all([
+    ] = await Promise.all([
       storageUtility.getForUser(sessionId, "issuer", {
         errorIfNull: true,
       }),
-      storageUtility.getForUser(sessionId, "codeVerifier", {
-        errorIfNull: true,
-      }),
-      storageUtility.getForUser(sessionId, "redirectUri", {
-        errorIfNull: true,
-      }),
+      storageUtility.getForUser(sessionId, "codeVerifier"),
+      storageUtility.getForUser(sessionId, "redirectUri"),
       storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
-    ])) as string[];
+    ]);
 
     // Unlike openid-client, this looks up the configuration from storage
-    const issuerConfig = await configFetcher.fetchConfig(issuerIri);
+    const issuerConfig = await configFetcher.fetchConfig(issuerIri as string);
     return {
       codeVerifier,
       redirectUri: storedRedirectIri,
@@ -98,30 +94,25 @@ export async function loadOidcContextFromStorage(
 export async function saveSessionInfoToStorage(
   storageUtility: IStorageUtility,
   sessionId: string,
-  idToken: string,
-  webId: string,
-  isLoggedIn: string,
+  idToken?: string,
+  webId?: string,
+  isLoggedIn?: string,
   refreshToken?: string,
   secure?: boolean
 ): Promise<void> {
+  // TODO: Investigate why this does not work with a Promise.all
   if (refreshToken !== undefined) {
-    await storageUtility.setForUser(
-      sessionId,
-      {
-        refreshToken,
-      },
-      { secure }
-    );
+    await storageUtility.setForUser(sessionId, { refreshToken }, { secure });
   }
-  await storageUtility.setForUser(
-    sessionId,
-    {
-      idToken,
-      webId,
-      isLoggedIn,
-    },
-    { secure }
-  );
+  if (idToken !== undefined) {
+    await storageUtility.setForUser(sessionId, { idToken }, { secure });
+  }
+  if (webId !== undefined) {
+    await storageUtility.setForUser(sessionId, { webId }, { secure });
+  }
+  if (isLoggedIn !== undefined) {
+    await storageUtility.setForUser(sessionId, { isLoggedIn }, { secure });
+  }
 }
 
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
