@@ -32,7 +32,6 @@ import {
   ILoginHandler,
   ILoginOptions,
   AggregateHandler,
-  ISessionInfo,
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
 

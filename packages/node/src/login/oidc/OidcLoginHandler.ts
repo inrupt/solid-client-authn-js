@@ -39,10 +39,8 @@ import {
   ConfigurationError,
   IClient,
   IOidcOptions,
-  ISessionInfo,
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
-import { fetch } from "cross-fetch";
 
 function hasIssuer(
   options: ILoginOptions

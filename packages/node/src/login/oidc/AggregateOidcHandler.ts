@@ -32,10 +32,8 @@ import {
   IOidcHandler,
   IOidcOptions,
   AggregateHandler,
-  ISessionInfo,
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
-import fetch from "cross-fetch";
 
 /**
  * @hidden
