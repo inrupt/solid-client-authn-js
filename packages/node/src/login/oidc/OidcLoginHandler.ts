@@ -50,6 +50,7 @@ function hasIssuer(
   return typeof options.oidcIssuer === "string";
 }
 
+// TODO: the following code must be pushed to the handlers that actually need redirection
 // function hasRedirectUrl(
 //   options: ILoginOptions
 // ): options is ILoginOptions & { redirectUrl: string } {
@@ -81,6 +82,7 @@ export default class OidcLoginHandler implements ILoginHandler {
         )}`
       );
     }
+    // TODO: the following code must be pushed to the handlers that actually need redirection
     // if (!hasRedirectUrl(options)) {
     //   throw new ConfigurationError(
     //     `OidcLoginHandler requires a redirect URL: missing property 'redirectUrl' in ${JSON.stringify(
