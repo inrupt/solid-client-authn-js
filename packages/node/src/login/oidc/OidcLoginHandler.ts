@@ -40,6 +40,7 @@ import {
   IClient,
   IOidcOptions,
   ISessionInfo,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { fetch } from "cross-fetch";
 
@@ -72,9 +73,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     return hasIssuer(options);
   }
 
-  async handle(
-    options: ILoginOptions
-  ): Promise<(ISessionInfo & { fetch: typeof fetch }) | undefined> {
+  async handle(options: ILoginOptions): Promise<LoginResult> {
     if (!hasIssuer(options)) {
       throw new ConfigurationError(
         `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(

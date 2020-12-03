@@ -33,6 +33,7 @@ import {
   ILoginOptions,
   AggregateHandler,
   ISessionInfo,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 
 /**
@@ -40,10 +41,7 @@ import {
  */
 @injectable()
 export default class AggregateLoginHandler
-  extends AggregateHandler<
-    [ILoginOptions],
-    (ISessionInfo & { fetch: typeof fetch }) | undefined
-  >
+  extends AggregateHandler<[ILoginOptions], LoginResult>
   implements ILoginHandler {
   constructor(@injectAll("loginHandlers") loginHandlers: ILoginHandler[]) {
     super(loginHandlers);
