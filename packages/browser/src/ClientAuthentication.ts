@@ -69,7 +69,7 @@ export default class ClientAuthentication {
       options.redirectUrl ?? window.location.href
     );
 
-    return this.loginHandler.handle({
+    await this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
       redirectUrl,

@@ -53,4 +53,9 @@ export default interface ILoginInputOptions {
    * an additional safety against replay. By default, a DPoP token will be used.
    */
   tokenType?: "DPoP" | "Bearer";
+  /**
+   * If you already have a refresh token available, it may be used to log in along with the associated client ID and
+   * secret to authenticate.
+   */
+  refreshToken?: string;
 }

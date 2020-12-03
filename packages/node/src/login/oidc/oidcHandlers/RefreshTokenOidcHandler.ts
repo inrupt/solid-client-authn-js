@@ -30,18 +30,108 @@
 import {
   IOidcHandler,
   IOidcOptions,
-  NotImplementedError,
+  IStorageUtility,
+  LoginResult,
+  saveSessionInfoToStorage,
 } from "@inrupt/solid-client-authn-core";
+import { JWK } from "jose";
+import { inject, injectable } from "tsyringe";
+import { ISessionInfo } from "../../../../../core/dist";
+import {
+  buildBearerFetch,
+  buildDpopFetch,
+  RefreshOptions,
+} from "../../../authenticatedFetch/fetchFactory";
+import { ITokenRefresher } from "../refresh/TokenRefresher";
+
+function validateOptions(
+  oidcLoginOptions: IOidcOptions
+): oidcLoginOptions is IOidcOptions & {
+  refreshToken: string;
+  client: { clientId: string; clientSecret: string };
+} {
+  return (
+    oidcLoginOptions.refreshToken !== undefined &&
+    oidcLoginOptions.client.clientId !== undefined
+  );
+}
 
 /**
  * @hidden
  */
+@injectable()
 export default class RefreshTokenOidcHandler implements IOidcHandler {
-  async canHandle(_oidcLoginOptions: IOidcOptions): Promise<boolean> {
-    return false;
+  constructor(
+    @inject("tokenRefresher") private tokenRefresher: ITokenRefresher,
+    @inject("storageUtility") private storageUtility: IStorageUtility
+  ) {}
+
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
+    return validateOptions(oidcLoginOptions);
   }
 
-  async handle(_oidcLoginOptions: IOidcOptions): Promise<void> {
-    throw new NotImplementedError("RefreshTokenOidcHandler handle");
+  async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
+    if (!(await this.canHandle(oidcLoginOptions))) {
+      throw new Error(
+        `RefreshTokenOidcHandler cannot handle the provided options, missing one of 'refreshToken', 'clientId' in: ${JSON.stringify(
+          oidcLoginOptions
+        )}`
+      );
+    }
+    const refreshOptions: RefreshOptions = {
+      // The type assertion is okay, because it is tested for in canHandle.
+      refreshToken: oidcLoginOptions.refreshToken as string,
+      sessionId: oidcLoginOptions.sessionId,
+      tokenRefresher: this.tokenRefresher,
+    };
+    let authFetch: typeof fetch;
+    if (oidcLoginOptions.dpop) {
+      authFetch = await buildDpopFetch(
+        // The first request with this empty access token will 401, which will
+        // trigger the refresh flow.
+        "",
+        await JWK.generate("EC", "P-256"),
+        refreshOptions
+      );
+    } else {
+      authFetch = buildBearerFetch(
+        // The first request with this empty access token will 401, which will
+        // trigger the refresh flow.
+        "",
+        refreshOptions
+      );
+    }
+    const sessionInfo: ISessionInfo = {
+      isLoggedIn: true,
+      sessionId: oidcLoginOptions.sessionId,
+    };
+
+    await saveSessionInfoToStorage(
+      this.storageUtility,
+      oidcLoginOptions.sessionId,
+      undefined,
+      undefined,
+      "true",
+      oidcLoginOptions.refreshToken as string
+    );
+    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+      issuer: oidcLoginOptions.issuer,
+      dpop: oidcLoginOptions.dpop ? "true" : "false",
+      clientId: oidcLoginOptions.client.clientId,
+    });
+    if (oidcLoginOptions.client.clientSecret) {
+      await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+        clientSecret: oidcLoginOptions.client.clientSecret,
+      });
+    }
+    if (oidcLoginOptions.client.clientName) {
+      await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+        clientName: oidcLoginOptions.client.clientName,
+      });
+    }
+
+    return Object.assign(sessionInfo, {
+      fetch: authFetch,
+    });
   }
 }

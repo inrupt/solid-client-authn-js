@@ -28,11 +28,10 @@ import type { fetch } from "cross-fetch";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import ISessionInfo from "../../../sessionInfo/ISessionInfo";
 
+export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
+
 /**
  * @hidden
  */
-type IRedirectHandler = IHandleable<
-  [string],
-  ISessionInfo & { fetch: typeof fetch }
->;
+type IRedirectHandler = IHandleable<[string], RedirectResult>;
 export default IRedirectHandler;

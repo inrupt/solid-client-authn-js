@@ -32,6 +32,7 @@ import {
   IOidcOptions,
   IRedirector,
   IStorageUtility,
+  LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { injectable, inject } from "tsyringe";
@@ -57,7 +58,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
   }
 
-  async handle(oidcLoginOptions: IOidcOptions): Promise<void> {
+  async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     const issuer = new Issuer(
       configToIssuerMetadata(oidcLoginOptions.issuerConfiguration)
     );
@@ -75,6 +76,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
       response_type: "code",
       redirect_uri: oidcLoginOptions.redirectUrl,
       code_challenge_method: "S256",
+      // The offline_access scope asks the provider to issue a refresh token.
+      scope: "openid offline_access",
     });
 
     // Stores information to be reused after reload
@@ -93,5 +96,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     this.redirector.redirect(targetUrl, {
       handleRedirect: oidcLoginOptions.handleRedirect,
     });
+    // The login is only completed AFTER redirect, so there is nothing to return.
+    return undefined;
   }
 }

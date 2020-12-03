@@ -34,5 +34,5 @@ export const LoginHandlerMock: jest.Mocked<ILoginHandler> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canHandle: jest.fn((options: ILoginOptions) => Promise.resolve(true)),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handle: jest.fn((options: ILoginOptions) => Promise.resolve()),
+  handle: jest.fn((options: ILoginOptions) => Promise.resolve(undefined)),
 };

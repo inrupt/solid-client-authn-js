@@ -24,25 +24,226 @@
  * @packageDocumentation
  */
 
-import { standardOidcOptions } from "../__mocks__/IOidcOptions";
+import "reflect-metadata";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  mockDefaultOidcOptions,
+  mockOidcOptions,
+} from "../__mocks__/IOidcOptions";
 import RefreshTokenOidcHandler from "./RefreshTokenOidcHandler";
+import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 
-describe("PrimaryDeviceOidcHandler", () => {
+jest.mock("cross-fetch");
+
+describe("RefreshTokenOidcHandler", () => {
   describe("canHandle", () => {
-    it("doesn't handle anything", async () => {
-      const refreshTokenOidcHandler = new RefreshTokenOidcHandler();
+    it("doesn't handle options missing a refresh token", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(
-        refreshTokenOidcHandler.canHandle(standardOidcOptions)
+        refreshTokenOidcHandler.canHandle(
+          mockOidcOptions({
+            refreshToken: undefined,
+            client: {
+              clientId: "some client id",
+              clientSecret: "some client secret",
+            },
+          })
+        )
+      ).resolves.toEqual(false);
+    });
+
+    it("doesn't handle options missing a client ID", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
+      await expect(
+        refreshTokenOidcHandler.canHandle(
+          mockOidcOptions({
+            refreshToken: "some refresh token",
+            client: {
+              // TS would prevent this configuration
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              clientId: undefined,
+              clientSecret: "some client secret",
+            },
+          })
+        )
       ).resolves.toEqual(false);
     });
   });
 
   describe("handle", () => {
-    it("isn't implemented yet", async () => {
-      const refreshTokenOidcHandler = new RefreshTokenOidcHandler();
+    it("throws if the refresh token is missing", async () => {
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(() =>
-        refreshTokenOidcHandler.handle(standardOidcOptions)
-      ).rejects.toThrow("not implemented");
+        refreshTokenOidcHandler.handle(
+          mockOidcOptions({
+            refreshToken: undefined,
+            client: {
+              clientId: "some client id",
+              clientSecret: "some client secret",
+            },
+          })
+        )
+      ).rejects.toThrow("missing one of 'refreshToken', 'clientId'");
     });
+
+    it("uses the refresh token to get an access token", async () => {
+      const mockedTokenRefresher = mockDefaultTokenRefresher();
+      const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
+
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockedTokenRefresher,
+        mockStorageUtility({})
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+          },
+        })
+      );
+      expect(result).not.toBeUndefined();
+
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://my.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      expect(mockedRefreshFunction).toHaveBeenCalled();
+    });
+
+    it("returns an authenticated fetch if the credentials are valid", async () => {
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+          },
+        })
+      );
+      expect(result).not.toBeUndefined();
+
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://some.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+        "DPoP some refreshed access token"
+      );
+    });
+
+    it("returns a bearer-authenticated fetch if the credentials are valid", async () => {
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+          },
+          dpop: false,
+        })
+      );
+      expect(result).not.toBeUndefined();
+
+      const mockedFetch = jest.requireMock("cross-fetch");
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://some.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+        "Bearer some refreshed access token"
+      );
+    });
+
+    it("stores OIDC context in storage so that refreshing the token succeeds later", async () => {
+      const mockedStorage = mockStorageUtility({});
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockedStorage
+      );
+      await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+            clientName: "some client name",
+          },
+        })
+      );
+      await expect(
+        mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "clientId")
+      ).resolves.toEqual("some client id");
+      await expect(
+        mockedStorage.getForUser(
+          mockDefaultOidcOptions().sessionId,
+          "clientSecret"
+        )
+      ).resolves.toEqual("some client secret");
+      await expect(
+        mockedStorage.getForUser(
+          mockDefaultOidcOptions().sessionId,
+          "clientName"
+        )
+      ).resolves.toEqual("some client name");
+      await expect(
+        mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "issuer")
+      ).resolves.toEqual(mockDefaultOidcOptions().issuer);
+    });
+  });
+
+  it("supports a public client without a secret", async () => {
+    const mockedStorage = mockStorageUtility({});
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      mockDefaultTokenRefresher(),
+      mockedStorage
+    );
+    const result = await refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: undefined,
+          clientName: "some client name",
+        },
+      })
+    );
+    expect(result).not.toBeUndefined();
   });
 });
