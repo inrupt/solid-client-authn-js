@@ -33,6 +33,10 @@ from being possible, and now after a login that does not require a redirect, the
 
 - issue #685 fixed by removing all URL query params.
 
+### Patches
+
+- updated version of `solid-common-vocab` to pull in common RDF/JS types.
+
 ## 1.1.0 - 2020-11-27
 
 ### New features
