@@ -90,7 +90,7 @@ export default class InruptError extends Error {
     );
 
     // Preserve the HTTP response (in case the consumer of this error wishes to
-    // it's details directly themselves).
+    // access its details directly themselves).
     this.httpErrorResponse = httpErrorResponse;
 
     return this;
@@ -107,7 +107,7 @@ export default class InruptError extends Error {
   getHttpStatusCode(): number {
     if (!this.hasHttpResponse()) {
       throw new InruptError(
-        "This InruptError was not provided with a HTTP response - so we can't get it's HTTP Status Code!"
+        "This InruptError was not provided with a HTTP response - so we can't get its HTTP Status Code!"
       );
     }
 
@@ -117,7 +117,7 @@ export default class InruptError extends Error {
   getHttpStatusText(): string {
     if (!this.hasHttpResponse()) {
       throw new InruptError(
-        "This InruptError was not provided with a HTTP response - so we can't get it's HTTP Status Text!"
+        "This InruptError was not provided with a HTTP response - so we can't get its HTTP Status Text!"
       );
     }
 

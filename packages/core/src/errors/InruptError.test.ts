@@ -82,7 +82,7 @@ describe("InruptError", () => {
       );
 
       expect(error.name).toEqual("Error");
-      expect(error.hasHttpResponse()).toBeTruthy();
+      expect(error.hasHttpResponse()).toEqual(true);
       expect(error.getHttpStatusCode()).toEqual(404);
       expect(error.getHttpStatusText()).toEqual("Not Found");
       expect(error.toString()).toContain(message);
@@ -98,7 +98,7 @@ describe("InruptError", () => {
       const error = new InruptError(message).httpResponse(failedResponse);
 
       expect(error.name).toEqual("Error");
-      expect(error.hasHttpResponse()).toBeTruthy();
+      expect(error.hasHttpResponse()).toEqual(true);
       expect(error.getHttpStatusCode()).toEqual(404);
       expect(error.getHttpStatusText()).toEqual("Not Found");
       expect(error.toString()).toContain(message);
@@ -111,10 +111,10 @@ describe("InruptError", () => {
 
       expect(error.hasHttpResponse()).toBeFalsy();
       expect(() => error.getHttpStatusCode()).toThrow(
-        "can't get it's HTTP Status Code!"
+        "can't get its HTTP Status Code!"
       );
       expect(() => error.getHttpStatusText()).toThrow(
-        "can't get it's HTTP Status Text!"
+        "can't get its HTTP Status Text!"
       );
     });
 
@@ -234,7 +234,7 @@ describe("InruptError", () => {
           );
 
           expect(error.name).toEqual("Error");
-          expect(error.hasHttpResponse()).toBeTruthy();
+          expect(error.hasHttpResponse()).toEqual(true);
           expect(error.getHttpStatusCode()).toEqual(404);
           expect(error.getHttpStatusText()).toEqual("Not Found");
           expect(error.toString()).toContain(params[0]);
