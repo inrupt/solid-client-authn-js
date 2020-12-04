@@ -29,6 +29,11 @@ jobs:
       - run: npm run bootstrap -- --ci
       - run: npm run build
       - run: npm run test
+      - run: npm run e2e-test
+        env: 
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
       - run: npm audit --audit-level=moderate
       - name: Archive code coverage results
