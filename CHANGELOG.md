@@ -7,10 +7,23 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+## New feature
+
+## 1.2.0 - 2020-12-04
+
+## New feature
+
+- Support for authenticated scripts: It's now possible to provide a script with login
+parameters for a refresh token, a client ID and a client secret, which enables it to access
+private resources on Pods. This means that it's now easier to write small backend
+scripts which can interact with Pods in an automated way (i.e. no human interaction
+required).
+
 ## Bugfixes
 
 - In some use cases (e.g. authenticating a script), logging in happens without a redirection. The architecture so far prevented this
 from being possible, and now after a login that does not require a redirect, the current session may be authenticated.
+- Logging in a browser app will now clear OIDC-specific query params from the URL, which prevents a crash on refresh.
 
 ### New features
 
