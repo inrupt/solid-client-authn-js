@@ -1,5 +1,3 @@
-const path = require("path");
-
 module.exports = {
   entry: "./src/index.browser.ts",
   module: {
@@ -26,10 +24,5 @@ module.exports = {
       util: require.resolve("util/"),
       buffer: require.resolve("buffer/"),
     },
-  },
-  output: {
-    filename: "solid-client-authn.bundle.js",
-    path: path.resolve(__dirname, "browserDist"),
-    libraryTarget: "commonjs",
   },
 };
