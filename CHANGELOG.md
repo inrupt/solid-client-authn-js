@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+## Bugfix
+
+- Addressed part of issue https://github.com/inrupt/solid-client-authn-js/issues/684,
+by providing a `browser` entry in the `package.json` file. The ES modules export will
+be adressed in a different PR. 
+
 ## New feature
 
 ## 1.2.0 - 2020-12-04
@@ -31,7 +37,7 @@ from being possible, and now after a login that does not require a redirect, the
 
 ### Bugfixes
 
-- issue #685 fixed by removing all URL query params.
+- issue #685 fixed by removing all URL query params after login, which prevents from crashing when reloading a page.
 
 ### Patches
 
