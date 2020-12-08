@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@inrupt/vocab-inrupt-common": "^0.6.3",
-    "@types/jest": "^26.0.15",
+    "@types/jest": "^26.0.17",
     "@types/n3": "^1.4.4",
     "@types/node-fetch": "^2.5.6",
     "eslint": "^7.13.0",
