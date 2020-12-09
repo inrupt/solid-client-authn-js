@@ -22,15 +22,6 @@
 // The only import we need from the Node AuthN library is the Session class.
 const { Session } = require("../../../dist/Session");
 const { InMemoryStorage } = require("@inrupt/solid-client-authn-core");
-
-const argv = require("yargs/yargs")(process.argv.slice(2))
-  .describe("oidcIssuer", "The identity provider at which the user should authenticate.")
-  .alias("issuer", "oidcIssuer")
-  .describe("clientName", "The name of the bootstrapped app.")
-  .demandOption(["oidcIssuer"])
-  .locale("en")
-  .help().argv;
-
 const express = require("express");
 const app = express();
 const PORT = 3001;
@@ -40,6 +31,18 @@ const storage = new InMemoryStorage();
 // Initialised when the server comes up and is running...
 let session;
 let server;
+const identity = {};
+
+const issuers = [
+  "https://broker.pod.inrupt.com",
+  /** add other issuers here as they become available
+   *   uncomment these when NSS supports this cookie retrieval
+   *     "https://inrupt.net",
+   *     "https://solidcommunity.net",
+   *     "https://solidWeb.org",
+   */
+  "Other",
+];
 
 app.get("/", async (_req, res) => {
   console.log("Login successful.");
@@ -51,9 +54,15 @@ app.get("/", async (_req, res) => {
     `solidClientAuthenticationUser:${session.info.sessionId}`
   );
   const storedSession = JSON.parse(rawStoredSession);
-  console.log(`\nRefresh token: [${storedSession.refreshToken}]`);
-  console.log(`Client ID: [${storedSession.clientId}]`);
-  console.log(`Client Secret: [${storedSession.clientSecret}]`);
+  identity.token = storedSession.refreshToken;
+  identity.clientId = storedSession.clientId;
+  identity.clientSecret = storedSession.clientSecret;
+  console.log(`
+The code below allows entry to your pod, do not share it with anyone.
+You probably want to store this in an (encrypted) JSON file for reuse
+in a call to login() in your scripts and apps.
+`);
+  console.log(JSON.stringify(identity));
 
   res.send(
     "The tokens have been sent to the bootstraping app. You can close this window."
@@ -62,16 +71,32 @@ app.get("/", async (_req, res) => {
 });
 
 server = app.listen(PORT, async () => {
+  const rl = require("readline-sync");
+  identity.oidcIssuer = (() => {
+    const index = rl.keyInSelect(issuers, "Identity Provider (oidcIssuer) ?");
+    if (index === issuers.length - 1) {
+      return rl.question("Other Identity Provider? ");
+    }
+    if (index === -1) {
+      console.log("No Identity Provider supplied!\n");
+      process.exit();
+    }
+    return issuers[index];
+  })();
+  identity.clientName = (() => {
+    return rl.question(`User Name (clientName) ? `);
+  })();
+
   session = new Session({
     insecureStorage: storage,
     secureStorage: storage,
   });
 
   console.log(`Listening at: [http://localhost:${PORT}].`);
-  console.log(`Logging in ${argv.oidcIssuer} to get a refresh token.`);
+  console.log(`Logging in ${identity.oidcIssuer} to get a refresh token.`);
   session.login({
-    clientName: argv.clientName,
-    oidcIssuer: argv.oidcIssuer,
+    clientName: identity.clientName,
+    oidcIssuer: identity.oidcIssuer,
     redirectUrl: iriBase,
     tokenType: "DPoP",
     handleRedirect: (url) => {

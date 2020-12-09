@@ -16,6 +16,7 @@
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^1.1.0",
     "express": "^4.17.1",
+    "readline-sync": "^1.4.10",
     "yargs": "^16.1.1"
   }
 }

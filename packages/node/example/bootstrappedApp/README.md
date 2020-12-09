@@ -33,3 +33,7 @@ request. It expects a number of arguments:
 ```
 node app.js --clientId <the client id> --clientSecret <the client secret>  --refreshToken <the refresh token> --oidcIssuer <the issuer that issued the token> --resource <the private resource you want to access>
 ```
+Within a script, you may simply paste the credentials obtained in the getting-a-token step, as arguments to login.  For example;
+```javascript
+    login( <JSON returned from getting a cookie goes here> )
+```
