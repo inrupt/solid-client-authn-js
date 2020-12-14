@@ -53,7 +53,7 @@
     "jest": "^26.6.3",
     "license-checker": "^25.0.1",
     "ts-jest": "^26.4.4",
-    "ts-loader": "^8.0.10",
+    "ts-loader": "^8.0.12",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
     "typedoc-plugin-markdown": "^3.1.0",
