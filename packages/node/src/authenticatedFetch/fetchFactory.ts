@@ -19,7 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JWK, JWT } from "jose";
+import { JWK } from "jose/types";
+import SignJWT from "jose/jwt/sign";
+import parseJwk from "jose/jwk/parse";
 import { fetch } from "cross-fetch";
 import { v4 } from "uuid";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
@@ -136,39 +138,40 @@ export function normalizeHttpUriClaim(audience: string): string {
  * @param key Key used to sign the token.
  * @returns A JWT that can be used as a DPoP Authorization header.
  */
-export function createDpopHeader(
+export async function createDpopHeader(
   audience: string,
   method: string,
-  key: JWK.ECKey
-): string {
-  return JWT.sign(
-    {
-      htu: normalizeHttpUriClaim(audience),
-      htm: method.toUpperCase(),
-      jti: v4(),
-    },
-    key,
-    {
-      header: {
-        jwk: key.toJWK(false),
-        typ: "dpop+jwt",
-      },
-      algorithm: "ES256",
-    }
-  );
+  key: JWK
+): Promise<string> {
+  return new SignJWT({
+    htu: normalizeHttpUriClaim(audience),
+    htm: method.toUpperCase(),
+    jti: v4(),
+  })
+    .setProtectedHeader({
+      alg: "ES256",
+      jwk: key,
+      typ: "dpop+jwt",
+    })
+    .setIssuedAt()
+    .sign(await parseJwk(key), {});
 }
 
 async function buildDpopFetchOptions(
   targetUrl: string,
   authToken: string,
-  dpopKey: JWK.ECKey,
+  dpopKey: JWK,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   const options: RequestInit = { ...defaultOptions };
   options.headers = {
     ...defaultOptions?.headers,
     Authorization: `DPoP ${authToken}`,
-    DPoP: createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
+    DPoP: await createDpopHeader(
+      targetUrl,
+      defaultOptions?.method ?? "get",
+      dpopKey
+    ),
   };
   return options;
 }
@@ -182,7 +185,7 @@ async function buildDpopFetchOptions(
  */
 export async function buildDpopFetch(
   accessToken: string,
-  dpopKey: JWK.ECKey,
+  dpopKey: JWK,
   refreshOptions?: RefreshOptions
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;

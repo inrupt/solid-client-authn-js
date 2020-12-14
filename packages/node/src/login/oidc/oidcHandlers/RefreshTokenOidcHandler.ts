@@ -34,7 +34,8 @@ import {
   LoginResult,
   saveSessionInfoToStorage,
 } from "@inrupt/solid-client-authn-core";
-import { JWK } from "jose";
+import fromKeyLike from "jose/jwk/from_key_like";
+import generateKeyPair from "jose/util/generate_key_pair";
 import { TokenSet } from "openid-client";
 import { inject, injectable } from "tsyringe";
 import { ISessionInfo } from "../../../../../core/dist";
@@ -71,10 +72,13 @@ async function refreshAccess(
   let authFetch: typeof fetch;
   // eslint-disable-next-line camelcase
   let tokens: TokenSet & { access_token: string };
-  let dpopKey: JWK.ECKey;
   try {
     if (dpop) {
-      dpopKey = await JWK.generate("EC", "P-256");
+      const dpopKey = await fromKeyLike(
+        (await generateKeyPair("ES256")).privateKey
+      );
+      // The alg property isn't set by fromKeyLike, so set it manually.
+      dpopKey.alg = "ES256";
       tokens = await refreshOptions.tokenRefresher.refresh(
         refreshOptions.sessionId,
         refreshOptions.refreshToken,

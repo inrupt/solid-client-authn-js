@@ -34,7 +34,7 @@ import {
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, TokenSet } from "openid-client";
-import { JWK } from "jose";
+import { JWK } from "jose/types";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
@@ -49,7 +49,7 @@ export interface ITokenRefresher {
   refresh(
     localUserId: string,
     refreshToken?: string,
-    dpopKey?: JWK.ECKey,
+    dpopKey?: JWK,
     onNewRefreshToken?: (token: string) => unknown
   ): Promise<TokenSet & { access_token: string }>;
 }
@@ -69,7 +69,7 @@ export default class TokenRefresher implements ITokenRefresher {
   async refresh(
     sessionId: string,
     refreshToken?: string,
-    dpopKey?: JWK.ECKey,
+    dpopKey?: JWK,
     onNewRefreshToken?: (newToken: string) => unknown
   ): Promise<TokenSet & { access_token: string }> {
     const oidcContext = await loadOidcContextFromStorage(
@@ -110,7 +110,11 @@ export default class TokenRefresher implements ITokenRefresher {
     }
 
     const tokenSet = await client.refresh(refreshToken, {
-      DPoP: dpopKey?.toJWK(true),
+      // openid-client does not support yet jose@3.x, and expects
+      // type definitions that are no longer present. However, the JWK
+      // type that we pass here is compatible with the API, hence the `any`
+      // assertion.
+      DPoP: dpopKey as any,
     });
 
     if (tokenSet.access_token === undefined) {

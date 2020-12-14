@@ -24,7 +24,7 @@ import {
   mockStorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { JWK } from "jose";
+import { JWK } from "jose/types";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import TokenRefresher from "./TokenRefresher";
 import {
@@ -38,8 +38,8 @@ import {
 
 jest.mock("openid-client");
 
-const mockJwk = (): JWK.ECKey =>
-  JWK.asKey({
+const mockJwk = (): JWK => {
+  return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
     alg: "ES256",
@@ -47,7 +47,8 @@ const mockJwk = (): JWK.ECKey =>
     x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
     y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
     d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  });
+  };
+};
 
 const mockIdToken = (): string =>
   "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw";
