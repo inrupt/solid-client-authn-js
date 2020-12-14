@@ -9,4 +9,8 @@ module.exports = {
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
   },
+  moduleNameMapper: {
+    // Here, the OIDC package is used, but any package depending on jose@3.x would do.
+    "^jose/(.*)$": "<rootDir>/packages/node/node_modules/jose/dist/node/cjs/$1",
+  },
 };
