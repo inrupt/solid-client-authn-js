@@ -5,7 +5,7 @@
     "audit": "lerna-audit",
     "demo-app": "cd packages/browser; npm run demo-app",
     "bootstrap": "lerna bootstrap",
-    "e2e-test": "jest --config jest.e2e.config.js",
+    "e2e-test": "lerna run e2e-test",
     "build": "lerna run build",
     "clean": "rm --recursive --force packages/*/dist/ packages/*/node_modules/ packages/*/coverage/ packages/*/umd/",
     "build-api-docs": "lerna run build-api-docs",
