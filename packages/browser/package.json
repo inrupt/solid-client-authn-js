@@ -61,7 +61,7 @@
     "webpack": "^5.10.0",
     "webpack-bundle-analyzer": "^4.2.0",
     "webpack-cli": "^4.2.0",
-    "webpack-merge": "^5.4.0"
+    "webpack-merge": "^5.7.0"
   },
   "dependencies": {
     "@inrupt/oidc-client-ext": "^1.2.0",
