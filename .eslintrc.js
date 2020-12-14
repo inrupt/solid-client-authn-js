@@ -39,5 +39,10 @@ module.exports = {
     "import/prefer-default-export": "off",
     // The following rule should be re-enabled after a refactoring of the handler pattern
     "class-methods-use-this": "off",
+    // The following rule prevents issues with jose@3.x
+    "import/no-unresolved": "off",
+    // Each usage of @ts-ignore is documented. This rule only leads to
+    // add an additional comment on top of each TS command.
+    "@typescript-eslint/ban-ts-comment": "off",
   },
 };
