@@ -34,7 +34,8 @@ import {
   LoginResult,
   saveSessionInfoToStorage,
 } from "@inrupt/solid-client-authn-core";
-import { JWK } from "jose";
+import fromKeyLike from "jose/jwk/from_key_like";
+import generateKeyPair from "jose/util/generate_key_pair";
 import { inject, injectable } from "tsyringe";
 import { ISessionInfo } from "../../../../../core/dist";
 import {
@@ -85,12 +86,17 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       tokenRefresher: this.tokenRefresher,
     };
     let authFetch: typeof fetch;
+    const dpopKey = await fromKeyLike(
+      (await generateKeyPair("ES256")).privateKey
+    );
+    // The alg property isn't set by fromKeyLike, so set it manually.
+    dpopKey.alg = "ES256";
     if (oidcLoginOptions.dpop) {
       authFetch = await buildDpopFetch(
         // The first request with this empty access token will 401, which will
         // trigger the refresh flow.
         "",
-        await JWK.generate("EC", "P-256"),
+        dpopKey,
         refreshOptions
       );
     } else {

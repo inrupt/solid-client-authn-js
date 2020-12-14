@@ -33,7 +33,7 @@ import {
   loadOidcContextFromStorage,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, TokenSet } from "openid-client";
-import { JWK } from "jose";
+import { JWK } from "jose/types";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
@@ -47,7 +47,7 @@ export interface ITokenRefresher {
   refresh(
     localUserId: string,
     refreshToken?: string,
-    dpopKey?: JWK.ECKey
+    dpopKey?: JWK
   ): Promise<TokenSet & { access_token: string }>;
 }
 
@@ -66,7 +66,7 @@ export default class TokenRefresher implements ITokenRefresher {
   async refresh(
     sessionId: string,
     refreshToken?: string,
-    dpopKey?: JWK.ECKey
+    dpopKey?: JWK
   ): Promise<TokenSet & { access_token: string }> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
@@ -99,7 +99,11 @@ export default class TokenRefresher implements ITokenRefresher {
     }
 
     const tokenSet = await client.refresh(refreshToken, {
-      DPoP: dpopKey?.toJWK(true),
+      // openid-client does not support yet jose@3.x, and expects
+      // type definitions that are no longer present. However, the JWK
+      // type that we pass here is compatible with the API.
+      // @ts-ignore
+      DPoP: dpopKey,
     });
 
     if (tokenSet.access_token === undefined) {

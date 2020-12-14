@@ -21,12 +21,10 @@
 
 import "reflect-metadata";
 import { describe, it } from "@jest/globals";
-import { JWK, JWT } from "jose";
-import {
-  buildBearerFetch,
-  buildDpopFetch,
-  DpopHeaderPayload,
-} from "./fetchFactory";
+import { JWK } from "jose/types";
+import jwtVerify from "jose/jwt/verify";
+import parseJwk from "jose/jwk/parse";
+import { buildBearerFetch, buildDpopFetch } from "./fetchFactory";
 import {
   mockDefaultTokenRefresher,
   mockDefaultTokenSet,
@@ -171,8 +169,8 @@ describe("buildBearerFetch", () => {
   });
 });
 
-const mockJwk = (): JWK.ECKey =>
-  JWK.asKey({
+const mockJwk = (): JWK => {
+  return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
     alg: "ES256",
@@ -180,7 +178,8 @@ const mockJwk = (): JWK.ECKey =>
     x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
     y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
     d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  });
+  };
+};
 
 describe("buildDpopFetch", () => {
   it("returns a fetch holding the provided token and key", async () => {
@@ -195,12 +194,9 @@ describe("buildDpopFetch", () => {
     );
 
     const dpopHeader = mockedFetch.mock.calls[0][1].headers.DPoP as string;
-    const decodedHeader = JWT.verify(
-      dpopHeader,
-      mockJwk()
-    ) as DpopHeaderPayload;
-    expect(decodedHeader.htu).toEqual("http://some.url/");
-    expect(decodedHeader.htm).toEqual("GET");
+    const { payload } = await jwtVerify(dpopHeader, await parseJwk(mockJwk()));
+    expect(payload.htu).toEqual("http://some.url/");
+    expect(payload.htm).toEqual("GET");
   });
 
   it("builds the appropriate DPoP header for a given HTTP verb.", async () => {
@@ -213,12 +209,9 @@ describe("buildDpopFetch", () => {
     });
 
     const dpopHeader = mockedFetch.mock.calls[0][1].headers.DPoP as string;
-    const decodedHeader = JWT.verify(
-      dpopHeader,
-      mockJwk()
-    ) as DpopHeaderPayload;
-    expect(decodedHeader.htu).toEqual("http://some.url/");
-    expect(decodedHeader.htm).toEqual("POST");
+    const { payload } = await jwtVerify(dpopHeader, await parseJwk(mockJwk()));
+    expect(payload.htu).toEqual("http://some.url/");
+    expect(payload.htm).toEqual("POST");
   });
 
   it("returns a fetch preserving the provided optional headers", async () => {
@@ -271,11 +264,8 @@ describe("buildDpopFetch", () => {
 
     expect(mockedFetch.mock.calls[1][0]).toEqual("https://my.pod/container/");
     const dpopHeader = mockedFetch.mock.calls[1][1].headers.DPoP as string;
-    const decodedHeader = JWT.verify(
-      dpopHeader,
-      mockJwk()
-    ) as DpopHeaderPayload;
-    expect(decodedHeader.htu).toEqual("https://my.pod/container/");
+    const { payload } = await jwtVerify(dpopHeader, await parseJwk(mockJwk()));
+    expect(payload.htu).toEqual("https://my.pod/container/");
   });
 
   it("does not retry a redirected fetch if the error is not auth-related", async () => {

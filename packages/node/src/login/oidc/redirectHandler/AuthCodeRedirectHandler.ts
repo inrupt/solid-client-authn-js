@@ -39,7 +39,10 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
 import { IdTokenClaims, Issuer, TokenSet } from "openid-client";
-import { JWK } from "jose";
+import { JWK } from "jose/types";
+import generateKeyPair from "jose/util/generate_key_pair";
+import fromKeyLike from "jose/jwk/from_key_like";
+
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
   buildBearerFetch,
@@ -148,17 +151,23 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     const params = client.callbackParams(redirectUrl);
 
-    let dpopKey: JWK.ECKey;
+    let dpopKey: JWK;
     let tokenSet: TokenSet;
     let authFetch: typeof fetch;
 
     if (dpop) {
-      dpopKey = await JWK.generate("EC", "P-256");
+      dpopKey = await fromKeyLike((await generateKeyPair("ES256")).privateKey);
+      // The alg property isn't set by fromKeyLike, so set it manually.
+      dpopKey.alg = "ES256";
       tokenSet = await client.callback(
         redirectUri,
         params,
         { code_verifier: codeVerifier, state: oauthState },
-        { DPoP: dpopKey.toJWK(true) }
+        // openid-client does not support yet jose@3.x, and expects
+        // type definitions that are no longer present. However, the JWK
+        // type that we pass here is compatible with the API.
+        // @ts-ignore
+        { DPoP: dpopKey }
       );
     } else {
       tokenSet = await client.callback(redirectUri, params, {
