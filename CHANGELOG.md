@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - Addressed part of issue https://github.com/inrupt/solid-client-authn-js/issues/684,
 by providing a `browser` entry in the `package.json` file. The ES modules export will
 be adressed in a different PR. 
+- The WebID is now set on the session when logging in a script.
 
 ## New feature
 
