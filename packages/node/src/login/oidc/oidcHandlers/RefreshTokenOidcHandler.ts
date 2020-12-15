@@ -66,19 +66,24 @@ async function refreshAccess(
   // eslint-disable-next-line camelcase
   let tokens: TokenSet & { access_token: string };
   let dpopKey: JWK.ECKey;
-  if (dpop) {
-    dpopKey = await JWK.generate("EC", "P-256");
-    tokens = await refreshOptions.tokenRefresher.refresh(
-      refreshOptions.sessionId,
-      refreshOptions.refreshToken,
-      dpopKey
-    );
-  } else {
-    tokens = await refreshOptions.tokenRefresher.refresh(
-      refreshOptions.sessionId,
-      refreshOptions.refreshToken
-    );
+  try {
+    if (dpop) {
+      dpopKey = await JWK.generate("EC", "P-256");
+      tokens = await refreshOptions.tokenRefresher.refresh(
+        refreshOptions.sessionId,
+        refreshOptions.refreshToken,
+        dpopKey
+      );
+    } else {
+      tokens = await refreshOptions.tokenRefresher.refresh(
+        refreshOptions.sessionId,
+        refreshOptions.refreshToken
+      );
+    }
+  } catch (e) {
+    throw new Error(`Invalid refresh credentials: ${e.toString()}`);
   }
+
   // Rotate the refresh token if applicable
   const rotatedRefreshOptions = {
     ...refreshOptions,
