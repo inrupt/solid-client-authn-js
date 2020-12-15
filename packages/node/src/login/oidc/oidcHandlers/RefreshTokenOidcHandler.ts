@@ -130,6 +130,15 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       tokenRefresher: this.tokenRefresher,
     };
 
+    // This information must be in storage for the refresh flow to succeed.
+    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+      issuer: oidcLoginOptions.issuer,
+      dpop: oidcLoginOptions.dpop ? "true" : "false",
+      clientId: oidcLoginOptions.client.clientId,
+      // Note: We assume here that a client secret is present, which is checked for when validating the options.
+      clientSecret: oidcLoginOptions.client.clientSecret as string,
+    });
+
     const accessInfo = await refreshAccess(
       refreshOptions,
       oidcLoginOptions.dpop
@@ -155,11 +164,13 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       "true",
       accessInfo.refresh_token ?? refreshOptions.refreshToken
     );
+
     await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
       issuer: oidcLoginOptions.issuer,
       dpop: oidcLoginOptions.dpop ? "true" : "false",
       clientId: oidcLoginOptions.client.clientId,
     });
+
     if (oidcLoginOptions.client.clientSecret) {
       await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
         clientSecret: oidcLoginOptions.client.clientSecret,
