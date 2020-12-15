@@ -46,6 +46,7 @@ const mockIdTokenPayload = (): IdTokenClaims => {
 export const mockDefaultTokenSet = (): TokenSet & { access_token: string } => {
   return {
     access_token: "some refreshed access token",
+    id_token: JSON.stringify(mockIdTokenPayload()),
     expired: () => false,
     claims: mockIdTokenPayload,
   };
