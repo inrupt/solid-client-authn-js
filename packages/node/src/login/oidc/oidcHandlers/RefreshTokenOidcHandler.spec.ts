@@ -311,4 +311,27 @@ describe("RefreshTokenOidcHandler", () => {
       "some rotated refresh token"
     );
   });
+
+  it("throws if the credentials are incorrect", async () => {
+    const tokenRefresher = mockTokenRefresher({
+      access_token: "some access token",
+      expired: () => false,
+      claims: () => (null as unknown) as IdTokenClaims,
+    });
+    tokenRefresher.refresh = jest.fn().mockRejectedValue("Invalid credentials");
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      tokenRefresher,
+      mockStorageUtility({})
+    );
+    const result = refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: "some client secret",
+        },
+      })
+    );
+    await expect(result).rejects.toThrow("Invalid credentials");
+  });
 });
