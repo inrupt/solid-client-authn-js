@@ -66,7 +66,6 @@ export default class ClientAuthentication {
     // could return to a previous redirect URL that contains OIDC params that
     // are now longer valid - so just to be safe, strip relevant params now.
     const { redirectUrl } = options;
-
     const loginReturn = await this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
