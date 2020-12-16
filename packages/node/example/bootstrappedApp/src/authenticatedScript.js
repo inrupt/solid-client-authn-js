@@ -30,7 +30,7 @@ async function main() {
   await session.login({
     clientId: argv.clientId,
     clientSecret: argv.clientSecret,
-    refreshToken: argv.token,
+    refreshToken: argv.refreshToken,
     oidcIssuer: argv.oidcIssuer,
   });
   if (session.info.isLoggedIn) {
