@@ -68,7 +68,7 @@
     "@inrupt/solid-client-authn-core": "^1.2.1",
     "@types/form-urlencoded": "^2.0.1",
     "@types/lodash.clonedeep": "^4.5.6",
-    "@types/node": "^14.14.11",
+    "@types/node": "^14.14.14",
     "@types/uuid": "^8.3.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
