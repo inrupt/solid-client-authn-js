@@ -58,6 +58,12 @@ function validateOptions(
   );
 }
 
+/**
+ * Go through the refresh flow to get a new valid access token, and build an
+ * authenticated fetch with it.
+ * @param refreshOptions
+ * @param dpop
+ */
 async function refreshAccess(
   refreshOptions: RefreshOptions,
   dpop: boolean
@@ -74,32 +80,29 @@ async function refreshAccess(
         refreshOptions.refreshToken,
         dpopKey
       );
+      // Rotate the refresh token if applicable
+      const rotatedRefreshOptions = {
+        ...refreshOptions,
+        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
+      };
+      authFetch = await buildDpopFetch(
+        tokens.access_token,
+        dpopKey,
+        rotatedRefreshOptions
+      );
     } else {
       tokens = await refreshOptions.tokenRefresher.refresh(
         refreshOptions.sessionId,
         refreshOptions.refreshToken
       );
+      const rotatedRefreshOptions = {
+        ...refreshOptions,
+        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
+      };
+      authFetch = buildBearerFetch(tokens.access_token, rotatedRefreshOptions);
     }
   } catch (e) {
     throw new Error(`Invalid refresh credentials: ${e.toString()}`);
-  }
-
-  // Rotate the refresh token if applicable
-  const rotatedRefreshOptions = {
-    ...refreshOptions,
-    refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
-  };
-  if (dpop) {
-    authFetch = await buildDpopFetch(
-      tokens.access_token,
-      // dpopkey is assigned in the previous if block
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      dpopKey as JWK.ECKey,
-      rotatedRefreshOptions
-    );
-  } else {
-    authFetch = buildBearerFetch(tokens.access_token, rotatedRefreshOptions);
   }
   return Object.assign(tokens, {
     fetch: authFetch,
@@ -156,7 +159,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
 
     if (accessInfo.id_token === undefined) {
       throw new Error(
-        "The Identity Provider did not return an ID token on refresh, which prevents from getting the user's WebID."
+        `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents from getting the user's WebID.`
       );
     }
     sessionInfo.webId = await getWebidFromTokenPayload(accessInfo.claims());

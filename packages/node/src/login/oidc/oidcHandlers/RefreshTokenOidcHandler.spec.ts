@@ -272,11 +272,11 @@ describe("RefreshTokenOidcHandler", () => {
       })
     );
     await expect(result).rejects.toThrow(
-      "The Identity Provider did not return an ID token on refresh, which prevents from getting the user's WebID."
+      "The Identity Provider [https://example.com] did not return an ID token on refresh, which prevents from getting the user's WebID."
     );
   });
 
-  it("uses the rotated refresh token to build the authenticated fetch if applicable", async () => {
+  it("uses the rotated refresh token to build the DPoP-authenticated fetch if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refresh_token = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
@@ -294,6 +294,43 @@ describe("RefreshTokenOidcHandler", () => {
           clientId: "some client id",
           clientSecret: "some client secret",
         },
+      })
+    );
+    expect(result?.webId).toEqual("https://my.webid/");
+
+    const mockedFetch = jest.requireMock("cross-fetch");
+    mockedFetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    if (result !== undefined) {
+      // ... and this should trigger the refresh flow.
+      await result.fetch("https://some.pod/resource");
+    }
+    expect(mockedRefreshFunction.mock.calls[1]).toContain(
+      "some rotated refresh token"
+    );
+  });
+
+  it("uses the rotated refresh token to build the Bearer-authenticated fetch if applicable", async () => {
+    const tokenSet = mockDefaultTokenSet();
+    tokenSet.refresh_token = "some rotated refresh token";
+    const mockedTokenRefresher = mockTokenRefresher(tokenSet);
+    const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
+
+    // This builds the fetch function holding the refresh token...
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      mockedTokenRefresher,
+      mockStorageUtility({})
+    );
+    const result = await refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: "some client secret",
+        },
+        dpop: false,
       })
     );
     expect(result?.webId).toEqual("https://my.webid/");
