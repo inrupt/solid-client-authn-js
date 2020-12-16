@@ -7,18 +7,22 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
-## Bugfix
+### New feature
+
+## 1.2.1 - 2020-12-16
+
+### Bugfix
 
 - Addressed part of issue https://github.com/inrupt/solid-client-authn-js/issues/684,
 by providing a `browser` entry in the `package.json` file. The ES modules export will
 be adressed in a different PR. 
 - The WebID is now set on the session when logging in a script.
+- When logging in with a refresh token (e.g. for a script), if the provided credentials are incorrect, an error is thrown.
 
-## New feature
 
 ## 1.2.0 - 2020-12-04
 
-## New feature
+### New feature
 
 - Support for authenticated scripts: It's now possible to provide a script with login
 parameters for a refresh token, a client ID and a client secret, which enables it to access
@@ -26,7 +30,7 @@ private resources on Pods. This means that it's now easier to write small backen
 scripts which can interact with Pods in an automated way (i.e. no human interaction
 required).
 
-## Bugfixes
+### Bugfixes
 
 - In some use cases (e.g. authenticating a script), logging in happens without a redirection. The architecture so far prevented this
 from being possible, and now after a login that does not require a redirect, the current session may be authenticated.
