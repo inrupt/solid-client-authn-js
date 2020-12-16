@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.2.2 - 2020-12-16
+
 ### Bugfix
 
 - The WebID is now REALLY set on the session when logging in a script. The initial 
