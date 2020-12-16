@@ -272,7 +272,7 @@ describe("RefreshTokenOidcHandler", () => {
       })
     );
     await expect(result).rejects.toThrow(
-      "The Identity Provider [https://example.com] did not return an ID token on refresh, which prevents from getting the user's WebID."
+      "The Identity Provider [https://example.com] did not return an ID token on refresh, which prevents us from getting the user's WebID."
     );
   });
 

@@ -159,7 +159,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
 
     if (accessInfo.id_token === undefined) {
       throw new Error(
-        `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents from getting the user's WebID.`
+        `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
       );
     }
     sessionInfo.webId = await getWebidFromTokenPayload(accessInfo.claims());
