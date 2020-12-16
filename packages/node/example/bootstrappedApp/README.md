@@ -16,7 +16,7 @@ the build of the library. Then, run `npm ci` again, this time in
 ## Getting a token
 
 To get all the credentials needed to authenticate your script, you can `cd src/`,
-and then run `node bootstrap.js --oidcProvider <your identity provider>`. 
+and then run `node bootstrap.js --oidcIssuer <your identity provider>`.
 This utility script will output to the console an IRI in the domain of your specified
 identity provider (e.g. `https://broker.pod.inrupt.com/`) that you should open
 in a web browser. There, you should be able to log into your identity provider. Once
