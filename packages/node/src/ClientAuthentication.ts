@@ -84,6 +84,7 @@ export default class ClientAuthentication {
       return {
         isLoggedIn: true,
         sessionId,
+        webId: loginReturn.webId,
       };
     }
     // undefined is returned in the case when the login must be completed

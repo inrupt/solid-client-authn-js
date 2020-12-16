@@ -149,6 +149,7 @@ describe("RefreshTokenOidcHandler", () => {
         })
       );
       expect(result).not.toBeUndefined();
+      expect(result?.webId).toEqual("https://my.webid/");
 
       const mockedFetch = jest.requireMock("cross-fetch");
       mockedFetch.mockResolvedValue({

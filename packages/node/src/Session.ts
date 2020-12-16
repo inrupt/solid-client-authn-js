@@ -131,6 +131,7 @@ export class Session extends EventEmitter {
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
       this.info.sessionId = loginInfo.sessionId;
+      this.info.webId = loginInfo.webId;
     }
   };
 

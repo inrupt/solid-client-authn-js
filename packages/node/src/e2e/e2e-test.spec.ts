@@ -35,6 +35,19 @@ describe("Environment", () => {
 });
 
 describe("Authenticated fetch", () => {
+  it("properly sets up session information", async () => {
+    const session = new Session();
+    await session.login({
+      clientId: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      refreshToken: process.env.REFRESH_TOKEN,
+      oidcIssuer: OIDC_ISSUER,
+    });
+    expect(session.info.isLoggedIn).toEqual(true);
+    expect(session.info.sessionId).not.toBeUndefined();
+    expect(session.info.webId).not.toBeUndefined();
+  });
+
   it("can fetch a public resource when logged in", async () => {
     const session = new Session();
     await session.login({

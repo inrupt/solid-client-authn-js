@@ -90,11 +90,13 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn().mockResolvedValueOnce({
         isLoggedIn: true,
         sessionId: "mySession",
+        webId: "https://my.webid/",
       });
       const mySession = new Session({ clientAuthentication });
       await mySession.login({});
       expect(mySession.info.isLoggedIn).toEqual(true);
       expect(mySession.info.sessionId).toEqual("mySession");
+      expect(mySession.info.webId).toEqual("https://my.webid/");
     });
   });
 

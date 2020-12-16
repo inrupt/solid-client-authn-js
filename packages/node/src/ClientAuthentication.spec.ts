@@ -85,6 +85,7 @@ describe("ClientAuthentication", () => {
         handle: jest.fn((_options: ILoginOptions) =>
           Promise.resolve(({
             fetch: mockedAuthFetch,
+            webId: "https://my.webid/",
           } as unknown) as LoginResult)
         ),
       };
@@ -97,6 +98,7 @@ describe("ClientAuthentication", () => {
         clientSecret: "some client secret",
       });
       expect(loginResult).not.toBeUndefined();
+      expect(loginResult?.webId).toEqual("https://my.webid/");
       expect(clientAuthn.fetch).toBe(mockedAuthFetch);
     });
 

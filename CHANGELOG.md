@@ -7,7 +7,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
-### New feature
+### Bugfix
+
+- The WebID is now REALLY set on the session when logging in a script. The initial 
+fix introduced in 1.2.1 did compute the WebID from the identity provider response,
+but did not set it properly on the session.
+
+The following sections document changes that have been released already:
 
 ## 1.2.1 - 2020-12-16
 
