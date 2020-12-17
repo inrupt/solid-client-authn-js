@@ -9,6 +9,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+## 1.2.3 - 2020-12-17
+
+### Bugfix
+
+- The `browser` entry in the `package.json` was incorrect, leading to issues when
+bundling the library.
+
 ## 1.2.2 - 2020-12-16
 
 ### Bugfix
