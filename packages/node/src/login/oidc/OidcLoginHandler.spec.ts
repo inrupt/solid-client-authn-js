@@ -21,7 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "./__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "./OidcLoginHandler";
@@ -32,7 +32,7 @@ import {
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
-    storageUtility: StorageUtilityMock,
+    storageUtility: mockStorageUtility({}),
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
     clientRegistrar: mockDefaultClientRegistrar(),
@@ -125,22 +125,62 @@ describe("OidcLoginHandler", () => {
       expect(clientRegistrar.getClient).toHaveBeenCalled();
     });
 
-    it("does not perform DCR if client ID and secret are specified", async () => {
+    it("does not perform DCR if client ID and secret are specified, but stores client credentials", async () => {
       const { oidcHandler } = defaultMocks;
+      const mockedStorage = mockStorageUtility({});
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = jest
         .fn()
         .mockResolvedValueOnce(mockDefaultClient());
-      const handler = getInitialisedHandler({ oidcHandler, clientRegistrar });
+      const handler = getInitialisedHandler({
+        oidcHandler,
+        clientRegistrar,
+        storageUtility: mockedStorage,
+      });
       await handler.handle({
         sessionId: "mySession",
         oidcIssuer: "https://arbitrary.url",
         redirectUrl: "https://app.com/redirect",
         clientId: "some pre-registered client id",
         clientSecret: "some pre-registered client secret",
+        clientName: "My App",
         tokenType: "DPoP",
       });
       expect(clientRegistrar.getClient).not.toHaveBeenCalled();
+      await expect(
+        mockedStorage.getForUser("mySession", "clientId")
+      ).resolves.toEqual("some pre-registered client id");
+      await expect(
+        mockedStorage.getForUser("mySession", "clientSecret")
+      ).resolves.toEqual("some pre-registered client secret");
+      await expect(
+        mockedStorage.getForUser("mySession", "clientName")
+      ).resolves.toEqual("My App");
+    });
+
+    it("stores credentials for public clients", async () => {
+      const { oidcHandler } = defaultMocks;
+      const mockedStorage = mockStorageUtility({});
+      const clientRegistrar = mockDefaultClientRegistrar();
+      clientRegistrar.getClient = jest
+        .fn()
+        .mockResolvedValueOnce(mockDefaultClient());
+      const handler = getInitialisedHandler({
+        oidcHandler,
+        clientRegistrar,
+        storageUtility: mockedStorage,
+      });
+      await handler.handle({
+        sessionId: "mySession",
+        oidcIssuer: "https://arbitrary.url",
+        redirectUrl: "https://app.com/redirect",
+        clientId: "some pre-registered client id",
+        tokenType: "DPoP",
+      });
+      expect(clientRegistrar.getClient).not.toHaveBeenCalled();
+      await expect(
+        mockedStorage.getForUser("mySession", "clientId")
+      ).resolves.toEqual("some pre-registered client id");
     });
   });
 });
