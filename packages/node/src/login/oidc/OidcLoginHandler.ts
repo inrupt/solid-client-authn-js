@@ -61,7 +61,7 @@ function hasIssuer(
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
-    @inject("storageUtility") private _storageUtility: IStorageUtility,
+    @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("oidcHandler") private oidcHandler: IOidcHandler,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
@@ -99,16 +99,16 @@ export default class OidcLoginHandler implements ILoginHandler {
         clientSecret: options.clientSecret,
         clientName: options.clientName,
       };
-      await this._storageUtility.setForUser(options.sessionId, {
+      await this.storageUtility.setForUser(options.sessionId, {
         clientId: options.clientId,
       });
       if (options.clientSecret) {
-        await this._storageUtility.setForUser(options.sessionId, {
+        await this.storageUtility.setForUser(options.sessionId, {
           clientSecret: options.clientSecret,
         });
       }
       if (options.clientName) {
-        await this._storageUtility.setForUser(options.sessionId, {
+        await this.storageUtility.setForUser(options.sessionId, {
           clientName: options.clientName,
         });
       }
