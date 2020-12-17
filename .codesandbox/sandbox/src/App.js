@@ -1,21 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  Session as AuthSession,
-  getClientAuthenticationWithDependencies
-} from "@inrupt/solid-client-authn-browser";
+import { Session as AuthSession } from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = window.location;
 
 export default function Home() {
   // eslint-disable-next-line
-  const [session, setSession] = useState(
-    new AuthSession(
-      {
-        clientAuthentication: getClientAuthenticationWithDependencies({})
-      },
-      "mySession"
-    )
-  );
+  const [session, _setSession] = useState(new AuthSession({}));
   const [issuer, setIssuer] = useState("https://broker.demo-ess.inrupt.com/");
   const [resource, setResource] = useState(session.info.webId);
   const [data, setData] = useState(null);
@@ -24,11 +14,9 @@ export default function Home() {
     const authCode = new URL(window.location.href).searchParams.get("code");
     if (authCode) {
       console.log("Being redirected from the IdP");
-      session
-        .handleIncomingRedirect(window.location.href)
-        .then((info) => {
-          setResource(info.webId);
-        });
+      session.handleIncomingRedirect(window.location.href).then((info) => {
+        setResource(info.webId);
+      });
     }
   }, [session]);
 
@@ -38,7 +26,7 @@ export default function Home() {
     e.preventDefault();
     session.login({
       redirectUrl: REDIRECT_URL,
-      oidcIssuer: issuer
+      oidcIssuer: issuer,
     });
   };
 
