@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfix
+
+- `ajv` was imported through a dependency instead of being explicitly declared as
+a direct dependency of `solid-client-authn-core`
+
 The following sections document changes that have been released already:
 
 ## 1.2.3 - 2020-12-17
