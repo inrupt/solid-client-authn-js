@@ -97,7 +97,21 @@ export default class OidcLoginHandler implements ILoginHandler {
       clientInfo = {
         clientId: options.clientId,
         clientSecret: options.clientSecret,
+        clientName: options.clientName,
       };
+      await this._storageUtility.setForUser(options.sessionId, {
+        clientId: options.clientId,
+      });
+      if (options.clientSecret) {
+        await this._storageUtility.setForUser(options.sessionId, {
+          clientSecret: options.clientSecret,
+        });
+      }
+      if (options.clientName) {
+        await this._storageUtility.setForUser(options.sessionId, {
+          clientName: options.clientName,
+        });
+      }
     } else {
       // If 'client_id' and 'client_secret' aren't specified in the options,
       // perform dynamic client registration.
