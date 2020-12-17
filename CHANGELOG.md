@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Bugfix
 
+- Credentials for statically registered clients weren't stored, which failed the token exchange.
+
 The following sections document changes that have been released already:
 
 ## 1.2.4 - 2020-12-17
