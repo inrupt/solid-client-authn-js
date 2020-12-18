@@ -6,16 +6,16 @@ The main documentation is at the [root of the repository](../../README.md).
 ## Required polyfills
 
 Our JavaScript Client Libraries use relatively modern JavaScript features that
-will work in all commonly-used browsers, except Internet Explorer. However, one of
-the library we currently use expects some Node.js modules to be present, which must
-be polyfilled by the bundler. Here is a list of the modules to polyfill:
+will work in all commonly used browsers, except Internet Explorer. However, one of
+the libraries we currently use expects some Node.js modules to be present, which must
+be polyfilled by the bundler. Here is the list of modules that need to be polyfilled:
 - `crypto`
 - `stream`
 - `util`
 - `buffer`
 
-Prior version 5, Webpack polyfilled these by default, but that is no longer the case.
-See [our webpack configuration](./webpack.common.js) for packages that can provide
+Prior to Webpack version 5 these modules were polyfilled by default, but that is no longer the case.
+See [our Webpack configuration](./webpack.common.js) for packages that can provide
 the necessary polyfills.
 
 ## Underlying libraries
