@@ -3,6 +3,21 @@
 `solid-client-authn-browser` is a library designed to authenticate web apps (in the browser) with Solid identity servers.
 The main documentation is at the [root of the repository](../../README.md).
 
+## Required polyfills
+
+Our JavaScript Client Libraries use relatively modern JavaScript features that
+will work in all commonly used browsers, except Internet Explorer. However, one of
+the libraries we currently use expects some Node.js modules to be present, which must
+be polyfilled by the bundler. Here is the list of modules that need to be polyfilled:
+- `crypto`
+- `stream`
+- `util`
+- `buffer`
+
+Prior to Webpack version 5 these modules were polyfilled by default, but that is no longer the case.
+See [our Webpack configuration](./webpack.common.js) for packages that can provide
+the necessary polyfills.
+
 ## Underlying libraries
 
 `solid-client-authn-browser` is based on [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js). 
