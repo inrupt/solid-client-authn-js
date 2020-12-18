@@ -162,17 +162,11 @@ async function buildDpopFetchOptions(
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   const options: RequestInit = { ...defaultOptions };
-  if (authToken !== "") {
-    options.headers = {
-      ...defaultOptions?.headers,
-      Authorization: `DPoP ${authToken}`,
-      DPoP: createDpopHeader(
-        targetUrl,
-        defaultOptions?.method ?? "get",
-        dpopKey
-      ),
-    };
-  }
+  options.headers = {
+    ...defaultOptions?.headers,
+    Authorization: `DPoP ${authToken}`,
+    DPoP: createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
+  };
   return options;
 }
 

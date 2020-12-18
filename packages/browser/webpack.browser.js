@@ -1,4 +1,5 @@
 const { merge } = require("webpack-merge");
+const path = require("path");
 
 const commonConfig = require("./webpack.common.js");
 
@@ -9,6 +10,8 @@ module.exports = () => {
     output: {
       libraryTarget: "var",
       library: "solidClientAuthentication",
+      filename: "solid-client-authn.bundle.js",
+      path: path.resolve(__dirname, "dist"),
     },
   };
 

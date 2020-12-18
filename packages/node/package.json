@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-node",
-  "version": "1.2.0",
+  "version": "1.2.5",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -20,25 +20,25 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.16",
-    "eslint": "^7.13.0",
+    "@types/jest": "^26.0.19",
+    "eslint": "^7.15.0",
     "jest": "^26.6.3",
     "license-checker": "^25.0.1",
     "ts-jest": "^26.4.4",
     "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^3.0.11",
+    "typedoc-plugin-markdown": "^3.1.0",
     "typescript": "^4.0.5"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-core": "^1.2.0",
-    "@types/node": "^14.14.10",
+    "@inrupt/solid-client-authn-core": "^1.2.5",
+    "@types/node": "^14.14.14",
     "@types/uuid": "^8.3.0",
     "cross-fetch": "^3.0.6",
     "jose": "^2.0.3",
     "openid-client": "^4.2.2",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.4.0",
-    "uuid": "^8.3.1"
+    "uuid": "^8.3.2"
   },
   "publishConfig": {
     "access": "public"

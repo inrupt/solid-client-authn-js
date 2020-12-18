@@ -7,11 +7,50 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
-## New feature
+The following sections document changes that have been released already:
+
+## 1.2.5 - 2020-12-17
+
+### Bugfix
+
+- Credentials for statically registered clients weren't stored, which failed the token exchange.
+
+## 1.2.4 - 2020-12-17
+
+- `ajv` was imported through a dependency instead of being explicitly declared as
+a direct dependency of `solid-client-authn-core`
+
+## 1.2.3 - 2020-12-17
+
+### Bugfix
+
+- The `browser` entry in the `package.json` was incorrect, leading to issues when
+bundling the library.
+
+## 1.2.2 - 2020-12-16
+
+### Bugfix
+
+- The WebID is now REALLY set on the session when logging in a script. The initial 
+fix introduced in 1.2.1 did compute the WebID from the identity provider response,
+but did not set it properly on the session.
+
+The following sections document changes that have been released already:
+
+## 1.2.1 - 2020-12-16
+
+### Bugfix
+
+- Addressed part of issue https://github.com/inrupt/solid-client-authn-js/issues/684,
+by providing a `browser` entry in the `package.json` file. The ES modules export will
+be adressed in a different PR. 
+- The WebID is now set on the session when logging in a script.
+- When logging in with a refresh token (e.g. for a script), if the provided credentials are incorrect, an error is thrown.
+
 
 ## 1.2.0 - 2020-12-04
 
-## New feature
+### New feature
 
 - Support for authenticated scripts: It's now possible to provide a script with login
 parameters for a refresh token, a client ID and a client secret, which enables it to access
@@ -19,7 +58,7 @@ private resources on Pods. This means that it's now easier to write small backen
 scripts which can interact with Pods in an automated way (i.e. no human interaction
 required).
 
-## Bugfixes
+### Bugfixes
 
 - In some use cases (e.g. authenticating a script), logging in happens without a redirection. The architecture so far prevented this
 from being possible, and now after a login that does not require a redirect, the current session may be authenticated.
@@ -31,7 +70,11 @@ from being possible, and now after a login that does not require a redirect, the
 
 ### Bugfixes
 
-- issue #685 fixed by removing all URL query params.
+- issue #685 fixed by removing all URL query params after login, which prevents from crashing when reloading a page.
+
+### Patches
+
+- updated version of `solid-common-vocab` to pull in common RDF/JS types.
 
 ## 1.1.0 - 2020-11-27
 

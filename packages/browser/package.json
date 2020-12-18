@@ -1,9 +1,10 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "1.2.0",
+  "version": "1.2.5",
   "license": "MIT",
-  "main": "dist/index.js",
   "types": "dist/index",
+  "browser": "dist/index.js",
+  "bundle": "dist/solid-client-authn.bundle.js",
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },
@@ -45,7 +46,7 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.12",
+    "@types/jest": "^26.0.19",
     "@types/node-fetch": "^2.5.6",
     "concurrently": "^5.3.0",
     "eslint": "^7.12.1",
@@ -55,19 +56,19 @@
     "ts-loader": "^8.0.10",
     "tsc-watch": "^4.2.9",
     "typedoc": "^0.19.2",
-    "typedoc-plugin-markdown": "^3.0.11",
+    "typedoc-plugin-markdown": "^3.1.0",
     "typescript": "^4.0.5",
-    "webpack": "^5.9.0",
-    "webpack-bundle-analyzer": "^4.2.0",
+    "webpack": "^5.11.0",
+    "webpack-bundle-analyzer": "^4.3.0",
     "webpack-cli": "^4.2.0",
-    "webpack-merge": "^5.4.0"
+    "webpack-merge": "^5.7.2"
   },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^1.2.0",
-    "@inrupt/solid-client-authn-core": "^1.2.0",
+    "@inrupt/oidc-client-ext": "^1.2.5",
+    "@inrupt/solid-client-authn-core": "^1.2.5",
     "@types/form-urlencoded": "^2.0.1",
     "@types/lodash.clonedeep": "^4.5.6",
-    "@types/node": "^14.14.9",
+    "@types/node": "^14.14.14",
     "@types/uuid": "^8.3.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",

@@ -26,12 +26,17 @@
 
 import "reflect-metadata";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { IdTokenClaims } from "openid-client";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
 } from "../__mocks__/IOidcOptions";
 import RefreshTokenOidcHandler from "./RefreshTokenOidcHandler";
-import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
+import {
+  mockDefaultTokenRefresher,
+  mockDefaultTokenSet,
+  mockTokenRefresher,
+} from "../refresh/__mocks__/TokenRefresher";
 
 jest.mock("cross-fetch");
 
@@ -114,7 +119,7 @@ describe("RefreshTokenOidcHandler", () => {
           },
         })
       );
-      expect(result).not.toBeUndefined();
+      expect(result?.webId).toEqual("https://my.webid/");
 
       const mockedFetch = jest.requireMock("cross-fetch");
       mockedFetch.mockResolvedValue({
@@ -144,6 +149,7 @@ describe("RefreshTokenOidcHandler", () => {
         })
       );
       expect(result).not.toBeUndefined();
+      expect(result?.webId).toEqual("https://my.webid/");
 
       const mockedFetch = jest.requireMock("cross-fetch");
       mockedFetch.mockResolvedValue({
@@ -245,5 +251,125 @@ describe("RefreshTokenOidcHandler", () => {
       })
     );
     expect(result).not.toBeUndefined();
+  });
+
+  it("throws if the IdP does not return an ID token", async () => {
+    // This builds the fetch function holding the refresh token...
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      mockTokenRefresher({
+        access_token: "some access token",
+        expired: () => false,
+        claims: () => (null as unknown) as IdTokenClaims,
+      }),
+      mockStorageUtility({})
+    );
+    const result = refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: "some client secret",
+        },
+      })
+    );
+    await expect(result).rejects.toThrow(
+      "The Identity Provider [https://example.com] did not return an ID token on refresh, which prevents us from getting the user's WebID."
+    );
+  });
+
+  it("uses the rotated refresh token to build the DPoP-authenticated fetch if applicable", async () => {
+    const tokenSet = mockDefaultTokenSet();
+    tokenSet.refresh_token = "some rotated refresh token";
+    const mockedTokenRefresher = mockTokenRefresher(tokenSet);
+    const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
+
+    // This builds the fetch function holding the refresh token...
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      mockedTokenRefresher,
+      mockStorageUtility({})
+    );
+    const result = await refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: "some client secret",
+        },
+      })
+    );
+    expect(result?.webId).toEqual("https://my.webid/");
+
+    const mockedFetch = jest.requireMock("cross-fetch");
+    mockedFetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    if (result !== undefined) {
+      // ... and this should trigger the refresh flow.
+      await result.fetch("https://some.pod/resource");
+    }
+    expect(mockedRefreshFunction.mock.calls[1]).toContain(
+      "some rotated refresh token"
+    );
+  });
+
+  it("uses the rotated refresh token to build the Bearer-authenticated fetch if applicable", async () => {
+    const tokenSet = mockDefaultTokenSet();
+    tokenSet.refresh_token = "some rotated refresh token";
+    const mockedTokenRefresher = mockTokenRefresher(tokenSet);
+    const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
+
+    // This builds the fetch function holding the refresh token...
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      mockedTokenRefresher,
+      mockStorageUtility({})
+    );
+    const result = await refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: "some client secret",
+        },
+        dpop: false,
+      })
+    );
+    expect(result?.webId).toEqual("https://my.webid/");
+
+    const mockedFetch = jest.requireMock("cross-fetch");
+    mockedFetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    if (result !== undefined) {
+      // ... and this should trigger the refresh flow.
+      await result.fetch("https://some.pod/resource");
+    }
+    expect(mockedRefreshFunction.mock.calls[1]).toContain(
+      "some rotated refresh token"
+    );
+  });
+
+  it("throws if the credentials are incorrect", async () => {
+    const tokenRefresher = mockTokenRefresher({
+      access_token: "some access token",
+      expired: () => false,
+      claims: () => (null as unknown) as IdTokenClaims,
+    });
+    tokenRefresher.refresh = jest.fn().mockRejectedValue("Invalid credentials");
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      tokenRefresher,
+      mockStorageUtility({})
+    );
+    const result = refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: "some client secret",
+        },
+      })
+    );
+    await expect(result).rejects.toThrow("Invalid credentials");
   });
 });
