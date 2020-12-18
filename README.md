@@ -14,7 +14,7 @@ The libraries share a common API and include different modules for different dep
 
 [@inrupt/solid-client](https://docs.inrupt.com/client-libraries/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
 
-### Authentication - solid-client-authn
+## Authentication - solid-client-authn
 
 [@inrupt/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
@@ -66,14 +66,35 @@ The `solid-client-authn` libraries are compatible with [NSS](https://github.com/
 - [Using Inrupt Solid JavaScript Client Libraries to authenticate](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/)
 - [Inrupt documentation Homepage](https://docs.inrupt.com/)
 
-## How to run the test client login app?
+## How to run test apps?
+
+### Browser
 
 ```shell
 git clone https://github.com/inrupt/solid-client-authn-js
 cd solid-client-authn-js
 npm ci
 cd packages/browser/examples/single/bundle/
+npm ci
 npm run start
 ```
-
 Go to http://localhost:3001/.
+
+### NodeJS
+
+#### Running a server-side app
+
+```shell
+git clone https://github.com/inrupt/solid-client-authn-js
+cd solid-client-authn-js
+npm ci
+cd packages/node/example/demoClientApp/
+npm ci
+npm run start
+```
+Go to http://localhost:3001/.
+
+#### Running an authenticated script
+
+See [the dedicated documentation](/packages/node/example/bootstrappedApp/README.md).
+
