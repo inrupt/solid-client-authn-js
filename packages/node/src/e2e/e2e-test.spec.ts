@@ -22,15 +22,14 @@
 import { it, describe } from "@jest/globals";
 import { Session } from "../Session";
 
-const OIDC_ISSUER = "https://broker.demo-ess.inrupt.com/";
-
 // This first test just saves the trouble of looking for a library failure when
 // the environment wasn't properly set.
 describe("Environment", () => {
   it("contains the expected environment variables", () => {
-    expect(process.env.REFRESH_TOKEN).not.toBeUndefined();
-    expect(process.env.CLIENT_ID).not.toBeUndefined();
-    expect(process.env.CLIENT_SECRET).not.toBeUndefined();
+    expect(process.env.E2E_TEST_REFRESH_TOKEN).not.toBeUndefined();
+    expect(process.env.E2E_TEST_CLIENT_ID).not.toBeUndefined();
+    expect(process.env.E2E_TEST_CLIENT_SECRET).not.toBeUndefined();
+    expect(process.env.E2E_TEST_IDP_URL).not.toBeUndefined();
   });
 });
 
@@ -38,10 +37,10 @@ describe("Authenticated fetch", () => {
   it("properly sets up session information", async () => {
     const session = new Session();
     await session.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     expect(session.info.isLoggedIn).toEqual(true);
     expect(session.info.sessionId).not.toBeUndefined();
@@ -51,10 +50,10 @@ describe("Authenticated fetch", () => {
   it("can fetch a public resource when logged in", async () => {
     const session = new Session();
     await session.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     const publicResourceUrl = session.info.webId!;
     const response = await session.fetch(publicResourceUrl);
@@ -67,12 +66,12 @@ describe("Authenticated fetch", () => {
   it("can fetch a private resource when logged in", async () => {
     const session = new Session();
     await session.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
-    const privateResourceUrl = process.env.POD_ROOT!;
+    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     const response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain("ldp:BasicContainer");
@@ -80,15 +79,15 @@ describe("Authenticated fetch", () => {
 
   it("can fetch a private resource when logged in after the same fetch failed", async () => {
     const session = new Session();
-    const privateResourceUrl = process.env.POD_ROOT!;
+    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     let response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
 
     await session.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
 
     response = await session.fetch(privateResourceUrl);
@@ -101,13 +100,13 @@ describe("Authenticated fetch", () => {
 
   it("only logs in the requested session", async () => {
     const authenticatedSession = new Session();
-    const privateResourceUrl = process.env.POD_ROOT!;
+    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
 
     await authenticatedSession.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
 
     let response = await authenticatedSession.fetch(privateResourceUrl);
@@ -123,10 +122,10 @@ describe("Unauthenticated fetch", () => {
   it("can fetch a public resource when not logged in", async () => {
     const authenticatedSession = new Session();
     await authenticatedSession.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: process.env.OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     const publicResourceUrl = authenticatedSession.info.webId!;
 
@@ -140,7 +139,7 @@ describe("Unauthenticated fetch", () => {
 
   it("cannot fetch a private resource when not logged in", async () => {
     const session = new Session();
-    const privateResourceUrl = process.env.POD_ROOT!;
+    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     const response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
   });
@@ -150,10 +149,10 @@ describe("Post-logout fetch", () => {
   it("can fetch a public resource after logging out", async () => {
     const session = new Session();
     await session.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     const publicResourceUrl = session.info.webId!;
     await session.logout();
@@ -166,12 +165,12 @@ describe("Post-logout fetch", () => {
 
   it("cannot fetch a private resource after logging out", async () => {
     const session = new Session();
-    const privateResourceUrl = process.env.POD_ROOT!;
+    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     await session.login({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-      oidcIssuer: OIDC_ISSUER,
+      clientId: process.env.E2E_TEST_CLIENT_ID,
+      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
+      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
+      oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     await session.logout();
     const response = await session.fetch(privateResourceUrl);
