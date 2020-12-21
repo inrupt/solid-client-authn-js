@@ -67,6 +67,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.env*.local
 config.json
 data
 
