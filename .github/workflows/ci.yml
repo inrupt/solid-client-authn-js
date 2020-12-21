@@ -34,6 +34,8 @@ jobs:
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          OIDC_ISSUER: ${{ secrets.OIDC_ISSUER }}
+          POD_ROOT: ${{ secrets.POD_ROOT }}
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
       - run: npm audit --audit-level=moderate
       - name: Archive code coverage results

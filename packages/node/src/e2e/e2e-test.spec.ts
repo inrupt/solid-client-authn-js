@@ -56,9 +56,8 @@ describe("Authenticated fetch", () => {
       refreshToken: process.env.REFRESH_TOKEN,
       oidcIssuer: OIDC_ISSUER,
     });
-    const response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/profile/card#me"
-    );
+    const publicResourceUrl = session.info.webId!;
+    const response = await session.fetch(publicResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain(
       "foaf:PersonalProfileDocument"
@@ -73,18 +72,16 @@ describe("Authenticated fetch", () => {
       refreshToken: process.env.REFRESH_TOKEN,
       oidcIssuer: OIDC_ISSUER,
     });
-    const response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    const privateResourceUrl = process.env.POD_ROOT!;
+    const response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain("ldp:BasicContainer");
   });
 
   it("can fetch a private resource when logged in after the same fetch failed", async () => {
     const session = new Session();
-    let response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    const privateResourceUrl = process.env.POD_ROOT!;
+    let response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
 
     await session.login({
@@ -94,20 +91,17 @@ describe("Authenticated fetch", () => {
       oidcIssuer: OIDC_ISSUER,
     });
 
-    response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(200);
 
     await session.logout();
-    response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
   });
 
-  it("only logs the requested session", async () => {
+  it("only logs in the requested session", async () => {
     const authenticatedSession = new Session();
+    const privateResourceUrl = process.env.POD_ROOT!;
 
     await authenticatedSession.login({
       clientId: process.env.CLIENT_ID,
@@ -116,25 +110,28 @@ describe("Authenticated fetch", () => {
       oidcIssuer: OIDC_ISSUER,
     });
 
-    let response = await authenticatedSession.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    let response = await authenticatedSession.fetch(privateResourceUrl);
     expect(response.status).toEqual(200);
 
     const nonAuthenticatedSession = new Session();
-    response = await nonAuthenticatedSession.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    response = await nonAuthenticatedSession.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
   });
 });
 
 describe("Unauthenticated fetch", () => {
   it("can fetch a public resource when not logged in", async () => {
-    const session = new Session();
-    const response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/profile/card#me"
-    );
+    const authenticatedSession = new Session();
+    await authenticatedSession.login({
+      clientId: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      refreshToken: process.env.REFRESH_TOKEN,
+      oidcIssuer: process.env.OIDC_ISSUER,
+    });
+    const publicResourceUrl = authenticatedSession.info.webId!;
+
+    const unauthenticatedSession = new Session();
+    const response = await unauthenticatedSession.fetch(publicResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain(
       "foaf:PersonalProfileDocument"
@@ -143,9 +140,8 @@ describe("Unauthenticated fetch", () => {
 
   it("cannot fetch a private resource when not logged in", async () => {
     const session = new Session();
-    const response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    const privateResourceUrl = process.env.POD_ROOT!;
+    const response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
   });
 });
@@ -159,10 +155,9 @@ describe("Post-logout fetch", () => {
       refreshToken: process.env.REFRESH_TOKEN,
       oidcIssuer: OIDC_ISSUER,
     });
+    const publicResourceUrl = session.info.webId!;
     await session.logout();
-    const response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/profile/card#me"
-    );
+    const response = await session.fetch(publicResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain(
       "foaf:PersonalProfileDocument"
@@ -171,6 +166,7 @@ describe("Post-logout fetch", () => {
 
   it("cannot fetch a private resource after logging out", async () => {
     const session = new Session();
+    const privateResourceUrl = process.env.POD_ROOT!;
     await session.login({
       clientId: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
@@ -178,9 +174,7 @@ describe("Post-logout fetch", () => {
       oidcIssuer: OIDC_ISSUER,
     });
     await session.logout();
-    const response = await session.fetch(
-      "https://ldp.demo-ess.inrupt.com/105177326598249077653/"
-    );
+    const response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
   });
 });
