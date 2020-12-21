@@ -23,7 +23,6 @@
     "build": "npm run build-module && npm run build-browser",
     "build-module": "npm run clean-module && tsc -p tsconfig.json",
     "build-browser": "npm run clean-browser && webpack --config webpack.browser.js",
-    "analyze-bundle": "npm run clean-browser && webpack --config webpack.config.js --env.env=analyze",
     "lint": "eslint --fix \"src/**\" && eslint --fix \"__tests__/**/*.ts\"",
     "licenses": "license-checker --production --out license.csv --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
     "dev": "tsc-watch --preserveWatchOutput --noClear",
@@ -58,10 +57,9 @@
     "typedoc": "^0.19.2",
     "typedoc-plugin-markdown": "^3.1.0",
     "typescript": "^4.0.5",
-    "webpack": "^5.10.3",
-    "webpack-bundle-analyzer": "^4.2.0",
+    "webpack": "^5.11.0",
     "webpack-cli": "^4.2.0",
-    "webpack-merge": "^5.4.0"
+    "webpack-merge": "^5.7.2"
   },
   "dependencies": {
     "@inrupt/oidc-client-ext": "^1.2.5",
