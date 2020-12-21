@@ -20,7 +20,16 @@
  */
 
 import { it, describe } from "@jest/globals";
+import { config } from "dotenv-flow";
 import { Session } from "../Session";
+
+// Load environment variables from .env.local if available:
+config({
+  path: __dirname,
+  // In CI, actual environment variables will overwrite values from .env files.
+  // We don't need warning messages in the logs for that:
+  silent: process.env.CI === "true",
+});
 
 // This first test just saves the trouble of looking for a library failure when
 // the environment wasn't properly set.

@@ -31,11 +31,13 @@
   "devDependencies": {
     "@inrupt/eslint-config-base": "0.0.4",
     "@inrupt/eslint-config-lib": "0.0.4",
+    "@types/dotenv-flow": "^3.1.0",
     "@types/estree": "0.0.45",
     "@types/jest": "^26.0.13",
     "@types/node-fetch": "^2.5.6",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
+    "dotenv-flow": "^3.2.0",
     "eslint": "^7.13.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.10.0",
