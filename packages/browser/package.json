@@ -4,6 +4,7 @@
   "license": "MIT",
   "types": "dist/index",
   "browser": "dist/index.js",
+  "main": "dist/index.js",
   "bundle": "dist/solid-client-authn.bundle.js",
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
