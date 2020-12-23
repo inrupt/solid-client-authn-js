@@ -5,9 +5,22 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
 ## Unreleased
 
+N/A
+
 The following sections document changes that have been released already:
+
+## 1.2.6 - 2020-12-23
+
+### Bugfix
+
+- Adds "main" entry to browser packages
+
+### Feature
+
+- Adds .env file loading for credentials, for node package
 
 ## 1.2.5 - 2020-12-17
 
