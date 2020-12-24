@@ -18,10 +18,6 @@ The following sections document changes that have been released already:
 
 - Adds "main" entry to browser packages
 
-### Feature
-
-- Adds .env file loading for credentials, for node package
-
 ## 1.2.5 - 2020-12-17
 
 ### Bugfix
