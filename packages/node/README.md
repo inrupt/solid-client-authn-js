@@ -1,7 +1,7 @@
 # Solid JavaScript authentication for Node.js - solid-client-authn-node
 
 `solid-client-authn-node` is a library designed to authenticate Node.js apps (both scripts and full-blown Web servers) with Solid identity servers.
-The main documentation is at the [root of the repository](../../README.md).
+The main documentation is at the [root of the repository](https://github.com/inrupt/solid-client-authn-js).
 
 ## Underlying libraries
 
