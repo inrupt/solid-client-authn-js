@@ -8,7 +8,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
-N/A
+### New feature
+
+- Although still possible, it is now no longer required to manually instantiate
+a new `Session` object when using `solid-client-authn-browser`. Instead, you can
+directly import `fetch`, `login`, `logout` and `handleIncomingRedirect`,
+which will instantiate a new Session implicitly behind the scenes. If you do
+need access to this Session, you can do so using the new function
+`getDefaultSession`.
 
 The following sections document changes that have been released already:
 

@@ -138,7 +138,7 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
+   * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
    */
   logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
@@ -146,7 +146,7 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * Completes the login process by processing the information provided by the identity provider through redirect.
+   * Completes the login process by processing the information provided by the Solid identity provider through redirect.
    *
    * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
    */
