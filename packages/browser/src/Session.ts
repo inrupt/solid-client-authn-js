@@ -68,12 +68,7 @@ export class Session extends EventEmitter {
    * Session object constructor. Typically called as follows:
    *
    * ```typescript
-   * const session = new Session(
-   *   {
-   *     clientAuthentication: getClientAuthenticationWithDependencies({})
-   *   },
-   *   "mySession"
-   * );
+   * const session = new Session();
    * ```
    * @param sessionOptions The options enabling the correct instantiation of
    * the session. Either both storages or clientAuthentication are required. For
