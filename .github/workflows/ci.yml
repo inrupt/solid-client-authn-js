@@ -31,9 +31,11 @@ jobs:
       - run: npm run test
       - run: npm run e2e-test
         env: 
-          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
+          E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
+          E2E_TEST_CLIENT_SECRET: ${{ secrets.E2E_TEST_CLIENT_SECRET }}
+          E2E_TEST_IDP_URL: ${{ secrets.E2E_TEST_IDP_URL }}
+          E2E_TEST_ESS_POD: ${{ secrets.E2E_TEST_ESS_POD }}
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
       - run: npm audit --audit-level=moderate
       - name: Archive code coverage results

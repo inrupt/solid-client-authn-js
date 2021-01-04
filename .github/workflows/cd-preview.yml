@@ -27,8 +27,12 @@ jobs:
         run: |
           git config user.name $GITHUB_ACTOR
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
+          # Unfortunately re-running a job does not change its run ID nor run number.
+          # To prevent re-releasing the same version when re-running the CD job,
+          # we incorporate a timestamp in the prerelease version:
+          TIMESTAMP=$(date --utc +%s)
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
-          npm run version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER --yes --no-push --exact
+          npm run version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER-$TIMESTAMP --yes --no-push --exact
       - run: npm run build
       - run: npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
         env:
