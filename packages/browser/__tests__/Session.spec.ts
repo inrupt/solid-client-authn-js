@@ -82,6 +82,17 @@ describe("Session", () => {
       await mySession.login({});
       expect(clientAuthnLogin).toHaveBeenCalled();
     });
+
+    it("preserves a binding to its Session instance", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnLogin = jest.spyOn(clientAuthentication, "login");
+      const mySession = new Session({ clientAuthentication });
+      const objectWithLogin = {
+        login: mySession.login,
+      };
+      await objectWithLogin.login({});
+      expect(clientAuthnLogin).toHaveBeenCalled();
+    });
   });
 
   describe("logout", () => {
@@ -90,6 +101,17 @@ describe("Session", () => {
       const clientAuthnLogout = jest.spyOn(clientAuthentication, "logout");
       const mySession = new Session({ clientAuthentication });
       await mySession.logout();
+      expect(clientAuthnLogout).toHaveBeenCalled();
+    });
+
+    it("preserves a binding to its Session instance", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnLogout = jest.spyOn(clientAuthentication, "logout");
+      const mySession = new Session({ clientAuthentication });
+      const objectWithLogout = {
+        logout: mySession.logout,
+      };
+      await objectWithLogout.logout();
       expect(clientAuthnLogout).toHaveBeenCalled();
     });
   });
@@ -101,6 +123,18 @@ describe("Session", () => {
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url");
+      expect(clientAuthnFetch).toHaveBeenCalled();
+    });
+
+    it("preserves a binding to its Session instance", async () => {
+      window.fetch = jest.fn();
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
+      const mySession = new Session({ clientAuthentication });
+      const objectWithFetch = {
+        fetch: mySession.fetch,
+      };
+      await objectWithFetch.fetch("https://some.url");
       expect(clientAuthnFetch).toHaveBeenCalled();
     });
   });
@@ -208,6 +242,22 @@ describe("Session", () => {
       // One of the two token requests should not have reached the token endpoint
       // because the other was pending.
       expect(tokenRequests).toContain(undefined);
+    });
+
+    it("preserves a binding to its Session instance", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnHandleIncomingRedirect = jest.spyOn(
+        clientAuthentication,
+        "handleIncomingRedirect"
+      );
+      const mySession = new Session({ clientAuthentication });
+      const objectWithHandleIncomingRedirect = {
+        handleIncomingRedirect: mySession.handleIncomingRedirect,
+      };
+      await objectWithHandleIncomingRedirect.handleIncomingRedirect(
+        "https://some.url"
+      );
+      expect(clientAuthnHandleIncomingRedirect).toHaveBeenCalled();
     });
   });
 

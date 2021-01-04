@@ -1,7 +1,7 @@
 # Demo: an authenticated NodeJS script
 
 This demo shows how you can run an authenticated script to interact with your Pod.
-Check out the code in `src/app.js` for more details.
+Check out the code in `src/authenticatedScript.js` for more details.
 
 Note that until [this issue](https://github.com/solid/node-solid-server/issues/1533)
 is resolved, this will not work against NSS. This demo is only intended to work against a compliant
@@ -16,7 +16,7 @@ the build of the library. Then, run `npm ci` again, this time in
 ## Getting a token
 
 To get all the credentials needed to authenticate your script, you can `cd src/`,
-and then run `node bootstrap.js --oidcProvider <your identity provider>`. 
+and then run `node bootstrap.js --oidcIssuer <your identity provider>`. 
 This utility script will output to the console an IRI in the domain of your specified
 identity provider (e.g. `https://broker.pod.inrupt.com/`) that you should open
 in a web browser. There, you should be able to log into your identity provider. Once
@@ -31,5 +31,5 @@ access token. `authenticatedScript.js` shows a minimal app issuing an authentica
 request. It expects a number of arguments: 
 
 ```
-node app.js --clientId <the client id> --clientSecret <the client secret>  --refreshToken <the refresh token> --oidcIssuer <the issuer that issued the token> --resource <the private resource you want to access>
+node authenticatedScript.js --clientId <the client id> --clientSecret <the client secret>  --refreshToken <the refresh token> --oidcIssuer <the issuer that issued the token> --resource <the private resource you want to access>
 ```
