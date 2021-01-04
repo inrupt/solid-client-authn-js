@@ -1,7 +1,7 @@
 # Solid JavaScript authentication for the browser - solid-client-authn-browser
 
 `solid-client-authn-browser` is a library designed to authenticate web apps (in the browser) with Solid identity servers.
-The main documentation is at the [root of the repository](../../README.md).
+The main documentation is at the [root of the repository](https://github.com/inrupt/solid-client-authn-js).
 
 ## Required polyfills
 
@@ -15,8 +15,9 @@ be polyfilled by the bundler. Here is the list of modules that need to be polyfi
 - `buffer`
 
 Prior to Webpack version 5 these modules were polyfilled by default, but that is no longer the case.
-See [our Webpack configuration](./webpack.common.js) for packages that can provide
-the necessary polyfills.
+See
+[our Webpack configuration](https://github.com/inrupt/solid-client-authn-js/blob/master/packages/browser/webpack.common.js)
+for packages that can provide the necessary polyfills.
 
 ## Underlying libraries
 
