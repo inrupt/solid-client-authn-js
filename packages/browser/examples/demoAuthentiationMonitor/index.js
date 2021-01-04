@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@ const express = require("express");
 const port = 3000;
 
 const app = express();
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get("/", async (req, res) => {
@@ -43,11 +43,13 @@ app.post("/register_pod", async (req, res) => {
   }
 });
 
-const server = app.listen(port, () => console.log(`Listening on port: [${port}]...`));
+const server = app.listen(port, () =>
+  console.log(`Listening on port: [${port}]...`)
+);
 
 process.on("SIGTERM", () => {
   console.info("SIGTERM signal received, closing HTTP server...");
   server.close(() => {
-    console.log('...HTTP server closed.');
+    console.log("...HTTP server closed.");
   });
 });

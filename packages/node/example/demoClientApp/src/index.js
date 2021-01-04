@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -45,7 +45,8 @@ const markerResourceValueRetrieved = "{{resourceValueRetrieved}}";
 
 const oidcIssuer = "https://broker.demo-ess.inrupt.com/";
 
-const enterResourceUriMessage = "...but enter any resource URI to attempt to read it...";
+const enterResourceUriMessage =
+  "...but enter any resource URI to attempt to read it...";
 
 // We expect these values to be overwritten as the users interacts!
 let loggedOutStatus = "";
@@ -114,7 +115,6 @@ app.get("/redirect", async (req, res) => {
           loginStatus = `Received another redirect, but we are already handling a previous redirect request - so ignoring this one!`;
           sendHtmlResponse(res);
         } else if (info.isLoggedIn) {
-
           // This is deliberately making a big assumption about the structure of
           // the logged-in WebID, but if the WebID does have a different
           // structure, which is perfectly valid of course, then this code
@@ -144,9 +144,10 @@ app.get("/fetch", async (req, res) => {
 
   // Only attempt to fetch if the resource is not our message to enter a URI!
   if (resourceToFetch === enterResourceUriMessage) {
-    resourceValueRetrieved = "Please enter a resource URI in the edit box above!";
+    resourceValueRetrieved =
+      "Please enter a resource URI in the edit box above!";
   } else {
-      // Update our state with whatever was in the query param.
+    // Update our state with whatever was in the query param.
     resourceToRead = resourceToFetch;
 
     try {
@@ -174,8 +175,9 @@ app.get("/fetch", async (req, res) => {
 app.get("/logout", async (_req, res, next) => {
   try {
     await session.logout();
-    resourceToRead = enterResourceUriMessage
-    resourceValueRetrieved = "...nothing read yet - click 'Read Pod Resource' button above...";
+    resourceToRead = enterResourceUriMessage;
+    resourceValueRetrieved =
+      "...nothing read yet - click 'Read Pod Resource' button above...";
 
     loginStatus = `Logged out successfully.`;
     sendHtmlResponse(res);
