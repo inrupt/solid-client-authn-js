@@ -105,7 +105,7 @@ jobs:
       env:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Parcel build artifacts
-      uses: actions/upload-artifact@v2.2.1
+      uses: actions/upload-artifact@v2.2.2
       with:
         name: parcel-dist
         path: .github/workflows/cd-packaging-tests/bundler-parcel/dist
@@ -128,7 +128,7 @@ jobs:
       env:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Webpack build artifacts
-      uses: actions/upload-artifact@v2.2.1
+      uses: actions/upload-artifact@v2.2.2
       with:
         name: webpack-dist
         path: .github/workflows/cd-packaging-tests/bundler-webpack/dist
