@@ -114,6 +114,14 @@ describe("Session", () => {
       await objectWithLogout.logout();
       expect(clientAuthnLogout).toHaveBeenCalled();
     });
+
+    it("updates the session's info", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const mySession = new Session({ clientAuthentication });
+      mySession.info.isLoggedIn = true;
+      await mySession.logout();
+      expect(mySession.info.isLoggedIn).toEqual(false);
+    });
   });
 
   describe("fetch", () => {

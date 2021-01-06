@@ -17,6 +17,10 @@ which will instantiate a new Session implicitly behind the scenes. If you do
 need access to this Session, you can do so using the new function
 `getDefaultSession`.
 
+### Bugfix
+
+- The `session.info.isLoggedIn` property is now set to false on logout. 
+
 The following sections document changes that have been released already:
 
 ## 1.2.6 - 2020-12-23
