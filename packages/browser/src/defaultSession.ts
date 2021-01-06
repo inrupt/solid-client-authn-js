@@ -31,6 +31,7 @@ let defaultSession: Session;
  * implicitly-instantiated {@link Session}.
  * This function returns a reference to that Session in order to obtain e.g. the current user's
  * WebID.
+ * @since 1.3.0
  */
 export function getDefaultSession(): Session {
   if (typeof defaultSession === "undefined") {
@@ -45,6 +46,7 @@ export function getDefaultSession(): Session {
  * credentials. If not, this will behave just like the regular `window.fetch`.
  *
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch}
+ * @since 1.3.0
  */
 export const fetch: Session["fetch"] = (...args) => {
   const session = getDefaultSession();
@@ -56,13 +58,18 @@ export const fetch: Session["fetch"] = (...args) => {
  *
  * @param options Parameter to customize the login behaviour. In particular, two options are mandatory: `options.oidcIssuer`, the user's identity provider, and `options.redirectUrl`, the URL to which the user will be redirected after logging in their identity provider.
  * @returns This method should redirect the user away from the app: it does not return anything. The login process is completed by [[handleIncomingRedirect]].
+ * @since 1.3.0
  */
 export const login: Session["login"] = (...args) => {
   const session = getDefaultSession();
   return session.login(...args);
 };
+
 /**
- * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
+ * Logs the user out of the application. This does not log the user out of their
+ * Solid identity provider, and should not redirect the user away.
+ *
+ * @since 1.3.0
  */
 export const logout: Session["logout"] = (...args) => {
   const session = getDefaultSession();
@@ -73,6 +80,7 @@ export const logout: Session["logout"] = (...args) => {
  * Completes the login process by processing the information provided by the Solid identity provider through redirect.
  *
  * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
+ * @since 1.3.0
  */
 export const handleIncomingRedirect: Session["handleIncomingRedirect"] = (
   ...args
@@ -85,6 +93,7 @@ export const handleIncomingRedirect: Session["handleIncomingRedirect"] = (
  * Register a callback function to be called when a user completes login.
  *
  * The callback is called when {@link handleIncomingRedirect} completes successfully.
+ * @since 1.3.0
  *
  * @param callback The function called when a user completes login.
  */
@@ -97,6 +106,7 @@ export const onLogin: Session["onLogin"] = (...args) => {
  * Register a callback function to be called when a user logs out:
  *
  * @param callback The function called when a user completes logout.
+ * @since 1.3.0
  */
 export const onLogout: Session["onLogout"] = (...args) => {
   const session = getDefaultSession();
