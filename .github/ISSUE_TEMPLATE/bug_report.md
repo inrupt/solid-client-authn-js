@@ -17,7 +17,7 @@ Please fill in as much of the template below as you're able. Feel free to delete
 
 ### Impacted package
 
-What package(s) of the monorepo is impacted by the bug ?
+Which packages do you think might be impacted by the bug ?
 
 - [ ] solid-client-authn-browser
 - [ ] solid-client-authn-node
