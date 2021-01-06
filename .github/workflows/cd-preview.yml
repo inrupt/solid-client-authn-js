@@ -11,6 +11,8 @@ jobs:
   dev-release-npm:
     name: "NPM release under a dev tag"
     runs-on: ubuntu-18.04
+    outputs:
+      version-nr: ${{ steps.determine-npm-version.outputs.version-nr }}
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Prepare for publication to GitHub Packages
@@ -24,6 +26,7 @@ jobs:
         run: echo "TAG_SLUG=$(echo ${GITHUB_REF#refs/heads/} | tr -cd '[:alnum:]-')" >> $GITHUB_ENV
       - run: npm ci
       - name: Prepare prerelease version
+        id: determine-npm-version
         run: |
           git config user.name $GITHUB_ACTOR
           git config user.email gh-actions-${GITHUB_ACTOR}@github.com
@@ -33,6 +36,10 @@ jobs:
           TIMESTAMP=$(date --utc +%s)
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
           npm run version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER-$TIMESTAMP --yes --no-push --exact
+          # Read the "version" key from one of our packages to determine the exact version nr
+          # the prerelease was published under:
+          VERSION_NR=$(cat packages/browser/package.json | npx json version)
+          echo "::set-output name=version-nr::$VERSION_NR"
       - run: npm run build
       - run: npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
         env:
@@ -41,3 +48,87 @@ jobs:
           echo "Package published. To install, run:"
           echo ""
           echo "    npm install @inrupt/solid-client-authn-browser@$TAG_SLUG"
+          echo ""
+          echo "or"
+          echo ""
+          echo "    npm install @inrupt/solid-client-authn-node@$TAG_SLUG"
+      - name: Waiting for npm CDNs to update...
+        run: |
+          echo "Giving npm some time to make the newly-published package available…"
+          sleep 5m
+          echo "Done — hopefully that was enough time for the follow-up jobs to install the just-published package, to verify that everything looks OK."
+
+  verify-imports-node:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [14.x, 12.x, 10.x]
+    needs: [dev-release-npm]
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2.1.4
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install the preview release of solid-client-authn-node in the packaging test project
+        run: |
+          cd .github/workflows/cd-packaging-tests/node
+          npm install @inrupt/solid-client-authn-node@$VERSION_NR
+        env:
+          VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
+      - name: Verify that the package can be imported in Node from a CommonJS module
+        run: |
+          cd .github/workflows/cd-packaging-tests/node
+          node --unhandled-rejections=strict commonjs.cjs
+      - name: Verify that the package can be imported in Node from an ES module
+        run: |
+          cd .github/workflows/cd-packaging-tests/node
+          node --unhandled-rejections=strict esmodule.mjs
+        # Node 10 does not support ES modules:
+        if: matrix.node-version != '10.x'
+
+
+  verify-imports-parcel:
+    runs-on: ubuntu-20.04
+    needs: [dev-release-npm]
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/setup-node@v2.1.4
+      with:
+        node-version: '14.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Verify that the package can be imported in a Parcel project
+      run: |
+        cd .github/workflows/cd-packaging-tests/bundler-parcel
+        npm install @inrupt/solid-client-authn-browser@$VERSION_NR
+        npx parcel build index.ts
+      env:
+        VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
+    - name: Archive Parcel build artifacts
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: parcel-dist
+        path: .github/workflows/cd-packaging-tests/bundler-parcel/dist
+
+  verify-imports-webpack:
+    runs-on: ubuntu-20.04
+    needs: [dev-release-npm]
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/setup-node@v2.1.4
+      with:
+        node-version: '14.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Verify that the package can be imported in a Webpack project
+      run: |
+        cd .github/workflows/cd-packaging-tests/bundler-webpack
+        npm install @inrupt/solid-client-authn-browser@$VERSION_NR
+        npm install webpack@5 webpack-cli buffer crypto-browserify stream-browserify util
+        npx webpack --devtool source-map
+      env:
+        VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
+    - name: Archive Webpack build artifacts
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: webpack-dist
+        path: .github/workflows/cd-packaging-tests/bundler-webpack/dist
