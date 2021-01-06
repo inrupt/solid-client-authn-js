@@ -25,9 +25,13 @@
     "webpack-dev-server": "^3.11.1"
   },
   "dependencies": {
+    "@inrupt/solid-client-authn-browser": "file://../../../",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "regenerator-runtime": "^0.13.7",
-    "@inrupt/solid-client-authn-browser": "file://../../../"
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.3"
   }
 }
