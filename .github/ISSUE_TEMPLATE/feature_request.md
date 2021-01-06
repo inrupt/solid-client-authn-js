@@ -15,6 +15,16 @@ Please fill in as much of the template below as you're able. Feel free to delete
 ### Search terms you've used
 <!-- What search terms have you used to check whether this feature has been requested before? -->
 
+### Impacted package
+
+What package(s) of the monorepo would implement the feature ?
+
+- [ ] solid-client-authn-browser
+- [ ] solid-client-authn-node
+- [ ] solid-client-authn-core
+- [ ] oidc-client-ext
+- [ ] Other (please specify): ...
+
 ### Feature suggestion
 
 <!-- A summary of what you'd like to see added or changed -->
