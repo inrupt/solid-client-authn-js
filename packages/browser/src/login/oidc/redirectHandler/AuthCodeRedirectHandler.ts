@@ -104,6 +104,9 @@ async function setupResourceServerSession(
   await storageUtility.storeResourceServerSessionInfo(
     webId,
     resourceServerIri,
+    // Note that here, if the lifespan of the cookie was returned by the server,
+    // we'd expect a relative value (the remaining time of validity) rather than
+    // an absolute one (the moment when the cookie expires).
     Date.now() + DEFAULT_LIFESPAN
   );
 }
