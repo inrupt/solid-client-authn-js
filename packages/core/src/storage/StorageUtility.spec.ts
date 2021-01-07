@@ -349,15 +349,16 @@ describe("StorageUtility", () => {
       await storageUtility.storeResourceServerSessionInfo(
         "https://some.pod/profile#me",
         "https://some-resource.provider/",
-        "1h"
+        1610026667
       );
       await expect(
         storageUtility.get("tmp-resource-server-session-info")
       ).resolves.toEqual(
         JSON.stringify({
-          "https://some.pod/profile#me": {
+          webId: "https://some.pod/profile#me",
+          sessions: {
             "https://some-resource.provider/": {
-              expiration: "1h",
+              expiration: 1610026667,
             },
           },
         })
@@ -368,9 +369,10 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({
         insecureStorage: mockStorage({
           "tmp-resource-server-session-info": JSON.stringify({
-            "https://some.pod/profile#me": {
+            webId: "https://some.pod/profile#me",
+            sessions: {
               "https://some-other-resource.provider/": {
-                expiration: "1h",
+                expiration: 1610026667,
               },
             },
           }),
@@ -380,18 +382,52 @@ describe("StorageUtility", () => {
       await storageUtility.storeResourceServerSessionInfo(
         "https://some.pod/profile#me",
         "https://some-resource.provider/",
-        "1h"
+        1610026667
       );
       await expect(
         storageUtility.get("tmp-resource-server-session-info")
       ).resolves.toEqual(
         JSON.stringify({
-          "https://some.pod/profile#me": {
+          webId: "https://some.pod/profile#me",
+          sessions: {
             "https://some-other-resource.provider/": {
-              expiration: "1h",
+              expiration: 1610026667,
             },
             "https://some-resource.provider/": {
-              expiration: "1h",
+              expiration: 1610026667,
+            },
+          },
+        })
+      );
+    });
+
+    it("overwrites existing sessions when storing a session for a new WebID", async () => {
+      const storageUtility = getStorageUtility({
+        insecureStorage: mockStorage({
+          "tmp-resource-server-session-info": JSON.stringify({
+            webId: "https://some-other.pod/profile#me",
+            sessions: {
+              "https://some-other-resource.provider/": {
+                expiration: 1610026667,
+              },
+            },
+          }),
+        }),
+      });
+
+      await storageUtility.storeResourceServerSessionInfo(
+        "https://some.pod/profile#me",
+        "https://some-resource.provider/",
+        1610026667
+      );
+      await expect(
+        storageUtility.get("tmp-resource-server-session-info")
+      ).resolves.toEqual(
+        JSON.stringify({
+          webId: "https://some.pod/profile#me",
+          sessions: {
+            "https://some-resource.provider/": {
+              expiration: 1610026667,
             },
           },
         })
@@ -400,7 +436,7 @@ describe("StorageUtility", () => {
   });
 
   describe("clearResourceServerSessionInfo", () => {
-    it("doesn not fail if the WebID does not exist", async () => {
+    it("doesn't not fail if the WebID does not exist", async () => {
       const storageUtility = getStorageUtility({
         insecureStorage: mockStorage({}),
       });
@@ -417,9 +453,10 @@ describe("StorageUtility", () => {
       const storageUtility = getStorageUtility({
         insecureStorage: mockStorage({
           "tmp-resource-server-session-info": JSON.stringify({
-            "https://some.pod/profile#me": {
+            webId: "https://some.pod/profile#me",
+            sessions: {
               "https://some-resource.provider/": {
-                expiration: "1h",
+                expiration: 1610026667,
               },
             },
           }),
@@ -432,16 +469,22 @@ describe("StorageUtility", () => {
       );
       await expect(
         storageUtility.get("tmp-resource-server-session-info")
-      ).resolves.toEqual(JSON.stringify({ "https://some.pod/profile#me": {} }));
+      ).resolves.toEqual(
+        JSON.stringify({
+          webId: "https://some.pod/profile#me",
+          sessions: {},
+        })
+      );
     });
 
     it("does not remove a different resource server session info", async () => {
       const storageUtility = getStorageUtility({
         insecureStorage: mockStorage({
           "tmp-resource-server-session-info": JSON.stringify({
-            "https://some.pod/profile#me": {
+            webId: "https://some.pod/profile#me",
+            sessions: {
               "https://some-resource.provider/": {
-                expiration: "1h",
+                expiration: 1610026667,
               },
             },
           }),
@@ -456,9 +499,10 @@ describe("StorageUtility", () => {
         storageUtility.get("tmp-resource-server-session-info")
       ).resolves.toEqual(
         JSON.stringify({
-          "https://some.pod/profile#me": {
+          webId: "https://some.pod/profile#me",
+          sessions: {
             "https://some-resource.provider/": {
-              expiration: "1h",
+              expiration: 1610026667,
             },
           },
         })

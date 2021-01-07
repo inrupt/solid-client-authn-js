@@ -73,7 +73,7 @@ export const StorageUtilityMock: IStorageUtility = {
   storeResourceServerSessionInfo: async (
     _webId: string,
     _resourceServerIri: string,
-    _sessionExpires: string
+    _sessionExpires: number
   ): Promise<void> => {
     // Do nothing
   },

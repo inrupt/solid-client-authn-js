@@ -63,7 +63,7 @@ export default interface IStorageUtility {
   storeResourceServerSessionInfo(
     webId: string,
     resourceServerIri: string,
-    sessionExpires: string
+    sessionExpires: number
   ): Promise<void>;
   /**
    * Removes session information for a given WebID and a given Resource Server.

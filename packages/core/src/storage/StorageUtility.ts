@@ -116,7 +116,13 @@ export async function saveSessionInfoToStorage(
 }
 
 type ResourceServerSession = {
-  expiration: string;
+  webId: string;
+  sessions: Record<
+    string,
+    {
+      expiration: number;
+    }
+  >;
 };
 
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
@@ -259,27 +265,21 @@ export default class StorageUtility implements IStorageUtility {
   async storeResourceServerSessionInfo(
     webId: string,
     resourceServerIri: string,
-    sessionExpires: string
+    sessionExpires: number
   ): Promise<void> {
-    const sessions: Record<
-      string,
-      Record<string, ResourceServerSession>
-    > = JSON.parse(
+    const sessions: ResourceServerSession = JSON.parse(
       (await this.insecureStorage.get(
         this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
       )) ?? "{}"
     );
-    if (sessions[webId] !== undefined) {
-      sessions[webId][resourceServerIri] = {
-        expiration: sessionExpires,
-      };
-    } else {
-      sessions[webId] = {
-        [resourceServerIri]: {
-          expiration: sessionExpires,
-        },
-      };
+    if (sessions.webId !== webId) {
+      // Clear sessions active previously
+      sessions.sessions = {};
     }
+    sessions.webId = webId;
+    sessions.sessions[resourceServerIri] = {
+      expiration: sessionExpires,
+    };
     await this.insecureStorage.set(
       this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
       JSON.stringify(sessions)
@@ -298,8 +298,8 @@ export default class StorageUtility implements IStorageUtility {
         this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
       )) ?? "{}"
     );
-    if (sessions[webId] !== undefined) {
-      delete sessions[webId][resourceServerIri];
+    if (sessions.sessions !== undefined) {
+      delete sessions.sessions[resourceServerIri];
     }
     await this.insecureStorage.set(
       this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
