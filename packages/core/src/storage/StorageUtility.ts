@@ -296,21 +296,19 @@ export default class StorageUtility implements IStorageUtility {
     );
     if (sessions.sessions !== undefined) {
       delete sessions.sessions[resourceServerIri];
-    }
-    if (
-      sessions.sessions !== undefined &&
-      Object.keys(sessions.sessions).length === 0
-    ) {
-      // If there isn't any active session left, the whole object is cleared.
-      await this.insecureStorage.set(
-        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
-        "{}"
-      );
-    } else {
-      await this.insecureStorage.set(
-        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
-        JSON.stringify(sessions)
-      );
+
+      if (Object.keys(sessions.sessions).length === 0) {
+        // If there isn't any active session left, the whole object is cleared.
+        await this.insecureStorage.set(
+          this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
+          "{}"
+        );
+      } else {
+        await this.insecureStorage.set(
+          this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
+          JSON.stringify(sessions)
+        );
+      }
     }
   }
 

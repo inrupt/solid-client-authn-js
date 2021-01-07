@@ -445,7 +445,7 @@ describe("StorageUtility", () => {
       );
       await expect(
         storageUtility.get("tmp-resource-server-session-info")
-      ).resolves.toEqual(JSON.stringify({}));
+      ).resolves.toBeUndefined();
     });
 
     it("clears the session info object if no session is active", async () => {
