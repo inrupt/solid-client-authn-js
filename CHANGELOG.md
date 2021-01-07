@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.3.0 - 2020-01-06
+
 ### New feature
 
 - Although still possible, it is now no longer required to manually instantiate
@@ -17,7 +21,9 @@ which will instantiate a new Session implicitly behind the scenes. If you do
 need access to this Session, you can do so using the new function
 `getDefaultSession`.
 
-The following sections document changes that have been released already:
+### Bugfix
+
+- The `session.info.isLoggedIn` property is now set to false on logout. 
 
 ## 1.2.6 - 2020-12-23
 

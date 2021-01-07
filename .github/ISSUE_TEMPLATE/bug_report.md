@@ -15,6 +15,16 @@ Please fill in as much of the template below as you're able. Feel free to delete
 ### Search terms you've used
 <!-- What search terms have you used to check whether this bug was already reported? -->
 
+### Impacted package
+
+Which packages do you think might be impacted by the bug ?
+
+- [ ] solid-client-authn-browser
+- [ ] solid-client-authn-node
+- [ ] solid-client-authn-core
+- [ ] oidc-client-ext
+- [ ] Other (please specify): ...
+
 ### Bug description
 <!-- A short description of what the problem is. -->
 
