@@ -399,6 +399,73 @@ describe("StorageUtility", () => {
     });
   });
 
+  describe("clearResourceServerSessionInfo", () => {
+    it("doesn not fail if the WebID does not exist", async () => {
+      const storageUtility = getStorageUtility({
+        insecureStorage: mockStorage({}),
+      });
+      await storageUtility.clearResourceServerSessionInfo(
+        "https://some.pod/profile#me",
+        "https://some-resource.provider/"
+      );
+      await expect(
+        storageUtility.get("tmp-resource-server-session-info")
+      ).resolves.toEqual(JSON.stringify({}));
+    });
+
+    it("removes a resource server session info to a WebID that is already registered", async () => {
+      const storageUtility = getStorageUtility({
+        insecureStorage: mockStorage({
+          "tmp-resource-server-session-info": JSON.stringify({
+            "https://some.pod/profile#me": {
+              "https://some-resource.provider/": {
+                expiration: "1h",
+              },
+            },
+          }),
+        }),
+      });
+
+      await storageUtility.clearResourceServerSessionInfo(
+        "https://some.pod/profile#me",
+        "https://some-resource.provider/"
+      );
+      await expect(
+        storageUtility.get("tmp-resource-server-session-info")
+      ).resolves.toEqual(JSON.stringify({ "https://some.pod/profile#me": {} }));
+    });
+
+    it("does not remove a different resource server session info", async () => {
+      const storageUtility = getStorageUtility({
+        insecureStorage: mockStorage({
+          "tmp-resource-server-session-info": JSON.stringify({
+            "https://some.pod/profile#me": {
+              "https://some-resource.provider/": {
+                expiration: "1h",
+              },
+            },
+          }),
+        }),
+      });
+
+      await storageUtility.clearResourceServerSessionInfo(
+        "https://some.pod/profile#me",
+        "https://some-other-resource.provider/"
+      );
+      await expect(
+        storageUtility.get("tmp-resource-server-session-info")
+      ).resolves.toEqual(
+        JSON.stringify({
+          "https://some.pod/profile#me": {
+            "https://some-resource.provider/": {
+              expiration: "1h",
+            },
+          },
+        })
+      );
+    });
+  });
+
   describe("safeGet", () => {
     it("should correctly retrieve valid data from the given storage", async () => {
       const storageUtility = getStorageUtility({

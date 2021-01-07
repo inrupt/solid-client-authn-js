@@ -77,6 +77,12 @@ export const StorageUtilityMock: IStorageUtility = {
   ): Promise<void> => {
     // Do nothing
   },
+  clearResourceServerSessionInfo: async (
+    _webId: string,
+    _resourceServerIri: string
+  ): Promise<void> => {
+    // Do nothing
+  },
 };
 
 export const mockStorage = (

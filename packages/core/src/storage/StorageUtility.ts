@@ -286,6 +286,27 @@ export default class StorageUtility implements IStorageUtility {
     );
   }
 
+  async clearResourceServerSessionInfo(
+    webId: string,
+    resourceServerIri: string
+  ): Promise<void> {
+    const sessions: Record<
+      string,
+      Record<string, ResourceServerSession>
+    > = JSON.parse(
+      (await this.insecureStorage.get(
+        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
+      )) ?? "{}"
+    );
+    if (sessions[webId] !== undefined) {
+      delete sessions[webId][resourceServerIri];
+    }
+    await this.insecureStorage.set(
+      this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
+      JSON.stringify(sessions)
+    );
+  }
+
   /**
    * Get an object from storage with the guarantee that it matches a given schema.
    *
