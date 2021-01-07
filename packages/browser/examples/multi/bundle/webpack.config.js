@@ -20,6 +20,15 @@ module.exports = {
       },
     ],
   },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+    fallback: {
+      crypto: require.resolve("crypto-browserify"),
+      stream: require.resolve("stream-browserify"),
+      util: require.resolve("util/"),
+      buffer: require.resolve("buffer/"),
+    },
+  },
   plugins: [
     new HtmlWebPackPlugin({
       template: "./src/index.html",
@@ -27,7 +36,7 @@ module.exports = {
     }),
   ],
   output: {
-    publicPath: process.env.ASSET_PATH || '/',
+    publicPath: process.env.ASSET_PATH || "/",
   },
   devServer: {
     port: 3001,
