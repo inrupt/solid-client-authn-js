@@ -71,10 +71,7 @@ export default interface IStorageUtility {
    * @param webId
    * @param resourceServerIri
    */
-  clearResourceServerSessionInfo(
-    webId: string,
-    resourceServerIri: string
-  ): Promise<void>;
+  clearResourceServerSessionInfo(resourceServerIri: string): Promise<void>;
 
   /**
    * Retrieve from local storage

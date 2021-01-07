@@ -351,18 +351,18 @@ describe("StorageUtility", () => {
         "https://some-resource.provider/",
         1610026667
       );
-      await expect(
-        storageUtility.get("tmp-resource-server-session-info")
-      ).resolves.toEqual(
-        JSON.stringify({
-          webId: "https://some.pod/profile#me",
-          sessions: {
-            "https://some-resource.provider/": {
-              expiration: 1610026667,
-            },
+      expect(
+        JSON.parse(
+          (await storageUtility.get("tmp-resource-server-session-info")) ?? "{}"
+        )
+      ).toEqual({
+        webId: "https://some.pod/profile#me",
+        sessions: {
+          "https://some-resource.provider/": {
+            expiration: 1610026667,
           },
-        })
-      );
+        },
+      });
     });
 
     it("adds a new resource server to a WebID that is already registered", async () => {
@@ -441,7 +441,6 @@ describe("StorageUtility", () => {
         insecureStorage: mockStorage({}),
       });
       await storageUtility.clearResourceServerSessionInfo(
-        "https://some.pod/profile#me",
         "https://some-resource.provider/"
       );
       await expect(
@@ -464,7 +463,6 @@ describe("StorageUtility", () => {
       });
 
       await storageUtility.clearResourceServerSessionInfo(
-        "https://some.pod/profile#me",
         "https://some-resource.provider/"
       );
       await expect(
@@ -492,7 +490,6 @@ describe("StorageUtility", () => {
       });
 
       await storageUtility.clearResourceServerSessionInfo(
-        "https://some.pod/profile#me",
         "https://some-other-resource.provider/"
       );
       await expect(

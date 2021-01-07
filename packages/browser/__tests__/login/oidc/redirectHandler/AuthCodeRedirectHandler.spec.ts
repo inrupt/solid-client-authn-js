@@ -30,13 +30,13 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
+import { Response } from "cross-fetch";
 import {
   AuthCodeRedirectHandler,
   exchangeDpopToken,
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { Response } from "cross-fetch";
 
 const mockJwk = (): JSONWebKey => {
   return {
@@ -222,6 +222,18 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("retrieves the code verifier from memory", async () => {
+      window.fetch = jest.fn().mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            ...new Response("", {
+              status: 200,
+            }),
+          });
+        })
+      ) as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
       const storage = mockStorageUtility({
         "solidClientAuthenticationUser:oauth2_state_value": {
           sessionId: "userId",
@@ -250,6 +262,18 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("Fails if a session was not retrieved", async () => {
+      window.fetch = jest.fn().mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            ...new Response("", {
+              status: 200,
+            }),
+          });
+        })
+      ) as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
       defaultMocks.sessionInfoManager.get.mockResolvedValueOnce(undefined);
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
@@ -263,7 +287,15 @@ describe("AuthCodeRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
-      window.fetch = jest.fn() as jest.Mock<
+      window.fetch = jest.fn().mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve({
+            ...new Response("", {
+              status: 200,
+            }),
+          });
+        })
+      ) as jest.Mock<
         ReturnType<typeof window.fetch>,
         [RequestInfo, RequestInit?]
       >;
@@ -293,16 +325,16 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated dpop fetch if requested", async () => {
-      window.fetch = jest.fn().mockReturnValueOnce(
+      window.fetch = jest.fn() as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
+      window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
           resolve(
-            Object.assign(
-              {
-                redirected: true,
-                url: "https://my.pod/container/",
-              },
-              new Response("", {})
-            )
+            new Response("", {
+              status: 200,
+            })
           );
         })
       ) as jest.Mock<
@@ -338,22 +370,62 @@ describe("AuthCodeRedirectHandler", () => {
     });
   });
 
-  it("stores information about the resource server cookie in local storage", async () => {
+  it("stores information about the resource server cookie in local storage on on successful authentication", async () => {
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the webid in plain/text, it could
     // be extended later to also provide the cookie expiration.
     window.fetch = jest.fn().mockReturnValueOnce(
       new Promise((resolve) => {
         resolve(
-          Object.assign(
-            {
-              redirected: true,
-              url: "https://my.pod/container/",
-            },
-            new Response("https://my.pod/profile#me", {
-              status: 200,
-            })
-          )
+          new Response("https://my.webid", {
+            status: 200,
+          })
+        );
+      })
+    ) as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
+
+    Date.now = jest.fn().mockReturnValueOnce(10000);
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({
+      webId: "https://my.webid",
+      sessions: {
+        "https://my.webid": {
+          expiration: 11800,
+        },
+      },
+    });
+  });
+
+  it("store nothing if the resource server has no session endpoint", async () => {
+    // This mocks the fetch to the Resource Server session endpoint
+    // Note: Currently, the endpoint only returns the webid in plain/text, it could
+    // be extended later to also provide the cookie expiration.
+    window.fetch = jest.fn().mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolve(
+          new Response("", {
+            status: 404,
+          })
         );
       })
     ) as jest.Mock<
@@ -378,13 +450,44 @@ describe("AuthCodeRedirectHandler", () => {
       JSON.parse(
         (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
       )
-    ).toEqual({
-      "https://my.pod/profile#me": {
-        "https://my.pod/": {
-          expiration: "XXX",
-        },
+    ).toEqual({});
+  });
+
+  it("store nothing if the resource server does not recognize the user", async () => {
+    // This mocks the fetch to the Resource Server session endpoint
+    // Note: Currently, the endpoint only returns the webid in plain/text, it could
+    // be extended later to also provide the cookie expiration.
+    window.fetch = jest.fn().mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolve(
+          new Response("", {
+            status: 401,
+          })
+        );
+      })
+    ) as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
       },
     });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({});
   });
 });
 

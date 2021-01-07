@@ -287,7 +287,6 @@ export default class StorageUtility implements IStorageUtility {
   }
 
   async clearResourceServerSessionInfo(
-    webId: string,
     resourceServerIri: string
   ): Promise<void> {
     const sessions: Record<

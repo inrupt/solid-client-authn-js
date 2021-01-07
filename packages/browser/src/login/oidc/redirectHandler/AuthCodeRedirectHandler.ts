@@ -69,6 +69,48 @@ export async function exchangeDpopToken(
   });
 }
 
+// We
+const DEFAULT_LIFESPAN = 1800;
+
+/**
+ * Stores the resoure server session information in local storage, so that they
+ * can be leveraged on refresh.
+ * @param webId
+ * @param authenticatedFetch
+ * @param storageUtility
+ */
+async function setupResourceServerSession(
+  webId: string,
+  authenticatedFetch: typeof fetch,
+  storageUtility: IStorageUtility
+): Promise<void> {
+  const webIdAsUrl = new URL(webId);
+  const resourceServerIri = webIdAsUrl.origin;
+  const resourceServerResponse = await authenticatedFetch(
+    `${resourceServerIri}/session`
+  );
+  if (
+    resourceServerResponse.status === 404 ||
+    resourceServerResponse.status === 401
+  ) {
+    // In this case, the resource server either:
+    // - does not have the expected endpoint, or
+    // - does not recognize the user
+    // Either ways, no cookie is expected to be set there, and any existing
+    // session information should be cleared.
+    await storageUtility.clearResourceServerSessionInfo(
+      webId,
+      resourceServerIri
+    );
+    return;
+  }
+  await storageUtility.storeResourceServerSessionInfo(
+    webId,
+    resourceServerIri,
+    Date.now() + DEFAULT_LIFESPAN
+  );
+}
+
 /**
  * @hidden
  */
@@ -174,6 +216,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         isLoggedIn: "true",
       },
       { secure: true }
+    );
+
+    await setupResourceServerSession(
+      tokens.webId,
+      authFetch,
+      this.storageUtility
     );
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
