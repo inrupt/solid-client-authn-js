@@ -32,25 +32,29 @@ import { generateJwkForDpop } from "./keyGeneration";
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>
 ): value is { access_token: string } {
-  return value.access_token && typeof value.access_token === "string";
+  return (
+    value.access_token !== undefined && typeof value.access_token === "string"
+  );
 }
 
 function hasIdToken(
   value: { id_token: string } | Record<string, unknown>
 ): value is { id_token: string } {
-  return value.id_token && typeof value.id_token === "string";
+  return value.id_token !== undefined && typeof value.id_token === "string";
 }
 
 function hasRefreshToken(
   value: { refresh_token: string } | Record<string, unknown>
 ): value is { refresh_token: string } {
-  return value.refresh_token && typeof value.refresh_token === "string";
+  return (
+    value.refresh_token !== undefined && typeof value.refresh_token === "string"
+  );
 }
 
 function hasTokenType(
   value: { token_type: string } | Record<string, unknown>
 ): value is { token_type: string } {
-  return value.token_type && typeof value.token_type === "string";
+  return value.token_type !== undefined && typeof value.token_type === "string";
 }
 
 export type TokenEndpointResponse = {
@@ -83,9 +87,9 @@ function isWebIdOidcIdToken(
   token: WebIdOidcIdToken | Record<string, unknown>
 ): token is WebIdOidcIdToken {
   return (
-    (token.sub &&
+    (token.sub !== undefined &&
       typeof token.sub === "string" &&
-      token.iss &&
+      token.iss !== undefined &&
       typeof token.iss === "string" &&
       !token.webid) ||
     typeof token.webid === "string"
