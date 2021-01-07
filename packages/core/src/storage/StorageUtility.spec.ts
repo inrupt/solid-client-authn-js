@@ -448,7 +448,7 @@ describe("StorageUtility", () => {
       ).resolves.toEqual(JSON.stringify({}));
     });
 
-    it("removes a resource server session info to a WebID that is already registered", async () => {
+    it("clears the session info object if no session is active", async () => {
       const storageUtility = getStorageUtility({
         insecureStorage: mockStorage({
           "tmp-resource-server-session-info": JSON.stringify({
@@ -467,15 +467,10 @@ describe("StorageUtility", () => {
       );
       await expect(
         storageUtility.get("tmp-resource-server-session-info")
-      ).resolves.toEqual(
-        JSON.stringify({
-          webId: "https://some.pod/profile#me",
-          sessions: {},
-        })
-      );
+      ).resolves.toEqual(JSON.stringify({}));
     });
 
-    it("does not remove a different resource server session info", async () => {
+    it("removes the given resource server session info", async () => {
       const storageUtility = getStorageUtility({
         insecureStorage: mockStorage({
           "tmp-resource-server-session-info": JSON.stringify({

@@ -98,10 +98,7 @@ async function setupResourceServerSession(
     // - does not recognize the user
     // Either ways, no cookie is expected to be set there, and any existing
     // session information should be cleared.
-    await storageUtility.clearResourceServerSessionInfo(
-      webId,
-      resourceServerIri
-    );
+    await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
     return;
   }
   await storageUtility.storeResourceServerSessionInfo(
