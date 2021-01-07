@@ -341,6 +341,64 @@ describe("StorageUtility", () => {
     });
   });
 
+  describe("storeResourceServerSessionInfo", () => {
+    it("stores session information for a new WebID", async () => {
+      const storageUtility = getStorageUtility({
+        insecureStorage: mockStorage({}),
+      });
+      await storageUtility.storeResourceServerSessionInfo(
+        "https://some.pod/profile#me",
+        "https://some-resource.provider/",
+        "1h"
+      );
+      await expect(
+        storageUtility.get("tmp-resource-server-session-info")
+      ).resolves.toEqual(
+        JSON.stringify({
+          "https://some.pod/profile#me": {
+            "https://some-resource.provider/": {
+              expiration: "1h",
+            },
+          },
+        })
+      );
+    });
+
+    it("adds a new resource server to a WebID that is already registered", async () => {
+      const storageUtility = getStorageUtility({
+        insecureStorage: mockStorage({
+          "tmp-resource-server-session-info": JSON.stringify({
+            "https://some.pod/profile#me": {
+              "https://some-other-resource.provider/": {
+                expiration: "1h",
+              },
+            },
+          }),
+        }),
+      });
+
+      await storageUtility.storeResourceServerSessionInfo(
+        "https://some.pod/profile#me",
+        "https://some-resource.provider/",
+        "1h"
+      );
+      await expect(
+        storageUtility.get("tmp-resource-server-session-info")
+      ).resolves.toEqual(
+        JSON.stringify({
+          "https://some.pod/profile#me": {
+            "https://some-other-resource.provider/": {
+              expiration: "1h",
+            },
+            "https://some-resource.provider/": {
+              expiration: "1h",
+            },
+          },
+        })
+      );
+    });
+  });
+
   describe("safeGet", () => {
     it("should correctly retrieve valid data from the given storage", async () => {
       const storageUtility = getStorageUtility({

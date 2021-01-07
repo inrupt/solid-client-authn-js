@@ -273,6 +273,12 @@ export default class StorageUtility implements IStorageUtility {
       sessions[webId][resourceServerIri] = {
         expiration: sessionExpires,
       };
+    } else {
+      sessions[webId] = {
+        [resourceServerIri]: {
+          expiration: sessionExpires,
+        },
+      };
     }
     await this.insecureStorage.set(
       this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,

@@ -70,6 +70,13 @@ export const StorageUtilityMock: IStorageUtility = {
     }>
   ) => StorageUtilitySafeGetResponse,
   /* eslint-enable @typescript-eslint/no-unused-vars */
+  storeResourceServerSessionInfo: async (
+    _webId: string,
+    _resourceServerIri: string,
+    _sessionExpires: string
+  ): Promise<void> => {
+    // Do nothing
+  },
 };
 
 export const mockStorage = (
