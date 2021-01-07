@@ -36,6 +36,7 @@ import {
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
+import { Response } from "cross-fetch";
 
 const mockJwk = (): JSONWebKey => {
   return {
@@ -294,10 +295,15 @@ describe("AuthCodeRedirectHandler", () => {
     it("returns an authenticated dpop fetch if requested", async () => {
       window.fetch = jest.fn().mockReturnValueOnce(
         new Promise((resolve) => {
-          resolve({
-            redirected: true,
-            url: "https://my.pod/container/",
-          } as Response);
+          resolve(
+            Object.assign(
+              {
+                redirected: true,
+                url: "https://my.pod/container/",
+              },
+              new Response("", {})
+            )
+          );
         })
       ) as jest.Mock<
         ReturnType<typeof window.fetch>,
@@ -329,6 +335,55 @@ describe("AuthCodeRedirectHandler", () => {
         // @ts-ignore
         header
       ).toMatch(/^DPoP .+$/);
+    });
+  });
+
+  it("stores information about the resource server cookie in local storage", async () => {
+    // This mocks the fetch to the Resource Server session endpoint
+    // Note: Currently, the endpoint only returns the webid in plain/text, it could
+    // be extended later to also provide the cookie expiration.
+    window.fetch = jest.fn().mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolve(
+          Object.assign(
+            {
+              redirected: true,
+              url: "https://my.pod/container/",
+            },
+            new Response("https://my.pod/profile#me", {
+              status: 200,
+            })
+          )
+        );
+      })
+    ) as jest.Mock<
+      ReturnType<typeof window.fetch>,
+      [RequestInfo, RequestInit?]
+    >;
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({
+      "https://my.pod/profile#me": {
+        "https://my.pod/": {
+          expiration: "XXX",
+        },
+      },
     });
   });
 });

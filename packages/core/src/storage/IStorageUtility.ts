@@ -54,6 +54,11 @@ export default interface IStorageUtility {
     userId: string,
     options?: { secure?: boolean }
   ): Promise<void>;
+  storeResourceServerSessionInfo(
+    webId: string,
+    resourceServerIri: string,
+    sessionExpires: string
+  ): Promise<void>;
 
   /**
    * Retrieve from local storage

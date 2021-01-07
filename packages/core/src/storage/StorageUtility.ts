@@ -115,6 +115,10 @@ export async function saveSessionInfoToStorage(
   }
 }
 
+type ResourceServerSession = {
+  expiration: string;
+};
+
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
  * @hidden
@@ -128,6 +132,9 @@ export default class StorageUtility implements IStorageUtility {
   private getKey(userId: string): string {
     return `solidClientAuthenticationUser:${userId}`;
   }
+
+  private RESOURCE_SERVER_SESSION_INFORMATION_KEY =
+    "tmp-resource-server-session-info";
 
   private async getUserData(
     userId: string,
@@ -246,6 +253,30 @@ export default class StorageUtility implements IStorageUtility {
   ): Promise<void> {
     await (options?.secure ? this.secureStorage : this.insecureStorage).delete(
       this.getKey(userId)
+    );
+  }
+
+  async storeResourceServerSessionInfo(
+    webId: string,
+    resourceServerIri: string,
+    sessionExpires: string
+  ): Promise<void> {
+    const sessions: Record<
+      string,
+      Record<string, ResourceServerSession>
+    > = JSON.parse(
+      (await this.insecureStorage.get(
+        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
+      )) ?? "{}"
+    );
+    if (sessions[webId] !== undefined) {
+      sessions[webId][resourceServerIri] = {
+        expiration: sessionExpires,
+      };
+    }
+    await this.insecureStorage.set(
+      this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
+      JSON.stringify(sessions)
     );
   }
 
