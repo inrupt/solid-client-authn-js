@@ -366,7 +366,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
   });
 
-  it("stores information about the resource server cookie in local storage on on successful authentication", async () => {
+  it("stores information about the resource server cookie in local storage on successful authentication", async () => {
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the webid in plain/text, it could
     // be extended later to also provide the cookie expiration.
@@ -414,7 +414,7 @@ describe("AuthCodeRedirectHandler", () => {
 
   it("store nothing if the resource server has no session endpoint", async () => {
     // This mocks the fetch to the Resource Server session endpoint
-    // Note: Currently, the endpoint only returns the webid in plain/text, it could
+    // Note: Currently, the endpoint only returns the WebID in plain/text, it could
     // be extended later to also provide the cookie expiration.
     window.fetch = jest.fn().mockReturnValueOnce(
       new Promise((resolve) => {
@@ -451,7 +451,7 @@ describe("AuthCodeRedirectHandler", () => {
 
   it("store nothing if the resource server does not recognize the user", async () => {
     // This mocks the fetch to the Resource Server session endpoint
-    // Note: Currently, the endpoint only returns the webid in plain/text, it could
+    // Note: Currently, the endpoint only returns the WebID in plain/text, it could
     // be extended later to also provide the cookie expiration.
     window.fetch = jest.fn().mockReturnValueOnce(
       new Promise((resolve) => {
