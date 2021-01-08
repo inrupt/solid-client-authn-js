@@ -23,8 +23,6 @@ import { it, describe } from "@jest/globals";
 import { config } from "dotenv-flow";
 import { Session } from "../Session";
 
-jest.setTimeout(15000);
-
 // Load environment variables from .env.local if available:
 config({
   path: __dirname,
