@@ -38,6 +38,7 @@ export function buildBearerFetch(
   return (init, options): Promise<Response> => {
     return fetch(init, {
       ...options,
+      credentials: "include",
       headers: {
         ...options?.headers,
         Authorization: `Bearer ${authToken}`,
@@ -63,6 +64,7 @@ async function buildDpopFetchOptions(
         dpopKey
       ),
     },
+    credentials: "include",
   };
 }
 
