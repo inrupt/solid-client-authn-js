@@ -71,7 +71,7 @@ export async function exchangeDpopToken(
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we configure the
 // server to return the remaining lifespan of the cookie.
-const DEFAULT_LIFESPAN = 1800;
+export const DEFAULT_LIFESPAN = 1800;
 
 /**
  * Stores the resoure server session information in local storage, so that they

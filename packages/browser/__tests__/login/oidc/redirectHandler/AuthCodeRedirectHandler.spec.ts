@@ -33,6 +33,7 @@ import { JSONWebKey } from "jose";
 import { Response } from "cross-fetch";
 import {
   AuthCodeRedirectHandler,
+  DEFAULT_LIFESPAN,
   exchangeDpopToken,
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
@@ -363,7 +364,8 @@ describe("AuthCodeRedirectHandler", () => {
       })
     );
 
-    Date.now = jest.fn().mockReturnValueOnce(10000);
+    const MOCK_TIMESTAMP = 10000;
+    Date.now = jest.fn().mockReturnValueOnce(MOCK_TIMESTAMP);
 
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:oauth2_state_value": {
@@ -386,7 +388,7 @@ describe("AuthCodeRedirectHandler", () => {
       webId: "https://my.webid",
       sessions: {
         "https://my.webid": {
-          expiration: 11800,
+          expiration: MOCK_TIMESTAMP + DEFAULT_LIFESPAN,
         },
       },
     });
