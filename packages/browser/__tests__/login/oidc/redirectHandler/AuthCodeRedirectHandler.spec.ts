@@ -145,8 +145,8 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
   };
 }
 
-const mockFetchOnce = (response: Response): void => {
-  window.fetch = jest.fn().mockReturnValueOnce(
+const mockFetch = (response: Response): void => {
+  window.fetch = jest.fn().mockReturnValue(
     new Promise((resolve) => {
       resolve(response);
     })
@@ -231,7 +231,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("retrieves the code verifier from memory", async () => {
-      mockFetchOnce(
+      mockFetch(
         new Response("", {
           status: 200,
         })
@@ -264,7 +264,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("Fails if a session was not retrieved", async () => {
-      mockFetchOnce(
+      mockFetch(
         new Response("", {
           status: 200,
         })
@@ -282,7 +282,7 @@ describe("AuthCodeRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
-      mockFetchOnce(
+      mockFetch(
         new Response("", {
           status: 200,
         })
@@ -358,7 +358,7 @@ describe("AuthCodeRedirectHandler", () => {
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the webid in plain/text, it could
     // be extended later to also provide the cookie expiration.
-    mockFetchOnce(
+    mockFetch(
       new Response("https://my.webid", {
         status: 200,
       })
@@ -398,7 +398,7 @@ describe("AuthCodeRedirectHandler", () => {
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the WebID in plain/text, it could
     // be extended later to also provide the cookie expiration.
-    mockFetchOnce(
+    mockFetch(
       new Response("", {
         status: 404,
       })
@@ -428,7 +428,7 @@ describe("AuthCodeRedirectHandler", () => {
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the WebID in plain/text, it could
     // be extended later to also provide the cookie expiration.
-    mockFetchOnce(
+    mockFetch(
       new Response("", {
         status: 401,
       })

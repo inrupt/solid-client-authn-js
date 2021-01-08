@@ -87,6 +87,10 @@ async function setupResourceServerSession(
 ): Promise<void> {
   const webIdAsUrl = new URL(webId);
   const resourceServerIri = webIdAsUrl.origin;
+  // Querying the /session endpoint does not set the cookie, but issuing an
+  // authenticated request to any actual resource (even public ones) does,
+  // so we fetch the user's WebID before checking the /session endpoint.
+  await authenticatedFetch(webId);
   const resourceServerResponse = await authenticatedFetch(
     `${resourceServerIri}/session`
   );
