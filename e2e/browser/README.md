@@ -1,25 +1,37 @@
-# solid-client-authn-testcafe
+# End-2-End Browser Tests
 
-TestCafe end-to-end tests for [solid-client-authn.js](https://github.com/inrupt/solid-client-authn-js). These are run automatically in CI.
+TestCafe end-to-end tests for [solid-client-authn.js](https://github.com/inrupt/solid-client-authn-js).
+These can be run manually locally, or automatically in CI.
 
 ## Running locally
 
 The tests connect to Solid Pods using credentials set as environment variables.
-The commands below assume they are executed in this directory, and that you have
-a recent version of Node/npm installed.
+The commands below assume they are being executed in this directory, and that
+you have a recent version of Node/npm installed.
+
+Before running the tests, first make sure a client application is up and
+running, and listening for requests. We recommend simply running the
+`demoClientApp` that is included in the examples folder of the browser package,
+for example:
+
+```script
+cd ../packages/browser/examples/demoClientApp
+npm ci
+npm run start
+```
 
 To run the tests, insert your credentials into the following command (replace
 `all` with e.g. `chrome` or `firefox` to only run the tests using a specific
 browser):
 
-```
+```script
 E2E_ESS_USERNAME=<ESS username> E2E_ESS_PASSWORD=<ESS password> E2E_NSS_USERNAME=<NSS username> E2E_NSS_PASSWORD=<NSS password> npx testcafe all testSuiteRunner.test.ts
 ```
 
-To can also specify the location of a deployed demo client application - for
+You can also specify the location of a deployed demo client application - for
 example, if you were running that application on `localhost:3001` (which is the
 default used if no environment variable is set), then you could use that
-instance for the tests by including on your command line:
+application for the tests by including on your command line:
 
 ```
 DEMO_CLIENT_APP_URL="http://localhost:3001"
@@ -36,7 +48,11 @@ When adding new secrets, make sure to also expose them to the CI job using /.git
 
 ## Login
 
-TestCafe allows defined tests to be executed with different authentications through the use of [Roles](https://devexpress.github.io/testcafe/documentation/guides/advanced-guides/authentication.html). However, when Roles were implemented for the solid-client-authn-browser test application, the application does not render after being redirected back from the Broker and shows the following error in the browser console:
+TestCafe allows defined tests to be executed with different authentications
+through the use of [Roles](https://devexpress.github.io/testcafe/documentation/guides/advanced-guides/authentication.html).
+However, when we implemented Roles, the application did not render after being
+redirected back from the Solid Identity Provider, and threw the following error
+in the browser console:
 
 ```
 Uncaught (in promise) Error: Field [sessionId] for user [1ff42712103649afa3a0267ac80e8f35] is not stored
@@ -45,14 +61,20 @@ Uncaught (in promise) Error: Field [sessionId] for user [1ff42712103649afa3a0267
    at async Session.handleIncomingRedirect (Session.js:34)
 ```
 
-Attempting to store the Local Storage between redirects, as proposed [here](https://github.com/DevExpress/testcafe/issues/2142#issuecomment-367618275), did not solve the issue.
+Attempting to store the Local Storage between redirects, as proposed [here](https://github.com/DevExpress/testcafe/issues/2142#issuecomment-367618275),
+did not solve the issue.
 
-Hence, a [Login Helper](../helperslogin.js) was implemented that allows login by Google, Twitter, or Github, as the expense of need to perform the full login workflow at the start of each test.
+Hence, a [Login Helper](../helperslogin.js) was implemented that allows login by
+Google, Twitter, or Github, as the expense of need to perform the full login
+workflow at the start of each test.
 
 ## Tests
 
-The solid-client-authn-browser test application attempts to fetch resources based on particular authentications. To provide flexibility, the resources to fetch together with expected responses are stored in `resources.json`.
+The solid-client-authn-browser test application attempts to fetch resources
+based on particular authentications. To provide flexibility, the resources to
+fetch together with expected responses are stored in `resources.json`.
 
 ## To Do
 
-- Implement a method whereby the expected response can be dynamically determined based on a particular authentication.
+- Implement a method whereby the expected response can be dynamically determined
+based on a particular authentication.
