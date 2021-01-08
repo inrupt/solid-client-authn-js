@@ -69,6 +69,47 @@ export async function exchangeDpopToken(
   });
 }
 
+// A lifespan of 30 minutes is ESS's default. This could be removed if we configure the
+// server to return the remaining lifespan of the cookie.
+export const DEFAULT_LIFESPAN = 1800;
+
+/**
+ * Stores the resource server session information in local storage, so that they
+ * can be used on refresh.
+ * @param webId
+ * @param authenticatedFetch
+ * @param storageUtility
+ */
+async function setupResourceServerSession(
+  webId: string,
+  authenticatedFetch: typeof fetch,
+  storageUtility: IStorageUtility
+): Promise<void> {
+  const webIdAsUrl = new URL(webId);
+  const resourceServerIri = webIdAsUrl.origin;
+  const resourceServerResponse = await authenticatedFetch(
+    `${resourceServerIri}/session`
+  );
+
+  if (resourceServerResponse.status === 200) {
+    await storageUtility.storeResourceServerSessionInfo(
+      webId,
+      resourceServerIri,
+      // Note that here, if the lifespan of the cookie was returned by the server,
+      // we'd expect a relative value (the remaining time of validity) rather than
+      // an absolute one (the moment when the cookie expires).
+      Date.now() + DEFAULT_LIFESPAN
+    );
+    return;
+  }
+  // In this case, the resource server either:
+  // - does not have the expected endpoint, or
+  // - does not recognize the user
+  // Either way, no cookie is expected to be set there, and any existing
+  // session information should be cleared.
+  await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
+}
+
 /**
  * @hidden
  */
@@ -174,6 +215,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         isLoggedIn: "true",
       },
       { secure: true }
+    );
+
+    await setupResourceServerSession(
+      tokens.webId,
+      authFetch,
+      this.storageUtility
     );
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);

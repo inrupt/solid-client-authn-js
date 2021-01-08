@@ -53,6 +53,15 @@ export async function clear(
   sessionId: string,
   storage: IStorageUtility
 ): Promise<void> {
+  // The type assertion is okay, because it throws on undefined.
+  const webId = await storage.getForUser(sessionId, "webId", {
+    secure: true,
+  });
+  if (webId !== undefined) {
+    const webIdAsUrl = new URL(webId);
+    const resourceServerIri = webIdAsUrl.origin;
+    await storage.clearResourceServerSessionInfo(resourceServerIri);
+  }
   await Promise.all([
     storage.deleteAllUserData(sessionId, { secure: false }),
     storage.deleteAllUserData(sessionId, { secure: true }),
