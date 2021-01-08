@@ -162,11 +162,6 @@ describe("SessionInfoManager", () => {
         "https://my.pod",
         10000
       );
-      console.log(
-        await mockStorage.get("tmp-resource-server-session-info", {
-          secure: false,
-        })
-      );
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorage,
       });
