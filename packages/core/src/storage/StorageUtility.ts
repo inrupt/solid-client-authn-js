@@ -115,7 +115,7 @@ export async function saveSessionInfoToStorage(
   }
 }
 
-type ResourceServerSession = {
+export type ResourceServerSession = {
   webId: string;
   sessions: Record<
     string,
