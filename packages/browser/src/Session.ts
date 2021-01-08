@@ -27,6 +27,7 @@ import {
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
+  ResourceServerSession,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
@@ -175,10 +176,6 @@ export class Session extends EventEmitter {
     if (typeof storedSessionCookieReference === "string") {
       // TOOD: Re-use the type used when writing this data:
       // https://github.com/inrupt/solid-client-authn-js/pull/920/files#diff-659ac87dfd3711f4cfcea3c7bf6970980f4740fd59df45f04c7977bffaa23e98R118
-      type ResourceServerSession = {
-        webId: string;
-        sessions: Record<string, { expiration: number }>;
-      };
       // To keep temporary code together
       // eslint-disable-next-line no-inner-declarations
       function isValidSessionCookieReference(
