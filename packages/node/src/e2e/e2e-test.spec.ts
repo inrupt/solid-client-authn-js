@@ -23,6 +23,11 @@ import { it, describe } from "@jest/globals";
 import { config } from "dotenv-flow";
 import { Session } from "../Session";
 
+import { custom } from "openid-client";
+custom.setHttpOptionsDefaults({
+  timeout: 15000,
+});
+
 // Load environment variables from .env.local if available:
 config({
   path: __dirname,
