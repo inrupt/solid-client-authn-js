@@ -325,10 +325,6 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated dpop fetch if requested", async () => {
-      window.fetch = jest.fn() as jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
       window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
           resolve(
