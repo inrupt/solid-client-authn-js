@@ -90,26 +90,24 @@ async function setupResourceServerSession(
   const resourceServerResponse = await authenticatedFetch(
     `${resourceServerIri}/session`
   );
-  if (
-    resourceServerResponse.status === 404 ||
-    resourceServerResponse.status === 401
-  ) {
-    // In this case, the resource server either:
-    // - does not have the expected endpoint, or
-    // - does not recognize the user
-    // Either way, no cookie is expected to be set there, and any existing
-    // session information should be cleared.
-    await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
+
+  if (resourceServerResponse.status === 200) {
+    await storageUtility.storeResourceServerSessionInfo(
+      webId,
+      resourceServerIri,
+      // Note that here, if the lifespan of the cookie was returned by the server,
+      // we'd expect a relative value (the remaining time of validity) rather than
+      // an absolute one (the moment when the cookie expires).
+      Date.now() + DEFAULT_LIFESPAN
+    );
     return;
   }
-  await storageUtility.storeResourceServerSessionInfo(
-    webId,
-    resourceServerIri,
-    // Note that here, if the lifespan of the cookie was returned by the server,
-    // we'd expect a relative value (the remaining time of validity) rather than
-    // an absolute one (the moment when the cookie expires).
-    Date.now() + DEFAULT_LIFESPAN
-  );
+  // In this case, the resource server either:
+  // - does not have the expected endpoint, or
+  // - does not recognize the user
+  // Either way, no cookie is expected to be set there, and any existing
+  // session information should be cleared.
+  await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
 }
 
 /**
