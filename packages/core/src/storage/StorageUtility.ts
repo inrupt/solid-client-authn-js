@@ -265,7 +265,7 @@ export default class StorageUtility implements IStorageUtility {
   async storeResourceServerSessionInfo(
     webId: string,
     resourceServerIri: string,
-    sessionExpires: number
+    expiration: number
   ): Promise<void> {
     const sessions: ResourceServerSession = JSON.parse(
       (await this.insecureStorage.get(
@@ -273,12 +273,12 @@ export default class StorageUtility implements IStorageUtility {
       )) ?? "{}"
     );
     if (sessions.webId !== webId) {
-      // Clear sessions active previously
+      // Clear all previously active sessions.
       sessions.sessions = {};
     }
     sessions.webId = webId;
     sessions.sessions[resourceServerIri] = {
-      expiration: sessionExpires,
+      expiration: expiration,
     };
     await this.insecureStorage.set(
       this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
@@ -298,7 +298,7 @@ export default class StorageUtility implements IStorageUtility {
       delete sessions.sessions[resourceServerIri];
 
       if (Object.keys(sessions.sessions).length === 0) {
-        // If there isn't any active session left, the whole object is cleared.
+        // If there aren't any active sessions left, the whole object is cleared.
         await this.insecureStorage.set(
           this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
           "{}"

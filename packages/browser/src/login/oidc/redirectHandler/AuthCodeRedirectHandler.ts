@@ -74,8 +74,8 @@ export async function exchangeDpopToken(
 export const DEFAULT_LIFESPAN = 1800;
 
 /**
- * Stores the resoure server session information in local storage, so that they
- * can be leveraged on refresh.
+ * Stores the resource server session information in local storage, so that they
+ * can be used on refresh.
  * @param webId
  * @param authenticatedFetch
  * @param storageUtility
@@ -97,7 +97,7 @@ async function setupResourceServerSession(
     // In this case, the resource server either:
     // - does not have the expected endpoint, or
     // - does not recognize the user
-    // Either ways, no cookie is expected to be set there, and any existing
+    // Either way, no cookie is expected to be set there, and any existing
     // session information should be cleared.
     await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
     return;
