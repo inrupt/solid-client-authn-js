@@ -27,6 +27,7 @@ import ITestConfig from "./ITestConfig";
 import IPodServerConfig from "./IPodServerConfig";
 import { authorizeEss, authorizeNss } from "./helpers/authorizeClientApp";
 import LoginPage from "./page-models/LoginPage";
+import { CognitoPage } from "./page-models/cognito";
 
 // Could probably provide this via a system environment variable too...
 const testSuite = require("./test-suite.json");
@@ -81,6 +82,13 @@ async function performLogin(
     case "nss":
       await loginNss(testUserName, testUserPassword as string);
       break;
+
+    case "Cognito":
+      const cognitoPage = new CognitoPage();
+      await cognitoPage.login(
+        process.env.E2E_TEST_ESS_COGNITO_USER!,
+        process.env.E2E_TEST_ESS_COGNITO_PASSWORD!
+      );
 
     default:
       throw new Error(
@@ -172,3 +180,11 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
     });
   }
 });
+
+// it("is still logged in after refresh", async () => {
+//   // Currently, this tests only works
+//   const server = import("./test-suite.json")["podServerList"][0];
+//   const testUserName = process.env[server.envTestUserName] as string;
+//   await performLogin(server, testUserName);
+//   await t.eval(() => location.reload());
+// })

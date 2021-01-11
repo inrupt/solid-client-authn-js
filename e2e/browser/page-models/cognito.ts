@@ -1,5 +1,5 @@
-/*
- * Copyright 2021 Inrupt Inc.
+/**
+ * Copyright 2020 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -19,12 +19,31 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export default interface IPodServerConfig {
-  description: string;
-  podResourceServer: string;
-  identityProvider: string;
-  envTestUserName: string;
-  envTestUserPassword: string;
-  brokeredIdp: "nss" | "Gluu" | "Google" | "Github" | "Auth0" | "Cognito";
-  authorizeClientAppMechanism: "nss" | "ess";
+import { t, Selector } from "testcafe";
+import { screen } from "@testing-library/testcafe";
+
+export class CognitoPage {
+  usernameInput;
+  passwordInput;
+  submitButton;
+
+  constructor() {
+    // The Cognito sign-in page contains the sign-in form twice and is basically confusing
+    // TestCafe/testing-library, hence the cumbersome selectors rather than selecting by label text.
+    this.usernameInput = screen.getByRole("textbox");
+    this.passwordInput = Selector(".visible-lg input[type=password]");
+    this.submitButton = Selector(".visible-lg input[type=submit]");
+  }
+
+  async login(username: string, password: string) {
+    await onCognitoPage();
+    await t
+      .typeText(this.usernameInput, username)
+      .typeText(this.passwordInput, password)
+      .click(this.submitButton);
+  }
+}
+
+export async function onCognitoPage() {
+  await t.expect(Selector("form[name=cognitoSignInForm]").exists).ok();
 }
