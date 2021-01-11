@@ -101,7 +101,10 @@ export default class ClientAuthentication {
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
-    this.fetch = fetchWithCookies;
+    this.fetch = (
+      info: RequestInfo,
+      init?: RequestInit
+    ): ReturnType<typeof fetch> => window.fetch(info, init);
   };
 
   getSessionInfo = async (
