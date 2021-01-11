@@ -8,14 +8,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.4.0 - 2020-01-11
+
 ### New features
 
 - Updating the browser window will no longer log the user out if their WebID is
 hosted on an ESS instance (such as https://pod.inrupt.com). A better, global
 solution will be implemented later in order not to break compatibility in the 
 ecosystem.
-
-The following sections document changes that have been released already:
 
 ## 1.3.0 - 2020-01-06
 
