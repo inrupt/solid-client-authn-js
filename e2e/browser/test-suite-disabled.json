@@ -1,15 +1,6 @@
 {
   "podServerList": [
     {
-      "description": "NSS",
-      "podResourceServer": "https://<TEST USER NAME>.inrupt.net/",
-      "identityProvider": "https://inrupt.net",
-      "envTestUserName": "E2E_NSS_USERNAME",
-      "envTestUserPassword": "E2E_NSS_PASSWORD",
-      "brokeredIdp": "nss",
-      "authorizeClientAppMechanism": "nss"
-    },
-    {
       "description": "ESS Prod - Gluu (default)",
       "podResourceServer": "https://ldp.pod.inrupt.com/<TEST USER NAME>/",
       "identityProvider": "https://broker.pod.inrupt.com",
@@ -27,5 +18,6 @@
       "brokeredIdp": "Cognito",
       "authorizeClientAppMechanism": "ess"
     }
-  ]
+  ],
+  "testList": []
 }

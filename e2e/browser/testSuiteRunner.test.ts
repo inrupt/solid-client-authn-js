@@ -22,12 +22,11 @@
 import { Selector, t } from "testcafe";
 import FetchPage from "./page-models/FetchPage";
 
-import { loginGluu, loginNss } from "./helpers/login";
+import { loginGluu, loginNss, loginCognito } from "./helpers/login";
 import ITestConfig from "./ITestConfig";
 import IPodServerConfig from "./IPodServerConfig";
 import { authorizeEss, authorizeNss } from "./helpers/authorizeClientApp";
 import LoginPage from "./page-models/LoginPage";
-import { CognitoPage } from "./page-models/cognito";
 
 // Could probably provide this via a system environment variable too...
 const testSuite = require("./test-suite.json");
@@ -84,11 +83,8 @@ async function performLogin(
       break;
 
     case "Cognito":
-      const cognitoPage = new CognitoPage();
-      await cognitoPage.login(
-        process.env.E2E_TEST_ESS_COGNITO_USER!,
-        process.env.E2E_TEST_ESS_COGNITO_PASSWORD!
-      );
+      await loginCognito(testUserName, testUserPassword as string);
+      break;
 
     default:
       throw new Error(
@@ -135,6 +131,11 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
       test(`Pod Server - IdP [${server.description}], test [${data.name}]`, async (t) => {
         if (data.performLogin) {
           await performLogin(server, testUserName);
+        }
+
+        // NSS does not support the RS session cookie
+        if (data.refresh && server.podResourceServer === "ess") {
+          await t.eval(() => location.reload());
         }
 
         const podRoot = server.podResourceServer.replace(

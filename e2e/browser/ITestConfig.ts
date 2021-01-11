@@ -24,4 +24,5 @@ export default interface ITestConfig {
   performLogin: boolean;
   resourceToGet: string;
   expectResponseContainsAnyOf: string[];
+  refresh: boolean | undefined;
 }

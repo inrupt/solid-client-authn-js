@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { t, Selector } from "testcafe";
+import { t, ClientFunction, Selector } from "testcafe";
 import { screen } from "@testing-library/testcafe";
 
 export class CognitoPage {
