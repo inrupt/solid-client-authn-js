@@ -355,7 +355,7 @@ describe("Session", () => {
         });
       });
 
-      it("logs you in even if your Identity Provider is not your Resource server", async () => {
+      it("logs you in even if your Solid Identity Provider is not your Resource server", async () => {
         // Mock localStorage's `getItem` method:
         const existingLocalStorage = window.localStorage;
         const localStorageMock = {
