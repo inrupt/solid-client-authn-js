@@ -181,11 +181,3 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
     });
   }
 });
-
-// it("is still logged in after refresh", async () => {
-//   // Currently, this tests only works
-//   const server = import("./test-suite.json")["podServerList"][0];
-//   const testUserName = process.env[server.envTestUserName] as string;
-//   await performLogin(server, testUserName);
-//   await t.eval(() => location.reload());
-// })
