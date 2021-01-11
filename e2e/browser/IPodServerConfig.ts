@@ -25,6 +25,6 @@ export default interface IPodServerConfig {
   identityProvider: string;
   envTestUserName: string;
   envTestUserPassword: string;
-  brokeredIdp: "nss" | "Gluu" | "Google" | "Github" | "Auth0";
+  brokeredIdp: "nss" | "Gluu" | "Google" | "Github" | "Auth0" | "Cognito";
   authorizeClientAppMechanism: "nss" | "ess";
 }

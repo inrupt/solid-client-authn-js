@@ -6,7 +6,7 @@
       "identityProvider": "https://broker.pod.inrupt.com",
       "envTestUserName": "E2E_ESS_USERNAME",
       "envTestUserPassword": "E2E_ESS_PASSWORD",
-      "brokeredIdp": "Gluu",
+      "brokeredIdp": "Cognito",
       "authorizeClientAppMechanism": "ess"
     },
     {
@@ -15,8 +15,9 @@
       "identityProvider": "https://broker.dev-ess.inrupt.com",
       "envTestUserName": "E2E_ESS_DEV_USERNAME",
       "envTestUserPassword": "E2E_ESS_DEV_PASSWORD",
-      "brokeredIdp": "Gluu",
+      "brokeredIdp": "Cognito",
       "authorizeClientAppMechanism": "ess"
     }
-  ]
+  ],
+  "testList": []
 }
