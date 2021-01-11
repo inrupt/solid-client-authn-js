@@ -303,20 +303,22 @@ describe("Session", () => {
           value: localStorageMock,
           writable: true,
         });
-        const clientAuthentication = mockClientAuthentication();
-        clientAuthentication.handleIncomingRedirect = jest.fn();
-        const mySession = new Session({ clientAuthentication });
-        await mySession.handleIncomingRedirect("https://some.url");
-        expect(mySession.info.isLoggedIn).toEqual(true);
-        expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
-        expect(
-          clientAuthentication.handleIncomingRedirect
-        ).toHaveBeenCalledTimes(0);
-
-        // Remove the mocked method:
-        Object.defineProperty(window, "localStorage", {
-          value: existingLocalStorage,
-        });
+        try {
+          const clientAuthentication = mockClientAuthentication();
+          clientAuthentication.handleIncomingRedirect = jest.fn();
+          const mySession = new Session({ clientAuthentication });
+          await mySession.handleIncomingRedirect("https://some.url");
+          expect(mySession.info.isLoggedIn).toEqual(true);
+          expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
+          expect(
+            clientAuthentication.handleIncomingRedirect
+          ).toHaveBeenCalledTimes(0);
+        } finally {
+          // Remove the mocked method:
+          Object.defineProperty(window, "localStorage", {
+            value: existingLocalStorage,
+          });
+        }
       });
 
       it("does not mark an almost-expired session as logged in", async () => {
