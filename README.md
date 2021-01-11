@@ -32,6 +32,12 @@ npm install solid-auth-fetcher
 ```bash
 git clone https://github.com/solid/solid-auth-fetcher.git
 cd solid-auth-fetcher
+vim examples/bundle/index.html +10
+// Edit the TEST_URL to something on your own pod.
+npx serve
+```
+Now browse to http://localhost:5000/
+<!--
 npm i
 npm run bootstrap-examples
 npm run build
@@ -44,7 +50,7 @@ npm run dev-bundle
 ```
 
 At this point, a test application will be running on port `3001` and a test solid server will be running on port `9001`
-
+-->
 ## Importing
 
 In the browser via the `script` tag:

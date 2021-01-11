@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+  </body>
+  <script src="./solid-auth-fetcher.bundle.js">
+  </script>
+  <script>
+    const TEST_URL = 'https://michielbdejong.solidcommunity.net/private/';
+    async function go() {
+      const authFetcher = await solidAuthFetcher.customAuthFetcher();
+      // if (window.location.search.length) {
+      //   await authFetcher.handleRedirect(window.location);
+      // }
+      const result = await solidAuthFetcher.fetch(TEST_URL);
+      console.log(result.status);
+      if (result.status === 401) {
+        console.log('Logging in!');
+        const session = await authFetcher.login({
+          oidcIssuer: new URL(TEST_URL).origin,
+          redirect: location.href
+        });
+        // FIXME: avoid this hard-coded timeout
+        await new Promise(resolve => setTimeout(resolve, 500));
+        window.location = session.neededAction.redirectUrl;
+      }
+    }
+    go()
+  </script>
+</html>
