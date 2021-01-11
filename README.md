@@ -28,7 +28,7 @@ npm install solid-auth-fetcher
  - [In React Native (iOS and Andorid)](./examples/react-native)
 
 ### Web app
-
+See the [code in this html page](https://github.com/solid/solid-auth-fetcher/blob/ce23693/examples/bundle/index.html#L12-L24), and try it out as follows:
 ```bash
 git clone https://github.com/solid/solid-auth-fetcher.git
 cd solid-auth-fetcher
