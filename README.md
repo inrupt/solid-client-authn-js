@@ -27,7 +27,7 @@ npm install solid-auth-fetcher
  - [On the server](./examples/server)
  - [In React Native (iOS and Andorid)](./examples/react-native)
 
-### Setting up the examples
+### Web app
 
 ```bash
 git clone https://github.com/solid/solid-auth-fetcher.git
@@ -38,7 +38,16 @@ npx serve
 ```
 Now browse to http://localhost:5000/
 
-<!--
+### Node
+
+See for instance how the solid-crud-tests use solid-auth-fetcher to [obtain the auth headers for use in websockets-pubsub](https://github.com/solid/solid-crud-tests/blob/v2.0.3/test/helpers/util.ts)
+or to [test an authenticated DELETE request](https://github.com/solid/solid-crud-tests/blob/v2.0.3/test/surface/delete.test.ts#L50-L52).
+
+### Setting up the other examples (YMMV)
+
+```bash
+git clone https://github.com/solid/solid-auth-fetcher.git
+cd solid-auth-fetcher
 npm i
 npm run bootstrap-examples
 npm run build
@@ -51,7 +60,7 @@ npm run dev-bundle
 ```
 
 At this point, a test application will be running on port `3001` and a test solid server will be running on port `9001`
--->
+
 ## Importing
 
 In the browser via the `script` tag:
