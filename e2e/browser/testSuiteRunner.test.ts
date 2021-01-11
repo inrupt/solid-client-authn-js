@@ -133,7 +133,7 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
           await performLogin(server, testUserName);
         }
 
-        // NSS does not support the RS session cookie
+        // NSS does not support the RS session cookie.
         if (data.refresh && server.podResourceServer === "ess") {
           await t.eval(() => location.reload());
         }
