@@ -71,7 +71,7 @@ export async function exchangeDpopToken(
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we configure the
 // server to return the remaining lifespan of the cookie.
-export const DEFAULT_LIFESPAN = 1800;
+export const DEFAULT_LIFESPAN = 1800 * 1000;
 
 /**
  * Stores the resource server session information in local storage, so that they
@@ -87,6 +87,10 @@ async function setupResourceServerSession(
 ): Promise<void> {
   const webIdAsUrl = new URL(webId);
   const resourceServerIri = webIdAsUrl.origin;
+  // Querying the /session endpoint does not set the cookie, but issuing an
+  // authenticated request to any actual resource (even public ones) does,
+  // so we fetch the user's WebID before checking the /session endpoint.
+  await authenticatedFetch(webId);
   const resourceServerResponse = await authenticatedFetch(
     `${resourceServerIri}/session`
   );

@@ -123,19 +123,23 @@ describe("ClientAuthentication", () => {
   });
 
   describe("fetch", () => {
-    it("calls fetch", async () => {
+    it("calls fetch using the browser cookies if available", async () => {
       window.fetch = jest.fn();
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
-      expect(window.fetch).toHaveBeenCalledWith("https://html5zombo.com");
+      expect(window.fetch).toHaveBeenCalledWith("https://html5zombo.com", {
+        credentials: "include",
+      });
     });
   });
 
   describe("logout", () => {
     it("reverts back to un-authenticated fetch on logout", async () => {
+      window.fetch = jest.fn();
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
       const clientAuthn = getClientAuthentication();
+
       const unauthFetch = clientAuthn.fetch;
 
       const url =
@@ -146,9 +150,14 @@ describe("ClientAuthentication", () => {
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
 
       await clientAuthn.logout("mySession");
-
+      const spyFetch = jest.spyOn(window, "fetch");
+      await clientAuthn.fetch("https://example.com", {
+        credentials: "omit",
+      });
       // Calling logout should revert back to our un-authenticated fetch.
-      expect(clientAuthn.fetch).toBe(unauthFetch);
+      expect(spyFetch).toHaveBeenCalledWith("https://example.com", {
+        credentials: "omit",
+      });
     });
   });
 

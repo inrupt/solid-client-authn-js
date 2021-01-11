@@ -21,9 +21,9 @@
 
 import { it, describe } from "@jest/globals";
 import { config } from "dotenv-flow";
+import { custom } from "openid-client";
 import { Session } from "../Session";
 
-import { custom } from "openid-client";
 custom.setHttpOptionsDefaults({
   timeout: 15000,
 });
@@ -69,6 +69,7 @@ describe("Authenticated fetch", () => {
       refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const publicResourceUrl = session.info.webId!;
     const response = await session.fetch(publicResourceUrl);
     expect(response.status).toEqual(200);
@@ -85,6 +86,7 @@ describe("Authenticated fetch", () => {
       refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     const response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(200);
@@ -93,6 +95,7 @@ describe("Authenticated fetch", () => {
 
   it("can fetch a private resource when logged in after the same fetch failed", async () => {
     const session = new Session();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     let response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
@@ -114,6 +117,7 @@ describe("Authenticated fetch", () => {
 
   it("only logs in the requested session", async () => {
     const authenticatedSession = new Session();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
 
     await authenticatedSession.login({
@@ -141,6 +145,7 @@ describe("Unauthenticated fetch", () => {
       refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const publicResourceUrl = authenticatedSession.info.webId!;
 
     const unauthenticatedSession = new Session();
@@ -153,6 +158,7 @@ describe("Unauthenticated fetch", () => {
 
   it("cannot fetch a private resource when not logged in", async () => {
     const session = new Session();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     const response = await session.fetch(privateResourceUrl);
     expect(response.status).toEqual(401);
@@ -168,6 +174,7 @@ describe("Post-logout fetch", () => {
       refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const publicResourceUrl = session.info.webId!;
     await session.logout();
     const response = await session.fetch(publicResourceUrl);
@@ -179,6 +186,7 @@ describe("Post-logout fetch", () => {
 
   it("cannot fetch a private resource after logging out", async () => {
     const session = new Session();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
     await session.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,

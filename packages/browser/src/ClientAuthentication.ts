@@ -35,6 +35,16 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 
+const fetchWithCookies = (
+  info: RequestInfo,
+  init?: RequestInit
+): ReturnType<typeof fetch> => {
+  return window.fetch(info, {
+    ...init,
+    credentials: "include",
+  });
+};
+
 /**
  * @hidden
  */
@@ -84,14 +94,17 @@ export default class ClientAuthentication {
   };
 
   // By default, our fetch() resolves to the environment fetch() function.
-  fetch = window.fetch;
+  fetch = fetchWithCookies;
 
   logout = async (sessionId: string): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
-    this.fetch = window.fetch;
+    this.fetch = (
+      info: RequestInfo,
+      init?: RequestInit
+    ): ReturnType<typeof fetch> => window.fetch(info, init);
   };
 
   getSessionInfo = async (

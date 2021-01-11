@@ -267,6 +267,160 @@ describe("Session", () => {
       );
       expect(clientAuthnHandleIncomingRedirect).toHaveBeenCalled();
     });
+
+    // This workaround will be removed after we've settled on an API that allows us to silently
+    // re-activate the user's session after a refresh:
+    describe("(using the temporary workaround for losing a session after refresh)", () => {
+      it("does not report the user to be logged in when the workaround cookie is not present, and just executes the redirect", async () => {
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn(
+          async (_url: string) => undefined
+        );
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(mySession.info.isLoggedIn).toEqual(false);
+        expect(mySession.info.webId).toBeUndefined();
+        expect(
+          clientAuthentication.handleIncomingRedirect
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      it("re-initialises the user's WebID without redirection if the proper cookie is set", async () => {
+        // Mock localStorage's `getItem` method:
+        const existingLocalStorage = window.localStorage;
+        const localStorageMock = {
+          getItem: jest.fn(() =>
+            JSON.stringify({
+              webId: "https://my.pod/profile#me",
+              sessions: {
+                "https://my.pod/": { expiration: 9000000000000 },
+              },
+            })
+          ),
+        };
+
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+          writable: true,
+        });
+        try {
+          const clientAuthentication = mockClientAuthentication();
+          clientAuthentication.handleIncomingRedirect = jest.fn();
+          const mySession = new Session({ clientAuthentication });
+          await mySession.handleIncomingRedirect("https://some.url");
+          expect(mySession.info.isLoggedIn).toEqual(true);
+          expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
+          expect(
+            clientAuthentication.handleIncomingRedirect
+          ).toHaveBeenCalledTimes(0);
+        } finally {
+          // Remove the mocked method:
+          Object.defineProperty(window, "localStorage", {
+            value: existingLocalStorage,
+          });
+        }
+      });
+
+      it("does not mark an almost-expired session as logged in", async () => {
+        // Mock localStorage's `getItem` method:
+        const existingLocalStorage = window.localStorage;
+        const localStorageMock = {
+          getItem: jest.fn(() =>
+            JSON.stringify({
+              webId: "https://my.pod/profile#me",
+              sessions: {
+                "https://my.pod/": { expiration: Date.now() + 10000 },
+              },
+            })
+          ),
+        };
+
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+          writable: true,
+        });
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn();
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(mySession.info.isLoggedIn).toEqual(false);
+        expect(mySession.info.webId).toBeUndefined();
+        expect(
+          clientAuthentication.handleIncomingRedirect
+        ).toHaveBeenCalledTimes(1);
+
+        // Remove the mocked method:
+        Object.defineProperty(window, "localStorage", {
+          value: existingLocalStorage,
+        });
+      });
+
+      it("logs you in even if your Solid Identity Provider is not your Resource server", async () => {
+        // Mock localStorage's `getItem` method:
+        const existingLocalStorage = window.localStorage;
+        const localStorageMock = {
+          getItem: jest.fn(() =>
+            JSON.stringify({
+              webId: "https://my.pod/profile#me",
+              sessions: {
+                "https://not.my.pod/": { expiration: 9000000000000 },
+              },
+            })
+          ),
+        };
+
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+          writable: true,
+        });
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn();
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(mySession.info.isLoggedIn).toEqual(true);
+        expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
+        expect(
+          clientAuthentication.handleIncomingRedirect
+        ).toHaveBeenCalledTimes(0);
+
+        // Remove the mocked method:
+        Object.defineProperty(window, "localStorage", {
+          value: existingLocalStorage,
+        });
+      });
+
+      it("does not log the user in if the data in the storage was invalid", async () => {
+        // Mock localStorage's `getItem` method:
+        const existingLocalStorage = window.localStorage;
+        const localStorageMock = {
+          getItem: jest.fn(() =>
+            JSON.stringify({
+              webId: "https://my.pod/profile#me",
+              // `sessions` key is intentionally missing
+            })
+          ),
+        };
+
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+          writable: true,
+        });
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn();
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(mySession.info.isLoggedIn).toEqual(false);
+        expect(mySession.info.webId).toBeUndefined();
+        expect(
+          clientAuthentication.handleIncomingRedirect
+        ).toHaveBeenCalledTimes(1);
+
+        // Remove the mocked method:
+        Object.defineProperty(window, "localStorage", {
+          value: existingLocalStorage,
+        });
+      });
+    });
   });
 
   describe("onLogin", () => {
