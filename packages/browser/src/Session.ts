@@ -129,18 +129,6 @@ export class Session extends EventEmitter {
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    if (!this.info.isLoggedIn) {
-      // TODO: why does this.clientAuthentication.fetch return throws
-      // ""'fetch' called on an object that does not implement interface Window"
-      // when unauthenticated ?
-      return window.fetch(url, {
-        ...init,
-        // TMP: This ensures that the HTTP requests will include any relevant cookie
-        // that could have been set by the resource server.
-        // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#parameters
-        credentials: "include",
-      });
-    }
     return this.clientAuthentication.fetch(url, init);
   };
 
