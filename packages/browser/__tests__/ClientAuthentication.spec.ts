@@ -123,11 +123,13 @@ describe("ClientAuthentication", () => {
   });
 
   describe("fetch", () => {
-    it("calls fetch", async () => {
+    it("calls fetch using the browser cookies if available", async () => {
       window.fetch = jest.fn();
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
-      expect(window.fetch).toHaveBeenCalledWith("https://html5zombo.com");
+      expect(window.fetch).toHaveBeenCalledWith("https://html5zombo.com", {
+        credentials: "include",
+      });
     });
   });
 

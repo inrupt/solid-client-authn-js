@@ -21,9 +21,9 @@
 
 import { it, describe } from "@jest/globals";
 import { config } from "dotenv-flow";
+import { custom } from "openid-client";
 import { Session } from "../Session";
 
-import { custom } from "openid-client";
 custom.setHttpOptionsDefaults({
   timeout: 15000,
 });
