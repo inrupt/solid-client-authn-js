@@ -32,11 +32,12 @@ npm install solid-auth-fetcher
 ```bash
 git clone https://github.com/solid/solid-auth-fetcher.git
 cd solid-auth-fetcher
-vim examples/bundle/index.html +10
-// Edit the TEST_URL to something on your own pod.
+cd examples/bundle
+# Edit the TEST_URL in line 10 of index.html to something on your own pod.
 npx serve
 ```
 Now browse to http://localhost:5000/
+
 <!--
 npm i
 npm run bootstrap-examples
