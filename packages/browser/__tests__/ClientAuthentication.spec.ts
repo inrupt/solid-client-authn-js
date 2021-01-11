@@ -135,9 +135,11 @@ describe("ClientAuthentication", () => {
 
   describe("logout", () => {
     it("reverts back to un-authenticated fetch on logout", async () => {
+      window.fetch = jest.fn();
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
       const clientAuthn = getClientAuthentication();
+
       const unauthFetch = clientAuthn.fetch;
 
       const url =
@@ -148,9 +150,14 @@ describe("ClientAuthentication", () => {
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
 
       await clientAuthn.logout("mySession");
-
+      const spyFetch = jest.spyOn(window, "fetch");
+      await clientAuthn.fetch("https://example.com", {
+        credentials: "omit",
+      });
       // Calling logout should revert back to our un-authenticated fetch.
-      expect(clientAuthn.fetch).toBe(unauthFetch);
+      expect(spyFetch).toHaveBeenCalledWith("https://example.com", {
+        credentials: "omit",
+      });
     });
   });
 
