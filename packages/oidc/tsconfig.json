@@ -7,7 +7,8 @@
   },
 
   "typedocOptions": {
-    "out": "website/docs/api/oidc-client-ext"
+    "out": "website/docs/api/oidc-client-ext",
+    "entryPoints": ["./src/index.ts"]
   },
 
   "include": ["src/**/*"],

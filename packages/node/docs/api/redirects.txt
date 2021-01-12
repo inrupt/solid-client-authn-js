@@ -1,0 +1,6 @@
+developer-tools/api/javascript/solid-client-authn-node/README.html -> developer-tools/api/javascript/solid-client-authn-node/index.html
+developer-tools/api/javascript/solid-client-authn-node/classes/_session_.session.html -> developer-tools/api/javascript/solid-client-authn-node/classes/session.html
+developer-tools/api/javascript/solid-client-authn-node/classes/_sessionmanager_.sessionmanager.html -> developer-tools/api/javascript/solid-client-authn-node/classes/sessionmanager.html
+developer-tools/api/javascript/solid-client-authn-node/interfaces/_sessionmanager_.isessionmanager.html -> developer-tools/api/javascript/solid-client-authn-node/classes/notimplementederror.html
+developer-tools/api/javascript/solid-client-authn-node/interfaces/_session_.isessionoptions.html -> developer-tools/api/javascript/solid-client-authn-node/interfaces/isessionoptions.html
+developer-tools/api/javascript/solid-client-authn-node/modules/_session_.html -> developer-tools/api/javascript/solid-client-authn-node/classes/session.html
