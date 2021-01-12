@@ -28,24 +28,7 @@ import { IStorage, NotImplementedError } from "@inrupt/solid-client-authn-core";
 // Note that currently, the jest runner doesn't support ES modules, so the following
 // does not work, and the "promise" import on the line after that is required instead.
 // import { readFile } from "fs/promises";
-import { existsSync, writeFileSync, promises } from "fs";
-
-export const get = async (
-  path: string,
-  key: string
-): Promise<string | undefined> => {
-  try {
-    const rawData = await promises.readFile(path, {
-      encoding: "utf-8",
-    });
-    const parsedData = JSON.parse(rawData);
-    return parsedData[key] || undefined;
-  } catch (e) {
-    throw new Error(
-      `An error happened while parsing JSON content of [${path}]: ${e}`
-    );
-  }
-};
+import { existsSync, writeFileSync, readFileSync, promises } from "fs";
 
 /**
  * Simple persistent storage solution that uses a file on the host filesystem to store data
@@ -57,14 +40,29 @@ export default class FileSystemStorage implements IStorage {
   constructor(private path: string) {
     // If the file does not exist, create it
     if (!existsSync(path)) {
-      writeFileSync(path, "");
+      writeFileSync(path, "{}", {
+        encoding: "utf-8",
+      });
+    }
+    try {
+      this.map = JSON.parse(
+        readFileSync(path, {
+          encoding: "utf-8",
+        })
+      );
+    } catch (e) {
+      throw new Error(
+        `An error happened while parsing JSON content of [${path}]: ${e}`
+      );
     }
   }
 
-  get = (key: string): Promise<string | undefined> => get(this.path, key);
+  get = async (key: string): Promise<string | undefined> =>
+    this.map[key] || undefined;
 
-  set = async (_key: string, _value: string): Promise<void> => {
-    throw new NotImplementedError("FileSystemStorage.set");
+  set = async (key: string, value: string): Promise<void> => {
+    this.map[key] = value;
+    return promises.writeFile(this.path, JSON.stringify(this.map));
   };
 
   delete = async (_key: string): Promise<void> => {
