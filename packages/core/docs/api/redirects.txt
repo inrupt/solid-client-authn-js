@@ -1,0 +1,16 @@
+developer-tools/api/javascript/solid-client-authn-core/README.html -> developer-tools/api/javascript/solid-client-authn-core/index.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_sessioninfo_isessioninfo_.html -> developer-tools/api/javascript/solid-client-authn-core/interfaces/isessioninfo.html
+developer-tools/api/javascript/solid-client-authn-core/interfaces/_ilogininputoptions_.ilogininputoptions.html -> developer-tools/api/javascript/solid-client-authn-core/interfaces/ilogininputoptions.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_ilogininputoptions_.html -> developer-tools/api/javascript/solid-client-authn-core/interfaces/ilogininputoptions.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_errors_errors_spec_.html -> developer-tools/api/javascript/solid-client-authn-core/index.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_index_.html -> developer-tools/api/javascript/solid-client-authn-core/index.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_storage___mocks___storageutility_.html  -> docs/developer-tools/api/javascript/solid-client-authn-core/interfaces/istorageutility.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_storage_inmemorystorage_spec_.html  -> developer-tools/api/javascript/solid-client-authn-core/index.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_storage_istorage_.html -> docs/developer-tools/api/javascript/solid-client-authn-core/interfaces/istorage.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_storage_storageutility_spec_.html -> docs/developer-tools/api/javascript/solid-client-authn-core/interfaces/istorageutility.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_util_handlerpattern_aggregatehandler_spec_.html  -> developer-tools/api/javascript/solid-client-authn-core/index.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_util_validateschema_spec_.html  -> developer-tools/api/javascript/solid-client-authn-core/index.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_login_oidc___mocks___issuerconfigfetcher_.html -> developer-tools/api/javascript/solid-client-authn-core/interfaces/iissuerconfigfetcher.html
+developer-tools/api/javascript/solid-client-authn-core/modules/_login_oidc___mocks___issuerconfig_.html -> developer-tools/api/javascript/solid-client-authn-core/interfaces/iissuerconfigfetcher.html
+developer-tools/api/javascript/solid-client-authn-core/interfaces/_sessioninfo_isessioninfo_.isessioninfo.html -> developer-tools/api/javascript/solid-client-authn-core/interfaces/isessioninfo.html
+developer-tools/api/javascript/solid-client-authn-core/interfaces/_storage_istorage_.istorage.html -> developer-tools/api/javascript/solid-client-authn-core/interfaces/istorage.html

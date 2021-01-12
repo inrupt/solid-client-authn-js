@@ -32,6 +32,10 @@ migrate: clean
    # Copying to SOURCECOPYDIR instead of copying source dir to BUILDDIR
    # in case someone forgets to backslash after build/
 
+   # First remove redundant index.md (auto-generated) so that
+	# we can use the index.rst file (which has the toctree)
+	if [ -f $(SOURCEDIR)/api/index.md ]; then rm $(SOURCEDIR)/api/index.md; fi
+
 	cp -R $(SOURCEDIR)/index.rst $(SOURCECOPYDIR)
 	cp -R $(SOURCEDIR)/api/* $(SOURCECOPYDIR)
 
