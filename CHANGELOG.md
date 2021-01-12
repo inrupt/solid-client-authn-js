@@ -10,6 +10,17 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+### Backward-compatible API changes
+
+- For `solid-client-authn-node`, the `secureStorage` and `insecureStorage` are
+deprecated, and replaced by `storage`.
+
+### Bugfix
+
+- When providing a storage that already contains session information in the NodeJS
+context (as demonstrated with the `FileSystemStorage` in `packages/node/example/bootstrappedApp`),
+the refresh token is now picked up instead of the request failing.
+
 ## 1.4.0 - 2020-01-11
 
 ### New features

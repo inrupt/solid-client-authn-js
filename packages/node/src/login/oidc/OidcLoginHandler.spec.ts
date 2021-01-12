@@ -182,5 +182,62 @@ describe("OidcLoginHandler", () => {
         mockedStorage.getForUser("mySession", "clientId")
       ).resolves.toEqual("some pre-registered client id");
     });
+
+    it("uses the refresh token from storage if available", async () => {
+      const { oidcHandler } = defaultMocks;
+      const mockedStorage = mockStorageUtility({});
+      await mockedStorage.setForUser("mySession", {
+        refreshToken: "some token",
+      });
+      const clientRegistrar = mockDefaultClientRegistrar();
+      clientRegistrar.getClient = jest
+        .fn()
+        .mockResolvedValueOnce(mockDefaultClient());
+      const handler = getInitialisedHandler({
+        oidcHandler,
+        clientRegistrar,
+        storageUtility: mockedStorage,
+      });
+      await handler.handle({
+        sessionId: "mySession",
+        oidcIssuer: "https://arbitrary.url",
+        redirectUrl: "https://app.com/redirect",
+        tokenType: "DPoP",
+      });
+      expect(oidcHandler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          refreshToken: "some token",
+        })
+      );
+    });
+
+    it("ignores the refresh token from storage if one is passed in arguments", async () => {
+      const { oidcHandler } = defaultMocks;
+      const mockedStorage = mockStorageUtility({});
+      await mockedStorage.setForUser("mySession", {
+        refreshToken: "some token",
+      });
+      const clientRegistrar = mockDefaultClientRegistrar();
+      clientRegistrar.getClient = jest
+        .fn()
+        .mockResolvedValueOnce(mockDefaultClient());
+      const handler = getInitialisedHandler({
+        oidcHandler,
+        clientRegistrar,
+        storageUtility: mockedStorage,
+      });
+      await handler.handle({
+        sessionId: "mySession",
+        oidcIssuer: "https://arbitrary.url",
+        redirectUrl: "https://app.com/redirect",
+        tokenType: "DPoP",
+        refreshToken: "some other refresh token",
+      });
+      expect(oidcHandler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          refreshToken: "some other refresh token",
+        })
+      );
+    });
   });
 });

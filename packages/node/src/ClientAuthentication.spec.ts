@@ -122,35 +122,6 @@ describe("ClientAuthentication", () => {
         tokenType: "Bearer",
       });
     });
-
-    it("should clear the local storage when logging in", async () => {
-      const nonEmptyStorage = mockStorageUtility({
-        someUser: { someKey: "someValue" },
-      });
-      await nonEmptyStorage.setForUser(
-        "someUser",
-        { someKey: "someValue" },
-        { secure: true }
-      );
-      const clientAuthn = getClientAuthentication({
-        sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
-      });
-      await clientAuthn.login("someUser", {
-        clientId: "coolApp",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com",
-      });
-      await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
-      ).resolves.toBeUndefined();
-      await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
-      ).resolves.toBeUndefined();
-      // This test is only necessary until the key is stored safely
-      await expect(
-        nonEmptyStorage.get("clientKey", { secure: false })
-      ).resolves.toBeUndefined();
-    });
   });
 
   describe("fetch", () => {

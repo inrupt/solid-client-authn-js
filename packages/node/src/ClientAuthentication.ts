@@ -54,14 +54,6 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<ISessionInfo | undefined> => {
-    // In order to get a clean start, make sure that the session is logged out
-    // on login.
-    // But we may want to preserve our client application info, particularly if
-    // we used Dynamic Client Registration to register (since we don't
-    // necessarily want the user to have to register this app each time they
-    // login).
-    await this.sessionInfoManager.clear(sessionId);
-
     // In the case of the user hitting the 'back' button in their browser, they
     // could return to a previous redirect URL that contains OIDC params that
     // are now longer valid - so just to be safe, strip relevant params now.

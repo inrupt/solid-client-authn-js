@@ -128,7 +128,13 @@ export default class OidcLoginHandler implements ILoginHandler {
       issuerConfiguration: issuerConfig,
       client: clientInfo,
       sessionId: options.sessionId,
-      refreshToken: options.refreshToken,
+      // If the refresh token is available in storage, use it.
+      refreshToken:
+        options.refreshToken ??
+        (await this.storageUtility.getForUser(
+          options.sessionId,
+          "refreshToken"
+        )),
       handleRedirect: options.handleRedirect,
     };
     // Call proper OIDC Handler

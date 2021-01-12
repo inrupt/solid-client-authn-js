@@ -19,8 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
-
 export { Session, ISessionOptions } from "./Session";
 
 export { SessionManager, ISessionManagerOptions } from "./SessionManager";
