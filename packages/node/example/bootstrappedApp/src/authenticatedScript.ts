@@ -1,5 +1,5 @@
 import { Session } from "../../../dist/Session";
-import { FileSystemStorage } from "./FileSystemStorage";
+import { FileSystemStorage } from "./fileSystemStorage";
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
   .describe("clientId", "The registered client ID.")
