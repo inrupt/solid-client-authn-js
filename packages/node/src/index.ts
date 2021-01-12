@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Nothing in there yet, but node-compatible !
+export { FileSystemStorage } from "./storage/FileSystemStorage";
 
 export { Session, ISessionOptions } from "./Session";
 

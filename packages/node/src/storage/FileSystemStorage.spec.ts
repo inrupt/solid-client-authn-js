@@ -20,7 +20,7 @@
  */
 
 import { it, describe } from "@jest/globals";
-import FileSystemStorage from "./FileSystemStorage";
+import { FileSystemStorage } from "./FileSystemStorage";
 
 jest.mock("fs");
 

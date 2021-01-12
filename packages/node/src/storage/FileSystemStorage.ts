@@ -34,7 +34,7 @@ import { existsSync, writeFileSync, readFileSync, promises } from "fs";
  * Simple persistent storage solution that uses a file on the host filesystem to store data
  * @hidden
  */
-export default class FileSystemStorage implements IStorage {
+export class FileSystemStorage implements IStorage {
   private map: Record<string, string> = {};
 
   constructor(private path: string) {
