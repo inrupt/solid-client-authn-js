@@ -18,5 +18,6 @@ module.exports = {
     "!**/src/external-types/**",
     "!**/src/index.ts",
     "!**/dist/**",
+    "!**/*.spec.ts",
   ],
 };
