@@ -1,0 +1,10 @@
+{
+  "extends": "../../../../tsconfig.build.json",
+
+  "compilerOptions": {
+    "lib": ["es2018"],
+    "outDir": "./dist"
+  },
+
+  "include": ["src/**/*"]
+}

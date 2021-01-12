@@ -1,4 +1,5 @@
-const { Session } = require("../../../dist/Session");
+import { Session } from "../../../dist/Session";
+import { FileSystemStorage } from "./FileSystemStorage";
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
   .describe("clientId", "The registered client ID.")
@@ -25,8 +26,11 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
   .locale("en")
   .help().argv;
 
-async function main() {
-  const session = new Session();
+async function main(): Promise<void> {
+  const storage = new FileSystemStorage("./session-data.json");
+  const session = new Session({
+    storage,
+  });
   await session.login({
     clientId: argv.clientId,
     clientSecret: argv.clientSecret,

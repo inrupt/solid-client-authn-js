@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Demo for script authentication in NodeJS",
   "main": "src/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inrupt/solid-client-authn-js.git"
@@ -17,5 +20,8 @@
     "@inrupt/solid-client-authn-core": "^1.1.0",
     "express": "^4.17.1",
     "yargs": "^16.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.3"
   }
 }
