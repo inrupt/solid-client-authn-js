@@ -118,6 +118,14 @@ export default class OidcLoginHandler implements ILoginHandler {
       clientInfo = await this.clientRegistrar.getClient(options, issuerConfig);
     }
 
+    // If the refresh token is available in storage, use it.
+    if (options.refreshToken === undefined) {
+      options.refreshToken = await this.storageUtility.getForUser(
+        options.sessionId,
+        "refreshToken"
+      );
+    }
+
     // Construct OIDC Options
     const oidcOptions: IOidcOptions = {
       issuer: options.oidcIssuer,
