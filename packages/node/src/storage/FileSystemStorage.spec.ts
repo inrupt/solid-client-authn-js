@@ -136,7 +136,7 @@ describe("FileSystemStorage", () => {
       mockedFs.readFileSync = jest.fn().mockReturnValue("{}");
       mockedFs.promises = {
         writeFile: () => {
-          throw new Error("Some write error");
+          return Promise.reject(new Error("Some write error"));
         },
       };
       const storage = new FileSystemStorage("some/path");
