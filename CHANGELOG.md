@@ -10,11 +10,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
-### New features
+### Backward-compatible API changes
 
-- Using `@inrupt/solid-client-authn-node`, one can now use `FileSystemStorage` when
-building a `Session` in order to persist information in a file on disk, rather than
-to keep it in volatile memory.
+- For `solid-client-authn-node`, the `secureStorage` and `insecureStorage` are
+deprecated, and replaced by `storage`.
+
+### Bugfix
+
+- When providing a storage that already contains session information in the NodeJS
+context (as demonstrated with the `FileSystemStorage` in `packages/node/example/bootstrappedApp`),
+the refresh token is now picked up instead of the request failing.
 
 ## 1.4.0 - 2020-01-11
 
