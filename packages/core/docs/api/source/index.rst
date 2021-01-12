@@ -10,8 +10,5 @@ solid-client-authn-core API
 .. toctree::
    :glob:
    :titlesonly:
-   :hidden:
 
-   *
    /interfaces/*
-   /modules/*
