@@ -16,13 +16,7 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
   )
   .alias("oidcIssuer", "issuer")
   .describe("resource", "The resource to fetch")
-  .demandOption([
-    "clientId",
-    "clientSecret",
-    "refreshToken",
-    "oidcIssuer",
-    "resource",
-  ])
+  .demandOption(["oidcIssuer", "resource"])
   .locale("en")
   .help().argv;
 

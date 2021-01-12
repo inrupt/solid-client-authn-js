@@ -11,12 +11,12 @@ OIDC implementation, such as Inrupt's ESS (e.g. deployed at `https://pod.inrupt.
 
 To properly install this demo app, first run `npm ci` at the root of the repository, which will trigger
 the build of the library. Then, run `npm ci` again, this time in
-`packages/node/example/bootstrappedApp/`. You should be all set.
+`packages/node/example/bootstrappedApp/`, and then `npm run build`. You should be all set.
 
 ## Getting a token
 
-To get all the credentials needed to authenticate your script, you can `cd src/`,
-and then run `node bootstrap.js --oidcIssuer <your identity provider>`. 
+To get all the credentials needed to authenticate your script, you can run
+`npx @inrupt/generate-oidc-token`. 
 This utility script will output to the console an IRI in the domain of your specified
 identity provider (e.g. `https://broker.pod.inrupt.com/`) that you should open
 in a web browser. There, you should be able to log into your identity provider. Once
@@ -28,8 +28,8 @@ your client ID, client secret and refresh token. Save these values for use in th
 
 All you need to do now is to use the credentials obtained from the previous step to get an
 access token. `authenticatedScript.js` shows a minimal app issuing an authenticated
-request. It expects a number of arguments: 
+request. It expects a number of arguments to run: 
 
 ```
-node authenticatedScript.js --clientId <the client id> --clientSecret <the client secret>  --refreshToken <the refresh token> --oidcIssuer <the issuer that issued the token> --resource <the private resource you want to access>
+node dist/authenticatedScript.js --clientId <the client id> --clientSecret <the client secret>  --refreshToken <the refresh token> --oidcIssuer <the issuer that issued the token> --resource <the private resource you want to access>
 ```
