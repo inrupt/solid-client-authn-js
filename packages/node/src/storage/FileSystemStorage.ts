@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import { IStorage, NotImplementedError } from "@inrupt/solid-client-authn-core";
+import { IStorage } from "@inrupt/solid-client-authn-core";
 // Note that currently, the jest runner doesn't support ES modules, so the following
 // does not work, and the "promise" import on the line after that is required instead.
 // import { readFile } from "fs/promises";
@@ -65,7 +65,8 @@ export default class FileSystemStorage implements IStorage {
     return promises.writeFile(this.path, JSON.stringify(this.map));
   };
 
-  delete = async (_key: string): Promise<void> => {
-    throw new NotImplementedError("FileSystemStorage.delete");
+  delete = async (key: string): Promise<void> => {
+    delete this.map[key];
+    return promises.writeFile(this.path, JSON.stringify(this.map));
   };
 }

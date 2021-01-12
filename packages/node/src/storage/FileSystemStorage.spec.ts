@@ -147,11 +147,61 @@ describe("FileSystemStorage", () => {
   });
 
   describe("delete", () => {
-    it("does not implement delete yet", async () => {
+    it("deletes the value for the provided key from storage", async () => {
+      const data = { someKey: "some old value" };
       const mockedFs = jest.requireMock("fs");
-      mockedFs.existsSync = jest.fn().mockReturnValueOnce(true);
-      const store = new FileSystemStorage("some file");
-      await expect(store.delete("someKey")).rejects.toThrow("not implemented");
+      mockedFs.existsSync = jest.fn().mockReturnValue(true);
+      mockedFs.readFileSync = jest.fn().mockReturnValue(JSON.stringify(data));
+      mockedFs.promises = {
+        writeFile: jest.fn(),
+      };
+      const storage = new FileSystemStorage("some/path");
+      await storage.delete("someKey");
+      await expect(storage.get("someKey")).resolves.toBeUndefined();
+    });
+
+    it("does not delete the value for another key", async () => {
+      const data = { someKey: "some old value" };
+      const mockedFs = jest.requireMock("fs");
+      mockedFs.existsSync = jest.fn().mockReturnValue(true);
+      mockedFs.readFileSync = jest.fn().mockReturnValue(JSON.stringify(data));
+      mockedFs.promises = {
+        writeFile: jest.fn(),
+      };
+      const storage = new FileSystemStorage("some/path");
+      await storage.delete("someOtherKey");
+      await expect(storage.get("someKey")).resolves.toEqual("some old value");
+    });
+
+    it("persists the updated file on disk", async () => {
+      const data = { someKey: "some old value" };
+      const mockedFs = jest.requireMock("fs");
+      mockedFs.existsSync = jest.fn().mockReturnValue(true);
+      mockedFs.readFileSync = jest.fn().mockReturnValue(JSON.stringify(data));
+      mockedFs.promises = {
+        writeFile: jest.fn(),
+      };
+      const storage = new FileSystemStorage("some/path");
+      await storage.delete("someKey");
+      expect(mockedFs.promises.writeFile).toHaveBeenCalledWith(
+        "some/path",
+        "{}"
+      );
+    });
+
+    it("throws in case of write error", async () => {
+      const mockedFs = jest.requireMock("fs");
+      mockedFs.existsSync = jest.fn().mockReturnValue(true);
+      mockedFs.readFileSync = jest.fn().mockReturnValue("{}");
+      mockedFs.promises = {
+        writeFile: () => {
+          throw new Error("Some write error");
+        },
+      };
+      const storage = new FileSystemStorage("some/path");
+      await expect(storage.delete("someKey")).rejects.toThrow(
+        "Some write error"
+      );
     });
   });
 });
