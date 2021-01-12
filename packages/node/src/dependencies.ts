@@ -166,8 +166,9 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }): ClientAuthentication {
-  const secureStorage = dependencies.secureStorage || new InMemoryStorage();
-  const insecureStorage = dependencies.insecureStorage || new InMemoryStorage();
+  const storage = new InMemoryStorage();
+  const secureStorage = dependencies.secureStorage || storage;
+  const insecureStorage = dependencies.insecureStorage || storage;
 
   const authenticatorContainer = container.createChildContainer();
   authenticatorContainer.register<IStorage>("secureStorage", {

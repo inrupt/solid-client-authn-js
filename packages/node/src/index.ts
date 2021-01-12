@@ -19,8 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export { FileSystemStorage } from "./storage/FileSystemStorage";
-
 export { Session, ISessionOptions } from "./Session";
 
 export { SessionManager, ISessionManagerOptions } from "./SessionManager";
