@@ -28,9 +28,12 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
 
 async function main(): Promise<void> {
   const storage = new FileSystemStorage("./session-data.json");
-  const session = new Session({
-    storage,
-  });
+  const session = new Session(
+    {
+      storage,
+    },
+    "my-session"
+  );
   await session.login({
     clientId: argv.clientId,
     clientSecret: argv.clientSecret,

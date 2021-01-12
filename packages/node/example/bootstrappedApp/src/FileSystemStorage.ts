@@ -62,11 +62,15 @@ export class FileSystemStorage implements IStorage {
 
   set = async (key: string, value: string): Promise<void> => {
     this.map[key] = value;
-    return promises.writeFile(this.path, JSON.stringify(this.map));
+    return promises.writeFile(this.path, JSON.stringify(this.map, null, "  "), {
+      encoding: "utf-8",
+    });
   };
 
   delete = async (key: string): Promise<void> => {
     delete this.map[key];
-    return promises.writeFile(this.path, JSON.stringify(this.map));
+    return promises.writeFile(this.path, JSON.stringify(this.map, null, "  "), {
+      encoding: "utf-8",
+    });
   };
 }
