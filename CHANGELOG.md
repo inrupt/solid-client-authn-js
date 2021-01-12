@@ -10,6 +10,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+### New features
+
+- Using `@inrupt/solid-client-authn-node`, one can now use `FileSystemStorage` when
+building a `Session` in order to persist information in a file on disk, rather than
+to keep it in volatile memory.
+
 ## 1.4.0 - 2020-01-11
 
 ### New features
