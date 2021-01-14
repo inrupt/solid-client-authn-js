@@ -27,6 +27,8 @@ import { mockClientAuthentication } from "../src/__mocks__/ClientAuthentication"
 import { Session } from "../src/Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
 
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 describe("Session", () => {
   describe("constructor", () => {
     it("accepts an empty config", async () => {
@@ -148,17 +150,14 @@ describe("Session", () => {
       expect(clientAuthnFetch).toHaveBeenCalled();
     });
 
-    // Prevents the bug when clientAuthentication.fetch throws
-    // ""'fetch' called on an object that does not implement interface Window"
-    // when unauthenticated.
-    it("does not call authenticated fetch if logged out", async () => {
+    it("does not rebind window.fetch if logged out", async () => {
       window.fetch = jest.fn();
       const clientAuthentication = mockClientAuthentication();
-      const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url/");
-      expect(clientAuthnFetch).not.toHaveBeenCalled();
       expect(window.fetch).toHaveBeenCalled();
+      // @ts-ignore
+      expect(window.fetch.mock.instances).toEqual([window]);
     });
   });
 
