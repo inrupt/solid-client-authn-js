@@ -14,6 +14,9 @@ The following sections document changes that have been released already:
 
 - For `solid-client-authn-node`, the `secureStorage` and `insecureStorage` are
 deprecated, and replaced by `storage`.
+- The `Session` constructor in solid-client-authn-browser no longer references
+  `window` so that it can be instantiated in a non-window context (although
+  it will continue to referene window.localstorage when you attempt to log in.)
 
 ### Bugfix
 
