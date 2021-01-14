@@ -10,23 +10,24 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+N/A
+
+## 1.4.1 - 2020-01-14
+
 ### Backward-compatible API changes
+
+#### node
 
 - For `solid-client-authn-node`, the `secureStorage` and `insecureStorage` are
 deprecated, and replaced by `storage`.
 
 ### Bugfix
 
-
-#### node
-
-- When providing a storage that already contains session information in the NodeJS
-context (as demonstrated with the `FileSystemStorage` in `packages/node/example/bootstrappedApp`),
-the refresh token is now picked up instead of the request failing.
-
 #### browser
 
-- Calling `Session::fetch` before logging the Session in threw an error.
+- The `Session` constructor in solid-client-authn-browser no longer references
+  `window` so that it can be instantiated in a non-window context (although
+  it will continue to referene window.localstorage when you attempt to log in.)
 
 ## 1.4.0 - 2020-01-11
 
