@@ -17,9 +17,16 @@ deprecated, and replaced by `storage`.
 
 ### Bugfix
 
+
+#### node
+
 - When providing a storage that already contains session information in the NodeJS
 context (as demonstrated with the `FileSystemStorage` in `packages/node/example/bootstrappedApp`),
 the refresh token is now picked up instead of the request failing.
+
+#### browser
+
+- Calling `Session::fetch` before logging the Session in threw an error.
 
 ## 1.4.0 - 2020-01-11
 

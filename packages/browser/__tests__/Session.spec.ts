@@ -27,6 +27,8 @@ import { mockClientAuthentication } from "../src/__mocks__/ClientAuthentication"
 import { Session } from "../src/Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
 
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 describe("Session", () => {
   describe("constructor", () => {
     it("accepts an empty config", async () => {
@@ -125,11 +127,12 @@ describe("Session", () => {
   });
 
   describe("fetch", () => {
-    it("wraps up ClientAuthentication fetch", async () => {
+    it("wraps up ClientAuthentication fetch if logged in", async () => {
       window.fetch = jest.fn();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
+      mySession.info.isLoggedIn = true;
       await mySession.fetch("https://some.url");
       expect(clientAuthnFetch).toHaveBeenCalled();
     });
@@ -139,11 +142,22 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
+      mySession.info.isLoggedIn = true;
       const objectWithFetch = {
         fetch: mySession.fetch,
       };
       await objectWithFetch.fetch("https://some.url");
       expect(clientAuthnFetch).toHaveBeenCalled();
+    });
+
+    it("does not rebind window.fetch if logged out", async () => {
+      window.fetch = jest.fn();
+      const clientAuthentication = mockClientAuthentication();
+      const mySession = new Session({ clientAuthentication });
+      await mySession.fetch("https://some.url/");
+      expect(window.fetch).toHaveBeenCalled();
+      // @ts-ignore
+      expect(window.fetch.mock.instances).toEqual([window]);
     });
   });
 
