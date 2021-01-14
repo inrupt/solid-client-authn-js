@@ -127,7 +127,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
    * ID already exists then that session will be returned.
    *
    * @param sessionId An optional unique session identifier.
-   * @returns A {@link Session} associated to the given ID.
+   * @returns A {@link Session} associated with the given ID.
    */
   async getSession(sessionId?: string): Promise<Session> {
     await this.init();
@@ -153,7 +153,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
 
   /**
    * @param sessionId A unique session identifier.
-   * @returns A Promise resolving to true if a session associated to the given ID exists, and false if not.
+   * @returns A Promise resolving to true if a session associated with the given ID exists, and false if not.
    */
   async hasSession(sessionId: string): Promise<boolean> {
     await this.init();

@@ -63,9 +63,11 @@ export class SessionManager extends EventEmitter implements ISessionManager {
    *   secureStorage: customStorage
    * });
    * ```
-   * See {@link IStorage} for more information on how to define your own storage mechanism.
+   * See {@link IStorage} for more information on how to define your own storage
+   * mechanism.
    *
-   * @param options Options customizing the behaviour of the SessionManager, namely to store data appropriately.
+   * @param options Options customizing the behaviour of the SessionManager,
+   * namely to store data appropriately.
    */
   constructor(options: ISessionManagerOptions = {}) {
     super();
@@ -80,10 +82,12 @@ export class SessionManager extends EventEmitter implements ISessionManager {
       this.emit("sessionLogout", session);
     };
     session.onLogout(logoutCallback);
+
     this.sessionRecords[session.info.sessionId] = {
       session,
       logoutCallback,
     };
+
     return session;
   }
 
@@ -94,6 +98,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
       sessionRecord.session.info.isLoggedIn = sessionInfo.isLoggedIn;
       return sessionRecord.session;
     }
+
     return this.addNewSessionRecord(
       new Session({
         clientAuthentication: this.clientAuthn,
@@ -119,7 +124,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
    * ID already exists then that session will be returned.
    *
    * @param sessionId An optional unique session identifier.
-   * @returns A {@link Session} associated to the given ID.
+   * @returns A {@link Session} associated with the given ID.
    */
   async getSession(sessionId?: string): Promise<Session> {
     let session: Session;
@@ -127,6 +132,7 @@ export class SessionManager extends EventEmitter implements ISessionManager {
       const retrievedSessionInfo = await this.clientAuthn.getSessionInfo(
         sessionId
       );
+
       if (retrievedSessionInfo) {
         session = this.getSessionFromCurrentSessionInfo(retrievedSessionInfo);
       } else {
@@ -139,12 +145,14 @@ export class SessionManager extends EventEmitter implements ISessionManager {
         new Session({ clientAuthentication: this.clientAuthn })
       );
     }
+
     return session;
   }
 
   /**
    * @param sessionId A unique session identifier.
-   * @returns A Promise resolving to true if a session associated to the given ID exists, and false if not.
+   * @returns A Promise resolving to true if a session associated with the given
+   * ID exists, and false if not.
    */
   async hasSession(sessionId: string): Promise<boolean> {
     return (await this.clientAuthn.getSessionInfo(sessionId)) !== undefined;
@@ -153,7 +161,8 @@ export class SessionManager extends EventEmitter implements ISessionManager {
   /**
    * Registers a callback to be called when a session is logged in.
    *
-   * @param callback a function executed when a session logs in, with the session as a parameter.
+   * @param callback a function executed when a session logs in, with the
+   * session as a parameter.
    */
   onSessionLogin(callback: (session: Session) => unknown): void {
     this.on("sessionLogin", callback);
@@ -162,23 +171,28 @@ export class SessionManager extends EventEmitter implements ISessionManager {
   /**
    * Registers a callback to be called when a session is logged out.
    *
-   * @param callback a function executed when a session logs out, with the session as a parameter.
+   * @param callback a function executed when a session logs out, with the
+   * session as a parameter.
    */
   onSessionLogout(callback: (session: Session) => unknown): void {
     this.on("sessionLogout", callback);
   }
 
   /**
-   * Removes a session from the pool managed by the manager. This is typically useful
-   * when a user logs out of the application, so that the number of managed session
-   * is not ever-growing. Note that this specific function **does not log out the session**,
-   * it only removes references to it, so after this call the session will become unreachable.
+   * Removes a session from the pool managed by the manager. This is typically
+   * useful when a user logs out of the application, so that the number of
+   * managed sessions is not ever-growing.
+   *
+   * Note: this specific function **does not log out the session**, it only
+   * removes references to it, so after this call the session will become
+   * unreachable.
    *
    * @param sessionId A unique session identifier.
    * @since 0.2.0
    */
   detachSession(sessionId: string): void {
     const sessionRecord = this.sessionRecords[sessionId];
+
     if (sessionRecord) {
       sessionRecord.session.removeListener(
         "onLogout",
@@ -189,20 +203,23 @@ export class SessionManager extends EventEmitter implements ISessionManager {
   }
 
   /**
-   * Processes the information sent by the identity provider after
+   * Processes the information sent by the Solid Identity Provider after
    * the user has logged in, in order to return a logged in {@link Session}.
    *
    * @param url The URL to which the user is being redirected.
-   * @returns The {@link Session} that completed login if the process has been successful.
+   * @returns The {@link Session} that completed login if the process has been
+   * successful.
    */
   async handleIncomingRedirect(url: string): Promise<Session | undefined> {
     const sessionInfo = await this.clientAuthn.handleIncomingRedirect(url);
+
     if (sessionInfo) {
       const session = this.getSessionFromCurrentSessionInfo(sessionInfo);
       this.emit("sessionLogin", session);
       session.emit("login");
       return session;
     }
+
     return undefined;
   }
 }

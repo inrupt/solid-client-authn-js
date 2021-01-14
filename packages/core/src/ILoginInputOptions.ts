@@ -33,7 +33,7 @@ export default interface ILoginInputOptions {
    */
   clientId?: string;
   /**
-   * A secret associated to your client ID during client registration to the the identity provider. Only required if users of your app log in an identity provider known a priori, which only supports a predefined set of apps and prevents [dynamic registration](https://tools.ietf.org/html/rfc7591).
+   * A secret associated with your client ID during client registration to the the identity provider. Only required if users of your app log in an identity provider known a priori, which only supports a predefined set of apps and prevents [dynamic registration](https://tools.ietf.org/html/rfc7591).
    */
   clientSecret?: string;
   /**

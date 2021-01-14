@@ -5,7 +5,7 @@ module.exports = {
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
   },
-  modulePathIgnorePatterns: ["dist/"],
+  modulePathIgnorePatterns: ["dist/", "<rootDir>/example/"],
   testPathIgnorePatterns: [
     "/node_modules/",
     // By default we only run unit tests:
