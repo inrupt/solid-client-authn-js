@@ -1,6 +1,6 @@
 # Solid JavaScript Authentication - solid-client-authn
 
-`solid-client-authn` is a suite of libraries designed to authenticate against Solid resource servers.
+`solid-client-authn` is a suite of libraries to manage the authentication required to access protected resources on Solid servers.
 The libraries share a common API and include different modules for different deployment environments:
 
 - `solid-client-authn-browser` can be used to build web apps in the browser.
@@ -97,4 +97,3 @@ Go to http://localhost:3001/.
 #### Running an authenticated script
 
 See [the dedicated documentation](/packages/node/example/bootstrappedApp/README.md).
-
