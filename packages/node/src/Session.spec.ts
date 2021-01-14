@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -48,7 +48,7 @@ describe("Session", () => {
       expect(mySession.info.sessionId).toEqual("mySession");
     });
 
-    it("accepts input storage", async () => {
+    it("accepts legacy input storage", async () => {
       const insecureStorage = mockStorage({});
       const secureStorage = mockStorage({});
       const mySession = new Session({
@@ -60,6 +60,35 @@ describe("Session", () => {
       await mySession.logout();
       expect(clearSecureStorage).toHaveBeenCalled();
       expect(clearInsecureStorage).toHaveBeenCalled();
+    });
+
+    it("accepts input storage", async () => {
+      const storage = mockStorage({});
+      const mySession = new Session({
+        storage,
+      });
+      const clearStorage = jest.spyOn(storage, "delete");
+      await mySession.logout();
+      // The unique storage object should be used as both secure and insecure storage.
+      expect(clearStorage).toHaveBeenCalledTimes(3);
+    });
+
+    it("ignores legacy input storage if new input storage is specified", async () => {
+      const insecureStorage = mockStorage({});
+      const secureStorage = mockStorage({});
+      const storage = mockStorage({});
+      const mySession = new Session({
+        insecureStorage,
+        secureStorage,
+        storage,
+      });
+      const clearStorage = jest.spyOn(secureStorage, "delete");
+      const clearSecureStorage = jest.spyOn(secureStorage, "delete");
+      const clearInsecureStorage = jest.spyOn(insecureStorage, "delete");
+      await mySession.logout();
+      expect(clearStorage).not.toHaveBeenCalled();
+      expect(clearSecureStorage).not.toHaveBeenCalled();
+      expect(clearInsecureStorage).not.toHaveBeenCalled();
     });
 
     it("accepts session info", () => {
@@ -90,11 +119,13 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn().mockResolvedValueOnce({
         isLoggedIn: true,
         sessionId: "mySession",
+        webId: "https://my.webid/",
       });
       const mySession = new Session({ clientAuthentication });
       await mySession.login({});
       expect(mySession.info.isLoggedIn).toEqual(true);
       expect(mySession.info.sessionId).toEqual("mySession");
+      expect(mySession.info.webId).toEqual("https://my.webid/");
     });
   });
 

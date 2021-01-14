@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -117,6 +117,7 @@ export class SessionInfoManager implements ISessionInfoManager {
       sessionId,
       "isLoggedIn"
     );
+
     if (isLoggedIn !== undefined) {
       return {
         sessionId,
@@ -124,6 +125,7 @@ export class SessionInfoManager implements ISessionInfoManager {
         isLoggedIn: isLoggedIn === "true",
       };
     }
+
     return undefined;
   }
 

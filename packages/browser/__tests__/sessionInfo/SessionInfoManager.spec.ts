@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -146,6 +146,33 @@ describe("SessionInfoManager", () => {
       expect(
         await mockStorage.getForUser("mySession", "key", { secure: false })
       ).toBeUndefined();
+    });
+
+    it("clears resource server session info from local storage", async () => {
+      const mockStorage = mockStorageUtility(
+        {
+          "solidClientAuthenticationUser:mySession": {
+            webId: "https://my.pod/profile#me",
+          },
+        },
+        true
+      );
+      await mockStorage.storeResourceServerSessionInfo(
+        "https://my.pod/profile#me",
+        "https://my.pod",
+        10000
+      );
+      const sessionManager = getSessionInfoManager({
+        storageUtility: mockStorage,
+      });
+      await sessionManager.clear("mySession");
+      expect(
+        JSON.parse(
+          (await mockStorage.get("tmp-resource-server-session-info", {
+            secure: false,
+          })) ?? ""
+        )
+      ).toEqual({});
     });
   });
 

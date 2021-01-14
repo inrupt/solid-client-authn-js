@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -32,25 +32,29 @@ import { generateJwkForDpop } from "./keyGeneration";
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>
 ): value is { access_token: string } {
-  return value.access_token && typeof value.access_token === "string";
+  return (
+    value.access_token !== undefined && typeof value.access_token === "string"
+  );
 }
 
 function hasIdToken(
   value: { id_token: string } | Record<string, unknown>
 ): value is { id_token: string } {
-  return value.id_token && typeof value.id_token === "string";
+  return value.id_token !== undefined && typeof value.id_token === "string";
 }
 
 function hasRefreshToken(
   value: { refresh_token: string } | Record<string, unknown>
 ): value is { refresh_token: string } {
-  return value.refresh_token && typeof value.refresh_token === "string";
+  return (
+    value.refresh_token !== undefined && typeof value.refresh_token === "string"
+  );
 }
 
 function hasTokenType(
   value: { token_type: string } | Record<string, unknown>
 ): value is { token_type: string } {
-  return value.token_type && typeof value.token_type === "string";
+  return value.token_type !== undefined && typeof value.token_type === "string";
 }
 
 export type TokenEndpointResponse = {
@@ -83,9 +87,9 @@ function isWebIdOidcIdToken(
   token: WebIdOidcIdToken | Record<string, unknown>
 ): token is WebIdOidcIdToken {
   return (
-    (token.sub &&
+    (token.sub !== undefined &&
       typeof token.sub === "string" &&
-      token.iss &&
+      token.iss !== undefined &&
       typeof token.iss === "string" &&
       !token.webid) ||
     typeof token.webid === "string"
@@ -290,7 +294,7 @@ export async function getBearerToken(
       // profile referenced by the WebId.
       // TODO: Note that this is heavy-handed, and that this userinfo check verifies
       // that the `sub` caim in the id token you get along with the access token
-      // matches the sub claim associated to the access token at the userinfo endpoint.
+      // matches the sub claim associated with the access token at the userinfo endpoint.
       // That is a useful check, and in the future it should be only disabled against
       // NSS, and not in general.
       // Issue tracker: https://github.com/solid/node-solid-server/issues/1490

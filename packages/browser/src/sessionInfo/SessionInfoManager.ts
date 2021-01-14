@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -33,6 +33,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
+import { fetchWithCookies } from "../ClientAuthentication";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
@@ -40,7 +41,7 @@ export function getUnauthenticatedSession(): ISessionInfo & {
   return {
     isLoggedIn: false,
     sessionId: v4(),
-    fetch,
+    fetch: fetchWithCookies,
   };
 }
 
@@ -53,6 +54,15 @@ export async function clear(
   sessionId: string,
   storage: IStorageUtility
 ): Promise<void> {
+  // The type assertion is okay, because it throws on undefined.
+  const webId = await storage.getForUser(sessionId, "webId", {
+    secure: true,
+  });
+  if (webId !== undefined) {
+    const webIdAsUrl = new URL(webId);
+    const resourceServerIri = webIdAsUrl.origin;
+    await storage.clearResourceServerSessionInfo(resourceServerIri);
+  }
   await Promise.all([
     storage.deleteAllUserData(sessionId, { secure: false }),
     storage.deleteAllUserData(sessionId, { secure: true }),

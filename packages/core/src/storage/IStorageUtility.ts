@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -54,6 +54,24 @@ export default interface IStorageUtility {
     userId: string,
     options?: { secure?: boolean }
   ): Promise<void>;
+  /**
+   * Register a new session for a given WebID against a given Resource Server.
+   * @param webId
+   * @param resourceServerIri
+   * @param sessionExpires
+   */
+  storeResourceServerSessionInfo(
+    webId: string,
+    resourceServerIri: string,
+    sessionExpires: number
+  ): Promise<void>;
+  /**
+   * Removes session information for a given WebID and a given Resource Server.
+   * Note that if the WebID has no associated session, nothing happens.
+   * @param webId
+   * @param resourceServerIri
+   */
+  clearResourceServerSessionInfo(resourceServerIri: string): Promise<void>;
 
   /**
    * Retrieve from local storage

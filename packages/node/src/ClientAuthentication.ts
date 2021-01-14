@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -54,19 +54,10 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<ISessionInfo | undefined> => {
-    // In order to get a clean start, make sure that the session is logged out
-    // on login.
-    // But we may want to preserve our client application info, particularly if
-    // we used Dynamic Client Registration to register (since we don't
-    // necessarily want the user to have to register this app each time they
-    // login).
-    await this.sessionInfoManager.clear(sessionId);
-
     // In the case of the user hitting the 'back' button in their browser, they
     // could return to a previous redirect URL that contains OIDC params that
     // are now longer valid - so just to be safe, strip relevant params now.
     const { redirectUrl } = options;
-
     const loginReturn = await this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
@@ -80,13 +71,16 @@ export default class ClientAuthentication {
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
     });
+
     if (loginReturn !== undefined) {
       this.fetch = loginReturn.fetch;
       return {
         isLoggedIn: true,
         sessionId,
+        webId: loginReturn.webId,
       };
     }
+
     // undefined is returned in the case when the login must be completed
     // after redirect.
     return undefined;

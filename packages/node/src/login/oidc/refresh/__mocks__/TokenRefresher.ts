@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -46,6 +46,7 @@ const mockIdTokenPayload = (): IdTokenClaims => {
 export const mockDefaultTokenSet = (): TokenSet & { access_token: string } => {
   return {
     access_token: "some refreshed access token",
+    id_token: JSON.stringify(mockIdTokenPayload()),
     expired: () => false,
     claims: mockIdTokenPayload,
   };

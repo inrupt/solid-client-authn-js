@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,7 @@
  * @packageDocumentation
  */
 
+import "reflect-metadata";
 import { injectable, inject } from "tsyringe";
 import {
   ILoginInputOptions,
@@ -34,6 +35,19 @@ import {
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
+
+// TMP: This ensures that the HTTP requests will include any relevant cookie
+// that could have been set by the resource server.
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#parameters
+export const fetchWithCookies = (
+  info: RequestInfo,
+  init?: RequestInit
+): ReturnType<typeof fetch> => {
+  return window.fetch(info, {
+    ...init,
+    credentials: "include",
+  });
+};
 
 /**
  * @hidden
@@ -84,14 +98,17 @@ export default class ClientAuthentication {
   };
 
   // By default, our fetch() resolves to the environment fetch() function.
-  fetch = window.fetch;
+  fetch = fetchWithCookies;
 
   logout = async (sessionId: string): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
-    this.fetch = window.fetch;
+    this.fetch = (
+      info: RequestInfo,
+      init?: RequestInit
+    ): ReturnType<typeof fetch> => window.fetch(info, init);
   };
 
   getSessionInfo = async (

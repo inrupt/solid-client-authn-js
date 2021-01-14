@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -424,7 +424,7 @@ describe("AuthCodeRedirectHandler", () => {
           "https://my.app/redirect?code=someCode&state=someState"
         )
       ).rejects.toThrow(
-        "No stored session is associated to the state [someState]"
+        "No stored session is associated with the state [someState]"
       );
     });
   });

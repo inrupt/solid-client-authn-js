@@ -7,9 +7,11 @@
   },
 
   "typedocOptions": {
-    "out": "website/docs/api/node"
+    "out": "website/docs/api/node",
+    "entryPoints": ["./src/index.ts"],
+    "entryDocument": "index.md"
   },
 
   "include": ["src/**/*"],
-  "exclude": ["src/**/*.spec.ts"]
+  "exclude": ["src/**/*.spec.ts", "**/__mocks__/*"]
 }

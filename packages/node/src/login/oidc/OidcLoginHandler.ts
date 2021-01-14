@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -61,7 +61,7 @@ function hasIssuer(
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
-    @inject("storageUtility") private _storageUtility: IStorageUtility,
+    @inject("storageUtility") private storageUtility: IStorageUtility,
     @inject("oidcHandler") private oidcHandler: IOidcHandler,
     @inject("issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
@@ -97,7 +97,21 @@ export default class OidcLoginHandler implements ILoginHandler {
       clientInfo = {
         clientId: options.clientId,
         clientSecret: options.clientSecret,
+        clientName: options.clientName,
       };
+      await this.storageUtility.setForUser(options.sessionId, {
+        clientId: options.clientId,
+      });
+      if (options.clientSecret) {
+        await this.storageUtility.setForUser(options.sessionId, {
+          clientSecret: options.clientSecret,
+        });
+      }
+      if (options.clientName) {
+        await this.storageUtility.setForUser(options.sessionId, {
+          clientName: options.clientName,
+        });
+      }
     } else {
       // If 'client_id' and 'client_secret' aren't specified in the options,
       // perform dynamic client registration.
@@ -114,7 +128,13 @@ export default class OidcLoginHandler implements ILoginHandler {
       issuerConfiguration: issuerConfig,
       client: clientInfo,
       sessionId: options.sessionId,
-      refreshToken: options.refreshToken,
+      // If the refresh token is available in storage, use it.
+      refreshToken:
+        options.refreshToken ??
+        (await this.storageUtility.getForUser(
+          options.sessionId,
+          "refreshToken"
+        )),
       handleRedirect: options.handleRedirect,
     };
     // Call proper OIDC Handler

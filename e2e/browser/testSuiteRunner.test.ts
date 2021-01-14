@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,7 @@
 import { Selector, t } from "testcafe";
 import FetchPage from "./page-models/FetchPage";
 
-import { loginGluu, loginNss } from "./helpers/login";
+import { loginGluu, loginNss, loginCognito } from "./helpers/login";
 import ITestConfig from "./ITestConfig";
 import IPodServerConfig from "./IPodServerConfig";
 import { authorizeEss, authorizeNss } from "./helpers/authorizeClientApp";
@@ -82,6 +82,10 @@ async function performLogin(
       await loginNss(testUserName, testUserPassword as string);
       break;
 
+    case "Cognito":
+      await loginCognito(testUserName, testUserPassword as string);
+      break;
+
     default:
       throw new Error(
         `Unknown login mechanism in test suite configuration: [${podServerConfig.brokeredIdp}]`
@@ -104,7 +108,16 @@ async function performLogin(
   }
 
   await t.wait(parseInt(testCafeWaitTime, 10));
-  await t.expect(FetchPage.fetchButton.exists).ok("Logged in");
+
+  // If this fails, check that the user is registered correctly on the Pod (i.e.
+  // just try and log in manually using the credentials being used for this
+  // test).
+  // Then check that you passed those credentials correctly - this can be tricky
+  // if they're coming from GitHub secrets (because nobody can see the values of
+  // GitHub secrets), but they should also be stored in a password manager, like
+  // 1Password or similar. We suggest that the GitHub secret name be used as a
+  // tag (or a label) in the credential entry in your password manager.
+  await t.expect(FetchPage.fetchButton.exists).ok("We logged in just fine");
 }
 
 // Run through all the tests defined in our test suite.
@@ -120,12 +133,23 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
           await performLogin(server, testUserName);
         }
 
+        // NSS does not support the RS session cookie.
+        if (data.refresh && server.podResourceServer === "ess") {
+          await t.eval(() => location.reload());
+        }
+
         const podRoot = server.podResourceServer.replace(
           "<TEST USER NAME>",
           testUserName
         );
         const resourceToGet = data.resourceToGet.replace("<POD ROOT>", podRoot);
 
+        // If this select fails, it probably means our client application is not
+        // running (since all we're trying to do here is select the resource IRI
+        // textbox from a client application, so that we can enter the IRI of
+        // the resource we wish to fetch).
+        // See our README, which recommends running 'demoClientApp' from the
+        // examples within our browser package.
         await t
           .selectText(FetchPage.fetchUriTextbox)
           .typeText(FetchPage.fetchUriTextbox, resourceToGet)
@@ -136,13 +160,23 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
 
         // To help debug failing tests, it can be really useful to display what
         // we actually got back from the server before we assert on it!
-        console.log(`Got response body: ${responseBody}`);
+        console.log(`******** Got response body: ********`);
+        console.log(`${responseBody}`);
+        console.log(`************************************`);
 
         const expected = data.expectResponseContainsAnyOf.some((option) =>
           responseBody.includes(option)
         );
 
-        await t.expect(expected).ok();
+        // If this fails, check that the user is registered correctly on the Pod (i.e.
+        // just try and log in manually using the credentials being used for this
+        // test).
+        // Then check that you passed those credentials correctly - this can be tricky
+        // if they're coming from GitHub secrets (because nobody can see the values of
+        // GitHub secrets), but they should also be stored in a password manager, like
+        // 1Password or similar. We suggest that the GitHub secret name be used as a
+        // tag (or a label) in the credential entry in your password manager.
+        await t.expect(expected).ok("We fetched from Pod just fine");
       });
     });
   }

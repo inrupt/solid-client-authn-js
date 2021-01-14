@@ -1,7 +1,23 @@
 # Solid JavaScript authentication for the browser - solid-client-authn-browser
 
 `solid-client-authn-browser` is a library designed to authenticate web apps (in the browser) with Solid identity servers.
-The main documentation is at the [root of the repository](../../README.md). 
+The main documentation is at the [root of the repository](https://github.com/inrupt/solid-client-authn-js).
+
+## Required polyfills
+
+Our JavaScript Client Libraries use relatively modern JavaScript features that
+will work in all commonly used browsers, except Internet Explorer. However, one of
+the libraries we currently use expects some Node.js modules to be present, which must
+be polyfilled by the bundler. Here is the list of modules that need to be polyfilled:
+- `crypto`
+- `stream`
+- `util`
+- `buffer`
+
+Prior to Webpack version 5 these modules were polyfilled by default, but that is no longer the case.
+See
+[our Webpack configuration](https://github.com/inrupt/solid-client-authn-js/blob/master/packages/browser/webpack.common.js)
+for packages that can provide the necessary polyfills.
 
 ## Underlying libraries
 
@@ -11,16 +27,6 @@ However, the latter lacks some features that are necessary to provide the develo
 # Other Inrupt Solid JavaScript Libraries
 [`@inrupt/solid-client-authn-browser`](https://www.npmjs.com/package/@inrupt/solid-client-authn-browser )is part of a family open source JavaScript libraries designed to support developers building Solid applications.
  
-## Solid JavaScript Authentication - solid-client-authn
-
-`solid-client-authn` is a set of libraries designed to authenticate with Solid identity servers.
-The libraries share a common API and include different modules for different deployment environments:
-
-- `solid-client-authn-browser` can be used to help build web apps in the browser.
-- `solid-client-authn-node` is **planned** to help build server-side and console-based apps.
-
-@inrupt/solid-client-authn libraries are part of a family open source JavaScript libraries designed to support developers building Solid applications.
-
 ## Inrupt Solid JavaScript Client Libraries
 
 ### Data access and permissions management - solid-client
@@ -33,7 +39,7 @@ The libraries share a common API and include different modules for different dep
 
 ### Vocabularies and interoperability - solid-common-vocab-rdf
 
-[@inrupt/solid-common-vocab-rdf](https://github.com/inrupt/solid-common-vocab-rdf) allows developers to build interoperable apps by reusing well-known vocabularies. These libraries provide vocabularies available as constants that you just have to import.
+[@inrupt/solid-common-vocab-rdf](https://github.com/inrupt/solid-common-vocab-rdf) allows developers to build interoperable apps by reusing well-known vocabularies. These libraries provide vocabulary terms as constants that you just have to import.
 
 # Issues & Help
 
@@ -48,15 +54,9 @@ If you have questions about working with Solid or just want to share what you’
 
 ## Prerequisite
 
-Any of the `solid-client-authn` libraries require at least:
-
-- NodeJS 12.X.Y
-- npm 6.14.X
-  **Note**: We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage your node version.
-
 The `solid-client-authn` libraries are compatible with [NSS](https://github.com/solid/node-solid-server/releases/tag/v5.3.0) 5.3.X and higher.
 
 ## Documentation
 
-- [Using the libraries from within the browser](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/)
+- [Using this library from within the browser](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/)
 - [Inrupt documentation Homepage](https://docs.inrupt.com/)

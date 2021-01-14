@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -35,6 +35,7 @@ import {
   saveSessionInfoToStorage,
 } from "@inrupt/solid-client-authn-core";
 import { JWK } from "jose";
+import { TokenSet } from "openid-client";
 import { inject, injectable } from "tsyringe";
 import { ISessionInfo } from "../../../../../core/dist";
 import {
@@ -42,6 +43,7 @@ import {
   buildDpopFetch,
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
+import { getWebidFromTokenPayload } from "../redirectHandler/AuthCodeRedirectHandler";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 function validateOptions(
@@ -54,6 +56,57 @@ function validateOptions(
     oidcLoginOptions.refreshToken !== undefined &&
     oidcLoginOptions.client.clientId !== undefined
   );
+}
+
+/**
+ * Go through the refresh flow to get a new valid access token, and build an
+ * authenticated fetch with it.
+ * @param refreshOptions
+ * @param dpop
+ */
+async function refreshAccess(
+  refreshOptions: RefreshOptions,
+  dpop: boolean
+): Promise<TokenSet & { fetch: typeof fetch }> {
+  let authFetch: typeof fetch;
+  // eslint-disable-next-line camelcase
+  let tokens: TokenSet & { access_token: string };
+  let dpopKey: JWK.ECKey;
+  try {
+    if (dpop) {
+      dpopKey = await JWK.generate("EC", "P-256");
+      tokens = await refreshOptions.tokenRefresher.refresh(
+        refreshOptions.sessionId,
+        refreshOptions.refreshToken,
+        dpopKey
+      );
+      // Rotate the refresh token if applicable
+      const rotatedRefreshOptions = {
+        ...refreshOptions,
+        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
+      };
+      authFetch = await buildDpopFetch(
+        tokens.access_token,
+        dpopKey,
+        rotatedRefreshOptions
+      );
+    } else {
+      tokens = await refreshOptions.tokenRefresher.refresh(
+        refreshOptions.sessionId,
+        refreshOptions.refreshToken
+      );
+      const rotatedRefreshOptions = {
+        ...refreshOptions,
+        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
+      };
+      authFetch = buildBearerFetch(tokens.access_token, rotatedRefreshOptions);
+    }
+  } catch (e) {
+    throw new Error(`Invalid refresh credentials: ${e.toString()}`);
+  }
+  return Object.assign(tokens, {
+    fetch: authFetch,
+  });
 }
 
 /**
@@ -84,27 +137,32 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       sessionId: oidcLoginOptions.sessionId,
       tokenRefresher: this.tokenRefresher,
     };
-    let authFetch: typeof fetch;
-    if (oidcLoginOptions.dpop) {
-      authFetch = await buildDpopFetch(
-        // The first request with this empty access token will 401, which will
-        // trigger the refresh flow.
-        "",
-        await JWK.generate("EC", "P-256"),
-        refreshOptions
-      );
-    } else {
-      authFetch = buildBearerFetch(
-        // The first request with this empty access token will 401, which will
-        // trigger the refresh flow.
-        "",
-        refreshOptions
-      );
-    }
+
+    // This information must be in storage for the refresh flow to succeed.
+    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+      issuer: oidcLoginOptions.issuer,
+      dpop: oidcLoginOptions.dpop ? "true" : "false",
+      clientId: oidcLoginOptions.client.clientId,
+      // Note: We assume here that a client secret is present, which is checked for when validating the options.
+      clientSecret: oidcLoginOptions.client.clientSecret as string,
+    });
+
+    const accessInfo = await refreshAccess(
+      refreshOptions,
+      oidcLoginOptions.dpop
+    );
+
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
     };
+
+    if (accessInfo.id_token === undefined) {
+      throw new Error(
+        `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
+      );
+    }
+    sessionInfo.webId = await getWebidFromTokenPayload(accessInfo.claims());
 
     await saveSessionInfoToStorage(
       this.storageUtility,
@@ -112,13 +170,15 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       undefined,
       undefined,
       "true",
-      oidcLoginOptions.refreshToken as string
+      accessInfo.refresh_token ?? refreshOptions.refreshToken
     );
+
     await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
       issuer: oidcLoginOptions.issuer,
       dpop: oidcLoginOptions.dpop ? "true" : "false",
       clientId: oidcLoginOptions.client.clientId,
     });
+
     if (oidcLoginOptions.client.clientSecret) {
       await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
         clientSecret: oidcLoginOptions.client.clientSecret,
@@ -131,7 +191,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     }
 
     return Object.assign(sessionInfo, {
-      fetch: authFetch,
+      fetch: accessInfo.fetch,
     });
   }
 }

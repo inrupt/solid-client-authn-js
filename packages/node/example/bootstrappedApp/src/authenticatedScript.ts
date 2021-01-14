@@ -1,4 +1,5 @@
-const { Session } = require("../../../dist/Session");
+import { Session } from "../../../dist/Session";
+import { FileSystemStorage } from "./fileSystemStorage";
 
 const argv = require("yargs/yargs")(process.argv.slice(2))
   .describe("clientId", "The registered client ID.")
@@ -15,22 +16,22 @@ const argv = require("yargs/yargs")(process.argv.slice(2))
   )
   .alias("oidcIssuer", "issuer")
   .describe("resource", "The resource to fetch")
-  .demandOption([
-    "clientId",
-    "clientSecret",
-    "refreshToken",
-    "oidcIssuer",
-    "resource",
-  ])
+  .demandOption(["oidcIssuer", "resource"])
   .locale("en")
   .help().argv;
 
-async function main() {
-  const session = new Session();
+async function main(): Promise<void> {
+  const storage = new FileSystemStorage("./session-data.json");
+  const session = new Session(
+    {
+      storage,
+    },
+    "my-session"
+  );
   await session.login({
     clientId: argv.clientId,
     clientSecret: argv.clientSecret,
-    refreshToken: argv.token,
+    refreshToken: argv.refreshToken,
     oidcIssuer: argv.oidcIssuer,
   });
   if (session.info.isLoggedIn) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -30,8 +30,10 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
+import { Response } from "cross-fetch";
 import {
   AuthCodeRedirectHandler,
+  DEFAULT_LIFESPAN,
   exchangeDpopToken,
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
@@ -143,6 +145,14 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
   };
 }
 
+const mockFetch = (response: Response): void => {
+  window.fetch = jest.fn().mockReturnValue(
+    new Promise((resolve) => {
+      resolve(response);
+    })
+  ) as jest.Mock<ReturnType<typeof window.fetch>, [RequestInfo, RequestInit?]>;
+};
+
 const defaultMocks = {
   storageUtility: StorageUtilityMock,
   redirector: RedirectorMock,
@@ -221,6 +231,11 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("retrieves the code verifier from memory", async () => {
+      mockFetch(
+        new Response("", {
+          status: 200,
+        })
+      );
       const storage = mockStorageUtility({
         "solidClientAuthenticationUser:oauth2_state_value": {
           sessionId: "userId",
@@ -249,6 +264,11 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("Fails if a session was not retrieved", async () => {
+      mockFetch(
+        new Response("", {
+          status: 200,
+        })
+      );
       defaultMocks.sessionInfoManager.get.mockResolvedValueOnce(undefined);
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
@@ -262,10 +282,11 @@ describe("AuthCodeRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
-      window.fetch = jest.fn() as jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
+      mockFetch(
+        new Response("", {
+          status: 200,
+        })
+      );
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockStorageUtility({
@@ -292,12 +313,13 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated dpop fetch if requested", async () => {
-      window.fetch = jest.fn().mockReturnValueOnce(
+      window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
-          resolve({
-            redirected: true,
-            url: "https://my.pod/container/",
-          } as Response);
+          resolve(
+            new Response("", {
+              status: 200,
+            })
+          );
         })
       ) as jest.Mock<
         ReturnType<typeof window.fetch>,
@@ -330,6 +352,106 @@ describe("AuthCodeRedirectHandler", () => {
         header
       ).toMatch(/^DPoP .+$/);
     });
+  });
+
+  it("stores information about the resource server cookie in local storage on successful authentication", async () => {
+    // This mocks the fetch to the Resource Server session endpoint
+    // Note: Currently, the endpoint only returns the webid in plain/text, it could
+    // be extended later to also provide the cookie expiration.
+    mockFetch(
+      new Response("https://my.webid", {
+        status: 200,
+      })
+    );
+
+    const MOCK_TIMESTAMP = 10000;
+    Date.now = jest.fn().mockReturnValueOnce(MOCK_TIMESTAMP);
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({
+      webId: "https://my.webid",
+      sessions: {
+        "https://my.webid": {
+          expiration: MOCK_TIMESTAMP + DEFAULT_LIFESPAN,
+        },
+      },
+    });
+  });
+
+  it("store nothing if the resource server has no session endpoint", async () => {
+    // This mocks the fetch to the Resource Server session endpoint
+    // Note: Currently, the endpoint only returns the WebID in plain/text, it could
+    // be extended later to also provide the cookie expiration.
+    mockFetch(
+      new Response("", {
+        status: 404,
+      })
+    );
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({});
+  });
+
+  it("store nothing if the resource server does not recognize the user", async () => {
+    // This mocks the fetch to the Resource Server session endpoint
+    // Note: Currently, the endpoint only returns the WebID in plain/text, it could
+    // be extended later to also provide the cookie expiration.
+    mockFetch(
+      new Response("", {
+        status: 401,
+      })
+    );
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({});
   });
 });
 

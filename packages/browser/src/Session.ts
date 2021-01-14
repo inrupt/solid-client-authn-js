@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -27,6 +27,7 @@ import {
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
+  ResourceServerSession,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
@@ -68,12 +69,7 @@ export class Session extends EventEmitter {
    * Session object constructor. Typically called as follows:
    *
    * ```typescript
-   * const session = new Session(
-   *   {
-   *     clientAuthentication: getClientAuthenticationWithDependencies({})
-   *   },
-   *   "mySession"
-   * );
+   * const session = new Session();
    * ```
    * @param sessionOptions The options enabling the correct instantiation of
    * the session. Either both storages or clientAuthentication are required. For
@@ -133,25 +129,20 @@ export class Session extends EventEmitter {
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    if (!this.info.isLoggedIn) {
-      // TODO: why does this.clientAuthentication.fetch return throws
-      // ""'fetch' called on an object that does not implement interface Window"
-      // when unauthenticated ?
-      return window.fetch(url, init);
-    }
     return this.clientAuthentication.fetch(url, init);
   };
 
   /**
-   * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
+   * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
    */
   logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
+    this.info.isLoggedIn = false;
     this.emit("logout");
   };
 
   /**
-   * Completes the login process by processing the information provided by the identity provider through redirect.
+   * Completes the login process by processing the information provided by the Solid identity provider through redirect.
    *
    * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
    */
@@ -164,6 +155,63 @@ export class Session extends EventEmitter {
     if (this.tokenRequestInProgress) {
       return undefined;
     }
+
+    // Unfortunately, regular sessions are lost when the user refreshes the page or opens a new tab.
+    // While we're figuring out the API for a longer-term solution, as a temporary workaround some
+    // *resource* servers set a cookie that keeps the user logged in after authenticated requests,
+    // and expose the fact that they set it on a special endpoint.
+    // After login, we store that fact in LocalStorage. This means that we can now look for that
+    // data, and if present, indicate that the user is already logged in.
+    // Note that there are a lot of edge cases that won't work well with this approach, so it willl
+    // be removed in due time.
+    const storedSessionCookieReference = window.localStorage.getItem(
+      "tmp-resource-server-session-info"
+    );
+    if (typeof storedSessionCookieReference === "string") {
+      // TOOD: Re-use the type used when writing this data:
+      // https://github.com/inrupt/solid-client-authn-js/pull/920/files#diff-659ac87dfd3711f4cfcea3c7bf6970980f4740fd59df45f04c7977bffaa23e98R118
+      // To keep temporary code together
+      // eslint-disable-next-line no-inner-declarations
+      function isValidSessionCookieReference(
+        reference: Record<string, unknown>
+      ): reference is ResourceServerSession {
+        const resourceServers = Object.keys(
+          (reference as ResourceServerSession).sessions ?? {}
+        );
+        return (
+          typeof (reference as ResourceServerSession).webId === "string" &&
+          resourceServers.length > 0 &&
+          typeof (reference as ResourceServerSession).sessions[
+            resourceServers[0]
+          ].expiration === "number"
+        );
+      }
+      const reference = JSON.parse(storedSessionCookieReference);
+      if (isValidSessionCookieReference(reference)) {
+        const resourceServers = Object.keys(reference.sessions);
+        const webIdOrigin = new URL(reference.webId).hostname;
+        const ownResourceServer = resourceServers.find((resourceServer) => {
+          return new URL(resourceServer).hostname === webIdOrigin;
+        });
+        // Usually the user's WebID is also a Resource server for them,
+        // so we pick the expiration time for that. If it doesn't exist,
+        // we just pick the first (and probably only) one:
+        const relevantServer = ownResourceServer ?? resourceServers[0];
+        // If the cookie is valid for fewer than five minutes,
+        // pretend it's not valid anymore already, to avoid small misalignments
+        // resulting in invalid states:
+        if (
+          reference.sessions[relevantServer].expiration - Date.now() >
+          5 * 60 * 1000
+        ) {
+          this.info.isLoggedIn = true;
+          this.info.webId = reference.webId;
+          return this.info;
+        }
+      }
+    }
+    // end of temporary workaround.
+
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url

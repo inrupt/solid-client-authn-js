@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -120,7 +120,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     );
     if (sessionId === undefined) {
       throw new Error(
-        `No stored session is associated to the state [${oauthState}]`
+        `No stored session is associated with the state [${oauthState}]`
       );
     }
 

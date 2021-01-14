@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -21,6 +21,7 @@
 
 import { Selector, t } from "testcafe";
 import LoginPage from "../page-models/LoginPage";
+import { CognitoPage } from "../page-models/cognito";
 
 // Login using NSS User
 export async function loginNss(username: string, password: string) {
@@ -123,4 +124,9 @@ export async function loginGluu(username: string, password: string) {
     .typeText("#loginForm\\:username", username)
     .typeText("#loginForm\\:password", password)
     .click("#loginForm\\:loginButton");
+}
+
+export async function loginCognito(username: string, password: string) {
+  const cognitoPage = new CognitoPage();
+  await cognitoPage.login(username, password);
 }

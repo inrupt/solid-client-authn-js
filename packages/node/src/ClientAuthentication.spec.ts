@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -62,6 +62,7 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login("mySession", {
         clientId: "coolApp",
+        clientName: "some client app name",
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com",
       });
@@ -71,7 +72,7 @@ describe("ClientAuthentication", () => {
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com",
         popUp: false,
-        clientName: "coolApp",
+        clientName: "some client app name",
         clientSecret: undefined,
         handleRedirect: undefined,
         tokenType: "DPoP",
@@ -85,6 +86,7 @@ describe("ClientAuthentication", () => {
         handle: jest.fn((_options: ILoginOptions) =>
           Promise.resolve(({
             fetch: mockedAuthFetch,
+            webId: "https://my.webid/",
           } as unknown) as LoginResult)
         ),
       };
@@ -97,6 +99,7 @@ describe("ClientAuthentication", () => {
         clientSecret: "some client secret",
       });
       expect(loginResult).not.toBeUndefined();
+      expect(loginResult?.webId).toEqual("https://my.webid/");
       expect(clientAuthn.fetch).toBe(mockedAuthFetch);
     });
 
@@ -119,35 +122,6 @@ describe("ClientAuthentication", () => {
         handleRedirect: undefined,
         tokenType: "Bearer",
       });
-    });
-
-    it("should clear the local storage when logging in", async () => {
-      const nonEmptyStorage = mockStorageUtility({
-        someUser: { someKey: "someValue" },
-      });
-      await nonEmptyStorage.setForUser(
-        "someUser",
-        { someKey: "someValue" },
-        { secure: true }
-      );
-      const clientAuthn = getClientAuthentication({
-        sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
-      });
-      await clientAuthn.login("someUser", {
-        clientId: "coolApp",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com",
-      });
-      await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
-      ).resolves.toBeUndefined();
-      await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
-      ).resolves.toBeUndefined();
-      // This test is only necessary until the key is stored safely
-      await expect(
-        nonEmptyStorage.get("clientKey", { secure: false })
-      ).resolves.toBeUndefined();
     });
   });
 
@@ -180,7 +154,7 @@ describe("ClientAuthentication", () => {
   });
 
   describe("getSessionInfo", () => {
-    it("creates a session for the global user", async () => {
+    it("gets the session info for a specific session ID", async () => {
       const sessionInfo = {
         isLoggedIn: "true",
         sessionId: "mySession",
@@ -196,6 +170,15 @@ describe("ClientAuthentication", () => {
       const session = await clientAuthn.getSessionInfo("mySession");
       // isLoggedIn is stored as a string under the hood, but deserialized as a boolean
       expect(session).toEqual({ ...sessionInfo, isLoggedIn: true });
+    });
+  });
+
+  describe("getAllSessionInfo", () => {
+    it("gets all session info instances", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(clientAuthn.getAllSessionInfo()).rejects.toThrow(
+        "Not implemented"
+      );
     });
   });
 

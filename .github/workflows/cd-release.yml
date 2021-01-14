@@ -49,7 +49,7 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       - name: Prepare for publication to npm
-        uses: actions/setup-node@v2.1.2
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: "12.x"
           registry-url: "https://registry.npmjs.org"
@@ -98,3 +98,72 @@ jobs:
           state: failure
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  verify-imports-node:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [14.x, 12.x, 10.x]
+    needs: [publish-npm]
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2.1.4
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install the preview release of solid-client-authn-node in the packaging test project
+        run: |
+          cd .github/workflows/cd-packaging-tests/node
+          npm install @inrupt/solid-client-authn-node
+      - name: Verify that the package can be imported in Node from a CommonJS module
+        run: |
+          cd .github/workflows/cd-packaging-tests/node
+          node --unhandled-rejections=strict commonjs.cjs
+      - name: Verify that the package can be imported in Node from an ES module
+        run: |
+          cd .github/workflows/cd-packaging-tests/node
+          node --unhandled-rejections=strict esmodule.mjs
+        # Node 10 does not support ES modules:
+        if: matrix.node-version != '10.x'
+
+
+  verify-imports-parcel:
+    runs-on: ubuntu-20.04
+    needs: [publish-npm]
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/setup-node@v2.1.4
+      with:
+        node-version: '14.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Verify that the package can be imported in a Parcel project
+      run: |
+        cd .github/workflows/cd-packaging-tests/bundler-parcel
+        npm install @inrupt/solid-client-authn-browser
+        npx parcel build index.ts
+    - name: Archive Parcel build artifacts
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: parcel-dist
+        path: .github/workflows/cd-packaging-tests/bundler-parcel/dist
+
+  verify-imports-webpack:
+    runs-on: ubuntu-20.04
+    needs: [publish-npm]
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/setup-node@v2.1.4
+      with:
+        node-version: '14.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Verify that the package can be imported in a Webpack project
+      run: |
+        cd .github/workflows/cd-packaging-tests/bundler-webpack
+        npm install @inrupt/solid-client-authn-browser
+        npm install webpack@5 webpack-cli buffer
+        npx webpack --devtool source-map
+    - name: Archive Webpack build artifacts
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: webpack-dist
+        path: .github/workflows/cd-packaging-tests/bundler-webpack/dist

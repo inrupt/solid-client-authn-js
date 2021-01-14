@@ -7,7 +7,9 @@
   },
 
   "typedocOptions": {
-    "out": "website/docs/api/browser"
+    "out": "website/docs/api/browser",
+    "entryPoints": ["./src/index.ts"],
+    "entryDocument": "index.md"
   },
 
   "include": ["src/**/*"]

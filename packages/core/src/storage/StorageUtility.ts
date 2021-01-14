@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -115,6 +115,16 @@ export async function saveSessionInfoToStorage(
   }
 }
 
+export type ResourceServerSession = {
+  webId: string;
+  sessions: Record<
+    string,
+    {
+      expiration: number;
+    }
+  >;
+};
+
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
  * @hidden
@@ -128,6 +138,9 @@ export default class StorageUtility implements IStorageUtility {
   private getKey(userId: string): string {
     return `solidClientAuthenticationUser:${userId}`;
   }
+
+  private RESOURCE_SERVER_SESSION_INFORMATION_KEY =
+    "tmp-resource-server-session-info";
 
   private async getUserData(
     userId: string,
@@ -249,6 +262,56 @@ export default class StorageUtility implements IStorageUtility {
     );
   }
 
+  async storeResourceServerSessionInfo(
+    webId: string,
+    resourceServerIri: string,
+    expiration: number
+  ): Promise<void> {
+    const sessions: ResourceServerSession = JSON.parse(
+      (await this.insecureStorage.get(
+        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
+      )) ?? "{}"
+    );
+    if (sessions.webId !== webId) {
+      // Clear all previously active sessions.
+      sessions.sessions = {};
+    }
+    sessions.webId = webId;
+    sessions.sessions[resourceServerIri] = {
+      expiration,
+    };
+    await this.insecureStorage.set(
+      this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
+      JSON.stringify(sessions)
+    );
+  }
+
+  async clearResourceServerSessionInfo(
+    resourceServerIri: string
+  ): Promise<void> {
+    const sessions: ResourceServerSession = JSON.parse(
+      (await this.insecureStorage.get(
+        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
+      )) ?? "{}"
+    );
+    if (sessions.sessions !== undefined) {
+      delete sessions.sessions[resourceServerIri];
+
+      if (Object.keys(sessions.sessions).length === 0) {
+        // If there aren't any active sessions left, the whole object is cleared.
+        await this.insecureStorage.set(
+          this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
+          "{}"
+        );
+      } else {
+        await this.insecureStorage.set(
+          this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
+          JSON.stringify(sessions)
+        );
+      }
+    }
+  }
+
   /**
    * Get an object from storage with the guarantee that it matches a given schema.
    *
@@ -256,7 +319,7 @@ export default class StorageUtility implements IStorageUtility {
    * @param options Optional parameters:
    *  - schema describing the expected JSON structure
    *  - secure switch to specify the target storage
-   * @returns The storad object associated to the provided key iff it matches the
+   * @returns The storad object associated with the provided key iff it matches the
    * provided schema.
    */
   async safeGet(

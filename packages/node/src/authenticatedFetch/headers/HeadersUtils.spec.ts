@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,18 @@ import { Headers as NodeHeaders } from "cross-fetch";
 import { flattenHeaders } from "./HeadersUtils";
 
 describe("Headers interoperability function", () => {
+  it("returns empty object if nothing passed in", () => {
+    expect(flattenHeaders(undefined)).toStrictEqual({});
+  });
+
+  it("returns Record if Record passed in", () => {
+    const flatHeaders: Record<string, string> = {
+      test: "value",
+    };
+    const result: Record<string, string> = flattenHeaders(flatHeaders);
+    expect(result.test).toBe("value");
+  });
+
   it("transforms an incoming Headers object into a flat headers structure", () => {
     const myHeaders = new NodeHeaders();
     myHeaders.append("accept", "application/json");

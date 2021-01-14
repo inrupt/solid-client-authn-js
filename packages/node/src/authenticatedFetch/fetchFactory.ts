@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -162,17 +162,11 @@ async function buildDpopFetchOptions(
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   const options: RequestInit = { ...defaultOptions };
-  if (authToken !== "") {
-    options.headers = {
-      ...defaultOptions?.headers,
-      Authorization: `DPoP ${authToken}`,
-      DPoP: createDpopHeader(
-        targetUrl,
-        defaultOptions?.method ?? "get",
-        dpopKey
-      ),
-    };
-  }
+  options.headers = {
+    ...defaultOptions?.headers,
+    Authorization: `DPoP ${authToken}`,
+    DPoP: createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
+  };
   return options;
 }
 

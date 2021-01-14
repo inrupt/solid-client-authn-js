@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -226,8 +226,6 @@ class DemoClientApp extends Component {
   extractComponentOfWebId(webId, part) {
     let result;
 
-
-
     switch (part) {
       case 0:
         result = webId.substring(0, webId.indexOf(".com/") + 5);
@@ -363,9 +361,9 @@ class DemoClientApp extends Component {
               Your Identity Provider is who you trust to manage your identity.
               <p></p>
               Hover your mouse over the editbox and click the 'x' on the
-              right-hand side of the field to clear it, and then use the
-              'down arrow' icon to select from various public Identity
-              Provider options.
+              right-hand side of the field to clear it, and then use the 'down
+              arrow' icon to select from various public Identity Provider
+              options.
             </span>
           </div>
           <input
@@ -564,7 +562,10 @@ class DemoClientApp extends Component {
               {this.extractComponentOfWebId(this.state.sessionInfo.webId, 0)}
               <span style={{ color: "red", fontSize: "18px" }}>
                 <strong>
-                  {this.extractComponentOfWebId(this.state.sessionInfo.webId, 1)}
+                  {this.extractComponentOfWebId(
+                    this.state.sessionInfo.webId,
+                    1
+                  )}
                 </strong>
               </span>
               {this.extractComponentOfWebId(this.state.sessionInfo.webId, 2)}

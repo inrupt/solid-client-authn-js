@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -30,7 +30,9 @@ import { IStorage } from "@inrupt/solid-client-authn-core";
  * @hidden
  */
 export default class BrowserStorage implements IStorage {
-  private storage = window.localStorage;
+  get storage(): typeof window.localStorage {
+    return window.localStorage;
+  }
 
   async get(key: string): Promise<string | undefined> {
     return this.storage.getItem(key) || undefined;

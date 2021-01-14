@@ -8,6 +8,15 @@
       "envTestUserPassword": "E2E_NSS_PASSWORD",
       "brokeredIdp": "nss",
       "authorizeClientAppMechanism": "nss"
+    },
+    {
+      "description": "ESS Dev - Cognito",
+      "podResourceServer": "https://dev-ess.inrupt.com/<TEST USER NAME>/",
+      "identityProvider": "https://broker.dev-ess.inrupt.com",
+      "envTestUserName": "E2E_ESS_DEV_USERNAME",
+      "envTestUserPassword": "E2E_ESS_DEV_PASSWORD",
+      "brokeredIdp": "Cognito",
+      "authorizeClientAppMechanism": "ess"
     }
   ],
 
@@ -56,6 +65,13 @@
         "\"Not Found\"",
         "Can't find file requested"
       ]
+    },
+    {
+      "name": "Private resource - logged in then refreshed",
+      "performLogin": true,
+      "resourceToGet": "<POD ROOT>private/",
+      "expectResponseContainsAnyOf": ["ldp:BasicContainer"],
+      "refresh": true
     }
   ]
 }

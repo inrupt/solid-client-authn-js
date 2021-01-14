@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -24,4 +24,5 @@ export default interface ITestConfig {
   performLogin: boolean;
   resourceToGet: string;
   expectResponseContainsAnyOf: string[];
+  refresh: boolean | undefined;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -36,12 +36,29 @@ import { getClientAuthenticationWithDependencies } from "./dependencies";
 export interface ISessionOptions {
   /**
    * A private storage, unreachable to other scripts on the page. Typically in-memory.
+   * This is deprecated in the NodeJS environment, since there is no issue getting
+   * a storage both private and persistent. If both `secureStorage` and its intended
+   * replacement `storage` are set, `secureStorage` will be ignored.
+   *
+   * @deprecated
    */
   secureStorage: IStorage;
   /**
-   * A storage where non-sensitive information may be stored, potentially longer-lived than the secure storage.
+   * A storage where non-sensitive information may be stored, potentially longer-lived
+   * than the secure storage. This is deprecated in the NodeJS environment, since there
+   * is no issue getting a storage both private and persistent. If both `insecureStorage`
+   * and its intended replacement `storage` are set, `insecureStorage` will be ignored.
+   *
+   * @deprecated
    */
   insecureStorage: IStorage;
+  /**
+   * A private storage where sensitive information may be stored, such as refresh
+   * tokens. The `storage` option aims at eventually replacing the legacy `secureStorage`
+   * and `insecureStorage`, which
+   * @since X.Y.Z
+   */
+  storage: IStorage;
   /**
    * Details about the current session
    */
@@ -90,6 +107,11 @@ export class Session extends EventEmitter {
 
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
+    } else if (sessionOptions.storage) {
+      this.clientAuthentication = getClientAuthenticationWithDependencies({
+        secureStorage: sessionOptions.storage,
+        insecureStorage: sessionOptions.storage,
+      });
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
       this.clientAuthentication = getClientAuthenticationWithDependencies({
         secureStorage: sessionOptions.secureStorage,
@@ -131,6 +153,7 @@ export class Session extends EventEmitter {
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
       this.info.sessionId = loginInfo.sessionId;
+      this.info.webId = loginInfo.webId;
     }
   };
 

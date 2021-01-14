@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -34,6 +34,12 @@ class LoginPage {
   }
 
   async submitLoginForm(identityServerUri: string) {
+    // If this select fails, it probably means our client application is not
+    // running (since all we're trying to do here is select the identity
+    // provider IRI textbox from a client application, so we can log into that
+    // provider).
+    // See our README, which recommends running 'demoClientApp' from the
+    // examples within our browser package.
     await t
       .selectText(this.identityProviderTextbox)
       .typeText(this.identityProviderTextbox, identityServerUri)

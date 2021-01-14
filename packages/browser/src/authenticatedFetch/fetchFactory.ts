@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -38,6 +38,7 @@ export function buildBearerFetch(
   return (init, options): Promise<Response> => {
     return fetch(init, {
       ...options,
+      credentials: "include",
       headers: {
         ...options?.headers,
         Authorization: `Bearer ${authToken}`,
@@ -63,6 +64,7 @@ async function buildDpopFetchOptions(
         dpopKey
       ),
     },
+    credentials: "include",
   };
 }
 

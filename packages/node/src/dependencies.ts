@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -166,8 +166,9 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }): ClientAuthentication {
-  const secureStorage = dependencies.secureStorage || new InMemoryStorage();
-  const insecureStorage = dependencies.insecureStorage || new InMemoryStorage();
+  const storage = new InMemoryStorage();
+  const secureStorage = dependencies.secureStorage || storage;
+  const insecureStorage = dependencies.insecureStorage || storage;
 
   const authenticatorContainer = container.createChildContainer();
   authenticatorContainer.register<IStorage>("secureStorage", {
