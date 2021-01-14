@@ -117,6 +117,7 @@ export class SessionInfoManager implements ISessionInfoManager {
       sessionId,
       "isLoggedIn"
     );
+
     if (isLoggedIn !== undefined) {
       return {
         sessionId,
@@ -124,6 +125,7 @@ export class SessionInfoManager implements ISessionInfoManager {
         isLoggedIn: isLoggedIn === "true",
       };
     }
+
     return undefined;
   }
 

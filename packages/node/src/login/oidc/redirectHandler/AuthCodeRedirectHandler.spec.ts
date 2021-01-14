@@ -424,7 +424,7 @@ describe("AuthCodeRedirectHandler", () => {
           "https://my.app/redirect?code=someCode&state=someState"
         )
       ).rejects.toThrow(
-        "No stored session is associated to the state [someState]"
+        "No stored session is associated with the state [someState]"
       );
     });
   });

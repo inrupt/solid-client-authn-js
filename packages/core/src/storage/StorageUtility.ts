@@ -319,7 +319,7 @@ export default class StorageUtility implements IStorageUtility {
    * @param options Optional parameters:
    *  - schema describing the expected JSON structure
    *  - secure switch to specify the target storage
-   * @returns The storad object associated to the provided key iff it matches the
+   * @returns The storad object associated with the provided key iff it matches the
    * provided schema.
    */
   async safeGet(

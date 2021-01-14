@@ -120,7 +120,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     );
     if (sessionId === undefined) {
       throw new Error(
-        `No stored session is associated to the state [${oauthState}]`
+        `No stored session is associated with the state [${oauthState}]`
       );
     }
 

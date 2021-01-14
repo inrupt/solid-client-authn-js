@@ -62,6 +62,7 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login("mySession", {
         clientId: "coolApp",
+        clientName: "some client app name",
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com",
       });
@@ -71,7 +72,7 @@ describe("ClientAuthentication", () => {
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com",
         popUp: false,
-        clientName: "coolApp",
+        clientName: "some client app name",
         clientSecret: undefined,
         handleRedirect: undefined,
         tokenType: "DPoP",
@@ -153,7 +154,7 @@ describe("ClientAuthentication", () => {
   });
 
   describe("getSessionInfo", () => {
-    it("creates a session for the global user", async () => {
+    it("gets the session info for a specific session ID", async () => {
       const sessionInfo = {
         isLoggedIn: "true",
         sessionId: "mySession",
@@ -169,6 +170,15 @@ describe("ClientAuthentication", () => {
       const session = await clientAuthn.getSessionInfo("mySession");
       // isLoggedIn is stored as a string under the hood, but deserialized as a boolean
       expect(session).toEqual({ ...sessionInfo, isLoggedIn: true });
+    });
+  });
+
+  describe("getAllSessionInfo", () => {
+    it("gets all session info instances", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(clientAuthn.getAllSessionInfo()).rejects.toThrow(
+        "Not implemented"
+      );
     });
   });
 

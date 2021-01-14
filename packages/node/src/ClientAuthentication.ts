@@ -71,6 +71,7 @@ export default class ClientAuthentication {
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
     });
+
     if (loginReturn !== undefined) {
       this.fetch = loginReturn.fetch;
       return {
@@ -79,6 +80,7 @@ export default class ClientAuthentication {
         webId: loginReturn.webId,
       };
     }
+
     // undefined is returned in the case when the login must be completed
     // after redirect.
     return undefined;
