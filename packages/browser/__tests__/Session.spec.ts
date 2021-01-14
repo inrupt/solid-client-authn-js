@@ -125,11 +125,12 @@ describe("Session", () => {
   });
 
   describe("fetch", () => {
-    it("wraps up ClientAuthentication fetch", async () => {
+    it("wraps up ClientAuthentication fetch if logged in", async () => {
       window.fetch = jest.fn();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
+      mySession.info.isLoggedIn = true;
       await mySession.fetch("https://some.url");
       expect(clientAuthnFetch).toHaveBeenCalled();
     });
@@ -139,11 +140,25 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
+      mySession.info.isLoggedIn = true;
       const objectWithFetch = {
         fetch: mySession.fetch,
       };
       await objectWithFetch.fetch("https://some.url");
       expect(clientAuthnFetch).toHaveBeenCalled();
+    });
+
+    // Prevents the bug when clientAuthentication.fetch throws
+    // ""'fetch' called on an object that does not implement interface Window"
+    // when unauthenticated.
+    it("does not call authenticated fetch if logged out", async () => {
+      window.fetch = jest.fn();
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
+      const mySession = new Session({ clientAuthentication });
+      await mySession.fetch("https://some.url/");
+      expect(clientAuthnFetch).not.toHaveBeenCalled();
+      expect(window.fetch).toHaveBeenCalled();
     });
   });
 

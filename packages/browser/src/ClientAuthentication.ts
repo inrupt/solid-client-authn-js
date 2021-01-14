@@ -24,6 +24,7 @@
  * @packageDocumentation
  */
 
+import "reflect-metadata";
 import { injectable, inject } from "tsyringe";
 import {
   ILoginInputOptions,
@@ -35,7 +36,10 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 
-const fetchWithCookies = (
+// TMP: This ensures that the HTTP requests will include any relevant cookie
+// that could have been set by the resource server.
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#parameters
+export const fetchWithCookies = (
   info: RequestInfo,
   init?: RequestInit
 ): ReturnType<typeof fetch> => {
