@@ -64,7 +64,10 @@ app.get("/login", async (req, res, next) => {
 });
 
 app.get("/redirect", async (req, res) => {
-  const session = new Session({ storage }, req.session!.sessionId);
+  const session =
+    (await getStoredSession(req.session!.sessionId, storage)) ??
+    new Session({ storage }, req.session!.sessionId);
+
   await session.handleIncomingRedirect(getRequestFullUrl(req));
   if (session.info.isLoggedIn) {
     res
