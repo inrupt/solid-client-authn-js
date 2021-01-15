@@ -245,3 +245,31 @@ export class Session extends EventEmitter {
     this.on("logout", callback);
   }
 }
+
+export async function getStoredSession(
+  sessionId: string,
+  storage?: IStorage
+): Promise<Session | undefined> {
+  let clientAuth: ClientAuthentication = storage
+    ? getClientAuthenticationWithDependencies({
+        secureStorage: storage,
+        insecureStorage: storage,
+      })
+    : getClientAuthenticationWithDependencies({});
+  const sessionInfo = await clientAuth.getSessionInfo(sessionId);
+  const session = new Session({
+    sessionInfo,
+    clientAuthentication: clientAuth,
+  });
+  const logininfo = await clientAuth.getStoredSessionInfo(
+    session.info.sessionId
+  );
+  if (logininfo["refreshToken"]) {
+    await session.login({
+      oidcIssuer: logininfo["oidcIssuer"],
+    });
+  } else {
+    await session.logout();
+  }
+  return session;
+}

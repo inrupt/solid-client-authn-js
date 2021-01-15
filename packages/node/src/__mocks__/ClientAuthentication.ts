@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "../ClientAuthentication";
 import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
@@ -30,5 +31,6 @@ export const mockClientAuthentication = (): ClientAuthentication =>
     LoginHandlerMock,
     RedirectHandlerMock,
     LogoutHandlerMock,
-    SessionInfoManagerMock
+    SessionInfoManagerMock,
+    mockStorageUtility({})
   );

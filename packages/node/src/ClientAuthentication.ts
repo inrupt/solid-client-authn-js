@@ -32,6 +32,7 @@ import {
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
+  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { fetch } from "cross-fetch";
 
@@ -45,7 +46,8 @@ export default class ClientAuthentication {
     @inject("redirectHandler") private redirectHandler: IRedirectHandler,
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionInfoManager")
-    private sessionInfoManager: ISessionInfoManager
+    private sessionInfoManager: ISessionInfoManager,
+    @inject("storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   // Define these functions as properties so that they don't get accidentally re-bound.
@@ -117,6 +119,18 @@ export default class ClientAuthentication {
       isLoggedIn: redirectInfo.isLoggedIn,
       webId: redirectInfo.webId,
       sessionId: redirectInfo.sessionId,
+    };
+  };
+
+  getStoredSessionInfo = async (
+    sessionId: string
+  ): Promise<Record<string, string | undefined>> => {
+    return {
+      refreshToken: await this.storageUtility.getForUser(
+        sessionId,
+        "refreshToken"
+      ),
+      oidcIssuer: await this.storageUtility.getForUser(sessionId, "issuer"),
     };
   };
 }

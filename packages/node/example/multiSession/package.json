@@ -1,0 +1,29 @@
+{
+  "name": "@inrupt/demo-authn-node-script",
+  "version": "1.0.0",
+  "description": "Demo for script authentication in NodeJS",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inrupt/solid-client-authn-js.git"
+  },
+  "author": "Inrupt, Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inrupt/solid-client-authn-js/issues"
+  },
+  "homepage": "https://github.com/inrupt/solid-client-authn-js#readme",
+  "dependencies": {
+    "@inrupt/solid-client-authn-core": "^1.1.0",
+    "cookie-session": "^1.4.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/cookie-session": "^2.0.42",
+    "@types/express": "^4.17.11",
+    "typescript": "^4.1.3"
+  }
+}
