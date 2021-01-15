@@ -31,7 +31,7 @@ const app = express();
 const PORT = 3001;
 const storage = new FileSystemStorage("sessions-data.json");
 
-const DEFAULT_OIDC_ISSUER = "https://broker.demo-ess.inrupt.com/";
+const DEFAULT_OIDC_ISSUER = "https://broker.pod.inrupt.com/";
 
 app.use(
   cookieSession({
@@ -41,17 +41,9 @@ app.use(
   })
 );
 
-app.get("/", (_req, res) => {
-  console.log("root");
-  res.writeHead(200, { "Content-Type": "text/html" }).write(`<p>root</p>`);
-  res.end();
-});
-
 app.get("/login", async (req, res, next) => {
-  console.log("login");
   const session = new Session({ storage });
   req.session!.sessionId = session.info.sessionId;
-  console.log(`cookied session id: ${req.session!.sessionId}`);
   await session.login({
     redirectUrl: "http://localhost:3001/redirect",
     oidcIssuer: DEFAULT_OIDC_ISSUER,
@@ -72,42 +64,33 @@ app.get("/login", async (req, res, next) => {
 });
 
 app.get("/redirect", async (req, res) => {
-  console.log("redirect");
-  console.log(`cookied session id: ${req.session!.sessionId}`);
   const session = new Session({ storage }, req.session!.sessionId);
   await session.handleIncomingRedirect(getRequestFullUrl(req));
   if (session.info.isLoggedIn) {
-    console.log("Logged in.");
-    console.log(
-      await (
-        await session.fetch(
-          "https://ldp.demo-ess.inrupt.com/116455455448573774513/"
-        )
-      ).text()
-    );
+    res
+      .writeHead(200, { "Content-Type": "text/html" })
+      .write(`<p>Logged in as ${session.info.webId} after redirect</p>`);
   } else {
-    console.log("Not logged in after redirect.");
+    res
+      .writeHead(400, { "Content-Type": "text/html" })
+      .write(`<p>Not logged in after redirect</p>`);
   }
-  res.writeHead(200, { "Content-Type": "text/html" }).write(`<p>redirect</p>`);
   res.end();
 });
 
 app.get("/fetch", async (req, res, next) => {
-  console.log(`cookied session id: ${req.session!.sessionId}`);
   const session = await getStoredSession(req.session!.sessionId, storage);
   if (!req.query["resource"]) {
     res
       .writeHead(400, { "Content-Type": "text/html" })
       .write("<p>Expected a 'resource' query param</p>");
   } else if (session) {
-    console.log("auth fetch");
     res
       .writeHead(200, { "Content-Type": "text/html" })
       .write(
         await (await session.fetch(req.query["resource"] as string)).text()
       );
   } else {
-    console.log("non-auth fetch");
     res
       .writeHead(200, { "Content-Type": "text/html" })
       .write(

@@ -60,14 +60,12 @@ export default class ClientRegistrar implements IClientRegistrar {
       this.storageUtility.getForUser(options.sessionId, "clientName"),
     ]);
     if (storedClientId) {
-      console.log("found stored client");
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
         clientName: storedClientName as string | undefined,
       };
     }
-    console.log(`no stored client for session ${options.sessionId}`);
     const extendedOptions = { ...options };
     // If registration access token is stored, use that.
     extendedOptions.registrationAccessToken =
