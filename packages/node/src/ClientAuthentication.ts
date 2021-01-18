@@ -31,6 +31,7 @@ import {
   ILogoutHandler,
   IRedirectHandler,
   ISessionInfo,
+  ISessionInternalInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import { fetch } from "cross-fetch";
@@ -99,7 +100,7 @@ export default class ClientAuthentication {
 
   getSessionInfo = async (
     sessionId: string
-  ): Promise<ISessionInfo | undefined> => {
+  ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> => {
     // TODO complete
     return this.sessionInfoManager.get(sessionId);
   };
