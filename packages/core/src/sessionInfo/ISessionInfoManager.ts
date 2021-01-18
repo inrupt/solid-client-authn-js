@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import ISessionInfo from "./ISessionInfo";
+import { ISessionInfo, ISessionInternalInfo } from "./ISessionInfo";
 
 /**
  * @hidden
@@ -39,7 +39,9 @@ export interface ISessionInfoManagerOptions {
  */
 export interface ISessionInfoManager {
   update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
-  get(sessionId: string): Promise<ISessionInfo | undefined>;
-  getAll(): Promise<ISessionInfo[]>;
+  get(
+    sessionId: string
+  ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined>;
+  getAll(): Promise<(ISessionInfo & ISessionInternalInfo)[]>;
   clear(sessionId: string): Promise<void>;
 }

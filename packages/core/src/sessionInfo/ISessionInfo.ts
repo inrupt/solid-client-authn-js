@@ -22,7 +22,7 @@
 /**
  * Defines the data that should be persisted for each session.
  */
-export default interface ISessionInfo {
+export interface ISessionInfo {
   /**
    * 'true' if the session is currently logged into an associated identity
    * provider.
@@ -38,4 +38,16 @@ export default interface ISessionInfo {
    * A unique identifier for the session.
    */
   sessionId: string;
+}
+
+export interface ISessionInternalInfo {
+  /**
+   * The refresh token associated to the session (if any).
+   */
+  refreshToken?: string;
+
+  /**
+   * The OIDC issuer that issued the tokens authenticating the session.
+   */
+  issuer?: string;
 }
