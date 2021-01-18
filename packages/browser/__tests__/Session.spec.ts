@@ -442,13 +442,11 @@ describe("Session", () => {
     // onLogin is called.
     // eslint-disable-next-line jest/no-done-callback
     it("calls the registered callback on login", async (done) => {
-      let hasBeenCalled = false;
-      const myCallback = (): void => {
-        hasBeenCalled = true;
+      const myCallback = jest.fn((): void => {
         if (done) {
           done();
         }
-      };
+      });
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest.fn(
         async (_url: string) => {
@@ -462,7 +460,7 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       mySession.onLogin(myCallback);
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(hasBeenCalled).toEqual(true);
+      expect(myCallback).toHaveBeenCalled();
     });
 
     it("does not call the registered callback if login isn't successful", async () => {
@@ -489,7 +487,6 @@ describe("Session", () => {
     });
 
     it("sets the appropriate information before calling the callback", async () => {
-      let hasBeenCalled = false;
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest.fn(
         async (_url: string) => {
@@ -501,13 +498,12 @@ describe("Session", () => {
         }
       );
       const mySession = new Session({ clientAuthentication });
-      const myCallback = (): void => {
-        hasBeenCalled = true;
+      const myCallback = jest.fn((): void => {
         expect(mySession.info.webId).toBe("https://some.webid#them");
-      };
+      });
       mySession.onLogin(myCallback);
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(hasBeenCalled).toEqual(true);
+      expect(myCallback).toHaveBeenCalled();
     });
   });
 
