@@ -316,6 +316,31 @@ describe("Session", () => {
         mySession.handleIncomingRedirect("https://some.url")
       ).resolves.not.toThrow();
     });
+
+    it("sets the appropriate information before calling the callback", async (done) => {
+      let hasBeenCalled = false;
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.handleIncomingRedirect = jest.fn(
+        async (_url: string) => {
+          return {
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          };
+        }
+      );
+      const mySession = new Session({ clientAuthentication });
+      const myCallback = (): void => {
+        hasBeenCalled = true;
+        expect(mySession.info.webId).toBe("https://some.webid#them");
+        if (done) {
+          done();
+        }
+      };
+      mySession.onLogin(myCallback);
+      await mySession.handleIncomingRedirect("https://some.url");
+      expect(hasBeenCalled).toEqual(true);
+    });
   });
 
   describe("onLogout", () => {
