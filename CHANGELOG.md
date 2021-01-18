@@ -10,7 +10,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
-N/A
+### Bugfix
+
+#### browser and node
+
+- The `login` even was emitted before setting the session info, which
+could result in a race where the onLogin callback couldn't read session
+information, surch as the WebID.
 
 ## 1.4.1 - 2020-01-14
 
