@@ -438,15 +438,8 @@ describe("Session", () => {
   });
 
   describe("onLogin", () => {
-    // The `done` callback is used in order to make sure the callback passed to
-    // onLogin is called.
-    // eslint-disable-next-line jest/no-done-callback
-    it("calls the registered callback on login", async (done) => {
-      const myCallback = jest.fn((): void => {
-        if (done) {
-          done();
-        }
-      });
+    it("calls the registered callback on login", async () => {
+      const myCallback = jest.fn();
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest.fn(
         async (_url: string) => {
@@ -504,6 +497,8 @@ describe("Session", () => {
       mySession.onLogin(myCallback);
       await mySession.handleIncomingRedirect("https://some.url");
       expect(myCallback).toHaveBeenCalled();
+      // Verify that the conditional assertion has been called
+      expect.assertions(2);
     });
   });
 
