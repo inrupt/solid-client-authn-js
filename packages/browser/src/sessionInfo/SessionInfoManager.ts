@@ -170,4 +170,26 @@ export class SessionInfoManager implements ISessionInfoManager {
   async clear(sessionId: string): Promise<void> {
     return clear(sessionId, this.storageUtility);
   }
+
+  /**
+   * Registers a new session, so that its ID can be retrieved.
+   * @param sessionId
+   */
+  async register(_sessionId: string): Promise<void> {
+    throw new Error("Unimplemented");
+  }
+  /**
+   * Returns all the registered session IDs. Differs from getAll, which also
+   * returns additional session information.
+   */
+  async getRegisteredSessionIdAll(): Promise<string[]> {
+    throw new Error("Unimplemented");
+  }
+
+  /**
+   * Deletes all information about all sessions, including their registrations.
+   */
+  async clearAll(): Promise<void> {
+    throw new Error("Unimplemented");
+  }
 }
