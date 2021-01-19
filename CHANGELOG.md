@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+
+### New features
+
+#### browser
+
+- `handleIncomingRedirect` uses the current browser URL as a default value.
+
 The following sections document changes that have been released already:
 
 ### New features
