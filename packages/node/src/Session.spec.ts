@@ -384,13 +384,11 @@ describe("getStoredSession", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     const mySession = await getStoredSession("mySession", mockStorage({}));
-    expect(mySession?.info).toEqual(
-      expect.objectContaining({
-        webId: "https://my.webid",
-        isLoggedIn: true,
-        sessionId: "mySession",
-      })
-    );
+    expect(mySession?.info).toStrictEqual({
+      webId: "https://my.webid",
+      isLoggedIn: true,
+      sessionId: "mySession",
+    });
   });
 
   it("returns a logged out Session if no refresh token is available", async () => {
@@ -410,12 +408,11 @@ describe("getStoredSession", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     const mySession = await getStoredSession("mySession", mockStorage({}));
-    expect(mySession?.info).toEqual(
-      expect.objectContaining({
-        isLoggedIn: false,
-        sessionId: "mySession",
-      })
-    );
+    expect(mySession?.info).toStrictEqual({
+      isLoggedIn: false,
+      sessionId: "mySession",
+      webId: "https://my.webid",
+    });
   });
 
   it("returns undefined if no session id matches in storage", async () => {
