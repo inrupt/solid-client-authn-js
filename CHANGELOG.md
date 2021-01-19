@@ -10,6 +10,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+### New features
+
+#### node
+
+- `getStoredSession`: a function to retrieve a session from storage based on
+its session ID (for multi-session management).
+
 ## 1.4.2 - 2020-01-19
 
 ### Bugfix
@@ -17,13 +24,6 @@ The following sections document changes that have been released already:
 #### browser and node
 
 - The `onLogin` callback couldn't read session information, such as the WebID.
-
-### New features
-
-#### node
-
-- `getStoredSession`: a function to retrieve a session from storage based on
-its session ID (for multi-session management).
 
 ## 1.4.1 - 2020-01-14
 
