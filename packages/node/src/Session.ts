@@ -244,7 +244,7 @@ export class Session extends EventEmitter {
   }
 }
 
-export async function getStoredSession(
+export async function getSessionFromStorage(
   sessionId: string,
   storage?: IStorage
 ): Promise<Session | undefined> {

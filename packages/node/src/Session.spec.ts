@@ -24,7 +24,7 @@ import "reflect-metadata";
 import { it, describe } from "@jest/globals";
 import { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
-import { getStoredSession, Session } from "./Session";
+import { getSessionFromStorage, Session } from "./Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
 
 jest.mock("cross-fetch");
@@ -383,7 +383,7 @@ describe("getStoredSession", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    const mySession = await getStoredSession("mySession", mockStorage({}));
+    const mySession = await getSessionFromStorage("mySession", mockStorage({}));
     expect(mySession?.info).toStrictEqual({
       webId: "https://my.webid",
       isLoggedIn: true,
@@ -407,7 +407,7 @@ describe("getStoredSession", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    const mySession = await getStoredSession("mySession", mockStorage({}));
+    const mySession = await getSessionFromStorage("mySession", mockStorage({}));
     expect(mySession?.info).toStrictEqual({
       isLoggedIn: false,
       sessionId: "mySession",
@@ -424,7 +424,7 @@ describe("getStoredSession", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    const mySession = await getStoredSession("mySession", mockStorage({}));
+    const mySession = await getSessionFromStorage("mySession", mockStorage({}));
     expect(mySession?.info).toBeUndefined();
   });
 
@@ -437,7 +437,7 @@ describe("getStoredSession", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    await getStoredSession("mySession");
+    await getSessionFromStorage("mySession");
 
     expect(
       dependencies.getClientAuthenticationWithDependencies
