@@ -142,12 +142,16 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * Completes the login process by processing the information provided by the Solid identity provider through redirect.
+   * Completes the login process by processing the information provided by the
+   * Solid identity provider through redirect.
    *
-   * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
+   * @param url The URL of the page handling the redirect, including the query
+   * parameters — these contain the information to process the login.
+   * Note: as a convenience, if no URL value is specified here, we default to
+   * using the browser's current location.
    */
   handleIncomingRedirect = async (
-    url: string
+    url: string = window.location.href
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
       return this.info;

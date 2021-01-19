@@ -162,17 +162,62 @@ describe("Session", () => {
   });
 
   describe("handleincomingRedirect", () => {
+    it("uses current window location as default redirect URL", async () => {
+      // We can't simply do 'window.location.href = defaultLocation;', as that
+      // causes our test environment to try to navigate to the new location (as
+      // a browser would do). So instead we need to reset 'window.location' as a
+      // whole, and reset it's value after our test. We also seem to need to
+      // save and restore the 'history' object.
+      const {
+        location,
+        history: { replaceState },
+      } = window;
+
+      try {
+        // location and history aren't optional on window, which makes TS complain
+        // (rightfully) when we delete them. However, they are deleted on purpose
+        // here just for testing.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        delete window.location;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        delete window.history.replaceState;
+
+        // Set our window's location to our test value.
+        const defaultLocation = "https://coolSite.com/myAppTestPage";
+        window.location = {
+          href: defaultLocation,
+        } as Location;
+        window.history.replaceState = jest.fn();
+
+        const clientAuthentication = mockClientAuthentication();
+        const clientAuthnHandler = jest.spyOn(
+          clientAuthentication,
+          "handleIncomingRedirect"
+        );
+
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect();
+        expect(clientAuthnHandler).toHaveBeenCalledWith(defaultLocation);
+      } finally {
+        // Restore our 'window' state.
+        window.location = location;
+        window.history.replaceState = replaceState;
+      }
+    });
+
     it("wraps up ClientAuthentication handleIncomingRedirect", async () => {
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
       const clientAuthentication = mockClientAuthentication();
-      const clientAuthnHandle = jest.spyOn(
+      const clientAuthnHandler = jest.spyOn(
         clientAuthentication,
         "handleIncomingRedirect"
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(clientAuthnHandle).toHaveBeenCalled();
+      expect(clientAuthnHandler).toHaveBeenCalled();
     });
 
     it("updates the session's info if relevant", async () => {
@@ -268,7 +313,7 @@ describe("Session", () => {
 
     it("preserves a binding to its Session instance", async () => {
       const clientAuthentication = mockClientAuthentication();
-      const clientAuthnHandleIncomingRedirect = jest.spyOn(
+      const clientAuthnHandlerIncomingRedirect = jest.spyOn(
         clientAuthentication,
         "handleIncomingRedirect"
       );
@@ -279,7 +324,7 @@ describe("Session", () => {
       await objectWithHandleIncomingRedirect.handleIncomingRedirect(
         "https://some.url"
       );
-      expect(clientAuthnHandleIncomingRedirect).toHaveBeenCalled();
+      expect(clientAuthnHandlerIncomingRedirect).toHaveBeenCalled();
     });
 
     // This workaround will be removed after we've settled on an API that allows us to silently

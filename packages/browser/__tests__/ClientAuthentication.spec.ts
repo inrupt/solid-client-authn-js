@@ -146,7 +146,7 @@ describe("ClientAuthentication", () => {
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       await clientAuthn.handleIncomingRedirect(url);
 
-      // Calling handleredirect should give us an authenticated fetch.
+      // Calling handle redirect should give us an authenticated fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
 
       await clientAuthn.logout("mySession");
@@ -198,7 +198,7 @@ describe("ClientAuthentication", () => {
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
 
-      // Calling handleredirect should have updated the fetch.
+      // Calling handle redirect should have updated the fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
     });
 
