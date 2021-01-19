@@ -19,11 +19,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {
+  ILoginHandler,
+  ILogoutHandler,
+  IRedirectHandler,
+  ISessionInfoManager,
+  IStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "../ClientAuthentication";
 import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
-import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
-import { SessionInfoManagerMock } from "../sessionInfo/__mocks__/SessionInfoManager";
+import {
+  LogoutHandlerMock,
+  mockLogoutHandler,
+} from "../logout/__mocks__/LogoutHandler";
+import {
+  mockSessionInfoManager,
+  SessionInfoManagerMock,
+} from "../sessionInfo/__mocks__/SessionInfoManager";
 
 export const mockClientAuthentication = (): ClientAuthentication =>
   new ClientAuthentication(
@@ -31,4 +44,22 @@ export const mockClientAuthentication = (): ClientAuthentication =>
     RedirectHandlerMock,
     LogoutHandlerMock,
     SessionInfoManagerMock
+  );
+
+type CustomMocks = {
+  storage: IStorageUtility;
+  sessionInfoManager: ISessionInfoManager;
+  loginHandler: ILoginHandler;
+  redirectHandler: IRedirectHandler;
+  logoutHandler: ILogoutHandler;
+};
+
+export const mockCustomClientAuthentication = (
+  mocks: Partial<CustomMocks>
+): ClientAuthentication =>
+  new ClientAuthentication(
+    mocks.loginHandler ?? LoginHandlerMock,
+    mocks.redirectHandler ?? RedirectHandlerMock,
+    mocks.logoutHandler ?? mockLogoutHandler(mocks.storage!),
+    mocks.sessionInfoManager ?? mockSessionInfoManager(mocks.storage!)
   );

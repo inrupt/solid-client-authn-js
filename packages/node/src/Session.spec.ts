@@ -22,10 +22,23 @@
 // The following is required by tsyringe
 import "reflect-metadata";
 import { it, describe } from "@jest/globals";
-import { ISessionInfo } from "@inrupt/solid-client-authn-core";
-import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
-import { getSessionFromStorage, Session } from "./Session";
+import {
+  ISessionInfo,
+  mockStorageUtility,
+} from "@inrupt/solid-client-authn-core";
+import {
+  mockClientAuthentication,
+  mockCustomClientAuthentication,
+} from "./__mocks__/ClientAuthentication";
+import {
+  clearSessionAll,
+  getSessionFromStorage,
+  getStoredSessionIdAll,
+  Session,
+} from "./Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
+import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
+import { REGISTERED_SESSIONS_KEY } from "./constants";
 
 jest.mock("cross-fetch");
 jest.mock("./dependencies");
@@ -438,6 +451,89 @@ describe("getSessionFromStorage", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     await getSessionFromStorage("mySession");
+
+    expect(
+      dependencies.getClientAuthenticationWithDependencies
+    ).toHaveBeenCalledWith({});
+  });
+});
+
+describe("getStoredSessionIdAll", () => {
+  it("returns all the session IDs available in storage", async () => {
+    const storage = mockStorageUtility({
+      [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+        "a session",
+        "another session",
+      ]),
+    });
+
+    const clientAuthentication = mockCustomClientAuthentication({
+      sessionInfoManager: mockSessionInfoManager(storage),
+    });
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    const sessions = await getStoredSessionIdAll(mockStorage({}));
+    expect(sessions).toStrictEqual(["a session", "another session"]);
+  });
+
+  it("falls back to the environment storage if none is specified", async () => {
+    const storage = mockStorageUtility({
+      [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+        "a session",
+        "another session",
+      ]),
+    });
+
+    const clientAuthentication = mockCustomClientAuthentication({
+      sessionInfoManager: mockSessionInfoManager(storage),
+    });
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    await getStoredSessionIdAll();
+
+    expect(
+      dependencies.getClientAuthenticationWithDependencies
+    ).toHaveBeenCalledWith({});
+  });
+});
+
+describe("clearSessionAll", () => {
+  it("clears all the sessions in storage", async () => {
+    const storage = mockStorageUtility({
+      [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+        "a session",
+        "another session",
+      ]),
+    });
+
+    const clientAuthentication = mockCustomClientAuthentication({
+      sessionInfoManager: mockSessionInfoManager(storage),
+    });
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    await clearSessionAll(storage);
+    await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+      JSON.stringify([])
+    );
+  });
+
+  it("falls back to the environment storage if none is specified", async () => {
+    const storage = mockStorageUtility({});
+
+    const clientAuthentication = mockCustomClientAuthentication({
+      sessionInfoManager: mockSessionInfoManager(storage),
+    });
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    await clearSessionAll();
 
     expect(
       dependencies.getClientAuthenticationWithDependencies
