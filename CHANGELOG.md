@@ -22,7 +22,7 @@ The following sections document changes that have been released already:
 
 #### node
 
-- Add a `getStoredSession` function to retrieve a session from storage based on
+- `getStoredSession`: a function to retrieve a session from storage based on
 its session ID (for multi-session management).
 
 ## 1.4.1 - 2020-01-14
