@@ -28,6 +28,7 @@ import { inject, injectable } from "tsyringe";
 import {
   ISessionInfo,
   ISessionInfoManager,
+  ISessionInternalInfo,
   ISessionInfoManagerOptions,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
@@ -120,7 +121,9 @@ export class SessionInfoManager implements ISessionInfoManager {
     throw new Error("Not Implemented");
   }
 
-  async get(sessionId: string): Promise<ISessionInfo | undefined> {
+  async get(
+    sessionId: string
+  ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
     const webId = await this.storageUtility.getForUser(sessionId, "webId", {
       secure: true,
     });
@@ -131,18 +134,30 @@ export class SessionInfoManager implements ISessionInfoManager {
         secure: true,
       }
     );
+    const refreshToken = await this.storageUtility.getForUser(
+      sessionId,
+      "refreshToken",
+      {
+        secure: true,
+      }
+    );
+    const issuer = await this.storageUtility.getForUser(sessionId, "issuer", {
+      secure: true,
+    });
     if (isLoggedIn !== undefined) {
       return {
         sessionId,
         webId,
         isLoggedIn: isLoggedIn === "true",
+        refreshToken,
+        issuer,
       };
     }
     return undefined;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async getAll(): Promise<ISessionInfo[]> {
+  async getAll(): Promise<(ISessionInfo & ISessionInternalInfo)[]> {
     throw new Error("Not implemented");
   }
 

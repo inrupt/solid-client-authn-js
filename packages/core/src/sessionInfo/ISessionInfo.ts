@@ -20,9 +20,10 @@
  */
 
 /**
- * Defines the data that should be persisted for each session.
+ * Defines the data that should be persisted for each session. This interface
+ * is exposed as part of our public API.
  */
-export default interface ISessionInfo {
+export interface ISessionInfo {
   /**
    * 'true' if the session is currently logged into an associated identity
    * provider.
@@ -38,4 +39,22 @@ export default interface ISessionInfo {
    * A unique identifier for the session.
    */
   sessionId: string;
+}
+
+/**
+ * Captures information about sessions that is persisted in storage, but that
+ * should not be exposed as part of our public API, and is only used for internal
+ * purpose. It is complementary to ISessionInfo when retrieving all information
+ * about a stored session, both public and internal.
+ */
+export interface ISessionInternalInfo {
+  /**
+   * The refresh token associated to the session (if any).
+   */
+  refreshToken?: string;
+
+  /**
+   * The OIDC issuer that issued the tokens authenticating the session.
+   */
+  issuer?: string;
 }

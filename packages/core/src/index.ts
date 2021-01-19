@@ -38,7 +38,7 @@ export {
 } from "./login/oidc/redirectHandler/IRedirectHandler";
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 
-export { default as ISessionInfo } from "./sessionInfo/ISessionInfo";
+export { ISessionInfo, ISessionInternalInfo } from "./sessionInfo/ISessionInfo";
 export {
   ISessionInfoManager,
   ISessionInfoManagerOptions,

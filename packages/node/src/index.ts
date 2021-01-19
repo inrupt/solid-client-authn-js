@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export { Session, ISessionOptions } from "./Session";
+export { Session, ISessionOptions, getStoredSession } from "./Session";
 
 export { SessionManager, ISessionManagerOptions } from "./SessionManager";
 

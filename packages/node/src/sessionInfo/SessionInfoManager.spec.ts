@@ -65,13 +65,6 @@ describe("SessionInfoManager", () => {
         },
       });
 
-      // const storageUtility = defaultMocks.storageUtility;
-      // storageUtility.getForUser
-      //   .mockReturnValueOnce(
-      //     Promise.resolve("https://zoomies.com/commanderCool#me")
-      //   )
-      //   .mockReturnValueOnce(Promise.resolve("true"));
-
       const sessionManager = getSessionInfoManager({
         storageUtility: storageMock,
       });
@@ -89,6 +82,33 @@ describe("SessionInfoManager", () => {
       });
       const session = await sessionManager.get("commanderCool");
       expect(session).toBeUndefined();
+    });
+
+    it("retrieves a session internal info from specified storage", async () => {
+      const sessionId = "commanderCool";
+
+      const webId = "https://zoomies.com/commanderCool#me";
+
+      const storageMock = mockStorageUtility({
+        [`solidClientAuthenticationUser:${sessionId}`]: {
+          webId,
+          isLoggedIn: "true",
+          refreshToken: "some token",
+          issuer: "https://my.idp/",
+        },
+      });
+
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storageMock,
+      });
+      const session = await sessionManager.get(sessionId);
+      expect(session).toMatchObject({
+        sessionId,
+        webId,
+        isLoggedIn: true,
+        refreshToken: "some token",
+        issuer: "https://my.idp/",
+      });
     });
   });
 

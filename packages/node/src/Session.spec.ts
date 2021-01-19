@@ -24,10 +24,11 @@ import "reflect-metadata";
 import { it, describe } from "@jest/globals";
 import { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
-import { Session } from "./Session";
+import { getStoredSession, Session } from "./Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
 
 jest.mock("cross-fetch");
+jest.mock("./dependencies");
 
 describe("Session", () => {
   describe("constructor", () => {
@@ -49,31 +50,43 @@ describe("Session", () => {
     });
 
     it("accepts legacy input storage", async () => {
+      const dependencies = jest.requireMock("./dependencies");
+      dependencies.getClientAuthenticationWithDependencies = jest.fn();
       const insecureStorage = mockStorage({});
       const secureStorage = mockStorage({});
+
       const mySession = new Session({
         insecureStorage,
         secureStorage,
       });
-      const clearSecureStorage = jest.spyOn(secureStorage, "delete");
-      const clearInsecureStorage = jest.spyOn(insecureStorage, "delete");
-      await mySession.logout();
-      expect(clearSecureStorage).toHaveBeenCalled();
-      expect(clearInsecureStorage).toHaveBeenCalled();
+      expect(mySession).not.toBeUndefined();
+      expect(
+        dependencies.getClientAuthenticationWithDependencies
+      ).toHaveBeenCalledWith({
+        secureStorage,
+        insecureStorage,
+      });
     });
 
     it("accepts input storage", async () => {
+      const dependencies = jest.requireMock("./dependencies");
+      dependencies.getClientAuthenticationWithDependencies = jest.fn();
       const storage = mockStorage({});
       const mySession = new Session({
         storage,
       });
-      const clearStorage = jest.spyOn(storage, "delete");
-      await mySession.logout();
-      // The unique storage object should be used as both secure and insecure storage.
-      expect(clearStorage).toHaveBeenCalledTimes(3);
+      expect(mySession).not.toBeUndefined();
+      expect(
+        dependencies.getClientAuthenticationWithDependencies
+      ).toHaveBeenCalledWith({
+        secureStorage: storage,
+        insecureStorage: storage,
+      });
     });
 
     it("ignores legacy input storage if new input storage is specified", async () => {
+      const dependencies = jest.requireMock("./dependencies");
+      dependencies.getClientAuthenticationWithDependencies = jest.fn();
       const insecureStorage = mockStorage({});
       const secureStorage = mockStorage({});
       const storage = mockStorage({});
@@ -82,13 +95,13 @@ describe("Session", () => {
         secureStorage,
         storage,
       });
-      const clearStorage = jest.spyOn(secureStorage, "delete");
-      const clearSecureStorage = jest.spyOn(secureStorage, "delete");
-      const clearInsecureStorage = jest.spyOn(insecureStorage, "delete");
-      await mySession.logout();
-      expect(clearStorage).not.toHaveBeenCalled();
-      expect(clearSecureStorage).not.toHaveBeenCalled();
-      expect(clearInsecureStorage).not.toHaveBeenCalled();
+      expect(mySession).not.toBeUndefined();
+      expect(
+        dependencies.getClientAuthenticationWithDependencies
+      ).toHaveBeenCalledWith({
+        secureStorage: storage,
+        insecureStorage: storage,
+      });
     });
 
     it("accepts session info", () => {
@@ -348,5 +361,86 @@ describe("Session", () => {
       mySession.onLogout(myCallback);
       await mySession.logout();
     });
+  });
+});
+
+describe("getStoredSession", () => {
+  it("returns a logged in Session if a refresh token is available in storage", async () => {
+    const clientAuthentication = mockClientAuthentication();
+    clientAuthentication.getSessionInfo = jest.fn().mockResolvedValue({
+      webId: "https://my.webid",
+      isLoggedIn: true,
+      refreshToken: "some token",
+      issuer: "https://my.idp",
+      sessionId: "mySession",
+    });
+    clientAuthentication.login = jest.fn().mockResolvedValue({
+      webId: "https://my.webid",
+      isLoggedIn: true,
+      sessionId: "mySession",
+    });
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    const mySession = await getStoredSession("mySession", mockStorage({}));
+    expect(mySession?.info).toStrictEqual({
+      webId: "https://my.webid",
+      isLoggedIn: true,
+      sessionId: "mySession",
+    });
+  });
+
+  it("returns a logged out Session if no refresh token is available", async () => {
+    const clientAuthentication = mockClientAuthentication();
+    clientAuthentication.getSessionInfo = jest.fn().mockResolvedValueOnce({
+      webId: "https://my.webid",
+      isLoggedIn: true,
+      issuer: "https://my.idp",
+      sessionId: "mySession",
+    });
+    clientAuthentication.logout = jest.fn().mockResolvedValueOnce({
+      isLoggedIn: false,
+      sessionId: "mySession",
+    });
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    const mySession = await getStoredSession("mySession", mockStorage({}));
+    expect(mySession?.info).toStrictEqual({
+      isLoggedIn: false,
+      sessionId: "mySession",
+      webId: "https://my.webid",
+    });
+  });
+
+  it("returns undefined if no session id matches in storage", async () => {
+    const clientAuthentication = mockClientAuthentication();
+    clientAuthentication.getSessionInfo = jest
+      .fn()
+      .mockResolvedValueOnce(undefined);
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    const mySession = await getStoredSession("mySession", mockStorage({}));
+    expect(mySession?.info).toBeUndefined();
+  });
+
+  it("falls back to the environment storage if none is specified", async () => {
+    const clientAuthentication = mockClientAuthentication();
+    clientAuthentication.getSessionInfo = jest
+      .fn()
+      .mockResolvedValueOnce(undefined);
+    const dependencies = jest.requireMock("./dependencies");
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn()
+      .mockReturnValue(clientAuthentication);
+    await getStoredSession("mySession");
+
+    expect(
+      dependencies.getClientAuthenticationWithDependencies
+    ).toHaveBeenCalledWith({});
   });
 });
