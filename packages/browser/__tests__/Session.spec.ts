@@ -192,14 +192,14 @@ describe("Session", () => {
         window.history.replaceState = jest.fn();
 
         const clientAuthentication = mockClientAuthentication();
-        const clientAuthnHandler = jest.spyOn(
+        const incomingRedirectHandler = jest.spyOn(
           clientAuthentication,
           "handleIncomingRedirect"
         );
 
         const mySession = new Session({ clientAuthentication });
         await mySession.handleIncomingRedirect();
-        expect(clientAuthnHandler).toHaveBeenCalledWith(defaultLocation);
+        expect(incomingRedirectHandler).toHaveBeenCalledWith(defaultLocation);
       } finally {
         // Restore our 'window' state.
         window.location = location;
@@ -211,13 +211,13 @@ describe("Session", () => {
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
       const clientAuthentication = mockClientAuthentication();
-      const clientAuthnHandler = jest.spyOn(
+      const incomingRedirectHandler = jest.spyOn(
         clientAuthentication,
         "handleIncomingRedirect"
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(clientAuthnHandler).toHaveBeenCalled();
+      expect(incomingRedirectHandler).toHaveBeenCalled();
     });
 
     it("updates the session's info if relevant", async () => {
@@ -313,7 +313,7 @@ describe("Session", () => {
 
     it("preserves a binding to its Session instance", async () => {
       const clientAuthentication = mockClientAuthentication();
-      const clientAuthnHandlerIncomingRedirect = jest.spyOn(
+      const incomingRedirectHandler = jest.spyOn(
         clientAuthentication,
         "handleIncomingRedirect"
       );
@@ -324,7 +324,7 @@ describe("Session", () => {
       await objectWithHandleIncomingRedirect.handleIncomingRedirect(
         "https://some.url"
       );
-      expect(clientAuthnHandlerIncomingRedirect).toHaveBeenCalled();
+      expect(incomingRedirectHandler).toHaveBeenCalled();
     });
 
     // This workaround will be removed after we've settled on an API that allows us to silently
