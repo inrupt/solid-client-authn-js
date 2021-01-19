@@ -38,6 +38,7 @@ export interface ISessionManager {
 /**
  * A SessionManager instance can be used to manage all the sessions in an
  * application, each session being associated with an individual user.
+ * @deprecated
  */
 @injectable()
 export class SessionManager extends EventEmitter implements ISessionManager {
