@@ -20,7 +20,8 @@
  */
 
 /**
- * Defines the data that should be persisted for each session.
+ * Defines the data that should be persisted for each session. This interface
+ * is exposed as part of our public API.
  */
 export interface ISessionInfo {
   /**
@@ -40,6 +41,12 @@ export interface ISessionInfo {
   sessionId: string;
 }
 
+/**
+ * Captures information about sessions that is persisted in storage, but that
+ * should not be exposed as part of our public API, and is only used for internal
+ * purpose. It is complementary to ISessionInfo when retrieving all information
+ * about a stored session, both public and internal.
+ */
 export interface ISessionInternalInfo {
   /**
    * The refresh token associated to the session (if any).
