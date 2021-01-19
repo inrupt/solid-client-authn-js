@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+- Just as a convenience for the developer, on the `handleIncomingRedirect`
+  method of the `Session` class in the browser package, set the current browser
+  URL as the default value.
+
 The following sections document changes that have been released already:
 
 ### New features
