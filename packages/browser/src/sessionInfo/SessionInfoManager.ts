@@ -178,6 +178,7 @@ export class SessionInfoManager implements ISessionInfoManager {
   async register(_sessionId: string): Promise<void> {
     throw new Error("Unimplemented");
   }
+
   /**
    * Returns all the registered session IDs. Differs from getAll, which also
    * returns additional session information.
