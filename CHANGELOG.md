@@ -18,6 +18,13 @@ The following sections document changes that have been released already:
 
 - The `onLogin` callback couldn't read session information, such as the WebID.
 
+### New features
+
+#### node
+
+- Add a `getStoredSession` function to retrieve a session from storage based on
+its session ID (for multi-session management).
+
 ## 1.4.1 - 2020-01-14
 
 ### Backward-compatible API changes
