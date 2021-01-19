@@ -272,7 +272,7 @@ export async function getSessionFromStorage(
   return session;
 }
 
-export async function getStoredSessionIdAll(
+export async function getSessionIdFromStorageAll(
   storage?: IStorage
 ): Promise<string[]> {
   const clientAuth: ClientAuthentication = storage
@@ -284,7 +284,9 @@ export async function getStoredSessionIdAll(
   return clientAuth.getSessionIdAll();
 }
 
-export async function clearSessionAll(storage?: IStorage): Promise<void> {
+export async function clearSessionFromStorageAll(
+  storage?: IStorage
+): Promise<void> {
   const clientAuth: ClientAuthentication = storage
     ? getClientAuthenticationWithDependencies({
         secureStorage: storage,

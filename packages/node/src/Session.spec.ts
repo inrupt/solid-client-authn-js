@@ -31,9 +31,9 @@ import {
   mockCustomClientAuthentication,
 } from "./__mocks__/ClientAuthentication";
 import {
-  clearSessionAll,
+  clearSessionFromStorageAll,
   getSessionFromStorage,
-  getStoredSessionIdAll,
+  getSessionIdFromStorageAll,
   Session,
 } from "./Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
@@ -474,7 +474,7 @@ describe("getStoredSessionIdAll", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    const sessions = await getStoredSessionIdAll(mockStorage({}));
+    const sessions = await getSessionIdFromStorageAll(mockStorage({}));
     expect(sessions).toStrictEqual(["a session", "another session"]);
   });
 
@@ -493,7 +493,7 @@ describe("getStoredSessionIdAll", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    await getStoredSessionIdAll();
+    await getSessionIdFromStorageAll();
 
     expect(
       dependencies.getClientAuthenticationWithDependencies
@@ -517,7 +517,7 @@ describe("clearSessionAll", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    await clearSessionAll(storage);
+    await clearSessionFromStorageAll(storage);
     await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
       JSON.stringify([])
     );
@@ -533,7 +533,7 @@ describe("clearSessionAll", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    await clearSessionAll();
+    await clearSessionFromStorageAll();
 
     expect(
       dependencies.getClientAuthenticationWithDependencies
