@@ -195,6 +195,12 @@ export class SessionInfoManager implements ISessionInfoManager {
    * Deletes all information about all sessions, including their registrations.
    */
   async clearAll(): Promise<void> {
-    throw new Error("Unimplemented");
+    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    if (rawSessions === undefined) {
+      return Promise.resolve();
+    }
+    const sessions: string[] = JSON.parse(rawSessions);
+    await Promise.all(sessions.map((sessionId) => this.clear(sessionId)));
+    return this.storageUtility.set(REGISTERED_SESSIONS_KEY, JSON.stringify([]));
   }
 }

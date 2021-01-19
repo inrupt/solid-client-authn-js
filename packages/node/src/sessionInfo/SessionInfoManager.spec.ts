@@ -254,17 +254,46 @@ describe("SessionInfoManager", () => {
 
   describe("clearAll", () => {
     it("clears all sessions registrations", async () => {
-      const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({}),
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+          "a session",
+          "another session",
+        ]),
       });
-      await expect(sessionManager.clearAll()).rejects.toThrow("Unimplemented");
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clearAll();
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+        JSON.stringify([])
+      );
     });
 
     it("clears all sessions information", async () => {
-      const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({}),
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify(["a session"]),
+        "solidClientAuthenticationUser:a session": {
+          "some user info": "a value",
+        },
       });
-      await expect(sessionManager.clearAll()).rejects.toThrow("Unimplemented");
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clearAll();
+      await expect(
+        storage.getForUser("a session", "some user info")
+      ).resolves.toBeUndefined();
+    });
+
+    it("does not fail if no session information arae available", async () => {
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clearAll();
+      await expect(
+        storage.getForUser("a session", "some user info")
+      ).resolves.toBeUndefined();
     });
   });
 });
