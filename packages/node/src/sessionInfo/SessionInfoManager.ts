@@ -152,6 +152,16 @@ export class SessionInfoManager implements ISessionInfoManager {
    * @hidden
    */
   async clear(sessionId: string): Promise<void> {
+    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    if (rawSessions !== undefined) {
+      const sessions: string[] = JSON.parse(rawSessions);
+      await this.storageUtility.set(
+        REGISTERED_SESSIONS_KEY,
+        JSON.stringify(
+          sessions.filter((storedSessionId) => storedSessionId !== sessionId)
+        )
+      );
+    }
     return clear(sessionId, this.storageUtility);
   }
 

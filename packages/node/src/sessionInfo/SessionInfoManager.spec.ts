@@ -159,6 +159,22 @@ describe("SessionInfoManager", () => {
         await mockStorage.getForUser("mySession", "key", { secure: false })
       ).toBeUndefined();
     });
+
+    it("clears the session registration", async () => {
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+          "a session",
+          "another session",
+        ]),
+      });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clear("a session");
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+        JSON.stringify(["another session"])
+      );
+    });
   });
 
   describe("getAll", () => {
