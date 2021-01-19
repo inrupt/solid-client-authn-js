@@ -364,7 +364,7 @@ describe("Session", () => {
   });
 });
 
-describe("getStoredSession", () => {
+describe("getSessionFromStorage", () => {
   it("returns a logged in Session if a refresh token is available in storage", async () => {
     const clientAuthentication = mockClientAuthentication();
     clientAuthentication.getSessionInfo = jest.fn().mockResolvedValue({
