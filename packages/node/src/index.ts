@@ -19,7 +19,17 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+<<<<<<< HEAD
 export { Session, ISessionOptions, getSessionFromStorage } from "./Session";
+=======
+export {
+  Session,
+  ISessionOptions,
+  getStoredSession,
+  getStoredSessionIdAll,
+  clearSessionAll,
+} from "./Session";
+>>>>>>> EUpdated exports and changelog
 
 export { SessionManager, ISessionManagerOptions } from "./SessionManager";
 
