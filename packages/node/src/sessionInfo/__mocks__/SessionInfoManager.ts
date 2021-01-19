@@ -43,7 +43,7 @@ export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   ),
   getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse])),
   clear: jest.fn(async (_sessionId: string) => Promise.resolve()),
-  register: jest.fn(async (sessionId: string) => Promise.resolve()),
+  register: jest.fn(async (_sessionId: string) => Promise.resolve()),
   clearAll: jest.fn(async () => Promise.resolve()),
   getRegisteredSessionIdAll: jest.fn(async () => Promise.resolve([])),
 };

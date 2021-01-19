@@ -34,6 +34,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { fetch } from "cross-fetch";
+import { REGISTERED_SESSIONS_KEY } from "../constants";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
@@ -159,8 +160,24 @@ export class SessionInfoManager implements ISessionInfoManager {
    * @param sessionId
    */
   async register(sessionId: string): Promise<void> {
-    throw new Error("Unimplemented");
+    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    if (rawSessions === undefined) {
+      return this.storageUtility.set(
+        REGISTERED_SESSIONS_KEY,
+        JSON.stringify([sessionId])
+      );
+    }
+    const sessions: string[] = JSON.parse(rawSessions);
+    if (!sessions.includes(sessionId)) {
+      sessions.push(sessionId);
+      return this.storageUtility.set(
+        REGISTERED_SESSIONS_KEY,
+        JSON.stringify(sessions)
+      );
+    }
+    return Promise.resolve();
   }
+
   /**
    * Returns all the registered session IDs. Differs from getAll, which also
    * returns additional session information.
