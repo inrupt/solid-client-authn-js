@@ -227,21 +227,28 @@ describe("SessionInfoManager", () => {
 
   describe("getRegisteredSessionIdAll", () => {
     it("returns a list of all registered session IDs", async () => {
-      const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({}),
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+          "a session",
+          "another session",
+        ]),
       });
-      await expect(sessionManager.getRegisteredSessionIdAll()).rejects.toThrow(
-        "Unimplemented"
-      );
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+
+      await expect(
+        sessionManager.getRegisteredSessionIdAll()
+      ).resolves.toStrictEqual(["a session", "another session"]);
     });
 
     it("returns an empty list if no session IDs are registered", async () => {
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorageUtility({}),
       });
-      await expect(sessionManager.getRegisteredSessionIdAll()).rejects.toThrow(
-        "Unimplemented"
-      );
+      await expect(
+        sessionManager.getRegisteredSessionIdAll()
+      ).resolves.toStrictEqual([]);
     });
   });
 

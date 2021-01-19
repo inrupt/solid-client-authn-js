@@ -183,7 +183,12 @@ export class SessionInfoManager implements ISessionInfoManager {
    * returns additional session information.
    */
   async getRegisteredSessionIdAll(): Promise<string[]> {
-    throw new Error("Unimplemented");
+    return this.storageUtility.get(REGISTERED_SESSIONS_KEY).then((data) => {
+      if (data === undefined) {
+        return [];
+      }
+      return JSON.parse(data);
+    });
   }
 
   /**
