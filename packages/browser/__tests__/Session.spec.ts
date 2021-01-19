@@ -438,17 +438,8 @@ describe("Session", () => {
   });
 
   describe("onLogin", () => {
-    // The `done` callback is used in order to make sure the callback passed to
-    // onLogin is called.
-    // eslint-disable-next-line jest/no-done-callback
-    it("calls the registered callback on login", async (done) => {
-      let hasBeenCalled = false;
-      const myCallback = (): void => {
-        hasBeenCalled = true;
-        if (done) {
-          done();
-        }
-      };
+    it("calls the registered callback on login", async () => {
+      const myCallback = jest.fn();
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest.fn(
         async (_url: string) => {
@@ -462,7 +453,7 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       mySession.onLogin(myCallback);
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(hasBeenCalled).toEqual(true);
+      expect(myCallback).toHaveBeenCalled();
     });
 
     it("does not call the registered callback if login isn't successful", async () => {
@@ -486,6 +477,28 @@ describe("Session", () => {
       await expect(
         mySession.handleIncomingRedirect("https://some.url")
       ).resolves.not.toThrow();
+    });
+
+    it("sets the appropriate information before calling the callback", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.handleIncomingRedirect = jest.fn(
+        async (_url: string) => {
+          return {
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          };
+        }
+      );
+      const mySession = new Session({ clientAuthentication });
+      const myCallback = jest.fn((): void => {
+        expect(mySession.info.webId).toBe("https://some.webid#them");
+      });
+      mySession.onLogin(myCallback);
+      await mySession.handleIncomingRedirect("https://some.url");
+      expect(myCallback).toHaveBeenCalled();
+      // Verify that the conditional assertion has been called
+      expect.assertions(2);
     });
   });
 
