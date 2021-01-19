@@ -59,6 +59,8 @@ export default class ClientAuthentication {
     // could return to a previous redirect URL that contains OIDC params that
     // are now longer valid - so just to be safe, strip relevant params now.
     const { redirectUrl } = options;
+    // Keep track of the session ID
+    await this.sessionInfoManager.register(sessionId);
     const loginReturn = await this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
@@ -103,6 +105,18 @@ export default class ClientAuthentication {
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> => {
     // TODO complete
     return this.sessionInfoManager.get(sessionId);
+  };
+
+  getSessionIdAll = async (): Promise<string[]> => {
+    return this.sessionInfoManager.getRegisteredSessionIdAll();
+  };
+
+  registerSession = async (sessionId: string): Promise<void> => {
+    return this.sessionInfoManager.register(sessionId);
+  };
+
+  clearSessionAll = async (): Promise<void> => {
+    return this.sessionInfoManager.clearAll();
   };
 
   getAllSessionInfo = async (): Promise<ISessionInfo[]> => {
