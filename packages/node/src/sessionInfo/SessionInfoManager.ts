@@ -34,6 +34,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { fetch } from "cross-fetch";
+import { REGISTERED_SESSIONS_KEY } from "../constants";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
@@ -151,6 +152,65 @@ export class SessionInfoManager implements ISessionInfoManager {
    * @hidden
    */
   async clear(sessionId: string): Promise<void> {
+    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    if (rawSessions !== undefined) {
+      const sessions: string[] = JSON.parse(rawSessions);
+      await this.storageUtility.set(
+        REGISTERED_SESSIONS_KEY,
+        JSON.stringify(
+          sessions.filter((storedSessionId) => storedSessionId !== sessionId)
+        )
+      );
+    }
     return clear(sessionId, this.storageUtility);
+  }
+
+  /**
+   * Registers a new session, so that its ID can be retrieved.
+   * @param sessionId
+   */
+  async register(sessionId: string): Promise<void> {
+    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    if (rawSessions === undefined) {
+      return this.storageUtility.set(
+        REGISTERED_SESSIONS_KEY,
+        JSON.stringify([sessionId])
+      );
+    }
+    const sessions: string[] = JSON.parse(rawSessions);
+    if (!sessions.includes(sessionId)) {
+      sessions.push(sessionId);
+      return this.storageUtility.set(
+        REGISTERED_SESSIONS_KEY,
+        JSON.stringify(sessions)
+      );
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * Returns all the registered session IDs. Differs from getAll, which also
+   * returns additional session information.
+   */
+  async getRegisteredSessionIdAll(): Promise<string[]> {
+    return this.storageUtility.get(REGISTERED_SESSIONS_KEY).then((data) => {
+      if (data === undefined) {
+        return [];
+      }
+      return JSON.parse(data);
+    });
+  }
+
+  /**
+   * Deletes all information about all sessions, including their registrations.
+   */
+  async clearAll(): Promise<void> {
+    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    if (rawSessions === undefined) {
+      return Promise.resolve();
+    }
+    const sessions: string[] = JSON.parse(rawSessions);
+    await Promise.all(sessions.map((sessionId) => this.clear(sessionId)));
+    return this.storageUtility.set(REGISTERED_SESSIONS_KEY, JSON.stringify([]));
   }
 }

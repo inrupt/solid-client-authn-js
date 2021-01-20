@@ -182,6 +182,45 @@ describe("ClientAuthentication", () => {
     });
   });
 
+  describe("getSessionIdAll", () => {
+    it("calls the session manager", async () => {
+      const sessionInfoManager = mockSessionInfoManager(mockStorageUtility({}));
+      const sessionManagerGetAllSpy = jest.spyOn(
+        sessionInfoManager,
+        "getRegisteredSessionIdAll"
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager,
+      });
+      await clientAuthn.getSessionIdAll();
+      expect(sessionManagerGetAllSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("registerSession", () => {
+    it("calls the session manager", async () => {
+      const sessionInfoManager = mockSessionInfoManager(mockStorageUtility({}));
+      const sessionManagerRegister = jest.spyOn(sessionInfoManager, "register");
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager,
+      });
+      await clientAuthn.registerSession("some session");
+      expect(sessionManagerRegister).toHaveBeenCalled();
+    });
+  });
+
+  describe("clearSessionAll", () => {
+    it("calls the session manager", async () => {
+      const sessionInfoManager = mockSessionInfoManager(mockStorageUtility({}));
+      const sessionManagerClearAll = jest.spyOn(sessionInfoManager, "clearAll");
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager,
+      });
+      await clientAuthn.clearSessionAll();
+      expect(sessionManagerClearAll).toHaveBeenCalled();
+    });
+  });
+
   describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
       const clientAuthn = getClientAuthentication();

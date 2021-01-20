@@ -24,6 +24,7 @@ import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "./SessionInfoManager";
+import { REGISTERED_SESSIONS_KEY } from "../constants";
 
 describe("SessionInfoManager", () => {
   const defaultMocks = {
@@ -158,6 +159,22 @@ describe("SessionInfoManager", () => {
         await mockStorage.getForUser("mySession", "key", { secure: false })
       ).toBeUndefined();
     });
+
+    it("clears the session registration", async () => {
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+          "a session",
+          "another session",
+        ]),
+      });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clear("a session");
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+        JSON.stringify(["another session"])
+      );
+    });
   });
 
   describe("getAll", () => {
@@ -166,6 +183,133 @@ describe("SessionInfoManager", () => {
         storageUtility: mockStorageUtility({}),
       });
       await expect(sessionManager.getAll).rejects.toThrow("Not implemented");
+    });
+  });
+
+  describe("register", () => {
+    it("adds a new entry in the registered sessions list", async () => {
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.register("someSession");
+
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+        JSON.stringify(["someSession"])
+      );
+    });
+
+    it("does not overwrite registered sessions already in storage", async () => {
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify(["some existing session"]),
+      });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.register("some session");
+
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+        JSON.stringify(["some existing session", "some session"])
+      );
+    });
+
+    it("does not register an already registered session", async () => {
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify(["some session"]),
+      });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.register("some session");
+
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+        JSON.stringify(["some session"])
+      );
+    });
+
+    it("does not overwrite registered sessions", async () => {
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.register("some session");
+      await sessionManager.register("some other session");
+
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+        JSON.stringify(["some session", "some other session"])
+      );
+    });
+  });
+
+  describe("getRegisteredSessionIdAll", () => {
+    it("returns a list of all registered session IDs", async () => {
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+          "a session",
+          "another session",
+        ]),
+      });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+
+      await expect(
+        sessionManager.getRegisteredSessionIdAll()
+      ).resolves.toStrictEqual(["a session", "another session"]);
+    });
+
+    it("returns an empty list if no session IDs are registered", async () => {
+      const sessionManager = getSessionInfoManager({
+        storageUtility: mockStorageUtility({}),
+      });
+      await expect(
+        sessionManager.getRegisteredSessionIdAll()
+      ).resolves.toStrictEqual([]);
+    });
+  });
+
+  describe("clearAll", () => {
+    it("clears all sessions registrations", async () => {
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+          "a session",
+          "another session",
+        ]),
+      });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clearAll();
+      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+        JSON.stringify([])
+      );
+    });
+
+    it("clears all sessions information", async () => {
+      const storage = mockStorageUtility({
+        [REGISTERED_SESSIONS_KEY]: JSON.stringify(["a session"]),
+        "solidClientAuthenticationUser:a session": {
+          "some user info": "a value",
+        },
+      });
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clearAll();
+      await expect(
+        storage.getForUser("a session", "some user info")
+      ).resolves.toBeUndefined();
+    });
+
+    it("does not fail if no session information arae available", async () => {
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      await sessionManager.clearAll();
+      await expect(
+        storage.getForUser("a session", "some user info")
+      ).resolves.toBeUndefined();
     });
   });
 });

@@ -19,23 +19,4 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export {
-  Session,
-  ISessionOptions,
-  getSessionFromStorage,
-  getSessionIdFromStorageAll,
-  clearSessionFromStorageAll,
-} from "./Session";
-
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-
-export {
-  ILoginInputOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+export const REGISTERED_SESSIONS_KEY = "solidClientAuthn:registeredSessions";
