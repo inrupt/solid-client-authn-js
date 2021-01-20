@@ -25,6 +25,7 @@ import {
   IRedirectHandler,
   ISessionInfoManager,
   IStorageUtility,
+  mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "../ClientAuthentication";
 import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
@@ -56,10 +57,12 @@ type CustomMocks = {
 
 export const mockCustomClientAuthentication = (
   mocks: Partial<CustomMocks>
-): ClientAuthentication =>
-  new ClientAuthentication(
+): ClientAuthentication => {
+  const storage = mocks.storage ?? mockStorageUtility({});
+  return new ClientAuthentication(
     mocks.loginHandler ?? LoginHandlerMock,
     mocks.redirectHandler ?? RedirectHandlerMock,
-    mocks.logoutHandler ?? mockLogoutHandler(mocks.storage!),
-    mocks.sessionInfoManager ?? mockSessionInfoManager(mocks.storage!)
+    mocks.logoutHandler ?? mockLogoutHandler(storage),
+    mocks.sessionInfoManager ?? mockSessionInfoManager(storage)
   );
+};
