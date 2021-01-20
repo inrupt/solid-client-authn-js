@@ -290,7 +290,10 @@ export async function getSessionIdFromStorageAll(
         secureStorage: storage,
         insecureStorage: storage,
       })
-    : getClientAuthenticationWithDependencies({});
+    : getClientAuthenticationWithDependencies({
+        secureStorage: defaultStorage,
+        insecureStorage: defaultStorage,
+      });
   return clientAuth.getSessionIdAll();
 }
 
@@ -302,6 +305,9 @@ export async function clearSessionFromStorageAll(
         secureStorage: storage,
         insecureStorage: storage,
       })
-    : getClientAuthenticationWithDependencies({});
+    : getClientAuthenticationWithDependencies({
+        secureStorage: defaultStorage,
+        insecureStorage: defaultStorage,
+      });
   return clientAuth.clearSessionAll();
 }

@@ -20,9 +20,11 @@
  */
 
 // The only import we need from the Node AuthN library is the Session class.
-import { getSessionFromStorage, Session } from "../../../dist/Session";
-import InMemoryStorage from "../../../../core/dist/storage/InMemoryStorage";
-// import { FileSystemStorage } from "./fileSystemStorage";
+import {
+  getSessionFromStorage,
+  Session,
+  getSessionIdFromStorageAll,
+} from "../../../dist/Session";
 
 import cookieSession from "cookie-session";
 
@@ -31,8 +33,6 @@ const clientApplicationName = "solid-client-authn-node multi session demo";
 import express from "express";
 const app = express();
 const PORT = 3001;
-// const storage = new FileSystemStorage("./sessions-data.json");
-// const storage = new InMemoryStorage();
 
 const DEFAULT_OIDC_ISSUER = "https://broker.pod.inrupt.com/";
 
@@ -44,6 +44,28 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   })
 );
+
+app.get("/", async (req, res, next) => {
+  const sessionIds = await getSessionIdFromStorageAll();
+  const sessions = await Promise.all(
+    sessionIds.map(async (sessionId) => {
+      return await getSessionFromStorage(sessionId);
+    })
+  );
+  const htmlSessions =
+    sessions.reduce((sessionList, session) => {
+      if (session?.info.isLoggedIn) {
+        return sessionList + `<li>${session?.info.webId}</li>`;
+      }
+      return "Anonymous";
+    }, "<ul>") + "</ul>";
+  res
+    .writeHead(200, { "Content-Type": "text/html" })
+    .write(
+      `<p>There are currently ${sessionIds.length} visitors: ${htmlSessions}</p>`
+    );
+  res.end();
+});
 
 app.get("/login", async (req, res, next) => {
   const session = new Session();
