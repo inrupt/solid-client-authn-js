@@ -15,10 +15,6 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 - `handleIncomingRedirect` uses the current browser URL as a default value.
 
-The following sections document changes that have been released already:
-
-### New features
-
 #### node
 
 - `getSessionFromStorage`: a function to retrieve a session from storage based on
@@ -27,6 +23,15 @@ its session ID (for multi-session management).
 sessions.
 - `clearSessionFromStorageAll`: a function to clear all information about all sessions in
 storage.
+
+### Bugfix
+
+#### node
+
+- Building multiple sessions with the default storage re-initialized a new storage 
+each time.
+
+The following sections document changes that have been released already:
 
 ## 1.4.2 - 2020-01-19
 
