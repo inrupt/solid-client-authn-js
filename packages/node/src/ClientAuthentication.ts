@@ -55,9 +55,6 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<ISessionInfo | undefined> => {
-    // In the case of the user hitting the 'back' button in their browser, they
-    // could return to a previous redirect URL that contains OIDC params that
-    // are now longer valid - so just to be safe, strip relevant params now.
     const { redirectUrl } = options;
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
