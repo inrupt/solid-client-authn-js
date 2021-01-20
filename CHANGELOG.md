@@ -23,9 +23,9 @@ The following sections document changes that have been released already:
 
 - `getSessionFromStorage`: a function to retrieve a session from storage based on
 its session ID (for multi-session management).
-- `getStoredSessionIdAll`: a function to retrieve the session IDs for all stored
+- `getSessionIdFromStorageAll`: a function to retrieve the session IDs for all stored
 sessions.
-- `clearSessionAll`: a function to clear all information about all sessions in
+- `clearSessionFromStorageAll`: a function to clear all information about all sessions in
 storage.
 
 ## 1.4.2 - 2020-01-19
