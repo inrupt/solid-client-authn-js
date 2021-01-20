@@ -25,6 +25,7 @@
 import { EventEmitter } from "events";
 import {
   ILoginInputOptions,
+  InMemoryStorage,
   ISessionInfo,
   IStorage,
 } from "@inrupt/solid-client-authn-core";
@@ -68,6 +69,11 @@ export interface ISessionOptions {
    */
   clientAuthentication: ClientAuthentication;
 }
+
+/**
+ * If no external storage is provided, this storage gets used.
+ */
+const defaultStorage = new InMemoryStorage();
 
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
@@ -118,7 +124,10 @@ export class Session extends EventEmitter {
         insecureStorage: sessionOptions.insecureStorage,
       });
     } else {
-      this.clientAuthentication = getClientAuthenticationWithDependencies({});
+      this.clientAuthentication = getClientAuthenticationWithDependencies({
+        secureStorage: defaultStorage,
+        insecureStorage: defaultStorage,
+      });
     }
 
     if (sessionOptions.sessionInfo) {
@@ -253,7 +262,10 @@ export async function getSessionFromStorage(
         secureStorage: storage,
         insecureStorage: storage,
       })
-    : getClientAuthenticationWithDependencies({});
+    : getClientAuthenticationWithDependencies({
+        secureStorage: defaultStorage,
+        insecureStorage: defaultStorage,
+      });
   const sessionInfo = await clientAuth.getSessionInfo(sessionId);
   if (sessionInfo === undefined) {
     return undefined;
@@ -266,8 +278,6 @@ export async function getSessionFromStorage(
     await session.login({
       oidcIssuer: sessionInfo.issuer,
     });
-  } else {
-    await session.logout();
   }
   return session;
 }

@@ -127,7 +127,7 @@ export class SessionInfoManager implements ISessionInfoManager {
     );
     const issuer = await this.storageUtility.getForUser(sessionId, "issuer");
 
-    if (isLoggedIn !== undefined) {
+    if (issuer !== undefined) {
       return {
         sessionId,
         webId,
