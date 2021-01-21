@@ -99,20 +99,14 @@ app.get("/fetch", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (!req.query["resource"]) {
     res.status(400).send("<p>Expected a 'resource' query param</p>");
-  } else if (session) {
-    res.send(
-      "<pre>" +
-        (
-          await (await session.fetch(req.query["resource"] as string)).text()
-        ).replace(/</g, "&lt;") +
-        "</pre>"
-    );
   } else {
+    const fetch = (session ?? new Session()).fetch;
     res.send(
       "<pre>" +
-        (await (
-          await new Session().fetch(req.query["resource"] as string)
-        ).text()) +
+        (await (await fetch(req.query["resource"] as string)).text()).replace(
+          /</g,
+          "&lt;"
+        ) +
         "</pre>"
     );
   }
