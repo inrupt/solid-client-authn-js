@@ -16,7 +16,10 @@
 
 # -- Project information -----------------------------------------------------
 
-copyright = '2020-present, Inrupt Inc.'
+import datetime
+
+copyright = u'{0} Inrupt Inc.'.format(datetime.date.today().year)
+
 
 # -- General configuration ---------------------------------------------------
 
