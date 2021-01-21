@@ -16,6 +16,9 @@
  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 // We only need the following imports from the Node AuthN library.
 import {
   getSessionFromStorage,
@@ -32,12 +35,17 @@ const app = express();
 const PORT = 3001;
 
 const DEFAULT_OIDC_ISSUER = "https://broker.pod.inrupt.com/";
+// This is the endpoint our NodeJS demo app listens on to receive incoming login
+const REDIRECT_URL = "http://localhost:3001/redirect";
 
 app.use(
   cookieSession({
     name: "session",
     // These keys are required by cookie-session to sign the cookies.
-    keys: ["Required, but value not relevant for this demo - key1", "Required, but value not relevant for this demo - key2"],
+    keys: [
+      "Required, but value not relevant for this demo - key1",
+      "Required, but value not relevant for this demo - key2",
+    ],
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   })
 );
@@ -54,7 +62,7 @@ app.get("/", async (req, res, next) => {
       if (session?.info.isLoggedIn) {
         return sessionList + `<li><strong>${session?.info.webId}</strong></li>`;
       }
-      return sessionList + "<li>Anonymous</li>";
+      return sessionList + "<li>Logging in process</li>";
     }, "<ul>") + "</ul>";
   res.send(
     `<p>There are currently [${sessionIds.length}] visitors: ${htmlSessions}</p>`
@@ -65,13 +73,15 @@ app.get("/login", async (req, res, next) => {
   const session = new Session();
   req.session!.sessionId = session.info.sessionId;
   await session.login({
-    redirectUrl: "http://localhost:3001/redirect",
+    redirectUrl: REDIRECT_URL,
     oidcIssuer: DEFAULT_OIDC_ISSUER,
     clientName: clientApplicationName,
     handleRedirect: (redirectUrl) => res.redirect(redirectUrl),
   });
   if (session.info.isLoggedIn) {
-    res.send(`<p>Already logged in with WebID: [${session.info.webId}]</p>`);
+    res.send(
+      `<p>Already logged in with WebID: <strong>[${session.info.webId}]</strong></p>`
+    );
   }
 });
 
@@ -84,7 +94,9 @@ app.get("/redirect", async (req, res) => {
   } else {
     await session.handleIncomingRedirect(getRequestFullUrl(req));
     if (session.info.isLoggedIn) {
-      res.send(`<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`);
+      res.send(
+        `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`
+      );
     } else {
       res.status(400).send(`<p>Not logged in after redirect</p>`);
     }
@@ -95,7 +107,11 @@ app.get("/redirect", async (req, res) => {
 app.get("/fetch", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (!req.query["resource"]) {
-    res.status(400).send("<p>Expected a 'resource' query param, for example <strong>http://localhost:3001/fetch?resource=https://pod.inrupt.com/MY_USERNAME/</strong> to fetch the resource at the root of your Pod (which, by default, only <strong>you</strong> will have access to).</p>");
+    res
+      .status(400)
+      .send(
+        "<p>Expected a 'resource' query param, for example <strong>http://localhost:3001/fetch?resource=https://pod.inrupt.com/MY_USERNAME/</strong> to fetch the resource at the root of your Pod (which, by default, only <strong>you</strong> will have access to).</p>"
+      );
   } else {
     const fetch = (session ?? new Session()).fetch;
     res.send(
@@ -112,8 +128,9 @@ app.get("/fetch", async (req, res, next) => {
 app.get("/logout", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (session) {
+    const webId = session.info.webId;
     session.logout();
-    res.send(`<p>Logged out</p>`);
+    res.send(`<p>Logged out of session with WebID [${webId}]</p>`);
   } else {
     res.status(400).send(`<p>No active session to log out</p>`);
   }
