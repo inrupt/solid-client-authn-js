@@ -159,6 +159,7 @@ describe("ClientAuthentication", () => {
         isLoggedIn: "true",
         sessionId: "mySession",
         webId: "https://pod.com/profile/card#me",
+        issuer: "https://some.idp",
       };
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(

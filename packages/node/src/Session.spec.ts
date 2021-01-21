@@ -23,6 +23,7 @@
 import "reflect-metadata";
 import { it, describe } from "@jest/globals";
 import {
+  InMemoryStorage,
   ISessionInfo,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
@@ -451,10 +452,13 @@ describe("getSessionFromStorage", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     await getSessionFromStorage("mySession");
-
+    const mockDefaultStorage = new InMemoryStorage();
     expect(
       dependencies.getClientAuthenticationWithDependencies
-    ).toHaveBeenCalledWith({});
+    ).toHaveBeenCalledWith({
+      insecureStorage: mockDefaultStorage,
+      secureStorage: mockDefaultStorage,
+    });
   });
 });
 
@@ -494,10 +498,13 @@ describe("getStoredSessionIdAll", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     await getSessionIdFromStorageAll();
-
+    const mockDefaultStorage = new InMemoryStorage();
     expect(
       dependencies.getClientAuthenticationWithDependencies
-    ).toHaveBeenCalledWith({});
+    ).toHaveBeenCalledWith({
+      insecureStorage: mockDefaultStorage,
+      secureStorage: mockDefaultStorage,
+    });
   });
 });
 
@@ -534,9 +541,12 @@ describe("clearSessionAll", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     await clearSessionFromStorageAll();
-
+    const mockDefaultStorage = new InMemoryStorage();
     expect(
       dependencies.getClientAuthenticationWithDependencies
-    ).toHaveBeenCalledWith({});
+    ).toHaveBeenCalledWith({
+      insecureStorage: mockDefaultStorage,
+      secureStorage: mockDefaultStorage,
+    });
   });
 });
