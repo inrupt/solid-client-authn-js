@@ -19,9 +19,9 @@ before you re-run it.
 ## Running the app
 
 Running `node dist/serverSideApp.js` starts the server. Four endpoints are then available:
-- `/login`, to initiate the login process against a solid Identity Provider 
+- `/login`, to initiate the login process against a Solid Identity Provider 
 (by default, `https://broker.pod.inrupt.com`)
 - `/redirect`, where the Solid Identity Provider will redirect users after login
 - `/fetch`, where you have to pass a `resource=<some resource>` query param in 
-order to fetch a resource
+order to fetch a resource (protected resources will require you be logged in and to have been granted READ access to that resource, whereas public resources can be fetched whether you're logged in or not)
 - `/logout`, to log out of the session
