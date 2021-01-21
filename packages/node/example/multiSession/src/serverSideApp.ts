@@ -37,7 +37,7 @@ app.use(
   cookieSession({
     name: "session",
     // These keys are required by cookie-session to sign the cookies.
-    keys: ["key1", "key2"],
+    keys: ["Required, but value not relevant for this demo - key1", "Required, but value not relevant for this demo - key2"],
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   })
 );
@@ -52,12 +52,12 @@ app.get("/", async (req, res, next) => {
   const htmlSessions =
     sessions.reduce((sessionList, session) => {
       if (session?.info.isLoggedIn) {
-        return sessionList + `<li>${session?.info.webId}</li>`;
+        return sessionList + `<li><strong>${session?.info.webId}</strong></li>`;
       }
       return sessionList + "<li>Anonymous</li>";
     }, "<ul>") + "</ul>";
   res.send(
-    `<p>There are currently ${sessionIds.length} visitors: ${htmlSessions}</p>`
+    `<p>There are currently [${sessionIds.length}] visitors: ${htmlSessions}</p>`
   );
 });
 
@@ -80,11 +80,11 @@ app.get("/redirect", async (req, res) => {
   if (session === undefined) {
     res
       .status(400)
-      .send(`<p>No session stored for ID ${req.session!.sessionId}</p>`);
+      .send(`<p>No session stored for ID [${req.session!.sessionId}]</p>`);
   } else {
     await session.handleIncomingRedirect(getRequestFullUrl(req));
     if (session.info.isLoggedIn) {
-      res.send(`<p>Logged in as [${session.info.webId}] after redirect</p>`);
+      res.send(`<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`);
     } else {
       res.status(400).send(`<p>Not logged in after redirect</p>`);
     }
@@ -95,7 +95,7 @@ app.get("/redirect", async (req, res) => {
 app.get("/fetch", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (!req.query["resource"]) {
-    res.status(400).send("<p>Expected a 'resource' query param</p>");
+    res.status(400).send("<p>Expected a 'resource' query param, for example <strong>http://localhost:3001/fetch?resource=https://pod.inrupt.com/MY_USERNAME/</strong> to fetch the resource at the root of your Pod (which, by default, only <strong>you</strong> will have access to).</p>");
   } else {
     const fetch = (session ?? new Session()).fetch;
     res.send(
@@ -120,7 +120,7 @@ app.get("/logout", async (req, res, next) => {
 });
 
 app.listen(PORT, async () => {
-  console.log(`Listening on ${PORT}`);
+  console.log(`Listening on [${PORT}]...`);
 });
 
 function getRequestFullUrl(request: express.Request) {
