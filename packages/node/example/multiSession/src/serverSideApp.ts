@@ -19,7 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// We only need the following imports from the Node AuthN library.
+// We only need the following imports from the Node AuthN library. Note that to
+// reuse this code "standalone", you'll have to change "../../../dist/Session"
+// into "@inrupt/solid-client-authn-node", and to npm install this module.
 import {
   getSessionFromStorage,
   Session,
