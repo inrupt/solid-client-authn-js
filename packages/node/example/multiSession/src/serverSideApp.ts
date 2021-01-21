@@ -59,12 +59,9 @@ app.get("/", async (req, res, next) => {
       }
       return sessionList + "<li>Anonymous</li>";
     }, "<ul>") + "</ul>";
-  res
-    .writeHead(200, { "Content-Type": "text/html" })
-    .write(
-      `<p>There are currently ${sessionIds.length} visitors: ${htmlSessions}</p>`
-    );
-  res.end();
+  res.send(
+    `<p>There are currently ${sessionIds.length} visitors: ${htmlSessions}</p>`
+  );
 });
 
 app.get("/login", async (req, res, next) => {
@@ -74,18 +71,10 @@ app.get("/login", async (req, res, next) => {
     redirectUrl: "http://localhost:3001/redirect",
     oidcIssuer: DEFAULT_OIDC_ISSUER,
     clientName: clientApplicationName,
-    handleRedirect: (data) => {
-      res.writeHead(302, {
-        location: data,
-      });
-      res.end();
-    },
+    handleRedirect: (redirectUrl) => res.redirect(redirectUrl),
   });
   if (session.info.isLoggedIn) {
-    res
-      .writeHead(200, { "Content-Type": "text/html" })
-      .write(`<p>Already logged in with WebID: [${session.info.webId}]</p>`);
-    res.end();
+    res.send(`<p>Already logged in with WebID: [${session.info.webId}]</p>`);
   }
 });
 
@@ -93,18 +82,14 @@ app.get("/redirect", async (req, res) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (session === undefined) {
     res
-      .writeHead(400, { "Content-Type": "text/html" })
-      .write(`<p>No session stored for ID ${req.session!.sessionId}</p>`);
+      .status(400)
+      .send(`<p>No session stored for ID ${req.session!.sessionId}</p>`);
   } else {
     await session.handleIncomingRedirect(getRequestFullUrl(req));
     if (session.info.isLoggedIn) {
-      res
-        .writeHead(200, { "Content-Type": "text/html" })
-        .write(`<p>Logged in as [${session.info.webId}] after redirect</p>`);
+      res.send(`<p>Logged in as [${session.info.webId}] after redirect</p>`);
     } else {
-      res
-        .writeHead(400, { "Content-Type": "text/html" })
-        .write(`<p>Not logged in after redirect</p>`);
+      res.status(400).send(`<p>Not logged in after redirect</p>`);
     }
   }
   res.end();
@@ -113,46 +98,34 @@ app.get("/redirect", async (req, res) => {
 app.get("/fetch", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (!req.query["resource"]) {
-    res
-      .writeHead(400, { "Content-Type": "text/html" })
-      .write("<p>Expected a 'resource' query param</p>");
+    res.status(400).send("<p>Expected a 'resource' query param</p>");
   } else if (session) {
-    res
-      .writeHead(200, { "Content-Type": "text/html" })
-      .write(
-        "<pre>" +
-          (
-            await (await session.fetch(req.query["resource"] as string)).text()
-          ).replace(/</g, "&lt;") +
-          "</pre>"
-      );
+    res.send(
+      "<pre>" +
+        (
+          await (await session.fetch(req.query["resource"] as string)).text()
+        ).replace(/</g, "&lt;") +
+        "</pre>"
+    );
   } else {
-    const result = res
-      .writeHead(200, { "Content-Type": "text/html" })
-      .write(
-        "<pre>" +
-          (await (
-            await new Session().fetch(req.query["resource"] as string)
-          ).text()) +
-          "</pre>"
-      );
+    res.send(
+      "<pre>" +
+        (await (
+          await new Session().fetch(req.query["resource"] as string)
+        ).text()) +
+        "</pre>"
+    );
   }
-  res.end();
 });
 
 app.get("/logout", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (session) {
     session.logout();
-    res
-      .writeHead(200, { "Content-Type": "text/html" })
-      .write(`<p>Logged out</p>`);
+    res.send(`<p>Logged out</p>`);
   } else {
-    res
-      .writeHead(400, { "Content-Type": "text/html" })
-      .write(`<p>No active session to log out</p>`);
+    res.status(400).send(`<p>No active session to log out</p>`);
   }
-  res.end();
 });
 
 app.listen(PORT, async () => {
