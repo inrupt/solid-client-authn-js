@@ -63,6 +63,7 @@ describe("SessionInfoManager", () => {
         [`solidClientAuthenticationUser:${sessionId}`]: {
           webId,
           isLoggedIn: "true",
+          issuer: "https://some.idp/",
         },
       });
 
