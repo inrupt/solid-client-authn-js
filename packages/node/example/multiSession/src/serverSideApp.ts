@@ -57,7 +57,7 @@ app.get("/", async (req, res, next) => {
       if (session?.info.isLoggedIn) {
         return sessionList + `<li>${session?.info.webId}</li>`;
       }
-      return "Anonymous";
+      return sessionList + "<li>Anonymous</li>";
     }, "<ul>") + "</ul>";
   res
     .writeHead(200, { "Content-Type": "text/html" })
