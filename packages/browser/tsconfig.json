@@ -8,7 +8,7 @@
 
   "typedocOptions": {
     "out": "website/docs/api/browser",
-    "entryPoints": ["./src/index.ts"],
+    "entryPoints": ["./src/index.ts", "./src/defaultSession.ts"],
     "entryDocument": "index.md"
   },
 
