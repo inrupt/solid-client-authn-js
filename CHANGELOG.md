@@ -26,6 +26,8 @@ storage.
 
 ### Bugfix
 
+- Any exception thrown by the custom `/session` endpoint lookup is swallowed.
+
 #### node
 
 - Building multiple sessions with the default storage re-initialized a new storage 
@@ -65,7 +67,8 @@ deprecated, and replaced by `storage`.
 - Updating the browser window will no longer log the user out if their WebID is
 hosted on an ESS instance (such as https://pod.inrupt.com). A better, global
 solution will be implemented later in order not to break compatibility in the 
-ecosystem.
+ecosystem. The current solution is based on a custom `/session` endpoint lookup, 
+and a Resource Server cookie.
 
 ## 1.3.0 - 2020-01-06
 
