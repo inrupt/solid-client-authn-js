@@ -146,11 +146,10 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
 }
 
 const mockFetch = (response: Response): void => {
-  window.fetch = jest.fn().mockReturnValue(
-    new Promise((resolve) => {
-      resolve(response);
-    })
-  ) as jest.Mock<ReturnType<typeof window.fetch>, [RequestInfo, RequestInit?]>;
+  window.fetch = jest.fn().mockResolvedValue(response) as jest.Mock<
+    ReturnType<typeof window.fetch>,
+    [RequestInfo, RequestInit?]
+  >;
 };
 
 const defaultMocks = {
