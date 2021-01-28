@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.5.0 - 2020-01-28
 
 ### New features
 
@@ -30,8 +33,6 @@ storage.
 
 - Building multiple sessions with the default storage re-initialized a new storage 
 each time.
-
-The following sections document changes that have been released already:
 
 ## 1.4.2 - 2020-01-19
 
