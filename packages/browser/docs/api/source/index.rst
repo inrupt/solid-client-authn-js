@@ -10,3 +10,4 @@ solid-client-authn-browser API
 
    /classes/*
    /interfaces/*
+   /modules/*
