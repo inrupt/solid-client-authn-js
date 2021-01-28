@@ -424,6 +424,42 @@ describe("AuthCodeRedirectHandler", () => {
     ).toEqual({});
   });
 
+  it("swallows the exception if the fetch to the session endpoint fails", async () => {
+    window.fetch = jest
+      .fn()
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolve(
+            new Response("https://my.webid", {
+              status: 200,
+            })
+          );
+        })
+      )
+      .mockImplementation(() => {
+        throw new Error("Some error");
+      });
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({});
+  });
+
   it("store nothing if the resource server does not recognize the user", async () => {
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the WebID in plain/text, it could
