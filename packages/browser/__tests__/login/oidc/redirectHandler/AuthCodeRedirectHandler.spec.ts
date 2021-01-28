@@ -427,18 +427,12 @@ describe("AuthCodeRedirectHandler", () => {
   it("swallows the exception if the fetch to the session endpoint fails", async () => {
     window.fetch = jest
       .fn()
-      .mockReturnValueOnce(
-        new Promise((resolve) => {
-          resolve(
-            new Response("https://my.webid", {
-              status: 200,
-            })
-          );
+      .mockResolvedValueOnce(
+        new Response("https://my.webid", {
+          status: 200,
         })
       )
-      .mockImplementation(() => {
-        throw new Error("Some error");
-      });
+      .mockRejectedValueOnce("Some error");
 
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:oauth2_state_value": {
