@@ -31,15 +31,15 @@ import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
 } from "./__mocks__/ClientAuthentication";
+import { Session } from "./Session";
+import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
+import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
+import { REGISTERED_SESSIONS_KEY } from "./constants";
 import {
   clearSessionFromStorageAll,
   getSessionFromStorage,
   getSessionIdFromStorageAll,
-  Session,
-} from "./Session";
-import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
-import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
-import { REGISTERED_SESSIONS_KEY } from "./constants";
+} from "./multiSession";
 
 jest.mock("cross-fetch");
 jest.mock("./dependencies");
