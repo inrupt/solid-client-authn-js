@@ -91,27 +91,38 @@ async function setupResourceServerSession(
   // authenticated request to any actual resource (even public ones) does,
   // so we fetch the user's WebID before checking the /session endpoint.
   await authenticatedFetch(webId);
-  const resourceServerResponse = await authenticatedFetch(
-    `${resourceServerIri}/session`
-  );
-
-  if (resourceServerResponse.status === 200) {
-    await storageUtility.storeResourceServerSessionInfo(
-      webId,
-      resourceServerIri,
-      // Note that here, if the lifespan of the cookie was returned by the server,
-      // we'd expect a relative value (the remaining time of validity) rather than
-      // an absolute one (the moment when the cookie expires).
-      Date.now() + DEFAULT_LIFESPAN
+  try {
+    const resourceServerResponse = await authenticatedFetch(
+      `${resourceServerIri}/session`
     );
-    return;
+
+    if (resourceServerResponse.status === 200) {
+      await storageUtility.storeResourceServerSessionInfo(
+        webId,
+        resourceServerIri,
+        // Note that here, if the lifespan of the cookie was returned by the server,
+        // we'd expect a relative value (the remaining time of validity) rather than
+        // an absolute one (the moment when the cookie expires).
+        Date.now() + DEFAULT_LIFESPAN
+      );
+      return;
+    }
+    // In this case, the resource server either:
+    // - does not have the expected endpoint, or
+    // - does not recognize the user
+    // Either way, no cookie is expected to be set there, and any existing
+    // session information should be cleared.
+    await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
+  } catch (_e) {
+    // Setting the `credentials=include` option on fetch, which is required in
+    // the current approach based on a RS cookie, may result in an error if
+    // attempting to access an URL, depending on the CORS policies.
+    // Since this internal fetch is necessary, and out of control of the
+    // calling library, there is no other solution but to swallow the exception.
+    // This may happen depending on how the target RS handles a request to the
+    // /session endpoint.
+    await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
   }
-  // In this case, the resource server either:
-  // - does not have the expected endpoint, or
-  // - does not recognize the user
-  // Either way, no cookie is expected to be set there, and any existing
-  // session information should be cleared.
-  await storageUtility.clearResourceServerSessionInfo(resourceServerIri);
 }
 
 /**
