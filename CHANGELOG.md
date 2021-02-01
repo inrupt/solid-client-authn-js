@@ -10,6 +10,18 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Internal refactor
 
+These changes are being reflected here even though normally internal refactoring 
+shouldn't be mentioned in the CHANGELOG (since it's meant for the consumers of
+the library, whereas library developers would rather read the commit history).
+In this case though, it is indeed a change that should be mentioned to
+library users, as it's really a feature change: i.e., the implicit flow is no
+longer supported.
+Whether this is really breaking or not is up for debate, because while it
+technically is a breaking change, we don't think any OIDC issuers only support
+the implicit flow and not the auth code flow, and no user-facing controls enable
+chosing one's flow, so there's no reason why this should be breaking, and it
+could be merely a patch release.
+
 #### browser
 
 - removed Implicit Flow code.
