@@ -59,9 +59,6 @@ import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
-import TokenSaver, {
-  ITokenSaver,
-} from "./login/oidc/redirectHandler/TokenSaver";
 import Redirector from "./login/oidc/Redirector";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
@@ -146,9 +143,6 @@ container.register<IRedirectHandler>("redirectHandler", {
 });
 container.register<IRedirectHandler>("redirectHandlers", {
   useClass: AuthCodeRedirectHandler,
-});
-container.register<ITokenSaver>("tokenSaver", {
-  useClass: TokenSaver,
 });
 // This catch-all class will always be able to handle the
 // redirect IRI, so it must be registered last in the container
