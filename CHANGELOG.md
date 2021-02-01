@@ -8,6 +8,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Internal refactor
+
+#### browser
+
+- removed Implicit Flow code.
+- removed unused TokenSaver code.
+
 The following sections document changes that have been released already:
 
 ## 1.5.0 - 2020-01-28
