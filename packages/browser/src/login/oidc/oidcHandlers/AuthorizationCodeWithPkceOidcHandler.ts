@@ -86,21 +86,26 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const storage = this.storageUtility;
 
     await oidcClientLibrary.createSigninRequest().then((req: SigninRequest) => {
-      // We use the OAuth 'state' value (which should be crypto-random) as
-      // the key in our storage to store our actual SessionID. We do this 'cos
-      // we'll need to lookup our session information again when the browser
-      // is redirected back to us (i.e. the OAuth client application) from the
-      // Authorization Server.
-      // We don't want to use our session ID as the OAuth 'state' value, as
-      // that session ID can be any developer-specified value, and therefore
-      // may not be appropriate (since the OAuth 'state' value should really
-      // be an unguessable crypto-random value).
       return (
         Promise.all([
+          // We use the OAuth 'state' value (which should be crypto-random) as
+          // the key in our storage to store our actual SessionID. We do this
+          // 'cos we'll need to lookup our session information again when the
+          // browser is redirected back to us (i.e. the OAuth client
+          // application) from the Authorization Server.
+          // We don't want to use our session ID as the OAuth 'state' value, as
+          // that session ID can be any developer-specified value, and therefore
+          // may not be appropriate (since the OAuth 'state' value should really
+          // be an unguessable crypto-random value).
           // eslint-disable-next-line no-underscore-dangle
           storage.setForUser(req.state._id, {
             sessionId: oidcLoginOptions.sessionId,
           }),
+
+          // Store our login-process state using the session ID as the key.
+          // Strictly speaking, this indirection from our OAuth state value to
+          // our session ID is unnecessary, but it provides a slightly cleaner
+          // separation of concerns.
           storage.setForUser(oidcLoginOptions.sessionId, {
             // eslint-disable-next-line no-underscore-dangle
             codeVerifier: req.state._code_verifier,
@@ -121,7 +126,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
           })
       );
     });
-    // The login is only completed AFTER redirect, so nothin to return here.
+
+    // The login is only completed AFTER redirect, so nothing to return here.
     return undefined;
   }
 }

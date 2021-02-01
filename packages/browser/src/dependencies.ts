@@ -51,10 +51,8 @@ import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/Auth
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
 import PrimaryDeviceOidcHandler from "./login/oidc/oidcHandlers/PrimaryDeviceOidcHandler";
 import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDeviceOidcHandler";
-import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
-import { ImplicitRedirectHandler } from "./login/oidc/redirectHandler/ImplicitRedirectHandler";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
@@ -121,9 +119,6 @@ container.register<IOidcHandler>("oidcHandlers", {
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler,
 });
-container.register<IOidcHandler>("oidcHandlers", {
-  useClass: LegacyImplicitFlowOidcHandler,
-});
 
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: ClientCredentialsOidcHandler,
@@ -151,9 +146,6 @@ container.register<IRedirectHandler>("redirectHandler", {
 });
 container.register<IRedirectHandler>("redirectHandlers", {
   useClass: AuthCodeRedirectHandler,
-});
-container.register<IRedirectHandler>("redirectHandlers", {
-  useClass: ImplicitRedirectHandler,
 });
 container.register<ITokenSaver>("tokenSaver", {
   useClass: TokenSaver,
