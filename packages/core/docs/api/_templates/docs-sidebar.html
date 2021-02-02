@@ -20,6 +20,10 @@
   #}
   <ul class="nav bd-sidenav">
      
+     <li class="nav-item toctree-top">
+        <a class="nav-link" href="{{url_root}}"> solid-client-authn-core API </a>
+     </li>
+     
       {% for main_nav_item in nav %}
          {% if main_nav_item.title %}
              <li class="nav-item {% if main_nav_item.active%}active{% endif %} toctree-l1"> <a class="nav-link" href="{{ main_nav_item.url }}">{{ main_nav_item.title }}</a>
