@@ -309,7 +309,7 @@ describe("AuthCodeRedirectHandler", () => {
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
       /* tslint:disable-next-line:no-any */
-      (global as any).localStorage = new LocalStorageMock();
+      (window as any).localStorage = new LocalStorageMock();
 
       mockFetch(
         new Response("", {
@@ -356,7 +356,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       /* tslint:disable-next-line:no-any */
-      (global as any).localStorage = new LocalStorageMock();
+      (window as any).localStorage = new LocalStorageMock();
 
       window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
@@ -407,7 +407,7 @@ describe("AuthCodeRedirectHandler", () => {
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
     /* tslint:disable-next-line:no-any */
-    (global as any).localStorage = new LocalStorageMock();
+    (window as any).localStorage = new LocalStorageMock();
 
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the webid in plain/text, it could
