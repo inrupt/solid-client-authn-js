@@ -27,6 +27,10 @@ could be merely a patch release.
 - removed Implicit Flow code.
 - removed unused TokenSaver code.
 
+### Bugs fixed
+
+- Logging out of an app opened in multiple tabs logged the user back in automatically.
+
 The following sections document changes that have been released already:
 
 ## 1.5.0 - 2020-01-28
