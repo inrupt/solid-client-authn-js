@@ -24,7 +24,7 @@ import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "./SessionInfoManager";
-import { REGISTERED_SESSIONS_KEY } from "../constants";
+import { KEY_REGISTERED_SESSIONS } from "../constant";
 
 describe("SessionInfoManager", () => {
   const defaultMocks = {
@@ -163,7 +163,7 @@ describe("SessionInfoManager", () => {
 
     it("clears the session registration", async () => {
       const storage = mockStorageUtility({
-        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+        [KEY_REGISTERED_SESSIONS]: JSON.stringify([
           "a session",
           "another session",
         ]),
@@ -172,7 +172,7 @@ describe("SessionInfoManager", () => {
         storageUtility: storage,
       });
       await sessionManager.clear("a session");
-      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+      await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toStrictEqual(
         JSON.stringify(["another session"])
       );
     });
@@ -195,35 +195,35 @@ describe("SessionInfoManager", () => {
       });
       await sessionManager.register("someSession");
 
-      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+      await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
         JSON.stringify(["someSession"])
       );
     });
 
     it("does not overwrite registered sessions already in storage", async () => {
       const storage = mockStorageUtility({
-        [REGISTERED_SESSIONS_KEY]: JSON.stringify(["some existing session"]),
+        [KEY_REGISTERED_SESSIONS]: JSON.stringify(["some existing session"]),
       });
       const sessionManager = getSessionInfoManager({
         storageUtility: storage,
       });
       await sessionManager.register("some session");
 
-      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+      await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
         JSON.stringify(["some existing session", "some session"])
       );
     });
 
     it("does not register an already registered session", async () => {
       const storage = mockStorageUtility({
-        [REGISTERED_SESSIONS_KEY]: JSON.stringify(["some session"]),
+        [KEY_REGISTERED_SESSIONS]: JSON.stringify(["some session"]),
       });
       const sessionManager = getSessionInfoManager({
         storageUtility: storage,
       });
       await sessionManager.register("some session");
 
-      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+      await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
         JSON.stringify(["some session"])
       );
     });
@@ -236,7 +236,7 @@ describe("SessionInfoManager", () => {
       await sessionManager.register("some session");
       await sessionManager.register("some other session");
 
-      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toBe(
+      await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
         JSON.stringify(["some session", "some other session"])
       );
     });
@@ -245,7 +245,7 @@ describe("SessionInfoManager", () => {
   describe("getRegisteredSessionIdAll", () => {
     it("returns a list of all registered session IDs", async () => {
       const storage = mockStorageUtility({
-        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+        [KEY_REGISTERED_SESSIONS]: JSON.stringify([
           "a session",
           "another session",
         ]),
@@ -272,7 +272,7 @@ describe("SessionInfoManager", () => {
   describe("clearAll", () => {
     it("clears all sessions registrations", async () => {
       const storage = mockStorageUtility({
-        [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+        [KEY_REGISTERED_SESSIONS]: JSON.stringify([
           "a session",
           "another session",
         ]),
@@ -281,14 +281,14 @@ describe("SessionInfoManager", () => {
         storageUtility: storage,
       });
       await sessionManager.clearAll();
-      await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+      await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toStrictEqual(
         JSON.stringify([])
       );
     });
 
     it("clears all sessions information", async () => {
       const storage = mockStorageUtility({
-        [REGISTERED_SESSIONS_KEY]: JSON.stringify(["a session"]),
+        [KEY_REGISTERED_SESSIONS]: JSON.stringify(["a session"]),
         "solidClientAuthenticationUser:a session": {
           "some user info": "a value",
         },

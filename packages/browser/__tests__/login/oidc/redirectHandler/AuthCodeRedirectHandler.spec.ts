@@ -38,6 +38,7 @@ import {
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
+import { KEY_CURRENT_ISSUER } from "../../../../dist/constant";
 
 const mockJwk = (): JSONWebKey => {
   return {
@@ -287,31 +288,44 @@ describe("AuthCodeRedirectHandler", () => {
         })
       );
 
+      const testIssuer = "some test Issuer";
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockStorageUtility({
+          "solidClientAuthenticationUser:mySession": {
+            issuer: testIssuer,
+          },
           "solidClientAuthenticationUser:oauth2_state_value": {
             sessionId: "mySession",
           },
         }),
       });
+
       const redirectInfo = await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
+
       // This will call the oidc-client-ext module, which is mocked at
       // the top of this file. The purpose of this test is to check that, if
       // no additional information is given, the `getBearerToken` method is called
       // (as opposed to the getDpopToken one), which here returns a mock token
       // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
+
       // @ts-ignore
       const header = window.fetch.mock.calls[0][1].headers.Authorization;
       expect(
         // @ts-ignore
         header
       ).toMatch(/^Bearer some token$/);
+
+      // Also check that our issuer was stored correctly (specifically in
+      // 'localStorage').
+      expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(
+        testIssuer
+      );
     });
 
-    it("returns an authenticated dpop fetch if requested", async () => {
+    it("returns an authenticated DPoP fetch if requested", async () => {
       window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
           resolve(
@@ -350,6 +364,12 @@ describe("AuthCodeRedirectHandler", () => {
         // @ts-ignore
         header
       ).toMatch(/^DPoP .+$/);
+
+      // Also check that our issuer was stored correctly (specifically in
+      // 'localStorage').
+      expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(
+        mockIssuer().issuer.toString()
+      );
     });
   });
 
@@ -366,7 +386,11 @@ describe("AuthCodeRedirectHandler", () => {
     const MOCK_TIMESTAMP = 10000;
     Date.now = jest.fn().mockReturnValueOnce(MOCK_TIMESTAMP);
 
+    const testIssuer = "some test Issuer";
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: testIssuer,
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },
@@ -391,6 +415,10 @@ describe("AuthCodeRedirectHandler", () => {
         },
       },
     });
+
+    // Also check that our issuer was stored correctly (specifically in
+    // 'localStorage').
+    expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(testIssuer);
   });
 
   it("store nothing if the resource server has no session endpoint", async () => {
@@ -404,6 +432,9 @@ describe("AuthCodeRedirectHandler", () => {
     );
 
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "some dummy test Issuer",
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },
@@ -434,6 +465,9 @@ describe("AuthCodeRedirectHandler", () => {
       .mockRejectedValueOnce("Some error");
 
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "some dummy test Issuer",
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },
@@ -464,6 +498,9 @@ describe("AuthCodeRedirectHandler", () => {
     );
 
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "some dummy test Issuer",
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },
