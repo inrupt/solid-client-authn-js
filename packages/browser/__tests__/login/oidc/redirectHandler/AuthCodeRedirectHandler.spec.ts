@@ -40,6 +40,36 @@ import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector"
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_CURRENT_ISSUER } from "../../../../dist/constant";
 
+// Not sure this is strictly necessary, but perhaps best to mock out
+// 'localStorage' in case of parallelized tests.
+class LocalStorageMock {
+  public store: {
+    [key: string]: string;
+  };
+
+  constructor() {
+    this.store = {};
+  }
+
+  public clear() {
+    this.store = {};
+  }
+
+  public getItem(key: string) {
+    return this.store[key] || undefined;
+  }
+
+  public setItem(key: string, value: string) {
+    this.store[key] = value.toString();
+  }
+
+  public removeItem(key: string) {
+    delete this.store[key];
+  }
+}
+/* tslint:disable-next-line:no-any */
+(global as any).localStorage = new LocalStorageMock();
+
 const mockJwk = (): JSONWebKey => {
   return {
     kty: "EC",

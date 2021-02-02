@@ -16,6 +16,7 @@ the library, whereas library developers would rather read the commit history).
 In this case though, it is indeed a change that should be mentioned to
 library users, as it's really a feature change: i.e., the implicit flow is no
 longer supported.
+
 Whether this is really breaking or not is up for debate, because while it
 technically is a breaking change, we don't think any OIDC issuers only support
 the implicit flow and not the auth code flow, and no user-facing controls enable
@@ -26,6 +27,13 @@ could be merely a patch release.
 
 - removed Implicit Flow code.
 - removed unused TokenSaver code.
+
+### New features
+
+#### browser
+
+- store the user's issuer claim, specifically to 'localStorage' to allow
+  retrieval on tab refresh.
 
 The following sections document changes that have been released already:
 
