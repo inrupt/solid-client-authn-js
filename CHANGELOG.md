@@ -8,6 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Deprecation
+
+#### browser
+
+- Deprecated SessionManager
+
 ### Internal refactor
 
 These changes are being reflected here even though normally internal refactoring 
