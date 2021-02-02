@@ -55,10 +55,11 @@ export async function clear(
   sessionId: string,
   storage: IStorageUtility
 ): Promise<void> {
-  // The type assertion is okay, because it throws on undefined.
-  const webId = await storage.getForUser(sessionId, "webId", {
-    secure: true,
-  });
+  const storedSessionCookieReference = await storage.get(
+    "tmp-resource-server-session-info"
+  );
+  const reference = JSON.parse(storedSessionCookieReference ?? "{}");
+  const { webId } = reference;
   if (webId !== undefined) {
     const webIdAsUrl = new URL(webId);
     const resourceServerIri = webIdAsUrl.origin;

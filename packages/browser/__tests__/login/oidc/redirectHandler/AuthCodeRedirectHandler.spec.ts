@@ -146,11 +146,10 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
 }
 
 const mockFetch = (response: Response): void => {
-  window.fetch = jest.fn().mockReturnValue(
-    new Promise((resolve) => {
-      resolve(response);
-    })
-  ) as jest.Mock<ReturnType<typeof window.fetch>, [RequestInfo, RequestInit?]>;
+  window.fetch = jest.fn().mockResolvedValue(response) as jest.Mock<
+    ReturnType<typeof window.fetch>,
+    [RequestInfo, RequestInit?]
+  >;
 };
 
 const defaultMocks = {
@@ -403,6 +402,36 @@ describe("AuthCodeRedirectHandler", () => {
         status: 404,
       })
     );
+
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({});
+  });
+
+  it("swallows the exception if the fetch to the session endpoint fails", async () => {
+    window.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        new Response("https://my.webid", {
+          status: 200,
+        })
+      )
+      .mockRejectedValueOnce("Some error");
 
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:oauth2_state_value": {

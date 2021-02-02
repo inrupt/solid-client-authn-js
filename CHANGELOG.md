@@ -8,6 +8,35 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Deprecation
+
+#### browser
+
+- Deprecated SessionManager
+
+### Internal refactor
+
+These changes are being reflected here even though normally internal refactoring 
+shouldn't be mentioned in the CHANGELOG (since it's meant for the consumers of
+the library, whereas library developers would rather read the commit history).
+In this case though, it is indeed a change that should be mentioned to
+library users, as it's really a feature change: i.e., the implicit flow is no
+longer supported.
+Whether this is really breaking or not is up for debate, because while it
+technically is a breaking change, we don't think any OIDC issuers only support
+the implicit flow and not the auth code flow, and no user-facing controls enable
+chosing one's flow, so there's no reason why this should be breaking, and it
+could be merely a patch release.
+
+#### browser
+
+- removed Implicit Flow code.
+- removed unused TokenSaver code.
+
+### Bugs fixed
+
+- Logging out of an app opened in multiple tabs logged the user back in automatically.
+
 The following sections document changes that have been released already:
 
 ## 1.5.0 - 2020-01-28
@@ -28,6 +57,8 @@ sessions.
 storage.
 
 ### Bugfix
+
+- Any exception thrown by the custom `/session` endpoint lookup is swallowed.
 
 #### node
 
@@ -66,7 +97,8 @@ deprecated, and replaced by `storage`.
 - Updating the browser window will no longer log the user out if their WebID is
 hosted on an ESS instance (such as https://pod.inrupt.com). A better, global
 solution will be implemented later in order not to break compatibility in the 
-ecosystem.
+ecosystem. The current solution is based on a custom `/session` endpoint lookup, 
+and a Resource Server cookie.
 
 ## 1.3.0 - 2020-01-06
 
