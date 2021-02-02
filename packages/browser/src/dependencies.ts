@@ -51,19 +51,14 @@ import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/Auth
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
 import PrimaryDeviceOidcHandler from "./login/oidc/oidcHandlers/PrimaryDeviceOidcHandler";
 import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDeviceOidcHandler";
-import LegacyImplicitFlowOidcHandler from "./login/oidc/oidcHandlers/LegacyImplicitFlowOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
-import { ImplicitRedirectHandler } from "./login/oidc/redirectHandler/ImplicitRedirectHandler";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
-import TokenSaver, {
-  ITokenSaver,
-} from "./login/oidc/redirectHandler/TokenSaver";
 import Redirector from "./login/oidc/Redirector";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
@@ -121,9 +116,6 @@ container.register<IOidcHandler>("oidcHandlers", {
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler,
 });
-container.register<IOidcHandler>("oidcHandlers", {
-  useClass: LegacyImplicitFlowOidcHandler,
-});
 
 container.register<IOidcHandler>("oidcHandlers", {
   useClass: ClientCredentialsOidcHandler,
@@ -151,12 +143,6 @@ container.register<IRedirectHandler>("redirectHandler", {
 });
 container.register<IRedirectHandler>("redirectHandlers", {
   useClass: AuthCodeRedirectHandler,
-});
-container.register<IRedirectHandler>("redirectHandlers", {
-  useClass: ImplicitRedirectHandler,
-});
-container.register<ITokenSaver>("tokenSaver", {
-  useClass: TokenSaver,
 });
 // This catch-all class will always be able to handle the
 // redirect IRI, so it must be registered last in the container
