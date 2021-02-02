@@ -69,9 +69,9 @@ export async function exchangeDpopToken(
   });
 }
 
-// A lifespan of 30 minutes is ESS's default. This could be removed if we configure the
-// server to return the remaining lifespan of the cookie.
-export const DEFAULT_LIFESPAN = 1800 * 1000;
+// A lifespan of 30 minutes is ESS's default. This could be removed if we
+// configure the server to return the remaining lifespan of the cookie.
+export const DEFAULT_LIFESPAN = 30 * 60 * 1000;
 
 /**
  * Stores the resource server session information in local storage, so that they
@@ -100,9 +100,9 @@ async function setupResourceServerSession(
       await storageUtility.storeResourceServerSessionInfo(
         webId,
         resourceServerIri,
-        // Note that here, if the lifespan of the cookie was returned by the server,
-        // we'd expect a relative value (the remaining time of validity) rather than
-        // an absolute one (the moment when the cookie expires).
+        // Note that here, if the lifespan of the cookie was returned by the
+        // server, we'd expect a relative value (the remaining time of validity)
+        // rather than an absolute one (the moment when the cookie expires).
         Date.now() + DEFAULT_LIFESPAN
       );
       return;
