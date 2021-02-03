@@ -8,6 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Deprecation
+
+#### browser
+
+- Deprecated SessionManager
+
 ### Internal refactor
 
 These changes are being reflected here even though normally internal refactoring 
@@ -34,6 +40,10 @@ could be merely a patch release.
 
 - store the user's issuer claim, specifically to 'localStorage' to allow
   retrieval on tab refresh.
+=======
+### Bugs fixed
+
+- Logging out of an app opened in multiple tabs logged the user back in automatically.
 
 The following sections document changes that have been released already:
 
