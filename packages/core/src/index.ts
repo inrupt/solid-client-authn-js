@@ -19,6 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+export * from "./constant";
+
 export { default as ILoginInputOptions } from "./ILoginInputOptions";
 
 export { default as ILoginHandler, LoginResult } from "./login/ILoginHandler";

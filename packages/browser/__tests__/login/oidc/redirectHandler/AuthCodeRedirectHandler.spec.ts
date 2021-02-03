@@ -38,6 +38,33 @@ import {
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
+import { KEY_CURRENT_ISSUER } from "../../../../dist/constant";
+
+class LocalStorageMock {
+  public store: {
+    [key: string]: string;
+  };
+
+  constructor() {
+    this.store = {};
+  }
+
+  public clear() {
+    this.store = {};
+  }
+
+  public getItem(key: string) {
+    return this.store[key] || undefined;
+  }
+
+  public setItem(key: string, value: string) {
+    this.store[key] = value.toString();
+  }
+
+  public removeItem(key: string) {
+    delete this.store[key];
+  }
+}
 
 const mockJwk = (): JSONWebKey => {
   return {
@@ -281,37 +308,56 @@ describe("AuthCodeRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
+      /* tslint:disable-next-line:no-any */
+      (window as any).localStorage = new LocalStorageMock();
+
       mockFetch(
         new Response("", {
           status: 200,
         })
       );
 
+      const testIssuer = "some test Issuer";
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockStorageUtility({
+          "solidClientAuthenticationUser:mySession": {
+            issuer: testIssuer,
+          },
           "solidClientAuthenticationUser:oauth2_state_value": {
             sessionId: "mySession",
           },
         }),
       });
+
       const redirectInfo = await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2_state_value"
       );
+
       // This will call the oidc-client-ext module, which is mocked at
       // the top of this file. The purpose of this test is to check that, if
       // no additional information is given, the `getBearerToken` method is called
       // (as opposed to the getDpopToken one), which here returns a mock token
       // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
+
       // @ts-ignore
       const header = window.fetch.mock.calls[0][1].headers.Authorization;
       expect(
         // @ts-ignore
         header
       ).toMatch(/^Bearer some token$/);
+
+      // Also check that our issuer was stored correctly (specifically in
+      // 'localStorage').
+      expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(
+        testIssuer
+      );
     });
 
-    it("returns an authenticated dpop fetch if requested", async () => {
+    it("returns an authenticated DPoP fetch if requested", async () => {
+      /* tslint:disable-next-line:no-any */
+      (window as any).localStorage = new LocalStorageMock();
+
       window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
           resolve(
@@ -350,10 +396,19 @@ describe("AuthCodeRedirectHandler", () => {
         // @ts-ignore
         header
       ).toMatch(/^DPoP .+$/);
+
+      // Also check that our issuer was stored correctly (specifically in
+      // 'localStorage').
+      expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(
+        mockIssuer().issuer.toString()
+      );
     });
   });
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
+    /* tslint:disable-next-line:no-any */
+    (window as any).localStorage = new LocalStorageMock();
+
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the webid in plain/text, it could
     // be extended later to also provide the cookie expiration.
@@ -366,7 +421,11 @@ describe("AuthCodeRedirectHandler", () => {
     const MOCK_TIMESTAMP = 10000;
     Date.now = jest.fn().mockReturnValueOnce(MOCK_TIMESTAMP);
 
+    const testIssuer = "some test Issuer";
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: testIssuer,
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },
@@ -391,6 +450,10 @@ describe("AuthCodeRedirectHandler", () => {
         },
       },
     });
+
+    // Also check that our issuer was stored correctly (specifically in
+    // 'localStorage').
+    expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(testIssuer);
   });
 
   it("store nothing if the resource server has no session endpoint", async () => {
@@ -404,6 +467,9 @@ describe("AuthCodeRedirectHandler", () => {
     );
 
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "some dummy test Issuer",
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },
@@ -434,6 +500,9 @@ describe("AuthCodeRedirectHandler", () => {
       .mockRejectedValueOnce("Some error");
 
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "some dummy test Issuer",
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },
@@ -464,6 +533,9 @@ describe("AuthCodeRedirectHandler", () => {
     );
 
     const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "some dummy test Issuer",
+      },
       "solidClientAuthenticationUser:oauth2_state_value": {
         sessionId: "mySession",
       },

@@ -29,7 +29,7 @@ import {
   mockStorage,
   mockStorageUtility,
 } from "../../core/src/storage/__mocks__/StorageUtility";
-import { REGISTERED_SESSIONS_KEY } from "./constants";
+import { KEY_REGISTERED_SESSIONS } from "./constant";
 import {
   clearSessionFromStorageAll,
   getSessionFromStorage,
@@ -126,7 +126,7 @@ describe("getSessionFromStorage", () => {
 describe("getStoredSessionIdAll", () => {
   it("returns all the session IDs available in storage", async () => {
     const storage = mockStorageUtility({
-      [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+      [KEY_REGISTERED_SESSIONS]: JSON.stringify([
         "a session",
         "another session",
       ]),
@@ -145,7 +145,7 @@ describe("getStoredSessionIdAll", () => {
 
   it("falls back to the environment storage if none is specified", async () => {
     const storage = mockStorageUtility({
-      [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+      [KEY_REGISTERED_SESSIONS]: JSON.stringify([
         "a session",
         "another session",
       ]),
@@ -172,7 +172,7 @@ describe("getStoredSessionIdAll", () => {
 describe("clearSessionAll", () => {
   it("clears all the sessions in storage", async () => {
     const storage = mockStorageUtility({
-      [REGISTERED_SESSIONS_KEY]: JSON.stringify([
+      [KEY_REGISTERED_SESSIONS]: JSON.stringify([
         "a session",
         "another session",
       ]),
@@ -186,7 +186,7 @@ describe("clearSessionAll", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     await clearSessionFromStorageAll(storage);
-    await expect(storage.get(REGISTERED_SESSIONS_KEY)).resolves.toStrictEqual(
+    await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toStrictEqual(
       JSON.stringify([])
     );
   });
