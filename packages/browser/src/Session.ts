@@ -71,10 +71,13 @@ export class Session extends EventEmitter {
    * ```typescript
    * const session = new Session();
    * ```
+   *
+   * See also [getDefaultSession](https://docs.inrupt.com/developer-tools/api/javascript/solid-client-authn-browser/functions.html#getdefaultsession).
+   *
    * @param sessionOptions The options enabling the correct instantiation of
    * the session. Either both storages or clientAuthentication are required. For
    * more information, see {@link ISessionOptions}.
-   * @param sessionId A magic string uniquely identifying the session.
+   * @param sessionId A string uniquely identifying the session.
    *
    */
   constructor(
