@@ -102,7 +102,7 @@ export class Session extends EventEmitter {
    * @param sessionOptions The options enabling the correct instantiation of
    * the session. Either both storages or clientAuthentication are required. For
    * more information, see {@link ISessionOptions}.
-   * @param sessionId A magic string uniquely identifying the session.
+   * @param sessionId A string uniquely identifying the session.
    *
    */
   constructor(
