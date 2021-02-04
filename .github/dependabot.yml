@@ -7,14 +7,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-
   - package-ecosystem: npm
     directory: "/"
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-  - package-ecosystem: npm
-    directory: "/packages/browser/examples/multi/bundle"
     schedule:
       interval: daily
     open-pull-requests-limit: 10

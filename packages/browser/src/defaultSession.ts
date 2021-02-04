@@ -42,7 +42,7 @@ export function getDefaultSession(): Session {
 
 /**
  * This function's signature is equal to `window.fetch`, but if the current user is authenticated
- * (see [[login]] and [[handleIncomingRedirect]), requests made using it will include that user's
+ * (see [[login]] and [[handleIncomingRedirect]]), requests made using it will include that user's
  * credentials. If not, this will behave just like the regular `window.fetch`.
  *
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch}

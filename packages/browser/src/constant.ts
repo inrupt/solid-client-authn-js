@@ -19,20 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ITokenSaver } from "../TokenSaver";
+import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
 
-/**
- * @hidden
- */
-export const TokenSaverMock: jest.Mocked<ITokenSaver> = {
-  saveSession: jest.fn(
-    (
-      /* eslint-disable @typescript-eslint/no-unused-vars */
-      sessionId: string,
-      idToken: string,
-      accessToken?: string,
-      refreshToken?: string
-    ) => Promise.resolve()
-    /* eslint-enable-next-line @typescript-eslint/no-unused-vars */
-  ),
-};
+export const KEY_CURRENT_ISSUER = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentIssuer`;

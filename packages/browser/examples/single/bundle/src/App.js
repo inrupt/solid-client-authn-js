@@ -22,13 +22,18 @@
 import React, { useState, useEffect } from "react";
 import "regenerator-runtime/runtime";
 
-import { Session } from "../../../../dist/index";
+import {
+  login,
+  logout,
+  handleIncomingRedirect,
+  fetch,
+  getDefaultSession,
+} from "../../../../dist/index";
 
 const REDIRECT_URL = window.location;
 
 export default function App() {
-  const [session, setSession] = useState(new Session());
-  const [webId, setWebId] = useState(session.info.webId);
+  const [webId, setWebId] = useState(getDefaultSession().info.webId);
   const [issuer, setIssuer] = useState("https://broker.demo-ess.inrupt.com/");
   const [resource, setResource] = useState(webId);
   const [data, setData] = useState(null);
@@ -37,11 +42,11 @@ export default function App() {
   // is redirected to the page after logging in the identity provider.
   useEffect(() => {
     // After redirect, the current URL contains login information.
-    session.handleIncomingRedirect(window.location.href).then((info) => {
-      setResource(info.webId);
+    handleIncomingRedirect(window.location.href).then((info) => {
       setWebId(info.webId);
+      setResource(webId);
     });
-  }, [session]);
+  }, [webId]);
 
   const handleLogin = (e) => {
     // The default behaviour of the button is to resubmit.
@@ -49,7 +54,7 @@ export default function App() {
     e.preventDefault();
     // Login will redirect the user away so that they can log in the OIDC issuer,
     // and back to the provided redirect URL (which should be controlled by your app).
-    session.login({
+    login({
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
     });
@@ -57,7 +62,7 @@ export default function App() {
 
   const handleLogout = (e) => {
     e.preventDefault();
-    session.logout();
+    logout();
     // The following has no impact on the logout, it just resets the UI.
     setWebId(undefined);
     setData("");
@@ -66,8 +71,7 @@ export default function App() {
 
   const handleFetch = (e) => {
     e.preventDefault();
-    session
-      .fetch(resource)
+    fetch(resource)
       .then((response) => response.text())
       .then(setData);
   };

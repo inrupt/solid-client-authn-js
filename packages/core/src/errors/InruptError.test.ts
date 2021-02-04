@@ -111,7 +111,7 @@ describe("InruptError", () => {
 
       expect(error.hasHttpResponse()).toBeFalsy();
       expect(() => error.getHttpStatusCode()).toThrow(
-        "can't get its HTTP Status Code!"
+        "can't get its HTTP Status Code."
       );
       expect(() => error.getHttpStatusText()).toThrow(
         "can't get its HTTP Status Text!"

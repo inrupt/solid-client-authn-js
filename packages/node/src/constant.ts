@@ -19,33 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import "reflect-metadata";
-import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
-import TokenSaver from "../../../../src/login/oidc/redirectHandler/TokenSaver";
-import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
+import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
 
-/**
- * Test for TokenSaver
- */
-describe("TokenSaver", () => {
-  const defaultMocks = {
-    sessionCreator: SessionInfoManagerMock,
-    storageUtility: StorageUtilityMock,
-  };
-  function getTokenSaver(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
-  ): TokenSaver {
-    return new TokenSaver(mocks.storageUtility ?? defaultMocks.storageUtility);
-  }
-
-  describe("saveTokenAndGetSession", () => {
-    // TODO: Delete support for the implicit flow
-
-    // eslint-disable-next-line jest/expect-expect
-    it("Saves token and returns session", async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const tokenSaver = getTokenSaver();
-      // TODO: write this test once you have the right tokens
-    });
-  });
-});
+export const KEY_REGISTERED_SESSIONS = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}registeredSessions`;

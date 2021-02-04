@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,8 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import React from "react";
-import ReactDOM from "react-dom";
-import App from "./App";
-
-ReactDOM.render(<App />, document.getElementById("container"));
+/**
+ * Intended to be used by dependent packages as a common prefix for keys into
+ * storage mechanisms (so as to group all keys related to Solid Client Authn
+ * within those storage mechanisms, e.g., window.localStorage).
+ */
+export const SOLID_CLIENT_AUTHN_KEY_PREFIX = "solidClientAuthn:";

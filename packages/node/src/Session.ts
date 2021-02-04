@@ -73,7 +73,7 @@ export interface ISessionOptions {
 /**
  * If no external storage is provided, this storage gets used.
  */
-const defaultStorage = new InMemoryStorage();
+export const defaultStorage = new InMemoryStorage();
 
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
@@ -102,7 +102,7 @@ export class Session extends EventEmitter {
    * @param sessionOptions The options enabling the correct instantiation of
    * the session. Either both storages or clientAuthentication are required. For
    * more information, see {@link ISessionOptions}.
-   * @param sessionId A magic string uniquely identifying the session.
+   * @param sessionId A string uniquely identifying the session.
    *
    */
   constructor(
@@ -251,63 +251,4 @@ export class Session extends EventEmitter {
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
   }
-}
-
-export async function getSessionFromStorage(
-  sessionId: string,
-  storage?: IStorage
-): Promise<Session | undefined> {
-  const clientAuth: ClientAuthentication = storage
-    ? getClientAuthenticationWithDependencies({
-        secureStorage: storage,
-        insecureStorage: storage,
-      })
-    : getClientAuthenticationWithDependencies({
-        secureStorage: defaultStorage,
-        insecureStorage: defaultStorage,
-      });
-  const sessionInfo = await clientAuth.getSessionInfo(sessionId);
-  if (sessionInfo === undefined) {
-    return undefined;
-  }
-  const session = new Session({
-    sessionInfo,
-    clientAuthentication: clientAuth,
-  });
-  if (sessionInfo.refreshToken) {
-    await session.login({
-      oidcIssuer: sessionInfo.issuer,
-    });
-  }
-  return session;
-}
-
-export async function getSessionIdFromStorageAll(
-  storage?: IStorage
-): Promise<string[]> {
-  const clientAuth: ClientAuthentication = storage
-    ? getClientAuthenticationWithDependencies({
-        secureStorage: storage,
-        insecureStorage: storage,
-      })
-    : getClientAuthenticationWithDependencies({
-        secureStorage: defaultStorage,
-        insecureStorage: defaultStorage,
-      });
-  return clientAuth.getSessionIdAll();
-}
-
-export async function clearSessionFromStorageAll(
-  storage?: IStorage
-): Promise<void> {
-  const clientAuth: ClientAuthentication = storage
-    ? getClientAuthenticationWithDependencies({
-        secureStorage: storage,
-        insecureStorage: storage,
-      })
-    : getClientAuthenticationWithDependencies({
-        secureStorage: defaultStorage,
-        insecureStorage: defaultStorage,
-      });
-  return clientAuth.clearSessionAll();
 }

@@ -36,6 +36,10 @@ export interface ISessionManager {
 }
 
 /**
+ * DEPRECATION NOTE: We don't plan on supporting multi session for client-side
+ * applications. Please see @inrupt/solid-client-authn-node for server-side
+ * multi session. This class will be removed in an upcoming major release.
+ *
  * A SessionManager instance can be used to manage all the sessions in an
  * application, each session being associated with an individual user.
  *

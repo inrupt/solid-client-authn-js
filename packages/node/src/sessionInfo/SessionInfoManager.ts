@@ -34,7 +34,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { fetch } from "cross-fetch";
-import { REGISTERED_SESSIONS_KEY } from "../constants";
+import { KEY_REGISTERED_SESSIONS } from "../constant";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
@@ -152,11 +152,11 @@ export class SessionInfoManager implements ISessionInfoManager {
    * @hidden
    */
   async clear(sessionId: string): Promise<void> {
-    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    const rawSessions = await this.storageUtility.get(KEY_REGISTERED_SESSIONS);
     if (rawSessions !== undefined) {
       const sessions: string[] = JSON.parse(rawSessions);
       await this.storageUtility.set(
-        REGISTERED_SESSIONS_KEY,
+        KEY_REGISTERED_SESSIONS,
         JSON.stringify(
           sessions.filter((storedSessionId) => storedSessionId !== sessionId)
         )
@@ -170,10 +170,10 @@ export class SessionInfoManager implements ISessionInfoManager {
    * @param sessionId
    */
   async register(sessionId: string): Promise<void> {
-    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    const rawSessions = await this.storageUtility.get(KEY_REGISTERED_SESSIONS);
     if (rawSessions === undefined) {
       return this.storageUtility.set(
-        REGISTERED_SESSIONS_KEY,
+        KEY_REGISTERED_SESSIONS,
         JSON.stringify([sessionId])
       );
     }
@@ -181,7 +181,7 @@ export class SessionInfoManager implements ISessionInfoManager {
     if (!sessions.includes(sessionId)) {
       sessions.push(sessionId);
       return this.storageUtility.set(
-        REGISTERED_SESSIONS_KEY,
+        KEY_REGISTERED_SESSIONS,
         JSON.stringify(sessions)
       );
     }
@@ -193,7 +193,7 @@ export class SessionInfoManager implements ISessionInfoManager {
    * returns additional session information.
    */
   async getRegisteredSessionIdAll(): Promise<string[]> {
-    return this.storageUtility.get(REGISTERED_SESSIONS_KEY).then((data) => {
+    return this.storageUtility.get(KEY_REGISTERED_SESSIONS).then((data) => {
       if (data === undefined) {
         return [];
       }
@@ -205,12 +205,12 @@ export class SessionInfoManager implements ISessionInfoManager {
    * Deletes all information about all sessions, including their registrations.
    */
   async clearAll(): Promise<void> {
-    const rawSessions = await this.storageUtility.get(REGISTERED_SESSIONS_KEY);
+    const rawSessions = await this.storageUtility.get(KEY_REGISTERED_SESSIONS);
     if (rawSessions === undefined) {
       return Promise.resolve();
     }
     const sessions: string[] = JSON.parse(rawSessions);
     await Promise.all(sessions.map((sessionId) => this.clear(sessionId)));
-    return this.storageUtility.set(REGISTERED_SESSIONS_KEY, JSON.stringify([]));
+    return this.storageUtility.set(KEY_REGISTERED_SESSIONS, JSON.stringify([]));
   }
 }

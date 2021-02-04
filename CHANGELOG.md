@@ -8,6 +8,31 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.5.1 - 2020-02-03
+
+### Deprecation
+
+#### browser
+
+- Deprecated SessionManager
+- The implicit flow is no longer supported. However, no known Solid Identity issuer
+only supports the implicit flow and not the auth code flow, and no user-facing
+controls enable choosing one's flow, so this has no user impact.
+
+### New features
+
+#### browser
+
+- store the user's issuer claim, specifically to 'localStorage' to allow
+  retrieval on tab refresh.
+
+### Bugs fixed
+
+- Logging out of an app opened in multiple tabs logged the user back in automatically.
+
+## 1.5.0 - 2020-01-28
 
 ### New features
 
@@ -26,12 +51,12 @@ storage.
 
 ### Bugfix
 
+- Any exception thrown by the custom `/session` endpoint lookup is swallowed.
+
 #### node
 
 - Building multiple sessions with the default storage re-initialized a new storage 
 each time.
-
-The following sections document changes that have been released already:
 
 ## 1.4.2 - 2020-01-19
 
@@ -65,7 +90,8 @@ deprecated, and replaced by `storage`.
 - Updating the browser window will no longer log the user out if their WebID is
 hosted on an ESS instance (such as https://pod.inrupt.com). A better, global
 solution will be implemented later in order not to break compatibility in the 
-ecosystem.
+ecosystem. The current solution is based on a custom `/session` endpoint lookup, 
+and a Resource Server cookie.
 
 ## 1.3.0 - 2020-01-06
 

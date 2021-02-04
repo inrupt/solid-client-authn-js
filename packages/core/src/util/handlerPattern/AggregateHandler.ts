@@ -92,6 +92,7 @@ export default class AggregateHandler<P extends Array<unknown>, R>
           try {
             return JSON.stringify(param);
           } catch (err) {
+            /* eslint-disable  @typescript-eslint/no-explicit-any */
             return (param as any).toString();
           }
         })

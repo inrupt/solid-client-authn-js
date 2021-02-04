@@ -19,13 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+export { Session, ISessionOptions } from "./Session";
+
 export {
-  Session,
-  ISessionOptions,
   getSessionFromStorage,
   getSessionIdFromStorageAll,
   clearSessionFromStorageAll,
-} from "./Session";
+} from "./multiSession";
 
 export { SessionManager, ISessionManagerOptions } from "./SessionManager";
 
