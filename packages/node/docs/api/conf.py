@@ -16,7 +16,10 @@
 
 # -- Project information -----------------------------------------------------
 
-copyright = '2020-present, Inrupt Inc.'
+import datetime
+
+copyright = u'{0} Inrupt Inc.'.format(datetime.date.today().year)
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -84,8 +87,8 @@ html_title = 'Inrupt {0} API Documentation'.format(name)
 
 html_theme_options = {
     'project_title': 'Inrupt {0} API Documentation'.format(name),
-    'banner': True,
-    'banner_msg': 'The product and documentation are currently in Alpha. Content and features are subject to change.',
+    'banner': False,
+    'banner_msg': '',
     'robots_index': True,
     'github_editable': False,
     'github_org': 'inrupt',
