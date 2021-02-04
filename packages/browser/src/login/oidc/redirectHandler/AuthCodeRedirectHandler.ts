@@ -46,6 +46,7 @@ import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
+import { KEY_CURRENT_ISSUER } from "../../../constant";
 
 export async function exchangeDpopToken(
   sessionId: string,
@@ -69,9 +70,9 @@ export async function exchangeDpopToken(
   });
 }
 
-// A lifespan of 30 minutes is ESS's default. This could be removed if we configure the
-// server to return the remaining lifespan of the cookie.
-export const DEFAULT_LIFESPAN = 1800 * 1000;
+// A lifespan of 30 minutes is ESS's default. This could be removed if we
+// configure the server to return the remaining lifespan of the cookie.
+export const DEFAULT_LIFESPAN = 30 * 60 * 1000;
 
 /**
  * Stores the resource server session information in local storage, so that they
@@ -100,9 +101,9 @@ async function setupResourceServerSession(
       await storageUtility.storeResourceServerSessionInfo(
         webId,
         resourceServerIri,
-        // Note that here, if the lifespan of the cookie was returned by the server,
-        // we'd expect a relative value (the remaining time of validity) rather than
-        // an absolute one (the moment when the cookie expires).
+        // Note that here, if the lifespan of the cookie was returned by the
+        // server, we'd expect a relative value (the remaining time of validity)
+        // rather than an absolute one (the moment when the cookie expires).
         Date.now() + DEFAULT_LIFESPAN
       );
       return;
@@ -176,21 +177,28 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       (await this.storageUtility.getForUser(storedSessionId, "dpop")) ===
       "true";
 
+    // Since we throw if not found, the type assertion is okay
+    const issuer = (await this.storageUtility.getForUser(
+      storedSessionId,
+      "issuer",
+      { errorIfNull: true }
+    )) as string;
+
+    // Store our current Issuer specifically in 'localStorage' (i.e., not using
+    // any other storage mechanism), as we don't deem this information to be
+    // sensitive, and we want to ensure it survives a browser tab refresh.
+    window.localStorage.setItem(KEY_CURRENT_ISSUER, issuer);
+
     let tokens: TokenEndpointResponse | TokenEndpointDpopResponse;
     let authFetch: typeof fetch;
 
     if (isDpop) {
-      // Since we throw if not found, the type assertion is okay
-      const issuer = (await this.storageUtility.getForUser(
-        storedSessionId,
-        "issuer",
-        { errorIfNull: true }
-      )) as string;
       const codeVerifier = (await this.storageUtility.getForUser(
         storedSessionId,
         "codeVerifier",
         { errorIfNull: true }
       )) as string;
+
       const storedRedirectIri = (await this.storageUtility.getForUser(
         storedSessionId,
         "redirectUri",
@@ -202,12 +210,14 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         issuer,
         this.issuerConfigFetcher,
         this.clientRegistrar,
-        // the canHandle function checks that the code is part of the query strings
+        // We rely on our 'canHandle' function checking that the OAuth 'code'
+        // parameter is present in our query string.
         url.searchParams.get("code") as string,
         codeVerifier,
         storedRedirectIri
       );
-      // The type assertion should not be necessary
+
+      // The type assertion should not be necessary...
       authFetch = await buildDpopFetch(
         tokens.accessToken,
         tokens.refreshToken,

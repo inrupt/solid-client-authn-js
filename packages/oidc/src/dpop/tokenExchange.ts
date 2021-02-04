@@ -292,11 +292,12 @@ export async function getBearerToken(
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the
       // profile referenced by the WebId.
-      // TODO: Note that this is heavy-handed, and that this userinfo check verifies
-      // that the `sub` caim in the id token you get along with the access token
-      // matches the sub claim associated with the access token at the userinfo endpoint.
-      // That is a useful check, and in the future it should be only disabled against
-      // NSS, and not in general.
+      // TODO: Note that this is heavy-handed, and that this userinfo check
+      //  verifies that the `sub` claim in the id token you get along with the
+      //  access token matches the sub claim associated with the access token at
+      //  the userinfo endpoint.
+      // That is a useful check, and in the future it should be only disabled
+      // against NSS, and not in general.
       // Issue tracker: https://github.com/solid/node-solid-server/issues/1490
       loadUserInfo: false,
     }).processSigninResponse(redirectUrl);

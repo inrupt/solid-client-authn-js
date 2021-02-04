@@ -105,23 +105,23 @@ export default class InruptError extends Error {
   }
 
   getHttpStatusCode(): number {
-    if (!this.hasHttpResponse()) {
+    if (this.httpErrorResponse === undefined) {
       throw new InruptError(
-        "This InruptError was not provided with a HTTP response - so we can't get its HTTP Status Code!"
+        "This InruptError was not provided with a HTTP response - so we can't get its HTTP Status Code."
       );
     }
 
-    return this.httpErrorResponse!.status;
+    return this.httpErrorResponse.status;
   }
 
   getHttpStatusText(): string {
-    if (!this.hasHttpResponse()) {
+    if (this.httpErrorResponse === undefined) {
       throw new InruptError(
         "This InruptError was not provided with a HTTP response - so we can't get its HTTP Status Text!"
       );
     }
 
-    return this.httpErrorResponse!.statusText;
+    return this.httpErrorResponse.statusText;
   }
 
   static determineIfVocabTerm(
