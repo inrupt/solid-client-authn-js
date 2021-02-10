@@ -191,6 +191,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     let tokens: TokenEndpointResponse | TokenEndpointDpopResponse;
     let authFetch: typeof fetch;
+    const referenceTime = Date.now();
 
     if (isDpop) {
       const codeVerifier = (await this.storageUtility.getForUser(
@@ -255,6 +256,10 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      expirationDate:
+        typeof tokens.expiresIn === "number"
+          ? referenceTime + tokens.expiresIn * 1000
+          : null,
     });
   }
 }

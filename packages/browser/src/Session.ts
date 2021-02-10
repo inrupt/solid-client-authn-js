@@ -232,6 +232,12 @@ export class Session extends EventEmitter {
         // redirected from the IdP with access and ID tokens.
         this.emit("login");
       }
+
+      if (typeof sessionInfo.expirationDate === "number") {
+        setTimeout(async () => {
+          await this.logout();
+        }, sessionInfo.expirationDate - Date.now());
+      }
     }
     this.tokenRequestInProgress = false;
     return sessionInfo;

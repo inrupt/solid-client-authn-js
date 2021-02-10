@@ -148,6 +148,7 @@ export default class ClientAuthentication {
       isLoggedIn: redirectInfo.isLoggedIn,
       webId: redirectInfo.webId,
       sessionId: redirectInfo.sessionId,
+      expirationDate: redirectInfo.expirationDate,
     };
   };
 }
