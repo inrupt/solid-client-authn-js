@@ -123,11 +123,13 @@ const mockAccessTokenDpop = (): AccessJwt => {
 
 const mockAccessTokenBearer = (): string => "some token";
 
+const MOCK_EXPIRE_TIME = 1337;
 const mockTokenEndpointBearerResponse = (): TokenEndpointResponse => {
   return {
     accessToken: mockAccessTokenBearer(),
     idToken: mockIdToken(),
     webId: mockWebId(),
+    expiresIn: MOCK_EXPIRE_TIME,
   };
 };
 
@@ -137,6 +139,7 @@ const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
     idToken: mockIdToken(),
     webId: mockWebId(),
     dpopJwk: mockJwk(),
+    expiresIn: MOCK_EXPIRE_TIME,
   };
 };
 
@@ -199,7 +202,7 @@ function getAuthCodeRedirectHandler(
 }
 
 describe("AuthCodeRedirectHandler", () => {
-  describe("canHandler", () => {
+  describe("canHandle", () => {
     it("Accepts a valid url with the correct query", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
@@ -403,6 +406,38 @@ describe("AuthCodeRedirectHandler", () => {
         mockIssuer().issuer.toString()
       );
     });
+
+    it("returns the expiration time normalised to the current time", async () => {
+      const MOCK_TIMESTAMP = 10000;
+      Date.now = jest
+        .fn()
+        // Date.now is called twice: once to be able to calculate the auth token expiry time,
+        // and once to set the cookie expiry. We only care about the second in this test.
+        .mockReturnValueOnce(MOCK_TIMESTAMP)
+        .mockReturnValueOnce(MOCK_TIMESTAMP);
+
+      const testIssuer = "some test Issuer";
+      const mockedStorage = mockStorageUtility({
+        "solidClientAuthenticationUser:mySession": {
+          issuer: testIssuer,
+        },
+        "solidClientAuthenticationUser:oauth2_state_value": {
+          sessionId: "mySession",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      const sessionInfo = await authCodeRedirectHandler.handle(
+        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+      );
+
+      expect(sessionInfo.expirationDate).toBe(
+        MOCK_TIMESTAMP + MOCK_EXPIRE_TIME * 1000
+      );
+    });
   });
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
@@ -419,7 +454,12 @@ describe("AuthCodeRedirectHandler", () => {
     );
 
     const MOCK_TIMESTAMP = 10000;
-    Date.now = jest.fn().mockReturnValueOnce(MOCK_TIMESTAMP);
+    Date.now = jest
+      .fn()
+      // Date.now is called twice: once to be able to calculate the auth token expiry time,
+      // and once to set the cookie expiry. We only care about the second in this test.
+      .mockReturnValueOnce(MOCK_TIMESTAMP)
+      .mockReturnValueOnce(MOCK_TIMESTAMP);
 
     const testIssuer = "some test Issuer";
     const mockedStorage = mockStorageUtility({

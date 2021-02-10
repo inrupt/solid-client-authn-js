@@ -57,12 +57,19 @@ function hasTokenType(
   return value.token_type !== undefined && typeof value.token_type === "string";
 }
 
+function hasExpiresIn(
+  value: { expires_in?: number } | Record<string, unknown>
+): value is { expires_in?: number } {
+  return value.expires_in === undefined || typeof value.expires_in === "number";
+}
+
 export type TokenEndpointResponse = {
   accessToken: string;
   idToken: string;
   webId: string;
   refreshToken?: string;
   dpopJwk?: JSONWebKey;
+  expiresIn?: number;
 };
 
 export type TokenEndpointDpopResponse = TokenEndpointResponse & {
@@ -150,7 +157,11 @@ function validatePreconditions(
 export function validateTokenEndpointResponse(
   tokenResponse: Record<string, unknown>,
   dpop: boolean
-): Record<string, unknown> & { access_token: string; id_token: string } {
+): Record<string, unknown> & {
+  access_token: string;
+  id_token: string;
+  expires_in?: number;
+} {
   if (!hasAccessToken(tokenResponse)) {
     throw new Error(
       `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
@@ -170,6 +181,14 @@ export function validateTokenEndpointResponse(
   if (!hasTokenType(tokenResponse)) {
     throw new Error(
       `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
+        tokenResponse
+      )}`
+    );
+  }
+
+  if (!hasExpiresIn(tokenResponse)) {
+    throw new Error(
+      `Invalid token endpoint response (invalid field 'expires_in'): ${JSON.stringify(
         tokenResponse
       )}`
     );
@@ -263,6 +282,7 @@ export async function getTokens(
       : undefined,
     webId,
     dpopJwk,
+    expiresIn: tokenResponse.expires_in,
   };
 }
 

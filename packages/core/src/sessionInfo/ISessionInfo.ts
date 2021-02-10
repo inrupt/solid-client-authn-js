@@ -39,6 +39,12 @@ export interface ISessionInfo {
    * A unique identifier for the session.
    */
   sessionId: string;
+
+  /**
+   * UNIX timestamp (number of milliseconds since Jan 1st 1970) representing the
+   * time until which this session is valid.
+   */
+  expirationDate?: number;
 }
 
 /**

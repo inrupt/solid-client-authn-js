@@ -5,8 +5,13 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-
 ## Unreleased
+
+### Bugfix
+
+#### Browser
+
+- When a session expires, the session is now marked as logged out, and a `logout` event is thrown.
 
 The following sections document changes that have been released already:
 
@@ -28,7 +33,7 @@ controls enable choosing one's flow, so this has no user impact.
 - store the user's issuer claim, specifically to 'localStorage' to allow
   retrieval on tab refresh.
 
-### Bugs fixed
+### Bugfix
 
 - Logging out of an app opened in multiple tabs logged the user back in automatically.
 

@@ -30,6 +30,7 @@ import {
   getDpopToken,
   getTokens,
   TokenEndpointInput,
+  validateTokenEndpointResponse,
 } from "./tokenExchange";
 import { decodeJwt, signJwt } from "./dpop";
 
@@ -175,6 +176,76 @@ const mockFetch = (
   global.fetch = mockedFetch;
   return mockedFetch;
 };
+
+describe("validateTokenEndpointResponse", () => {
+  describe("for DPoP tokens", () => {
+    const fakeTokenEndpointResponse = {
+      access_token: "Arbitrary access token",
+      id_token: "Arbitrary ID token",
+      token_type: "DPoP",
+    };
+
+    it("does not throw when the Response contains a valid expiration time", () => {
+      const fakeValidResponse = {
+        ...fakeTokenEndpointResponse,
+        expires_in: 1337,
+      };
+      expect(() =>
+        validateTokenEndpointResponse(fakeValidResponse, true)
+      ).not.toThrow();
+    });
+
+    it("does not throw when the Response does not contain an expiration time", () => {
+      expect(() =>
+        validateTokenEndpointResponse(fakeTokenEndpointResponse, true)
+      ).not.toThrow();
+    });
+
+    it("throws when the Response contains an invalid expiration time", () => {
+      const fakeInvalidResponse = {
+        ...fakeTokenEndpointResponse,
+        expires_in: "Not a number",
+      };
+      expect(() =>
+        validateTokenEndpointResponse(fakeInvalidResponse, true)
+      ).toThrow();
+    });
+  });
+
+  describe("for Bearer tokens", () => {
+    const fakeTokenEndpointResponse = {
+      access_token: "Arbitrary access token",
+      id_token: "Arbitrary ID token",
+      token_type: "Bearer",
+    };
+
+    it("does not throw when the Response contains a valid expiration time", () => {
+      const fakeValidResponse = {
+        ...fakeTokenEndpointResponse,
+        expires_in: 1337,
+      };
+      expect(() =>
+        validateTokenEndpointResponse(fakeValidResponse, false)
+      ).not.toThrow();
+    });
+
+    it("does not throw when the Response does not contain an expiration time", () => {
+      expect(() =>
+        validateTokenEndpointResponse(fakeTokenEndpointResponse, false)
+      ).not.toThrow();
+    });
+
+    it("throws when the Response contains an invalid expiration time", () => {
+      const fakeInvalidResponse = {
+        ...fakeTokenEndpointResponse,
+        expires_in: "Not a number",
+      };
+      expect(() =>
+        validateTokenEndpointResponse(fakeInvalidResponse, false)
+      ).toThrow();
+    });
+  });
+});
 
 describe("getTokens", () => {
   it("throws if the grant type isn't supported", async () => {
