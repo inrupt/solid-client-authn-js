@@ -21,7 +21,10 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { StorageUtilityMock } from "@inrupt/solid-client-authn-core";
+import {
+  StorageUtilityGetResponse,
+  StorageUtilityMock,
+} from "@inrupt/solid-client-authn-core";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
@@ -62,6 +65,9 @@ describe("OidcLoginHandler", () => {
   it("should lookup client ID if not provided", async () => {
     const actualHandler = defaultMocks.oidcHandler;
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
+
+    // If no 'clientId' passed in, we expect it to be looked up in storage
+    // (which our test setup does).
     await handler.handle({
       sessionId: "mySession",
       oidcIssuer: "https://arbitrary.url",
@@ -70,6 +76,9 @@ describe("OidcLoginHandler", () => {
     });
 
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
+
+    const calledWith = actualHandler.handle.mock.calls[0][0];
+    expect(calledWith.client.clientId).toEqual(StorageUtilityGetResponse);
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
