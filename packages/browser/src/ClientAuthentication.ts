@@ -35,6 +35,7 @@ import {
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
+import { KEY_CURRENT_URL } from "./constant";
 
 // TMP: This ensures that the HTTP requests will include any relevant cookie
 // that could have been set by the resource server.
@@ -137,12 +138,26 @@ export default class ClientAuthentication {
     cleanedUpUrl.searchParams.delete("id_token");
     cleanedUpUrl.searchParams.delete("access_token");
 
-    // Remove OAuth-specific query params (since the login flow finishes with the
-    // browser being redirected back with OAuth2 query params (e.g. for 'code'
-    // and 'state'), and so if the user simply refreshes this page our
+    // Remove OAuth-specific query params (since the login flow finishes with
+    // the browser being redirected back with OAuth2 query params (e.g. for
+    // 'code' and 'state'), and so if the user simply refreshes this page our
     // authentication library will be called again with what are now invalid
     // query parameters!).
     window.history.replaceState(null, "", cleanedUpUrl.toString());
+
+    // Check if we have an ID Token in storage - if we do then we may be
+    // currently logged in, and the user has refreshed their browser page. In
+    // this case, it can be really useful to save the user's current browser
+    // location, so that we can restore that location after we complete the
+    // entire re-login-the-user-silently-flow (e.g., if the user was on a
+    // specific 'page' of a Single Page App, then presumably they'll expect to
+    // be brought back to exactly that same 'page' after the full refresh).
+    const sessionInfo = await this.sessionInfoManager.get(
+      redirectInfo.sessionId
+    );
+    if (sessionInfo?.idToken !== undefined) {
+      localStorage.setItem(KEY_CURRENT_URL, window.location.toString());
+    }
 
     return {
       isLoggedIn: redirectInfo.isLoggedIn,

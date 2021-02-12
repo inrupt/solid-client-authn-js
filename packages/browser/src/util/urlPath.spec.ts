@@ -51,12 +51,4 @@ describe("urlPath", () => {
       "https://ex.com/a/test"
     );
   });
-
-  it("should throw a helpful error if URL is invalid", () => {
-    // Regular expression here simply says "match against 1st string, followed
-    // anywhere later by the second, followed anywhere later by the third".
-    expect(() => appendToUrlPathname("not an iri", "test ending")).toThrow(
-      /test ending.*not an iri.*Invalid URL/
-    );
-  });
 });

@@ -19,8 +19,37 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-export const KEY_CURRENT_ISSUER = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentIssuer`;
+/**
+ * Handles login if a user's WebID was provided.
+ */
+import {
+  ILoginOptions,
+  ILoginHandler,
+  LoginResult,
+} from "@inrupt/solid-client-authn-core";
 
-export const KEY_CURRENT_URL = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentUrl`;
+/**
+ * @hidden
+ */
+export default class WebIdLoginHandler implements ILoginHandler {
+  async canHandle(_loginOptions: ILoginOptions): Promise<boolean> {
+    return false;
+  }
+
+  /**
+   * Handles a given WebID by first de-referencing that WebID, then creating
+   * correct login options for a future login handler and triggering that login
+   * handler. For example, if a WebID contains an 'oidcIssuer' triple, it will
+   * create login credentials to match that.
+   * @param loginOptions
+   */
+  async handle(_loginOptions: ILoginOptions): Promise<LoginResult> {
+    // TODO: implement
+    throw new Error("Not implemented");
+  }
+}

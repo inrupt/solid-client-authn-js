@@ -20,13 +20,14 @@
  */
 
 import "reflect-metadata";
+import { jest } from "@jest/globals";
 import Redirector from "../../../src/login/oidc/Redirector";
 
 /**
  * Test for Redirector
  */
 describe("Redirector", () => {
-  describe("Redirect", () => {
+  describe("redirect", () => {
     const {
       location,
       history: { replaceState },
@@ -71,6 +72,19 @@ describe("Redirector", () => {
         "https://someUrl.com/redirect"
       );
       expect(window.location.href).toBe("https://coolSite.com");
+    });
+
+    it("calls redirect handler", () => {
+      const handler = jest.fn();
+      const redirectUrl = "https://someUrl.com/redirect";
+      const redirector = new Redirector();
+      redirector.redirect(redirectUrl, {
+        redirectByReplacingState: true,
+        handleRedirect: handler,
+      });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(redirectUrl);
     });
   });
 });

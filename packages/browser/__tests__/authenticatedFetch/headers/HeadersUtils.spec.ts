@@ -23,6 +23,15 @@ import { Headers as NodeHeaders } from "node-fetch";
 import { flattenHeaders } from "../../../src/authenticatedFetch/headers/HeadersUtils";
 
 describe("Headers interoperability function", () => {
+  it("returns empty object if nothing to flatten", () => {
+    expect(flattenHeaders(undefined)).toEqual({});
+  });
+
+  it("returns input if already a Record<>", () => {
+    const headersToFlatten: Record<string, string> = { key: "some value" };
+    expect(flattenHeaders(headersToFlatten)).toStrictEqual(headersToFlatten);
+  });
+
   it("transforms an incoming Headers object into a flat headers structure", () => {
     const myHeaders = new NodeHeaders();
     myHeaders.append("accept", "application/json");

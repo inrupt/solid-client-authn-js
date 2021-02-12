@@ -19,8 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
+import { it } from "@jest/globals";
+import * as solidClientAuthentication from "../src/index.browser";
 
-export const KEY_CURRENT_ISSUER = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentIssuer`;
-
-export const KEY_CURRENT_URL = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentUrl`;
+it("exports the public API from the entrypoint", () => {
+  expect(solidClientAuthentication).toBeDefined();
+});

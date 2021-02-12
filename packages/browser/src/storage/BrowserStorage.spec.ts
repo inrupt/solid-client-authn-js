@@ -19,8 +19,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
+import BrowserStorage from "./BrowserStorage";
 
-export const KEY_CURRENT_ISSUER = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentIssuer`;
+describe("BrowserStorage", () => {
+  it("should get storage", () => {
+    expect(new BrowserStorage().storage).toBeDefined();
+  });
 
-export const KEY_CURRENT_URL = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentUrl`;
+  it("should exercise operations - no need for separate tests", async () => {
+    const storage = new BrowserStorage();
+
+    const testKey = "some key";
+    await expect(storage.get(testKey)).resolves.toBeUndefined();
+
+    const testValue = "some value";
+    await storage.set(testKey, testValue);
+    await expect(storage.get(testKey)).resolves.toEqual(testValue);
+
+    await storage.delete(testKey);
+    await expect(storage.get(testKey)).resolves.toBeUndefined();
+  });
+});

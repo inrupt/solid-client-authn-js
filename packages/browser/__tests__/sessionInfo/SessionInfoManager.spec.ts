@@ -51,12 +51,37 @@ describe("SessionInfoManager", () => {
 
   describe("update", () => {
     it("is not implemented yet", async () => {
-      const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorageUtility({}),
-      });
+      const sessionManager = getSessionInfoManager();
       await expect(async () =>
         sessionManager.update("commanderCool", {})
       ).rejects.toThrow("Not Implemented");
+    });
+  });
+
+  describe("register", () => {
+    it("is not implemented yet", async () => {
+      const sessionManager = getSessionInfoManager();
+      await expect(async () =>
+        sessionManager.register("commanderCool")
+      ).rejects.toThrow("Not implemented");
+    });
+  });
+
+  describe("getRegisteredSessionIdAll", () => {
+    it("is not implemented yet", async () => {
+      const sessionManager = getSessionInfoManager();
+      await expect(async () =>
+        sessionManager.getRegisteredSessionIdAll()
+      ).rejects.toThrow("Not implemented");
+    });
+  });
+
+  describe("clearAll", () => {
+    it("is not implemented yet", async () => {
+      const sessionManager = getSessionInfoManager();
+      await expect(async () => sessionManager.clearAll()).rejects.toThrow(
+        "Not implemented"
+      );
     });
   });
 

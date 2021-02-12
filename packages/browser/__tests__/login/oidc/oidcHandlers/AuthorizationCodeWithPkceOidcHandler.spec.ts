@@ -25,6 +25,8 @@
 import "reflect-metadata";
 import {
   IOidcOptions,
+  IRedirector,
+  IRedirectorOptions,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
 import { SigninRequest } from "@inrupt/oidc-client-ext";
@@ -81,7 +83,35 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   });
 
   describe("handle", () => {
-    it("Handles login properly with PKCE", async () => {
+    it("swallows any redirector exceptions", async () => {
+      const redirectorThatThrowsMock: jest.Mocked<IRedirector> = {
+        redirect: jest.fn(
+          (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
+            throw new Error(
+              `Redirecting to [${redirectUrl}] with options [${redirectOptions}] throws...`
+            );
+          }
+        ),
+      };
+
+      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
+        { redirector: redirectorThatThrowsMock }
+      );
+
+      const oidcOptions: IOidcOptions = {
+        ...standardOidcOptions,
+        // Set this to test this code path too (doesn't warrant a whole test!).
+        dpop: false,
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["authorization_code"],
+        },
+      };
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+      expect(redirectorThatThrowsMock.redirect).toHaveBeenCalledTimes(1);
+    });
+
+    it("handles login properly with PKCE", async () => {
       const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,

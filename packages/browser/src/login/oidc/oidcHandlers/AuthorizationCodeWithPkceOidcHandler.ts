@@ -60,11 +60,11 @@ export default class AuthorizationCodeWithPkceOidcHandler
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     /* eslint-disable camelcase */
     const oidcOptions = {
-      authority: oidcLoginOptions.issuer?.toString(),
+      authority: oidcLoginOptions.issuer.toString(),
       client_id: oidcLoginOptions.client.clientId,
       client_secret: oidcLoginOptions.client.clientSecret,
-      redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
-      post_logout_redirect_uri: oidcLoginOptions.redirectUrl?.toString(),
+      redirect_uri: oidcLoginOptions.redirectUrl.toString(),
+      post_logout_redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       response_type: "code",
       // TODO: The 'webid' scope is still a spec discussion topic
       //  https://github.com/solid/specification/issues/203, i.e. the 'webid'

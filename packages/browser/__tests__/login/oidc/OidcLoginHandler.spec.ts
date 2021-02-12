@@ -59,6 +59,49 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
   });
 
+  it("should lookup client ID if not provided", async () => {
+    const actualHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({ oidcHandler: actualHandler });
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      tokenType: "DPoP",
+    });
+
+    expect(actualHandler.handle.mock.calls).toHaveLength(1);
+  });
+
+  it("should lookup client ID if not provided, if not found do DCR", async () => {
+    // Override our default mock storage utility to deliberately return nothing.
+    const NothingStoredMock = {
+      ...StorageUtilityMock,
+      getForUser: async (
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        userId: string,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        key: string,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        options?: { errorIfNull?: boolean; secure?: boolean }
+      ) => undefined,
+    };
+
+    const actualHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({
+      oidcHandler: actualHandler,
+      storageUtility: NothingStoredMock,
+    });
+
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      tokenType: "DPoP",
+    });
+
+    expect(actualHandler.handle.mock.calls).toHaveLength(1);
+  });
+
   it("should throw an error when called without an issuer", async () => {
     const handler = getInitialisedHandler();
     // TS Ignore because bad input is purposely given here for the purpose of testing
@@ -80,7 +123,7 @@ describe("OidcLoginHandler", () => {
     ).rejects.toThrow("OidcLoginHandler requires a redirect URL");
   });
 
-  it("should indicate it when it can handle logins", async () => {
+  it("should indicate when it can handle logins", async () => {
     const handler = getInitialisedHandler();
 
     await expect(
