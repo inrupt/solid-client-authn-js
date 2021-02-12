@@ -83,6 +83,7 @@ describe("OidcLoginHandler", () => {
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
     // Override our default mock storage utility to deliberately return nothing.
+    let savedValue: Record<string, string> = {};
     const NothingStoredMock = {
       ...StorageUtilityMock,
       getForUser: async (
@@ -93,14 +94,30 @@ describe("OidcLoginHandler", () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         options?: { errorIfNull?: boolean; secure?: boolean }
       ) => undefined,
+
+      // We expect only one call to our storage, so save whatever was set in a
+      // single local variable.
+      setForUser: async (
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        userId: string,
+        values: Record<string, string>,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        options?: { secure?: boolean }
+      ) => {
+        savedValue = values;
+      },
     };
 
     const actualHandler = defaultMocks.oidcHandler;
+    const actualRegistrar = defaultMocks.clientRegistrar;
     const handler = getInitialisedHandler({
       oidcHandler: actualHandler,
       storageUtility: NothingStoredMock,
+      clientRegistrar: actualRegistrar,
     });
 
+    // We're not providing a client ID here (and we've explicitly cleared our
+    // storage above), so we expect this call to use DCR to get a client ID...
     await handler.handle({
       sessionId: "mySession",
       oidcIssuer: "https://arbitrary.url",
@@ -109,6 +126,13 @@ describe("OidcLoginHandler", () => {
     });
 
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
+    expect(actualRegistrar.getClient.mock.calls).toHaveLength(1);
+
+    // Get the response from the expected mocked DCR call, and ensure it matches
+    // the value we expect to have been stored in our storage.
+    const registrarResult = await actualRegistrar.getClient.mock.results[0]
+      .value;
+    expect(registrarResult.clientId).toEqual(savedValue.clientId);
   });
 
   it("should throw an error when called without an issuer", async () => {
