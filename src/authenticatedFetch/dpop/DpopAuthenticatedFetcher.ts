@@ -87,7 +87,7 @@ export default class DpopAuthenticatedFetcher implements IAuthenticatedFetcher {
       ...requestInit,
       headers: {
         ...flattenHeaders(requestInitiWithDefaults.headers as Headers),
-        authorization: `DPOP ${authToken}`,
+        authorization: `DPoP ${authToken}`,
         dpop: await this.dpopHeaderCreator.createHeaderToken(
           this.urlRepresentationConverter.requestInfoToUrl(url),
           requestInitiWithDefaults.method

@@ -122,7 +122,7 @@ describe("DpopAuthenticatedFetcher", () => {
       );
       expect(fetcher.fetch).toHaveBeenCalledWith(url.toString(), {
         headers: {
-          authorization: `DPOP ${StorageUtilityGetResponse}`,
+          authorization: `DPoP ${StorageUtilityGetResponse}`,
           dpop: DpopHeaderCreatorResponse
         }
       });
@@ -154,7 +154,7 @@ describe("DpopAuthenticatedFetcher", () => {
     );
     expect(fetcher.fetch).toHaveBeenCalledWith(url.toString(), {
       headers: {
-        authorization: `DPOP ${StorageUtilityGetResponse}`,
+        authorization: `DPoP ${StorageUtilityGetResponse}`,
         dpop: DpopHeaderCreatorResponse,
         Accept: "text/turtle"
       }
