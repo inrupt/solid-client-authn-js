@@ -39,32 +39,7 @@ import {
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_CURRENT_SESSION } from "../../../../src/constant";
-
-class LocalStorageMock {
-  public store: {
-    [key: string]: string;
-  };
-
-  constructor() {
-    this.store = {};
-  }
-
-  public clear() {
-    this.store = {};
-  }
-
-  public getItem(key: string) {
-    return this.store[key] || undefined;
-  }
-
-  public setItem(key: string, value: string) {
-    this.store[key] = value.toString();
-  }
-
-  public removeItem(key: string) {
-    delete this.store[key];
-  }
-}
+import { LocalStorageMock } from "../../../../src/storage/__mocks__/LocalStorage";
 
 const mockJwk = (): JSONWebKey => {
   return {
