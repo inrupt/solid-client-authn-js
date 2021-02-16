@@ -38,7 +38,7 @@ import {
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { KEY_CURRENT_ISSUER } from "../../../../dist/constant";
+import { KEY_CURRENT_SESSION } from "../../../../src/constant";
 
 class LocalStorageMock {
   public store: {
@@ -352,8 +352,8 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Also check that our issuer was stored correctly (specifically in
       // 'localStorage').
-      expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(
-        testIssuer
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
+        "mySession"
       );
     });
 
@@ -399,11 +399,10 @@ describe("AuthCodeRedirectHandler", () => {
         // @ts-ignore
         header
       ).toMatch(/^DPoP .+$/);
-
       // Also check that our issuer was stored correctly (specifically in
       // 'localStorage').
-      expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(
-        mockIssuer().issuer.toString()
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
+        "mySession"
       );
     });
 
@@ -493,7 +492,9 @@ describe("AuthCodeRedirectHandler", () => {
 
     // Also check that our issuer was stored correctly (specifically in
     // 'localStorage').
-    expect(window.localStorage.getItem(KEY_CURRENT_ISSUER)).toEqual(testIssuer);
+    expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
+      "mySession"
+    );
   });
 
   it("store nothing if the resource server has no session endpoint", async () => {
