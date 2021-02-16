@@ -36,6 +36,12 @@ export interface ISessionInfo {
   webId?: string;
 
   /**
+   * The WebID of the app, or a "Public app" WebID if the app does not provide its own.
+   * undefined until the session is logged in and the app WebID has been verified.
+   */
+  clientAppId?: string;
+
+  /**
    * A unique identifier for the session.
    */
   sessionId: string;

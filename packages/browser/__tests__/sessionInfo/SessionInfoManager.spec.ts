@@ -20,7 +20,11 @@
  */
 
 import "reflect-metadata";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  mockStorageUtility,
+  StorageUtility,
+} from "@inrupt/solid-client-authn-core";
+import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";
@@ -91,24 +95,61 @@ describe("SessionInfoManager", () => {
 
       const webId = "https://zoomies.com/commanderCool#me";
 
-      const storageMock = mockStorageUtility(
-        {
+      const storageMock = new StorageUtility(
+        mockStorage({
           [`solidClientAuthenticationUser:${sessionId}`]: {
             webId,
             isLoggedIn: "true",
+            refreshToken: "some refresh token",
+            issuer: "https://some.issuer",
           },
-        },
-        true
+        }),
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            idToken: "some.id.token",
+          },
+        })
       );
 
       const sessionManager = getSessionInfoManager({
         storageUtility: storageMock,
       });
       const session = await sessionManager.get(sessionId);
-      expect(session).toMatchObject({
+      expect(session).toStrictEqual({
         sessionId,
         webId,
         isLoggedIn: true,
+        clientAppId: "https://some.app/registration",
+        issuer: "https://some.issuer",
+        idToken: "some.id.token",
+        refreshToken: "some refresh token",
+      });
+    });
+
+    it("returns undefined for the optional elements if they aren't in storage", async () => {
+      const sessionId = "commanderCool";
+      const storageMock = new StorageUtility(
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            isLoggedIn: "false",
+          },
+        }),
+        mockStorage({})
+      );
+
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storageMock,
+      });
+      const session = await sessionManager.get(sessionId);
+      expect(session).toStrictEqual({
+        sessionId,
+        webId: undefined,
+        isLoggedIn: false,
+        clientAppId: undefined,
+        issuer: undefined,
+        idToken: undefined,
+        refreshToken: undefined,
       });
     });
 
@@ -161,7 +202,7 @@ describe("SessionInfoManager", () => {
     });
 
     it("clears local secure storage from user data", async () => {
-      const mockStorage = mockStorageUtility(
+      const mockedStorage = mockStorageUtility(
         {
           "solidClientAuthenticationUser:mySession": {
             key: "value",
@@ -170,16 +211,16 @@ describe("SessionInfoManager", () => {
         true
       );
       const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorage,
+        storageUtility: mockedStorage,
       });
       await sessionManager.clear("mySession");
       expect(
-        await mockStorage.getForUser("mySession", "key", { secure: true })
+        await mockedStorage.getForUser("mySession", "key", { secure: true })
       ).toBeUndefined();
     });
 
     it("clears local unsecure storage from user data", async () => {
-      const mockStorage = mockStorageUtility(
+      const mockedStorage = mockStorageUtility(
         {
           "solidClientAuthenticationUser:mySession": {
             key: "value",
@@ -188,16 +229,16 @@ describe("SessionInfoManager", () => {
         false
       );
       const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorage,
+        storageUtility: mockedStorage,
       });
       await sessionManager.clear("mySession");
       expect(
-        await mockStorage.getForUser("mySession", "key", { secure: false })
+        await mockedStorage.getForUser("mySession", "key", { secure: false })
       ).toBeUndefined();
     });
 
     it("clears resource server session info from local storage", async () => {
-      const mockStorage = mockStorageUtility(
+      const mockedStorage = mockStorageUtility(
         {
           "solidClientAuthenticationUser:mySession": {
             webId: "https://my.pod/profile#me",
@@ -205,18 +246,18 @@ describe("SessionInfoManager", () => {
         },
         true
       );
-      await mockStorage.storeResourceServerSessionInfo(
+      await mockedStorage.storeResourceServerSessionInfo(
         "https://my.pod/profile#me",
         "https://my.pod",
         10000
       );
       const sessionManager = getSessionInfoManager({
-        storageUtility: mockStorage,
+        storageUtility: mockedStorage,
       });
       await sessionManager.clear("mySession");
       expect(
         JSON.parse(
-          (await mockStorage.get("tmp-resource-server-session-info", {
+          (await mockedStorage.get("tmp-resource-server-session-info", {
             secure: false,
           })) ?? ""
         )
