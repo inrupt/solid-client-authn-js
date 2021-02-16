@@ -70,3 +70,5 @@ export interface ISessionInfoManager {
    */
   clearAll(): Promise<void>;
 }
+
+export const USER_SESSION_PREFIX = "solidClientAuthenticationUser";

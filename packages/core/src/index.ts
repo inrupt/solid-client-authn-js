@@ -44,6 +44,7 @@ export { ISessionInfo, ISessionInternalInfo } from "./sessionInfo/ISessionInfo";
 export {
   ISessionInfoManager,
   ISessionInfoManagerOptions,
+  USER_SESSION_PREFIX,
 } from "./sessionInfo/ISessionInfoManager";
 
 export { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
