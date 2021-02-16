@@ -21,6 +21,7 @@
 
 import ClientAuthentication from "../ClientAuthentication";
 import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
+import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";
 import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
 import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
 import { SessionInfoManagerMock } from "../sessionInfo/__mocks__/SessionInfoManager";
@@ -30,5 +31,6 @@ export const mockClientAuthentication = (): ClientAuthentication =>
     LoginHandlerMock,
     RedirectHandlerMock,
     LogoutHandlerMock,
-    SessionInfoManagerMock
+    SessionInfoManagerMock,
+    IssuerConfigFetcherMock
   );

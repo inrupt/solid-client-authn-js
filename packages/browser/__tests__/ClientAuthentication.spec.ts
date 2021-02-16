@@ -22,10 +22,15 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import {
+  IIssuerConfig,
   mockStorageUtility,
   StorageUtility,
+  USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
+import { Response } from "cross-fetch";
+import { JSONWebKey } from "jose";
+import { signJwt } from "@inrupt/oidc-client-ext";
 import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
@@ -34,7 +39,84 @@ import {
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "../src/ClientAuthentication";
-import { KEY_CURRENT_URL } from "../src/constant";
+import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "../src/constant";
+import {
+  mockDefaultIssuerConfigFetcher,
+  mockIssuerConfigFetcher,
+} from "../src/login/oidc/__mocks__/IssuerConfigFetcher";
+import { LocalStorageMock } from "../src/storage/__mocks__/LocalStorage";
+
+const mockFetch = (response: Response): typeof window.fetch => {
+  window.fetch = jest.fn().mockReturnValueOnce(response);
+  return window.fetch;
+};
+
+const mockJwk = (): JSONWebKey => {
+  return {
+    kty: "EC",
+    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+    alg: "ES256",
+    crv: "P-256",
+    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
+    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+  };
+};
+
+const mockAnotherJwk = (): JSONWebKey => {
+  return {
+    kty: "EC",
+    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+    alg: "ES256",
+    crv: "P-256",
+    x: "0dGe_s-urLhD3mpqYqmSXriUZApVV5ZNxMJXg7Vp-2A",
+    y: "-oMe9gGkpfIr1J0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+    d: "yR1bCsR8m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+  };
+};
+
+const mockIdTokenPayload = (
+  subject: string,
+  issuer: string,
+  audience: string
+): Record<string, string | number> => {
+  return {
+    sub: subject,
+    iss: issuer,
+    aud: audience,
+    exp: 1662266216,
+    iat: 1462266216,
+  };
+};
+
+// mockIdTokenPayload(
+//   "https://my.pod/profile#me",
+//   "https://some.issuer",
+//   "https://some.app/registration"
+// ),
+
+const mockSessionStorage = async (
+  sessionId: string,
+  idTokenPayload: Record<string, string | number> = {}
+): Promise<StorageUtility> => {
+  return new StorageUtility(
+    mockStorage({
+      [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+        isLoggedIn: "true",
+        issuer: "https://some.issuer",
+        webId: "https://my.pod/profile#me",
+      },
+    }),
+    mockStorage({
+      [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+        idToken: await signJwt(idTokenPayload, mockJwk(), {
+          algorithm: "ES256",
+        }),
+        clientId: "https://some.app/registration",
+      },
+    })
+  );
+};
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {
@@ -42,6 +124,7 @@ describe("ClientAuthentication", () => {
     redirectHandler: RedirectHandlerMock,
     logoutHandler: LogoutHandlerMock,
     sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
+    issuerConfigFetcher: mockDefaultIssuerConfigFetcher(),
   };
 
   function getClientAuthentication(
@@ -51,7 +134,8 @@ describe("ClientAuthentication", () => {
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
-      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
+      mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher
     );
   }
 
@@ -289,7 +373,7 @@ describe("ClientAuthentication", () => {
           sessionInfoManager: mockSessionInfoManager(
             new StorageUtility(
               mockStorage({
-                "solidClientAuthenticationUser:global": {
+                [`${USER_SESSION_PREFIX}:global`]: {
                   isLoggedIn: "true",
                 },
               }),
@@ -317,5 +401,244 @@ describe("ClientAuthentication", () => {
         });
       }
     });
+  });
+
+  describe("getCurrentIssuer", () => {
+    it("returns null no current session is in storage", async () => {
+      const clientAuthn = getClientAuthentication({});
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    // ts-ignore is used to mock out local storage.
+    /* eslint-disable @typescript-eslint/ban-ts-comment */
+
+    it("returns null if the current session has no stored issuer", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            idToken: "some.id.token",
+          },
+        })
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    it("returns null if the current session has no stored ID token", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            issuer: "https://some.issuer",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+          },
+        })
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    it("returns null if the current session has no stored client ID", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            issuer: "https://some.issuer",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            idToken: "some.id.token",
+          },
+        })
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    it("returns null if the issuer does not have a JWKS", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      const mockedIssuerConfig = mockIssuerConfigFetcher({} as IIssuerConfig);
+
+      const mockedStorage = await mockSessionStorage(sessionId);
+
+      const clientAuthn = getClientAuthentication({
+        issuerConfigFetcher: mockedIssuerConfig,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    it("returns null if the issuer's JWKS isn't available", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      const mockedIssuerConfig = mockIssuerConfigFetcher({
+        jwksUri: "https://some.issuer/jwks",
+      } as IIssuerConfig);
+      const mockedStorage = await mockSessionStorage(sessionId);
+      mockFetch(new Response("Not a valid JWKS"));
+
+      const clientAuthn = getClientAuthentication({
+        issuerConfigFetcher: mockedIssuerConfig,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    it("returns null if the current issuer doesn't match the ID token's", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      const mockedIssuerConfig = mockIssuerConfigFetcher({
+        jwksUri: "https://some.issuer/jwks",
+      } as IIssuerConfig);
+      const mockedStorage = await mockSessionStorage(
+        sessionId,
+        mockIdTokenPayload(
+          "https://my.pod/profile#me",
+          "https://some-other.issuer",
+          "https://some.app/registration"
+        )
+      );
+      mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
+
+      const clientAuthn = getClientAuthentication({
+        issuerConfigFetcher: mockedIssuerConfig,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    it("returns null if the current client ID doesn't match the ID token audience", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      const mockedIssuerConfig = mockIssuerConfigFetcher({
+        jwksUri: "https://some.issuer/jwks",
+      } as IIssuerConfig);
+      const mockedStorage = await mockSessionStorage(
+        sessionId,
+        mockIdTokenPayload(
+          "https://my.pod/profile#me",
+          "https://some.issuer",
+          "https://some-other.app/registration"
+        )
+      );
+      mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
+
+      const clientAuthn = getClientAuthentication({
+        issuerConfigFetcher: mockedIssuerConfig,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+
+    it("returns null if the ID token signature cannot be verified", async () => {
+      const sessionId = "mySession";
+      // @ts-ignore
+      window.localStorage = new LocalStorageMock({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      const mockedIssuerConfig = mockIssuerConfigFetcher({
+        jwksUri: "https://some.issuer/jwks",
+      } as IIssuerConfig);
+      const mockedStorage = await mockSessionStorage(
+        sessionId,
+        mockIdTokenPayload(
+          "https://my.pod/profile#me",
+          "https://some.issuer",
+          "https://some.app/registration"
+        )
+      );
+      mockFetch(new Response(JSON.stringify({ keys: [mockAnotherJwk()] })));
+
+      const clientAuthn = getClientAuthentication({
+        issuerConfigFetcher: mockedIssuerConfig,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+    });
+  });
+
+  it("returns the issuer if the ID token is verified", async () => {
+    const sessionId = "mySession";
+    // @ts-ignore
+    window.localStorage = new LocalStorageMock({
+      [KEY_CURRENT_SESSION]: sessionId,
+    });
+    const mockedIssuerConfig = mockIssuerConfigFetcher({
+      jwksUri: "https://some.issuer/jwks",
+    } as IIssuerConfig);
+    const mockedStorage = await mockSessionStorage(
+      sessionId,
+      mockIdTokenPayload(
+        "https://my.pod/profile#me",
+        "https://some.issuer",
+        "https://some.app/registration"
+      )
+    );
+    mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
+
+    const clientAuthn = getClientAuthentication({
+      issuerConfigFetcher: mockedIssuerConfig,
+      sessionInfoManager: mockSessionInfoManager(mockedStorage),
+    });
+
+    await expect(clientAuthn.getCurrentIssuer()).resolves.toBe(
+      "https://some.issuer"
+    );
   });
 });
