@@ -143,6 +143,36 @@ const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
   };
 };
 
+/**
+ * Suggested improvement from Nic - just recording here for future reference:
+
+ I really don't like tests results depending on the value of a global variable,
+ that may introduce many side-effects. Now that I'm more familiar with jest than
+ when I wrote these tests, I think I would approach it this way: I'd replace the
+ whole jest.mock("@inrupt/oidc-client-ext", () => {...}; block with:
+
+ jest.mock("@inrupt/oidc-client-ext");
+
+ const defaultJwt = {
+  sub: "https://some.webid",
+};
+
+ function mockOidcClient(jwt: any = defaultJwt): void {
+  const mockedOidcClient = jest.requireMock("@inrupt/oidc-client-ext");
+  mockedOidcClient.generateJwkForDpop = jest.fn().mockResolvedValue(mockJWK);
+  mockedOidcClient.createDpopHeader = jest.fn().mockResolvedValue("someToken");
+  mockedOidcClient.decodeJwt = jest.fn().mockResolvedValue(jwt);
+}
+ ```,
+ and add a call to `mockOidcClient()` at the beginning of each test. For the
+ tests where a different JWT value must be mocked, it can be set this way:
+ `mockOidcClient({})` e.g. for an empty JWT. It may be possible to reduce
+ overhead by grouping all tests sharing a same `oidc-client` setupd in the same
+ `describe` block, and set `jest.beforeEach` to call `mockOidcClient` there, but
+ I had issues with this before to redefine the mocked values in the blocks where
+ I needed to override the default, so I don't know if that would work in this
+ case.
+ */
 jest.mock("@inrupt/oidc-client-ext", () => {
   const { createDpopHeader } = jest.requireActual("@inrupt/oidc-client-ext");
   return {
