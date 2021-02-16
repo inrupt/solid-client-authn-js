@@ -44,7 +44,7 @@ export async function validateIdToken(
     | JWKOctKey;
   const parsedKey = await JWK.asKey(key);
   try {
-    JWT.verify(token, parsedKey.toPEM(true), {
+    JWT.verify(token, parsedKey.toPEM(false), {
       issuer,
       audience,
       algorithms: ["ES256"],
