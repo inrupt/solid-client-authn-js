@@ -194,7 +194,7 @@
 "slice-ansi@3.0.0","MIT","https://github.com/chalk/slice-ansi"
 "slice-ansi@4.0.0","MIT","https://github.com/chalk/slice-ansi"
 "slide@1.1.6","ISC","https://github.com/isaacs/slide-flow-control"
-"solid-auth-fetcher@1.4.0","MIT",""
+"solid-auth-fetcher@1.5.0","MIT",""
 "spdx-compare@1.0.0","MIT","https://github.com/kemitchell/spdx-compare.js"
 "spdx-correct@3.1.1","Apache-2.0","https://github.com/jslicense/spdx-correct.js"
 "spdx-exceptions@2.3.0","CC-BY-3.0","https://github.com/kemitchell/spdx-exceptions.json"
