@@ -20,17 +20,13 @@
  */
 
 import { JWK } from "node-jose";
-import {
-  JSONWebKey,
-  JWKECKey,
-  JWKOctKey,
-  JWKOKPKey,
-  JWKRSAKey,
-  JWT as JWTJose,
-  JWKS,
-} from "jose";
+import { JSONWebKey, JWKECKey, JWKOctKey, JWKOKPKey, JWKRSAKey } from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
 import { v4 } from "uuid";
+
+type internalJwks = {
+  keys: any[];
+};
 
 export async function validateIdToken(
   token: string,
@@ -38,11 +34,20 @@ export async function validateIdToken(
   issuer: string,
   audience: string
 ): Promise<boolean> {
-  const jwks = JWKS.asKeyStore(rawJwks as any);
+  // jose methods would be cleaner, but aren't supported by the polyfill we
+  // have to use for `crypto`. This will all get cleaned after we move to jose@3
+  // when Node10 support is dropped.
+  const key = (rawJwks as internalJwks).keys[0] as
+    | JWKECKey
+    | JWKOKPKey
+    | JWKRSAKey
+    | JWKOctKey;
+  const parsedKey = await JWK.asKey(key);
   try {
-    JWTJose.IdToken.verify(token, jwks, {
+    JWT.verify(token, parsedKey.toPEM(true), {
       issuer,
       audience,
+      algorithms: ["ES256"],
     });
   } catch (e) {
     // If the verification throws, the token is invalid
