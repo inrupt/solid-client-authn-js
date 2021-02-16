@@ -26,6 +26,10 @@
  */
 import URL from "url-parse";
 import _fetch from "cross-fetch";
+import Debug from "debug";
+
+const debug = Debug("SolidAuthFetcher");
+debug("Ready to roll");
 
 export interface IFetcher {
   fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response>;
@@ -34,6 +38,7 @@ export interface IFetcher {
 export default class Fetcher implements IFetcher {
   async fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const fetchUrl = url instanceof URL ? url.toString() : url;
+    debug("fetch", url, init);
     if (typeof window !== "undefined" && typeof window.fetch !== "undefined") {
       return window.fetch(fetchUrl, init);
     }
