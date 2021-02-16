@@ -46,6 +46,16 @@ const mockJWK = {
   d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
 };
 
+// Allow our tests to control the JWT that comes back from our mock.
+// Setting a file scoped variable like this relies on our test runner running
+// tests within a single file in series, and not in parallel!
+enum DecodeJwtResult {
+  Undefined,
+  SubClaimPresent,
+  Empty,
+}
+let decodeJwt: DecodeJwtResult = DecodeJwtResult.SubClaimPresent;
+
 jest.mock("@inrupt/oidc-client-ext", () => {
   return {
     generateJwkForDpop: async (): Promise<typeof mockJWK> => mockJWK,
@@ -54,10 +64,25 @@ jest.mock("@inrupt/oidc-client-ext", () => {
       _method: string,
       _jwt: JSONWebKey
     ): Promise<string> => "someToken",
-    decodeJwt: async (_jwt: string): Promise<Record<string, unknown>> => {
-      return {
-        sub: "https://some.webid",
-      };
+    decodeJwt: async (
+      _jwt: string
+    ): Promise<Record<string, unknown> | undefined> => {
+      switch (decodeJwt) {
+        case DecodeJwtResult.Undefined: {
+          return undefined;
+        }
+        case DecodeJwtResult.Empty: {
+          return {};
+        }
+        case DecodeJwtResult.SubClaimPresent: {
+          return {
+            sub: "https://some.webid",
+          };
+        }
+        default:
+          break;
+      }
+      return undefined;
     },
   };
 });
@@ -128,7 +153,41 @@ describe("TokenRequester", () => {
     window.fetch = mockedFetch;
   }
 
-  it("Properly follows the refresh flow", async () => {
+  it("fails if no JWT decode response", async () => {
+    await setUpMockedReturnValues({});
+    const TokenRefresher = getTokenRequester({
+      clientRegistrar: PublicClientRegistrarMock,
+    });
+
+    const saveSetup = decodeJwt;
+    try {
+      decodeJwt = DecodeJwtResult.Undefined;
+      await expect(TokenRefresher.request("global", {})).rejects.toThrow(
+        "returned a bad token"
+      );
+    } finally {
+      decodeJwt = saveSetup;
+    }
+  });
+
+  it("fails if no 'sub' claim in JWT", async () => {
+    await setUpMockedReturnValues({});
+    const TokenRefresher = getTokenRequester({
+      clientRegistrar: PublicClientRegistrarMock,
+    });
+
+    const saveSetup = decodeJwt;
+    try {
+      decodeJwt = DecodeJwtResult.Empty;
+      await expect(TokenRefresher.request("global", {})).rejects.toThrow(
+        "returned a bad token"
+      );
+    } finally {
+      decodeJwt = saveSetup;
+    }
+  });
+
+  it("properly follows the refresh flow", async () => {
     await setUpMockedReturnValues({});
     const TokenRefresher = getTokenRequester({
       clientRegistrar: PublicClientRegistrarMock,
@@ -153,7 +212,7 @@ describe("TokenRequester", () => {
     );
   });
 
-  it("Adds an authorization header if a client secret is present", async () => {
+  it("adds an authorization header if a client secret is present", async () => {
     const TokenRefresher = getTokenRequester();
     window.fetch = jest.fn().mockResolvedValueOnce(
       new NodeResponse(
@@ -188,7 +247,7 @@ describe("TokenRequester", () => {
     );
   });
 
-  it("Fails elegantly if the idp returns a bad value", async () => {
+  it("fails elegantly if the IdP returns a bad value", async () => {
     await setUpMockedReturnValues({
       responseBody: JSON.stringify({
         // eslint-disable-next-line camelcase
@@ -206,7 +265,7 @@ describe("TokenRequester", () => {
     ).rejects.toThrow("IDP token route returned an invalid response.");
   });
 
-  it("Fails elegantly if the issuer does not support refresh tokens", async () => {
+  it("fails elegantly if the issuer does not support refresh tokens", async () => {
     await setUpMockedReturnValues({
       issuerConfig: {
         ...IssuerConfigFetcherFetchConfigResponse,
@@ -227,7 +286,7 @@ describe("TokenRequester", () => {
     );
   });
 
-  it("Fails elegantly if the issuer does not have a token endpoint", async () => {
+  it("fails elegantly if the issuer does not have a token endpoint", async () => {
     const mockIssuerConfig = {
       ...IssuerConfigFetcherFetchConfigResponse,
       tokenEndpoint: null,
@@ -256,7 +315,7 @@ describe("TokenRequester", () => {
 
   // This test fails with the current mock, but since the whole tokenrequester class is
   // going to be removed soon, it's not a priority to fix this now.
-  it.skip("Fails elegantly if the access token does not have a sub claim", async () => {
+  it.skip("fails elegantly if the access token does not have a sub claim", async () => {
     await setUpMockedReturnValues({
       jwt: {
         iss: "https://idp.com",

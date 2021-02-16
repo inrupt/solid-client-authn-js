@@ -19,36 +19,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import WebIdLoginHandler from "./WebIdLoginHandler";
 
-/**
- * Handles login if a user's webid was provided
- */
-import {
-  ILoginOptions,
-  ILoginHandler,
-  LoginResult,
-} from "@inrupt/solid-client-authn-core";
+describe("WebIdLoginHandler", () => {
+  it("should never handle", async () => {
+    await expect(
+      new WebIdLoginHandler().canHandle({
+        sessionId: "value doesn't matter",
+        tokenType: "DPoP",
+      })
+    ).resolves.toBeFalsy();
+  });
 
-/**
- * @hidden
- */
-export default class WebidLoginHandler implements ILoginHandler {
-  async canHandle(_loginOptions: ILoginOptions): Promise<boolean> {
-    return false;
-  }
-
-  /**
-   * Handles a given WebID by first dereferencing the WebId, then creating correct login options for
-   * a future login handler and triggering that login handler. For example, if a WebID contains an
-   * 'oidcIssuer' triple, it will create login credentials to match that
-   * @param loginOptions
-   */
-  async handle(_loginOptions: ILoginOptions): Promise<LoginResult> {
-    // TODO: implement
-    throw new Error("Not Implemented");
-  }
-}
+  it("should not be implement yet", async () => {
+    await expect(
+      new WebIdLoginHandler().handle({
+        sessionId: "value doesn't matter",
+        tokenType: "DPoP",
+      })
+    ).rejects.toThrow("Not implemented");
+  });
+});

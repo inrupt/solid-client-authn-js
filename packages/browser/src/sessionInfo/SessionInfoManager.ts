@@ -125,9 +125,6 @@ export class SessionInfoManager implements ISessionInfoManager {
   async get(
     sessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
-    const webId = await this.storageUtility.getForUser(sessionId, "webId", {
-      secure: true,
-    });
     const isLoggedIn = await this.storageUtility.getForUser(
       sessionId,
       "isLoggedIn",
@@ -135,6 +132,16 @@ export class SessionInfoManager implements ISessionInfoManager {
         secure: true,
       }
     );
+    if (isLoggedIn === undefined) {
+      return undefined;
+    }
+
+    const webId = await this.storageUtility.getForUser(sessionId, "webId", {
+      secure: true,
+    });
+    const idToken = await this.storageUtility.getForUser(sessionId, "idToken", {
+      secure: false,
+    });
     const refreshToken = await this.storageUtility.getForUser(
       sessionId,
       "refreshToken",
@@ -145,16 +152,15 @@ export class SessionInfoManager implements ISessionInfoManager {
     const issuer = await this.storageUtility.getForUser(sessionId, "issuer", {
       secure: true,
     });
-    if (isLoggedIn !== undefined) {
-      return {
-        sessionId,
-        webId,
-        isLoggedIn: isLoggedIn === "true",
-        refreshToken,
-        issuer,
-      };
-    }
-    return undefined;
+
+    return {
+      sessionId,
+      webId,
+      isLoggedIn: isLoggedIn === "true",
+      idToken,
+      refreshToken,
+      issuer,
+    };
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -177,7 +183,7 @@ export class SessionInfoManager implements ISessionInfoManager {
    * @param sessionId
    */
   async register(_sessionId: string): Promise<void> {
-    throw new Error("Unimplemented");
+    throw new Error("Not implemented");
   }
 
   /**
@@ -185,13 +191,13 @@ export class SessionInfoManager implements ISessionInfoManager {
    * returns additional session information.
    */
   async getRegisteredSessionIdAll(): Promise<string[]> {
-    throw new Error("Unimplemented");
+    throw new Error("Not implemented");
   }
 
   /**
    * Deletes all information about all sessions, including their registrations.
    */
   async clearAll(): Promise<void> {
-    throw new Error("Unimplemented");
+    throw new Error("Not implemented");
   }
 }

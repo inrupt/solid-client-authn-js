@@ -21,7 +21,11 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  mockStorageUtility,
+  StorageUtility,
+} from "@inrupt/solid-client-authn-core";
+import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
 import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
@@ -30,6 +34,7 @@ import {
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "../src/ClientAuthentication";
+import { KEY_CURRENT_URL } from "../src/constant";
 
 describe("ClientAuthentication", () => {
   const defaultMocks = {
@@ -106,6 +111,7 @@ describe("ClientAuthentication", () => {
       });
       await clientAuthn.login("someUser", {
         clientId: "coolApp",
+        clientName: "coolApp Name",
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com",
       });
@@ -158,6 +164,15 @@ describe("ClientAuthentication", () => {
       expect(spyFetch).toHaveBeenCalledWith("https://example.com", {
         credentials: "omit",
       });
+    });
+  });
+
+  describe("getAllSessionInfo", () => {
+    it("creates a session for the global user", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() => clientAuthn.getAllSessionInfo()).rejects.toThrow(
+        "Not implemented"
+      );
     });
   });
 
@@ -245,6 +260,62 @@ describe("ClientAuthentication", () => {
         "",
         "https://coolapp.com/redirect?someQuery=someValue"
       );
+    });
+
+    it("saves current window location if we have stored ID Token", async () => {
+      const existingLocalStorage = window.localStorage;
+
+      const storageData: Record<string, string> = {};
+      const localStorageMock = {
+        getItem: jest.fn((key) => JSON.stringify(storageData[key])),
+        setItem: jest.fn((key, value) => {
+          storageData[key] = value;
+        }),
+      };
+
+      Object.defineProperty(window, "localStorage", {
+        value: localStorageMock,
+        writable: true,
+      });
+
+      try {
+        // eslint-disable-next-line no-restricted-globals
+        history.replaceState = jest.fn();
+
+        const clientAuthn = getClientAuthentication({
+          // Awkward here - we need to be logged in (which is state stored in
+          // 'secure' storage), and have an ID Token (which is stored in
+          // 'insecure' storage).
+          sessionInfoManager: mockSessionInfoManager(
+            new StorageUtility(
+              mockStorage({
+                "solidClientAuthenticationUser:global": {
+                  isLoggedIn: "true",
+                },
+              }),
+              mockStorage({
+                "solidClientAuthenticationUser:global": {
+                  idToken: "value doesn't matter",
+                },
+              })
+            )
+          ),
+        });
+
+        await clientAuthn.handleIncomingRedirect("https://ex.com/redirect");
+
+        // In unit tests, the window location with just be localhost. All we're
+        // really testing here is that a location was persisted (so we could
+        // change this assertion to just ensure a value exists and is non-empty.
+        expect(window.localStorage.getItem(KEY_CURRENT_URL)).toContain(
+          "http://localhost/"
+        );
+      } finally {
+        // Remove the mocked method:
+        Object.defineProperty(window, "localStorage", {
+          value: existingLocalStorage,
+        });
+      }
     });
   });
 });
