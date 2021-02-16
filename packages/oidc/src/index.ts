@@ -47,6 +47,7 @@ export {
   signJwt,
   createDpopHeader,
   privateJwkToPublicJwk,
+  validateIdToken,
 } from "./dpop/dpop";
 export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGeneration";
 export {

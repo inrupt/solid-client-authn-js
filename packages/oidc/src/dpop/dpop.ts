@@ -20,9 +20,36 @@
  */
 
 import { JWK } from "node-jose";
-import { JSONWebKey, JWKECKey, JWKOctKey, JWKOKPKey, JWKRSAKey } from "jose";
+import {
+  JSONWebKey,
+  JWKECKey,
+  JWKOctKey,
+  JWKOKPKey,
+  JWKRSAKey,
+  JWT as JWTJose,
+  JWKS,
+} from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
 import { v4 } from "uuid";
+
+export async function validateIdToken(
+  token: string,
+  rawJwks: unknown,
+  issuer: string,
+  audience: string
+): Promise<boolean> {
+  const jwks = JWKS.asKeyStore(rawJwks as any);
+  try {
+    JWTJose.IdToken.verify(token, jwks, {
+      issuer,
+      audience,
+    });
+  } catch (e) {
+    // If the verification throws, the token is invalid
+    return false;
+  }
+  return true;
+}
 
 /**
  * Generates a Json Web Token (https://tools.ietf.org/html/rfc7519) containing
