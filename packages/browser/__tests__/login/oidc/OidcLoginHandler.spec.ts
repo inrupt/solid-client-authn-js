@@ -24,7 +24,6 @@ import "reflect-metadata";
 import {
   StorageUtility,
   StorageUtilityMock,
-  USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
@@ -72,7 +71,7 @@ describe("OidcLoginHandler", () => {
     const mockedStorage = new StorageUtility(
       mockStorage({}),
       mockStorage({
-        [`${USER_SESSION_PREFIX}:mySession`]: {
+        "solidClientAuthenticationUser:mySession": {
           clientId: "https://some.app/registration",
         },
       })
