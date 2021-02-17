@@ -22,6 +22,7 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import {
+  mockStorageUtility,
   StorageUtilityGetResponse,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
@@ -133,6 +134,29 @@ describe("OidcLoginHandler", () => {
     const registrarResult = await actualRegistrar.getClient.mock.results[0]
       .value;
     expect(registrarResult.clientId).toEqual(savedValue.clientId);
+  });
+
+  it("should save client ID if given one as an input option", async () => {
+    const actualStorage = mockStorageUtility({});
+    const handler = getInitialisedHandler({
+      storageUtility: actualStorage,
+    });
+
+    const inputClientId = "coolApp";
+
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      clientId: inputClientId,
+      tokenType: "DPoP",
+    });
+
+    const storedClientId = await actualStorage.getForUser(
+      "clientApplicationRegistrationInfo",
+      "clientId"
+    );
+    expect(storedClientId).toEqual(inputClientId);
   });
 
   it("should throw an error when called without an issuer", async () => {
