@@ -112,3 +112,14 @@ export const onLogout: Session["onLogout"] = (...args) => {
   const session = getDefaultSession();
   return session.onLogout(...args);
 };
+
+/**
+ * Register a callback function to be called when a session is restored:
+ *
+ * @param callback The function called when a session is restored.
+ * @since 1.3.0
+ */
+export const onSessionRestore: Session["onSessionRestore"] = (...args) => {
+  const session = getDefaultSession();
+  return session.onSessionRestore(...args);
+};

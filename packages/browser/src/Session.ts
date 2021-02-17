@@ -175,6 +175,11 @@ export class Session extends EventEmitter {
     this.emit("logout");
   };
 
+  fireSessionRestoreEvent = (): void => {
+    const storedCurrentUrl = localStorage.getItem(KEY_CURRENT_URL);
+    this.emit("sessionRestore", storedCurrentUrl);
+  };
+
   /**
    * Completes the login process by processing the information provided by the
    * Solid identity provider through redirect.
@@ -188,6 +193,7 @@ export class Session extends EventEmitter {
     url: string = window.location.href
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
+      this.fireSessionRestoreEvent();
       return this.info;
     }
 
@@ -248,5 +254,17 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
+  }
+
+  /**
+   * Register a callback function to be called when a session is restored.
+   *
+   * Note: the callback will be called with the saved value of the 'current URL'
+   * at the time the session was restored.
+   *
+   * @param callback The function called when a user completes logout.
+   */
+  onSessionRestore(callback: (currentUrl: string) => unknown): void {
+    this.on("sessionRestore", callback);
   }
 }

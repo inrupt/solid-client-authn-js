@@ -331,8 +331,8 @@ describe("Session", () => {
       const secondTokenRequest = mySession.handleIncomingRedirect(
         "https://my.app/?code=someCode&state=arizona"
       );
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       // We know that it has been set by the call to `blockingRequest`.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       continueAfterSecondRequest!();
       const tokenRequests = await Promise.all([
         firstTokenRequest,
@@ -553,7 +553,7 @@ describe("Session", () => {
 
   describe("onLogout", () => {
     // The `done` callback is used in order to make sure the callback passed to
-    // onLogin is called. If it is not, the test times out, which is why
+    // our event handler is called. If it is not, the test times out, which is why
     // no additional assertion is required.
     // eslint-disable-next-line jest/expect-expect, jest/no-done-callback
     it("calls the registered callback on logout", async (done) => {
@@ -565,8 +565,65 @@ describe("Session", () => {
       const mySession = new Session({
         clientAuthentication: mockClientAuthentication(),
       });
+
       mySession.onLogout(myCallback);
       await mySession.logout();
+    });
+  });
+
+  describe("onSessionRestore", () => {
+    // The `done` callback is used in order to make sure the callback passed to
+    // our event handler is called. If it is not, the test times out, which is why
+    // no additional assertion is required.
+    // eslint-disable-next-line jest/expect-expect, jest/no-done-callback
+    it("calls the registered callback on", async (done) => {
+      // Set our window's location to our test value.
+      const defaultLocation = "https://coolSite.com/myAppTestPage";
+
+      const myCallback = (urlBeforeRestore: string): void => {
+        expect(urlBeforeRestore).toEqual(defaultLocation);
+        if (done) {
+          done();
+        }
+      };
+
+      const {
+        location,
+        history: { replaceState },
+      } = window;
+
+      try {
+        // location and history aren't optional on window, which makes TS complain
+        // (rightfully) when we delete them. However, they are deleted on purpose
+        // here just for testing.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        delete window.location;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        delete window.history.replaceState;
+
+        window.location = {
+          href: defaultLocation,
+        } as Location;
+        window.history.replaceState = jest.fn();
+
+        const mySession = new Session({
+          clientAuthentication: mockClientAuthentication(),
+        });
+        mySession.onSessionRestore(myCallback);
+
+        // Callback should not be called on initial login...
+        await mySession.handleIncomingRedirect("https://not-relevant.com/");
+
+        // ...but should be called on a subsequent calls, i.e., on session
+        // restore after a silent login.
+        await mySession.handleIncomingRedirect("https://not-relevant.com/");
+      } finally {
+        // Restore our 'window' state.
+        window.location = location;
+        window.history.replaceState = replaceState;
+      }
     });
   });
 });

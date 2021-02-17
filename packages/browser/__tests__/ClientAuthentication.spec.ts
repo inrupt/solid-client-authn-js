@@ -307,9 +307,22 @@ describe("ClientAuthentication", () => {
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(url);
-      expect(redirectInfo).toEqual({
-        ...RedirectHandlerResponse,
-      });
+
+      // Our injected mocked response may also contain internal-only data (for
+      // other tests), whereas our response from `handleIncomingRedirect()` can
+      // only contain publicly visible fields. So we need to explicitly check
+      // for individual fields (as opposed to just checking against
+      // entire-response-object-equality).
+      expect(redirectInfo?.sessionId).toEqual(
+        RedirectHandlerResponse.sessionId
+      );
+      expect(redirectInfo?.webId).toEqual(RedirectHandlerResponse.webId);
+      expect(redirectInfo?.isLoggedIn).toEqual(
+        RedirectHandlerResponse.isLoggedIn
+      );
+      expect(redirectInfo?.expirationDate).toEqual(
+        RedirectHandlerResponse.expirationDate
+      );
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
 
       // Calling the redirect handler should have updated the fetch.

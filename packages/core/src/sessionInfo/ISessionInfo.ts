@@ -55,9 +55,9 @@ export interface ISessionInfo {
 
 /**
  * Captures information about sessions that is persisted in storage, but that
- * should not be exposed as part of our public API, and is only used for internal
- * purpose. It is complementary to ISessionInfo when retrieving all information
- * about a stored session, both public and internal.
+ * should not be exposed as part of our public API, and is only used for
+ * internal purposes. It is complementary to ISessionInfo when retrieving all
+ * information about a stored session, both public and internal.
  */
 export interface ISessionInternalInfo {
   /**

@@ -23,16 +23,22 @@ import {
   ISessionInfo,
   ISessionInfoManager,
   ISessionInfoManagerOptions,
+  ISessionInternalInfo,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManager } from "../SessionInfoManager";
 
-export const SessionCreatorCreateResponse: ISessionInfo = {
+export const SessionCreatorCreateResponse: ISessionInfo &
+  ISessionInternalInfo = {
   sessionId: "global",
   isLoggedIn: true,
   webId: "https://pod.com/profile/card#me",
+
+  // Internal info fields...
+  idToken: "test ID token",
 };
-export const SessionCreatorGetSessionResponse: ISessionInfo = SessionCreatorCreateResponse;
+export const SessionCreatorGetSessionResponse: ISessionInfo &
+  ISessionInternalInfo = SessionCreatorCreateResponse;
 
 export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   update: jest.fn(
