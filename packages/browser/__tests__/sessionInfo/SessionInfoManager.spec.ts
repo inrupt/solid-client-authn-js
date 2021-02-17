@@ -23,8 +23,9 @@ import "reflect-metadata";
 import {
   mockStorageUtility,
   StorageUtility,
+  mockStorage,
 } from "@inrupt/solid-client-authn-core";
-import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
+
 import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
 import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";

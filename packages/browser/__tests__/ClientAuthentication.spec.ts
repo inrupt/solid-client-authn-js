@@ -26,8 +26,9 @@ import {
   mockStorageUtility,
   StorageUtility,
   USER_SESSION_PREFIX,
+  mockStorage,
 } from "@inrupt/solid-client-authn-core";
-import { mockStorage } from "@inrupt/solid-client-authn-core";
+
 import { Response } from "cross-fetch";
 import { JSONWebKey } from "jose";
 import { signJwt } from "@inrupt/oidc-client-ext";

@@ -78,6 +78,7 @@ export { default as NotImplementedError } from "./errors/NotImplementedError";
 
 // Mocks.
 export {
+  mockStorage,
   mockStorageUtility,
   StorageUtilityMock,
   StorageUtilityGetResponse,
