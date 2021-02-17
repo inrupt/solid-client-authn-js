@@ -611,14 +611,21 @@ describe("Session", () => {
         const mySession = new Session({
           clientAuthentication: mockClientAuthentication(),
         });
+        const sessionRestoreTrigger = jest.spyOn(
+          mySession,
+          "fireSessionRestoreEvent"
+        );
+
         mySession.onSessionRestore(myCallback);
 
         // Callback should not be called on initial login...
         await mySession.handleIncomingRedirect("https://not-relevant.com/");
+        expect(sessionRestoreTrigger).not.toHaveBeenCalled();
 
         // ...but should be called on a subsequent calls, i.e., on session
         // restore after a silent login.
         await mySession.handleIncomingRedirect("https://not-relevant.com/");
+        expect(sessionRestoreTrigger).toHaveBeenCalled();
       } finally {
         // Restore our 'window' state.
         window.location = location;
