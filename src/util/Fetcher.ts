@@ -49,7 +49,7 @@ export default class Fetcher implements IFetcher {
             init.body.toString().length > 1000
               ? init.body.toString().substring(0, 100) + "..."
               : init.body
-          }`
+          }'`
         );
       }
       if (init.headers) {
