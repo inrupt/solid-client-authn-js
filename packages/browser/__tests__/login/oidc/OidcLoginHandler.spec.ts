@@ -147,6 +147,48 @@ describe("OidcLoginHandler", () => {
     expect(storedClientId).toEqual(inputClientId);
   });
 
+  it("should save client ID, secret and name if given as input options", async () => {
+    const actualStorage = new StorageUtility(mockStorage({}), mockStorage({}));
+    const handler = getInitialisedHandler({
+      storageUtility: actualStorage,
+    });
+
+    const inputClientId = "coolApp";
+    const inputClientSecret = "Top Secret!";
+    const inputClientName = "The coolest app around";
+
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      clientId: inputClientId,
+      clientSecret: inputClientSecret,
+      clientName: inputClientName,
+      tokenType: "DPoP",
+    });
+
+    expect(
+      await actualStorage.getForUser(
+        "clientApplicationRegistrationInfo",
+        "clientId"
+      )
+    ).toEqual(inputClientId);
+
+    expect(
+      await actualStorage.getForUser(
+        "clientApplicationRegistrationInfo",
+        "clientSecret"
+      )
+    ).toEqual(inputClientSecret);
+
+    expect(
+      await actualStorage.getForUser(
+        "clientApplicationRegistrationInfo",
+        "clientName"
+      )
+    ).toEqual(inputClientName);
+  });
+
   it("should throw an error when called without an issuer", async () => {
     const handler = getInitialisedHandler();
     // TS Ignore because bad input is purposely given here for the purpose of testing

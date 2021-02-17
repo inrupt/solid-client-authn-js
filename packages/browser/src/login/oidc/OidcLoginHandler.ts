@@ -89,7 +89,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       );
     }
 
-    // Fetch OpenId Config
+    // Fetch issuer config.
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
       options.oidcIssuer
     );
@@ -128,6 +128,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     await this.storageUtility.setForUser("clientApplicationRegistrationInfo", {
       clientId: dynamicClientRegistration.clientId,
       clientSecret: dynamicClientRegistration.clientSecret as string,
+      clientName: dynamicClientRegistration.clientName as string,
     });
 
     // Construct OIDC Options
