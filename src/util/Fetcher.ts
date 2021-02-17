@@ -57,10 +57,10 @@ export default class Fetcher implements IFetcher {
           (init.headers as string[][]).forEach(pair => {
             options.push(`-H '${pair[0]}: ${pair[1]}'`);
           });
-        // } else if (init.headers instanceof Headers) {
-        //   init.headers.forEach(pair => {
-        //     options.push(`-H '${pair[0]}: ${pair[1]}'`);
-        //   });
+          // } else if (init.headers instanceof Headers) {
+          //   init.headers.forEach(pair => {
+          //     options.push(`-H '${pair[0]}: ${pair[1]}'`);
+          //   });
         } else {
           Object.keys(init.headers as any).forEach(key => {
             options.push(`-H '${key}: ${(init.headers as any)[key]}'`);
