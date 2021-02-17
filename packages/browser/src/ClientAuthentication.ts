@@ -132,7 +132,7 @@ export default class ClientAuthentication {
       return null;
     }
     const sessionInfo = await this.sessionInfoManager.get(currentSessionId);
-    // Several session information are required in order to validate that the ID
+    // Several types of session data are required in order to validate that the ID
     // token in storage hasn't been tampered with, and has actually been issued
     // by the issuer present in storage.
     if (

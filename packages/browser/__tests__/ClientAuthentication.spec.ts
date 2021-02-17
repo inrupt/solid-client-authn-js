@@ -89,12 +89,6 @@ const mockIdTokenPayload = (
   };
 };
 
-// mockIdTokenPayload(
-//   "https://my.pod/profile#me",
-//   "https://some.issuer",
-//   "https://some.app/registration"
-// ),
-
 const mockSessionStorage = async (
   sessionId: string,
   idTokenPayload: Record<string, string | number> = {}
