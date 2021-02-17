@@ -27,7 +27,7 @@ import {
   StorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
+import { mockStorage } from "@inrupt/solid-client-authn-core";
 import { Response } from "cross-fetch";
 import { JSONWebKey } from "jose";
 import { signJwt } from "@inrupt/oidc-client-ext";
@@ -89,15 +89,24 @@ const mockIdTokenPayload = (
   };
 };
 
+type SessionStorageOptions = {
+  clientId: string;
+  issuer: string;
+};
+
 const mockSessionStorage = async (
   sessionId: string,
-  idTokenPayload: Record<string, string | number> = {}
+  idTokenPayload: Record<string, string | number> = {},
+  options: SessionStorageOptions = {
+    clientId: "https://some.app/registration",
+    issuer: "https://some.issuer",
+  }
 ): Promise<StorageUtility> => {
   return new StorageUtility(
     mockStorage({
       [`${USER_SESSION_PREFIX}:${sessionId}`]: {
         isLoggedIn: "true",
-        issuer: "https://some.issuer",
+        issuer: options.issuer,
         webId: "https://my.pod/profile#me",
       },
     }),
@@ -106,7 +115,7 @@ const mockSessionStorage = async (
         idToken: await signJwt(idTokenPayload, mockJwk(), {
           algorithm: "ES256",
         }),
-        clientId: "https://some.app/registration",
+        clientId: options.clientId,
       },
     })
   );
@@ -533,9 +542,15 @@ describe("ClientAuthentication", () => {
         sessionId,
         mockIdTokenPayload(
           "https://my.pod/profile#me",
+          // The ID token issuer
           "https://some-other.issuer",
           "https://some.app/registration"
-        )
+        ),
+        {
+          // The current issuer
+          issuer: "https://some.issuer",
+          clientId: "https://some.app/registration",
+        }
       );
       mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
 
@@ -560,8 +575,14 @@ describe("ClientAuthentication", () => {
         mockIdTokenPayload(
           "https://my.pod/profile#me",
           "https://some.issuer",
+          // The ID token audience
           "https://some-other.app/registration"
-        )
+        ),
+        {
+          issuer: "https://some.issuer",
+          // The current client ID
+          clientId: "https://some.app/registration",
+        }
       );
       mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
 
@@ -573,7 +594,7 @@ describe("ClientAuthentication", () => {
       await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
     });
 
-    it("returns null if the ID token signature cannot be verified", async () => {
+    it("returns null if the ID token isn't signed with the keys of the issuer", async () => {
       const sessionId = "mySession";
       (window as any).localStorage = new LocalStorageMock({
         [KEY_CURRENT_SESSION]: sessionId,
@@ -589,6 +610,7 @@ describe("ClientAuthentication", () => {
           "https://some.app/registration"
         )
       );
+
       mockFetch(new Response(JSON.stringify({ keys: [mockAnotherJwk()] })));
 
       const clientAuthn = getClientAuthentication({
