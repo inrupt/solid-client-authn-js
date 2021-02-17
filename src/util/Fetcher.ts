@@ -38,7 +38,37 @@ export interface IFetcher {
 export default class Fetcher implements IFetcher {
   async fetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const fetchUrl = url instanceof URL ? url.toString() : url;
-    debug("fetch", url, init);
+    const options = [];
+    if (init) {
+      if (init.method) {
+        options.push(`-X '${init.method}'`);
+      }
+      if (init.body) {
+        options.push(
+          `-d '${
+            init.body.toString().length > 1000
+              ? init.body.toString().substring(0, 100) + "..."
+              : init.body
+          }`
+        );
+      }
+      if (init.headers) {
+        if (Array.isArray(init.headers)) {
+          (init.headers as string[][]).forEach(pair => {
+            options.push(`-H '${pair[0]}: ${pair[1]}'`);
+          });
+        // } else if (init.headers instanceof Headers) {
+        //   init.headers.forEach(pair => {
+        //     options.push(`-H '${pair[0]}: ${pair[1]}'`);
+        //   });
+        } else {
+          Object.keys(init.headers as any).forEach(key => {
+            options.push(`-H '${key}: ${(init.headers as any)[key]}'`);
+          });
+        }
+      }
+    }
+    debug(`curl -v ${options.join(" ")} ${url}`);
     if (typeof window !== "undefined" && typeof window.fetch !== "undefined") {
       return window.fetch(fetchUrl, init);
     }
