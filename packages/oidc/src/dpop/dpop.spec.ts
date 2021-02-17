@@ -19,7 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { describe, it } from "@jest/globals";
+import { describe, it, expect } from "@jest/globals";
+import { JWKECKey } from "jose";
 
 import {
   createDpopHeader,
@@ -27,6 +28,7 @@ import {
   normalizeHttpUriClaim,
   privateJwkToPublicJwk,
   signJwt,
+  validateIdToken,
 } from "./dpop";
 import { generateJwk, generateJwkForDpop } from "./keyGeneration";
 
@@ -142,5 +144,78 @@ describe("createDpopHeader", () => {
     expect((decoded.header as Record<string, string>).alg).toEqual("ES256");
     expect((decoded.header as Record<string, string>).typ).toEqual("dpop+jwt");
     expect((decoded.header as Record<string, string>).jwk).toEqual(publicKey);
+  });
+});
+
+const mockJwk = (): JWKECKey => {
+  return {
+    kty: "EC",
+    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
+    alg: "ES256",
+    crv: "P-256",
+    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
+    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
+    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+  };
+};
+
+describe("validateIdToken", () => {
+  it("returns false if the provided issuer doesn't match the token's", async () => {
+    const payload = {
+      sub: "https://my.webid",
+      iss: "https://some.issuer",
+      aud: "https://my.app/registration",
+    };
+    const idToken = await signJwt(payload, mockJwk(), {
+      algorithm: "ES256",
+    });
+    await expect(
+      validateIdToken(
+        idToken,
+        { keys: [mockJwk()] },
+        "https://some-other.issuer",
+        "https://my.app/registration"
+      )
+    ).resolves.toBe(false);
+  });
+
+  it("returns false if the provided audience doesn't match the token's", async () => {
+    const payload = {
+      sub: "https://my.webid",
+      iss: "https://some.issuer",
+      aud: "https://my.app/registration",
+    };
+    const idToken = await signJwt(payload, mockJwk(), {
+      algorithm: "ES256",
+    });
+    await expect(
+      validateIdToken(
+        idToken,
+        { keys: [mockJwk()] },
+        "https://some.issuer",
+        "https://another.app/registration"
+      )
+    ).resolves.toBe(false);
+  });
+
+  it("returns true if the ID token is valid", async () => {
+    const payload = {
+      sub: "https://my.webid",
+      iss: "https://some.issuer",
+      aud: "https://my.app/registration",
+      iat: 2551294137,
+      exp: 2551301337,
+    };
+    const idToken = await signJwt(payload, mockJwk(), {
+      algorithm: "ES256",
+    });
+    await expect(
+      validateIdToken(
+        idToken,
+        { keys: [mockJwk()] },
+        "https://some.issuer",
+        "https://my.app/registration"
+      )
+    ).resolves.toBe(true);
   });
 });

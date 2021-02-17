@@ -24,6 +24,38 @@ import { JSONWebKey, JWKECKey, JWKOctKey, JWKOKPKey, JWKRSAKey } from "jose";
 import JWT, { VerifyOptions } from "jsonwebtoken";
 import { v4 } from "uuid";
 
+type internalJwks = {
+  keys: any[];
+};
+
+export async function validateIdToken(
+  token: string,
+  rawJwks: unknown,
+  issuer: string,
+  audience: string
+): Promise<boolean> {
+  // jose methods would be cleaner, but aren't supported by the polyfill we
+  // have to use for `crypto`. This will all get cleaned after we move to jose@3
+  // when Node10 support is dropped.
+  const key = (rawJwks as internalJwks).keys[0] as
+    | JWKECKey
+    | JWKOKPKey
+    | JWKRSAKey
+    | JWKOctKey;
+  const parsedKey = await JWK.asKey(key);
+  try {
+    JWT.verify(token, parsedKey.toPEM(false), {
+      issuer,
+      audience,
+      algorithms: ["ES256"],
+    });
+  } catch (e) {
+    // If the verification throws, the token is invalid
+    return false;
+  }
+  return true;
+}
+
 /**
  * Generates a Json Web Token (https://tools.ietf.org/html/rfc7519) containing
  * the provided payload and using the signature algorithm specified in the options.

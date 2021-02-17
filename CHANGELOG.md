@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
+#### oidc
+
+- `validateIdToken`: A function to check that an ID token has been signed by the
+correct issuer, and that it contains some expected values.
+
 ### Bugfix
 
 #### Browser
