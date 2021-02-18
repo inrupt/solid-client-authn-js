@@ -33,9 +33,10 @@ import {
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
+  IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
-import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
-import { KEY_CURRENT_URL } from "./constant";
+import { removeOidcQueryParam, validateIdToken } from "@inrupt/oidc-client-ext";
+import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
 
 // TMP: This ensures that the HTTP requests will include any relevant cookie
 // that could have been set by the resource server.
@@ -60,7 +61,9 @@ export default class ClientAuthentication {
     @inject("redirectHandler") private redirectHandler: IRedirectHandler,
     @inject("logoutHandler") private logoutHandler: ILogoutHandler,
     @inject("sessionInfoManager")
-    private sessionInfoManager: ISessionInfoManager
+    private sessionInfoManager: ISessionInfoManager,
+    @inject("issuerConfigFetcher")
+    private issuerConfigFetcher: IIssuerConfigFetcher
   ) {}
 
   // Define these functions as properties so that they don't get accidentally re-bound.
@@ -121,6 +124,47 @@ export default class ClientAuthentication {
 
   getAllSessionInfo = async (): Promise<ISessionInfo[]> => {
     return this.sessionInfoManager.getAll();
+  };
+
+  getCurrentIssuer = async (): Promise<string | null> => {
+    const currentSessionId = window.localStorage.getItem(KEY_CURRENT_SESSION);
+    if (currentSessionId === null) {
+      return null;
+    }
+    const sessionInfo = await this.sessionInfoManager.get(currentSessionId);
+    // Several types of session data are required in order to validate that the ID
+    // token in storage hasn't been tampered with, and has actually been issued
+    // by the issuer present in storage.
+    if (
+      sessionInfo === undefined ||
+      sessionInfo.idToken === undefined ||
+      sessionInfo.clientAppId === undefined ||
+      sessionInfo.issuer === undefined
+    ) {
+      return null;
+    }
+    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
+      sessionInfo.issuer
+    );
+
+    try {
+      const issuerResponse = await fetch(issuerConfig.jwksUri);
+      const jwks = await issuerResponse.json();
+      if (
+        await validateIdToken(
+          sessionInfo.idToken,
+          jwks,
+          sessionInfo.issuer,
+          sessionInfo.clientAppId
+        )
+      ) {
+        return sessionInfo.issuer;
+      }
+    } catch (e) {
+      // If an error happens when fetching the keys, the issuer cannot be trusted.
+      // The error is swallowed, and `null` is eventually returned.
+    }
+    return null;
   };
 
   handleIncomingRedirect = async (

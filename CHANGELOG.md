@@ -7,11 +7,23 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
+#### oidc
+
+- `validateIdToken`: A function to check that an ID token has been signed by the
+correct issuer, and that it contains some expected values.
+
 ### Bugfix
 
 #### Browser
 
-- When a session expires, the session is now marked as logged out, and a `logout` event is thrown.
+- When a session expires, the session is now marked as logged out, and a 
+  `logout` event is thrown.
+- The 'client_id' option, if specified as an option when logging in, is now
+  stored in storage, ready to be retrieved again from storage when the login
+  flow redirects back to the client application (previously it was only being
+  stored if DCR was invoked).
 
 The following sections document changes that have been released already:
 

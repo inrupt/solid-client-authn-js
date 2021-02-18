@@ -40,3 +40,19 @@ export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
   ),
 };
+
+export const mockDefaultIssuerConfigFetcher = (): IIssuerConfigFetcher => {
+  return {
+    fetchConfig: jest
+      .fn()
+      .mockResolvedValue(IssuerConfigFetcherFetchConfigResponse),
+  };
+};
+
+export const mockIssuerConfigFetcher = (
+  config: IIssuerConfig
+): IIssuerConfigFetcher => {
+  return {
+    fetchConfig: jest.fn().mockResolvedValue(config),
+  };
+};

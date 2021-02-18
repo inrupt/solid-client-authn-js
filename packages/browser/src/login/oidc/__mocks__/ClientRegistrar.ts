@@ -37,16 +37,23 @@ export const PublicClientRegistrarResponse: IClient = {
 
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
+    (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
       Promise.resolve(ClientRegistrarResponse)
   ),
 };
 
 export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
+    (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
       Promise.resolve(PublicClientRegistrarResponse)
   ),
+};
+
+export const mockDefaultClientRegistrar = (): IClientRegistrar => {
+  return {
+    getClient: jest.fn(
+      (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
+        Promise.resolve(ClientRegistrarResponse)
+    ),
+  };
 };

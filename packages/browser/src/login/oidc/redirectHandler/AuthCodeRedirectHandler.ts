@@ -46,7 +46,7 @@ import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
-import { KEY_CURRENT_ISSUER } from "../../../constant";
+import { KEY_CURRENT_SESSION } from "../../../constant";
 
 export async function exchangeDpopToken(
   sessionId: string,
@@ -184,10 +184,10 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       { errorIfNull: true }
     )) as string;
 
-    // Store our current Issuer specifically in 'localStorage' (i.e., not using
+    // Store the current session ID specifically in 'localStorage' (i.e., not using
     // any other storage mechanism), as we don't deem this information to be
     // sensitive, and we want to ensure it survives a browser tab refresh.
-    window.localStorage.setItem(KEY_CURRENT_ISSUER, issuer);
+    window.localStorage.setItem(KEY_CURRENT_SESSION, storedSessionId);
 
     let tokens: TokenEndpointResponse | TokenEndpointDpopResponse;
     let authFetch: typeof fetch;

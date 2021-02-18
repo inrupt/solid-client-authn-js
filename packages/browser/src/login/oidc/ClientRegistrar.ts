@@ -54,11 +54,9 @@ export default class ClientRegistrar implements IClientRegistrar {
       // storedClientName,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId", {
-        // FIXME: figure out how to persist secure storage at reload
         secure: false,
       }),
       this.storageUtility.getForUser(options.sessionId, "clientSecret", {
-        // FIXME: figure out how to persist secure storage at reload
         secure: false,
       }),
       // this.storageUtility.getForUser(options.sessionId, "clientName", {

@@ -22,20 +22,24 @@
 // Required by TSyringe:
 import "reflect-metadata";
 import {
-  StorageUtilityGetResponse,
+  StorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
+import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import { IssuerConfigFetcherMock } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
-import { ClientRegistrarMock } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
+import { mockDefaultClientRegistrar } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
+import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
+
+jest.mock("@inrupt/oidc-client-ext");
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
     storageUtility: StorageUtilityMock,
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: IssuerConfigFetcherMock,
-    clientRegistrar: ClientRegistrarMock,
+    clientRegistrar: mockDefaultClientRegistrar(),
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -64,10 +68,20 @@ describe("OidcLoginHandler", () => {
 
   it("should lookup client ID if not provided", async () => {
     const actualHandler = defaultMocks.oidcHandler;
-    const handler = getInitialisedHandler({ oidcHandler: actualHandler });
+    const mockedStorage = new StorageUtility(
+      mockStorage({}),
+      mockStorage({
+        "solidClientAuthenticationUser:mySession": {
+          clientId: "https://some.app/registration",
+        },
+      })
+    );
+    const handler = getInitialisedHandler({
+      oidcHandler: actualHandler,
+      storageUtility: mockedStorage,
+      clientRegistrar: new ClientRegistrar(mockedStorage),
+    });
 
-    // If no 'clientId' passed in, we expect it to be looked up in storage
-    // (which our test setup does).
     await handler.handle({
       sessionId: "mySession",
       oidcIssuer: "https://arbitrary.url",
@@ -78,46 +92,28 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
-    expect(calledWith.client.clientId).toEqual(StorageUtilityGetResponse);
+    expect(calledWith.client.clientId).toEqual("https://some.app/registration");
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
-    // Override our default mock storage utility to deliberately return nothing.
-    let savedValue: Record<string, string> = {};
-    const NothingStoredMock = {
-      ...StorageUtilityMock,
-      getForUser: async (
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        userId: string,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        key: string,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        options?: { errorIfNull?: boolean; secure?: boolean }
-      ) => undefined,
-
-      // We expect only one call to our storage, so save whatever was set in a
-      // single local variable.
-      setForUser: async (
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        userId: string,
-        values: Record<string, string>,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        options?: { secure?: boolean }
-      ) => {
-        savedValue = values;
-      },
-    };
-
-    const actualHandler = defaultMocks.oidcHandler;
-    const actualRegistrar = defaultMocks.clientRegistrar;
-    const handler = getInitialisedHandler({
-      oidcHandler: actualHandler,
-      storageUtility: NothingStoredMock,
-      clientRegistrar: actualRegistrar,
+    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext");
+    mockedOidcModule.registerClient = jest.fn().mockResolvedValue({
+      clientId: "some dynamically registered ID",
+      clientSecret: "some dynamically registered secret",
     });
 
-    // We're not providing a client ID here (and we've explicitly cleared our
-    // storage above), so we expect this call to use DCR to get a client ID...
+    const mockedEmptyStorage = new StorageUtility(
+      mockStorage({}),
+      mockStorage({})
+    );
+
+    const actualHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({
+      oidcHandler: actualHandler,
+      storageUtility: mockedEmptyStorage,
+      clientRegistrar: new ClientRegistrar(mockedEmptyStorage),
+    });
+
     await handler.handle({
       sessionId: "mySession",
       oidcIssuer: "https://arbitrary.url",
@@ -125,14 +121,63 @@ describe("OidcLoginHandler", () => {
       tokenType: "DPoP",
     });
 
-    expect(actualHandler.handle.mock.calls).toHaveLength(1);
-    expect(actualRegistrar.getClient.mock.calls).toHaveLength(1);
+    expect(mockedOidcModule.registerClient).toHaveBeenCalled();
+  });
 
-    // Get the response from the expected mocked DCR call, and ensure it matches
-    // the value we expect to have been stored in our storage.
-    const registrarResult = await actualRegistrar.getClient.mock.results[0]
-      .value;
-    expect(registrarResult.clientId).toEqual(savedValue.clientId);
+  it("should save client ID if given one as an input option", async () => {
+    const actualStorage = new StorageUtility(mockStorage({}), mockStorage({}));
+    const handler = getInitialisedHandler({
+      storageUtility: actualStorage,
+    });
+
+    const inputClientId = "coolApp";
+
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      clientId: inputClientId,
+      tokenType: "DPoP",
+    });
+
+    const storedClientId = await actualStorage.getForUser(
+      "mySession",
+      "clientId"
+    );
+    expect(storedClientId).toEqual(inputClientId);
+  });
+
+  it("should save client ID, secret and name if given as input options", async () => {
+    const actualStorage = new StorageUtility(mockStorage({}), mockStorage({}));
+    const handler = getInitialisedHandler({
+      storageUtility: actualStorage,
+    });
+
+    const inputClientId = "coolApp";
+    const inputClientSecret = "Top Secret!";
+    const inputClientName = "The coolest app around";
+
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      clientId: inputClientId,
+      clientSecret: inputClientSecret,
+      clientName: inputClientName,
+      tokenType: "DPoP",
+    });
+
+    expect(await actualStorage.getForUser("mySession", "clientId")).toEqual(
+      inputClientId
+    );
+
+    expect(await actualStorage.getForUser("mySession", "clientSecret")).toEqual(
+      inputClientSecret
+    );
+
+    expect(await actualStorage.getForUser("mySession", "clientName")).toEqual(
+      inputClientName
+    );
   });
 
   it("should throw an error when called without an issuer", async () => {
