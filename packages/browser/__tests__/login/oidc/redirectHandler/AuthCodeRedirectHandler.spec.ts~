@@ -144,8 +144,7 @@ const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
 };
 
 /**
- * TODO: FIXME: Suggested improvement from Nic - just recording here for future
- * reference:
+ * Suggested improvement from Nic - just recording here for future reference:
 
  I really don't like tests results depending on the value of a global variable,
  that may introduce many side-effects. Now that I'm more familiar with jest than
