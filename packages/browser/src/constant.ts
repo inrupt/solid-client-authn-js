@@ -21,6 +21,6 @@
 
 import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
 
-export const KEY_CURRENT_ISSUER = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentIssuer`;
+export const KEY_CURRENT_SESSION = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentSession`;
 
 export const KEY_CURRENT_URL = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentUrl`;

@@ -139,9 +139,17 @@ export class SessionInfoManager implements ISessionInfoManager {
     const webId = await this.storageUtility.getForUser(sessionId, "webId", {
       secure: true,
     });
+    const clientId = await this.storageUtility.getForUser(
+      sessionId,
+      "clientId",
+      {
+        secure: false,
+      }
+    );
     const idToken = await this.storageUtility.getForUser(sessionId, "idToken", {
       secure: false,
     });
+
     const refreshToken = await this.storageUtility.getForUser(
       sessionId,
       "refreshToken",
@@ -160,6 +168,7 @@ export class SessionInfoManager implements ISessionInfoManager {
       idToken,
       refreshToken,
       issuer,
+      clientAppId: clientId,
     };
   }
 

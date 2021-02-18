@@ -19,18 +19,28 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import ClientAuthentication from "../ClientAuthentication";
-import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
-import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";
-import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
-import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
-import { SessionInfoManagerMock } from "../sessionInfo/__mocks__/SessionInfoManager";
+export class LocalStorageMock {
+  public store: {
+    [key: string]: string;
+  };
 
-export const mockClientAuthentication = (): ClientAuthentication =>
-  new ClientAuthentication(
-    LoginHandlerMock,
-    RedirectHandlerMock,
-    LogoutHandlerMock,
-    SessionInfoManagerMock,
-    IssuerConfigFetcherMock
-  );
+  constructor(store?: Record<string, string>) {
+    this.store = store ?? {};
+  }
+
+  public clear(): void {
+    this.store = {};
+  }
+
+  public getItem(key: string): string | null {
+    return this.store[key] || null;
+  }
+
+  public setItem(key: string, value: string): void {
+    this.store[key] = value.toString();
+  }
+
+  public removeItem(key: string): void {
+    delete this.store[key];
+  }
+}
