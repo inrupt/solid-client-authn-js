@@ -141,7 +141,7 @@ describe("OidcLoginHandler", () => {
     });
 
     const storedClientId = await actualStorage.getForUser(
-      "clientApplicationRegistrationInfo",
+      "mySession",
       "clientId"
     );
     expect(storedClientId).toEqual(inputClientId);
@@ -167,26 +167,17 @@ describe("OidcLoginHandler", () => {
       tokenType: "DPoP",
     });
 
-    expect(
-      await actualStorage.getForUser(
-        "clientApplicationRegistrationInfo",
-        "clientId"
-      )
-    ).toEqual(inputClientId);
+    expect(await actualStorage.getForUser("mySession", "clientId")).toEqual(
+      inputClientId
+    );
 
-    expect(
-      await actualStorage.getForUser(
-        "clientApplicationRegistrationInfo",
-        "clientSecret"
-      )
-    ).toEqual(inputClientSecret);
+    expect(await actualStorage.getForUser("mySession", "clientSecret")).toEqual(
+      inputClientSecret
+    );
 
-    expect(
-      await actualStorage.getForUser(
-        "clientApplicationRegistrationInfo",
-        "clientName"
-      )
-    ).toEqual(inputClientName);
+    expect(await actualStorage.getForUser("mySession", "clientName")).toEqual(
+      inputClientName
+    );
   });
 
   it("should throw an error when called without an issuer", async () => {

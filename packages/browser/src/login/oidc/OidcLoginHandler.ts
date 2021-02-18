@@ -125,12 +125,6 @@ export default class OidcLoginHandler implements ILoginHandler {
       );
     }
 
-    await this.storageUtility.setForUser("clientApplicationRegistrationInfo", {
-      clientId: dynamicClientRegistration.clientId,
-      clientSecret: dynamicClientRegistration.clientSecret as string,
-      clientName: dynamicClientRegistration.clientName as string,
-    });
-
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
       issuer: options.oidcIssuer,
