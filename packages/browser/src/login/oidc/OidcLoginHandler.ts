@@ -89,7 +89,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       );
     }
 
-    // Fetch OpenId Config
+    // Fetch issuer config.
     const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
       options.oidcIssuer
     );
@@ -101,39 +101,28 @@ export default class OidcLoginHandler implements ILoginHandler {
         clientSecret: options.clientSecret,
         clientName: options.clientName,
       };
-    } else {
-      const clientId = await this.storageUtility.getForUser(
-        "clientApplicationRegistrationInfo",
-        "clientId"
-      );
-
-      if (clientId) {
-        dynamicClientRegistration = {
-          clientId,
-          clientSecret: await this.storageUtility.getForUser(
-            "clientApplicationRegistrationInfo",
-            "clientSecret"
-          ),
-          clientName: options.clientName,
-        };
-      } else {
-        dynamicClientRegistration = await this.clientRegistrar.getClient(
-          {
-            sessionId: options.sessionId,
-            clientName: options.clientName,
-            redirectUrl: options.redirectUrl,
-          },
-          issuerConfig
-        );
-
-        await this.storageUtility.setForUser(
-          "clientApplicationRegistrationInfo",
-          {
-            clientId: dynamicClientRegistration.clientId,
-            clientSecret: dynamicClientRegistration.clientSecret as string,
-          }
-        );
+      await this.storageUtility.setForUser(options.sessionId, {
+        clientId: options.clientId,
+      });
+      if (options.clientSecret) {
+        await this.storageUtility.setForUser(options.sessionId, {
+          clientSecret: options.clientSecret,
+        });
       }
+      if (options.clientName) {
+        await this.storageUtility.setForUser(options.sessionId, {
+          clientName: options.clientName,
+        });
+      }
+    } else {
+      dynamicClientRegistration = await this.clientRegistrar.getClient(
+        {
+          sessionId: options.sessionId,
+          clientName: options.clientName,
+          redirectUrl: options.redirectUrl,
+        },
+        issuerConfig
+      );
     }
 
     // Construct OIDC Options
