@@ -54,14 +54,9 @@ export interface ISessionOptions {
 }
 
 async function silentlyAuthenticate(
-  sessionId: string | null,
+  sessionId: string,
   clientAuthn: ClientAuthentication
 ) {
-  if (sessionId === null) {
-    // If there is no current session defined, there is no ID token, so silent
-    // authentication cannot happen.
-    return;
-  }
   // Check if we have an ID Token in storage - if we do then we may be
   // currently logged in, and the user has refreshed their browser page. In
   // this case, it can be really useful to save the user's current browser
@@ -74,7 +69,6 @@ async function silentlyAuthenticate(
     window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
   }
 }
-
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
@@ -265,13 +259,16 @@ export class Session extends EventEmitter {
       }
     } else {
       // Silent authentication happens after a refresh, which means there are no
-      // OAuth parames in the current location IRI. It can only succeed if a session
+      // OAuth params in the current location IRI. It can only succeed if a session
       // was previously logged in, in which case its ID will be present with a known
       // identifier in local storage.
-      await silentlyAuthenticate(
-        window.localStorage.getItem(KEY_CURRENT_SESSION),
-        this.clientAuthentication
-      );
+      // Check if we have a locally stored session ID...
+      const storedSessionID = window.localStorage.getItem(KEY_CURRENT_SESSION);
+      // ...if not, then there is no ID token, and so silent authentication cannot happen, but
+      // if we do have a stored session ID, attempt to re-authenticate now silently.
+      if (storedSessionID !== null) {
+        await silentlyAuthenticate(storedSessionID, this.clientAuthentication);
+      }
     }
     this.tokenRequestInProgress = false;
     return sessionInfo;
