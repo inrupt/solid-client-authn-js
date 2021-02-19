@@ -109,6 +109,7 @@ describe("SessionInfoManager", () => {
           [`solidClientAuthenticationUser:${sessionId}`]: {
             clientId: "https://some.app/registration",
             idToken: "some.id.token",
+            redirectUrl: "https://some.redirect/url",
           },
         })
       );
@@ -125,6 +126,7 @@ describe("SessionInfoManager", () => {
         issuer: "https://some.issuer",
         idToken: "some.id.token",
         refreshToken: "some refresh token",
+        redirectUrl: "https://some.redirect/url",
       });
     });
 
@@ -151,6 +153,7 @@ describe("SessionInfoManager", () => {
         issuer: undefined,
         idToken: undefined,
         refreshToken: undefined,
+        redirectUrl: undefined,
       });
     });
 

@@ -150,6 +150,14 @@ export class SessionInfoManager implements ISessionInfoManager {
       secure: false,
     });
 
+    const redirectUrl = await this.storageUtility.getForUser(
+      sessionId,
+      "redirectUrl",
+      {
+        secure: false,
+      }
+    );
+
     const refreshToken = await this.storageUtility.getForUser(
       sessionId,
       "refreshToken",
@@ -165,6 +173,7 @@ export class SessionInfoManager implements ISessionInfoManager {
       sessionId,
       webId,
       isLoggedIn: isLoggedIn === "true",
+      redirectUrl,
       idToken,
       refreshToken,
       issuer,

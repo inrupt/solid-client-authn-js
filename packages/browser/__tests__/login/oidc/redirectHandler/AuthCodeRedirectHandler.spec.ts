@@ -27,6 +27,7 @@ import {
   IClientRegistrar,
   IClientRegistrarOptions,
   IIssuerConfigFetcher,
+  USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
 import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
@@ -355,12 +356,6 @@ describe("AuthCodeRedirectHandler", () => {
         // @ts-ignore
         header
       ).toMatch(/^Bearer some token$/);
-
-      // Also check that our issuer was stored correctly (specifically in
-      // 'localStorage').
-      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
-        "mySession"
-      );
     });
 
     it("returns an authenticated DPoP fetch if requested", async () => {
@@ -405,11 +400,53 @@ describe("AuthCodeRedirectHandler", () => {
         // @ts-ignore
         header
       ).toMatch(/^DPoP .+$/);
-      // Also check that our issuer was stored correctly (specifically in
-      // 'localStorage').
+    });
+
+    it("saves session information in storage on successful login", async () => {
+      /* eslint-disable  @typescript-eslint/no-explicit-any */
+      (window as any).localStorage = new LocalStorageMock();
+
+      window.fetch = jest.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolve(
+            new Response("", {
+              status: 200,
+            })
+          );
+        })
+      ) as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
+
+      const mockedStorage = mockStorageUtility({
+        [`${USER_SESSION_PREFIX}:oauth2StateValue`]: {
+          sessionId: "mySession",
+        },
+        [`${USER_SESSION_PREFIX}:mySession`]: {
+          dpop: "true",
+          issuer: mockIssuer().issuer.toString(),
+          codeVerifier: "some code verifier",
+          redirectUri: "https://some.redirect.uri",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+      await authCodeRedirectHandler.handle(
+        "https://coolsite.com/redirect?code=someCode&state=oauth2StateValue"
+      );
+      // Check that the current session is stored correctly __specifically__ in
+      // 'localStorage'.
       expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
         "mySession"
       );
+      await expect(
+        mockedStorage.getForUser("mySession", "redirectUrl", {
+          secure: false,
+        })
+      ).resolves.toStrictEqual("https://coolsite.com/redirect");
     });
 
     it("returns the expiration time normalised to the current time", async () => {
@@ -495,12 +532,6 @@ describe("AuthCodeRedirectHandler", () => {
         },
       },
     });
-
-    // Also check that our issuer was stored correctly (specifically in
-    // 'localStorage').
-    expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
-      "mySession"
-    );
   });
 
   it("store nothing if the resource server has no session endpoint", async () => {

@@ -74,4 +74,9 @@ export interface ISessionInternalInfo {
    * The OIDC issuer that issued the tokens authenticating the session.
    */
   issuer?: string;
+
+  /**
+   * The redirect URL registered when initially logging the session in.
+   */
+  redirectUrl?: string;
 }
