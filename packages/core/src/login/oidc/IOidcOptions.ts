@@ -50,7 +50,7 @@ export interface IOidcOptions {
    */
   prompt?: string;
   /**
-   * True if a dpop compatible auth_token should be requested.
+   * True if a DPoP compatible auth_token should be requested.
    */
   dpop: boolean;
   /**

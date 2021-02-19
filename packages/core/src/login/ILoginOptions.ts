@@ -39,7 +39,10 @@ export default interface ILoginOptions extends ILoginInputOptions {
   // improvement really...
   sessionId: string;
   /**
-   * Specify wether the Solid Identity Provider may or may interact with the user.
+   * Specify whether the Solid Identity Provider may, or may not, interact with the user (for example,
+   * the normal login process **_requires_** human interaction for them to enter their credentials,
+   * but if a user simply refreshes the current page in their browser, we'll want to log them in again
+   * automatically, i.e., without prompting them to manually provide their credentials again).
    */
   prompt?: string;
   // Force the token type to be required (i.e. no longer optional).

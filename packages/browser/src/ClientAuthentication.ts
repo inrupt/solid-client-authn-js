@@ -72,7 +72,7 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions & {
       // TODO: the 'prompt' parameter shouldn't be exposed as part of the public API.
-      // This classe's login should take the internal IOidcOptions type as an
+      // This login function should take the internal IOidcOptions type as an
       // input, will be fixed later.
       prompt?: string;
     }

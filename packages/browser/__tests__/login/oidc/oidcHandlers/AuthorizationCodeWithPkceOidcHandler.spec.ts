@@ -133,7 +133,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       );
     });
 
-    it("supports silent authentication", async () => {
+    it("passes our the 'prompt' option down to our OIDC client library implementation", async () => {
       const oidcModule = mockOidcModule();
       const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
