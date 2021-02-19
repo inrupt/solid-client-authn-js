@@ -33,28 +33,35 @@ import { IClient } from "./IClient";
 /**
  * @hidden
  */
-export interface ICoreOidcOptions {
+export interface IOidcOptions {
+  /**
+   * The URL of the Solid Identity Provider.
+   */
   issuer: string;
+  /**
+   * The openid-configuration of the issuer.
+   */
   issuerConfiguration: IIssuerConfig;
   client: IClient;
   sessionId: string;
   refreshToken?: string;
-}
-
-/**
- * @hidden
- */
-export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
+  /**
+   * Specify whether the Solid Identity Provider may, or may not, interact with the user (for example,
+   * the normal login process **_requires_** human interaction for them to enter their credentials,
+   * but if a user simply refreshes the current page in their browser, we'll want to log them in again
+   * automatically, i.e., without prompting them to manually provide their credentials again).
+   */
+  prompt?: string;
+  /**
+   * True if a DPoP compatible auth_token should be requested.
+   */
   dpop: boolean;
+  /**
+   * The URL to which the user should be redirected after logging in the Solid
+   * Identity Provider and authorizing the app to access data in their stead.
+   */
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
 }
 
-/**
- * @issuer The URL of the IDP
- * @dpop True if a dpop compatible auth_token should be fetched
- * @redirectUrl The URL to which the user should be redirected after authorizing
- * @issuerConfiguration The openid-configuration of the issuer
- */
-type IOidcOptions = IAccessTokenOidcOptions;
 export default IOidcOptions;
