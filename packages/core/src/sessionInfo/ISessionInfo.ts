@@ -76,7 +76,7 @@ export interface ISessionInternalInfo {
   issuer?: string;
 
   /**
-   * The redirect IRI registered when initially logging the session in.
+   * The redirect URL registered when initially logging the session in.
    */
   redirectUrl?: string;
 }
