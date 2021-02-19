@@ -46,7 +46,10 @@ export interface IOidcOptions {
   sessionId: string;
   refreshToken?: string;
   /**
-   * Specify wether the Solid Identity Provider may or may interact with the user.
+   * Specify whether the Solid Identity Provider may, or may not, interact with the user (for example,
+   * the normal login process **_requires_** human interaction for them to enter their credentials,
+   * but if a user simply refreshes the current page in their browser, we'll want to log them in again
+   * automatically, i.e., without prompting them to manually provide their credentials again).
    */
   prompt?: string;
   /**
@@ -54,7 +57,8 @@ export interface IOidcOptions {
    */
   dpop: boolean;
   /**
-   * The URL to which the user should be redirected after authorizing.
+   * The URL to which the user should be redirected after logging in the Solid
+   * Identity Provider and authorizing the app to access data in their stead.
    */
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
