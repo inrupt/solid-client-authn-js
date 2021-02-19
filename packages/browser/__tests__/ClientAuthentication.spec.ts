@@ -107,7 +107,6 @@ const mockSessionStorage = async (
     mockStorage({
       [`${USER_SESSION_PREFIX}:${sessionId}`]: {
         isLoggedIn: "true",
-        issuer: options.issuer,
         webId: "https://my.pod/profile#me",
       },
     }),
@@ -117,6 +116,7 @@ const mockSessionStorage = async (
           algorithm: "ES256",
         }),
         clientId: options.clientId,
+        issuer: options.issuer,
       },
     })
   );

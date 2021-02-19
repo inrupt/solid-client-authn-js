@@ -102,7 +102,6 @@ describe("SessionInfoManager", () => {
             webId,
             isLoggedIn: "true",
             refreshToken: "some refresh token",
-            issuer: "https://some.issuer",
           },
         }),
         mockStorage({
@@ -111,6 +110,7 @@ describe("SessionInfoManager", () => {
             clientSecret: "some client secret",
             idToken: "some.id.token",
             redirectUrl: "https://some.redirect/url",
+            issuer: "https://some.issuer",
           },
         })
       );
@@ -173,16 +173,19 @@ describe("SessionInfoManager", () => {
 
       const webId = "https://zoomies.com/commanderCool#me";
 
-      const storageMock = mockStorageUtility(
-        {
+      const storageMock = new StorageUtility(
+        mockStorage({
           [`solidClientAuthenticationUser:${sessionId}`]: {
             webId,
             isLoggedIn: "true",
             refreshToken: "someToken",
+          },
+        }),
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
             issuer: "https://my.idp",
           },
-        },
-        true
+        })
       );
 
       const sessionManager = getSessionInfoManager({

@@ -132,13 +132,11 @@ export class SessionInfoManager implements ISessionInfoManager {
         secure: true,
       }
     );
-    if (isLoggedIn === undefined) {
-      return undefined;
-    }
 
     const webId = await this.storageUtility.getForUser(sessionId, "webId", {
       secure: true,
     });
+
     const clientId = await this.storageUtility.getForUser(
       sessionId,
       "clientId",
@@ -174,9 +172,20 @@ export class SessionInfoManager implements ISessionInfoManager {
         secure: true,
       }
     );
+
     const issuer = await this.storageUtility.getForUser(sessionId, "issuer", {
-      secure: true,
+      secure: false,
     });
+
+    if (
+      clientId === undefined &&
+      idToken === undefined &&
+      isLoggedIn === undefined &&
+      webId === undefined &&
+      refreshToken === undefined
+    ) {
+      return undefined;
+    }
 
     return {
       sessionId,
