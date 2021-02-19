@@ -29,27 +29,29 @@ import {
   IRedirectorOptions,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { SigninRequest } from "@inrupt/oidc-client-ext";
 import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 
+jest.mock("@inrupt/oidc-client-ext");
+
 const expectedSigninRedirectUrl = "https://test";
-jest.mock("@inrupt/oidc-client-ext", () => {
-  return {
-    OidcClient: jest.fn().mockImplementation(() => {
-      return {
-        createSigninRequest: (): Promise<SigninRequest> =>
-          Promise.resolve({
-            url: expectedSigninRedirectUrl,
-            state: "test state",
-          }),
-      };
+
+const mockOidcModule = (
+  url: string = expectedSigninRedirectUrl,
+  state = "test state"
+) => {
+  const oidcModule = jest.requireMock("@inrupt/oidc-client-ext");
+  oidcModule.OidcClient = jest.fn().mockReturnValue({
+    createSigninRequest: jest.fn().mockResolvedValue({
+      url,
+      state,
     }),
-  };
-});
+  });
+  return oidcModule;
+};
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
@@ -84,6 +86,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
   describe("handle", () => {
     it("swallows any redirector exceptions", async () => {
+      mockOidcModule();
       const redirectorThatThrowsMock: jest.Mocked<IRedirector> = {
         redirect: jest.fn(
           (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
@@ -112,6 +115,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
     });
 
     it("handles login properly with PKCE", async () => {
+      mockOidcModule();
       const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
@@ -129,7 +133,27 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       );
     });
 
+    it("supports silent authentication", async () => {
+      const oidcModule = mockOidcModule();
+      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+      const oidcOptions: IOidcOptions = {
+        prompt: "none",
+        ...standardOidcOptions,
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["authorization_code"],
+        },
+      };
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+      expect(oidcModule.OidcClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: "none",
+        })
+      );
+    });
+
     it("handles login when a client secret is present", async () => {
+      mockOidcModule();
       const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,

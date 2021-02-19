@@ -33,28 +33,31 @@ import { IClient } from "./IClient";
 /**
  * @hidden
  */
-export interface ICoreOidcOptions {
+export interface IOidcOptions {
+  /**
+   * The URL of the Solid Identity Provider.
+   */
   issuer: string;
+  /**
+   * The openid-configuration of the issuer.
+   */
   issuerConfiguration: IIssuerConfig;
   client: IClient;
   sessionId: string;
   refreshToken?: string;
-}
-
-/**
- * @hidden
- */
-export interface IAccessTokenOidcOptions extends ICoreOidcOptions {
+  /**
+   * Specify wether the Solid Identity Provider may or may interact with the user.
+   */
+  prompt?: string;
+  /**
+   * True if a dpop compatible auth_token should be requested.
+   */
   dpop: boolean;
+  /**
+   * The URL to which the user should be redirected after authorizing.
+   */
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
 }
 
-/**
- * @issuer The URL of the IDP
- * @dpop True if a dpop compatible auth_token should be fetched
- * @redirectUrl The URL to which the user should be redirected after authorizing
- * @issuerConfiguration The openid-configuration of the issuer
- */
-type IOidcOptions = IAccessTokenOidcOptions;
 export default IOidcOptions;

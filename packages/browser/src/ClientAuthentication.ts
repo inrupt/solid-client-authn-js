@@ -70,7 +70,12 @@ export default class ClientAuthentication {
   // Isn't Javascript fun?
   login = async (
     sessionId: string,
-    options: ILoginInputOptions
+    options: ILoginInputOptions & {
+      // TODO: the 'prompt' parameter shouldn't be exposed as part of the public API.
+      // This classe's login should take the internal IOidcOptions type as an
+      // input, will be fixed later.
+      prompt?: string;
+    }
   ): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
@@ -98,6 +103,7 @@ export default class ClientAuthentication {
       handleRedirect: options.handleRedirect,
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
+      prompt: options.prompt,
     });
   };
 

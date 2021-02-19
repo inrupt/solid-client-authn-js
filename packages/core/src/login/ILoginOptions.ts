@@ -38,7 +38,10 @@ export default interface ILoginOptions extends ILoginInputOptions {
   // 'bundling' into this options interface), but it wouldn't be a significant
   // improvement really...
   sessionId: string;
-
+  /**
+   * Specify wether the Solid Identity Provider may or may interact with the user.
+   */
+  prompt?: string;
   // Force the token type to be required (i.e. no longer optional).
   tokenType: "DPoP" | "Bearer";
 }
