@@ -23,6 +23,13 @@ the data is collected from.
 
 ### Bugfix
 
+#### browser
+
+- Refreshing the page no longer logs the session out, no matter what Resource Server
+the data is collected from. 
+
+### Bugfix
+
 #### Browser
 
 - When a session expires, the session is now marked as logged out, and a 
