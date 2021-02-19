@@ -135,6 +135,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       client: dynamicClientRegistration,
       sessionId: options.sessionId,
       handleRedirect: options.handleRedirect,
+      prompt: options.prompt,
     };
 
     // Call proper OIDC Handler

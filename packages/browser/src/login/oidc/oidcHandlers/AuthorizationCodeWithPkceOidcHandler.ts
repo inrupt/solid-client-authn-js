@@ -70,13 +70,14 @@ export default class AuthorizationCodeWithPkceOidcHandler
       //  https://github.com/solid/specification/issues/203, i.e. the 'webid'
       //  scope does not yet appear in the Solid specification (it's not even
       //  mentioned in the WebID-OIDC spec).
-      scope: "openid webid offline_access",
+      scope: "openid webid",
       filterProtocolClaims: true,
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the
       // profile referenced by the WebId.
       loadUserInfo: false,
       code_verifier: true,
+      prompt: oidcLoginOptions.prompt,
     };
     /* eslint-enable camelcase */
 
