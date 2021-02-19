@@ -233,7 +233,6 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     await this.storageUtility.setForUser(
       storedSessionId,
       {
-        idToken: tokens.idToken,
         // TODO: We need a PR to oidc-client-js to add parsing of the
         //  refresh_token from the redirect URL.
         refreshToken:
@@ -247,6 +246,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       storedSessionId,
       {
         redirectUrl: appendToUrlPathname(url.origin, url.pathname),
+        idToken: tokens.idToken,
       },
       {
         secure: false,
