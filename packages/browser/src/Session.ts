@@ -32,6 +32,7 @@ import {
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
+import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
 
 export interface ISessionOptions {
   /**
@@ -50,6 +51,28 @@ export interface ISessionOptions {
    * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
    */
   clientAuthentication: ClientAuthentication;
+}
+
+async function silentlyAuthenticate(
+  sessionId: string | null,
+  clientAuthn: ClientAuthentication
+) {
+  if (sessionId === null) {
+    // If there is no current session defined, there is no ID token, so silent
+    // authentication cannot happen.
+    return;
+  }
+  // Check if we have an ID Token in storage - if we do then we may be
+  // currently logged in, and the user has refreshed their browser page. In
+  // this case, it can be really useful to save the user's current browser
+  // location, so that we can restore that location after we complete the
+  // entire re-login-the-user-silently-flow (e.g., if the user was on a
+  // specific 'page' of a Single Page App, then presumably they'll expect to
+  // be brought back to exactly that same 'page' after the full refresh).
+  const storedSessionInfo = await clientAuthn.getSessionInfo(sessionId);
+  if (storedSessionInfo?.idToken !== undefined) {
+    window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
+  }
 }
 
 /**
@@ -159,6 +182,7 @@ export class Session extends EventEmitter {
     if (this.info.isLoggedIn) {
       return this.info;
     }
+
     if (this.tokenRequestInProgress) {
       return undefined;
     }
@@ -223,7 +247,8 @@ export class Session extends EventEmitter {
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url
     );
-    if (sessionInfo) {
+
+    if (sessionInfo !== undefined) {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
       this.info.sessionId = sessionInfo.sessionId;
@@ -238,6 +263,15 @@ export class Session extends EventEmitter {
           await this.logout();
         }, sessionInfo.expirationDate - Date.now());
       }
+    } else {
+      // Silent authentication happens after a refresh, which means there are no
+      // OAuth parames in the current location IRI. It can only succeed if a session
+      // was previously logged in, in which case its ID will be present with a known
+      // identifier in local storage.
+      await silentlyAuthenticate(
+        window.localStorage.getItem(KEY_CURRENT_SESSION),
+        this.clientAuthentication
+      );
     }
     this.tokenRequestInProgress = false;
     return sessionInfo;

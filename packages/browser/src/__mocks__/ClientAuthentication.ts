@@ -19,6 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {
+  IIssuerConfigFetcher,
+  ILoginHandler,
+  ILogoutHandler,
+  IRedirectHandler,
+  ISessionInfoManager,
+} from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "../ClientAuthentication";
 import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";
@@ -26,11 +33,21 @@ import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
 import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
 import { SessionInfoManagerMock } from "../sessionInfo/__mocks__/SessionInfoManager";
 
-export const mockClientAuthentication = (): ClientAuthentication =>
+type ClientAuthnDependencies = {
+  loginhandler: ILoginHandler;
+  redirectHandler: IRedirectHandler;
+  logoutHandler: ILogoutHandler;
+  sessionInfoManager: ISessionInfoManager;
+  issuerConfigFetcher: IIssuerConfigFetcher;
+};
+
+export const mockClientAuthentication = (
+  dependencies?: Partial<ClientAuthnDependencies>
+): ClientAuthentication =>
   new ClientAuthentication(
-    LoginHandlerMock,
-    RedirectHandlerMock,
-    LogoutHandlerMock,
-    SessionInfoManagerMock,
-    IssuerConfigFetcherMock
+    dependencies?.loginhandler ?? LoginHandlerMock,
+    dependencies?.redirectHandler ?? RedirectHandlerMock,
+    dependencies?.logoutHandler ?? LogoutHandlerMock,
+    dependencies?.sessionInfoManager ?? SessionInfoManagerMock,
+    dependencies?.issuerConfigFetcher ?? IssuerConfigFetcherMock
   );
