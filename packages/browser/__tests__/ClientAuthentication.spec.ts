@@ -40,7 +40,7 @@ import {
 import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "../src/ClientAuthentication";
-import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "../src/constant";
+import { KEY_CURRENT_SESSION } from "../src/constant";
 import {
   mockDefaultIssuerConfigFetcher,
   mockIssuerConfigFetcher,
@@ -120,6 +120,17 @@ const mockSessionStorage = async (
       },
     })
   );
+};
+
+const mockLocalStorage = (stored: Record<string, string>) => {
+  // Kinda weird: `(window as any).localStorage = new LocalStorageMock(stored)` does
+  // not work as intended unless the following snippet is present in the test suite.
+  // On the other hand, only ever mocking localstorage with the following snippet
+  // works well.
+  Object.defineProperty(window, "localStorage", {
+    value: new LocalStorageMock(stored),
+    writable: true,
+  });
 };
 
 describe("ClientAuthentication", () => {
@@ -349,62 +360,6 @@ describe("ClientAuthentication", () => {
         "https://coolapp.com/redirect?someQuery=someValue"
       );
     });
-
-    it("saves current window location if we have stored ID Token", async () => {
-      const existingLocalStorage = window.localStorage;
-
-      const storageData: Record<string, string> = {};
-      const localStorageMock = {
-        getItem: jest.fn((key) => JSON.stringify(storageData[key])),
-        setItem: jest.fn((key, value) => {
-          storageData[key] = value;
-        }),
-      };
-
-      Object.defineProperty(window, "localStorage", {
-        value: localStorageMock,
-        writable: true,
-      });
-
-      try {
-        // eslint-disable-next-line no-restricted-globals
-        history.replaceState = jest.fn();
-
-        const clientAuthn = getClientAuthentication({
-          // Awkward here - we need to be logged in (which is state stored in
-          // 'secure' storage), and have an ID Token (which is stored in
-          // 'insecure' storage).
-          sessionInfoManager: mockSessionInfoManager(
-            new StorageUtility(
-              mockStorage({
-                [`${USER_SESSION_PREFIX}:global`]: {
-                  isLoggedIn: "true",
-                },
-              }),
-              mockStorage({
-                "solidClientAuthenticationUser:global": {
-                  idToken: "value doesn't matter",
-                },
-              })
-            )
-          ),
-        });
-
-        await clientAuthn.handleIncomingRedirect("https://ex.com/redirect");
-
-        // In unit tests, the window location with just be localhost. All we're
-        // really testing here is that a location was persisted (so we could
-        // change this assertion to just ensure a value exists and is non-empty.
-        expect(window.localStorage.getItem(KEY_CURRENT_URL)).toContain(
-          "http://localhost/"
-        );
-      } finally {
-        // Remove the mocked method:
-        Object.defineProperty(window, "localStorage", {
-          value: existingLocalStorage,
-        });
-      }
-    });
   });
 
   describe("getCurrentIssuer", () => {
@@ -420,7 +375,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the current session has no stored issuer", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
 
@@ -446,7 +401,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the current session has no stored ID token", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
 
@@ -472,7 +427,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the current session has no stored client ID", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
       const mockedStorage = new StorageUtility(
@@ -497,7 +452,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the issuer does not have a JWKS", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
       const mockedIssuerConfig = mockIssuerConfigFetcher({} as IIssuerConfig);
@@ -514,7 +469,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the issuer's JWKS isn't available", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
       const mockedIssuerConfig = mockIssuerConfigFetcher({
@@ -533,7 +488,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the current issuer doesn't match the ID token's", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
       const mockedIssuerConfig = mockIssuerConfigFetcher({
@@ -565,7 +520,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the current client ID doesn't match the ID token audience", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
       const mockedIssuerConfig = mockIssuerConfigFetcher({
@@ -597,7 +552,7 @@ describe("ClientAuthentication", () => {
 
     it("returns null if the ID token isn't signed with the keys of the issuer", async () => {
       const sessionId = "mySession";
-      (window as any).localStorage = new LocalStorageMock({
+      mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
       const mockedIssuerConfig = mockIssuerConfigFetcher({
@@ -625,7 +580,7 @@ describe("ClientAuthentication", () => {
 
   it("returns the issuer if the ID token is verified", async () => {
     const sessionId = "mySession";
-    (window as any).localStorage = new LocalStorageMock({
+    mockLocalStorage({
       [KEY_CURRENT_SESSION]: sessionId,
     });
     const mockedIssuerConfig = mockIssuerConfigFetcher({
