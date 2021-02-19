@@ -146,6 +146,15 @@ export class SessionInfoManager implements ISessionInfoManager {
         secure: false,
       }
     );
+
+    const clientSecret = await this.storageUtility.getForUser(
+      sessionId,
+      "clientSecret",
+      {
+        secure: false,
+      }
+    );
+
     const idToken = await this.storageUtility.getForUser(sessionId, "idToken", {
       secure: false,
     });
@@ -178,6 +187,7 @@ export class SessionInfoManager implements ISessionInfoManager {
       refreshToken,
       issuer,
       clientAppId: clientId,
+      clientAppSecret: clientSecret,
     };
   }
 

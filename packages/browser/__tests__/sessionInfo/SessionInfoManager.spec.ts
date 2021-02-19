@@ -108,6 +108,7 @@ describe("SessionInfoManager", () => {
         mockStorage({
           [`solidClientAuthenticationUser:${sessionId}`]: {
             clientId: "https://some.app/registration",
+            clientSecret: "some client secret",
             idToken: "some.id.token",
             redirectUrl: "https://some.redirect/url",
           },
@@ -123,6 +124,7 @@ describe("SessionInfoManager", () => {
         webId,
         isLoggedIn: true,
         clientAppId: "https://some.app/registration",
+        clientAppSecret: "some client secret",
         issuer: "https://some.issuer",
         idToken: "some.id.token",
         refreshToken: "some refresh token",
@@ -150,6 +152,7 @@ describe("SessionInfoManager", () => {
         webId: undefined,
         isLoggedIn: false,
         clientAppId: undefined,
+        clientAppSecret: undefined,
         issuer: undefined,
         idToken: undefined,
         refreshToken: undefined,

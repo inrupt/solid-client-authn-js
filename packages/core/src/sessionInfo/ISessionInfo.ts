@@ -79,4 +79,10 @@ export interface ISessionInternalInfo {
    * The redirect URL registered when initially logging the session in.
    */
   redirectUrl?: string;
+
+  /**
+   * For public clients, and Solid Identity Providers that do not support Client
+   * WebIDs, the client secret is still required at the token endpoint.
+   */
+  clientAppSecret?: string;
 }
