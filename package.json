@@ -55,7 +55,7 @@
     "pinst": "^2.1.4",
     "prettier": "2.2.1",
     "rollup": "^2.38.4",
-    "rollup-plugin-typescript2": "^0.29.0",
+    "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.3",
     "tsc-watch": "^4.2.9",
