@@ -47,6 +47,7 @@ import {
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
+import { appendToUrlPathname } from "../../../util/urlPath";
 
 export async function exchangeDpopToken(
   sessionId: string,
@@ -241,6 +242,15 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         isLoggedIn: "true",
       },
       { secure: true }
+    );
+    await this.storageUtility.setForUser(
+      storedSessionId,
+      {
+        redirectUrl: appendToUrlPathname(url.origin, url.pathname),
+      },
+      {
+        secure: false,
+      }
     );
 
     await setupResourceServerSession(
