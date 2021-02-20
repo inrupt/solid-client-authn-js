@@ -21,9 +21,16 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  IIssuerConfigFetcher,
+  mockStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
-import { IssuerConfigFetcherMock } from "./__mocks__/IssuerConfigFetcher";
+import {
+  IssuerConfigFetcherFetchConfigResponse,
+  IssuerConfigFetcherMock,
+  mockIssuerConfigFetcher,
+} from "./__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "./OidcLoginHandler";
 import {
   mockDefaultClient,
@@ -236,6 +243,31 @@ describe("OidcLoginHandler", () => {
       expect(oidcHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
           refreshToken: "some other refresh token",
+        })
+      );
+    });
+
+    it("should use the issuer's IRI from the fetched configuration rather than from the input options", async () => {
+      const actualHandler = defaultMocks.oidcHandler;
+      const issuerConfig = IssuerConfigFetcherFetchConfigResponse;
+      issuerConfig.issuer = "https://some.issuer/";
+      const handler = getInitialisedHandler({
+        issuerConfigFetcher: mockIssuerConfigFetcher(
+          issuerConfig
+        ) as jest.Mocked<IIssuerConfigFetcher>,
+        oidcHandler: actualHandler,
+      });
+      await handler.handle({
+        sessionId: "mySession",
+        oidcIssuer: "https://some.issuer",
+        redirectUrl: "https://app.com/redirect",
+        clientId: "coolApp",
+        tokenType: "DPoP",
+      });
+
+      expect(actualHandler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          issuer: "https://some.issuer/",
         })
       );
     });

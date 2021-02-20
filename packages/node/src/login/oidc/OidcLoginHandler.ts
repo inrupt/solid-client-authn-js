@@ -120,7 +120,7 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Construct OIDC Options
     const oidcOptions: IOidcOptions = {
-      issuer: options.oidcIssuer,
+      issuer: issuerConfig.issuer,
       // TODO: differentiate if DPoP should be true
       dpop: options.tokenType.toLowerCase() === "dpop",
       // TODO Cleanup to remove the type assertion
