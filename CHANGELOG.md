@@ -24,6 +24,8 @@ correct issuer, and that it contains some expected values.
   stored in storage, ready to be retrieved again from storage when the login
   flow redirects back to the client application (previously it was only being
   stored if DCR was invoked).
+- The issuer URL associated to the session is now necessarily the __canonical__
+  issuer's URL, instead of potentially including/missing a trailing slash.
 
 The following sections document changes that have been released already:
 
