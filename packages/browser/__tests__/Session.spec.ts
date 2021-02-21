@@ -596,12 +596,8 @@ describe("Session", () => {
         // location and history aren't optional on window, which makes TS complain
         // (rightfully) when we delete them. However, they are deleted on purpose
         // here just for testing.
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        delete window.location;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        delete window.history.replaceState;
+        delete (window as any).location;
+        delete (window as any).history.replaceState;
 
         window.location = {
           href: defaultLocation,
