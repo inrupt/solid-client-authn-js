@@ -57,22 +57,17 @@ async function silentlyAuthenticate(
   clientAuthn: ClientAuthentication
 ) {
   // Check if we have an ID Token in storage - if we do then we may be
-  // currently logged in, and the user has refreshed their browser page. In
-  // this case, it can be really useful to save the user's current browser
-  // location, so that we can restore that location after we complete the
-  // entire re-login-the-user-silently-flow (e.g., if the user was on a
-  // specific 'page' of a Single Page App, then presumably they'll expect to
-  // be brought back to exactly that same 'page' after the full refresh).
-  const storedSessionInfo = await clientAuthn.getSessionInfo(sessionId);
-  if (
-    storedSessionInfo === undefined ||
-    storedSessionInfo.idToken === undefined
-  ) {
-    return;
-  }
-  window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
+  // currently logged in, and the user has refreshed their browser page. The ID
+  // token is validated, and its issuer claim is extracted to know where silent
+  // authentication is possible.
   const issuer = await clientAuthn.getCurrentIssuer();
-  if (issuer !== null) {
+  const storedSessionInfo = await clientAuthn.getSessionInfo(sessionId);
+  if (issuer !== null && storedSessionInfo !== undefined) {
+    // It can be really useful to save the user's current browser location,
+    // so that we can restore it after completing the silent authentication
+    // on incoming redirect. This way, the user is eventually redirected back
+    // to the page they were on and not to the app's redirect page.
+    window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
     await clientAuthn.login(sessionId, {
       prompt: "none",
       oidcIssuer: issuer,
@@ -175,11 +170,6 @@ export class Session extends EventEmitter {
     this.emit("logout");
   };
 
-  fireSessionRestoreEvent = (): void => {
-    const storedCurrentUrl = localStorage.getItem(KEY_CURRENT_URL);
-    this.emit("sessionRestore", storedCurrentUrl);
-  };
-
   /**
    * Completes the login process by processing the information provided by the
    * Solid identity provider through redirect.
@@ -193,7 +183,6 @@ export class Session extends EventEmitter {
     url: string = window.location.href
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
-      this.fireSessionRestoreEvent();
       return this.info;
     }
 
@@ -210,9 +199,17 @@ export class Session extends EventEmitter {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
       this.info.sessionId = sessionInfo.sessionId;
-      // The login event can only be triggered **after** the user has been
-      // redirected from the IdP with access and ID tokens.
-      this.emit("login");
+      const currentUrl = window.localStorage.getItem(KEY_CURRENT_URL);
+      if (currentUrl === null) {
+        // The login event can only be triggered **after** the user has been
+        // redirected from the IdP with access and ID tokens.
+        this.emit("login");
+      } else {
+        // If an URL is stored in local storage, we are being logged in after a
+        // silent authentication.
+        window.localStorage.removeItem(KEY_CURRENT_URL);
+        this.emit("sessionRestore", currentUrl);
+      }
 
       if (typeof sessionInfo.expirationDate === "number") {
         setTimeout(async () => {

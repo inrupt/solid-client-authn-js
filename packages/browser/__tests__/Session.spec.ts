@@ -403,6 +403,9 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockResolvedValue(undefined);
+      clientAuthentication.getCurrentIssuer = jest
+        .fn()
+        .mockResolvedValue("https://some.issuer/");
 
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.redirect/url");
@@ -490,15 +493,14 @@ describe("Session", () => {
     it("calls the registered callback on login", async () => {
       const myCallback = jest.fn();
       const clientAuthentication = mockClientAuthentication();
-      clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => {
-          return {
-            isLoggedIn: true,
-            sessionId: "a session ID",
-            webId: "https://some.webid#them",
-          };
-        }
-      );
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockResolvedValue({
+          isLoggedIn: true,
+          sessionId: "a session ID",
+          webId: "https://some.webid#them",
+        });
+      mockLocalStorage({});
       const mySession = new Session({ clientAuthentication });
       mySession.onLogin(myCallback);
       await mySession.handleIncomingRedirect("https://some.url");
@@ -572,54 +574,40 @@ describe("Session", () => {
   });
 
   describe("onSessionRestore", () => {
-    // The `done` callback is used in order to make sure the callback passed to
-    // our event handler is called. If it is not, the test times out, which is why
-    // no additional assertion is required.
-    // eslint-disable-next-line jest/expect-expect, jest/no-done-callback
-    it("calls the registered callback on", async (done) => {
+    it("calls the registered callback on session restore", async () => {
       // Set our window's location to our test value.
-      const defaultLocation = "https://coolSite.com/myAppTestPage";
+      const defaultLocation = "https://coolSite.com/resource";
+      const currentLocation = "https://coolSite.com/redirect";
 
+      // This pretends we have previously triggerd silent authentication and stored
+      // the location.
+      mockLocalStorage({
+        [KEY_CURRENT_URL]: defaultLocation,
+      });
+      // This acts as the URL the user has been redirected to.
+      mockLocation(currentLocation);
+      // This pretends the login is successful
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockResolvedValue({
+          isLoggedIn: true,
+          sessionId: "a session ID",
+          webId: "https://some.webid#them",
+        });
+
+      const mySession = new Session({
+        clientAuthentication,
+      });
       const myCallback = (urlBeforeRestore: string): void => {
         expect(urlBeforeRestore).toEqual(defaultLocation);
-        if (done) {
-          done();
-        }
       };
 
-      const {
-        location,
-        history: { replaceState },
-      } = window;
+      mySession.onSessionRestore(myCallback);
+      await mySession.handleIncomingRedirect(currentLocation);
 
-      try {
-        // location and history aren't optional on window, which makes TS complain
-        // (rightfully) when we delete them. However, they are deleted on purpose
-        // here just for testing.
-        delete (window as any).location;
-        delete (window as any).history.replaceState;
-
-        window.location = {
-          href: defaultLocation,
-        } as Location;
-        window.history.replaceState = jest.fn();
-
-        const mySession = new Session({
-          clientAuthentication: mockClientAuthentication(),
-        });
-        mySession.onSessionRestore(myCallback);
-
-        // Callback should not be called on initial login...
-        await mySession.handleIncomingRedirect("https://not-relevant.com/");
-
-        // ...but should be called on a subsequent calls, i.e., on session
-        // restore after a silent login.
-        await mySession.handleIncomingRedirect("https://not-relevant.com/");
-      } finally {
-        // Restore our 'window' state.
-        window.location = location;
-        window.history.replaceState = replaceState;
-      }
+      // This verifies that the callback has been called
+      expect.assertions(1);
     });
   });
 });

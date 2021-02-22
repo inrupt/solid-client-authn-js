@@ -496,48 +496,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-<<<<<<< HEAD
       await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
-=======
-      try {
-        // eslint-disable-next-line no-restricted-globals
-        history.replaceState = jest.fn();
-
-        const clientAuthn = getClientAuthentication({
-          // Awkward here - we need to be logged in (which is state stored in
-          // 'secure' storage), and have an ID Token (which is stored in
-          // 'insecure' storage).
-          sessionInfoManager: mockSessionInfoManager(
-            new StorageUtility(
-              mockStorage({
-                "solidClientAuthenticationUser:global": {
-                  isLoggedIn: "true",
-                },
-              }),
-              mockStorage({
-                "solidClientAuthenticationUser:global": {
-                  idToken: "value doesn't matter",
-                },
-              })
-            )
-          ),
-        });
-
-        await clientAuthn.handleIncomingRedirect("https://ex.com/redirect");
-
-        // In unit tests, the window location will just be localhost. All we're
-        // really testing here is that a location was persisted (so we could
-        // change this assertion to just ensure a value exists and is non-empty.
-        expect(window.localStorage.getItem(KEY_CURRENT_URL)).toContain(
-          "http://localhost/"
-        );
-      } finally {
-        // Remove the mocked method:
-        Object.defineProperty(window, "localStorage", {
-          value: existingLocalStorage,
-        });
-      }
->>>>>>> added session restore event
     });
 
     it("returns null if the current issuer doesn't match the ID token's", async () => {
