@@ -127,6 +127,11 @@ export default class OidcLoginHandler implements ILoginHandler {
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
+      // Note that here, the issuer is not the one from the received options, but
+      // from the issuer's config. This enforces the canonical URL is used and stored,
+      // which is also the one present in the ID token, so storing a technically
+      // valid, but different issuer URL (e.g. using a trailing slash or not) now
+      // could prevent from validating the ID token later.
       issuer: issuerConfig.issuer,
       // TODO: differentiate if DPoP should be true
       dpop: options.tokenType.toLowerCase() === "dpop",
