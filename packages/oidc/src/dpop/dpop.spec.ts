@@ -198,7 +198,7 @@ describe("validateIdToken", () => {
     ).resolves.toBe(false);
   });
 
-  it("returns true if the ID token is valid", async () => {
+  it("returns true if the ID token is valid for an elliptic curve signature", async () => {
     const payload = {
       sub: "https://my.webid",
       iss: "https://some.issuer",
@@ -208,6 +208,27 @@ describe("validateIdToken", () => {
     };
     const idToken = await signJwt(payload, mockJwk(), {
       algorithm: "ES256",
+    });
+    await expect(
+      validateIdToken(
+        idToken,
+        { keys: [mockJwk()] },
+        "https://some.issuer",
+        "https://my.app/registration"
+      )
+    ).resolves.toBe(true);
+  });
+
+  it("returns true if the ID token is valid for an RSA signature", async () => {
+    const payload = {
+      sub: "https://my.webid",
+      iss: "https://some.issuer",
+      aud: "https://my.app/registration",
+      iat: 2551294137,
+      exp: 2551301337,
+    };
+    const idToken = await signJwt(payload, mockJwk(), {
+      algorithm: "RS256",
     });
     await expect(
       validateIdToken(

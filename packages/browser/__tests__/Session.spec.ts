@@ -458,6 +458,24 @@ describe("Session", () => {
   });
 
   describe("silent authentication", () => {
+    it("does nothing if no previous session is available", async () => {
+      mockLocalStorage({});
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({}),
+        mockStorage({})
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect("https://some.redirect/url");
+      expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
+    });
+
     it("saves current window location if we have stored ID Token", async () => {
       const sessionId = "mySilentSession";
       mockLocalStorage({
@@ -498,8 +516,16 @@ describe("Session", () => {
       });
       mockLocation("https://mock.current/location");
       const mockedStorage = new StorageUtility(
-        mockStorage({}),
-        mockStorage({})
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "value doesn't matter",
+          },
+        })
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -510,6 +536,50 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.redirect/url");
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
+    });
+
+    it("triggers silent authentication if a valid ID token is stored", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            idToken: "value doesn't matter",
+            redirectUrl: "https://some.redirect/url",
+            clientId: "some client ID",
+            clientSecret: "some client secret",
+          },
+        })
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+      clientAuthentication.getCurrentIssuer = jest
+        .fn()
+        .mockResolvedValue("https://some.issuer");
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      clientAuthentication.login = jest.fn();
+
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect("https://some.redirect/url");
+
+      expect(clientAuthentication.login).toHaveBeenCalledWith("mySession", {
+        oidcIssuer: "https://some.issuer",
+        prompt: "none",
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        redirectUrl: "https://some.redirect/url",
+      });
     });
   });
 

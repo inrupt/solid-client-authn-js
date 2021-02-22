@@ -47,7 +47,7 @@ export async function validateIdToken(
     JWT.verify(token, parsedKey.toPEM(false), {
       issuer,
       audience,
-      algorithms: ["ES256"],
+      algorithms: ["ES256", "RS256"],
     });
   } catch (e) {
     // If the verification throws, the token is invalid

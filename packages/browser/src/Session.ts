@@ -65,10 +65,25 @@ async function silentlyAuthenticate(
   // specific 'page' of a Single Page App, then presumably they'll expect to
   // be brought back to exactly that same 'page' after the full refresh).
   const storedSessionInfo = await clientAuthn.getSessionInfo(sessionId);
-  if (storedSessionInfo?.idToken !== undefined) {
-    window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
+  if (
+    storedSessionInfo === undefined ||
+    storedSessionInfo.idToken === undefined
+  ) {
+    return;
+  }
+  window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
+  const issuer = await clientAuthn.getCurrentIssuer();
+  if (issuer !== null) {
+    await clientAuthn.login(sessionId, {
+      prompt: "none",
+      oidcIssuer: issuer,
+      redirectUrl: storedSessionInfo.redirectUrl,
+      clientId: storedSessionInfo.clientAppId,
+      clientSecret: storedSessionInfo.clientAppSecret,
+    });
   }
 }
+
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
@@ -242,15 +257,13 @@ export class Session extends EventEmitter {
       url
     );
 
-    if (sessionInfo !== undefined) {
+    if (sessionInfo?.isLoggedIn) {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
       this.info.sessionId = sessionInfo.sessionId;
-      if (sessionInfo.isLoggedIn) {
-        // The login event can only be triggered **after** the user has been
-        // redirected from the IdP with access and ID tokens.
-        this.emit("login");
-      }
+      // The login event can only be triggered **after** the user has been
+      // redirected from the IdP with access and ID tokens.
+      this.emit("login");
 
       if (typeof sessionInfo.expirationDate === "number") {
         setTimeout(async () => {
@@ -263,11 +276,11 @@ export class Session extends EventEmitter {
       // was previously logged in, in which case its ID will be present with a known
       // identifier in local storage.
       // Check if we have a locally stored session ID...
-      const storedSessionID = window.localStorage.getItem(KEY_CURRENT_SESSION);
+      const storedSessionId = window.localStorage.getItem(KEY_CURRENT_SESSION);
       // ...if not, then there is no ID token, and so silent authentication cannot happen, but
       // if we do have a stored session ID, attempt to re-authenticate now silently.
-      if (storedSessionID !== null) {
-        await silentlyAuthenticate(storedSessionID, this.clientAuthentication);
+      if (storedSessionId !== null) {
+        await silentlyAuthenticate(storedSessionId, this.clientAuthentication);
       }
     }
     this.tokenRequestInProgress = false;
