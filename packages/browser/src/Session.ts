@@ -60,7 +60,7 @@ async function silentlyAuthenticate(
   // currently logged in, and the user has refreshed their browser page. The ID
   // token is validated, and its issuer claim is extracted to know where silent
   // authentication is possible.
-  const issuer = await clientAuthn.getCurrentIssuer();
+  const issuer = await clientAuthn.validateCurrentIssuer();
   const storedSessionInfo = await clientAuthn.getSessionInfo(sessionId);
   if (issuer !== null && storedSessionInfo !== undefined) {
     // It can be really useful to save the user's current browser location,

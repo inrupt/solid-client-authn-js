@@ -133,7 +133,7 @@ export default class ClientAuthentication {
     return this.sessionInfoManager.getAll();
   };
 
-  getCurrentIssuer = async (): Promise<string | null> => {
+  validateCurrentIssuer = async (): Promise<string | null> => {
     const currentSessionId = window.localStorage.getItem(KEY_CURRENT_SESSION);
     if (currentSessionId === null) {
       return null;

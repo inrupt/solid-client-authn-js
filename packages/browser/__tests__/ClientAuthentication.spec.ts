@@ -383,7 +383,7 @@ describe("ClientAuthentication", () => {
     it("returns null no current session is in storage", async () => {
       const clientAuthn = getClientAuthentication({});
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the current session has no stored issuer", async () => {
@@ -409,7 +409,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the current session has no stored ID token", async () => {
@@ -435,7 +435,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the current session has no stored client ID", async () => {
@@ -460,7 +460,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the issuer does not have a JWKS", async () => {
@@ -477,7 +477,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the issuer's JWKS isn't available", async () => {
@@ -496,7 +496,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the current issuer doesn't match the ID token's", async () => {
@@ -528,7 +528,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the current client ID doesn't match the ID token audience", async () => {
@@ -560,7 +560,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
 
     it("returns null if the ID token isn't signed with the keys of the issuer", async () => {
@@ -587,7 +587,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentIssuer()).resolves.toBeNull();
     });
   });
 
@@ -614,7 +614,7 @@ describe("ClientAuthentication", () => {
       sessionInfoManager: mockSessionInfoManager(mockedStorage),
     });
 
-    await expect(clientAuthn.getCurrentIssuer()).resolves.toBe(
+    await expect(clientAuthn.validateCurrentIssuer()).resolves.toBe(
       "https://some.issuer"
     );
   });

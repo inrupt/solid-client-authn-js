@@ -403,7 +403,7 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockResolvedValue(undefined);
-      clientAuthentication.getCurrentIssuer = jest
+      clientAuthentication.validateCurrentIssuer = jest
         .fn()
         .mockResolvedValue("https://some.issuer/");
 
@@ -468,7 +468,7 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
-      clientAuthentication.getCurrentIssuer = jest
+      clientAuthentication.validateCurrentIssuer = jest
         .fn()
         .mockResolvedValue("https://some.issuer");
       clientAuthentication.handleIncomingRedirect = jest
