@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.6.0 - 2021-02-22
+
 ### New features
 
 #### oidc
@@ -14,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - `validateIdToken`: A function to check that an ID token has been signed by the
 correct issuer, and that it contains some expected values.
 
-#### Browser
+#### browser
 
 - Added new `onSessionRestore` event to `Session` (and default session) to allow
   the developer to register an event callback that will be called whenever a
@@ -31,9 +35,6 @@ correct issuer, and that it contains some expected values.
 
 - Refreshing the page no longer logs the session out, no matter what Resource Server
 the data is collected from. 
-
-#### Browser
-
 - When a session expires, the session is now marked as logged out, and a 
   `logout` event is thrown.
 - The 'client_id' option, if specified as an option when logging in, is now
@@ -42,8 +43,6 @@ the data is collected from.
   stored if DCR was invoked).
 - The issuer URL associated with the session is now necessarily the __canonical__
   issuer's URL, instead of potentially including/missing a trailing slash.
-
-The following sections document changes that have been released already:
 
 ## 1.5.1 - 2020-02-03
 
