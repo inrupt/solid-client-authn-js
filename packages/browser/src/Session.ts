@@ -58,11 +58,10 @@ async function silentlyAuthenticate(
 ) {
   // Check if we have an ID Token in storage - if we do then we may be
   // currently logged in, and the user has refreshed their browser page. The ID
-  // token is validated, and its issuer claim is extracted to know where silent
-  // authentication is possible.
-  const issuer = await clientAuthn.validateCurrentIssuer();
-  const storedSessionInfo = await clientAuthn.getSessionInfo(sessionId);
-  if (issuer !== null && storedSessionInfo !== undefined) {
+  // token is validated, and on success the current session information are returned,
+  // now that we know they have not been tampered with.
+  const storedSessionInfo = await clientAuthn.validateCurrentSession();
+  if (storedSessionInfo !== null) {
     // It can be really useful to save the user's current browser location,
     // so that we can restore it after completing the silent authentication
     // on incoming redirect. This way, the user is eventually redirected back
@@ -70,7 +69,7 @@ async function silentlyAuthenticate(
     window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
     await clientAuthn.login(sessionId, {
       prompt: "none",
-      oidcIssuer: issuer,
+      oidcIssuer: storedSessionInfo.issuer,
       redirectUrl: storedSessionInfo.redirectUrl,
       clientId: storedSessionInfo.clientAppId,
       clientSecret: storedSessionInfo.clientAppSecret,

@@ -403,7 +403,7 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockResolvedValue(undefined);
-      clientAuthentication.validateCurrentIssuer = jest
+      clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockResolvedValue("https://some.issuer/");
 
@@ -456,21 +456,19 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({
-          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
-            idToken: "value doesn't matter",
-            redirectUrl: "https://some.redirect/url",
-            clientId: "some client ID",
-            clientSecret: "some client secret",
-          },
-        })
+        mockStorage({})
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
-      clientAuthentication.validateCurrentIssuer = jest
+      clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockResolvedValue("https://some.issuer");
+        .mockResolvedValue({
+          issuer: "https://some.issuer",
+          clientAppId: "some client ID",
+          clientAppSecret: "some client secret",
+          redirectUrl: "https://some.redirect/url",
+        });
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockResolvedValue(undefined);
