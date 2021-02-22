@@ -206,7 +206,8 @@ export class Session extends EventEmitter {
         this.emit("login");
       } else {
         // If an URL is stored in local storage, we are being logged in after a
-        // silent authentication.
+        // silent authentication, so remove our currently stored URL location
+        // to clean up our state now that we are completing the re-login process.
         window.localStorage.removeItem(KEY_CURRENT_URL);
         this.emit("sessionRestore", currentUrl);
       }
@@ -259,7 +260,7 @@ export class Session extends EventEmitter {
    * Note: the callback will be called with the saved value of the 'current URL'
    * at the time the session was restored.
    *
-   * @param callback The function called when a user completes logout.
+   * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
    */
   onSessionRestore(callback: (currentUrl: string) => unknown): void {
     this.on("sessionRestore", callback);

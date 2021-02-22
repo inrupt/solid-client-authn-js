@@ -579,14 +579,14 @@ describe("Session", () => {
       const defaultLocation = "https://coolSite.com/resource";
       const currentLocation = "https://coolSite.com/redirect";
 
-      // This pretends we have previously triggerd silent authentication and stored
+      // This pretends we have previously triggered silent authentication and stored
       // the location.
       mockLocalStorage({
         [KEY_CURRENT_URL]: defaultLocation,
       });
       // This acts as the URL the user has been redirected to.
       mockLocation(currentLocation);
-      // This pretends the login is successful
+      // This pretends the login is successful.
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
