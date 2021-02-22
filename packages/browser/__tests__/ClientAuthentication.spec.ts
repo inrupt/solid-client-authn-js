@@ -307,9 +307,22 @@ describe("ClientAuthentication", () => {
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(url);
-      expect(redirectInfo).toEqual({
-        ...RedirectHandlerResponse,
-      });
+
+      // Our injected mocked response may also contain internal-only data (for
+      // other tests), whereas our response from `handleIncomingRedirect()` can
+      // only contain publicly visible fields. So we need to explicitly check
+      // for individual fields (as opposed to just checking against
+      // entire-response-object-equality).
+      expect(redirectInfo?.sessionId).toEqual(
+        RedirectHandlerResponse.sessionId
+      );
+      expect(redirectInfo?.webId).toEqual(RedirectHandlerResponse.webId);
+      expect(redirectInfo?.isLoggedIn).toEqual(
+        RedirectHandlerResponse.isLoggedIn
+      );
+      expect(redirectInfo?.expirationDate).toEqual(
+        RedirectHandlerResponse.expirationDate
+      );
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
 
       // Calling the redirect handler should have updated the fetch.
@@ -370,7 +383,7 @@ describe("ClientAuthentication", () => {
     it("returns null no current session is in storage", async () => {
       const clientAuthn = getClientAuthentication({});
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the current session has no stored issuer", async () => {
@@ -396,7 +409,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the current session has no stored ID token", async () => {
@@ -422,7 +435,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the current session has no stored client ID", async () => {
@@ -447,7 +460,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the issuer does not have a JWKS", async () => {
@@ -464,7 +477,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the issuer's JWKS isn't available", async () => {
@@ -483,7 +496,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the current issuer doesn't match the ID token's", async () => {
@@ -515,7 +528,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the current client ID doesn't match the ID token audience", async () => {
@@ -547,7 +560,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
     it("returns null if the ID token isn't signed with the keys of the issuer", async () => {
@@ -574,7 +587,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.getCurrentIssuer()).resolves.toBeNull();
+      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
   });
 
@@ -601,8 +614,14 @@ describe("ClientAuthentication", () => {
       sessionInfoManager: mockSessionInfoManager(mockedStorage),
     });
 
-    await expect(clientAuthn.getCurrentIssuer()).resolves.toBe(
-      "https://some.issuer"
+    await expect(clientAuthn.validateCurrentSession()).resolves.toStrictEqual(
+      expect.objectContaining({
+        issuer: "https://some.issuer",
+        clientAppId: "https://some.app/registration",
+        sessionId,
+        idToken: expect.anything(),
+        webId: "https://my.pod/profile#me",
+      })
     );
   });
 });

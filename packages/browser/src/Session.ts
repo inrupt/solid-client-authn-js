@@ -57,25 +57,19 @@ async function silentlyAuthenticate(
   clientAuthn: ClientAuthentication
 ) {
   // Check if we have an ID Token in storage - if we do then we may be
-  // currently logged in, and the user has refreshed their browser page. In
-  // this case, it can be really useful to save the user's current browser
-  // location, so that we can restore that location after we complete the
-  // entire re-login-the-user-silently-flow (e.g., if the user was on a
-  // specific 'page' of a Single Page App, then presumably they'll expect to
-  // be brought back to exactly that same 'page' after the full refresh).
-  const storedSessionInfo = await clientAuthn.getSessionInfo(sessionId);
-  if (
-    storedSessionInfo === undefined ||
-    storedSessionInfo.idToken === undefined
-  ) {
-    return;
-  }
-  window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
-  const issuer = await clientAuthn.getCurrentIssuer();
-  if (issuer !== null) {
+  // currently logged in, and the user has refreshed their browser page. The ID
+  // token is validated, and on success the current session information are returned,
+  // now that we know they have not been tampered with.
+  const storedSessionInfo = await clientAuthn.validateCurrentSession();
+  if (storedSessionInfo !== null) {
+    // It can be really useful to save the user's current browser location,
+    // so that we can restore it after completing the silent authentication
+    // on incoming redirect. This way, the user is eventually redirected back
+    // to the page they were on and not to the app's redirect page.
+    window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
     await clientAuthn.login(sessionId, {
       prompt: "none",
-      oidcIssuer: issuer,
+      oidcIssuer: storedSessionInfo.issuer,
       redirectUrl: storedSessionInfo.redirectUrl,
       clientId: storedSessionInfo.clientAppId,
       clientSecret: storedSessionInfo.clientAppSecret,
@@ -204,9 +198,18 @@ export class Session extends EventEmitter {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
       this.info.sessionId = sessionInfo.sessionId;
-      // The login event can only be triggered **after** the user has been
-      // redirected from the IdP with access and ID tokens.
-      this.emit("login");
+      const currentUrl = window.localStorage.getItem(KEY_CURRENT_URL);
+      if (currentUrl === null) {
+        // The login event can only be triggered **after** the user has been
+        // redirected from the IdP with access and ID tokens.
+        this.emit("login");
+      } else {
+        // If an URL is stored in local storage, we are being logged in after a
+        // silent authentication, so remove our currently stored URL location
+        // to clean up our state now that we are completing the re-login process.
+        window.localStorage.removeItem(KEY_CURRENT_URL);
+        this.emit("sessionRestore", currentUrl);
+      }
 
       if (typeof sessionInfo.expirationDate === "number") {
         setTimeout(async () => {
@@ -248,5 +251,17 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
+  }
+
+  /**
+   * Register a callback function to be called when a session is restored.
+   *
+   * Note: the callback will be called with the saved value of the 'current URL'
+   * at the time the session was restored.
+   *
+   * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
+   */
+  onSessionRestore(callback: (currentUrl: string) => unknown): void {
+    this.on("sessionRestore", callback);
   }
 }

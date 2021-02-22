@@ -14,6 +14,17 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - `validateIdToken`: A function to check that an ID token has been signed by the
 correct issuer, and that it contains some expected values.
 
+#### Browser
+
+- Added new `onSessionRestore` event to `Session` (and default session) to allow
+  the developer to register an event callback that will be called whenever a
+  session is restored (e.g., due to a browser page refresh). The callback is
+  given a URL parameter, which represents the current URL of the browser
+  *before* the session restoration (to allow the developer to restore their
+  app's state if needed, e.g., if the app is a Single Page App (SPA) and the
+  developer wishes to restore the users 'current page' to exactly where they
+  were before the refresh).
+
 ### Bugfix
 
 #### browser

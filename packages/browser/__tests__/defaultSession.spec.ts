@@ -27,6 +27,7 @@ import {
   login,
   logout,
   onLogin,
+  onSessionRestore,
   onLogout,
 } from "../src/defaultSession";
 import type * as SessionModuleType from "../src/Session";
@@ -59,6 +60,7 @@ it("re-uses the same Session when calling multiple methods", () => {
 
 it("all functions pass on their arguments to the default session", () => {
   const defaultSession = getDefaultSession();
+
   const fetchSpy = jest.fn();
   defaultSession.fetch = fetchSpy as typeof defaultSession.fetch;
   const loginSpy = jest.fn();
@@ -69,6 +71,7 @@ it("all functions pass on their arguments to the default session", () => {
   defaultSession.handleIncomingRedirect = handleIncomingRedirectSpy as typeof defaultSession.handleIncomingRedirect;
   const onLoginSpy = jest.spyOn(defaultSession, "onLogin");
   const onLogoutSpy = jest.spyOn(defaultSession, "onLogout");
+  const onSessionRestoreSpy = jest.spyOn(defaultSession, "onSessionRestore");
 
   expect(fetchSpy).not.toHaveBeenCalled();
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -93,6 +96,10 @@ it("all functions pass on their arguments to the default session", () => {
   expect(onLoginSpy).not.toHaveBeenCalled();
   onLogin(jest.fn());
   expect(onLoginSpy).toHaveBeenCalledTimes(1);
+
+  expect(onSessionRestoreSpy).not.toHaveBeenCalled();
+  onSessionRestore(jest.fn());
+  expect(onSessionRestoreSpy).toHaveBeenCalledTimes(1);
 
   expect(onLogoutSpy).not.toHaveBeenCalled();
   onLogout(jest.fn());

@@ -102,7 +102,7 @@ export default class ClientAuthentication {
       clientName: options.clientName ?? options.clientId,
       popUp: options.popUp || false,
       handleRedirect: options.handleRedirect,
-      // Defaults to DPoP
+      // Defaults to DPoP.
       tokenType: options.tokenType ?? "DPoP",
       prompt: options.prompt,
     });
@@ -133,7 +133,9 @@ export default class ClientAuthentication {
     return this.sessionInfoManager.getAll();
   };
 
-  getCurrentIssuer = async (): Promise<string | null> => {
+  validateCurrentSession = async (): Promise<
+    (ISessionInfo & ISessionInternalInfo) | null
+  > => {
     const currentSessionId = window.localStorage.getItem(KEY_CURRENT_SESSION);
     if (currentSessionId === null) {
       return null;
@@ -165,7 +167,7 @@ export default class ClientAuthentication {
           sessionInfo.clientAppId
         )
       ) {
-        return sessionInfo.issuer;
+        return sessionInfo;
       }
     } catch (e) {
       // If an error happens when fetching the keys, the issuer cannot be trusted.
