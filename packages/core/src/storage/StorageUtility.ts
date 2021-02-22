@@ -115,16 +115,6 @@ export async function saveSessionInfoToStorage(
   }
 }
 
-export type ResourceServerSession = {
-  webId: string;
-  sessions: Record<
-    string,
-    {
-      expiration: number;
-    }
-  >;
-};
-
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
  * @hidden
@@ -138,9 +128,6 @@ export default class StorageUtility implements IStorageUtility {
   private getKey(userId: string): string {
     return `solidClientAuthenticationUser:${userId}`;
   }
-
-  private RESOURCE_SERVER_SESSION_INFORMATION_KEY =
-    "tmp-resource-server-session-info";
 
   private async getUserData(
     userId: string,
@@ -260,56 +247,6 @@ export default class StorageUtility implements IStorageUtility {
     await (options?.secure ? this.secureStorage : this.insecureStorage).delete(
       this.getKey(userId)
     );
-  }
-
-  async storeResourceServerSessionInfo(
-    webId: string,
-    resourceServerIri: string,
-    expiration: number
-  ): Promise<void> {
-    const sessions: ResourceServerSession = JSON.parse(
-      (await this.insecureStorage.get(
-        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
-      )) ?? "{}"
-    );
-    if (sessions.webId !== webId) {
-      // Clear all previously active sessions.
-      sessions.sessions = {};
-    }
-    sessions.webId = webId;
-    sessions.sessions[resourceServerIri] = {
-      expiration,
-    };
-    await this.insecureStorage.set(
-      this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
-      JSON.stringify(sessions)
-    );
-  }
-
-  async clearResourceServerSessionInfo(
-    resourceServerIri: string
-  ): Promise<void> {
-    const sessions: ResourceServerSession = JSON.parse(
-      (await this.insecureStorage.get(
-        this.RESOURCE_SERVER_SESSION_INFORMATION_KEY
-      )) ?? "{}"
-    );
-    if (sessions.sessions !== undefined) {
-      delete sessions.sessions[resourceServerIri];
-
-      if (Object.keys(sessions.sessions).length === 0) {
-        // If there aren't any active sessions left, the whole object is cleared.
-        await this.insecureStorage.set(
-          this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
-          "{}"
-        );
-      } else {
-        await this.insecureStorage.set(
-          this.RESOURCE_SERVER_SESSION_INFORMATION_KEY,
-          JSON.stringify(sessions)
-        );
-      }
-    }
   }
 
   /**
