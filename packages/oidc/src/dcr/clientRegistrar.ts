@@ -100,9 +100,9 @@ export async function registerClient(
     redirect_uris: [options.redirectUrl?.toString()],
     subject_type: "pairwise",
     token_endpoint_auth_method: "client_secret_basic",
-    code_challenge_method: "S256",
     /* eslint-enable camelcase */
   };
+  console.log("wrong header is not present");
   if (!issuerConfig.registrationEndpoint) {
     throw new Error(
       "Dynamic Registration could not be completed because the issuer has no registration endpoint."

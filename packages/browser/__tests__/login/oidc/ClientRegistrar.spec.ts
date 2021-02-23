@@ -85,7 +85,6 @@ describe("ClientRegistrar", () => {
           redirect_uris: ["https://example.com"],
           subject_type: "pairwise",
           token_endpoint_auth_method: "client_secret_basic",
-          code_challenge_method: "S256",
           /* eslint-enable camelcase */
         }),
       });
