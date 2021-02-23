@@ -102,7 +102,6 @@ export async function registerClient(
     token_endpoint_auth_method: "client_secret_basic",
     /* eslint-enable camelcase */
   };
-  console.log("wrong header is not present");
   if (!issuerConfig.registrationEndpoint) {
     throw new Error(
       "Dynamic Registration could not be completed because the issuer has no registration endpoint."

@@ -43,19 +43,18 @@ const getMockOptions = (): IClientRegistrarOptions => {
 };
 
 const getSuccessfulFetch = (): typeof fetch =>
-  jest.fn(
-    async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-      new Response(
-        JSON.stringify({
-          // eslint-disable-next-line camelcase
-          client_id: "some id",
-          // eslint-disable-next-line camelcase
-          client_secret: "some secret",
-          // eslint-disable-next-line camelcase
-          redirect_uris: ["https://some.url"],
-        }),
-        { status: 200 }
-      )
+  jest.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        // eslint-disable-next-line camelcase
+        client_id: "some id",
+        // eslint-disable-next-line camelcase
+        client_secret: "some secret",
+        // eslint-disable-next-line camelcase
+        redirect_uris: ["https://some.url"],
+      }),
+      { status: 200 }
+    )
   );
 
 describe("registerClient", () => {
@@ -85,6 +84,8 @@ describe("registerClient", () => {
   });
 
   it("extract the client info from the IdP response", async () => {
+    const myFetch = getSuccessfulFetch();
+    global.fetch = myFetch;
     const client = await registerClient(getMockOptions(), getMockIssuer());
     expect(client.clientId).toEqual("some id");
     expect(client.clientSecret).toEqual("some secret");
@@ -92,6 +93,28 @@ describe("registerClient", () => {
 
   // TODO: this only tests the minimal registration request.
   // The additional provided options will be tested in an upcoming PR.
+
+  it("does not send a challenge method when performing DCR", async () => {
+    const options = getMockOptions();
+    const myFetch = getSuccessfulFetch() as jest.Mock<any, any>;
+    global.fetch = myFetch;
+
+    await registerClient(options, getMockIssuer());
+
+    expect(myFetch).toHaveBeenCalledWith(getMockIssuer().registrationEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_name: options.clientName,
+        application_type: "web",
+        redirect_uris: [options.redirectUrl?.toString()],
+        subject_type: "pairwise",
+        token_endpoint_auth_method: "client_secret_basic",
+      }),
+    });
+  });
 
   it("passes the specified redirection URL to the IdP", async () => {
     const options = getMockOptions();
