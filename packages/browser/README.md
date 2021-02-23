@@ -16,7 +16,7 @@ be polyfilled by the bundler. Here is the list of modules that need to be polyfi
 
 Prior to Webpack version 5 these modules were polyfilled by default, but that is no longer the case.
 See
-[our Webpack configuration](https://github.com/inrupt/solid-client-authn-js/blob/master/packages/browser/webpack.common.js)
+[our Webpack configuration](https://github.com/inrupt/solid-client-authn-js/blob/main/packages/browser/webpack.common.js)
 for packages that can provide the necessary polyfills.
 
 ## Underlying libraries
