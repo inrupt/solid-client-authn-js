@@ -375,7 +375,10 @@ describe("Session", () => {
         .fn()
         .mockResolvedValue(undefined);
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect("https://some.redirect/url");
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
     });
 
@@ -408,7 +411,10 @@ describe("Session", () => {
         .mockResolvedValue("https://some.issuer/");
 
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect("https://some.redirect/url");
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
 
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toEqual(
         "https://mock.current/location"
@@ -440,7 +446,10 @@ describe("Session", () => {
         .fn()
         .mockResolvedValue(undefined);
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect("https://some.redirect/url");
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
     });
 
@@ -475,7 +484,10 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect("https://some.redirect/url");
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
 
       expect(clientAuthentication.login).toHaveBeenCalledWith("mySession", {
         oidcIssuer: "https://some.issuer",
@@ -484,6 +496,83 @@ describe("Session", () => {
         clientSecret: "some client secret",
         redirectUrl: "https://some.redirect/url",
       });
+    });
+
+    it("does nothing if the developer has not explicitly enabled silent authentication", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({})
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+      clientAuthentication.validateCurrentSession = jest
+        .fn()
+        .mockResolvedValue({
+          issuer: "https://some.issuer",
+          clientAppId: "some client ID",
+          clientAppSecret: "some client secret",
+          redirectUrl: "https://some.redirect/url",
+        });
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      clientAuthentication.login = jest.fn();
+
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect("https://some.redirect/url");
+
+      expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
+    });
+
+    it("does nothing if the developer has disabled silent authentication", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({})
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+      clientAuthentication.validateCurrentSession = jest
+        .fn()
+        .mockResolvedValue({
+          issuer: "https://some.issuer",
+          clientAppId: "some client ID",
+          clientAppSecret: "some client secret",
+          redirectUrl: "https://some.redirect/url",
+        });
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      clientAuthentication.login = jest.fn();
+
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: false,
+      });
+
+      expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
     });
   });
 

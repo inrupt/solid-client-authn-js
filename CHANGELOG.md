@@ -15,6 +15,29 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+### Deprecations
+
+#### browser
+
+- The first parameter to `Session.handleIncomingRedirect` is now an options
+  object. If you want to pass in the URL to handle, you can now do so by setting
+  the `url` property on the options object. Passing the URL directly as the
+  first argument (which has been optional since version 1.5.0, defaulting to
+  `window.location.href`) is still possible, but is now deprecated and thus
+  might be removed in a future major release.
+
+### Bugfix
+
+#### browser
+
+- Version 1.6.0 automatically redirected the user away from your app after a
+  page refresh if they had signed in previously, losing all application state.
+  This now no longer happens; instead, you can opt in to automatically restoring
+  a user's session after reloading the page by passing a
+  `restorePreviousSession` boolean to `handleIncomingRedirect`, and listening
+  for the `sessionRestore` event (or passing a callback to `onSessionRestore`)
+  to restore your application state.
+
 ## 1.6.0 - 2021-02-22
 
 ### New features

@@ -52,6 +52,27 @@ export interface ISessionOptions {
   clientAuthentication: ClientAuthentication;
 }
 
+export interface IHandleIncomgingRedirectOptions {
+  /**
+   * If the user has signed in before, setting this to `true` will automatically
+   * redirect them to their Solid Identity Provider, which will then attempt to
+   * re-activate the session and send the user back to your app without
+   * requiring user interaction.
+   * If your app's access has not expired yet and re-activation completed
+   * successfully, a `sessionRestore` event will be fired with the URL the user
+   * was at before they were redirected to their Solid Identity Provider.
+   * {@see onSessionRestore}
+   */
+  restorePreviousSession?: boolean;
+  /**
+   * The URL of the page handling the redirect, including the query
+   * parameters — these contain the information to process the login.
+   * Note: as a convenience, if no URL value is specified here, we default to
+   * using the browser's current location.
+   */
+  url?: string;
+}
+
 async function silentlyAuthenticate(
   sessionId: string,
   clientAuthn: ClientAuthentication
@@ -173,13 +194,10 @@ export class Session extends EventEmitter {
    * Completes the login process by processing the information provided by the
    * Solid identity provider through redirect.
    *
-   * @param url The URL of the page handling the redirect, including the query
-   * parameters — these contain the information to process the login.
-   * Note: as a convenience, if no URL value is specified here, we default to
-   * using the browser's current location.
+   * @param options See {@see IHandleIncomgingRedirectOptions}.
    */
   handleIncomingRedirect = async (
-    url: string = window.location.href
+    inputOptions: string | IHandleIncomgingRedirectOptions = {}
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
       return this.info;
@@ -188,6 +206,9 @@ export class Session extends EventEmitter {
     if (this.tokenRequestInProgress) {
       return undefined;
     }
+    const options =
+      typeof inputOptions === "string" ? { url: inputOptions } : inputOptions;
+    const url = options.url ?? window.location.href;
 
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
@@ -216,7 +237,7 @@ export class Session extends EventEmitter {
           await this.logout();
         }, sessionInfo.expirationDate - Date.now());
       }
-    } else {
+    } else if (options.restorePreviousSession === true) {
       // Silent authentication happens after a refresh, which means there are no
       // OAuth params in the current location IRI. It can only succeed if a session
       // was previously logged in, in which case its ID will be present with a known
