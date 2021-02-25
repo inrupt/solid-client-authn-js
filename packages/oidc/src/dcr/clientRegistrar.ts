@@ -100,7 +100,6 @@ export async function registerClient(
     redirect_uris: [options.redirectUrl?.toString()],
     subject_type: "pairwise",
     token_endpoint_auth_method: "client_secret_basic",
-    code_challenge_method: "S256",
     /* eslint-enable camelcase */
   };
   if (!issuerConfig.registrationEndpoint) {
