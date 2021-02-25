@@ -7,14 +7,6 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
-### Bugfixes
-
-#### browser
-
-- No longer send PKCE-related information during DCR, when they are irrelevant.
-
-The following sections document changes that have been released already:
-
 ### Deprecations
 
 #### browser
@@ -37,6 +29,9 @@ The following sections document changes that have been released already:
   `restorePreviousSession` boolean to `handleIncomingRedirect`, and listening
   for the `sessionRestore` event (or passing a callback to `onSessionRestore`)
   to restore your application state.
+- No longer send PKCE-related information during DCR, when they are irrelevant.
+
+The following sections document changes that have been released already:
 
 ## 1.6.0 - 2021-02-22
 
