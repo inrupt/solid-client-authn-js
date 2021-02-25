@@ -55,9 +55,21 @@ export async function clear(
   sessionId: string,
   storage: IStorageUtility
 ): Promise<void> {
+  const storedSessionCookieReference = await storage.get(
+    "tmp-resource-server-session-info"
+  );
+  const reference = JSON.parse(storedSessionCookieReference ?? "{}");
+  const { webId } = reference;
+  if (webId !== undefined) {
+    const webIdAsUrl = new URL(webId);
+    const resourceServerIri = webIdAsUrl.origin;
+    await storage.clearResourceServerSessionInfo(resourceServerIri);
+  }
   await Promise.all([
     storage.deleteAllUserData(sessionId, { secure: false }),
     storage.deleteAllUserData(sessionId, { secure: true }),
+    // FIXME: This is needed until the DPoP key is stored safely
+    storage.delete("clientKey", { secure: false }),
   ]);
   await clearOidcPersistentStorage();
 }
