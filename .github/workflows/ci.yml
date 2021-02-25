@@ -40,6 +40,7 @@ jobs:
       - run: npm audit --audit-level=moderate
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.2
+        continue-on-error: true
         with:
           name: code-coverage-report
           path: ./packages/*/coverage/
