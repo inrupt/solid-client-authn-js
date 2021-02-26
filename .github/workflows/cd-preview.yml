@@ -106,6 +106,7 @@ jobs:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Parcel build artifacts
       uses: actions/upload-artifact@v2.2.2
+      continue-on-error: true
       with:
         name: parcel-dist
         path: .github/workflows/cd-packaging-tests/bundler-parcel/dist
@@ -129,6 +130,7 @@ jobs:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Webpack build artifacts
       uses: actions/upload-artifact@v2.2.2
+      continue-on-error: true
       with:
         name: webpack-dist
         path: .github/workflows/cd-packaging-tests/bundler-webpack/dist
