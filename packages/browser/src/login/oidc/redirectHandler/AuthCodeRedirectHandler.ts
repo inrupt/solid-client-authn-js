@@ -47,7 +47,6 @@ import {
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
-import { appendToUrlPathname } from "../../../util/urlPath";
 
 export async function exchangeDpopToken(
   sessionId: string,
@@ -242,10 +241,14 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       },
       { secure: true }
     );
+    // Clear the code query param from the redirect URL before storing it, but
+    // preserve any state that my have been provided by the client and returned
+    // by the IdP.
+    url.searchParams.delete("code");
     await this.storageUtility.setForUser(
       storedSessionId,
       {
-        redirectUrl: appendToUrlPathname(url.origin, url.pathname),
+        redirectUrl: url.toString(),
         idToken: tokens.idToken,
       },
       {

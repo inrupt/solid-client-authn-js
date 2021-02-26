@@ -446,7 +446,53 @@ describe("AuthCodeRedirectHandler", () => {
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
         })
-      ).resolves.toStrictEqual("https://coolsite.com/redirect");
+      ).resolves.toStrictEqual(
+        "https://coolsite.com/redirect?state=oauth2StateValue"
+      );
+    });
+
+    it("preserves any query strings from the redirect URI", async () => {
+      /* eslint-disable  @typescript-eslint/no-explicit-any */
+      (window as any).localStorage = new LocalStorageMock();
+
+      window.fetch = jest.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolve(
+            new Response("", {
+              status: 200,
+            })
+          );
+        })
+      ) as jest.Mock<
+        ReturnType<typeof window.fetch>,
+        [RequestInfo, RequestInit?]
+      >;
+
+      const mockedStorage = mockStorageUtility({
+        [`${USER_SESSION_PREFIX}:oauth2StateValue`]: {
+          sessionId: "mySession",
+        },
+        [`${USER_SESSION_PREFIX}:mySession`]: {
+          dpop: "true",
+          issuer: mockIssuer().issuer.toString(),
+          codeVerifier: "some code verifier",
+          redirectUrl: "https://some.redirect.uri?someKey=someValue",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+      await authCodeRedirectHandler.handle(
+        "https://coolsite.com/redirect?code=someCode&state=oauth2StateValue&someKey=someValue"
+      );
+      await expect(
+        mockedStorage.getForUser("mySession", "redirectUrl", {
+          secure: false,
+        })
+      ).resolves.toStrictEqual(
+        "https://coolsite.com/redirect?state=oauth2StateValue&someKey=someValue"
+      );
     });
 
     it("returns the expiration time normalised to the current time", async () => {

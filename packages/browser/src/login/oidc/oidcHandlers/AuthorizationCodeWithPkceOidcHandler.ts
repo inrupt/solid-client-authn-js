@@ -111,7 +111,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
             // eslint-disable-next-line no-underscore-dangle
             codeVerifier: req.state._code_verifier,
             issuer: oidcLoginOptions.issuer.toString(),
-            redirectUrl: oidcLoginOptions.redirectUrl.toString(),
             dpop: oidcLoginOptions.dpop ? "true" : "false",
           }),
         ])
