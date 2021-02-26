@@ -67,7 +67,7 @@ export async function exchangeDpopToken(
     grantType: "authorization_code",
     code,
     codeVerifier,
-    redirectUri: redirectUrl,
+    redirectUrl,
   });
 }
 
@@ -203,7 +203,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
       const storedRedirectIri = (await this.storageUtility.getForUser(
         storedSessionId,
-        "redirectUri",
+        "redirectUrl",
         { errorIfNull: true }
       )) as string;
 

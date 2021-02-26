@@ -119,7 +119,7 @@ const mockRefresherDefaultStorageUtility = () =>
     "solidClientAuthenticationUser:mySession": {
       issuer: "https://my.idp",
       codeVerifier: "some code verifier",
-      redirectUri: "https://my.app/redirect",
+      redirectUrl: "https://my.app/redirect",
       dpop: "true",
     },
   });
@@ -145,7 +145,7 @@ describe("TokenRefresher", () => {
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:mySession": {
         codeVerifier: "some code verifier",
-        redirectUri: "https://my.app/redirect",
+        redirectUrl: "https://my.app/redirect",
         dpop: "true",
       },
     });
@@ -230,7 +230,7 @@ describe("TokenRefresher", () => {
       "solidClientAuthenticationUser:mySession": {
         issuer: "https://my.idp",
         codeVerifier: "some code verifier",
-        redirectUri: "https://my.app/redirect",
+        redirectUrl: "https://my.app/redirect",
         dpop: "false",
       },
     });

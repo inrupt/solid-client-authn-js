@@ -37,7 +37,7 @@ import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 export type OidcContext = {
   issuerConfig: IIssuerConfig;
   codeVerifier?: string;
-  redirectUri?: string;
+  redirectUrl?: string;
   dpop: boolean;
 };
 
@@ -72,7 +72,7 @@ export async function loadOidcContextFromStorage(
         errorIfNull: true,
       }),
       storageUtility.getForUser(sessionId, "codeVerifier"),
-      storageUtility.getForUser(sessionId, "redirectUri"),
+      storageUtility.getForUser(sessionId, "redirectUrl"),
       storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
     ]);
 
@@ -80,7 +80,7 @@ export async function loadOidcContextFromStorage(
     const issuerConfig = await configFetcher.fetchConfig(issuerIri as string);
     return {
       codeVerifier,
-      redirectUri: storedRedirectIri,
+      redirectUrl: storedRedirectIri,
       issuerConfig,
       dpop: dpop === "true",
     };

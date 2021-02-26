@@ -278,7 +278,7 @@ describe("AuthCodeRedirectHandler", () => {
         },
         "solidClientAuthenticationUser:userId": {
           codeVerifier: "a",
-          redirectUri: "b",
+          redirectUrl: "b",
           issuer: "someIssuer",
           dpop: "true",
         },
@@ -383,7 +383,7 @@ describe("AuthCodeRedirectHandler", () => {
           dpop: "true",
           issuer: mockIssuer().issuer.toString(),
           codeVerifier: "some code verifier",
-          redirectUri: "https://some.redirect.uri",
+          redirectUrl: "https://some.redirect.uri",
         },
       });
 
@@ -427,7 +427,7 @@ describe("AuthCodeRedirectHandler", () => {
           dpop: "true",
           issuer: mockIssuer().issuer.toString(),
           codeVerifier: "some code verifier",
-          redirectUri: "https://some.redirect.uri",
+          redirectUrl: "https://some.redirect.uri",
         },
       });
 

@@ -78,7 +78,7 @@ export type TokenEndpointDpopResponse = TokenEndpointResponse & {
 
 export type TokenEndpointInput = {
   grantType: string;
-  redirectUri: string;
+  redirectUrl: string;
   code: string;
   codeVerifier: string;
 };
@@ -259,7 +259,7 @@ export async function getTokens(
     body: formurlencoded({
       /* eslint-disable camelcase */
       grant_type: data.grantType,
-      redirect_uri: data.redirectUri,
+      redirect_uri: data.redirectUrl,
       code: data.code,
       code_verifier: data.codeVerifier,
       client_id: client.clientId,
