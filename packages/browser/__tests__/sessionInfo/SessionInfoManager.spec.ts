@@ -246,6 +246,33 @@ describe("SessionInfoManager", () => {
         await mockedStorage.getForUser("mySession", "key", { secure: false })
       ).toBeUndefined();
     });
+
+    it("clears resource server session info from local storage", async () => {
+      const mockedStorage = mockStorageUtility(
+        {
+          "solidClientAuthenticationUser:mySession": {
+            webId: "https://my.pod/profile#me",
+          },
+        },
+        true
+      );
+      await mockedStorage.storeResourceServerSessionInfo(
+        "https://my.pod/profile#me",
+        "https://my.pod",
+        10000
+      );
+      const sessionManager = getSessionInfoManager({
+        storageUtility: mockedStorage,
+      });
+      await sessionManager.clear("mySession");
+      expect(
+        JSON.parse(
+          (await mockedStorage.get("tmp-resource-server-session-info", {
+            secure: false,
+          })) ?? ""
+        )
+      ).toEqual({});
+    });
   });
 
   describe("getAll", () => {
