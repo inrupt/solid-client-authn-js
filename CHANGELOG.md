@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### browser
+
+- Some components of the redirect URL are no longer lost after redirect, which
+prevents silent authentication from failing.
+
 The following sections document changes that have been released already:
 
 ## 1.6.1 - 2021-02-26

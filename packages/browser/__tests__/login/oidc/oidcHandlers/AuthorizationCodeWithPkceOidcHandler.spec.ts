@@ -27,6 +27,8 @@ import {
   IOidcOptions,
   IRedirector,
   IRedirectorOptions,
+  mockStorage,
+  StorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
 import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
@@ -131,6 +133,38 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           handleRedirect: standardOidcOptions.handleRedirect,
         }
       );
+    });
+
+    it("stores code verifier and redirect URL", async () => {
+      mockOidcModule();
+      const mockedStorage = new StorageUtility(
+        mockStorage({}),
+        mockStorage({})
+      );
+      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
+        {
+          storageUtility: mockedStorage,
+        }
+      );
+      const oidcOptions: IOidcOptions = {
+        ...standardOidcOptions,
+        redirectUrl: "https://app.example.com?someQuery=someValue",
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["authorization_code"],
+        },
+      };
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+      await expect(
+        mockedStorage.getForUser("mySession", "redirectUrl", {
+          secure: false,
+        })
+      ).resolves.toStrictEqual("https://app.example.com?someQuery=someValue");
+      await expect(
+        mockedStorage.getForUser("mySession", "codeVerifier", {
+          secure: false,
+        })
+      ).resolves.not.toBeNull();
     });
 
     it("passes our the 'prompt' option down to our OIDC client library implementation", async () => {

@@ -111,7 +111,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
             // eslint-disable-next-line no-underscore-dangle
             codeVerifier: req.state._code_verifier,
             issuer: oidcLoginOptions.issuer.toString(),
-            redirectUri: oidcLoginOptions.redirectUrl.toString(),
+            // The redirect URL is read after redirect, so it must be stored now.
+            redirectUrl: oidcLoginOptions.redirectUrl,
             dpop: oidcLoginOptions.dpop ? "true" : "false",
           }),
         ])
