@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
+- New options `useEssSession` for `session.handleIncomingRedirect`: If set to false, 
+the `/session` endpoint isn't looked up, and cookie-based auth is disabled. The 
+behaviour is similar when `restorePreviousSession` is true.
+
 ### Bugfixes
 
 #### browser
