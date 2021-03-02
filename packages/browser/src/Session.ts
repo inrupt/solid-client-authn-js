@@ -65,6 +65,17 @@ export interface IHandleIncomgingRedirectOptions {
    * {@see onSessionRestore}
    */
   restorePreviousSession?: boolean;
+
+  /**
+   * Inrupt's Enterprise Solid Server sets a cookie to allow the browser to
+   * access private resources on a Pod. In order to mitigate the logout-on-refresh
+   * issue on the short term, the server also implemented a session endpoint
+   * enabling the client app to know whether the cookie is set. If your app
+   * supports the newest session restore approach, or if you want to prevent
+   * your app to look up the session endpoint on your resource server, this
+   * option may be set to false. It defaults to true for backward compatibility.
+   */
+  useEssSession?: boolean;
   /**
    * The URL of the page handling the redirect, including the query
    * parameters — these contain the information to process the login.
@@ -219,12 +230,27 @@ export class Session extends EventEmitter {
     // data, and if present, indicate that the user is already logged in.
     // Note that there are a lot of edge cases that won't work well with this approach, so it willl
     // be removed in due time.
+    if (
+      options.useEssSession === false ||
+      options.restorePreviousSession === true
+    ) {
+      window.localStorage.setItem(
+        "tmp-resource-server-session-enabled",
+        "false"
+      );
+    } else {
+      window.localStorage.setItem(
+        "tmp-resource-server-session-enabled",
+        "true"
+      );
+    }
     const storedSessionCookieReference = window.localStorage.getItem(
       "tmp-resource-server-session-info"
     );
     if (
       typeof storedSessionCookieReference === "string" &&
-      options.restorePreviousSession !== true
+      options.restorePreviousSession !== true &&
+      options.useEssSession !== false
     ) {
       // TOOD: Re-use the type used when writing this data:
       // https://github.com/inrupt/solid-client-authn-js/pull/920/files#diff-659ac87dfd3711f4cfcea3c7bf6970980f4740fd59df45f04c7977bffaa23e98R118

@@ -42,7 +42,9 @@ export default function App() {
   // is redirected to the page after logging in the identity provider.
   useEffect(() => {
     // After redirect, the current URL contains login information.
-    handleIncomingRedirect(window.location.href).then((info) => {
+    handleIncomingRedirect({
+      restorePreviousSession: true,
+    }).then((info) => {
       setWebId(info.webId);
       setResource(webId);
     });

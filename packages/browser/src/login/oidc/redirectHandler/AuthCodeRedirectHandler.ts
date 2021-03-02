@@ -255,12 +255,18 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         secure: false,
       }
     );
-
-    await setupResourceServerSession(
-      tokens.webId,
-      authFetch,
-      this.storageUtility
-    );
+    // TODO: This is a temporary workaround. When deprecating the cookie-based auth,
+    // this should be all cleared.
+    const essWorkaroundDisabled =
+      window.localStorage.getItem("tmp-resource-server-session-enabled") ===
+      "false";
+    if (!essWorkaroundDisabled) {
+      await setupResourceServerSession(
+        tokens.webId,
+        authFetch,
+        this.storageUtility
+      );
+    }
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {

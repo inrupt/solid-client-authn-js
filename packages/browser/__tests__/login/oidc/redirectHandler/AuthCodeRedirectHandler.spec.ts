@@ -119,6 +119,17 @@ const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
   };
 };
 
+const mockLocalStorage = (stored: Record<string, string>) => {
+  // Kinda weird: `(window as any).localStorage = new LocalStorageMock(stored)` does
+  // not work as intended unless the following snippet is present in the test suite.
+  // On the other hand, only ever mocking localstorage with the following snippet
+  // works well.
+  Object.defineProperty(window, "localStorage", {
+    value: new LocalStorageMock(stored),
+    writable: true,
+  });
+};
+
 /**
  * TODO: FIXME: Suggested improvement from Nic - just recording here for future
  * reference:
@@ -319,7 +330,7 @@ describe("AuthCodeRedirectHandler", () => {
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
       /* eslint-disable  @typescript-eslint/no-explicit-any */
-      (window as any).localStorage = new LocalStorageMock();
+      mockLocalStorage({});
 
       mockFetch(
         new Response("", {
@@ -360,7 +371,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       /* eslint-disable  @typescript-eslint/no-explicit-any */
-      (window as any).localStorage = new LocalStorageMock();
+      mockLocalStorage({});
 
       window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
@@ -404,7 +415,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("saves session information in storage on successful login", async () => {
       /* eslint-disable  @typescript-eslint/no-explicit-any */
-      (window as any).localStorage = new LocalStorageMock();
+      mockLocalStorage({});
 
       window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
@@ -453,7 +464,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("preserves any query strings from the redirect URI", async () => {
       /* eslint-disable  @typescript-eslint/no-explicit-any */
-      (window as any).localStorage = new LocalStorageMock();
+      mockLocalStorage({});
 
       window.fetch = jest.fn().mockReturnValue(
         new Promise((resolve) => {
@@ -530,7 +541,7 @@ describe("AuthCodeRedirectHandler", () => {
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    (window as any).localStorage = new LocalStorageMock();
+    mockLocalStorage({});
 
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the webid in plain/text, it could
@@ -580,7 +591,54 @@ describe("AuthCodeRedirectHandler", () => {
     });
   });
 
+  it("does not look the session endpoint up if the ESS cookie workaround has been disabled", async () => {
+    mockLocalStorage({
+      "tmp-resource-server-session-enabled": "false",
+    });
+
+    // This mocks the fetch to the Resource Server session endpoint
+    // Note: Currently, the endpoint only returns the webid in plain/text, it could
+    // be extended later to also provide the cookie expiration.
+    mockFetch(
+      new Response("https://my.webid", {
+        status: 200,
+      })
+    );
+
+    const MOCK_TIMESTAMP = 10000;
+    Date.now = jest
+      .fn()
+      // Date.now is called twice: once to be able to calculate the auth token expiry time,
+      // and once to set the cookie expiry. We only care about the second in this test.
+      .mockReturnValueOnce(MOCK_TIMESTAMP)
+      .mockReturnValueOnce(MOCK_TIMESTAMP);
+
+    const testIssuer = "some test Issuer";
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: testIssuer,
+      },
+      "solidClientAuthenticationUser:oauth2_state_value": {
+        sessionId: "mySession",
+      },
+    });
+
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+    });
+
+    await authCodeRedirectHandler.handle(
+      "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+    );
+    expect(
+      JSON.parse(
+        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+      )
+    ).toEqual({});
+  });
+
   it("store nothing if the resource server has no session endpoint", async () => {
+    mockLocalStorage({});
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the WebID in plain/text, it could
     // be extended later to also provide the cookie expiration.
@@ -614,6 +672,7 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("swallows the exception if the fetch to the session endpoint fails", async () => {
+    mockLocalStorage({});
     window.fetch = jest
       .fn()
       .mockResolvedValueOnce(
@@ -647,6 +706,7 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("store nothing if the resource server does not recognize the user", async () => {
+    mockLocalStorage({});
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the WebID in plain/text, it could
     // be extended later to also provide the cookie expiration.

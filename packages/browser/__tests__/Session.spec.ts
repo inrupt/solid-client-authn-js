@@ -419,6 +419,29 @@ describe("Session", () => {
         ).toHaveBeenCalledTimes(1);
       });
 
+      it("does not attempt to use the workaround if it is explicitly disabled", async () => {
+        mockLocalStorage({
+          "tmp-resource-server-session-info": JSON.stringify({
+            webId: "https://my.pod/profile#me",
+            sessions: {
+              "https://my.pod/": { expiration: 9000000000000 },
+            },
+          }),
+        });
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn();
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+          useEssSession: false,
+        });
+        expect(mySession.info.isLoggedIn).toBe(false);
+        expect(mySession.info.webId).toBeUndefined();
+        expect(
+          clientAuthentication.handleIncomingRedirect
+        ).toHaveBeenCalledTimes(1);
+      });
+
       it("does not mark an almost-expired session as logged in", async () => {
         mockLocalStorage({
           "tmp-resource-server-session-info": JSON.stringify({
