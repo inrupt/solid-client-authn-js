@@ -70,10 +70,17 @@ export interface IHandleIncomgingRedirectOptions {
    * Inrupt's Enterprise Solid Server sets a cookie to allow the browser to
    * access private resources on a Pod. In order to mitigate the logout-on-refresh
    * issue on the short term, the server also implemented a session endpoint
-   * enabling the client app to know whether the cookie is set. If your app
-   * supports the newest session restore approach, or if you want to prevent
-   * your app to look up the session endpoint on your resource server, this
-   * option may be set to false. It defaults to true for backward compatibility.
+   * enabling the client app to know whether the cookie is set.
+   *
+   * If you want to prevent your app to look up the session endpoint on your
+   * resource server, this option may be set to false, which without any additional
+   * configuration will have the app logged out on refresh.
+   *
+   * If your app supports the newest session restore approach, and `restorePreviousSession`
+   * is set to true, this option is automatically set to false, but your app will
+   * not be logged out when reloaded.
+   *
+   * `useEssSession` defaults to true for backward compatibility.
    */
   useEssSession?: boolean;
   /**
