@@ -7,7 +7,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.7.0 - 2021-03-03
+
 ### New features
+
+#### browser
 
 - New option `useEssSession` for `session.handleIncomingRedirect`: Control to 
 enable and disble the behaviour introduced in 1.4.0. If set to false, the
@@ -20,8 +26,6 @@ behaviour is similar when `restorePreviousSession` is true.
 
 - Some components of the redirect URL are no longer lost after redirect, which
 prevents silent authentication from failing.
-
-The following sections document changes that have been released already:
 
 ## 1.6.1 - 2021-02-26
 
