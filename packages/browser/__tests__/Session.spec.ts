@@ -374,6 +374,10 @@ describe("Session", () => {
         expect(
           clientAuthentication.handleIncomingRedirect
         ).toHaveBeenCalledTimes(1);
+        // The workaround should be enabled by default
+        expect(
+          window.localStorage.getItem("tmp-resource-server-session-enabled")
+        ).toEqual("true");
       });
 
       it("re-initialises the user's WebID without redirection if the proper cookie is set", async () => {
@@ -394,6 +398,10 @@ describe("Session", () => {
         expect(
           clientAuthentication.handleIncomingRedirect
         ).toHaveBeenCalledTimes(0);
+        // The workaround should be enabled by default
+        expect(
+          window.localStorage.getItem("tmp-resource-server-session-enabled")
+        ).toEqual("true");
       });
 
       it("does not attempt to use the workaround if the long-term solution (silent refresh) is enabled", async () => {
@@ -417,6 +425,36 @@ describe("Session", () => {
         expect(
           clientAuthentication.handleIncomingRedirect
         ).toHaveBeenCalledTimes(1);
+        expect(
+          window.localStorage.getItem("tmp-resource-server-session-enabled")
+        ).toEqual("false");
+      });
+
+      it("overrides the workaround if both silent refresh and the ESS session are enabled", async () => {
+        mockLocalStorage({
+          "tmp-resource-server-session-info": JSON.stringify({
+            webId: "https://my.pod/profile#me",
+            sessions: {
+              "https://my.pod/": { expiration: 9000000000000 },
+            },
+          }),
+        });
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn();
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+          restorePreviousSession: true,
+          useEssSession: true,
+        });
+        expect(mySession.info.isLoggedIn).toBe(false);
+        expect(mySession.info.webId).toBeUndefined();
+        expect(
+          clientAuthentication.handleIncomingRedirect
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          window.localStorage.getItem("tmp-resource-server-session-enabled")
+        ).toEqual("false");
       });
 
       it("does not attempt to use the workaround if it is explicitly disabled", async () => {
@@ -440,6 +478,9 @@ describe("Session", () => {
         expect(
           clientAuthentication.handleIncomingRedirect
         ).toHaveBeenCalledTimes(1);
+        expect(
+          window.localStorage.getItem("tmp-resource-server-session-enabled")
+        ).toEqual("false");
       });
 
       it("does not mark an almost-expired session as logged in", async () => {
