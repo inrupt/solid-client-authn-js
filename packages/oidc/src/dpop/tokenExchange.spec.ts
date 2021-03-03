@@ -84,7 +84,7 @@ const mockEndpointInput = (): TokenEndpointInput => {
     grantType: "authorization_code",
     code: "some code",
     codeVerifier: "some pkce token",
-    redirectUri: "https://my.app/redirect",
+    redirectUrl: "https://my.app/redirect",
   };
 };
 
@@ -256,7 +256,7 @@ describe("getTokens", () => {
         grantType: "some_custom_grant",
         code: "some code",
         codeVerifier: "some pkce token",
-        redirectUri: "https://my.app/redirect",
+        redirectUrl: "https://my.app/redirect",
       },
       true
     );

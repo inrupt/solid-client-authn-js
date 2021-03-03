@@ -129,7 +129,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         mockedStorage.getForUser(oidcOptions.sessionId, "issuer")
       ).resolves.toEqual(oidcOptions.issuer);
       await expect(
-        mockedStorage.getForUser(oidcOptions.sessionId, "redirectUri")
+        mockedStorage.getForUser(oidcOptions.sessionId, "redirectUrl")
       ).resolves.toEqual(oidcOptions.redirectUrl);
       await expect(
         mockedStorage.getForUser(oidcOptions.sessionId, "dpop")

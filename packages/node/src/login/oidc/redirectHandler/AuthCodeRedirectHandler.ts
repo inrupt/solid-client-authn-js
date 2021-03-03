@@ -102,15 +102,15 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
   }
 
   async handle(
-    redirectUrl: string
+    inputRedirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
-    if (!(await this.canHandle(redirectUrl))) {
+    if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
-        `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
+        `AuthCodeRedirectHandler cannot handle [${inputRedirectUrl}]: it is missing one of [code, state].`
       );
     }
 
-    const url = new URL(redirectUrl);
+    const url = new URL(inputRedirectUrl);
     // The type assertion is ok, because we checked in canHandle for the presence of a state
     const oauthState = url.searchParams.get("state") as string;
 
@@ -124,45 +124,40 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       );
     }
 
-    const {
-      issuerConfig,
-      codeVerifier,
-      redirectUri,
-      dpop,
-    } = await loadOidcContextFromStorage(
+    const oidcContext = await loadOidcContextFromStorage(
       sessionId,
       this.storageUtility,
       this.issuerConfigFetcher
     );
 
-    const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
+    const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
     // This should also retrieve the client from storage
     const clientInfo: IClient = await this.clientRegistrar.getClient(
       { sessionId },
-      issuerConfig
+      oidcContext.issuerConfig
     );
     const client = new issuer.Client({
       client_id: clientInfo.clientId,
       client_secret: clientInfo.clientSecret,
     });
 
-    const params = client.callbackParams(redirectUrl);
+    const params = client.callbackParams(inputRedirectUrl);
 
     let dpopKey: JWK.ECKey;
     let tokenSet: TokenSet;
     let authFetch: typeof fetch;
 
-    if (dpop) {
+    if (oidcContext.dpop) {
       dpopKey = await JWK.generate("EC", "P-256");
       tokenSet = await client.callback(
-        redirectUri,
+        inputRedirectUrl,
         params,
-        { code_verifier: codeVerifier, state: oauthState },
+        { code_verifier: oidcContext.codeVerifier, state: oauthState },
         { DPoP: dpopKey.toJWK(true) }
       );
     } else {
-      tokenSet = await client.callback(redirectUri, params, {
-        code_verifier: codeVerifier,
+      tokenSet = await client.callback(inputRedirectUrl, params, {
+        code_verifier: oidcContext.codeVerifier,
         state: oauthState,
       });
     }
@@ -183,7 +178,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         tokenRefresher: this.tokenRefresher,
       };
     }
-    if (dpop) {
+    if (oidcContext.dpop) {
       authFetch = await buildDpopFetch(
         tokenSet.access_token,
         // TS thinks dpopKey isn't initialized, when it is.

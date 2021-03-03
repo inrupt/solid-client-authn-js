@@ -88,7 +88,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
         codeVerifier,
         issuer: oidcLoginOptions.issuer,
-        redirectUri: oidcLoginOptions.redirectUrl,
+        redirectUrl: oidcLoginOptions.redirectUrl,
         dpop: oidcLoginOptions.dpop ? "true" : "false",
       }),
     ]);
