@@ -35,7 +35,9 @@ jobs:
           # we incorporate a timestamp in the prerelease version:
           TIMESTAMP=$(date --utc +%s)
           # Make sure the prerelease is tagged with the branch name, and that they are sorted by build:
-          npm run version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER-$TIMESTAMP --yes --no-push --exact
+          # Note: we run a Lerna-specific script to update the version (as
+          # opposed to running `lerna version ...` or `npm version ...`).
+          npm run lerna-version -- prerelease --preid=$TAG_SLUG-$GITHUB_RUN_ID-$GITHUB_RUN_NUMBER-$TIMESTAMP --yes --no-push --exact
           # Read the "version" key from one of our packages to determine the exact version nr
           # the prerelease was published under:
           VERSION_NR=$(cat packages/browser/package.json | npx json version)
