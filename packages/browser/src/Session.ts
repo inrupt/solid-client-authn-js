@@ -53,7 +53,7 @@ export interface ISessionOptions {
   clientAuthentication: ClientAuthentication;
 }
 
-export interface IHandleIncomgingRedirectOptions {
+export interface IHandleIncomingRedirectOptions {
   /**
    * If the user has signed in before, setting this to `true` will automatically
    * redirect them to their Solid Identity Provider, which will then attempt to
@@ -213,10 +213,10 @@ export class Session extends EventEmitter {
    * Completes the login process by processing the information provided by the
    * Solid identity provider through redirect.
    *
-   * @param options See {@see IHandleIncomgingRedirectOptions}.
+   * @param options See {@see IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
-    inputOptions: string | IHandleIncomgingRedirectOptions = {}
+    inputOptions: string | IHandleIncomingRedirectOptions = {}
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
       return this.info;
