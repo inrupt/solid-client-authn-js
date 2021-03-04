@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+## 1.7.1 - 2021-03-04
+
+### Bugfixes
+
+#### browser
+
+- Fixed a typo in the TypeScript interface IHandleIncomingRedirectOptions.
+
 ## 1.7.0 - 2021-03-03
 
 ### New features
