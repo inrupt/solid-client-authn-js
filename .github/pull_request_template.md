@@ -24,7 +24,7 @@ This PR bumps the version to <version number>.
 
 # Checklist
 
-- [ ] I used `lerna version <major|minor|patch> --no-push` to update the version number, first inspecting the CHANGELOG to determine if the release was major, minor or patch.
+- [ ] I used `npm run version -- <major|minor|patch> --no-push` to update the version number, first inspecting the CHANGELOG to determine if the release was major, minor or patch.
 - [ ] The CHANGELOG has been updated to show version and release date - https://keepachangelog.com/en/1.0.0/.
 - [ ] The **only** commits in this PR are:
   - the CHANGELOG update.
