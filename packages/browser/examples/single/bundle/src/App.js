@@ -34,7 +34,7 @@ const REDIRECT_URL = window.location;
 
 export default function App() {
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
-  const [issuer, setIssuer] = useState("https://broker.demo-ess.inrupt.com/");
+  const [issuer, setIssuer] = useState("https://broker.pod.inrupt.com/");
   const [resource, setResource] = useState(webId);
   const [data, setData] = useState(null);
 
@@ -59,6 +59,7 @@ export default function App() {
     login({
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
+      clientName: "Demo app",
     });
   };
 
