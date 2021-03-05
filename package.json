@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@inrupt/eslint-config-base": "0.0.4",
-    "@inrupt/eslint-config-lib": "0.1.1",
+    "@inrupt/eslint-config-lib": "0.1.2",
     "@types/dotenv-flow": "^3.1.0",
     "@types/estree": "0.0.46",
     "@types/jest": "^26.0.13",
