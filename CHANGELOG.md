@@ -9,6 +9,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+### Bugfixes
+
+#### browser
+
+- Attempting to log in with a hash fragment in the redirect URL no longer throws, 
+the hash fragment is simply discarded.
+
 ## 1.7.1 - 2021-03-04
 
 ### Bugfixes
