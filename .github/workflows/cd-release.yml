@@ -140,7 +140,7 @@ jobs:
       run: |
         cd .github/workflows/cd-packaging-tests/bundler-parcel
         npm install @inrupt/solid-client-authn-browser
-        npx parcel build index.ts
+        npx parcel@1.12.3 build index.ts
     - name: Archive Parcel build artifacts
       uses: actions/upload-artifact@v2.2.2
       continue-on-error: true
