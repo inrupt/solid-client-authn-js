@@ -22,7 +22,8 @@
 import { OidcClient, WebStorageStateStore } from "oidc-client";
 
 /**
- * Removes OIDC-specific query parameters from a given URL (state, code...)
+ * Removes OIDC-specific query parameters from a given URL (state, code...), and
+ * sanitizes the URL (e.g. removes the hash fragment).
  * @param redirectUrl The URL to clean up.
  * @returns A copy of the URL, without OIDC-specific query params.
  */
@@ -30,6 +31,9 @@ export function removeOidcQueryParam(redirectUrl: string): string {
   const cleanedUrl = new URL(redirectUrl);
   cleanedUrl.searchParams.delete("code");
   cleanedUrl.searchParams.delete("state");
+  // As per https://tools.ietf.org/html/rfc6749#section-3.1.2, the redirect URL
+  // must not include a hash fragment.
+  cleanedUrl.hash = "";
   return cleanedUrl.toString();
 }
 

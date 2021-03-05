@@ -48,6 +48,12 @@ describe("removeOidcQueryParam", () => {
     );
   });
 
+  it("removes the hash part of the IRI", () => {
+    expect(removeOidcQueryParam("https://some.url/#some-anchor")).toEqual(
+      "https://some.url/"
+    );
+  });
+
   it("returns an URL without query strings as is", () => {
     expect(removeOidcQueryParam("https://some.url/")).toEqual(
       "https://some.url/"
