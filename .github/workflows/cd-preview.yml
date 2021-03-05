@@ -103,7 +103,7 @@ jobs:
       run: |
         cd .github/workflows/cd-packaging-tests/bundler-parcel
         npm install @inrupt/solid-client-authn-browser@$VERSION_NR
-        npx parcel build index.ts
+        npx parcel@1.12.3 build index.ts
       env:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Parcel build artifacts
