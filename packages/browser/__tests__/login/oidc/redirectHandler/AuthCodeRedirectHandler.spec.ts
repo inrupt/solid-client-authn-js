@@ -129,19 +129,27 @@ const mockLocalStorage = (stored: Record<string, string>) => {
   });
 };
 
+jest.mock("../../../../src/login/oidc/IssuerConfigFetcher", () => {
+  return {
+    getJwks: () => [mockJwk()],
+  };
+});
+
 jest.mock("@inrupt/oidc-client-ext");
 
 const defaultJwt = {
   sub: "https://some.webid",
 };
 
-function mockOidcClient(jwt: any = defaultJwt): any {
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+function mockOidcClient(jwt: typeof defaultJwt = defaultJwt): any {
   const mockedOidcClient = jest.requireMock("@inrupt/oidc-client-ext");
   mockedOidcClient.generateJwkForDpop = jest.fn().mockResolvedValue(mockJwk());
   mockedOidcClient.createDpopHeader = jest.fn().mockResolvedValue("someToken");
   mockedOidcClient.decodeJwt = jest.fn().mockResolvedValue(jwt);
   mockedOidcClient.getDpopToken = mockTokenEndpointDpopResponse;
   mockedOidcClient.getBearerToken = mockTokenEndpointBearerResponse;
+  mockedOidcClient.validateIdToken = jest.fn().mockResolvedValue(true);
   return mockedOidcClient;
 }
 
@@ -305,7 +313,6 @@ describe("AuthCodeRedirectHandler", () => {
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
       mockOidcClient();
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
       mockFetch(
@@ -347,7 +354,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
       window.fetch = jest.fn().mockReturnValue(
@@ -392,7 +398,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("saves session information in storage on successful login", async () => {
       mockOidcClient();
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
       window.fetch = jest.fn().mockReturnValue(
@@ -442,7 +447,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("preserves any query strings from the redirect URI", async () => {
       mockOidcClient();
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
       window.fetch = jest.fn().mockReturnValue(
@@ -521,7 +525,6 @@ describe("AuthCodeRedirectHandler", () => {
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
     mockOidcClient();
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
     mockLocalStorage({});
 
     // This mocks the fetch to the Resource Server session endpoint

@@ -127,6 +127,11 @@ const issuerConfigKeyMap: Record<
 };
 /* eslint-enable camelcase */
 
+export async function getJwks(issuerConfig: IIssuerConfig) {
+  const issuerResponse = await fetch(issuerConfig.jwksUri);
+  return issuerResponse.json();
+}
+
 function processConfig(
   config: Record<string, string | string[]>
 ): IIssuerConfig {
