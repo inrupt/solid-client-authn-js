@@ -35,7 +35,6 @@ import { Response } from "cross-fetch";
 import {
   AuthCodeRedirectHandler,
   DEFAULT_LIFESPAN,
-  exchangeDpopToken,
 } from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
 import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
@@ -130,47 +129,21 @@ const mockLocalStorage = (stored: Record<string, string>) => {
   });
 };
 
-/**
- * TODO: FIXME: Suggested improvement from Nic - just recording here for future
- * reference:
+jest.mock("@inrupt/oidc-client-ext");
 
- I really don't like tests results depending on the value of a global variable,
- that may introduce many side-effects. Now that I'm more familiar with jest than
- when I wrote these tests, I think I would approach it this way: I'd replace the
- whole jest.mock("@inrupt/oidc-client-ext", () => {...}; block with:
-
- jest.mock("@inrupt/oidc-client-ext");
-
- const defaultJwt = {
+const defaultJwt = {
   sub: "https://some.webid",
 };
 
- function mockOidcClient(jwt: any = defaultJwt): void {
+function mockOidcClient(jwt: any = defaultJwt): any {
   const mockedOidcClient = jest.requireMock("@inrupt/oidc-client-ext");
-  mockedOidcClient.generateJwkForDpop = jest.fn().mockResolvedValue(mockJWK);
+  mockedOidcClient.generateJwkForDpop = jest.fn().mockResolvedValue(mockJwk());
   mockedOidcClient.createDpopHeader = jest.fn().mockResolvedValue("someToken");
   mockedOidcClient.decodeJwt = jest.fn().mockResolvedValue(jwt);
+  mockedOidcClient.getDpopToken = mockTokenEndpointDpopResponse;
+  mockedOidcClient.getBearerToken = mockTokenEndpointBearerResponse;
+  return mockedOidcClient;
 }
- ```,
- and add a call to `mockOidcClient()` at the beginning of each test. For the
- tests where a different JWT value must be mocked, it can be set this way:
- `mockOidcClient({})` e.g. for an empty JWT. It may be possible to reduce
- overhead by grouping all tests sharing a same `oidc-client` setupd in the same
- `describe` block, and set `jest.beforeEach` to call `mockOidcClient` there, but
- I had issues with this before to redefine the mocked values in the blocks where
- I needed to override the default, so I don't know if that would work in this
- case.
- */
-jest.mock("@inrupt/oidc-client-ext", () => {
-  const { createDpopHeader } = jest.requireActual("@inrupt/oidc-client-ext");
-  return {
-    getDpopToken: async (): Promise<TokenEndpointResponse> =>
-      mockTokenEndpointDpopResponse(),
-    getBearerToken: async (): Promise<TokenEndpointResponse> =>
-      mockTokenEndpointBearerResponse(),
-    createDpopHeader,
-  };
-});
 
 function mockIssuerConfigFetcher(config: IIssuerConfig): IIssuerConfigFetcher {
   return {
@@ -278,6 +251,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("retrieves the code verifier from memory", async () => {
+      mockOidcClient();
       mockFetch(
         new Response("", {
           status: 200,
@@ -311,6 +285,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("Fails if a session was not retrieved", async () => {
+      mockOidcClient();
       mockFetch(
         new Response("", {
           status: 200,
@@ -329,6 +304,7 @@ describe("AuthCodeRedirectHandler", () => {
     // We use ts-ignore comments here only to access mock call arguments
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
+      mockOidcClient();
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
@@ -370,6 +346,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated DPoP fetch if requested", async () => {
+      mockOidcClient();
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
@@ -414,6 +391,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("saves session information in storage on successful login", async () => {
+      mockOidcClient();
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
@@ -463,6 +441,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("preserves any query strings from the redirect URI", async () => {
+      mockOidcClient();
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       mockLocalStorage({});
 
@@ -507,6 +486,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns the expiration time normalised to the current time", async () => {
+      mockOidcClient();
       const MOCK_TIMESTAMP = 10000;
       Date.now = jest
         .fn()
@@ -540,6 +520,7 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
+    mockOidcClient();
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     mockLocalStorage({});
 
@@ -592,6 +573,7 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("does not look the session endpoint up if the ESS cookie workaround has been disabled", async () => {
+    mockOidcClient();
     mockLocalStorage({
       "tmp-resource-server-session-enabled": "false",
     });
@@ -638,6 +620,7 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("store nothing if the resource server has no session endpoint", async () => {
+    mockOidcClient();
     mockLocalStorage({});
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the WebID in plain/text, it could
@@ -672,6 +655,7 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("swallows the exception if the fetch to the session endpoint fails", async () => {
+    mockOidcClient();
     mockLocalStorage({});
     window.fetch = jest
       .fn()
@@ -706,6 +690,7 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("store nothing if the resource server does not recognize the user", async () => {
+    mockOidcClient();
     mockLocalStorage({});
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the WebID in plain/text, it could
@@ -737,25 +722,5 @@ describe("AuthCodeRedirectHandler", () => {
         (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
       )
     ).toEqual({});
-  });
-});
-
-describe("exchangeDpopToken", () => {
-  it("requests a key-bound token", async () => {
-    const mockedIssuer = mockIssuer();
-    const tokens = await exchangeDpopToken(
-      "mySession",
-      mockedIssuer.issuer,
-      mockIssuerConfigFetcher(mockedIssuer),
-      mockClientRegistrar(mockClient()),
-      "some code",
-      "some pkce token",
-      "https://my.app/redirect"
-    );
-    expect(tokens.accessToken).toEqual(
-      mockTokenEndpointDpopResponse().accessToken
-    );
-    expect(tokens.idToken).toEqual(mockTokenEndpointDpopResponse().idToken);
-    expect(tokens.dpopJwk).toEqual(mockTokenEndpointDpopResponse().dpopJwk);
   });
 });
