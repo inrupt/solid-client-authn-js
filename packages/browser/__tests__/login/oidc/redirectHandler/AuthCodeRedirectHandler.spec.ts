@@ -352,6 +352,35 @@ describe("AuthCodeRedirectHandler", () => {
       ).toMatch(/^Bearer some token$/);
     });
 
+    it("throws if the ID token isn't valid", async () => {
+      const mockedOidcClient = mockOidcClient();
+      mockedOidcClient.validateIdToken = jest.fn().mockResolvedValue(false);
+      mockLocalStorage({});
+
+      const storage = mockStorageUtility({
+        "solidClientAuthenticationUser:oauth2StateValue": {
+          sessionId: "mySession",
+        },
+        "solidClientAuthenticationUser:mySession": {
+          dpop: "true",
+          issuer: mockIssuer().issuer.toString(),
+          codeVerifier: "some code verifier",
+          redirectUrl: "https://some.redirect.uri",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: storage,
+      });
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://coolsite.com/?code=someCode&state=oauth2StateValue"
+        )
+      ).rejects.toThrow(
+        `Invalid ID token [${mockIdToken()}]. Possible issues are bad signature, or mismatching audience (expected [some client])`
+      );
+    });
+
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
       mockLocalStorage({});
