@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### browser
+
+- The ID token is now validated when asking for DPoP-bound tokens, and not only when asking for a Bearer token.
+
 The following sections document changes that have been released already:
 
 ### Bugfixes
