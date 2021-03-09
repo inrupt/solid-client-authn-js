@@ -28,7 +28,6 @@ import { inject, injectable } from "tsyringe";
 import {
   IClient,
   IClientRegistrar,
-  IIssuerConfig,
   IIssuerConfigFetcher,
   IRedirectHandler,
   ISessionInfo,
@@ -40,6 +39,8 @@ import {
   getBearerToken,
   TokenEndpointResponse,
   TokenEndpointDpopResponse,
+  validateIdToken,
+  IIssuerConfig,
 } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
 import {
@@ -47,27 +48,16 @@ import {
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
+import { getJwks } from "../IssuerConfigFetcher";
 
-export async function exchangeDpopToken(
-  sessionId: string,
+async function verifyIdToken(
+  issuerConfig: IIssuerConfig,
+  client: IClient,
   issuer: string,
-  issuerFetcher: IIssuerConfigFetcher,
-  clientRegistrar: IClientRegistrar,
-  code: string,
-  codeVerifier: string,
-  redirectUrl: string
-): Promise<TokenEndpointDpopResponse> {
-  const issuerConfig: IIssuerConfig = await issuerFetcher.fetchConfig(issuer);
-  const client: IClient = await clientRegistrar.getClient(
-    { sessionId },
-    issuerConfig
-  );
-  return getDpopToken(issuerConfig, client, {
-    grantType: "authorization_code",
-    code,
-    codeVerifier,
-    redirectUrl,
-  });
+  idToken: string
+): Promise<boolean> {
+  const jwks = await getJwks(issuerConfig);
+  return validateIdToken(idToken, jwks, issuer, client.clientId);
 }
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
@@ -189,6 +179,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     // sensitive, and we want to ensure it survives a browser tab refresh.
     window.localStorage.setItem(KEY_CURRENT_SESSION, storedSessionId);
 
+    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(issuer);
+    const client: IClient = await this.clientRegistrar.getClient(
+      { sessionId: storedSessionId },
+      issuerConfig
+    );
+
     let tokens: TokenEndpointResponse | TokenEndpointDpopResponse;
     let authFetch: typeof fetch;
     const referenceTime = Date.now();
@@ -206,17 +202,14 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         { errorIfNull: true }
       )) as string;
 
-      tokens = await exchangeDpopToken(
-        storedSessionId,
-        issuer,
-        this.issuerConfigFetcher,
-        this.clientRegistrar,
+      tokens = await getDpopToken(issuerConfig, client, {
+        grantType: "authorization_code",
         // We rely on our 'canHandle' function checking that the OAuth 'code'
         // parameter is present in our query string.
-        url.searchParams.get("code") as string,
+        code: url.searchParams.get("code") as string,
         codeVerifier,
-        storedRedirectIri
-      );
+        redirectUrl: storedRedirectIri,
+      });
 
       // The type assertion should not be necessary...
       authFetch = await buildDpopFetch(
@@ -227,6 +220,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     } else {
       tokens = await getBearerToken(url.toString());
       authFetch = buildBearerFetch(tokens.accessToken, tokens.refreshToken);
+    }
+
+    if (!(await verifyIdToken(issuerConfig, client, issuer, tokens.idToken))) {
+      throw new Error(
+        `Invalid ID token [${tokens.idToken}]. Possible issues are bad signature, or mismatching audience (expected [${client.clientId}])`
+      );
     }
 
     await this.storageUtility.setForUser(

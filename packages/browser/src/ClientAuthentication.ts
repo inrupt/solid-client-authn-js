@@ -38,6 +38,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam, validateIdToken } from "@inrupt/oidc-client-ext";
 import { KEY_CURRENT_SESSION } from "./constant";
+import { getJwks } from "./login/oidc/IssuerConfigFetcher";
 
 // TMP: This ensures that the HTTP requests will include any relevant cookie
 // that could have been set by the resource server.
@@ -157,8 +158,7 @@ export default class ClientAuthentication {
     );
 
     try {
-      const issuerResponse = await fetch(issuerConfig.jwksUri);
-      const jwks = await issuerResponse.json();
+      const jwks = await getJwks(issuerConfig);
       if (
         await validateIdToken(
           sessionInfo.idToken,
