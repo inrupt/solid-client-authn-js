@@ -80,4 +80,24 @@ describe("IssuerConfigFetcher", () => {
       "[https://some.url] has an invalid configuration: Some error"
     );
   });
+
+  it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
+    const fetchResponse = (new NodeResponse(
+      JSON.stringify({
+        issuer: "https://example.com",
+        // eslint-disable-next-line camelcase
+        claim_types_supported: "oidc",
+        solid_oidc_supported: true,
+      })
+    ) as unknown) as Response;
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    const mockFetch = jest.fn().mockResolvedValueOnce(fetchResponse);
+    window.fetch = mockFetch;
+    const fetchedConfig = await configFetcher.fetchConfig(
+      "https://arbitrary.url"
+    );
+    expect(fetchedConfig.solidOidcSupported).toBe(true);
+  });
 });

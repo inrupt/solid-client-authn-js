@@ -161,4 +161,20 @@ describe("IssuerConfigFetcher", () => {
       "Issuer metadata is missing supported subject types:"
     );
   });
+
+  it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
+    const { Issuer } = jest.requireMock("openid-client");
+    const mockedIssuerConfig = mockIssuerMetadata({
+      solid_oidc_supported: true,
+    });
+    Issuer.discover = jest.fn().mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(fetchedConfig.solidOidcSupported).toBe(true);
+  });
 });
