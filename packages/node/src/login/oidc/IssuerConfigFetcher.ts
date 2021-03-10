@@ -102,7 +102,7 @@ export function configFromIssuerMetadata(
     responseTypesSupported: metadata.response_types_supported as
       | string[]
       | undefined,
-    solidOidcSupported: metadata.solid_oidc_supported as string | undefined,
+    solidOidcSupported: metadata.solid_oidc_supported as boolean | undefined,
   };
 }
 
