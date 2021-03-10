@@ -113,6 +113,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     const url = new URL(inputRedirectUrl);
     // The type assertion is ok, because we checked in canHandle for the presence of a state
     const oauthState = url.searchParams.get("state") as string;
+    url.searchParams.delete("code");
+    url.searchParams.delete("state");
 
     const sessionId = await getSessionIdFromOauthState(
       this.storageUtility,
@@ -150,13 +152,13 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     if (oidcContext.dpop) {
       dpopKey = await JWK.generate("EC", "P-256");
       tokenSet = await client.callback(
-        inputRedirectUrl,
+        url.href,
         params,
         { code_verifier: oidcContext.codeVerifier, state: oauthState },
         { DPoP: dpopKey.toJWK(true) }
       );
     } else {
-      tokenSet = await client.callback(inputRedirectUrl, params, {
+      tokenSet = await client.callback(url.href, params, {
         code_verifier: oidcContext.codeVerifier,
         state: oauthState,
       });

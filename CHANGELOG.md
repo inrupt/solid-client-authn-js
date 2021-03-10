@@ -7,11 +7,19 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
 ### Bugfixes
 
 #### browser
 
 - The ID token is now validated when asking for DPoP-bound tokens, and not only when asking for a Bearer token.
+
+#### node
+
+- The OIDC parameters added to the redirect IRI by the Solid Identity Provider 
+are no longer included in the redirect IRI provided at the token endpoint.
+- The provided redirect IRI is now normalized.
 
 The following sections document changes that have been released already:
 
