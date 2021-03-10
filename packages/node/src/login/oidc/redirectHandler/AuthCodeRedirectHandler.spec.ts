@@ -311,6 +311,7 @@ describe("AuthCodeRedirectHandler", () => {
       expect(callback).toHaveBeenCalledWith(
         "https://my.app/redirect",
         { code: "someCode", state: "someState" },
+        // The code verifier comes from the mocked storage.
         { code_verifier: "some code verifier", state: "someState" },
         expect.anything()
       );
