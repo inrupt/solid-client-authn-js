@@ -79,6 +79,20 @@ describe("ClientAuthentication", () => {
       });
     });
 
+    it("normalizes the redirect IRI", async () => {
+      const clientAuthn = getClientAuthentication();
+      await clientAuthn.login("mySession", {
+        clientId: "coolApp",
+        redirectUrl: "https://coolapp.com",
+        oidcIssuer: "https://idp.com",
+      });
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          redirectUrl: "https://coolapp.com/",
+        })
+      );
+    });
+
     it("may return after login if no redirect is required", async () => {
       const mockedAuthFetch = jest.fn();
       const mockedLoginHandler: jest.Mocked<ILoginHandler> = {

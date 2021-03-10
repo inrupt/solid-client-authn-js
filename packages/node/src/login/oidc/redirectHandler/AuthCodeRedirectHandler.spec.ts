@@ -196,7 +196,7 @@ describe("AuthCodeRedirectHandler", () => {
       },
     });
 
-  const setupOidcClientMock = (tokenSet: TokenSet) => {
+  const setupOidcClientMock = (tokenSet?: TokenSet, callback?: any) => {
     const { Issuer } = jest.requireMock("openid-client");
     function clientConstructor() {
       // this is untyped, which makes TS complain
@@ -209,18 +209,18 @@ describe("AuthCodeRedirectHandler", () => {
       // this is untyped, which makes TS complain
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      this.callback = jest.fn().mockResolvedValueOnce(tokenSet);
+      this.callback = callback ?? jest.fn().mockResolvedValueOnce(tokenSet);
     }
     const mockedIssuer = {
       metadata: mockDefaultIssuerConfig(),
       Client: clientConstructor,
     };
     Issuer.mockReturnValueOnce(mockedIssuer);
+    return mockedIssuer;
   };
 
-  const setupDefaultOidcClientMock = () => {
+  const setupDefaultOidcClientMock = () =>
     setupOidcClientMock(mockDpopTokens());
-  };
 
   describe("handle", () => {
     it("throws on non-redirect URL", async () => {
@@ -290,6 +290,30 @@ describe("AuthCodeRedirectHandler", () => {
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
         "Bearer"
+      );
+    });
+
+    it("cleans up the redirect IRI from the OIDC parameters", async () => {
+      // This function represents the openid-client callback
+      const callback = jest.fn().mockResolvedValueOnce(mockDpopTokens());
+      setupOidcClientMock(undefined, callback);
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      expect(callback).toHaveBeenCalledWith(
+        "https://my.app/redirect",
+        { code: "someCode", state: "someState" },
+        // The code verifier comes from the mocked storage.
+        { code_verifier: "some code verifier", state: "someState" },
+        expect.anything()
       );
     });
 

@@ -55,13 +55,14 @@ export default class ClientAuthentication {
     sessionId: string,
     options: ILoginInputOptions
   ): Promise<ISessionInfo | undefined> => {
-    const { redirectUrl } = options;
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
     const loginReturn = await this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
-      redirectUrl,
+      redirectUrl: options.redirectUrl
+        ? new URL(options.redirectUrl).href
+        : undefined,
       clientId: options.clientId,
       clientSecret: options.clientSecret,
       clientName: options.clientName ?? options.clientId,
