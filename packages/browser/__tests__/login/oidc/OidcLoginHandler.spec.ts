@@ -71,12 +71,14 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
   });
 
-  it("should lookup client ID if not provided", async () => {
+  it("should retrieve client ID from storage if one is not provided", async () => {
     const actualHandler = defaultMocks.oidcHandler;
     const mockedStorage = new StorageUtility(
       mockStorage({}),
       mockStorage({
         "solidClientAuthenticationUser:mySession": {
+          // The value of the client ID doesn't matter here, and it could be a WebID.
+          // This checks it gets passed through from storage to the handler.
           clientId: "some client ID",
         },
       })
@@ -148,6 +150,8 @@ describe("OidcLoginHandler", () => {
       clientRegistrar: new ClientRegistrar(mockedEmptyStorage),
       issuerConfigFetcher: mockIssuerConfigFetcher({
         ...IssuerConfigFetcherFetchConfigResponse,
+        // Solid-OIDC is not supported by the Identity Provider, so the provided
+        // client WebID cannot be used, and the client must go through DCR instead.
         solidOidcSupported: undefined,
       }),
     });
@@ -157,7 +161,7 @@ describe("OidcLoginHandler", () => {
       oidcIssuer: "https://arbitrary.url",
       redirectUrl: "https://app.com/redirect",
       tokenType: "DPoP",
-      clientId: "https://my.app/registration",
+      clientId: "https://my.app/registration#app",
     });
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
@@ -208,17 +212,17 @@ describe("OidcLoginHandler", () => {
       oidcIssuer: "https://arbitrary.url",
       redirectUrl: "https://app.com/redirect",
       tokenType: "DPoP",
-      clientId: "https://my.app/registration",
+      clientId: "https://my.app/registration#app",
     });
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
-    expect(calledWith.client.clientId).toBe("https://my.app/registration");
+    expect(calledWith.client.clientId).toBe("https://my.app/registration#app");
 
     const storedClientId = await mockedStorage.getForUser(
       "mySession",
       "clientId"
     );
-    expect(storedClientId).toEqual("https://my.app/registration");
+    expect(storedClientId).toEqual("https://my.app/registration#app");
   });
 
   it("should save client ID, secret and name if given as input options", async () => {
