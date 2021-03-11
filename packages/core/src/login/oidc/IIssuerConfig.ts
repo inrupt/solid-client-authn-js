@@ -67,5 +67,5 @@ export interface IIssuerConfig {
   requireRequestUriRegistration?: boolean;
   opPolicyUri?: string;
   opTosUri?: string;
-  solidOidcSupported?: boolean;
+  solidOidcSupported?: "https://solidproject.org/TR/solid-oidc";
 }

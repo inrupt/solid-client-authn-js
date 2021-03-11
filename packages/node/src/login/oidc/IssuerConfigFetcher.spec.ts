@@ -165,7 +165,7 @@ describe("IssuerConfigFetcher", () => {
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
     const { Issuer } = jest.requireMock("openid-client");
     const mockedIssuerConfig = mockIssuerMetadata({
-      solid_oidc_supported: true,
+      solid_oidc_supported: "https://solidproject.org/TR/solid-oidc",
     });
     Issuer.discover = jest.fn().mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
@@ -175,6 +175,8 @@ describe("IssuerConfigFetcher", () => {
       storageUtility: mockStorageUtility({}),
     });
     const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
-    expect(fetchedConfig.solidOidcSupported).toBe(true);
+    expect(fetchedConfig.solidOidcSupported).toBe(
+      "https://solidproject.org/TR/solid-oidc"
+    );
   });
 });

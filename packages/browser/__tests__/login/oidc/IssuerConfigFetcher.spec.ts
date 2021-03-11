@@ -87,7 +87,7 @@ describe("IssuerConfigFetcher", () => {
         issuer: "https://example.com",
         // eslint-disable-next-line camelcase
         claim_types_supported: "oidc",
-        solid_oidc_supported: true,
+        solid_oidc_supported: "https://solidproject.org/TR/solid-oidc",
       })
     ) as unknown) as Response;
     const configFetcher = getIssuerConfigFetcher({
@@ -98,6 +98,8 @@ describe("IssuerConfigFetcher", () => {
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );
-    expect(fetchedConfig.solidOidcSupported).toBe(true);
+    expect(fetchedConfig.solidOidcSupported).toBe(
+      "https://solidproject.org/TR/solid-oidc"
+    );
   });
 });
