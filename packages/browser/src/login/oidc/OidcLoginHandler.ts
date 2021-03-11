@@ -40,70 +40,8 @@ import {
   IStorageUtility,
   ConfigurationError,
   LoginResult,
+  handleRegistration,
 } from "@inrupt/solid-client-authn-core";
-
-import { IClient } from "@inrupt/oidc-client-ext";
-
-function isValidUrl(url: string): boolean {
-  try {
-    // Here, the URL constructor is just called to parse the given string and
-    // verify if it is a well-formed IRI.
-    // eslint-disable-next-line no-new
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function handleRegistration(
-  options: ILoginOptions,
-  issuerConfig: IIssuerConfig,
-  storageUtility: IStorageUtility,
-  clientRegistrar: IClientRegistrar
-): Promise<IClient> {
-  if (
-    options.clientId === undefined ||
-    (issuerConfig.solidOidcSupported !==
-      "https://solidproject.org/TR/solid-oidc" &&
-      isValidUrl(options.clientId))
-  ) {
-    // If no client_id is provided, the client must go through DCR.
-    // If a client_id is provided and it looks like a URI, yet the Identity Provider
-    // does *not* support Solid-OIDC, then we also perform DCR (and discard the
-    // provided client_id).
-    return clientRegistrar.getClient(
-      {
-        sessionId: options.sessionId,
-        clientName: options.clientName,
-        redirectUrl: options.redirectUrl,
-      },
-      issuerConfig
-    );
-  }
-  // If a client_id was provided, and the Identity Provider is Solid-OIDC compliant,
-  // or it is not compliant but the client_id isn't an IRI (we assume it has already
-  // been registered with the IdP), then the client registration information needs
-  // to be stored so that it can be retrieved later after redirect.
-  await storageUtility.setForUser(options.sessionId, {
-    clientId: options.clientId,
-  });
-  if (options.clientSecret) {
-    await storageUtility.setForUser(options.sessionId, {
-      clientSecret: options.clientSecret,
-    });
-  }
-  if (options.clientName) {
-    await storageUtility.setForUser(options.sessionId, {
-      clientName: options.clientName,
-    });
-  }
-  return {
-    clientId: options.clientId,
-    clientSecret: options.clientSecret,
-    clientName: options.clientName,
-  };
-}
 
 function hasIssuer(
   options: ILoginOptions
