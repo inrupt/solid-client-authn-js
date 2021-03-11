@@ -52,6 +52,7 @@ export { IIssuerConfig } from "./login/oidc/IIssuerConfig";
 export {
   IClientRegistrar,
   IClientRegistrarOptions,
+  handleRegistration,
 } from "./login/oidc/IClientRegistrar";
 export { IClient } from "./login/oidc/IClient";
 export { issuerConfigSchema } from "./login/oidc/issuerConfigSchema";
