@@ -68,14 +68,10 @@ async function handleRegistration(
       "https://solidproject.org/TR/solid-oidc" &&
       isValidUrl(options.clientId))
   ) {
-    // If no client_id is provided, the client must go through DCR. Whether the
-    // Identity Provider supports Solid-OIDC or not will only change the value
-    // of the provided client_id.
-    // The tricky case is if a client WebID (here, a client_id looking like an IRI)
-    // is provided, but the Identity Provider does not support Solid-OIDC. In this
-    // case, we must discard the provided client_id, and still go through dynamic
-    // client registration, because the Identity Provider will not recognize the
-    // provided client_id.
+    // If no client_id is provided, the client must go through DCR.
+    // If a client_id is provided and it looks like a URI, yet the Identity Provider
+    // does *not* support Solid-OIDC, then we also perform DCR (and discard the
+    // provided client_id).
     return clientRegistrar.getClient(
       {
         sessionId: options.sessionId,
@@ -85,9 +81,10 @@ async function handleRegistration(
       issuerConfig
     );
   }
-  // If the Identity Provider is Solid-OIDC compliant, or if the client_id isn't
-  // an IRI and therefore has been previously registered to the IdP, the client
-  // registration information just need to be stored to be retrieved after redirect.
+  // If a client_id was provided, and the Identity Provider is Solid-OIDC compliant,
+  // or it is not compliant but the client_id isn't an IRI (we assume it has already
+  // been registered with the IdP), then the client registration information needs
+  // to be stored so that it can be retrieved later after redirect.
   await storageUtility.setForUser(options.sessionId, {
     clientId: options.clientId,
   });
