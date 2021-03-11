@@ -130,7 +130,8 @@ const issuerConfigKeyMap: Record<
 };
 /* eslint-enable camelcase */
 
-export async function getJwks(issuerConfig: IIssuerConfig) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getJwks(issuerConfig: IIssuerConfig): Promise<any> {
   const issuerResponse = await fetch(issuerConfig.jwksUri);
   return issuerResponse.json();
 }

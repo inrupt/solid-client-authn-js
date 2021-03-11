@@ -11,6 +11,12 @@ The following sections document changes that have been released already:
 
 ## 1.7.2 - 2021-03-10
 
+#### browser and node
+
+- A client WebID can now be provided as part of the `login` options. The library will
+check for compliance of the chosen Solid Identity Provider, and go use the provided 
+client WebID or go through Dynamic Client Registration accordingly.
+
 ### Bugfixes
 
 #### browser
