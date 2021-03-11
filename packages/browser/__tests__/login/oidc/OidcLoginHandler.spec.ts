@@ -148,7 +148,7 @@ describe("OidcLoginHandler", () => {
       clientRegistrar: new ClientRegistrar(mockedEmptyStorage),
       issuerConfigFetcher: mockIssuerConfigFetcher({
         ...IssuerConfigFetcherFetchConfigResponse,
-        solidOidcSupported: false,
+        solidOidcSupported: undefined,
       }),
     });
 
@@ -199,7 +199,7 @@ describe("OidcLoginHandler", () => {
       clientRegistrar: new ClientRegistrar(mockedStorage),
       issuerConfigFetcher: mockIssuerConfigFetcher({
         ...IssuerConfigFetcherFetchConfigResponse,
-        solidOidcSupported: true,
+        solidOidcSupported: "https://solidproject.org/TR/solid-oidc",
       }),
     });
 
