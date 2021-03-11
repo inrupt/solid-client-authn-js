@@ -64,7 +64,9 @@ async function handleRegistration(
 ): Promise<IClient> {
   if (
     options.clientId === undefined ||
-    (issuerConfig.solidOidcSupported === false && isValidUrl(options.clientId))
+    (issuerConfig.solidOidcSupported !==
+      "https://solidproject.org/TR/solid-oidc" &&
+      isValidUrl(options.clientId))
   ) {
     // If no client_id is provided, the client must go through DCR. Whether the
     // Identity Provider supports Solid-OIDC or not will only change the value
