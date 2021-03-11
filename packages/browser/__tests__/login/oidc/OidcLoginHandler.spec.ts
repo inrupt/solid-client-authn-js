@@ -30,7 +30,7 @@ import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mock
 import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
 import {
   IssuerConfigFetcherFetchConfigResponse,
-  IssuerConfigFetcherMock,
+  mockDefaultIssuerConfigFetcher,
   mockIssuerConfigFetcher,
 } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
@@ -43,7 +43,7 @@ describe("OidcLoginHandler", () => {
   const defaultMocks = {
     storageUtility: StorageUtilityMock,
     oidcHandler: OidcHandlerMock,
-    issuerConfigFetcher: IssuerConfigFetcherMock,
+    issuerConfigFetcher: mockDefaultIssuerConfigFetcher(),
     clientRegistrar: mockDefaultClientRegistrar(),
   };
   function getInitialisedHandler(
@@ -71,13 +71,15 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
   });
 
-  it("should lookup client ID if not provided", async () => {
+  it("should retrieve client ID from storage if one is not provided", async () => {
     const actualHandler = defaultMocks.oidcHandler;
     const mockedStorage = new StorageUtility(
       mockStorage({}),
       mockStorage({
         "solidClientAuthenticationUser:mySession": {
-          clientId: "https://some.app/registration",
+          // The value of the client ID doesn't matter here, and it could be a WebID.
+          // This checks it gets passed through from storage to the handler.
+          clientId: "some client ID",
         },
       })
     );
@@ -97,7 +99,7 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
-    expect(calledWith.client.clientId).toEqual("https://some.app/registration");
+    expect(calledWith.client.clientId).toEqual("some client ID");
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
@@ -129,7 +131,46 @@ describe("OidcLoginHandler", () => {
     expect(mockedOidcModule.registerClient).toHaveBeenCalled();
   });
 
-  it("should save client ID if given one as an input option", async () => {
+  it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
+    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext");
+    mockedOidcModule.registerClient = jest.fn().mockResolvedValue({
+      clientId: "some dynamically registered ID",
+      clientSecret: "some dynamically registered secret",
+    });
+
+    const mockedEmptyStorage = new StorageUtility(
+      mockStorage({}),
+      mockStorage({})
+    );
+
+    const actualHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({
+      oidcHandler: actualHandler,
+      storageUtility: mockedEmptyStorage,
+      clientRegistrar: new ClientRegistrar(mockedEmptyStorage),
+      issuerConfigFetcher: mockIssuerConfigFetcher({
+        ...IssuerConfigFetcherFetchConfigResponse,
+        // Solid-OIDC is not supported by the Identity Provider, so the provided
+        // client WebID cannot be used, and the client must go through DCR instead.
+        solidOidcSupported: undefined,
+      }),
+    });
+
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      tokenType: "DPoP",
+      clientId: "https://my.app/registration#app",
+    });
+
+    const calledWith = actualHandler.handle.mock.calls[0][0];
+    expect(calledWith.client.clientId).toEqual(
+      "some dynamically registered ID"
+    );
+  });
+
+  it("should save statically registered client ID if given one as an input option", async () => {
     const actualStorage = new StorageUtility(mockStorage({}), mockStorage({}));
     const handler = getInitialisedHandler({
       storageUtility: actualStorage,
@@ -150,6 +191,38 @@ describe("OidcLoginHandler", () => {
       "clientId"
     );
     expect(storedClientId).toEqual(inputClientId);
+  });
+
+  it("should save client WebID if one is provided, and the target IdP supports Solid-OIDC", async () => {
+    const mockedStorage = new StorageUtility(mockStorage({}), mockStorage({}));
+
+    const actualHandler = defaultMocks.oidcHandler;
+    const handler = getInitialisedHandler({
+      oidcHandler: actualHandler,
+      storageUtility: mockedStorage,
+      clientRegistrar: new ClientRegistrar(mockedStorage),
+      issuerConfigFetcher: mockIssuerConfigFetcher({
+        ...IssuerConfigFetcherFetchConfigResponse,
+        solidOidcSupported: "https://solidproject.org/TR/solid-oidc",
+      }),
+    });
+
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      tokenType: "DPoP",
+      clientId: "https://my.app/registration#app",
+    });
+
+    const calledWith = actualHandler.handle.mock.calls[0][0];
+    expect(calledWith.client.clientId).toBe("https://my.app/registration#app");
+
+    const storedClientId = await mockedStorage.getForUser(
+      "mySession",
+      "clientId"
+    );
+    expect(storedClientId).toEqual("https://my.app/registration#app");
   });
 
   it("should save client ID, secret and name if given as input options", async () => {

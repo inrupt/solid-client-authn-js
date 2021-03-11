@@ -40,6 +40,7 @@ import {
   IClient,
   IOidcOptions,
   LoginResult,
+  handleRegistration,
 } from "@inrupt/solid-client-authn-core";
 
 function hasIssuer(
@@ -92,31 +93,13 @@ export default class OidcLoginHandler implements ILoginHandler {
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
       options.oidcIssuer
     );
-    let clientInfo: IClient;
-    if (options.clientId !== undefined) {
-      clientInfo = {
-        clientId: options.clientId,
-        clientSecret: options.clientSecret,
-        clientName: options.clientName,
-      };
-      await this.storageUtility.setForUser(options.sessionId, {
-        clientId: options.clientId,
-      });
-      if (options.clientSecret) {
-        await this.storageUtility.setForUser(options.sessionId, {
-          clientSecret: options.clientSecret,
-        });
-      }
-      if (options.clientName) {
-        await this.storageUtility.setForUser(options.sessionId, {
-          clientName: options.clientName,
-        });
-      }
-    } else {
-      // If 'client_id' and 'client_secret' aren't specified in the options,
-      // perform dynamic client registration.
-      clientInfo = await this.clientRegistrar.getClient(options, issuerConfig);
-    }
+
+    const clientInfo: IClient = await handleRegistration(
+      options,
+      issuerConfig,
+      this.storageUtility,
+      this.clientRegistrar
+    );
 
     // Construct OIDC Options
     const oidcOptions: IOidcOptions = {

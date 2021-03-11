@@ -40,9 +40,8 @@ import {
   IStorageUtility,
   ConfigurationError,
   LoginResult,
+  handleRegistration,
 } from "@inrupt/solid-client-authn-core";
-
-import { IClient } from "@inrupt/oidc-client-ext";
 
 function hasIssuer(
   options: ILoginOptions
@@ -94,36 +93,12 @@ export default class OidcLoginHandler implements ILoginHandler {
       options.oidcIssuer
     );
 
-    let dynamicClientRegistration: IClient;
-    if (options.clientId) {
-      dynamicClientRegistration = {
-        clientId: options.clientId,
-        clientSecret: options.clientSecret,
-        clientName: options.clientName,
-      };
-      await this.storageUtility.setForUser(options.sessionId, {
-        clientId: options.clientId,
-      });
-      if (options.clientSecret) {
-        await this.storageUtility.setForUser(options.sessionId, {
-          clientSecret: options.clientSecret,
-        });
-      }
-      if (options.clientName) {
-        await this.storageUtility.setForUser(options.sessionId, {
-          clientName: options.clientName,
-        });
-      }
-    } else {
-      dynamicClientRegistration = await this.clientRegistrar.getClient(
-        {
-          sessionId: options.sessionId,
-          clientName: options.clientName,
-          redirectUrl: options.redirectUrl,
-        },
-        issuerConfig
-      );
-    }
+    const clientRegistration = await handleRegistration(
+      options,
+      issuerConfig,
+      this.storageUtility,
+      this.clientRegistrar
+    );
 
     // Construct OIDC Options
     const OidcOptions: IOidcOptions = {
@@ -137,7 +112,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       dpop: options.tokenType.toLowerCase() === "dpop",
       redirectUrl: options.redirectUrl,
       issuerConfiguration: issuerConfig,
-      client: dynamicClientRegistration,
+      client: clientRegistration,
       sessionId: options.sessionId,
       handleRedirect: options.handleRedirect,
       prompt: options.prompt,
