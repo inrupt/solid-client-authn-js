@@ -30,7 +30,9 @@ import {
   getDefaultSession,
 } from "../../../../dist/index";
 
-const REDIRECT_URL = window.location;
+const REDIRECT_URL = "http://localhost:3001/";
+const CLIENT_APP_WEBID =
+  "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.ttl#app";
 
 export default function App() {
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
@@ -60,6 +62,7 @@ export default function App() {
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
       clientName: "Demo app",
+      clientId: CLIENT_APP_WEBID,
     });
   };
 
