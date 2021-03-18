@@ -30,7 +30,7 @@ import {
   getDefaultSession,
 } from "../../../../dist/index";
 
-const REDIRECT_URL = "http://localhost:3001/";
+const REDIRECT_URL = "http://localhost:3113/";
 const CLIENT_APP_WEBID =
   "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.ttl#app";
 
