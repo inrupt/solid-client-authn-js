@@ -11,9 +11,9 @@
   },
   "author": "Inrupt, Inc.",
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
     "@testing-library/testcafe": "^4.2.3",
+    "dotenv-flow": "^3.2.0",
     "testcafe": "^1.9.4"
   }
 }
