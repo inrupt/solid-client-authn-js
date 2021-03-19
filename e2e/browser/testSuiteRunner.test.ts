@@ -50,9 +50,6 @@ config({
 const clientApplicationUrl =
   process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001";
 
-// The default value has been determined empirically.
-const testCafeWaitTime: string = process.env.E2E_TESTCAFE_WAIT_TIME ?? "17000";
-
 fixture(
   `Automated tests using client application: [${clientApplicationUrl}]`
 ).page(clientApplicationUrl);
@@ -81,7 +78,7 @@ async function performLogin(
 
   await LoginPage.submitLoginForm(podServerConfig.identityProvider);
 
-  await t.wait(parseInt(testCafeWaitTime, 10));
+  await t.wait(podServerConfig.fetchTimeout);
   await selectBrokeredIdp(podServerConfig.brokeredIdp);
 
   switch (podServerConfig.brokeredIdp) {
@@ -118,7 +115,7 @@ async function performLogin(
       );
   }
 
-  await t.wait(parseInt(testCafeWaitTime, 10));
+  await t.wait(podServerConfig.loginTimeout);
 
   // If this fails, check that the user is registered correctly on the Pod (i.e.
   // just try and log in manually using the credentials being used for this
@@ -165,7 +162,7 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
           .selectText(FetchPage.fetchUriTextbox)
           .typeText(FetchPage.fetchUriTextbox, resourceToGet)
           .click(FetchPage.fetchButton)
-          .wait(parseInt(testCafeWaitTime, 10));
+          .wait(server.fetchTimeout);
 
         const responseBody = await FetchPage.fetchResponseTextbox.textContent;
 
