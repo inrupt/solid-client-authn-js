@@ -19,8 +19,8 @@
       "envTestUserPassword": "E2E_ESS_PASSWORD",
       "brokeredIdp": "Cognito",
       "authorizeClientAppMechanism": "ess",
-      "loginTimeout": 4000,
-      "fetchTimeout": 1000
+      "loginTimeout": 10000,
+      "fetchTimeout": 2000
     }
   ],
 
