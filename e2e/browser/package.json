@@ -4,16 +4,16 @@
   "description": "TestCafe end-2-end authentication test runner",
   "main": "index.ts",
   "scripts": {
-    "test": "testcafe firefox:headless,chrome:headless testSuiteRunner.test.ts"
+    "test": "testcafe chrome:headless testSuiteRunner.test.ts && testcafe firefox:headless testSuiteRunner.test.ts"
   },
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "author": "Inrupt, Inc.",
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
     "@testing-library/testcafe": "^4.2.3",
+    "dotenv-flow": "^3.2.0",
     "testcafe": "^1.9.4"
   }
 }

@@ -27,9 +27,19 @@ import ITestConfig from "./ITestConfig";
 import IPodServerConfig from "./IPodServerConfig";
 import { authorizeEss, authorizeNss } from "./helpers/authorizeClientApp";
 import LoginPage from "./page-models/LoginPage";
+import { config } from "dotenv-flow";
 
 // Could probably provide this via a system environment variable too...
 const testSuite = require("./test-suite.json");
+
+// Load environment variables from .env.test.local if available:
+config({
+  default_node_env: "test",
+  path: __dirname,
+  // In CI, actual environment variables will overwrite values from .env files.
+  // We don't need warning messages in the logs for that:
+  silent: process.env.CI === "true",
+});
 
 // This is the deployed client application that we'll be using to exercise
 // various authentication scenarios. We expect the system environment value to
@@ -39,8 +49,6 @@ const testSuite = require("./test-suite.json");
 // instance.
 const clientApplicationUrl =
   process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001";
-
-const testCafeWaitTime: string = process.env.E2E_TESTCAFE_WAIT_TIME ?? "2000";
 
 fixture(
   `Automated tests using client application: [${clientApplicationUrl}]`
@@ -70,7 +78,7 @@ async function performLogin(
 
   await LoginPage.submitLoginForm(podServerConfig.identityProvider);
 
-  await t.wait(parseInt(testCafeWaitTime, 10));
+  await t.wait(podServerConfig.fetchTimeout);
   await selectBrokeredIdp(podServerConfig.brokeredIdp);
 
   switch (podServerConfig.brokeredIdp) {
@@ -107,7 +115,7 @@ async function performLogin(
       );
   }
 
-  await t.wait(parseInt(testCafeWaitTime, 10));
+  await t.wait(podServerConfig.loginTimeout);
 
   // If this fails, check that the user is registered correctly on the Pod (i.e.
   // just try and log in manually using the credentials being used for this
@@ -154,7 +162,7 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
           .selectText(FetchPage.fetchUriTextbox)
           .typeText(FetchPage.fetchUriTextbox, resourceToGet)
           .click(FetchPage.fetchButton)
-          .wait(parseInt(testCafeWaitTime, 10));
+          .wait(server.fetchTimeout);
 
         const responseBody = await FetchPage.fetchResponseTextbox.textContent;
 
