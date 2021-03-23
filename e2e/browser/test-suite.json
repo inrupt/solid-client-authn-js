@@ -7,16 +7,20 @@
       "envTestUserName": "E2E_NSS_USERNAME",
       "envTestUserPassword": "E2E_NSS_PASSWORD",
       "brokeredIdp": "nss",
-      "authorizeClientAppMechanism": "nss"
+      "authorizeClientAppMechanism": "nss",
+      "loginTimeout": 15000,
+      "fetchTimeout": 2000
     },
     {
-      "description": "ESS Dev - Cognito",
-      "podResourceServer": "https://dev-ess.inrupt.com/<TEST USER NAME>/",
-      "identityProvider": "https://broker.dev-ess.inrupt.com",
-      "envTestUserName": "E2E_ESS_DEV_USERNAME",
-      "envTestUserPassword": "E2E_ESS_DEV_PASSWORD",
+      "description": "ESS - Cognito",
+      "podResourceServer": "https://pod.inrupt.com/<TEST USER NAME>/",
+      "identityProvider": "https://broker.pod.inrupt.com",
+      "envTestUserName": "E2E_ESS_USERNAME",
+      "envTestUserPassword": "E2E_ESS_PASSWORD",
       "brokeredIdp": "Cognito",
-      "authorizeClientAppMechanism": "ess"
+      "authorizeClientAppMechanism": "ess",
+      "loginTimeout": 10000,
+      "fetchTimeout": 2000
     }
   ],
 
