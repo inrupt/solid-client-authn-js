@@ -1,6 +1,9 @@
 name: End-to-end tests (browser)
 
-on: [deployment_status]
+on: 
+  deployment_status:
+    branches-ignore:
+      - dependabot/**
 
 env:
   CI: true

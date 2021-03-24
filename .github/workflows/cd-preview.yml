@@ -3,7 +3,7 @@ name: CD-preview
 on:
   push:
     branches-ignore:
-      - dependabot/*
+      - dependabot/**
 
 env:
   CI: true
