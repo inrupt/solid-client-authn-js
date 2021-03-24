@@ -40,8 +40,13 @@ jobs:
           VERSION_NR=$(cat packages/browser/package.json | npx json version)
           echo "::set-output name=version-nr::$VERSION_NR"
       - run: npm run build
-      - run: npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
-        if: ${{ secrets.NPM_TOKEN != '' }}
+      - run: |
+          # Unfortunately GitHub Actions does not currently let us do something like
+          #     if: secrets.NPM_TOKEN != ''
+          # so simply skip the command if the env var is not set:
+          if [ -n $NPM_TOKEN ]; then
+          npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: |

@@ -29,8 +29,13 @@ jobs:
       - run: npm run bootstrap -- --ci
       - run: npm run build
       - run: npm run test
-      - run: npm run e2e-test
-        if: ${{ secrets.E2E_TEST_REFRESH_TOKEN != '' }}
+      - run: |
+          # Unfortunately GitHub Actions does not currently let us do something like
+          #     if: secrets.NPM_TOKEN != ''
+          # so simply skip the command if the env var is not set:
+          if [ -n $E2E_TEST_REFRESH_TOKEN ]; then
+          npm run e2e-test
+          fi
         env: 
           E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
