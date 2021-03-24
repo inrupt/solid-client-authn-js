@@ -36,6 +36,9 @@ jobs:
           if [ -n $E2E_TEST_REFRESH_TOKEN ]; then
           npm run e2e-test
           fi
+        if:
+          # Testing for the secret is based on a bash expression, which isn't portable. 
+          ${{ matrix.os == 'ubuntu-20.04' }}
         env: 
           E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
