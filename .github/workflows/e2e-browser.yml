@@ -1,10 +1,6 @@
 name: End-to-end tests (browser)
 
-on: 
-  deployment_status:
-    branches-ignore:
-      - dependabot/**
-  workflow_dispatch:
+on: [deployment_status]
 
 env:
   CI: true
@@ -28,6 +24,7 @@ jobs:
           cd e2e/browser;
           npm ci;
           npm test;
+        if: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_USER != "" }}
         env:
           E2E_DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
           E2E_ESS_USERNAME: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_USER }}

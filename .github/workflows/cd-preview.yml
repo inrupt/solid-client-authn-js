@@ -1,10 +1,6 @@
 name: CD-preview
 
-on:
-  push:
-    branches-ignore:
-      - dependabot/**
-  workflow_dispatch:
+on: [push]
 
 env:
   CI: true
@@ -45,6 +41,7 @@ jobs:
           echo "::set-output name=version-nr::$VERSION_NR"
       - run: npm run build
       - run: npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
+        if: ${{ secrets.NPM_TOKEN != "" }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: |
