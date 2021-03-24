@@ -4,6 +4,7 @@ on:
   deployment_status:
     branches-ignore:
       - dependabot/**
+  workflow_dispatch:
 
 env:
   CI: true
