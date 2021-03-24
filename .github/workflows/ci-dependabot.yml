@@ -3,7 +3,7 @@ name: Dependabot CI
 on: 
   push:
     branches:
-      - dependabot/*
+      - dependabot/**
 
 env:
   CI: true
