@@ -30,7 +30,7 @@ jobs:
       - run: npm run build
       - run: npm run test
       - run: npm run e2e-test
-        if: ${{ secrets.E2E_TEST_REFRESH_TOKEN != "" }}
+        if: ${{ secrets.E2E_TEST_REFRESH_TOKEN != '' }}
         env: 
           E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
