@@ -1,6 +1,6 @@
 name: CI
 
-on: [push]
+on: [push, workflow_dispatch]
 
 env:
   CI: true
@@ -29,7 +29,11 @@ jobs:
       - run: npm run bootstrap -- --ci
       - run: npm run build
       - run: npm run test
-      - run: npm run e2e-test
+      - # Dependabot cannot access secrets, so it doesn't have a token to authenticate to ESS.
+        # Since all the other jobs of this workflow depend on this one, skipping it should
+        # skip the entire workflow.
+        if: ${{ github.actor != 'dependabot' }}
+        run: npm run e2e-test
         env: 
           E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}

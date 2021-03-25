@@ -7,7 +7,10 @@ env:
 jobs:
   unpublish-npm:
     runs-on: ubuntu-20.04
-    if: github.event.ref_type == 'branch'
+    # Dependabot cannot access secrets, so it doesn't have a token to publish to NPM.
+    # Since all the other jobs of this workflow depend on this one, skipping it should
+    # skip the entire workflow.
+    if: ${{github.event.ref_type == 'branch' && github.actor != 'dependabot'}} 
     steps:
     - name: Prepare for unpublication from npm
       uses: actions/setup-node@v2.1.5

@@ -1,16 +1,17 @@
 name: CD-preview
 
-on:
-  push:
-    branches-ignore:
-      - dependabot/*
+on: [push, workflow_dispatch]
 
 env:
   CI: true
 jobs:
   dev-release-npm:
     name: "NPM release under a dev tag"
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+    # Dependabot cannot access secrets, so it doesn't have a token to publish to NPM.
+    # Since all the other jobs of this workflow depend on this one, skipping it should
+    # skip the entire workflow.
+    if: ${{ github.actor != 'dependabot' }}
     outputs:
       version-nr: ${{ steps.determine-npm-version.outputs.version-nr }}
     steps:
