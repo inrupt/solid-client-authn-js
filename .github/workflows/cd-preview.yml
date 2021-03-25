@@ -1,6 +1,6 @@
 name: CD-preview
 
-on: [push]
+on: [push, workflow_dispatch]
 
 env:
   CI: true
