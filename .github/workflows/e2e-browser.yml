@@ -7,7 +7,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-20.04
-    if: github.event.deployment_status.state == 'success'
+    if: ${{github.event.deployment_status.state == 'success' && github.actor != 'dependabot[bot]'}}
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Use Node.js 12.x
