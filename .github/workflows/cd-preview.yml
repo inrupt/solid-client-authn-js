@@ -7,7 +7,11 @@ env:
 jobs:
   dev-release-npm:
     name: "NPM release under a dev tag"
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+    # Dependabot cannot access secrets, so it doesn't have a token to publish to NPM.
+    # Since all the other jobs of this workflow depend on this one, skipping it should
+    # skip the entire workflow.
+    if: ${{ github.actor != 'dependabot' }}
     outputs:
       version-nr: ${{ steps.determine-npm-version.outputs.version-nr }}
     steps:
@@ -40,13 +44,7 @@ jobs:
           VERSION_NR=$(cat packages/browser/package.json | npx json version)
           echo "::set-output name=version-nr::$VERSION_NR"
       - run: npm run build
-      - run: |
-          # Unfortunately GitHub Actions does not currently let us do something like
-          #     if: secrets.NPM_TOKEN != ''
-          # so simply skip the command if the env var is not set:
-          if [ -n $NPM_TOKEN ]; then
-          npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
-          fi
+      - run: npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: |

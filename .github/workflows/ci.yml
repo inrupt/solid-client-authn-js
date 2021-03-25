@@ -29,16 +29,11 @@ jobs:
       - run: npm run bootstrap -- --ci
       - run: npm run build
       - run: npm run test
-      - run: |
-          # Unfortunately GitHub Actions does not currently let us do something like
-          #     if: secrets.NPM_TOKEN != ''
-          # so simply skip the command if the env var is not set:
-          if [ -n $E2E_TEST_REFRESH_TOKEN ]; then
-          npm run e2e-test
-          fi
-        if:
-          # Testing for the secret is based on a bash expression, which isn't portable. 
-          ${{ matrix.os == 'ubuntu-20.04' }}
+      - # Dependabot cannot access secrets, so it doesn't have a token to authenticate to ESS.
+        # Since all the other jobs of this workflow depend on this one, skipping it should
+        # skip the entire workflow.
+        if: ${{ github.actor != 'dependabot' }}
+        run: npm run e2e-test
         env: 
           E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}

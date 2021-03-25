@@ -20,15 +20,14 @@ jobs:
           path: e2e/browser/node_modules
           key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
       - name: Run tests
+        # Dependabot cannot access secrets, so it doesn't have a token to authenticate to ESS.
+        # Since all the other jobs of this workflow depend on this one, skipping it should
+        # skip the entire workflow.
+        if: ${{ github.actor != 'dependabot' }}
         run: |
-          # Unfortunately GitHub Actions does not currently let us do something like
-          #     if: secrets.NPM_TOKEN != ''
-          # so simply skip the command if the env var is not set:
-          if [ -n $E2E_ESS_USERNAME ]; then
           cd e2e/browser;
           npm ci;
           npm test;
-          fi
         env:
           E2E_DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
           E2E_ESS_USERNAME: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_USER }}
