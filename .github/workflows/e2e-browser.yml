@@ -20,6 +20,10 @@ jobs:
           path: e2e/browser/node_modules
           key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
       - name: Run tests
+        # Dependabot cannot access secrets, so it doesn't have a token to authenticate to ESS.
+        # Since all the other jobs of this workflow depend on this one, skipping it should
+        # skip the entire workflow.
+        if: ${{ github.actor != 'dependabot' }}
         run: |
           cd e2e/browser;
           npm ci;
