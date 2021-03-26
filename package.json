@@ -33,7 +33,7 @@
     "@inrupt/eslint-config-base": "0.0.4",
     "@inrupt/eslint-config-lib": "0.1.2",
     "@types/dotenv-flow": "^3.1.0",
-    "@types/estree": "0.0.46",
+    "@types/estree": "0.0.47",
     "@types/jest": "^26.0.13",
     "@types/node-fetch": "^2.5.6",
     "@typescript-eslint/eslint-plugin": "^4.14.2",
