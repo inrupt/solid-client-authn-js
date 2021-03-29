@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### browser
+
+- Building the browser package is now possible on Windows, thanks to more portable scripts.
+
 The following sections document changes that have been released already:
 
 ## 1.7.2 - 2021-03-10

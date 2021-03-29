@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build",
-    "clean": "rm -rf ./dist && rm -rf ./coverage",
+    "clean": "rimraf ./dist && rimraf ./coverage",
     "e2e-test": "jest --config jest.e2e.config.js",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint \"src/**/*.ts\"",

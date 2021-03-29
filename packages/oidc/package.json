@@ -10,9 +10,9 @@
   "sideEffects": false,
   "scripts": {
     "prepublishOnly": "npm run build",
-    "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
-    "clean-module": "rm -rf ./dist",
-    "clean-browser": "rm -rf ./browserDist",
+    "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rimraf ./coverage",
+    "clean-module": "rimraf ./dist",
+    "clean-browser": "rimraf ./browserDist",
     "build": "rollup --config rollup.config.js",
     "lint": "eslint --fix \"src/**/*.ts\"",
     "format": "prettier --write \"src/**\" \"__tests__/**\"",

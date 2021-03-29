@@ -12,9 +12,9 @@
   "scripts": {
     "demo-app": "concurrently \"npm run dev\" \"cd examples/demoClientApp; npm run start\"",
     "prepublishOnly": "npm run build",
-    "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rm -rf ./coverage",
-    "clean-module": "rm -rf ./dist",
-    "clean-browser": "rm -rf ./browserDist",
+    "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rimraf ./coverage",
+    "clean-module": "rimraf ./dist",
+    "clean-browser": "rimraf ./browserDist",
     "clean-examples": "npm run clean-server && npm run clean-script && npm run clean-bundle && npm run clean-native && npm run clean-test-helper",
     "clean-server": "cd examples/server && npm run clean",
     "clean-script": "cd examples/script && npm run clean",
