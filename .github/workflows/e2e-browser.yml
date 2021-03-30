@@ -1,13 +1,17 @@
 name: End-to-end tests (browser)
 
-on: [deployment_status]
+on: 
+  deployment_status:
+    branches-ignore:
+      - 'dependabot/npm_and_yarn/**'
+  workflow_dispatch:
 
 env:
   CI: true
 jobs:
   test:
     runs-on: ubuntu-20.04
-    if: ${{github.event.deployment_status.state == 'success' && github.actor != 'dependabot[bot]'}}
+    if: ${{github.event.deployment_status.state == 'success'}}
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Use Node.js 12.x
