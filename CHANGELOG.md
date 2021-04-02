@@ -12,6 +12,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 #### browser
 
 - Building the browser package is now possible on Windows, thanks to more portable scripts.
+- Asynchronous calls that lead to a redirection when restoring a session are now
+  blocking, to prevent any race condition. 
 
 The following sections document changes that have been released already:
 
