@@ -307,7 +307,6 @@ export class Session extends EventEmitter {
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url
     );
-
     if (sessionInfo?.isLoggedIn) {
       this.info.isLoggedIn = sessionInfo.isLoggedIn;
       this.info.webId = sessionInfo.webId;
@@ -343,14 +342,9 @@ export class Session extends EventEmitter {
         await silentlyAuthenticate(storedSessionId, this.clientAuthentication);
         // At this point, we know that the main window will imminently be redirected.
         // However, this redirect is asynchronous and there is no way to halt execution
-        // until it happens precisely. That's why we wait an arbitrary length of time,
-        // to make sure this function never returns and the window is properly redirected.
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        // Just in case the previous sleep wasn't sufficient, undefined is returned
-        // to distinguish from a case when the session is legitimately logged out,
-        // in which case the user may directly call login, which triggers a race
-        // condition on the storage.
-        return undefined;
+        // until it happens precisely. That's why the current Promise simply does not
+        // resolve.
+        return new Promise(() => {});
       }
     }
     this.tokenRequestInProgress = false;
