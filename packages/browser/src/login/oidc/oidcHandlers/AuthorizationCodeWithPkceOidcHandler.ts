@@ -120,7 +120,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirector.redirect(signingRequest.url.toString(), {
         handleRedirect: oidcLoginOptions.handleRedirect,
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: unknown) {
       // eslint-disable-next-line no-console
       console.error(err);
