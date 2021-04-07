@@ -555,11 +555,13 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
+      const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockReturnValue(incomingRedirectPromise);
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect({
+      // eslint-disable-next-line no-void
+      void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
       });
@@ -587,19 +589,25 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
+      const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockReturnValueOnce(incomingRedirectPromise);
+      const validateCurrentSessionPromise = Promise.resolve(
+        "https://some.issuer/"
+      );
       clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockResolvedValue("https://some.issuer/");
+        .mockReturnValue(validateCurrentSessionPromise);
 
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect({
+      // eslint-disable-next-line no-void
+      void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
       });
-
+      await incomingRedirectPromise;
+      await validateCurrentSessionPromise;
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toEqual(
         "https://mock.current/location"
       );
@@ -630,7 +638,8 @@ describe("Session", () => {
         .fn()
         .mockResolvedValue(undefined);
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect({
+      // eslint-disable-next-line no-void
+      void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
       });
@@ -654,25 +663,29 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer",
+        clientAppId: "some client ID",
+        clientAppSecret: "some client secret",
+        redirectUrl: "https://some.redirect/url",
+      });
       clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockResolvedValue({
-          issuer: "https://some.issuer",
-          clientAppId: "some client ID",
-          clientAppSecret: "some client secret",
-          redirectUrl: "https://some.redirect/url",
-        });
+        .mockReturnValue(validateCurrentSessionPromise);
+      const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockReturnValueOnce(incomingRedirectPromise);
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect({
+      // eslint-disable-next-line no-void
+      void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
       });
-
+      await incomingRedirectPromise;
+      await validateCurrentSessionPromise;
       expect(clientAuthentication.login).toHaveBeenCalledWith("mySession", {
         oidcIssuer: "https://some.issuer",
         prompt: "none",
@@ -713,8 +726,8 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect("https://some.redirect/url");
-
+      // eslint-disable-next-line no-void
+      void mySession.handleIncomingRedirect("https://some.redirect/url");
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
       expect(clientAuthentication.login).not.toHaveBeenCalled();
     });
@@ -750,11 +763,11 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
-      await mySession.handleIncomingRedirect({
+      // eslint-disable-next-line no-void
+      void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: false,
       });
-
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
       expect(clientAuthentication.login).not.toHaveBeenCalled();
     });

@@ -108,7 +108,7 @@ jobs:
       env:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Parcel build artifacts
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v2.2.3
       continue-on-error: true
       with:
         name: parcel-dist
@@ -132,7 +132,7 @@ jobs:
       env:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Webpack build artifacts
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v2.2.3
       continue-on-error: true
       with:
         name: webpack-dist

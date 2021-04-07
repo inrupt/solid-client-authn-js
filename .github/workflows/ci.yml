@@ -44,7 +44,7 @@ jobs:
       - run: npm audit --audit-level=moderate
       - run: npm run lerna-audit -- --audit-level=moderate
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v2.2.2
+        uses: actions/upload-artifact@v2.2.3
         continue-on-error: true
         with:
           name: code-coverage-report
