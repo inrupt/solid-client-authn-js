@@ -545,10 +545,6 @@ describe("Session", () => {
   });
 
   describe("silent authentication", () => {
-    beforeEach(() => {
-      jest.useRealTimers();
-    });
-
     it("does nothing if no previous session is available", async () => {
       mockLocalStorage({});
       mockLocation("https://mock.current/location");
@@ -559,19 +555,15 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
+      const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockReturnValue(incomingRedirectPromise);
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
       void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
-      });
-      // We know that handleincomingRedirect is never going to return, so just
-      // wait some time for the async calls to complete.
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
       });
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
     });
@@ -597,12 +589,16 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
+      const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockReturnValueOnce(incomingRedirectPromise);
+      const validateCurrentSessionPromise = Promise.resolve(
+        "https://some.issuer/"
+      );
       clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockResolvedValue("https://some.issuer/");
+        .mockReturnValue(validateCurrentSessionPromise);
 
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
@@ -610,11 +606,8 @@ describe("Session", () => {
         url: "https://some.redirect/url",
         restorePreviousSession: true,
       });
-      // We know that handleincomingRedirect is never going to return, so just
-      // wait some time for the async calls to complete.
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
+      await incomingRedirectPromise;
+      await validateCurrentSessionPromise;
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toEqual(
         "https://mock.current/location"
       );
@@ -650,11 +643,6 @@ describe("Session", () => {
         url: "https://some.redirect/url",
         restorePreviousSession: true,
       });
-      // We know that handleincomingRedirect is never going to return, so just
-      // wait some time for the async calls to complete.
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
     });
 
@@ -675,17 +663,19 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer",
+        clientAppId: "some client ID",
+        clientAppSecret: "some client secret",
+        redirectUrl: "https://some.redirect/url",
+      });
       clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockResolvedValue({
-          issuer: "https://some.issuer",
-          clientAppId: "some client ID",
-          clientAppSecret: "some client secret",
-          redirectUrl: "https://some.redirect/url",
-        });
+        .mockReturnValue(validateCurrentSessionPromise);
+      const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockResolvedValue(undefined);
+        .mockReturnValueOnce(incomingRedirectPromise);
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
@@ -694,11 +684,8 @@ describe("Session", () => {
         url: "https://some.redirect/url",
         restorePreviousSession: true,
       });
-      // We know that handleincomingRedirect is never going to return, so just
-      // wait some time for the async calls to complete.
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
+      await incomingRedirectPromise;
+      await validateCurrentSessionPromise;
       expect(clientAuthentication.login).toHaveBeenCalledWith("mySession", {
         oidcIssuer: "https://some.issuer",
         prompt: "none",
@@ -709,7 +696,6 @@ describe("Session", () => {
     });
 
     it("does nothing if the developer has not explicitly enabled silent authentication", async () => {
-      jest.useRealTimers();
       const sessionId = "mySession";
       mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
@@ -742,11 +728,6 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
       void mySession.handleIncomingRedirect("https://some.redirect/url");
-      // We know that handleincomingRedirect is never going to return, so just
-      // wait some time for the async calls to complete.
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
       expect(clientAuthentication.login).not.toHaveBeenCalled();
     });
@@ -786,11 +767,6 @@ describe("Session", () => {
       void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: false,
-      });
-      // We know that handleincomingRedirect is never going to return, so just
-      // wait some time for the async calls to complete.
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
       });
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
       expect(clientAuthentication.login).not.toHaveBeenCalled();
