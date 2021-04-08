@@ -61,11 +61,11 @@ function hasRedirectUrl(
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("oidcHandler") private oidcHandler: IOidcHandler,
-    @inject("issuerConfigFetcher")
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility,
+    @inject("browser:oidcHandler") private oidcHandler: IOidcHandler,
+    @inject("browser:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("browser:clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async canHandle(options: ILoginOptions): Promise<boolean> {

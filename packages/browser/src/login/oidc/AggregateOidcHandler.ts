@@ -42,7 +42,9 @@ import {
 export default class AggregateOidcHandler
   extends AggregateHandler<[IOidcOptions], LoginResult>
   implements IOidcHandler {
-  constructor(@injectAll("oidcHandlers") oidcLoginHandlers: IOidcHandler[]) {
+  constructor(
+    @injectAll("browser:oidcHandlers") oidcLoginHandlers: IOidcHandler[]
+  ) {
     super(oidcLoginHandlers);
   }
 }

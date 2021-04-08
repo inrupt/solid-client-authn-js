@@ -159,7 +159,7 @@ function processConfig(
 @injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   // This method needs no state (so can be static), and can be exposed to allow
