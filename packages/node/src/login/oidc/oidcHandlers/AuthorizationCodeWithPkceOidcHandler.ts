@@ -45,8 +45,8 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("redirector") private redirector: IRedirector
+    @inject("node:storageUtility") private storageUtility: IStorageUtility,
+    @inject("node:redirector") private redirector: IRedirector
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

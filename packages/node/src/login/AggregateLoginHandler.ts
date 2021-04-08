@@ -42,7 +42,7 @@ import {
 export default class AggregateLoginHandler
   extends AggregateHandler<[ILoginOptions], LoginResult>
   implements ILoginHandler {
-  constructor(@injectAll("loginHandlers") loginHandlers: ILoginHandler[]) {
+  constructor(@injectAll("node:loginHandlers") loginHandlers: ILoginHandler[]) {
     super(loginHandlers);
   }
 }

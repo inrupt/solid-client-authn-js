@@ -78,13 +78,13 @@ export async function getWebidFromTokenPayload(
 @injectable()
 export class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("sessionInfoManager")
+    @inject("node:storageUtility") private storageUtility: IStorageUtility,
+    @inject("node:sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
-    @inject("issuerConfigFetcher")
+    @inject("node:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar,
-    @inject("tokenRefresher") private tokenRefresher: ITokenRefresher
+    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar,
+    @inject("node:tokenRefresher") private tokenRefresher: ITokenRefresher
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {

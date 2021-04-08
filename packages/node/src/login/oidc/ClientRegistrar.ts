@@ -42,7 +42,7 @@ import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 @injectable()
 export default class ClientRegistrar implements IClientRegistrar {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("node:storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   async getClient(
