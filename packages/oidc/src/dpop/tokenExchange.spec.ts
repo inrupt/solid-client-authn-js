@@ -453,6 +453,42 @@ describe("getTokens", () => {
     );
   });
 
+  it("throws if the token endpoint returned an error", async () => {
+    const tokenEndpointResponse = {
+      error: "SomeError",
+    };
+    mockFetch(JSON.stringify(tokenEndpointResponse), 400);
+    await expect(
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+    ).rejects.toThrow(`Token endpoint returned error [SomeError]`);
+  });
+
+  it("throws if the token endpoint returned an error, and shows its description when available", async () => {
+    const tokenEndpointResponse = {
+      error: "SomeError",
+      error_description: "This is an error.",
+    };
+    mockFetch(JSON.stringify(tokenEndpointResponse), 400);
+    await expect(
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+    ).rejects.toThrow(
+      `Token endpoint returned error [SomeError]: This is an error`
+    );
+  });
+
+  it("throws if the token endpoint returned an error, and shows the associated URI when available", async () => {
+    const tokenEndpointResponse = {
+      error: "SomeError",
+      error_uri: "https://some.vocab/error#id",
+    };
+    mockFetch(JSON.stringify(tokenEndpointResponse), 400);
+    await expect(
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+    ).rejects.toThrow(
+      `Token endpoint returned error [SomeError] (see https://some.vocab/error#id)`
+    );
+  });
+
   it("does not return a key with regular bearer tokens", async () => {
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const result = await getTokens(

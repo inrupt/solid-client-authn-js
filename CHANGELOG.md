@@ -16,6 +16,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
   blocking, to prevent the error associated to the message `Field [sessionId] for user [...] is not stored`
   that gets thrown when the user is redirected back from the identity provider.
 
+#### oidc
+
+- When the token endpoint returns an error message, it is now bubbled up properly.
+
 The following sections document changes that have been released already:
 
 ## 1.7.2 - 2021-03-10
