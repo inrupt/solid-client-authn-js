@@ -80,7 +80,7 @@ export async function clear(
 @injectable()
 export class SessionInfoManager implements ISessionInfoManager {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   // eslint-disable-next-line class-methods-use-this

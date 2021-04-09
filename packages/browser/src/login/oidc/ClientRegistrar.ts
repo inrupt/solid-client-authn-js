@@ -40,7 +40,7 @@ import { registerClient } from "@inrupt/oidc-client-ext";
 @injectable()
 export default class ClientRegistrar implements IClientRegistrar {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   async getClient(

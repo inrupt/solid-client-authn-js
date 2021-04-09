@@ -42,7 +42,7 @@ import {
   ISessionInfoManager,
   InMemoryStorage,
 } from "@inrupt/solid-client-authn-core";
-import StorageUtilityBrowser from "./storage/StorageUtility";
+import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
@@ -69,91 +69,91 @@ import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
 const container = emptyContainer;
 
-container.register<IStorageUtility>("storageUtility", {
-  useClass: StorageUtilityBrowser,
+container.register<IStorageUtility>("node:storageUtility", {
+  useClass: StorageUtilityNode,
 });
 
 // Session
-container.register<ISessionInfoManager>("sessionInfoManager", {
+container.register<ISessionInfoManager>("node:sessionInfoManager", {
   useClass: SessionInfoManager,
 });
-container.register<ISessionManager>("sessionManager", {
+container.register<ISessionManager>("node:sessionManager", {
   useClass: SessionManager,
 });
 
 // Login
-container.register<ILoginHandler>("loginHandler", {
+container.register<ILoginHandler>("node:loginHandler", {
   useClass: AggregateLoginHandler,
 });
-container.register<ILoginHandler>("loginHandlers", {
+container.register<ILoginHandler>("node:loginHandlers", {
   useClass: OidcLoginHandler,
 });
 
-container.register<ILoginHandler>("postPopUpLoginHandlers", {
+container.register<ILoginHandler>("node:postPopUpLoginHandlers", {
   useClass: OidcLoginHandler,
 });
 
 // Login/OIDC
-container.register<IOidcHandler>("oidcHandler", {
+container.register<IOidcHandler>("node:oidcHandler", {
   useClass: AggregateOidcHandler,
 });
-container.register<IOidcHandler>("oidcHandlers", {
+container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: RefreshTokenOidcHandler,
 });
 
-container.register<IOidcHandler>("oidcHandlers", {
+container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: AuthorizationCodeOidcHandler,
 });
-container.register<IOidcHandler>("oidcHandlers", {
+container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler,
 });
 
-container.register<IOidcHandler>("oidcHandlers", {
+container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: ClientCredentialsOidcHandler,
 });
-container.register<IOidcHandler>("oidcHandlers", {
+container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: PrimaryDeviceOidcHandler,
 });
-container.register<IOidcHandler>("oidcHandlers", {
+container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: SecondaryDeviceOidcHandler,
 });
 
-container.register<IRedirector>("redirector", {
+container.register<IRedirector>("node:redirector", {
   useClass: Redirector,
 });
-container.register<IClientRegistrar>("clientRegistrar", {
+container.register<IClientRegistrar>("node:clientRegistrar", {
   useClass: ClientRegistrar,
 });
-container.register<ITokenRequester>("tokenRequester", {
+container.register<ITokenRequester>("node:tokenRequester", {
   useClass: TokenRequester,
 });
 
 // Login/OIDC/redirectHandler
-container.register<IRedirectHandler>("redirectHandler", {
+container.register<IRedirectHandler>("node:redirectHandler", {
   useClass: AggregateRedirectHandler,
 });
-container.register<IRedirectHandler>("redirectHandlers", {
+container.register<IRedirectHandler>("node:redirectHandlers", {
   useClass: AuthCodeRedirectHandler,
 });
 
 // This catch-all class will always be able to handle the
 // redirect IRI, so it must be registered last in the container
-container.register<IRedirectHandler>("redirectHandlers", {
+container.register<IRedirectHandler>("node:redirectHandlers", {
   useClass: FallbackRedirectHandler,
 });
 
 // Login/OIDC/Issuer
-container.register<IIssuerConfigFetcher>("issuerConfigFetcher", {
+container.register<IIssuerConfigFetcher>("node:issuerConfigFetcher", {
   useClass: IssuerConfigFetcher,
 });
 
 // Login/OIDC/Refresh
-container.register<ITokenRefresher>("tokenRefresher", {
+container.register<ITokenRefresher>("node:tokenRefresher", {
   useClass: TokenRefresher,
 });
 
 // Logout
-container.register<ILogoutHandler>("logoutHandler", {
+container.register<ILogoutHandler>("node:logoutHandler", {
   useClass: GeneralLogoutHandler,
 });
 
@@ -171,10 +171,10 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   const insecureStorage = dependencies.insecureStorage || storage;
 
   const authenticatorContainer = container.createChildContainer();
-  authenticatorContainer.register<IStorage>("secureStorage", {
+  authenticatorContainer.register<IStorage>("node:secureStorage", {
     useValue: secureStorage,
   });
-  authenticatorContainer.register<IStorage>("insecureStorage", {
+  authenticatorContainer.register<IStorage>("node:insecureStorage", {
     useValue: insecureStorage,
   });
   return authenticatorContainer.resolve(ClientAuthentication);

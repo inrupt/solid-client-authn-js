@@ -42,10 +42,10 @@ import { fetch } from "cross-fetch";
 @injectable()
 export default class ClientAuthentication {
   constructor(
-    @inject("loginHandler") private loginHandler: ILoginHandler,
-    @inject("redirectHandler") private redirectHandler: IRedirectHandler,
-    @inject("logoutHandler") private logoutHandler: ILogoutHandler,
-    @inject("sessionInfoManager")
+    @inject("node:loginHandler") private loginHandler: ILoginHandler,
+    @inject("node:redirectHandler") private redirectHandler: IRedirectHandler,
+    @inject("node:logoutHandler") private logoutHandler: ILogoutHandler,
+    @inject("node:sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager
   ) {}
 

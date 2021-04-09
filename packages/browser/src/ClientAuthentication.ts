@@ -59,12 +59,13 @@ export const fetchWithCookies = (
 @injectable()
 export default class ClientAuthentication {
   constructor(
-    @inject("loginHandler") private loginHandler: ILoginHandler,
-    @inject("redirectHandler") private redirectHandler: IRedirectHandler,
-    @inject("logoutHandler") private logoutHandler: ILogoutHandler,
-    @inject("sessionInfoManager")
+    @inject("browser:loginHandler") private loginHandler: ILoginHandler,
+    @inject("browser:redirectHandler")
+    private redirectHandler: IRedirectHandler,
+    @inject("browser:logoutHandler") private logoutHandler: ILogoutHandler,
+    @inject("browser:sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
-    @inject("issuerConfigFetcher")
+    @inject("browser:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher
   ) {}
 

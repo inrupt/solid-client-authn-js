@@ -44,8 +44,8 @@ import { OidcClient } from "@inrupt/oidc-client-ext";
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("redirector") private redirector: IRedirector
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility,
+    @inject("browser:redirector") private redirector: IRedirector
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

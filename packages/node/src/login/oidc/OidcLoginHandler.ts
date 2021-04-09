@@ -62,11 +62,11 @@ function hasIssuer(
 @injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("oidcHandler") private oidcHandler: IOidcHandler,
-    @inject("issuerConfigFetcher")
+    @inject("node:storageUtility") private storageUtility: IStorageUtility,
+    @inject("node:oidcHandler") private oidcHandler: IOidcHandler,
+    @inject("node:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async canHandle(options: ILoginOptions): Promise<boolean> {

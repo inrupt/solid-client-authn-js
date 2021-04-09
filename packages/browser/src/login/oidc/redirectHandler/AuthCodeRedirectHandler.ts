@@ -122,12 +122,12 @@ async function setupResourceServerSession(
 @injectable()
 export class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("sessionInfoManager")
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility,
+    @inject("browser:sessionInfoManager")
     private sessionInfoManager: ISessionInfoManager,
-    @inject("issuerConfigFetcher")
+    @inject("browser:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("browser:clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {

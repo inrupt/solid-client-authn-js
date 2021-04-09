@@ -41,8 +41,8 @@ export interface ITokenRefresher {
 @injectable()
 export default class TokenRefresher implements ITokenRefresher {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("tokenRequester") private tokenRequester: ITokenRequester
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility,
+    @inject("browser:tokenRequester") private tokenRequester: ITokenRequester
   ) {}
 
   async refresh(localUserId: string): Promise<void> {
