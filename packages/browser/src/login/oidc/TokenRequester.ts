@@ -56,10 +56,10 @@ function btoa(str: string): string {
 @injectable()
 export default class TokenRequester {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("issuerConfigFetcher")
+    @inject("browser:storageUtility") private storageUtility: IStorageUtility,
+    @inject("browser:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("browser:clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async request(

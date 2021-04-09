@@ -115,8 +115,8 @@ async function refreshAccess(
 @injectable()
 export default class RefreshTokenOidcHandler implements IOidcHandler {
   constructor(
-    @inject("tokenRefresher") private tokenRefresher: ITokenRefresher,
-    @inject("storageUtility") private storageUtility: IStorageUtility
+    @inject("node:tokenRefresher") private tokenRefresher: ITokenRefresher,
+    @inject("node:storageUtility") private storageUtility: IStorageUtility
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

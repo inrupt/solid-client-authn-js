@@ -38,10 +38,10 @@ import { IStorage, StorageUtility } from "@inrupt/solid-client-authn-core";
  * @hidden
  */
 @injectable()
-export default class StorageUtilityBrowser extends StorageUtility {
+export default class StorageUtilityNode extends StorageUtility {
   constructor(
-    @inject("secureStorage") secureStorage: IStorage,
-    @inject("insecureStorage") insecureStorage: IStorage
+    @inject("node:secureStorage") secureStorage: IStorage,
+    @inject("node:insecureStorage") insecureStorage: IStorage
   ) {
     super(secureStorage, insecureStorage);
   }

@@ -57,10 +57,10 @@ export interface ITokenRefresher {
 @injectable()
 export default class TokenRefresher implements ITokenRefresher {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("issuerConfigFetcher")
+    @inject("node:storageUtility") private storageUtility: IStorageUtility,
+    @inject("node:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async refresh(

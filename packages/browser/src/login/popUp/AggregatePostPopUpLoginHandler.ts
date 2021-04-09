@@ -43,7 +43,7 @@ export default class AggregatePostPopUpLoginHandler
   extends AggregateHandler<[ILoginOptions], LoginResult>
   implements ILoginHandler {
   constructor(
-    @injectAll("postPopUpLoginHandlers") loginHandlers: ILoginHandler[]
+    @injectAll("browser:postPopUpLoginHandlers") loginHandlers: ILoginHandler[]
   ) {
     super(loginHandlers);
   }

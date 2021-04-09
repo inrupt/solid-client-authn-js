@@ -45,10 +45,10 @@ export interface ITokenRequester {
 @injectable()
 export default class TokenRequester {
   constructor(
-    @inject("storageUtility") private storageUtility: IStorageUtility,
-    @inject("issuerConfigFetcher")
+    @inject("node:storageUtility") private storageUtility: IStorageUtility,
+    @inject("node:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("clientRegistrar") private clientRegistrar: IClientRegistrar
+    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar
   ) {}
 
   async request(

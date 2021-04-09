@@ -46,8 +46,10 @@ import { injectable, inject } from "tsyringe";
 @injectable()
 export default class PopUpLoginHandler implements ILoginHandler {
   constructor(
-    @inject("postPopUpLoginHandler") private loginHandler: ILoginHandler,
-    @inject("sessionInfoManager") private sessionCreator: ISessionInfoManager
+    @inject("browser:postPopUpLoginHandler")
+    private loginHandler: ILoginHandler,
+    @inject("browser:sessionInfoManager")
+    private sessionCreator: ISessionInfoManager
   ) {}
 
   async canHandle(loginOptions: ILoginOptions): Promise<boolean> {
