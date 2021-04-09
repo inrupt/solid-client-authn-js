@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.7.3 - 2021-04-09
+
 ### Bugfixes
 
 #### oidc
@@ -25,8 +29,6 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - When loaded in the same environment (e.g. a full-stack NextJS app), it is no longer
 possible that the browser and node code get mixed together, resulting in code being
 executed in the wrong environment.
-
-The following sections document changes that have been released already:
 
 ## 1.7.2 - 2021-03-10
 
