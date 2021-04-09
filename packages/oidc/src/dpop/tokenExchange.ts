@@ -29,6 +29,27 @@ import { generateJwkForDpop } from "./keyGeneration";
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */
 
+function hasError(
+  value: { error: string } | Record<string, unknown>
+): value is { error: string } {
+  return value.error !== undefined && typeof value.error === "string";
+}
+
+function hasErrorDescription(
+  value: { error_description: string } | Record<string, unknown>
+): value is { error_description: string } {
+  return (
+    value.error_description !== undefined &&
+    typeof value.error_description === "string"
+  );
+}
+
+function hasErrorUri(
+  value: { error_uri: string } | Record<string, unknown>
+): value is { error_uri: string } {
+  return value.error_uri !== undefined && typeof value.error_uri === "string";
+}
+
 function hasAccessToken(
   value: { access_token: string } | Record<string, unknown>
 ): value is { access_token: string } {
@@ -162,6 +183,16 @@ export function validateTokenEndpointResponse(
   id_token: string;
   expires_in?: number;
 } {
+  if (hasError(tokenResponse)) {
+    throw new Error(
+      `Token endpoint returned error [${tokenResponse.error}]${
+        hasErrorDescription(tokenResponse)
+          ? `: ${tokenResponse.error_description}`
+          : ""
+      }${hasErrorUri(tokenResponse) ? ` (see ${tokenResponse.error_uri})` : ""}`
+    );
+  }
+
   if (!hasAccessToken(tokenResponse)) {
     throw new Error(
       `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(

@@ -32,7 +32,7 @@ jobs:
       - # Dependabot cannot access secrets, so it doesn't have a token to authenticate to ESS.
         # Since all the other jobs of this workflow depend on this one, skipping it should
         # skip the entire workflow.
-        if: ${{ github.actor != 'dependabot' }}
+        if: ${{ github.actor != 'dependabot[bot]' }}
         run: npm run e2e-test
         env: 
           E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
@@ -44,7 +44,7 @@ jobs:
       - run: npm audit --audit-level=moderate
       - run: npm run lerna-audit -- --audit-level=moderate
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v2.2.2
+        uses: actions/upload-artifact@v2.2.3
         continue-on-error: true
         with:
           name: code-coverage-report

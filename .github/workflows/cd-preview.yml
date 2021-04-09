@@ -11,7 +11,7 @@ jobs:
     # Dependabot cannot access secrets, so it doesn't have a token to publish to NPM.
     # Since all the other jobs of this workflow depend on this one, skipping it should
     # skip the entire workflow.
-    if: ${{ github.actor != 'dependabot' }}
+    if: ${{ github.actor != 'dependabot[bot]' }}
     outputs:
       version-nr: ${{ steps.determine-npm-version.outputs.version-nr }}
     steps:
@@ -108,7 +108,7 @@ jobs:
       env:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Parcel build artifacts
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v2.2.3
       continue-on-error: true
       with:
         name: parcel-dist
@@ -132,7 +132,7 @@ jobs:
       env:
         VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
     - name: Archive Webpack build artifacts
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v2.2.3
       continue-on-error: true
       with:
         name: webpack-dist

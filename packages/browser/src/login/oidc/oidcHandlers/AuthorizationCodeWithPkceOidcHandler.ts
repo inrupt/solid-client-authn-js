@@ -35,7 +35,7 @@ import {
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { injectable, inject } from "tsyringe";
-import { OidcClient, SigninRequest } from "@inrupt/oidc-client-ext";
+import { OidcClient } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden
@@ -86,48 +86,44 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const { redirector } = this;
     const storage = this.storageUtility;
 
-    await oidcClientLibrary.createSigninRequest().then((req: SigninRequest) => {
-      return (
-        Promise.all([
-          // We use the OAuth 'state' value (which should be crypto-random) as
-          // the key in our storage to store our actual SessionID. We do this
-          // 'cos we'll need to lookup our session information again when the
-          // browser is redirected back to us (i.e. the OAuth client
-          // application) from the Authorization Server.
-          // We don't want to use our session ID as the OAuth 'state' value, as
-          // that session ID can be any developer-specified value, and therefore
-          // may not be appropriate (since the OAuth 'state' value should really
-          // be an unguessable crypto-random value).
-          // eslint-disable-next-line no-underscore-dangle
-          storage.setForUser(req.state._id, {
-            sessionId: oidcLoginOptions.sessionId,
-          }),
+    try {
+      const signingRequest = await oidcClientLibrary.createSigninRequest();
+      await Promise.all([
+        // We use the OAuth 'state' value (which should be crypto-random) as
+        // the key in our storage to store our actual SessionID. We do this
+        // 'cos we'll need to lookup our session information again when the
+        // browser is redirected back to us (i.e. the OAuth client
+        // application) from the Authorization Server.
+        // We don't want to use our session ID as the OAuth 'state' value, as
+        // that session ID can be any developer-specified value, and therefore
+        // may not be appropriate (since the OAuth 'state' value should really
+        // be an unguessable crypto-random value).
+        // eslint-disable-next-line no-underscore-dangle
+        storage.setForUser(signingRequest.state._id, {
+          sessionId: oidcLoginOptions.sessionId,
+        }),
 
-          // Store our login-process state using the session ID as the key.
-          // Strictly speaking, this indirection from our OAuth state value to
-          // our session ID is unnecessary, but it provides a slightly cleaner
-          // separation of concerns.
-          storage.setForUser(oidcLoginOptions.sessionId, {
-            // eslint-disable-next-line no-underscore-dangle
-            codeVerifier: req.state._code_verifier,
-            issuer: oidcLoginOptions.issuer.toString(),
-            // The redirect URL is read after redirect, so it must be stored now.
-            redirectUrl: oidcLoginOptions.redirectUrl,
-            dpop: oidcLoginOptions.dpop ? "true" : "false",
-          }),
-        ])
-          .then(() => {
-            redirector.redirect(req.url.toString(), {
-              handleRedirect: oidcLoginOptions.handleRedirect,
-            });
-          })
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .catch((err: unknown) => {
-            // eslint-disable-next-line no-console
-            console.error(err);
-          })
-      );
-    });
+        // Store our login-process state using the session ID as the key.
+        // Strictly speaking, this indirection from our OAuth state value to
+        // our session ID is unnecessary, but it provides a slightly cleaner
+        // separation of concerns.
+        storage.setForUser(oidcLoginOptions.sessionId, {
+          // eslint-disable-next-line no-underscore-dangle
+          codeVerifier: signingRequest.state._code_verifier,
+          issuer: oidcLoginOptions.issuer.toString(),
+          // The redirect URL is read after redirect, so it must be stored now.
+          redirectUrl: oidcLoginOptions.redirectUrl,
+          dpop: oidcLoginOptions.dpop ? "true" : "false",
+        }),
+      ]);
+
+      redirector.redirect(signingRequest.url.toString(), {
+        handleRedirect: oidcLoginOptions.handleRedirect,
+      });
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
 
     // The login is only completed AFTER redirect, so nothing to return here.
     return undefined;

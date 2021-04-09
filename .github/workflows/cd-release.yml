@@ -142,7 +142,7 @@ jobs:
         npm install @inrupt/solid-client-authn-browser
         npx parcel@1.12.3 build index.ts
     - name: Archive Parcel build artifacts
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v2.2.3
       continue-on-error: true
       with:
         name: parcel-dist
@@ -164,7 +164,7 @@ jobs:
         npm install webpack@5 webpack-cli buffer
         npx webpack --devtool source-map
     - name: Archive Webpack build artifacts
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v2.2.3
       continue-on-error: true
       with:
         name: webpack-dist
