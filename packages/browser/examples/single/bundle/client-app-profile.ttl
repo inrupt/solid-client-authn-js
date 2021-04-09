@@ -1,0 +1,10 @@
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+
+<#app> solid:oidcRegistration """{
+    "client_id" : "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.ttl#app",
+    "redirect_uris" : ["http://localhost:3113/"],
+    "client_name" : "Demo app",
+    "scope" : "openid webid",
+    "grant_types" : ["authorization_code"],
+    "response_types" : ["code"]
+    }""" .
