@@ -54,24 +54,6 @@ export default interface IStorageUtility {
     userId: string,
     options?: { secure?: boolean }
   ): Promise<void>;
-  /**
-   * Register a new session for a given WebID against a given Resource Server.
-   * @param webId
-   * @param resourceServerIri
-   * @param sessionExpires
-   */
-  storeResourceServerSessionInfo(
-    webId: string,
-    resourceServerIri: string,
-    sessionExpires: number
-  ): Promise<void>;
-  /**
-   * Removes session information for a given WebID and a given Resource Server.
-   * Note that if the WebID has no associated session, nothing happens.
-   * @param webId
-   * @param resourceServerIri
-   */
-  clearResourceServerSessionInfo(resourceServerIri: string): Promise<void>;
 
   /**
    * Retrieve from local storage

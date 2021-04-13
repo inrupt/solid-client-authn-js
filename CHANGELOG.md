@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+- The workaround to maintain sessions in 1.6.1 has been removed; this means you
+  should see no more (failed) calls to `/session` in your network console. If
+  you want to make sure a session is preserved across page reloads, please see
+  [the documentation on using the `restorePreviousSession` option].
+
 The following sections document changes that have been released already:
 
 ## 1.7.3 - 2021-04-09
