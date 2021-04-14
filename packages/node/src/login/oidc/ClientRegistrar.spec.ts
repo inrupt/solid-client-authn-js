@@ -156,6 +156,41 @@ describe("ClientRegistrar", () => {
       );
     });
 
+    it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuer = {
+        metadata: mockIssuerMetadata({
+          id_token_signing_alg_values_supported: undefined,
+        }),
+        Client: {
+          register: jest.fn().mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.mockReturnValue(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      await expect(
+        clientRegistrar.getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          {
+            ...IssuerConfigFetcherFetchConfigResponse,
+          }
+        )
+      ).rejects.toThrow(
+        "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+      );
+    });
+
     it("throws if no signing algorithm supported by the issuer match the client preferences", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");

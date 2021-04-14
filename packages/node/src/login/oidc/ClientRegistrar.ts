@@ -94,6 +94,12 @@ export default class ClientRegistrar implements IClientRegistrar {
       );
     }
 
+    if (issuer.metadata.id_token_signing_alg_values_supported === undefined) {
+      throw new Error(
+        "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+      );
+    }
+
     const signingAlg = determineSigningAlg(
       issuer.metadata.id_token_signing_alg_values_supported as string[],
       PREFERRED_SIGNING_ALG
