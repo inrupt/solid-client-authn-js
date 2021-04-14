@@ -27,7 +27,7 @@
 import {
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
-} from "../common/negociation";
+} from "../common/negotiation";
 import {
   IIssuerConfig,
   IClient,
