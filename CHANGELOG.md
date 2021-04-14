@@ -7,6 +7,19 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### node and oidc
+
+- The OIDC issuer profile is used to negociate the preferred signature algorithm
+for ID tokens.
+
+#### node
+
+- During client registration, the client explicitly registers both the 'refresh_token'
+and the 'authorization_code' grants, instead of only relying on scopes to get 
+refresh tokens.
+
 The following sections document changes that have been released already:
 
 ## 1.7.3 - 2021-04-09
