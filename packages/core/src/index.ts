@@ -53,6 +53,7 @@ export {
   IClientRegistrar,
   IClientRegistrarOptions,
   handleRegistration,
+  determineSigningAlg,
 } from "./login/oidc/IClientRegistrar";
 export { IClient } from "./login/oidc/IClient";
 export { issuerConfigSchema } from "./login/oidc/issuerConfigSchema";
