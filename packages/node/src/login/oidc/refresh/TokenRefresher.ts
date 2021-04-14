@@ -83,6 +83,7 @@ export default class TokenRefresher implements ITokenRefresher {
     const client = new issuer.Client({
       client_id: clientInfo.clientId,
       client_secret: clientInfo.clientSecret,
+      id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
     });
 
     if (refreshToken === undefined) {

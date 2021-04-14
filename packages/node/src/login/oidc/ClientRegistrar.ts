@@ -125,6 +125,7 @@ export default class ClientRegistrar implements IClientRegistrar {
         client_name: options.clientName,
         // See https://openid.net/specs/openid-connect-registration-1_0.html
         id_token_signed_response_alg: signingAlg,
+        grant_types: ["authorization_code", "refresh_token"],
       },
       {
         initialAccessToken: extendedOptions.registrationAccessToken,
