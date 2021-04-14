@@ -33,6 +33,7 @@ const getMockIssuer = (): IIssuerConfig => {
     claimsSupported: ["code", "openid"],
     subjectTypesSupported: ["public", "pairwise"],
     registrationEndpoint: "https://some.issuer/registration",
+    idTokenSigningAlgValuesSupported: ["RS256"],
   };
 };
 
@@ -52,6 +53,8 @@ const getSuccessfulFetch = (): typeof fetch =>
         client_secret: "some secret",
         // eslint-disable-next-line camelcase
         redirect_uris: ["https://some.url"],
+        // eslint-disable-next-line camelcase
+        id_token_signed_response_alg: "RS256",
       }),
       { status: 200 }
     )
@@ -70,6 +73,18 @@ describe("registerClient", () => {
     );
   });
 
+  it("throws if the issuer doesn't advertize for supported signature algorithms", async () => {
+    const mockIssuer = {
+      ...getMockIssuer(),
+      idTokenSigningAlgValuesSupported: undefined,
+    };
+    await expect(() =>
+      registerClient(getMockOptions(), mockIssuer)
+    ).rejects.toThrow(
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+    );
+  });
+
   it("uses an access token if provided", async () => {
     const myFetch = getSuccessfulFetch();
     global.fetch = myFetch;
@@ -83,12 +98,13 @@ describe("registerClient", () => {
     );
   });
 
-  it("extract the client info from the IdP response", async () => {
+  it("extracts the client info from the IdP response", async () => {
     const myFetch = getSuccessfulFetch();
     global.fetch = myFetch;
     const client = await registerClient(getMockOptions(), getMockIssuer());
     expect(client.clientId).toEqual("some id");
     expect(client.clientSecret).toEqual("some secret");
+    expect(client.idTokenSignedResponseAlg).toEqual("RS256");
   });
 
   // TODO: this only tests the minimal registration request.

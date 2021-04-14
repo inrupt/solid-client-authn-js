@@ -91,6 +91,10 @@ export default class ClientRegistrar implements IClientRegistrar {
       if (registeredClient.clientSecret) {
         infoToSave.clientSecret = registeredClient.clientSecret;
       }
+      if (registeredClient.idTokenSignedResponseAlg) {
+        infoToSave.idTokenSignedResponseAlg =
+          registeredClient.idTokenSignedResponseAlg;
+      }
       await this.storageUtility.setForUser(
         extendedOptions.sessionId,
         infoToSave,

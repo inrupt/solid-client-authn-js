@@ -19,41 +19,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  IIssuerConfig,
-  IIssuerConfigFetcher,
-} from "@inrupt/solid-client-authn-core";
+// FIXME: this is copy-pasted from @inrupt/solid-client-authn-core (as is all the rest of this directory).
+// Initially, it was aimed that @inrupt/oidc-client-ext would not depend on the core package, and only
+// on the underlying OIDC library, but it is beginning to be impractical. This should be resolved in a
+// future PR.
+export function determineSigningAlg(
+  supported: string[],
+  preferred: string[]
+): string | null {
+  let preferredSupportedAlg = null;
+  preferred.some((signingAlg) => {
+    if (supported.includes(signingAlg)) {
+      preferredSupportedAlg = signingAlg;
+      // returnning true breaks the .some() iteration.
+      return true;
+    }
+    return false;
+  });
+  return preferredSupportedAlg;
+}
 
-export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
-  issuer: "https://idp.com",
-  authorizationEndpoint: "https://idp.com/auth",
-  tokenEndpoint: "https://idp.com/token",
-  jwksUri: "https://idp.com/jwks",
-  subjectTypesSupported: [],
-  claimsSupported: [],
-  grantTypesSupported: ["refresh_token"],
-  idTokenSigningAlgValuesSupported: ["RS256"],
-};
-
-export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  fetchConfig: jest.fn((_issuer: string) =>
-    Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
-  ),
-};
-
-export const mockDefaultIssuerConfigFetcher = (): IIssuerConfigFetcher => {
-  return {
-    fetchConfig: jest
-      .fn()
-      .mockResolvedValue(IssuerConfigFetcherFetchConfigResponse),
-  };
-};
-
-export const mockIssuerConfigFetcher = (
-  config: IIssuerConfig
-): IIssuerConfigFetcher => {
-  return {
-    fetchConfig: jest.fn().mockResolvedValue(config),
-  };
-};
+export const PREFERRED_SIGNING_ALG = ["ES256", "RS256"];
