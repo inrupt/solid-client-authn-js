@@ -141,6 +141,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     const client = new issuer.Client({
       client_id: clientInfo.clientId,
       client_secret: clientInfo.clientSecret,
+      id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
     });
 
     const params = client.callbackParams(inputRedirectUrl);
