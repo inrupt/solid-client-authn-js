@@ -62,16 +62,11 @@ export function determineSigningAlg(
   supported: string[],
   preferred: string[]
 ): string | null {
-  let preferredSupportedAlg = null;
-  preferred.some((signingAlg) => {
-    if (supported.includes(signingAlg)) {
-      preferredSupportedAlg = signingAlg;
-      // returnning true breaks the .some() iteration.
-      return true;
-    }
-    return false;
-  });
-  return preferredSupportedAlg;
+  return (
+    preferred.find((signingAlg) => {
+      return supported.includes(signingAlg);
+    }) || null
+  );
 }
 
 export async function handleRegistration(
