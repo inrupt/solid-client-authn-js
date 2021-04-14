@@ -158,6 +158,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         { code_verifier: oidcContext.codeVerifier, state: oauthState },
         { DPoP: dpopKey.toJWK(true) }
       );
+      console.log(`fetched tokens: ${JSON.stringify(tokenSet)}`);
     } else {
       tokenSet = await client.callback(url.href, params, {
         code_verifier: oidcContext.codeVerifier,

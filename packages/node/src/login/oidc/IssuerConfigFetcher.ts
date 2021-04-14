@@ -105,6 +105,9 @@ export function configFromIssuerMetadata(
     solidOidcSupported: metadata.solid_oidc_supported as
       | "https://solidproject.org/TR/solid-oidc"
       | undefined,
+    idTokenSigningAlgValuesSupported: metadata.id_token_signing_alg_values_supported as
+      | string[]
+      | undefined,
   };
 }
 
@@ -131,6 +134,8 @@ export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
       config.requestObjectSigningAlgValuesSupported,
     grant_types_supported: config.grantTypesSupported,
     response_types_supported: config.responseTypesSupported,
+    id_token_signing_alg_values_supported:
+      config.idTokenSigningAlgValuesSupported,
   };
 }
 
