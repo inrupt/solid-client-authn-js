@@ -37,7 +37,6 @@ import {
 export default class Redirector implements IRedirector {
   redirect(redirectUrl: string, options?: IRedirectorOptions): void {
     if (options && options.handleRedirect) {
-      console.log(`Redirecting to ${redirectUrl}`);
       options.handleRedirect(redirectUrl);
     } else {
       throw new Error(
