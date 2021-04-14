@@ -131,6 +131,7 @@ describe("registerClient", () => {
         redirect_uris: [options.redirectUrl?.toString()],
         subject_type: "pairwise",
         token_endpoint_auth_method: "client_secret_basic",
+        id_token_signed_response_alg: "RS256",
       }),
     });
   });
