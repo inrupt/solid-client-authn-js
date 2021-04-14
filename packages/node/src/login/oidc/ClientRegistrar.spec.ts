@@ -84,6 +84,7 @@ describe("ClientRegistrar", () => {
               clientId: "an id",
               clientSecret: "a secret",
               clientName: "my client name",
+              idTokenSignedResponseAlg: "ES256",
             },
           },
           false
@@ -101,6 +102,7 @@ describe("ClientRegistrar", () => {
       expect(client.clientId).toEqual("an id");
       expect(client.clientSecret).toEqual("a secret");
       expect(client.clientName).toEqual("my client name");
+      expect(client.idTokenSignedResponseAlg).toEqual("ES256");
     });
 
     it("properly performs dynamic registration and saves client information", async () => {
@@ -136,6 +138,9 @@ describe("ClientRegistrar", () => {
       expect(client.clientSecret).toEqual(
         mockDefaultClientConfig().client_secret
       );
+      expect(client.idTokenSignedResponseAlg).toEqual(
+        mockDefaultClientConfig().id_token_signed_response_alg
+      );
 
       // Check that the client information have been saved in storage
       await expect(
@@ -144,6 +149,46 @@ describe("ClientRegistrar", () => {
       await expect(
         mockStorage.getForUser("mySession", "clientSecret")
       ).resolves.toEqual(mockDefaultClientConfig().client_secret);
+      await expect(
+        mockStorage.getForUser("mySession", "idTokenSignedResponseAlg")
+      ).resolves.toEqual(
+        mockDefaultClientConfig().id_token_signed_response_alg
+      );
+    });
+
+    it("throws if no signing algorithm supported by the issuer match the client preferences", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client");
+      const mockedIssuer = {
+        metadata: mockIssuerMetadata({
+          id_token_signing_alg_values_supported: ["Some_bogus_algorithm"],
+        }),
+        Client: {
+          register: jest.fn().mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.mockReturnValue(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      await expect(
+        clientRegistrar.getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          {
+            ...IssuerConfigFetcherFetchConfigResponse,
+          }
+        )
+      ).rejects.toThrow(
+        'No signature algorithm match between ["Some_bogus_algorithm"] supported by the Identity Provider and ["ES256","RS256"] preferred by the client.'
+      );
     });
 
     it("retrieves client information from storage after dynamic registration", async () => {
@@ -226,9 +271,9 @@ describe("ClientRegistrar", () => {
         }
       );
       expect(mockedIssuer.Client.register).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           redirect_uris: ["https://example.com"],
-        },
+        }),
         {
           initialAccessToken: "a token",
         }
@@ -261,9 +306,9 @@ describe("ClientRegistrar", () => {
         }
       );
       expect(mockedIssuer.Client.register).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           redirect_uris: ["https://example.com"],
-        },
+        }),
         {
           initialAccessToken: "a token",
         }

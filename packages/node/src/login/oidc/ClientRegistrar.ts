@@ -32,6 +32,8 @@ import {
   IClient,
   IClientRegistrarOptions,
   ConfigurationError,
+  determineSigningAlg,
+  PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
 import { Client, Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
@@ -54,16 +56,22 @@ export default class ClientRegistrar implements IClientRegistrar {
       storedClientId,
       storedClientSecret,
       storedClientName,
+      storedIdTokenSignedResponseAlg,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId"),
       this.storageUtility.getForUser(options.sessionId, "clientSecret"),
       this.storageUtility.getForUser(options.sessionId, "clientName"),
+      this.storageUtility.getForUser(
+        options.sessionId,
+        "idTokenSignedResponseAlg"
+      ),
     ]);
     if (storedClientId) {
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
         clientName: storedClientName as string | undefined,
+        idTokenSignedResponseAlg: storedIdTokenSignedResponseAlg,
       };
     }
     const extendedOptions = { ...options };
@@ -86,6 +94,21 @@ export default class ClientRegistrar implements IClientRegistrar {
       );
     }
 
+    const signingAlg = determineSigningAlg(
+      issuer.metadata.id_token_signing_alg_values_supported as string[],
+      PREFERRED_SIGNING_ALG
+    );
+
+    if (signingAlg === null) {
+      throw new Error(
+        `No signature algorithm match between ${JSON.stringify(
+          issuer.metadata.id_token_signing_alg_values_supported
+        )} supported by the Identity Provider and ${JSON.stringify(
+          PREFERRED_SIGNING_ALG
+        )} preferred by the client.`
+      );
+    }
+
     // The following is compliant with the example code, but seems to mismatch the
     // type annotations.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -94,13 +117,18 @@ export default class ClientRegistrar implements IClientRegistrar {
       {
         redirect_uris: [options.redirectUrl],
         client_name: options.clientName,
+        // See https://openid.net/specs/openid-connect-registration-1_0.html
+        id_token_signed_response_alg: signingAlg,
       },
       {
         initialAccessToken: extendedOptions.registrationAccessToken,
       }
     );
+
     const infoToSave: Record<string, string> = {
       clientId: registeredClient.metadata.client_id,
+      idTokenSignedResponseAlg:
+        registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
     };
     if (registeredClient.metadata.client_secret) {
       infoToSave.clientSecret = registeredClient.metadata.client_secret;
@@ -110,6 +138,8 @@ export default class ClientRegistrar implements IClientRegistrar {
       clientId: registeredClient.metadata.client_id,
       clientSecret: registeredClient.metadata.client_secret,
       clientName: registeredClient.metadata.client_name as string | undefined,
+      idTokenSignedResponseAlg:
+        registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
     };
   }
 }
