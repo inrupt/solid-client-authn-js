@@ -232,7 +232,7 @@ describe("TokenRefresher", () => {
       mockJwk()
     );
 
-    expect(refreshedTokens.access_token).toEqual(mockDpopTokens().access_token);
+    expect(refreshedTokens.access_token).toBe(mockDpopTokens().access_token);
   });
 
   it("refreshes a DPoP token properly", async () => {
