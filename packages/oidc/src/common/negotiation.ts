@@ -19,17 +19,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-/**
- * @hidden
- */
-export interface IClient {
-  clientId: string;
-  clientSecret?: string;
-  clientName?: string;
-  idTokenSignedResponseAlg?: string;
+// FIXME: this is copy-pasted from @inrupt/solid-client-authn-core (as is all the rest of this directory).
+// Initially, it was aimed that @inrupt/oidc-client-ext would not depend on the core package, and only
+// on the underlying OIDC library, but it is beginning to be impractical. This should be resolved in a
+// future PR.
+export function determineSigningAlg(
+  supported: string[],
+  preferred: string[]
+): string | null {
+  return (
+    preferred.find((signingAlg) => {
+      return supported.includes(signingAlg);
+    }) ?? null
+  );
 }
+
+export const PREFERRED_SIGNING_ALG = ["ES256", "RS256"];

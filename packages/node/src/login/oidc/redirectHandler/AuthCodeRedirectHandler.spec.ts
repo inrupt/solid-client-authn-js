@@ -193,6 +193,7 @@ describe("AuthCodeRedirectHandler", () => {
         codeVerifier: "some code verifier",
         redirectUrl: "https://my.app/redirect",
         dpop: "true",
+        idTokenSignedResponseAlg: "RS256",
       },
     });
 

@@ -58,6 +58,17 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+export function determineSigningAlg(
+  supported: string[],
+  preferred: string[]
+): string | null {
+  return (
+    preferred.find((signingAlg) => {
+      return supported.includes(signingAlg);
+    }) ?? null
+  );
+}
+
 export async function handleRegistration(
   options: ILoginOptions,
   issuerConfig: IIssuerConfig,

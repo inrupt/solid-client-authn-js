@@ -28,8 +28,10 @@ export class CognitoPage {
   submitButton;
 
   constructor() {
-    // The Cognito sign-in page contains the sign-in form twice and is basically confusing
-    // TestCafe/testing-library, hence the cumbersome selectors rather than selecting by label text.
+    // The Cognito sign-in page contains the sign-in form twice (once for large screen sizes,
+    // and once for small screen sizes) and this basically confuses TestCafe/testing-library. So
+    // we explicitly tell TestCafe to make the window large so that we can reliably select
+    // the large-screen versions of our required elements!
     this.usernameInput = screen.getByRole("textbox");
     this.passwordInput = Selector(".visible-lg input[type=password]");
     this.submitButton = Selector(".visible-lg input[type=submit]");
@@ -38,6 +40,8 @@ export class CognitoPage {
   async login(username: string, password: string) {
     await onCognitoPage();
     await t
+      // See the constructor for details of why we need to maximize the window!
+      .resizeWindow(1600, 800)
       .typeText(this.usernameInput, username)
       .typeText(this.passwordInput, password)
       .click(this.submitButton);

@@ -34,6 +34,7 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   subjectTypesSupported: [],
   claimsSupported: [],
   grantTypesSupported: ["refresh_token"],
+  idTokenSigningAlgValuesSupported: ["ES256", "RS256"],
 };
 
 export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
@@ -54,6 +55,7 @@ export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
     jwks_uri: "https://my.idp/jwks",
     claims_supported: ["sub"],
     subject_types_supported: ["public", "pairwise"],
+    id_token_signing_alg_values_supported: ["ES256", "RS256"],
   };
 };
 

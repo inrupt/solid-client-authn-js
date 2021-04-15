@@ -74,7 +74,7 @@ describe("Authenticated fetch", () => {
     const response = await session.fetch(publicResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain(
-      "foaf:PersonalProfileDocument"
+      ":PersonalProfileDocument"
     );
   });
 
@@ -152,7 +152,7 @@ describe("Unauthenticated fetch", () => {
     const response = await unauthenticatedSession.fetch(publicResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain(
-      "foaf:PersonalProfileDocument"
+      ":PersonalProfileDocument"
     );
   });
 
@@ -180,7 +180,7 @@ describe("Post-logout fetch", () => {
     const response = await session.fetch(publicResourceUrl);
     expect(response.status).toEqual(200);
     await expect(response.text()).resolves.toContain(
-      "foaf:PersonalProfileDocument"
+      ":PersonalProfileDocument"
     );
   });
 

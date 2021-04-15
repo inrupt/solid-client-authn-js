@@ -31,10 +31,12 @@ import {
   IIssuerConfigFetcher,
   IStorageUtility,
   loadOidcContextFromStorage,
+  PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.
@@ -80,9 +82,16 @@ export default class TokenRefresher implements ITokenRefresher {
       { sessionId },
       oidcContext.issuerConfig
     );
+    if (clientInfo.idTokenSignedResponseAlg === undefined) {
+      clientInfo.idTokenSignedResponseAlg = negotiateClientSigningAlg(
+        oidcContext.issuerConfig,
+        PREFERRED_SIGNING_ALG
+      );
+    }
     const client = new issuer.Client({
       client_id: clientInfo.clientId,
       client_secret: clientInfo.clientSecret,
+      id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
     });
 
     if (refreshToken === undefined) {

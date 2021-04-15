@@ -25,3 +25,8 @@
  * within those storage mechanisms, e.g., window.localStorage).
  */
 export const SOLID_CLIENT_AUTHN_KEY_PREFIX = "solidClientAuthn:";
+
+/**
+ * Ordered list of signature algorithms, from most preferred to least preferred.
+ */
+export const PREFERRED_SIGNING_ALG = ["ES256", "RS256"];

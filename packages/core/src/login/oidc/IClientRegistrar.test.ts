@@ -21,7 +21,7 @@
 
 import { it, describe, expect } from "@jest/globals";
 import { IIssuerConfig, ILoginOptions, IStorageUtility } from "../..";
-import { handleRegistration } from "./IClientRegistrar";
+import { determineSigningAlg, handleRegistration } from "./IClientRegistrar";
 
 describe("handleRegistration", () => {
   it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
@@ -107,5 +107,22 @@ describe("handleRegistration", () => {
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
+  });
+});
+
+describe("determineSigningAlg", () => {
+  it("returns the preferred algorithm of the supported list", () => {
+    expect(
+      determineSigningAlg(["ES256", "HS256", "RS256"], ["ES256", "RS256"])
+    ).toBe("ES256");
+    expect(determineSigningAlg(["ES256", "HS256", "RS256"], ["RS256"])).toBe(
+      "RS256"
+    );
+    expect(determineSigningAlg(["RS256"], ["RS256"])).toBe("RS256");
+  });
+
+  it("returns null if there are no matches", () => {
+    expect(determineSigningAlg(["RS256"], ["ES256"])).toBeNull();
+    expect(determineSigningAlg(["RS256"], [])).toBeNull();
   });
 });

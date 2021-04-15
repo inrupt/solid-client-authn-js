@@ -43,6 +43,8 @@ describe("ClientRegistrar", () => {
 
   describe("getClient", () => {
     it("properly performs dynamic registration", async () => {
+      // FIXME: this should mock out oidc-client-ext, instead of mimicking the
+      // actual OIDC provider response.
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable camelcase */
         (new NodeResponse(
@@ -50,6 +52,7 @@ describe("ClientRegistrar", () => {
             client_id: "abcd",
             client_secret: "1234",
             redirect_uris: ["https://example.com"],
+            id_token_signed_response_alg: "RS256",
           })
         ) as unknown) as Response
         /* eslint-enable camelcase */
@@ -85,6 +88,7 @@ describe("ClientRegistrar", () => {
           redirect_uris: ["https://example.com"],
           subject_type: "pairwise",
           token_endpoint_auth_method: "client_secret_basic",
+          id_token_signed_response_alg: "RS256",
           /* eslint-enable camelcase */
         }),
       });

@@ -25,6 +25,10 @@
  */
 
 import {
+  determineSigningAlg,
+  PREFERRED_SIGNING_ALG,
+} from "../common/negotiation";
+import {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
@@ -93,6 +97,22 @@ export async function registerClient(
   options: IClientRegistrarOptions,
   issuerConfig: IIssuerConfig
 ): Promise<IClient> {
+  if (!issuerConfig.registrationEndpoint) {
+    throw new Error(
+      "Dynamic Registration could not be completed because the issuer has no registration endpoint."
+    );
+  }
+  if (!Array.isArray(issuerConfig.idTokenSigningAlgValuesSupported)) {
+    throw new Error(
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+    );
+  }
+
+  const signingAlg = determineSigningAlg(
+    issuerConfig.idTokenSigningAlgValuesSupported,
+    PREFERRED_SIGNING_ALG
+  );
+
   const config = {
     /* eslint-disable camelcase */
     client_name: options.clientName,
@@ -100,13 +120,10 @@ export async function registerClient(
     redirect_uris: [options.redirectUrl?.toString()],
     subject_type: "pairwise",
     token_endpoint_auth_method: "client_secret_basic",
+    id_token_signed_response_alg: signingAlg,
     /* eslint-enable camelcase */
   };
-  if (!issuerConfig.registrationEndpoint) {
-    throw new Error(
-      "Dynamic Registration could not be completed because the issuer has no registration endpoint."
-    );
-  }
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -127,6 +144,7 @@ export async function registerClient(
     return {
       clientId: responseBody.client_id,
       clientSecret: responseBody.client_secret,
+      idTokenSignedResponseAlg: responseBody.id_token_signed_response_alg,
     };
   }
   if (registerResponse.status === 400) {

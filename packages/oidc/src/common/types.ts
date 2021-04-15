@@ -61,6 +61,7 @@ export interface IClient {
   clientId: string;
   clientSecret?: string;
   clientName?: string;
+  idTokenSignedResponseAlg?: string;
 }
 
 export interface IClientRegistrarOptions {
