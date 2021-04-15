@@ -123,5 +123,6 @@ describe("determineSigningAlg", () => {
 
   it("returns null if there are no matches", () => {
     expect(determineSigningAlg(["RS256"], ["ES256"])).toBeNull();
+    expect(determineSigningAlg(["RS256"], [])).toBeNull();
   });
 });
