@@ -16,9 +16,10 @@ for ID tokens.
 
 #### node
 
-- During client registration, the client explicitly registers both the 'refresh_token'
-and the 'authorization_code' grants, instead of only relying on scopes to get 
-refresh tokens.
+- During client registration, the client explicitly specifies both the 'refresh_token'
+and the 'authorization_code' grants as part of its profile, instead of only relying
+on scopes to get refresh tokens. Depending on the Identity Provider, the former 
+behaviour could result in not getting refresh tokens.
 
 The following sections document changes that have been released already:
 
