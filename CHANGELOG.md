@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 #### node and oidc
 
-- The OIDC issuer profile is used to negociate the preferred signature algorithm
+- The OIDC issuer profile is used to negotiate the preferred signature algorithm
 for ID tokens.
 
 #### node
