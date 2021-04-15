@@ -102,7 +102,7 @@ export async function registerClient(
       "Dynamic Registration could not be completed because the issuer has no registration endpoint."
     );
   }
-  if (!issuerConfig.idTokenSigningAlgValuesSupported) {
+  if (!Array.isArray(issuerConfig.idTokenSigningAlgValuesSupported)) {
     throw new Error(
       "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
     );

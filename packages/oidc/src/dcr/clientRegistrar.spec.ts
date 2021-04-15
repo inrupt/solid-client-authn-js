@@ -76,8 +76,8 @@ describe("registerClient", () => {
   it("throws if the issuer doesn't advertize for supported signature algorithms", async () => {
     const mockIssuer = {
       ...getMockIssuer(),
-      idTokenSigningAlgValuesSupported: undefined,
     };
+    delete mockIssuer["idTokenSigningAlgValuesSupported"];
     await expect(() =>
       registerClient(getMockOptions(), mockIssuer)
     ).rejects.toThrow(

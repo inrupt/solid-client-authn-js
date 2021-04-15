@@ -174,16 +174,15 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorage,
       });
+      const issuerConfig = { ...IssuerConfigFetcherFetchConfigResponse };
+      delete issuerConfig.idTokenSigningAlgValuesSupported;
       await expect(
         clientRegistrar.getClient(
           {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          {
-            ...IssuerConfigFetcherFetchConfigResponse,
-            idTokenSigningAlgValuesSupported: undefined,
-          }
+          issuerConfig
         )
       ).rejects.toThrow(
         "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
