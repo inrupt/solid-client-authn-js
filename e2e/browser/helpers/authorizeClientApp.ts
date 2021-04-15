@@ -1,5 +1,4 @@
 import { Selector, t } from "testcafe";
-import FetchPage from "../page-models/FetchPage";
 
 export async function authorizeNss() {
   // Authorize our client application to access Pod resources. On NSS this will
@@ -16,7 +15,8 @@ export async function authorizeNss() {
 }
 
 export async function authorizeEss() {
-  await t.click(".approve");
+  const approveButton = Selector("button").withText("Approve");
+  await t.click(approveButton);
 
   // Previous ESS Broker IdP (based on MitreID Connect) used this selector:
   // await t.click("[name=authorize]");

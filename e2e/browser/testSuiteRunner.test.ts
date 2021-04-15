@@ -146,9 +146,10 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
           await t.eval(() => location.reload());
         }
 
+        // We explicitly lower-case th username here (since that's what ESS does
         const podRoot = server.podResourceServer.replace(
           "<TEST USER NAME>",
-          testUserName
+          testUserName.toLowerCase()
         );
         const resourceToGet = data.resourceToGet.replace("<POD ROOT>", podRoot);
 
