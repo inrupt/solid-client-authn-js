@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.7.4 - 2021-04-15
+
 ### Bugfixes
 
 #### node and oidc
@@ -20,8 +24,6 @@ for ID tokens.
 and the 'authorization_code' grants as part of its profile, instead of only relying
 on scopes to get refresh tokens. Depending on the Identity Provider, the former 
 behaviour could result in not getting refresh tokens.
-
-The following sections document changes that have been released already:
 
 ## 1.7.3 - 2021-04-09
 
