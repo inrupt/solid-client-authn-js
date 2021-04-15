@@ -26,24 +26,6 @@
 
   "testList": [
     {
-      "name": "Public resource in my Pod - not logged in",
-      "performLogin": false,
-      "resourceToGet": "<POD ROOT>public/",
-      "expectResponseContainsAnyOf": ["ldp:BasicContainer"]
-    },
-    {
-      "name": "Public resource in my Pod, redirected - not logged in",
-      "performLogin": false,
-      "resourceToGet": "<POD ROOT>public",
-      "expectResponseContainsAnyOf": ["ldp:BasicContainer"]
-    },
-    {
-      "name": "Private resource in my Pod - not logged in",
-      "performLogin": false,
-      "resourceToGet": "<POD ROOT>private/",
-      "expectResponseContainsAnyOf": ["\"Unauthorized\"", "requires you to log"]
-    },
-    {
       "name": "Private resource in my Pod - logged in",
       "performLogin": true,
       "resourceToGet": "<POD ROOT>private/",

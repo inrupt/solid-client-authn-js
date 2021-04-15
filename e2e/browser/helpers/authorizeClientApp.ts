@@ -16,5 +16,8 @@ export async function authorizeNss() {
 }
 
 export async function authorizeEss() {
-  await t.click("[name=authorize]");
+  await t.click(".approve");
+
+  // Previous ESS Broker IdP (based on MitreID Connect) used this selector:
+  // await t.click("[name=authorize]");
 }
