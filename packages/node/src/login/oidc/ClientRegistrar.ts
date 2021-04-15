@@ -38,6 +38,34 @@ import {
 import { Client, Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 
+export function negotiateClientSigningAlg(
+  issuerConfig: IIssuerConfig,
+  clientPreference: string[]
+): string {
+  if (issuerConfig.idTokenSigningAlgValuesSupported === undefined) {
+    throw new Error(
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+    );
+  }
+
+  const signingAlg = determineSigningAlg(
+    issuerConfig.idTokenSigningAlgValuesSupported,
+    clientPreference
+  );
+
+  if (signingAlg === null) {
+    throw new Error(
+      `No signature algorithm match between ${JSON.stringify(
+        issuerConfig.idTokenSigningAlgValuesSupported
+      )} supported by the Identity Provider and ${JSON.stringify(
+        clientPreference
+      )} preferred by the client.`
+    );
+  }
+
+  return signingAlg;
+}
+
 /**
  * @hidden
  */
@@ -94,26 +122,10 @@ export default class ClientRegistrar implements IClientRegistrar {
       );
     }
 
-    if (issuer.metadata.id_token_signing_alg_values_supported === undefined) {
-      throw new Error(
-        "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
-      );
-    }
-
-    const signingAlg = determineSigningAlg(
-      issuer.metadata.id_token_signing_alg_values_supported as string[],
+    const signingAlg = negotiateClientSigningAlg(
+      issuerConfig,
       PREFERRED_SIGNING_ALG
     );
-
-    if (signingAlg === null) {
-      throw new Error(
-        `No signature algorithm match between ${JSON.stringify(
-          issuer.metadata.id_token_signing_alg_values_supported
-        )} supported by the Identity Provider and ${JSON.stringify(
-          PREFERRED_SIGNING_ALG
-        )} preferred by the client.`
-      );
-    }
 
     // The following is compliant with the example code, but seems to mismatch the
     // type annotations.

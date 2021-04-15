@@ -34,6 +34,7 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   subjectTypesSupported: [],
   claimsSupported: [],
   grantTypesSupported: ["refresh_token"],
+  idTokenSigningAlgValuesSupported: ["ES256", "RS256"],
 };
 
 export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {

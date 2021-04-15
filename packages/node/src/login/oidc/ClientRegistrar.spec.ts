@@ -160,9 +160,7 @@ describe("ClientRegistrar", () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
       const mockedIssuer = {
-        metadata: mockIssuerMetadata({
-          id_token_signing_alg_values_supported: undefined,
-        }),
+        metadata: mockDefaultIssuerMetadata(),
         Client: {
           register: jest.fn().mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
@@ -184,6 +182,7 @@ describe("ClientRegistrar", () => {
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
+            idTokenSigningAlgValuesSupported: undefined,
           }
         )
       ).rejects.toThrow(
@@ -195,9 +194,7 @@ describe("ClientRegistrar", () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client");
       const mockedIssuer = {
-        metadata: mockIssuerMetadata({
-          id_token_signing_alg_values_supported: ["Some_bogus_algorithm"],
-        }),
+        metadata: mockDefaultIssuerMetadata(),
         Client: {
           register: jest.fn().mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
@@ -219,6 +216,7 @@ describe("ClientRegistrar", () => {
           },
           {
             ...IssuerConfigFetcherFetchConfigResponse,
+            idTokenSigningAlgValuesSupported: ["Some_bogus_algorithm"],
           }
         )
       ).rejects.toThrow(
