@@ -77,7 +77,7 @@ describe("registerClient", () => {
     const mockIssuer = {
       ...getMockIssuer(),
     };
-    delete mockIssuer["idTokenSigningAlgValuesSupported"];
+    delete mockIssuer.idTokenSigningAlgValuesSupported;
     await expect(() =>
       registerClient(getMockOptions(), mockIssuer)
     ).rejects.toThrow(
