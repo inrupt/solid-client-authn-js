@@ -30,7 +30,7 @@ export function determineSigningAlg(
   return (
     preferred.find((signingAlg) => {
       return supported.includes(signingAlg);
-    }) || null
+    }) ?? null
   );
 }
 
