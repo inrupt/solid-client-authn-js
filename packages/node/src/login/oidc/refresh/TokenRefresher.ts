@@ -49,7 +49,8 @@ export interface ITokenRefresher {
   refresh(
     localUserId: string,
     refreshToken?: string,
-    dpopKey?: JWK.ECKey
+    dpopKey?: JWK.ECKey,
+    handleRefreshTokenRotation?: (token: string) => unknown
   ): Promise<TokenSet & { access_token: string }>;
 }
 
@@ -68,7 +69,8 @@ export default class TokenRefresher implements ITokenRefresher {
   async refresh(
     sessionId: string,
     refreshToken?: string,
-    dpopKey?: JWK.ECKey
+    dpopKey?: JWK.ECKey,
+    handleRefreshTokenRotation?: (token: string) => unknown
   ): Promise<TokenSet & { access_token: string }> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
@@ -122,6 +124,9 @@ export default class TokenRefresher implements ITokenRefresher {
       await this.storageUtility.setForUser(sessionId, {
         refreshToken: tokenSet.refresh_token,
       });
+      if (handleRefreshTokenRotation !== undefined) {
+        handleRefreshTokenRotation(tokenSet.refresh_token);
+      }
     }
     // The type assertion is fine, since we throw on undefined access_token
     return tokenSet as TokenSet & { access_token: string };

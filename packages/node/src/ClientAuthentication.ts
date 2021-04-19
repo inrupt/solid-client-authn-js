@@ -71,6 +71,7 @@ export default class ClientAuthentication {
       handleRedirect: options.handleRedirect,
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
+      handleRefreshTokenRotation: options.handleRefreshTokenRotation,
     });
 
     if (loginReturn !== undefined) {
@@ -122,9 +123,13 @@ export default class ClientAuthentication {
   };
 
   handleIncomingRedirect = async (
-    url: string
+    url: string,
+    handleRefreshToken?: (token: string) => unknown
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(url);
+    const redirectInfo = await this.redirectHandler.handle(
+      url,
+      handleRefreshToken
+    );
 
     this.fetch = redirectInfo.fetch;
 

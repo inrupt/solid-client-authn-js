@@ -119,6 +119,7 @@ export default class OidcLoginHandler implements ILoginHandler {
           "refreshToken"
         )),
       handleRedirect: options.handleRedirect,
+      handleRefreshTokenRotation: options.handleRefreshTokenRotation,
     };
     // Call proper OIDC Handler
     return this.oidcHandler.handle(oidcOptions);

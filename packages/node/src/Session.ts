@@ -197,7 +197,8 @@ export class Session extends EventEmitter {
    * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
    */
   handleIncomingRedirect = async (
-    url: string
+    url: string,
+    handleRefreshToken?: (token: string) => unknown
   ): Promise<ISessionInfo | undefined> => {
     let sessionInfo;
 
@@ -212,7 +213,8 @@ export class Session extends EventEmitter {
       try {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
-          url
+          url,
+          handleRefreshToken
         );
 
         if (sessionInfo) {
