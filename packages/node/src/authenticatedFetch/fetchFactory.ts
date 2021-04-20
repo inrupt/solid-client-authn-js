@@ -28,7 +28,7 @@ export type RefreshOptions = {
   sessionId: string;
   refreshToken: string;
   tokenRefresher: ITokenRefresher;
-  handleRefreshToken?: (token: string) => unknown;
+  onNewRefreshToken?: (token: string) => unknown;
 };
 
 function isExpectedAuthError(statusCode: number): boolean {
@@ -83,8 +83,8 @@ export function buildBearerFetch(
       if (tokenSet.refresh_token) {
         // If the refresh token is rotated, update it in the closure.
         currentRefreshOptions.refreshToken = tokenSet.refresh_token;
-        if (currentRefreshOptions.handleRefreshToken !== undefined) {
-          currentRefreshOptions.handleRefreshToken(tokenSet.refresh_token);
+        if (currentRefreshOptions.onNewRefreshToken !== undefined) {
+          currentRefreshOptions.onNewRefreshToken(tokenSet.refresh_token);
         }
       }
       // Once the token has been refreshed, re-issue the authenticated request.
@@ -234,8 +234,8 @@ export async function buildDpopFetch(
         if (tokenSet.refresh_token) {
           // If the refresh token is rotated, update it in the closure.
           currentRefreshOptions.refreshToken = tokenSet.refresh_token;
-          if (currentRefreshOptions.handleRefreshToken !== undefined) {
-            currentRefreshOptions.handleRefreshToken(tokenSet.refresh_token);
+          if (currentRefreshOptions.onNewRefreshToken !== undefined) {
+            currentRefreshOptions.onNewRefreshToken(tokenSet.refresh_token);
           }
         }
         // Once the token has been refreshed, re-issue the authenticated request.

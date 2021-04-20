@@ -63,7 +63,7 @@ export interface IOidcOptions {
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
 
-  handleRefreshTokenRotation?: (token: string) => unknown;
+  onNewRefreshToken?: (newToken: string) => unknown;
 }
 
 export default IOidcOptions;

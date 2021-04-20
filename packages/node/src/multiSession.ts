@@ -44,7 +44,7 @@ import { defaultStorage, Session } from "./Session";
 export async function getSessionFromStorage(
   sessionId: string,
   storage?: IStorage,
-  handleRefreshToken?: (token: string) => unknown
+  onNewRefreshToken?: (newToken: string) => unknown
 ): Promise<Session | undefined> {
   const clientAuth: ClientAuthentication = storage
     ? getClientAuthenticationWithDependencies({
@@ -62,7 +62,7 @@ export async function getSessionFromStorage(
   const session = new Session({
     sessionInfo,
     clientAuthentication: clientAuth,
-    handleRefreshToken,
+    onNewRefreshToken,
   });
   if (sessionInfo.refreshToken) {
     await session.login({

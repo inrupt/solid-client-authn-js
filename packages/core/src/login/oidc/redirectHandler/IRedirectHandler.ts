@@ -34,7 +34,7 @@ export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
  * @hidden
  */
 type IRedirectHandler = IHandleable<
-  [url: string, handleRefreshToken?: (token: string) => unknown],
+  [url: string, onNewRefreshToken?: (newToken: string) => unknown],
   RedirectResult
 >;
 export default IRedirectHandler;
