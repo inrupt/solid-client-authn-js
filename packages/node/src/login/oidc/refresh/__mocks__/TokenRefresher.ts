@@ -29,7 +29,7 @@ export const mockTokenRefresher = (
   tokenSet: TokenSet & { access_token: string }
 ): ITokenRefresher => {
   return {
-    refresh: async () => tokenSet,
+    refresh: jest.fn().mockResolvedValue(tokenSet),
   };
 };
 

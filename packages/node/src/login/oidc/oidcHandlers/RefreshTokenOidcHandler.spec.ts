@@ -313,6 +313,36 @@ describe("RefreshTokenOidcHandler", () => {
     );
   });
 
+  it("calls the refresh token rotation handler if applicable", async () => {
+    const tokenSet = mockDefaultTokenSet();
+    tokenSet.refresh_token = "some rotated refresh token";
+    const mockedTokenRefresher = mockTokenRefresher(tokenSet);
+    const refreshTokenRotationHandler = jest.fn();
+
+    // This builds the fetch function holding the refresh token...
+    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+      mockedTokenRefresher,
+      mockStorageUtility({})
+    );
+    await refreshTokenOidcHandler.handle(
+      mockOidcOptions({
+        refreshToken: "some refresh token",
+        client: {
+          clientId: "some client id",
+          clientSecret: "some client secret",
+        },
+        handleRefreshTokenRotation: refreshTokenRotationHandler,
+      })
+    );
+
+    expect(mockedTokenRefresher.refresh).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      refreshTokenRotationHandler
+    );
+  });
+
   it("uses the rotated refresh token to build the Bearer-authenticated fetch if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refresh_token = "some rotated refresh token";
