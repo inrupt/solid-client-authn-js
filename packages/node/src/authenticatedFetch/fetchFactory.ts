@@ -83,7 +83,7 @@ export function buildBearerFetch(
       if (tokenSet.refresh_token) {
         // If the refresh token is rotated, update it in the closure.
         currentRefreshOptions.refreshToken = tokenSet.refresh_token;
-        if (currentRefreshOptions.onNewRefreshToken !== undefined) {
+        if (typeof currentRefreshOptions.onNewRefreshToken === "function") {
           currentRefreshOptions.onNewRefreshToken(tokenSet.refresh_token);
         }
       }
@@ -234,7 +234,7 @@ export async function buildDpopFetch(
         if (tokenSet.refresh_token) {
           // If the refresh token is rotated, update it in the closure.
           currentRefreshOptions.refreshToken = tokenSet.refresh_token;
-          if (currentRefreshOptions.onNewRefreshToken !== undefined) {
+          if (typeof currentRefreshOptions.onNewRefreshToken === "function") {
             currentRefreshOptions.onNewRefreshToken(tokenSet.refresh_token);
           }
         }

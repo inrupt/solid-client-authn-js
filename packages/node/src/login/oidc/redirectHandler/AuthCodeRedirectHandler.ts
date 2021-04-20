@@ -182,7 +182,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         tokenRefresher: this.tokenRefresher,
         onNewRefreshToken,
       };
-      if (onNewRefreshToken !== undefined) {
+      if (typeof onNewRefreshToken === "function") {
         onNewRefreshToken(tokenSet.refresh_token);
       }
     }

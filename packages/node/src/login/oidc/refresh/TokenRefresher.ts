@@ -124,7 +124,7 @@ export default class TokenRefresher implements ITokenRefresher {
       await this.storageUtility.setForUser(sessionId, {
         refreshToken: tokenSet.refresh_token,
       });
-      if (onNewRefreshToken !== undefined) {
+      if (typeof onNewRefreshToken === "function") {
         onNewRefreshToken(tokenSet.refresh_token);
       }
     }
