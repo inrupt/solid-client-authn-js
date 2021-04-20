@@ -180,6 +180,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         refreshToken: tokenSet.refresh_token,
         sessionId,
         tokenRefresher: this.tokenRefresher,
+        handleRefreshToken,
       };
       if (handleRefreshToken !== undefined) {
         handleRefreshToken(tokenSet.refresh_token);

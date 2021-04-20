@@ -137,6 +137,25 @@ describe("buildBearerFetch", () => {
     );
   });
 
+  it("returns a fetch that calls the refresh token handler if appropriate", async () => {
+    const fetch = jest.requireMock("cross-fetch");
+    fetch.mockResolvedValue({ status: 401 });
+    const tokenSet = mockDefaultTokenSet();
+    tokenSet.refresh_token = "some refreshed refresh token";
+    const mockedFreshener = mockTokenRefresher(tokenSet);
+    const refreshHandler = jest.fn();
+    const myFetch = buildBearerFetch("myToken", {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: mockedFreshener,
+      handleRefreshToken: refreshHandler,
+    });
+    await myFetch("someUrl");
+    // The mocked fetch will 401, which triggers the refresh flow.
+    // The test checks that the mocked refreshed token is used silently.
+    expect(refreshHandler).toHaveBeenCalledWith("some refreshed refresh token");
+  });
+
   it("does not try to refresh on a non-auth error", async () => {
     const fetch = jest.requireMock("cross-fetch");
     fetch.mockResolvedValue({ status: 418 });
@@ -375,6 +394,28 @@ describe("buildDpopFetch", () => {
     expect(refreshCall.mock.calls[1][1]).toEqual(
       "some refreshed refresh token"
     );
+  });
+
+  it("calls the refresh token handler if one is provided", async () => {
+    const fetch = jest.requireMock("cross-fetch");
+    fetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const tokenSet = mockDefaultTokenSet();
+    tokenSet.refresh_token = "some refreshed refresh token";
+    const mockedFreshener = mockTokenRefresher(tokenSet);
+    const refreshHandler = jest.fn();
+
+    const myFetch = await buildDpopFetch("myToken", mockJwk(), {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: mockedFreshener,
+      handleRefreshToken: refreshHandler,
+    });
+
+    await myFetch("https://my.pod/resource");
+    expect(refreshHandler).toHaveBeenCalledWith("some refreshed refresh token");
   });
 
   it("does not try to refresh on a non-auth error", async () => {
