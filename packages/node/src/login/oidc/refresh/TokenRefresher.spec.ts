@@ -299,6 +299,30 @@ describe("TokenRefresher", () => {
     ).resolves.toEqual("some new refresh token");
   });
 
+  it("calls the refresh token rotation handler if one is provided", async () => {
+    const mockedTokens = mockDpopTokens();
+    mockedTokens.refresh_token = "some new refresh token";
+    setupOidcClientMock(mockedTokens);
+    const mockedStorage = mockRefresherDefaultStorageUtility();
+    const refreshTokenRotationHandler = jest.fn();
+
+    const refresher = getTokenRefresher({
+      storageUtility: mockedStorage,
+    });
+
+    const refreshedTokens = await refresher.refresh(
+      "mySession",
+      "some old refresh token",
+      mockJwk(),
+      refreshTokenRotationHandler
+    );
+
+    expect(refreshedTokens.refresh_token).toEqual("some new refresh token");
+    expect(refreshTokenRotationHandler).toHaveBeenCalledWith(
+      "some new refresh token"
+    );
+  });
+
   it("throws if the IdP does not return an access token", async () => {
     const mockedTokens = mockDpopTokens();
     mockedTokens.access_token = undefined;

@@ -246,7 +246,32 @@ describe("ClientAuthentication", () => {
       expect(redirectInfo).toEqual({
         ...RedirectHandlerResponse,
       });
-      expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
+      expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
+        url,
+        undefined
+      );
+
+      // Calling the redirect handler should have updated the fetch.
+      expect(clientAuthn.fetch).not.toBe(unauthFetch);
+    });
+
+    it("calls handle redirect with the refresh token handler if one is provided", async () => {
+      const clientAuthn = getClientAuthentication();
+      const unauthFetch = clientAuthn.fetch;
+      const refreshTokenHandler = jest.fn();
+      const url =
+        "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
+      const redirectInfo = await clientAuthn.handleIncomingRedirect(
+        url,
+        refreshTokenHandler
+      );
+      expect(redirectInfo).toEqual({
+        ...RedirectHandlerResponse,
+      });
+      expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
+        url,
+        refreshTokenHandler
+      );
 
       // Calling the redirect handler should have updated the fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);

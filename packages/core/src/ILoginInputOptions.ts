@@ -45,7 +45,8 @@ export default interface ILoginInputOptions {
    */
   popUp?: boolean;
   /**
-   * If a function is provided, the browser will not auto-redirect and will instead trigger that function to redirect. Required in non-browser environments.
+   * If a function is provided, the browser will not auto-redirect and will instead trigger that function to redirect.
+   * Required in non-browser environments, ignored in the browser.
    */
   handleRedirect?: (redirectUrl: string) => unknown;
   /**

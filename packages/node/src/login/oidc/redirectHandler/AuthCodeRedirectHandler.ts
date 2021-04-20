@@ -102,7 +102,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
   }
 
   async handle(
-    inputRedirectUrl: string
+    inputRedirectUrl: string,
+    onNewRefreshToken?: (newToken: string) => unknown
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
@@ -179,7 +180,11 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         refreshToken: tokenSet.refresh_token,
         sessionId,
         tokenRefresher: this.tokenRefresher,
+        onNewRefreshToken,
       };
+      if (typeof onNewRefreshToken === "function") {
+        onNewRefreshToken(tokenSet.refresh_token);
+      }
     }
     if (oidcContext.dpop) {
       authFetch = await buildDpopFetch(

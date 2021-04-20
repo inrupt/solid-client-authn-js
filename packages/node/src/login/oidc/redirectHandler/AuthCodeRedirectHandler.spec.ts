@@ -368,6 +368,27 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toEqual("some refresh token");
     });
 
+    it("calls the refresh token handler if one is provided", async () => {
+      const mockedTokens = mockDpopTokens();
+      mockedTokens.refresh_token = "some refresh token";
+      setupOidcClientMock(mockedTokens);
+      const mockedStorage = mockDefaultRedirectStorage();
+      const refreshTokenHandler = jest.fn();
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState",
+        refreshTokenHandler
+      );
+
+      expect(refreshTokenHandler).toHaveBeenCalledWith("some refresh token");
+    });
+
     it("throws if the IdP does not return an access token", async () => {
       const mockedTokens = mockDpopTokens();
       mockedTokens.access_token = undefined;

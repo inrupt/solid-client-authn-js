@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
+#### node
+
+- It is now possible to specify a callback when constructing a function in order
+to invoke custom code when the refresh token is rotated. THis is useful for users
+who wish to run authenticated scripts, without implementing a brand new storage.
+
 The following sections document changes that have been released already:
 
 ## 1.7.4 - 2021-04-15

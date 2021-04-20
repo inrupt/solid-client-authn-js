@@ -25,6 +25,9 @@ async function main(): Promise<void> {
   const session = new Session(
     {
       storage,
+      onNewRefreshToken: (newToken: string) => {
+        console.log(`New refresh token: [${newToken}]`);
+      },
     },
     "my-session"
   );

@@ -68,6 +68,10 @@ export interface ISessionOptions {
    * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
    */
   clientAuthentication: ClientAuthentication;
+  /**
+   * A callback that gets invoked whenever a new refresh token is obtained.
+   */
+  onNewRefreshToken?: (newToken: string) => unknown;
 }
 
 /**
@@ -87,6 +91,8 @@ export class Session extends EventEmitter {
   private clientAuthentication: ClientAuthentication;
 
   private tokenRequestInProgress = false;
+
+  private onNewRefreshToken?: (newToken: string) => unknown;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -142,6 +148,7 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
+    this.onNewRefreshToken = sessionOptions.onNewRefreshToken;
   }
 
   /**
@@ -157,7 +164,8 @@ export class Session extends EventEmitter {
       this.info.sessionId,
       {
         ...options,
-      }
+      },
+      this.onNewRefreshToken
     );
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
@@ -212,7 +220,8 @@ export class Session extends EventEmitter {
       try {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
-          url
+          url,
+          this.onNewRefreshToken
         );
 
         if (sessionInfo) {
