@@ -53,7 +53,8 @@ export default class ClientAuthentication {
   // Isn't Javascript fun?
   login = async (
     sessionId: string,
-    options: ILoginInputOptions
+    options: ILoginInputOptions,
+    handleRefreshToken?: (token: string) => unknown
   ): Promise<ISessionInfo | undefined> => {
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
@@ -71,7 +72,7 @@ export default class ClientAuthentication {
       handleRedirect: options.handleRedirect,
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
-      handleRefreshTokenRotation: options.handleRefreshTokenRotation,
+      handleRefreshTokenRotation: handleRefreshToken,
     });
 
     if (loginReturn !== undefined) {

@@ -59,9 +59,4 @@ export default interface ILoginInputOptions {
    * secret to authenticate.
    */
   refreshToken?: string;
-  /**
-   * This callback will be called if, during the refresh token flow, the refresh token is rotated by the Solid Identity
-   * Provider. In this case, the provided function is called with the new token as a parameter.
-   */
-  handleRefreshTokenRotation?: (token: string) => unknown;
 }
