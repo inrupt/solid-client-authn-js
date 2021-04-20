@@ -331,7 +331,7 @@ describe("RefreshTokenOidcHandler", () => {
           clientId: "some client id",
           clientSecret: "some client secret",
         },
-        handleRefreshTokenRotation: refreshTokenRotationHandler,
+        onNewRefreshToken: refreshTokenRotationHandler,
       })
     );
 

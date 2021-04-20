@@ -146,7 +146,7 @@ describe("buildBearerFetch", () => {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockedFreshener,
-      handleRefreshToken: refreshHandler,
+      onNewRefreshToken: refreshHandler,
     });
     await myFetch("someUrl");
     // The mocked fetch will 401, which triggers the refresh flow.
@@ -407,7 +407,7 @@ describe("buildDpopFetch", () => {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockedFreshener,
-      handleRefreshToken: refreshHandler,
+      onNewRefreshToken: refreshHandler,
     });
 
     await myFetch("https://my.pod/resource");
