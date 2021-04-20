@@ -34,7 +34,7 @@
     "@types/node": "^14.14.14",
     "@types/uuid": "^8.3.0",
     "cross-fetch": "^3.0.6",
-    "jose": "^2.0.3",
+    "jose": "^3.11.5",
     "openid-client": "^4.2.2",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.4.0",
