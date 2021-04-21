@@ -16,7 +16,7 @@ The following sections document changes that have been released already:
 #### node
 
 - It is now possible to specify a callback when constructing a function in order
-to invoke custom code when the refresh token is rotated. THis is useful for users
+to invoke custom code when the refresh token is rotated. This is useful for users
 who wish to run authenticated scripts, without implementing a brand new storage.
 
 ## 1.7.4 - 2021-04-15
