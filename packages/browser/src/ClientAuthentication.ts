@@ -40,18 +40,11 @@ import { removeOidcQueryParam, validateIdToken } from "@inrupt/oidc-client-ext";
 import { KEY_CURRENT_SESSION } from "./constant";
 import { getJwks } from "./login/oidc/IssuerConfigFetcher";
 
-// TMP: This ensures that the HTTP requests will include any relevant cookie
-// that could have been set by the resource server.
-// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#parameters
-export const fetchWithCookies = (
-  info: RequestInfo,
-  init?: RequestInit
-): ReturnType<typeof fetch> => {
-  return window.fetch(info, {
-    ...init,
-    credentials: "include",
-  });
-};
+// By only referring to `window` at runtime, apps that do server-side rendering
+// won't run into errors when rendering code that instantiates a
+// ClientAuthentication:
+const globalFetch: typeof window.fetch = (request, init) =>
+  window.fetch(request, init);
 
 /**
  * @hidden
@@ -111,17 +104,14 @@ export default class ClientAuthentication {
   };
 
   // By default, our fetch() resolves to the environment fetch() function.
-  fetch = fetchWithCookies;
+  fetch = globalFetch;
 
   logout = async (sessionId: string): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
-    this.fetch = (
-      info: RequestInfo,
-      init?: RequestInit
-    ): ReturnType<typeof fetch> => window.fetch(info, init);
+    this.fetch = globalFetch;
   };
 
   getSessionInfo = async (

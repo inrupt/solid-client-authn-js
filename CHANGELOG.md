@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+- The workaround to maintain sessions in 1.6.1 has been disabled by default;
+  this means you should see no more (failed) calls to `/session` in your network
+  console. If you want to make sure a session is preserved across page reloads,
+  please see [the documentation on using the `restorePreviousSession`
+  option](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/restore-session-browser-refresh/).
+
 The following sections document changes that have been released already:
 
 ## 1.8.0 - 2021-04-21
