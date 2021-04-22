@@ -40,13 +40,6 @@ jobs:
           E2E_TEST_CLIENT_SECRET: ${{ secrets.E2E_TEST_CLIENT_SECRET }}
           E2E_TEST_IDP_URL: ${{ secrets.E2E_TEST_IDP_URL }}
           E2E_TEST_ESS_POD: ${{ secrets.E2E_TEST_ESS_POD }}
-      - name: Archive browser-based end-to-end test failure screenshots, if any
-        uses: actions/upload-artifact@v2.2.3
-        continue-on-error: true
-        if: failure()
-        with:
-          name: e2e-browser-failures
-          path: ./e2e-browser-failures
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
       - run: npm audit --audit-level=moderate
       - run: npm run lerna-audit -- --audit-level=moderate
