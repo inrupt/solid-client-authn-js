@@ -40,6 +40,36 @@ jobs:
           E2E_TEST_CLIENT_SECRET: ${{ secrets.E2E_TEST_CLIENT_SECRET }}
           E2E_TEST_IDP_URL: ${{ secrets.E2E_TEST_IDP_URL }}
           E2E_TEST_ESS_POD: ${{ secrets.E2E_TEST_ESS_POD }}
+      - name: Prepare browser-based end-to-end tests
+        run: |
+          cd packages/browser/examples/demoClientApp
+          npm install
+          cd ../../../../
+      - name: Run browser-based end-to-end tests (Linux)
+        # TODO: Add Edge/merge with Windows setup once Edge is available on Linux:
+        # Connections are flakier in CI, so retry failed network requests with --retry-test-pages.
+        # That also requires adding `--hostname localhost` to run over HTTPS:
+        # https://testcafe.io/documentation/402638/reference/configuration-file#retrytestpages
+        # Setting a test-specific user agent is only possible for Chrome: https://stackoverflow.com/a/59358925
+        run: |
+          cd e2e/browser
+          npm run test -- "firefox:headless,chrome:headless:userAgent='Browser-based solid-client-authn end-to-end tests running in CI. Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) $(chrome --version) Safari/537.36'" --screenshots takeOnFails=true,path=./e2e-browser-failures --retry-test-pages --hostname localhost
+        # The Node version does not influence how well our tests run in the browser,
+        # so we only need to test in one.
+        # (But I've explicitly set it to *not* run in the oldest versions,
+        # rather than running in the newest, so ensure that changing Node versions in CI
+        # does not cause end-to-end tests to stop running.)
+        # Additionally, Dependabot does not have access to our secrets,
+        # so end-to-end tests for Dependabot PRs can only be manually started.
+        # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && runner.os == 'Linux' && github.actor != 'dependabot[bot]'
+        env:
+          E2E_DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_ESS_USERNAME: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_USER }}
+          E2E_ESS_PASSWORD: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_PASSWORD }}
+          E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
+          E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
+          E2E_TESTCAFE_WAIT_TIME: 10000
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
       - run: npm audit --audit-level=moderate
       - run: npm run lerna-audit -- --audit-level=moderate

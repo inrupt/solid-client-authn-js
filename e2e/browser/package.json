@@ -4,7 +4,7 @@
   "description": "TestCafe end-2-end authentication test runner",
   "main": "index.ts",
   "scripts": {
-    "test": "testcafe chrome:headless testSuiteRunner.test.ts && testcafe firefox:headless testSuiteRunner.test.ts"
+    "test": "testcafe"
   },
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
