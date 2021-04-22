@@ -65,7 +65,7 @@ jobs:
         # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
         if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && runner.os == 'Linux' && github.actor != 'dependabot[bot]'
         env:
-          E2E_DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_DEMO_CLIENT_APP_URL: http://localhost:3001
           E2E_ESS_USERNAME: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_USER }}
           E2E_ESS_PASSWORD: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_PASSWORD }}
           E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
