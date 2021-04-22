@@ -65,4 +65,4 @@ jobs:
         if: failure()
         with:
           name: e2e-browser-failures
-          path: ./e2e-browser-failures
+          path: e2e/browser/e2e-browser-failures
