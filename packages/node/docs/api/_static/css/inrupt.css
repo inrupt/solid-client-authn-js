@@ -16,35 +16,32 @@ body {
   padding-top: 0;
 }
 
-/* Specify the padding for 3rd level) */
-.bd-sidebar .nav > li > ul > li > a {
-  padding: 0.1rem 1.5rem;
+/* add padding to top navbar */
+
+#navbar-start {
+   padding-left: 1rem;
+   display: block;
 }
 
-.section_l1 > li {
-  line-height: 24px;
+#navbar-center {
+   padding-left: 1rem;
 }
 
-/* inherited css for toc does not cover 3rd level - so genericize */
-
-.bd-sidebar .nav li > a {
-  display: block;
-  font-size: 0.9em;
-  color: rgba(0, 0, 0, 0.65);
+#navbar-end {
+   padding-left: 1rem;
 }
 
-/* inherited css for toc does not cover 3rd child - so genericize */
+/* specify max-widths to avoid abutting the logo/navbar-start */
 
-.bd-sidebar .nav li .active > a {
-  font-weight: 600;
-  color: #130654;
+#navbar-collapsible {
+   max-width: 75%;
 }
 
-/* inherited css does not cover 3rd child*/
-
-.toctree-l3 {
-  list-style: none;
+/* social icons update link colors */
+#navbar-icon-links i {
+   color: rgb(0, 91, 129);
 }
+
 
 /* Add border and padding to left hand toc sections */
 .toctree-l1 {
@@ -53,10 +50,7 @@ body {
   padding-bottom: 0.5rem;
 }
 
-/* Add border and padding to the top item in left hand toc */
-.toctree-top {
-  padding-bottom: 0.5rem;
-}
+
 
 /* Top Nav Header under Client Libraries dropdown - don't show by default*/
 
@@ -183,9 +177,10 @@ ul ol {
   padding-bottom: 0.75rem;
 }
 
-/* Not used - since not using captions for figures now */
-p.caption {
+/* for left hand nav - doc title caption */
+p.caption a {
   text-align: left;
+  color: rgba(0,0,0,.65);
 }
 
 /* Override basic.css's 10px margin-top */
@@ -209,10 +204,24 @@ p.topic-title {
   padding-right: 0.4rem;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 978px) {
    .navbar-expand-lg .navbar-nav .nav-link {
       padding-right: 1rem;
       padding-left: 1rem;
    }
 }
 
+/* Override the Prev and Next buttons styles */
+
+.prev-next-bottom {
+   margin-top: 40px;
+}
+
+.prev-next-bottom a.left-prev, .prev-next-bottom a.right-next {
+   border-radius: 20px;
+   font-size: 90%;
+}
+
+.footer {
+   text-align: center;
+}
