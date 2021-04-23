@@ -1,7 +1,7 @@
 {
   "appCommand": "cd ../../packages/browser/examples/demoClientApp && npm run start",
   "appInitDelay": 3000,
-  "browsers": ["firefox:headless"],
+  "browsers": ["firefox:headless,chrome:headless"],
   "src": "testSuiteRunner.test.ts",
   "clientScripts": [
     { "module": "@testing-library/dom/dist/@testing-library/dom.umd.js" }

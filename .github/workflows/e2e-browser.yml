@@ -42,7 +42,7 @@ jobs:
         run: |
           cd e2e/browser
           npm ci
-          npm run test -- "chrome:headless:userAgent='Browser-based solid-client-authn end-to-end tests running in CI. Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) $(chrome --version) Safari/537.36'" --screenshots takeOnFails=true,path=./e2e-browser-failures --retry-test-pages --hostname localhost
+          npm run test -- "firefox:headless,chrome:headless:userAgent='Browser-based solid-client-authn end-to-end tests running in CI. Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) $(chrome --version) Safari/537.36'" --screenshots takeOnFails=true,path=./e2e-browser-failures --retry-test-pages --hostname localhost
         # The Node version does not influence how well our tests run in the browser,
         # so we only need to test in one.
         # (But I've explicitly set it to *not* run in the oldest versions,
