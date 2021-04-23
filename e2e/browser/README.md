@@ -9,29 +9,28 @@ The tests connect to Solid Pods using credentials set as environment variables.
 The commands below assume they are being executed in this directory, and that
 you have a recent version of Node/npm installed.
 
-Before running the tests, first make sure a client application is up and
-running, and listening for requests. We recommend simply running the
-`demoClientApp` that is included in the examples folder of the browser package,
-for example:
+Before running the tests, first make sure a client application has been installed,
+so that Testcafe can run it.
 
 ```script
 cd ../packages/browser/examples/demoClientApp
 npm ci
-npm run start
 ```
 
-To run the tests, insert your credentials into the following command (replace
-`all` with e.g. `chrome` or `firefox` to only run the tests using a specific
-browser):
+To run the tests, create a `.env.test.local` file following the `.env.example` model, 
+and insert your credentials there. You can also check out `.testcaferc.json`, to
+configure which browsers run.
+
+Finally, you can run the tests with the following command:
 
 ```script
-E2E_ESS_USERNAME=<ESS username> E2E_ESS_PASSWORD=<ESS password> E2E_NSS_USERNAME=<NSS username> E2E_NSS_PASSWORD=<NSS password> npx testcafe all testSuiteRunner.test.ts
+npm run test
 ```
 
 You can also specify the location of a deployed demo client application - for
 example, if you were running that application on `localhost:3001` (which is the
 default used if no environment variable is set), then you could use that
-application for the tests by including on your command line:
+application for the tests by including in `.env.test.local`:
 
 ```
 DEMO_CLIENT_APP_URL="http://localhost:3001"

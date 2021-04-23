@@ -1,72 +1,64 @@
-name: End-to-end tests (browser)
+name: End-to-end browser tests
 
-on: 
-  deployment_status:
-    branches-ignore:
-      - 'dependabot/npm_and_yarn/**'
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 env:
   CI: true
 jobs:
-  test:
-    runs-on: ubuntu-20.04
-    if: ${{github.event.deployment_status.state == 'success'}}
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Available OS's: https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners
+        os: [ubuntu-20.04]
+        node-version: [14.x]
     steps:
       - uses: actions/checkout@v2.3.4
-      - name: Use Node.js 12.x
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         uses: actions/cache@v2.1.5
         env:
           cache-name: cache-node-modules
         with:
-          path: e2e/browser/node_modules
+          path: 
+            node_modules
+            packages/*/node_modules
           key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-      - name: Run tests
-        # Dependabot cannot access secrets, so it doesn't have a token to authenticate to ESS.
-        # Since all the other jobs of this workflow depend on this one, skipping it should
-        # skip the entire workflow.
-        if: ${{ github.actor != 'dependabot[bot]' }}
+      - run: npm ci
+      - run: npm run bootstrap -- --ci
+      - run: npm run build
+      - name: Prepare browser-based end-to-end tests
         run: |
-          cd e2e/browser;
-          npm ci;
-          npm test;
+          cd packages/browser/examples/demoClientApp
+          npm install
+          cd ../../../../
+      - name: Run browser-based end-to-end tests (Linux)
+        # Connections are flakier in CI, so retry failed network requests with --retry-test-pages.
+        # That also requires adding `--hostname localhost` to run over HTTPS:
+        # https://testcafe.io/documentation/402638/reference/configuration-file#retrytestpages
+        # Setting a test-specific user agent is only possible for Chrome: https://stackoverflow.com/a/59358925
+        run: |
+          cd e2e/browser
+          npm ci
+          npm run test -- "firefox:headless,chrome:headless:userAgent='Browser-based solid-client-authn end-to-end tests running in CI. Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) $(chrome --version) Safari/537.36'" --screenshots takeOnFails=true,path=./e2e-browser-failures --retry-test-pages --hostname localhost
+        # Dependabot does not have access to our secrets,
+        # so end-to-end tests for Dependabot PRs can only be manually started.
+        # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+        if: github.actor != 'dependabot[bot]'
         env:
-          E2E_DEMO_CLIENT_APP_URL: ${{ github.event.deployment_status.target_url }}/demo/
+          E2E_DEMO_CLIENT_APP_URL: http://localhost:3001
           E2E_ESS_USERNAME: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_USER }}
           E2E_ESS_PASSWORD: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_PASSWORD }}
           E2E_NSS_USERNAME: ${{ secrets.E2E_NSS_USERNAME }}
           E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
-          E2E_TESTCAFE_WAIT_TIME: 10000
-      - name: Add status check with successful test result
-        id: set-status-check-success
-        uses: octokit/request-action@v2.x
-        with:
-          route: POST /repos/:repository/statuses/:ref
-          repository: ${{ github.repository }}
-          ref: ${{ github.sha }}
-          state: success
-          context: 'End-to-end tests (browser)'
-          description: 'TestCafe clicking through the demo application deployed to Vercel'
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}?check_suite_focus=true
-          # The deployment runs in parallel with CI, so status checks will never have succeeded yet:
-          required_contexts: "[]"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Add status check with failed test result
-        id: set-status-check-failure
+          E2E_TESTCAFE_WAIT_TIME: 20000
+      - name: Archive browser-based end-to-end test failure screenshots, if any
+        uses: actions/upload-artifact@v2.2.3
+        continue-on-error: true
         if: failure()
-        uses: octokit/request-action@v2.x
         with:
-          route: POST /repos/:repository/statuses/:ref
-          repository: ${{ github.repository }}
-          ref: ${{ github.sha }}
-          state: failure
-          context: 'End-to-end tests (browser)'
-          description: 'TestCafe clicking through the demo application deployed to Vercel'
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}?check_suite_focus=true
-          # The deployment runs in parallel with CI, so status checks will never have succeeded yet:
-          required_contexts: "[]"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          name: e2e-browser-failures
+          path: e2e/browser/e2e-browser-failures
