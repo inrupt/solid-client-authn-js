@@ -85,4 +85,15 @@ export interface ISessionInternalInfo {
    * WebIDs, the client secret is still required at the token endpoint.
    */
   clientAppSecret?: string;
+
+  /**
+   * The token type used by the session
+   */
+  tokenType?: "DPoP" | "Bearer";
+}
+
+export function isSupportedTokenType(
+  token: string | "DPoP" | "Bearer"
+): token is "DPoP" | "Bearer" {
+  return typeof token === "string" && ["DPoP", "Bearer"].includes(token);
 }

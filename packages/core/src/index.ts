@@ -40,7 +40,11 @@ export {
 } from "./login/oidc/redirectHandler/IRedirectHandler";
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 
-export { ISessionInfo, ISessionInternalInfo } from "./sessionInfo/ISessionInfo";
+export {
+  ISessionInfo,
+  ISessionInternalInfo,
+  isSupportedTokenType,
+} from "./sessionInfo/ISessionInfo";
 export {
   ISessionInfoManager,
   ISessionInfoManagerOptions,
