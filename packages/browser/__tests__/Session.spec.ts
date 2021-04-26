@@ -122,6 +122,20 @@ describe("Session", () => {
       expect(clientAuthnLogin).toHaveBeenCalled();
     });
 
+    it("Uses the token type provided (if any)", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnLogin = jest.spyOn(clientAuthentication, "login");
+      const mySession = new Session({ clientAuthentication });
+      await mySession.login({
+        tokenType: "Bearer",
+      });
+      expect(clientAuthnLogin).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tokenType: "Bearer",
+        })
+      );
+    });
+
     it("preserves a binding to its Session instance", async () => {
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnLogin = jest.spyOn(clientAuthentication, "login");
@@ -707,6 +721,7 @@ describe("Session", () => {
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
         redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
       });
       clientAuthentication.validateCurrentSession = jest
         .fn()
@@ -725,7 +740,9 @@ describe("Session", () => {
       });
       await incomingRedirectPromise;
       await validateCurrentSessionPromise;
-      expect(clientAuthentication.login).toHaveBeenCalledWith("mySession", {
+      expect(clientAuthentication.login).toHaveBeenCalledWith({
+        sessionId: "mySession",
+        tokenType: "DPoP",
         oidcIssuer: "https://some.issuer",
         prompt: "none",
         clientId: "some client ID",

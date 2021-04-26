@@ -31,6 +31,7 @@ import {
   ISessionInternalInfo,
   ISessionInfoManagerOptions,
   IStorageUtility,
+  isSupportedTokenType,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
@@ -176,6 +177,15 @@ export class SessionInfoManager implements ISessionInfoManager {
       secure: false,
     });
 
+    const tokenType =
+      (await this.storageUtility.getForUser(sessionId, "tokenType", {
+        secure: false,
+      })) ?? "DPoP";
+
+    if (!isSupportedTokenType(tokenType)) {
+      throw new Error(`Tokens of type [${tokenType}] are not supported.`);
+    }
+
     if (
       clientId === undefined &&
       idToken === undefined &&
@@ -196,6 +206,7 @@ export class SessionInfoManager implements ISessionInfoManager {
       issuer,
       clientAppId: clientId,
       clientAppSecret: clientSecret,
+      tokenType,
     };
   }
 

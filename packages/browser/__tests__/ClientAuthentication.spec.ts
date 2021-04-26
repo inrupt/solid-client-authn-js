@@ -157,7 +157,9 @@ describe("ClientAuthentication", () => {
   describe("login", () => {
     it("calls login, and defaults to a DPoP token", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.login("mySession", {
+      await clientAuthn.login({
+        sessionId: "mySession",
+        tokenType: "DPoP",
         clientId: "coolApp",
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com",
@@ -177,7 +179,8 @@ describe("ClientAuthentication", () => {
 
     it("request a bearer token if specified", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.login("mySession", {
+      await clientAuthn.login({
+        sessionId: "mySession",
         clientId: "coolApp",
         redirectUrl: "https://coolapp.com/redirect",
         oidcIssuer: "https://idp.com",
@@ -208,7 +211,9 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
       });
-      await clientAuthn.login("someUser", {
+      await clientAuthn.login({
+        sessionId: "someUser",
+        tokenType: "DPoP",
         clientId: "coolApp",
         clientName: "coolApp Name",
         redirectUrl: "https://coolapp.com/redirect",
@@ -296,7 +301,11 @@ describe("ClientAuthentication", () => {
       });
       const session = await clientAuthn.getSessionInfo("mySession");
       // isLoggedIn is stored as a string under the hood, but deserialized as a boolean
-      expect(session).toEqual({ ...sessionInfo, isLoggedIn: true });
+      expect(session).toEqual({
+        ...sessionInfo,
+        isLoggedIn: true,
+        tokenType: "DPoP",
+      });
     });
   });
 
