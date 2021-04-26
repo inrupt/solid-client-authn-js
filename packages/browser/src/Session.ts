@@ -33,6 +33,7 @@ import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
+import { postRedirectUrlToParent, setupIframeListener } from "./iframe";
 
 export interface ISessionOptions {
   /**
@@ -179,6 +180,7 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
+    setupIframeListener(this.handleIncomingRedirect);
   }
 
   /**
@@ -244,6 +246,12 @@ export class Session extends EventEmitter {
     const options =
       typeof inputOptions === "string" ? { url: inputOptions } : inputOptions;
     const url = options.url ?? window.location.href;
+
+    if (window.frameElement) {
+      // This is being loaded from an iframe
+      postRedirectUrlToParent();
+      return undefined;
+    }
 
     // Unfortunately, regular sessions are lost when the user refreshes the page or opens a new tab.
     // While we're figuring out the API for a longer-term solution, as a temporary workaround some

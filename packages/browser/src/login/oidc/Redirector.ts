@@ -40,6 +40,14 @@ export default class Redirector implements IRedirector {
       options.handleRedirect(redirectUrl);
     } else if (options && options.redirectByReplacingState) {
       window.history.replaceState({}, "", redirectUrl);
+    } else if (options?.redirectInIframe) {
+      const iframe = window.document.createElement("iframe");
+      iframe.setAttribute("id", "token-renewal");
+      iframe.setAttribute("name", "token-renewal");
+      iframe.setAttribute("hidden", "true");
+      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+      window.document.body.appendChild(iframe);
+      iframe.src = redirectUrl;
     } else {
       window.location.href = redirectUrl;
     }
