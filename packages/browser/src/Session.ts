@@ -180,7 +180,12 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
-    setupIframeListener(this.handleIncomingRedirect);
+    // Listen for messages from children iframes.
+    setupIframeListener(this.clientAuthentication.handleIncomingRedirect);
+    // Listen for the 'tokenRenewal' signal to trigger the silent token renewal.
+    this.on("tokenRenewal", () =>
+      this.clientAuthentication.triggerRenewal(this.info.sessionId)
+    );
   }
 
   /**
@@ -248,7 +253,7 @@ export class Session extends EventEmitter {
     const url = options.url ?? window.location.href;
 
     if (window.frameElement) {
-      // This is being loaded from an iframe
+      // This is being loaded from an iframe.
       postRedirectUrlToParent();
       return undefined;
     }

@@ -27,6 +27,7 @@ import {
   logout,
   handleIncomingRedirect,
   fetch,
+  triggerRenewal,
   getDefaultSession,
 } from "../../../../dist/index";
 
@@ -62,7 +63,7 @@ export default function App() {
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
       clientName: "Demo app",
-      clientId: CLIENT_APP_WEBID,
+      // clientId: CLIENT_APP_WEBID,
     });
   };
 
@@ -82,6 +83,11 @@ export default function App() {
       .then(setData);
   };
 
+  const handleRenew = (e) => {
+    e.preventDefault();
+    triggerRenewal();
+  };
+
   return (
     <div>
       <main>
@@ -98,6 +104,7 @@ export default function App() {
             />
             <button onClick={(e) => handleLogin(e)}>Log In</button>
             <button onClick={(e) => handleLogout(e)}>Log Out</button>
+            <button onClick={(e) => handleRenew(e)}>Renew</button>
           </form>
         </div>
         <hr />

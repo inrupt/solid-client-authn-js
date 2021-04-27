@@ -20,58 +20,69 @@
  */
 
 import { ISessionInfo } from "@inrupt/solid-client-authn-core";
-import { IHandleIncomingRedirectOptions } from "./Session";
 
+/**
+ * Redirects the browser to a provided IRI, but does such redirection in a child
+ * iframe. This is used to have a front-channel interaction with the Solid Identity
+ * Provider without having the user involved, and without refreshing the main window.
+ *
+ * @param redirectUrl The IRI to which the iframe should be redirected.
+ */
+export function redirectInIframe(redirectUrl: string) {
+  const iframe = window.document.createElement("iframe");
+  iframe.setAttribute("id", "token-renewal");
+  iframe.setAttribute("name", "token-renewal");
+  iframe.setAttribute("hidden", "true");
+  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  window.document.body.appendChild(iframe);
+  iframe.src = redirectUrl;
+}
+
+/**
+ * This function sets up an event listener that will receive iframe messages.
+ * It is only listening to messages coming from iframes that could have been
+ * opened by the library, and expects to be posted the IRI the iframe has been
+ * redirected to by the Solid Identity Provider. This way, the top window can
+ * perform the backchannel exchange to the token endpoint without performing
+ * the front-channel redirection.
+ *
+ * @param handleIframeRedirect Redirect URL sent by the iframe
+ */
 export function setupIframeListener(
   handleIframeRedirect: (
-    inputOptions: string | IHandleIncomingRedirectOptions
+    redirectUrl: string
   ) => Promise<ISessionInfo | undefined>
-) {
+): void {
   window.onmessage = async (evt: MessageEvent) => {
-    if (window.frameElement) {
-      console.log("received an iframe message in iframe");
-    } else {
-      console.log("received an iframe message in main window");
-    }
-
-    if (evt.origin === window.location.origin) {
-      // if (evt.source === window.frames["token-renewal"]) {
-      //   console.log("source matches")
-      // } else {
-      //   console.log("source deos not match")
-      // }
-      console.log(`event data: ${JSON.stringify(evt.data)}`);
+    // The window.frame type is just Window, but window.frame[<frame-id>]
+    // does match the iframes in the top window object.
+    const frameRecord = (window.frames as unknown) as Record<string, Window>;
+    if (
+      evt.origin === window.location.origin &&
+      evt.source === frameRecord["token-renewal"]
+    ) {
       if (evt.data.redirectUrl) {
-        console.log(`received redirect URL: ${evt.data.redirectUrl}`);
-        await handleIframeRedirect({
-          url: evt.data.redirectUrl,
-        });
-      } else if (evt.data.error) {
-        console.log(evt.data);
+        // The top-levelw window handles the redirect that happened in the iframe.
+        await handleIframeRedirect(evt.data.redirectUrl);
       }
-    } else {
-      console.log(`${evt.origin} does not match ${window.location.origin}`);
+      // Clean up the iframe from the DOM
+      const iframe = window.document.getElementById("token-renewal");
+      if (iframe !== null) {
+        window.document.body.removeChild(iframe);
+      }
     }
   };
 }
 
+/**
+ * This function bubbles up the result of the front-channel interaction with
+ * the authorization endpoint to the parent window.
+ */
 export function postRedirectUrlToParent() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get("code");
-  if (code) {
-    console.log(`Posting message to ${window.location.origin}`);
-    window.top.postMessage(
-      { redirectUrl: window.location.href },
-      window.location.origin
-    );
-  } else {
-    const error = urlParams.get("error");
-    const description = urlParams.get("error_description");
-    if (error) {
-      window.top.postMessage(
-        { error: error, error_description: description },
-        window.location.origin
-      );
-    }
-  }
+  window.top.postMessage(
+    {
+      redirectUrl: window.location.href,
+    },
+    window.location.origin
+  );
 }

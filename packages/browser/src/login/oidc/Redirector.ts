@@ -29,6 +29,7 @@ import {
   IRedirector,
   IRedirectorOptions,
 } from "@inrupt/solid-client-authn-core";
+import { redirectInIframe } from "../../iframe";
 
 /**
  * @hidden
@@ -41,13 +42,7 @@ export default class Redirector implements IRedirector {
     } else if (options && options.redirectByReplacingState) {
       window.history.replaceState({}, "", redirectUrl);
     } else if (options?.redirectInIframe) {
-      const iframe = window.document.createElement("iframe");
-      iframe.setAttribute("id", "token-renewal");
-      iframe.setAttribute("name", "token-renewal");
-      iframe.setAttribute("hidden", "true");
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-      window.document.body.appendChild(iframe);
-      iframe.src = redirectUrl;
+      redirectInIframe(redirectUrl);
     } else {
       window.location.href = redirectUrl;
     }
