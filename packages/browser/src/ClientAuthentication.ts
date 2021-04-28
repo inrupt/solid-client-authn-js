@@ -183,20 +183,4 @@ export default class ClientAuthentication {
       expirationDate: redirectInfo.expirationDate,
     };
   };
-
-  triggerRenewal = async (sessionId: string) => {
-    const storedSessionInfo = await this.validateCurrentSession();
-    if (storedSessionInfo !== null) {
-      await this.login({
-        sessionId,
-        prompt: "none",
-        oidcIssuer: storedSessionInfo.issuer,
-        redirectUrl: storedSessionInfo.redirectUrl,
-        clientId: storedSessionInfo.clientAppId,
-        clientSecret: storedSessionInfo.clientAppSecret,
-        tokenType: storedSessionInfo.tokenType ?? "DPoP",
-        inIframe: true,
-      });
-    }
-  };
 }
