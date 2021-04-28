@@ -34,7 +34,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
-import { fetchWithCookies } from "../ClientAuthentication";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
@@ -42,7 +41,7 @@ export function getUnauthenticatedSession(): ISessionInfo & {
   return {
     isLoggedIn: false,
     sessionId: v4(),
-    fetch: fetchWithCookies,
+    fetch,
   };
 }
 

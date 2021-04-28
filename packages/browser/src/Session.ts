@@ -67,20 +67,20 @@ export interface IHandleIncomingRedirectOptions {
   restorePreviousSession?: boolean;
 
   /**
-   * Inrupt's Enterprise Solid Server sets a cookie to allow the browser to
+   * Inrupt's Enterprise Solid Server can set a cookie to allow the browser to
    * access private resources on a Pod. In order to mitigate the logout-on-refresh
    * issue on the short term, the server also implemented a session endpoint
-   * enabling the client app to know whether the cookie is set.
-   *
-   * If you want to prevent your app to look up the session endpoint on your
-   * resource server, this option may be set to false, which without any additional
-   * configuration will have the app logged out on refresh.
+   * enabling the client app to know whether the cookie is set. When a user
+   * logs in to a server that has that capability enabled, applications that set
+   * this option to `true` will be able to make use of it.
    *
    * If your app supports the newest session restore approach, and `restorePreviousSession`
    * is set to true, this option is automatically set to false, but your app will
    * not be logged out when reloaded.
    *
-   * `useEssSession` defaults to true for backward compatibility.
+   * `useEssSession` defaults to false and will be removed in the future; to
+   * preserve sessions across page reloads, use of `restorePreviousSession` is
+   * recommended.
    */
   useEssSession?: boolean;
   /**
@@ -129,6 +129,9 @@ export class Session extends EventEmitter {
   private clientAuthentication: ClientAuthentication;
 
   private tokenRequestInProgress = false;
+
+  // Remove this when removing the `useEssSession` workaround:
+  private tmpFetchWithCookies = false;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -197,7 +200,14 @@ export class Session extends EventEmitter {
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
   fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    return this.clientAuthentication.fetch(url, init);
+    return this.clientAuthentication.fetch(url, {
+      ...init,
+      credentials: this.tmpFetchWithCookies
+        ? /* istanbul ignore next Simulating a cookie-enabled session in tests is too much work for a temporary, disabled-by-default workaround: */
+          "include"
+        : /* istanbul ignore next Simulating a cookie-enabled session in tests is too much work for a temporary, disabled-by-default workaround: */
+          init?.credentials,
+    });
   };
 
   /**
@@ -206,6 +216,7 @@ export class Session extends EventEmitter {
   logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
+    this.tmpFetchWithCookies = false;
     this.emit("logout");
   };
 
@@ -236,9 +247,9 @@ export class Session extends EventEmitter {
     // After login, we store that fact in LocalStorage. This means that we can now look for that
     // data, and if present, indicate that the user is already logged in.
     // Note that there are a lot of edge cases that won't work well with this approach, so it willl
-    // be removed in due time.
+    // be removed in due time, and is disabled by default.
     if (
-      options.useEssSession === false ||
+      options.useEssSession !== true ||
       options.restorePreviousSession === true
     ) {
       window.localStorage.setItem(
@@ -257,7 +268,7 @@ export class Session extends EventEmitter {
     if (
       typeof storedSessionCookieReference === "string" &&
       options.restorePreviousSession !== true &&
-      options.useEssSession !== false
+      options.useEssSession === true
     ) {
       // TOOD: Re-use the type used when writing this data:
       // https://github.com/inrupt/solid-client-authn-js/pull/920/files#diff-659ac87dfd3711f4cfcea3c7bf6970980f4740fd59df45f04c7977bffaa23e98R118
@@ -297,6 +308,7 @@ export class Session extends EventEmitter {
         ) {
           this.info.isLoggedIn = true;
           this.info.webId = reference.webId;
+          this.tmpFetchWithCookies = true;
           return this.info;
         }
       }

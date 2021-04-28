@@ -228,13 +228,14 @@ describe("ClientAuthentication", () => {
   });
 
   describe("fetch", () => {
-    it("calls fetch using the browser cookies if available", async () => {
+    it("calls fetch", async () => {
       window.fetch = jest.fn();
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
-      expect(window.fetch).toHaveBeenCalledWith("https://html5zombo.com", {
-        credentials: "include",
-      });
+      expect(window.fetch).toHaveBeenCalledWith(
+        "https://html5zombo.com",
+        undefined
+      );
     });
   });
 
@@ -260,6 +261,7 @@ describe("ClientAuthentication", () => {
         credentials: "omit",
       });
       // Calling logout should revert back to our un-authenticated fetch.
+      expect(clientAuthn.fetch).toBe(unauthFetch);
       expect(spyFetch).toHaveBeenCalledWith("https://example.com", {
         credentials: "omit",
       });

@@ -193,8 +193,7 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url/");
       expect(window.fetch).toHaveBeenCalled();
-      // @ts-ignore
-      expect(window.fetch.mock.instances).toEqual([window]);
+      expect((window.fetch as jest.Mock).mock.instances).toEqual([window]);
     });
   });
 
@@ -368,7 +367,10 @@ describe("Session", () => {
           async (_url: string) => undefined
         );
         const mySession = new Session({ clientAuthentication });
-        await mySession.handleIncomingRedirect("https://some.url");
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+          useEssSession: true,
+        });
         expect(mySession.info.isLoggedIn).toEqual(false);
         expect(mySession.info.webId).toBeUndefined();
         expect(
@@ -392,7 +394,10 @@ describe("Session", () => {
         const clientAuthentication = mockClientAuthentication();
         clientAuthentication.handleIncomingRedirect = jest.fn();
         const mySession = new Session({ clientAuthentication });
-        await mySession.handleIncomingRedirect("https://some.url");
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+          useEssSession: true,
+        });
         expect(mySession.info.isLoggedIn).toEqual(true);
         expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
         expect(
@@ -457,6 +462,31 @@ describe("Session", () => {
         ).toEqual("false");
       });
 
+      it("does not attempt to use the workaround if it is not explicitly enabled", async () => {
+        mockLocalStorage({
+          "tmp-resource-server-session-info": JSON.stringify({
+            webId: "https://my.pod/profile#me",
+            sessions: {
+              "https://my.pod/": { expiration: 9000000000000 },
+            },
+          }),
+        });
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn();
+        const mySession = new Session({ clientAuthentication });
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+        });
+        expect(mySession.info.isLoggedIn).toBe(false);
+        expect(mySession.info.webId).toBeUndefined();
+        expect(
+          clientAuthentication.handleIncomingRedirect
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          window.localStorage.getItem("tmp-resource-server-session-enabled")
+        ).toEqual("false");
+      });
+
       it("does not attempt to use the workaround if it is explicitly disabled", async () => {
         mockLocalStorage({
           "tmp-resource-server-session-info": JSON.stringify({
@@ -496,7 +526,10 @@ describe("Session", () => {
         const clientAuthentication = mockClientAuthentication();
         clientAuthentication.handleIncomingRedirect = jest.fn();
         const mySession = new Session({ clientAuthentication });
-        await mySession.handleIncomingRedirect("https://some.url");
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+          useEssSession: true,
+        });
         expect(mySession.info.isLoggedIn).toEqual(false);
         expect(mySession.info.webId).toBeUndefined();
         expect(
@@ -516,7 +549,10 @@ describe("Session", () => {
         const clientAuthentication = mockClientAuthentication();
         clientAuthentication.handleIncomingRedirect = jest.fn();
         const mySession = new Session({ clientAuthentication });
-        await mySession.handleIncomingRedirect("https://some.url");
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+          useEssSession: true,
+        });
         expect(mySession.info.isLoggedIn).toEqual(true);
         expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
         expect(
@@ -534,7 +570,10 @@ describe("Session", () => {
         const clientAuthentication = mockClientAuthentication();
         clientAuthentication.handleIncomingRedirect = jest.fn();
         const mySession = new Session({ clientAuthentication });
-        await mySession.handleIncomingRedirect("https://some.url");
+        await mySession.handleIncomingRedirect({
+          url: "https://some.url",
+          useEssSession: true,
+        });
         expect(mySession.info.isLoggedIn).toEqual(false);
         expect(mySession.info.webId).toBeUndefined();
         expect(
