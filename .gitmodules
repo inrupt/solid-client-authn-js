@@ -1,0 +1,12 @@
+[submodule "packages/browser/docs/api/docs-assets"]
+	path = packages/browser/docs/api/docs-assets
+	url = https://github.com/inrupt/docs-assets.git
+	branch = main
+[submodule "packages/node/docs/api/docs-assets"]
+	path = packages/node/docs/api/docs-assets
+	url = https://github.com/inrupt/docs-assets.git
+	branch = main
+[submodule "packages/core/docs/api/docs-assets"]
+	path = packages/core/docs/api/docs-assets
+	url = https://github.com/inrupt/docs-assets.git
+	branch = main
