@@ -97,7 +97,7 @@ export async function silentlyAuthenticate(
   sessionId: string,
   clientAuthn: ClientAuthentication,
   inIframe?: boolean
-) {
+): Promise<void> {
   // Check if we have an ID Token in storage - if we do then we may be
   // currently logged in, and the user has refreshed their browser page. The ID
   // token is validated, and on success the current session information are returned,
@@ -254,9 +254,9 @@ export class Session extends EventEmitter {
       typeof inputOptions === "string" ? { url: inputOptions } : inputOptions;
     const url = options.url ?? window.location.href;
 
-    if (window.frameElement) {
+    if (window.frameElement !== null) {
       // This is being loaded from an iframe.
-      postRedirectUrlToParent();
+      postRedirectUrlToParent(url);
       return undefined;
     }
 
