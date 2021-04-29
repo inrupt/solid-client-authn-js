@@ -7,7 +7,25 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Deprecated
+
+#### node
+
+- With Node.js version 10 [reaching end-of-life on
+  2021-04-30](https://github.com/nodejs/Release),
+  @inrupt/solid-client-authn-node no longer actively supports it. It will not
+  stop working right away, but it will no longer be actively tested and no
+  special effort will be made to keep it from breaking.
+
+### New features
+
+#### node
+
+- Node.js version 16 is now supported.
+
 ### Bugfixes
+
+#### browser
 
 - The workaround to maintain sessions in 1.6.1 has been disabled by default;
   this means you should see no more (failed) calls to `/session` in your network
