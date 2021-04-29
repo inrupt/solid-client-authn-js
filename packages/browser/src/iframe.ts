@@ -28,7 +28,7 @@ import { ISessionInfo } from "@inrupt/solid-client-authn-core";
  *
  * @param redirectUrl The IRI to which the iframe should be redirected.
  */
-export function redirectInIframe(redirectUrl: string) {
+export function redirectInIframe(redirectUrl: string): void {
   const iframe = window.document.createElement("iframe");
   iframe.setAttribute("id", "token-renewal");
   iframe.setAttribute("name", "token-renewal");
@@ -53,36 +53,39 @@ export function setupIframeListener(
     redirectUrl: string
   ) => Promise<ISessionInfo | undefined>
 ): void {
-  window.onmessage = async (evt: MessageEvent) => {
-    // The window.frame type is just Window, but window.frame[<frame-id>]
-    // does match the iframes in the top window object.
-    const frameRecord = (window.frames as unknown) as Record<string, Window>;
+  window.addEventListener("message", async (evt: MessageEvent) => {
+    const frameElement = document
+      .getElementsByTagName("iframe")
+      .namedItem("token-renewal");
+
     if (
       evt.origin === window.location.origin &&
-      evt.source === frameRecord["token-renewal"]
+      evt.source === frameElement?.contentWindow
     ) {
-      if (evt.data.redirectUrl) {
-        // The top-levelw window handles the redirect that happened in the iframe.
+      if (typeof evt.data.redirectUrl === "string") {
+        // The top-level window handles the redirect that happened in the iframe.
         await handleIframeRedirect(evt.data.redirectUrl);
       }
-      // Clean up the iframe from the DOM
-      const iframe = window.document.getElementById("token-renewal");
-      if (iframe !== null) {
-        window.document.body.removeChild(iframe);
-      }
     }
-  };
+    // Clean up the iframe from the DOM
+    if (frameElement !== null) {
+      window.document.body.removeChild(frameElement);
+    }
+  });
 }
 
 /**
  * This function bubbles up the result of the front-channel interaction with
  * the authorization endpoint to the parent window.
  */
-export function postRedirectUrlToParent(redirectUrl: string) {
+export function postRedirectUrlToParent(
+  redirectUrl: string,
+  targetOrigin: string
+): void {
   window.top.postMessage(
     {
       redirectUrl,
     },
-    window.location.origin
+    targetOrigin
   );
 }

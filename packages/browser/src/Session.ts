@@ -255,8 +255,9 @@ export class Session extends EventEmitter {
     const url = options.url ?? window.location.href;
 
     if (window.frameElement !== null) {
-      // This is being loaded from an iframe.
-      postRedirectUrlToParent(url);
+      // This is being loaded from an iframe, so send the redirect
+      // URL to the parent window on the same origin.
+      postRedirectUrlToParent(url, window.location.origin);
       return undefined;
     }
 

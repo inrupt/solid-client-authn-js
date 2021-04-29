@@ -610,7 +610,8 @@ describe("Session", () => {
         url: "https://some.redirect.url?code=someCode&state=someState",
       });
       expect(postIri).toHaveBeenCalledWith(
-        "https://some.redirect.url?code=someCode&state=someState"
+        "https://some.redirect.url?code=someCode&state=someState",
+        undefined
       );
     });
   });
