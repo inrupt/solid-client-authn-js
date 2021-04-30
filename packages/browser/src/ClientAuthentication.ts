@@ -27,7 +27,6 @@
 import "reflect-metadata";
 import { injectable, inject } from "tsyringe";
 import {
-  ILoginInputOptions,
   ILoginHandler,
   ILogoutHandler,
   IRedirectHandler,
@@ -35,6 +34,7 @@ import {
   ISessionInfoManager,
   IIssuerConfigFetcher,
   ISessionInternalInfo,
+  ILoginOptions,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam, validateIdToken } from "@inrupt/oidc-client-ext";
 import { KEY_CURRENT_SESSION } from "./constant";
@@ -64,22 +64,14 @@ export default class ClientAuthentication {
 
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
-  login = async (
-    sessionId: string,
-    options: ILoginInputOptions & {
-      // TODO: the 'prompt' parameter shouldn't be exposed as part of the public API.
-      // This login function should take the internal IOidcOptions type as an
-      // input, will be fixed later.
-      prompt?: string;
-    }
-  ): Promise<void> => {
+  login = async (options: ILoginOptions): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
     // But we may want to preserve our client application info, particularly if
     // we used Dynamic Client Registration to register (since we don't
     // necessarily want the user to have to register this app each time they
     // login).
-    await this.sessionInfoManager.clear(sessionId);
+    await this.sessionInfoManager.clear(options.sessionId);
 
     // In the case of the user hitting the 'back' button in their browser, they
     // could return to a previous redirect URL that contains OIDC params that
@@ -89,17 +81,12 @@ export default class ClientAuthentication {
     );
 
     await this.loginHandler.handle({
-      sessionId,
-      oidcIssuer: options.oidcIssuer,
+      ...options,
       redirectUrl,
-      clientId: options.clientId,
-      clientSecret: options.clientSecret,
+      // If no clientName is provided, the clientId may be used instead.
       clientName: options.clientName ?? options.clientId,
+      // Defaults to no popup.
       popUp: options.popUp || false,
-      handleRedirect: options.handleRedirect,
-      // Defaults to DPoP.
-      tokenType: options.tokenType ?? "DPoP",
-      prompt: options.prompt,
     });
   };
 

@@ -111,6 +111,7 @@ describe("SessionInfoManager", () => {
             idToken: "some.id.token",
             redirectUrl: "https://some.redirect/url",
             issuer: "https://some.issuer",
+            tokenType: "DPoP",
           },
         })
       );
@@ -129,6 +130,7 @@ describe("SessionInfoManager", () => {
         idToken: "some.id.token",
         refreshToken: "some refresh token",
         redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
       });
     });
 
@@ -157,6 +159,7 @@ describe("SessionInfoManager", () => {
         idToken: undefined,
         refreshToken: undefined,
         redirectUrl: undefined,
+        tokenType: "DPoP",
       });
     });
 
@@ -169,6 +172,34 @@ describe("SessionInfoManager", () => {
     });
 
     it("retrieves internal session information from specified storage", async () => {
+      const sessionId = "commanderCool";
+
+      const webId = "https://zoomies.com/commanderCool#me";
+
+      const storageMock = new StorageUtility(
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            webId,
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            issuer: "https://my.idp",
+            tokenType: "Some arbitrary token type",
+          },
+        })
+      );
+
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storageMock,
+      });
+      await expect(sessionManager.get(sessionId)).rejects.toThrow(
+        "Tokens of type [Some arbitrary token type] are not supported."
+      );
+    });
+
+    it("throws if the stored token type isn't supported", async () => {
       const sessionId = "commanderCool";
 
       const webId = "https://zoomies.com/commanderCool#me";

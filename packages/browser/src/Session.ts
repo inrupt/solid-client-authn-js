@@ -107,12 +107,14 @@ async function silentlyAuthenticate(
     // on incoming redirect. This way, the user is eventually redirected back
     // to the page they were on and not to the app's redirect page.
     window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
-    await clientAuthn.login(sessionId, {
+    await clientAuthn.login({
+      sessionId,
       prompt: "none",
       oidcIssuer: storedSessionInfo.issuer,
       redirectUrl: storedSessionInfo.redirectUrl,
       clientId: storedSessionInfo.clientAppId,
       clientSecret: storedSessionInfo.clientAppSecret,
+      tokenType: storedSessionInfo.tokenType ?? "DPoP",
     });
   }
 }
@@ -188,8 +190,11 @@ export class Session extends EventEmitter {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
-    await this.clientAuthentication.login(this.info.sessionId, {
+    await this.clientAuthentication.login({
+      sessionId: this.info.sessionId,
       ...options,
+      // Defaults the token type to DPoP
+      tokenType: options.tokenType ?? "DPoP",
     });
   };
 
