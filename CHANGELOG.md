@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.8.1 - 2021-04-30
+
 ### Deprecated
 
 #### node
@@ -32,8 +36,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
   console. If you want to make sure a session is preserved across page reloads,
   please see [the documentation on using the `restorePreviousSession`
   option](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/restore-session-browser-refresh/).
-
-The following sections document changes that have been released already:
+  If you are working with an instance of ESS that still has the dedicated `/session`
+  you can still [enable this workaround](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/restore-session-browser-refresh/#cookie-based-sessions-temporary-solution) to maintain the previous behaviour.
 
 ## 1.8.0 - 2021-04-21
 
