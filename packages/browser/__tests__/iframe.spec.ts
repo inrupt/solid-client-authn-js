@@ -28,81 +28,36 @@ import {
 
 describe("redirectInIframe", () => {
   it("creates an iframe with the appropriate attributes and performs the redirection in it", () => {
-    const appendChild = jest.spyOn(window.document.body, "appendChild");
-    appendChild.mockImplementation(jest.fn());
-    const createElement = jest.spyOn(window.document, "createElement");
-    const mockIframe = {
-      setAttribute: jest.fn(),
-      src: undefined,
-    };
-    createElement.mockReturnValueOnce((mockIframe as unknown) as HTMLElement);
     redirectInIframe("http://some.iri");
 
+    const iframe = document.getElementsByTagName("iframe")[0];
+
+    // This verifies that the iframe has been added to the DOM, i.e. that
+    // window.document.body.appendChild has been called.
+    expect(iframe).not.toBeUndefined();
+
     // The iframe has the appropriate attributes.
-    expect(mockIframe.setAttribute).toHaveBeenCalledTimes(4);
-    expect(mockIframe.setAttribute).toHaveBeenNthCalledWith(
-      1,
-      "id",
-      "token-renewal"
-    );
-    expect(mockIframe.setAttribute).toHaveBeenNthCalledWith(
-      2,
-      "name",
-      "token-renewal"
-    );
-    expect(mockIframe.setAttribute).toHaveBeenNthCalledWith(
-      3,
-      "hidden",
-      "true"
-    );
-    expect(mockIframe.setAttribute).toHaveBeenNthCalledWith(
-      4,
-      "sandbox",
+    expect(iframe.getAttribute("hidden")).toBe("true");
+    expect(iframe.getAttribute("sandbox")).toBe(
       "allow-scripts allow-same-origin"
     );
-
-    // The iframe src is set to the redirect IRI.
-    expect(mockIframe.src).toBe("http://some.iri");
-
-    // The iframe is appended to the body.
-    expect(appendChild).toHaveBeenCalledWith(mockIframe);
+    expect(iframe.getAttribute("src")).toBe("http://some.iri");
   });
 });
 
 describe("setupIframeListener", () => {
-  const setupMockEvent = (
-    originMatch: boolean,
-    sourceMatch: boolean,
-    iframeExists: boolean
-  ) => {
-    // Create a mock iframe, and make it match the event source or not.
-    const mockedFrame = iframeExists
-      ? (({
-          // The event source is null in the test environment.
-          contentWindow: sourceMatch ? null : window,
-        } as unknown) as HTMLIFrameElement)
-      : null;
-
-    // Pretend that the iframe is present in the DOM
-    const mockedCollection = ({
-      namedItem: () => mockedFrame,
-    } as unknown) as HTMLCollectionOf<HTMLIFrameElement>;
-    jest
-      .spyOn(document, "getElementsByTagName")
-      .mockReturnValue(mockedCollection);
-
-    // The event origin is "" in the test environement.
+  const setupDom = (originMatch: boolean, sourceMatch: boolean) => {
     jest.spyOn(window, "location", "get").mockReturnValue({
+      // The test iframe message has "" as an origin.
       origin: originMatch ? "" : "https://some.other/origin",
     } as Location);
 
-    // Pretend that we can remove the iframe from the DOM
-    const mockedRemove = jest
-      .spyOn(window.document.body, "removeChild")
-      .mockReturnValue(window.document.createElement("iframe"));
-    return {
-      mockedRemove,
-    };
+    // Mock mismatching window
+    redirectInIframe("http://some.iri");
+    const iframe = document.getElementsByTagName("iframe")[0];
+    jest
+      .spyOn(iframe, "contentWindow", "get")
+      .mockReturnValue((sourceMatch ? null : ({} as unknown)) as Window);
   };
 
   const mockEventListener = () => {
@@ -130,8 +85,7 @@ describe("setupIframeListener", () => {
   it("ignores message from iframes on different origins", async () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
-    // Mock mismatching origins
-    setupMockEvent(false, true, true);
+    setupDom(false, true);
     setupIframeListener(callback);
 
     window.postMessage(
@@ -146,30 +100,10 @@ describe("setupIframeListener", () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it("ignores messages not from iframes", async () => {
+  it("ignores messages from iframes with an unknown source", async () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
-    // Mock mismatching identifier
-    setupMockEvent(true, true, false);
-    setupIframeListener(callback);
-
-    window.postMessage(
-      {
-        redirectUrl: "http://some.redirect/url",
-      },
-      "http://localhost"
-    );
-
-    await blockingPromise;
-
-    expect(callback).not.toHaveBeenCalled();
-  });
-
-  it("ignores messages from iframes with an unknown identifier", async () => {
-    const callback = jest.fn();
-    const blockingPromise = mockEventListener();
-    // Mock mismatching identifier
-    setupMockEvent(true, false, true);
+    setupDom(true, false);
     setupIframeListener(callback);
 
     window.postMessage(
@@ -187,7 +121,7 @@ describe("setupIframeListener", () => {
   it("ignores messages from valid iframes but with an unexpected structure", async () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
-    setupMockEvent(true, true, true);
+    setupDom(true, true);
     setupIframeListener(callback);
 
     window.postMessage(
@@ -206,7 +140,7 @@ describe("setupIframeListener", () => {
   it("calls the given callback", async () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
-    setupMockEvent(true, true, true);
+    setupDom(true, true);
     setupIframeListener(callback);
 
     window.postMessage(
@@ -224,8 +158,10 @@ describe("setupIframeListener", () => {
   it("cleans up the iframe after the message is received", async () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
-    const spyRemove = setupMockEvent(true, true, true).mockedRemove;
+    setupDom(true, true);
     setupIframeListener(callback);
+
+    expect(document.getElementsByTagName("iframe")[0]).not.toBeUndefined();
 
     window.postMessage(
       {
@@ -236,7 +172,8 @@ describe("setupIframeListener", () => {
 
     await blockingPromise;
 
-    expect(spyRemove).toHaveBeenCalled();
+    // Verify that the iframe has correctly been removed from the DOM
+    expect(document.getElementsByTagName("iframe")[0]).toBeUndefined();
   });
 });
 

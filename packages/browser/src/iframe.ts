@@ -19,7 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ISessionInfo } from "@inrupt/solid-client-authn-core";
+// This is an internal variable used to share some state between `redirectInIframe`,
+// which initializes it, and `setupIframeListener`, which reads from it. It avoids
+// creating a DOM element with identifying attributes such as an ID which may clash
+// with some other element set up by the library user.
+const iframe: HTMLIFrameElement = window.document.createElement("iframe");
+iframe.setAttribute("hidden", "true");
+iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
 
 /**
  * Redirects the browser to a provided IRI, but does such redirection in a child
@@ -29,11 +35,6 @@ import { ISessionInfo } from "@inrupt/solid-client-authn-core";
  * @param redirectUrl The IRI to which the iframe should be redirected.
  */
 export function redirectInIframe(redirectUrl: string): void {
-  const iframe = window.document.createElement("iframe");
-  iframe.setAttribute("id", "token-renewal");
-  iframe.setAttribute("name", "token-renewal");
-  iframe.setAttribute("hidden", "true");
-  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
   window.document.body.appendChild(iframe);
   iframe.src = redirectUrl;
 }
@@ -49,18 +50,12 @@ export function redirectInIframe(redirectUrl: string): void {
  * @param handleIframeRedirect Redirect URL sent by the iframe
  */
 export function setupIframeListener(
-  handleIframeRedirect: (
-    redirectUrl: string
-  ) => Promise<unknown>
+  handleIframeRedirect: (redirectUrl: string) => Promise<unknown>
 ): void {
   window.addEventListener("message", async (evt: MessageEvent) => {
-    const frameElement = document
-      .getElementsByTagName("iframe")
-      .namedItem("token-renewal");
-
     if (
       evt.origin === window.location.origin &&
-      evt.source === frameElement?.contentWindow
+      evt.source === iframe.contentWindow
     ) {
       if (typeof evt.data.redirectUrl === "string") {
         // The top-level window handles the redirect that happened in the iframe.
@@ -68,8 +63,8 @@ export function setupIframeListener(
       }
     }
     // Clean up the iframe from the DOM
-    if (frameElement !== null) {
-      window.document.body.removeChild(frameElement);
+    if (window.document.body.contains(iframe)) {
+      window.document.body.removeChild(iframe);
     }
   });
 }
