@@ -52,4 +52,11 @@ export default interface ILoginOptions extends ILoginInputOptions {
    * Provider. In this case, the provided function is called with the new token as a parameter.
    */
   onNewRefreshToken?: (newToken: string) => unknown;
+  /**
+   * This boolean specifies redirection to the Identity Provider should happen in
+   * the main window or in an iframe, thus making the redirect invisible to the
+   * user. Such redirection may only succeed in the case of silent authentication,
+   * if a cookie is set for the IdP and this cookie is included by the iframe.
+   */
+  inIframe?: boolean;
 }
