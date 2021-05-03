@@ -51,7 +51,7 @@ export function redirectInIframe(redirectUrl: string): void {
 export function setupIframeListener(
   handleIframeRedirect: (
     redirectUrl: string
-  ) => Promise<ISessionInfo | undefined>
+  ) => Promise<unknown>
 ): void {
   window.addEventListener("message", async (evt: MessageEvent) => {
     const frameElement = document
