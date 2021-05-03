@@ -73,14 +73,11 @@ export function setupIframeListener(
  * This function bubbles up the result of the front-channel interaction with
  * the authorization endpoint to the parent window.
  */
-export function postRedirectUrlToParent(
-  redirectUrl: string,
-  targetOrigin: string
-): void {
+export function postRedirectUrlToParent(redirectUrl: string): void {
   window.top.postMessage(
     {
       redirectUrl,
     },
-    targetOrigin
+    window.location.origin
   );
 }

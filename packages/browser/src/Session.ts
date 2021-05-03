@@ -257,7 +257,7 @@ export class Session extends EventEmitter {
     if (window.frameElement !== null) {
       // This is being loaded from an iframe, so send the redirect
       // URL to the parent window on the same origin.
-      postRedirectUrlToParent(url, window.location.origin);
+      postRedirectUrlToParent(url);
       return undefined;
     }
 
