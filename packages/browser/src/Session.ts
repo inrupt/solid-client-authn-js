@@ -96,7 +96,11 @@ export interface IHandleIncomingRedirectOptions {
 export async function silentlyAuthenticate(
   sessionId: string,
   clientAuthn: ClientAuthentication,
-  inIframe?: boolean
+  options: {
+    inIframe?: boolean;
+  } = {
+    inIframe: false,
+  }
 ): Promise<void> {
   // Check if we have an ID Token in storage - if we do then we may be
   // currently logged in, and the user has refreshed their browser page. The ID
@@ -117,7 +121,7 @@ export async function silentlyAuthenticate(
       clientId: storedSessionInfo.clientAppId,
       clientSecret: storedSessionInfo.clientAppSecret,
       tokenType: storedSessionInfo.tokenType ?? "DPoP",
-      inIframe,
+      inIframe: options.inIframe,
     });
   }
 }
@@ -186,7 +190,9 @@ export class Session extends EventEmitter {
     setupIframeListener(this.clientAuthentication.handleIncomingRedirect);
     // Listen for the 'tokenRenewal' signal to trigger the silent token renewal.
     this.on("tokenRenewal", () =>
-      silentlyAuthenticate(this.info.sessionId, this.clientAuthentication, true)
+      silentlyAuthenticate(this.info.sessionId, this.clientAuthentication, {
+        inIframe: true,
+      })
     );
   }
 
@@ -375,11 +381,7 @@ export class Session extends EventEmitter {
         // TODO: iframe-based authentication being still experimental, it is disabled
         // by default here. When it settles down, the following could be set to true,
         // in which case the unresolving promise afterwards would need to be changed.
-        await silentlyAuthenticate(
-          storedSessionId,
-          this.clientAuthentication,
-          false
-        );
+        await silentlyAuthenticate(storedSessionId, this.clientAuthentication);
         // At this point, we know that the main window will imminently be redirected.
         // However, this redirect is asynchronous and there is no way to halt execution
         // until it happens precisely. That's why the current Promise simply does not
