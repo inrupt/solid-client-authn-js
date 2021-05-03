@@ -38,8 +38,11 @@ import {
  * @hidden
  */
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
-  async canHandle(_oidcLoginOptions: IOidcOptions): Promise<boolean> {
-    return false;
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
+    return (
+      oidcLoginOptions.client.clientId !== undefined &&
+      oidcLoginOptions.client.clientSecret !== undefined
+    );
   }
 
   async handle(_oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
