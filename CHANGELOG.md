@@ -7,6 +7,17 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
+#### node
+
+- Client credential grant: for Solid Identity Providers which support it, a client
+may statically register, and use the obtained credentials (client ID and secret)
+to log in to an Identity Provider. This is convenient in some cases, such as CI
+environment. However, it requires offline provider/client interaction, which does
+not scale in the decentralized ecosystem of Solid. As such, it should only be
+used in specific cases.
+
 The following sections document changes that have been released already:
 
 ## 1.8.1 - 2021-04-30
