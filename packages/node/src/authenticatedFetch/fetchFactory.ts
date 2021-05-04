@@ -262,3 +262,23 @@ export async function buildDpopFetch(
     return response;
   };
 }
+
+/**
+ * @param authToken a DPoP token.
+ * @param dpopKey The private key the token is bound to.
+ * @param
+ * @returns A fetch function that adds an Authorization header with the provided
+ * DPoP token, and adds a dpop header.
+ */
+export async function buildAuthenticatedFetch(
+  accessToken: string,
+  options?: {
+    dpopKey?: JWK.ECKey;
+    refreshOptions?: RefreshOptions;
+  }
+): Promise<typeof fetch> {
+  if (options?.dpopKey) {
+    return buildDpopFetch(accessToken, options.dpopKey, options.refreshOptions);
+  }
+  return buildBearerFetch(accessToken, options?.refreshOptions);
+}
