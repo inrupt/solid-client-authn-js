@@ -53,7 +53,35 @@ describe("ClientCredentialsOidcHandler", () => {
       ).resolves.toEqual(false);
     });
 
-    it("can handle if both client ID and secret are present", async () => {
+    it("cannot handle if the client is public", async () => {
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      await expect(
+        clientCredentialsOidcHandler.canHandle({
+          ...standardOidcOptions,
+          client: {
+            clientId: "some client ID",
+            clientSecret: "some secret",
+            isPublic: true,
+          },
+        })
+      ).resolves.toEqual(false);
+    });
+
+    it("cannot handle if the client's nature (public or confidential) is unknown", async () => {
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      await expect(
+        clientCredentialsOidcHandler.canHandle({
+          ...standardOidcOptions,
+          client: {
+            clientId: "some client ID",
+            clientSecret: "some secret",
+            isPublic: (undefined as unknown) as boolean,
+          },
+        })
+      ).resolves.toEqual(false);
+    });
+
+    it("can handle if both client ID and secret are present for a confidential client", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -61,6 +89,7 @@ describe("ClientCredentialsOidcHandler", () => {
           client: {
             clientId: "some client ID",
             clientSecret: "some client secret",
+            isPublic: false,
           },
         })
       ).resolves.toEqual(true);

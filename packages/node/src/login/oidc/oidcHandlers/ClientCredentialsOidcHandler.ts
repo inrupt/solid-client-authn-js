@@ -41,7 +41,9 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return (
       typeof oidcLoginOptions.client.clientId === "string" &&
-      typeof oidcLoginOptions.client.clientSecret === "string"
+      typeof oidcLoginOptions.client.clientSecret === "string" &&
+      typeof oidcLoginOptions.client.isPublic === "boolean" &&
+      !oidcLoginOptions.client.isPublic
     );
   }
 

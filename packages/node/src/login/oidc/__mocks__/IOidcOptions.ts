@@ -38,6 +38,7 @@ export const standardOidcOptions: IOidcOptions = {
   },
   client: {
     clientId: "coolApp",
+    isPublic: true,
   },
 };
 
