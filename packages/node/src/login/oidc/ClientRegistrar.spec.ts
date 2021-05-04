@@ -85,6 +85,7 @@ describe("ClientRegistrar", () => {
               clientSecret: "a secret",
               clientName: "my client name",
               idTokenSignedResponseAlg: "ES256",
+              isPublic: "true",
             },
           },
           false
@@ -99,10 +100,11 @@ describe("ClientRegistrar", () => {
           ...IssuerConfigFetcherFetchConfigResponse,
         }
       );
-      expect(client.clientId).toEqual("an id");
-      expect(client.clientSecret).toEqual("a secret");
-      expect(client.clientName).toEqual("my client name");
-      expect(client.idTokenSignedResponseAlg).toEqual("ES256");
+      expect(client.clientId).toBe("an id");
+      expect(client.clientSecret).toBe("a secret");
+      expect(client.clientName).toBe("my client name");
+      expect(client.idTokenSignedResponseAlg).toBe("ES256");
+      expect(client.isPublic).toBe(true);
     });
 
     it("properly performs dynamic registration and saves client information", async () => {
@@ -134,26 +136,26 @@ describe("ClientRegistrar", () => {
       );
 
       // Check that the returned value is what we expect
-      expect(client.clientId).toEqual(mockDefaultClientConfig().client_id);
-      expect(client.clientSecret).toEqual(
-        mockDefaultClientConfig().client_secret
-      );
-      expect(client.idTokenSignedResponseAlg).toEqual(
+      expect(client.clientId).toBe(mockDefaultClientConfig().client_id);
+      expect(client.clientSecret).toBe(mockDefaultClientConfig().client_secret);
+      expect(client.idTokenSignedResponseAlg).toBe(
         mockDefaultClientConfig().id_token_signed_response_alg
       );
+      expect(client.isPublic).toBe(mockDefaultClientConfig().isPublic);
 
       // Check that the client information have been saved in storage
       await expect(
         mockStorage.getForUser("mySession", "clientId")
-      ).resolves.toEqual(mockDefaultClientConfig().client_id);
+      ).resolves.toBe(mockDefaultClientConfig().client_id);
       await expect(
         mockStorage.getForUser("mySession", "clientSecret")
-      ).resolves.toEqual(mockDefaultClientConfig().client_secret);
+      ).resolves.toBe(mockDefaultClientConfig().client_secret);
       await expect(
         mockStorage.getForUser("mySession", "idTokenSignedResponseAlg")
-      ).resolves.toEqual(
-        mockDefaultClientConfig().id_token_signed_response_alg
-      );
+      ).resolves.toBe(mockDefaultClientConfig().id_token_signed_response_alg);
+      await expect(
+        mockStorage.getForUser("mySession", "isPublic")
+      ).resolves.toBe("true");
     });
 
     it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {

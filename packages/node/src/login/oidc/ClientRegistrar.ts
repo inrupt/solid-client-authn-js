@@ -84,11 +84,13 @@ export default class ClientRegistrar implements IClientRegistrar {
       storedClientId,
       storedClientSecret,
       storedClientName,
+      storedIsPublic,
       storedIdTokenSignedResponseAlg,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId"),
       this.storageUtility.getForUser(options.sessionId, "clientSecret"),
       this.storageUtility.getForUser(options.sessionId, "clientName"),
+      this.storageUtility.getForUser(options.sessionId, "isPublic"),
       this.storageUtility.getForUser(
         options.sessionId,
         "idTokenSignedResponseAlg"
@@ -100,6 +102,7 @@ export default class ClientRegistrar implements IClientRegistrar {
         clientSecret: storedClientSecret,
         clientName: storedClientName as string | undefined,
         idTokenSignedResponseAlg: storedIdTokenSignedResponseAlg,
+        isPublic: storedIsPublic === "true",
       };
     }
     const extendedOptions = { ...options };
@@ -148,6 +151,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
+      isPublic: "true",
     };
     if (registeredClient.metadata.client_secret) {
       infoToSave.clientSecret = registeredClient.metadata.client_secret;
@@ -159,6 +163,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       clientName: registeredClient.metadata.client_name as string | undefined,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
+      isPublic: true,
     };
   }
 }

@@ -32,4 +32,5 @@ export interface IClient {
   clientSecret?: string;
   clientName?: string;
   idTokenSignedResponseAlg?: string;
+  isPublic?: boolean;
 }

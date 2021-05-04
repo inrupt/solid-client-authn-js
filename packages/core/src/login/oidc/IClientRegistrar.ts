@@ -115,5 +115,6 @@ export async function handleRegistration(
     clientId: options.clientId,
     clientSecret: options.clientSecret,
     clientName: options.clientName,
+    isPublic: false,
   };
 }

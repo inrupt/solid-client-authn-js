@@ -59,6 +59,7 @@ export const mockDefaultClientConfig = (): ClientMetadata => {
     redirect_uris: ["https://my.app/redirect"],
     response_types: ["code"],
     id_token_signed_response_alg: "RS256",
+    isPublic: true,
   };
 };
 
