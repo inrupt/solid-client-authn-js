@@ -119,6 +119,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
 
       redirector.redirect(signingRequest.url.toString(), {
         handleRedirect: oidcLoginOptions.handleRedirect,
+        redirectInIframe: oidcLoginOptions.inIframe,
       });
     } catch (err: unknown) {
       // eslint-disable-next-line no-console

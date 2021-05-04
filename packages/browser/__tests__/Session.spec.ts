@@ -66,6 +66,8 @@ const mockLocation = (mockedLocation: string) => {
   window.history.replaceState = jest.fn();
 };
 
+jest.mock("../src/iframe");
+
 describe("Session", () => {
   describe("constructor", () => {
     it("accepts an empty config", async () => {
@@ -211,7 +213,7 @@ describe("Session", () => {
     });
   });
 
-  describe("handleincomingRedirect", () => {
+  describe("handleIncomingRedirect", () => {
     it("uses current window location as default redirect URL", async () => {
       mockLocation("https://some.url");
       const clientAuthentication = mockClientAuthentication();
@@ -595,6 +597,22 @@ describe("Session", () => {
         ).toHaveBeenCalledTimes(1);
       });
     });
+
+    it("posts the redirect IRI to the parent if in an iframe", async () => {
+      // Pretend we are in an iframe.
+      const frameElement = jest.spyOn(window, "frameElement", "get");
+      frameElement.mockReturnValueOnce({} as Element);
+
+      const mySession = new Session({}, "mySession");
+      const iframe = jest.requireMock("../src/iframe");
+      const postIri = jest.spyOn(iframe, "postRedirectUrlToParent");
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect.url?code=someCode&state=someState",
+      });
+      expect(postIri).toHaveBeenCalledWith(
+        "https://some.redirect.url?code=someCode&state=someState"
+      );
+    });
   });
 
   describe("silent authentication", () => {
@@ -748,6 +766,7 @@ describe("Session", () => {
         clientId: "some client ID",
         clientSecret: "some client secret",
         redirectUrl: "https://some.redirect/url",
+        inIframe: false,
       });
     });
 
@@ -948,6 +967,58 @@ describe("Session", () => {
 
       // This verifies that the callback has been called
       expect.assertions(1);
+    });
+  });
+
+  describe("on tokenRenewal signal", () => {
+    it("triggers silent authentication in an iframe when receiving the signal", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({})
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer",
+        clientAppId: "some client ID",
+        clientAppSecret: "some client secret",
+        redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
+      });
+      clientAuthentication.validateCurrentSession = jest
+        .fn()
+        .mockReturnValue(validateCurrentSessionPromise);
+      const incomingRedirectPromise = Promise.resolve();
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockReturnValueOnce(incomingRedirectPromise);
+      clientAuthentication.login = jest.fn();
+
+      const mySession = new Session({ clientAuthentication }, sessionId);
+      // Send the signal to the session
+      mySession.emit("tokenRenewal");
+      await incomingRedirectPromise;
+      await validateCurrentSessionPromise;
+      expect(clientAuthentication.login).toHaveBeenCalledWith({
+        sessionId: "mySession",
+        tokenType: "DPoP",
+        oidcIssuer: "https://some.issuer",
+        prompt: "none",
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        redirectUrl: "https://some.redirect/url",
+        inIframe: true,
+      });
     });
   });
 });

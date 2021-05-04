@@ -33,6 +33,7 @@ import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
+import { postRedirectUrlToParent, setupIframeListener } from "./iframe";
 
 export interface ISessionOptions {
   /**
@@ -92,10 +93,15 @@ export interface IHandleIncomingRedirectOptions {
   url?: string;
 }
 
-async function silentlyAuthenticate(
+export async function silentlyAuthenticate(
   sessionId: string,
-  clientAuthn: ClientAuthentication
-) {
+  clientAuthn: ClientAuthentication,
+  options: {
+    inIframe?: boolean;
+  } = {
+    inIframe: false,
+  }
+): Promise<void> {
   // Check if we have an ID Token in storage - if we do then we may be
   // currently logged in, and the user has refreshed their browser page. The ID
   // token is validated, and on success the current session information are returned,
@@ -115,6 +121,7 @@ async function silentlyAuthenticate(
       clientId: storedSessionInfo.clientAppId,
       clientSecret: storedSessionInfo.clientAppSecret,
       tokenType: storedSessionInfo.tokenType ?? "DPoP",
+      inIframe: options.inIframe,
     });
   }
 }
@@ -179,6 +186,14 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
+    // Listen for messages from children iframes.
+    setupIframeListener(this.clientAuthentication.handleIncomingRedirect);
+    // Listen for the 'tokenRenewal' signal to trigger the silent token renewal.
+    this.on("tokenRenewal", () =>
+      silentlyAuthenticate(this.info.sessionId, this.clientAuthentication, {
+        inIframe: true,
+      })
+    );
   }
 
   /**
@@ -244,6 +259,13 @@ export class Session extends EventEmitter {
     const options =
       typeof inputOptions === "string" ? { url: inputOptions } : inputOptions;
     const url = options.url ?? window.location.href;
+
+    if (window.frameElement !== null) {
+      // This is being loaded from an iframe, so send the redirect
+      // URL to the parent window on the same origin.
+      postRedirectUrlToParent(url);
+      return undefined;
+    }
 
     // Unfortunately, regular sessions are lost when the user refreshes the page or opens a new tab.
     // While we're figuring out the API for a longer-term solution, as a temporary workaround some
@@ -356,6 +378,9 @@ export class Session extends EventEmitter {
       // ...if not, then there is no ID token, and so silent authentication cannot happen, but
       // if we do have a stored session ID, attempt to re-authenticate now silently.
       if (storedSessionId !== null) {
+        // TODO: iframe-based authentication being still experimental, it is disabled
+        // by default here. When it settles down, the following could be set to true,
+        // in which case the unresolving promise afterwards would need to be changed.
         await silentlyAuthenticate(storedSessionId, this.clientAuthentication);
         // At this point, we know that the main window will imminently be redirected.
         // However, this redirect is asynchronous and there is no way to halt execution

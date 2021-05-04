@@ -39,6 +39,8 @@ The following sections document changes that have been released already:
   If you are working with an instance of ESS that still has the dedicated `/session`
   you can still [enable this workaround](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/restore-session-browser-refresh/#cookie-based-sessions-temporary-solution) to maintain the previous behaviour.
 
+The following sections document changes that have been released already:
+
 ## 1.8.0 - 2021-04-21
 
 ### New features
