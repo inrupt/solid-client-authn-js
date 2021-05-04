@@ -37,7 +37,7 @@ import {
 import { JWK } from "jose";
 import { Issuer } from "openid-client";
 import { inject, injectable } from "tsyringe";
-import { buildDpopFetch } from "../../../authenticatedFetch/fetchFactory";
+import { buildAuthenticatedFetch } from "../../../authenticatedFetch/fetchFactory";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { getWebidFromTokenPayload } from "../redirectHandler/AuthCodeRedirectHandler";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
@@ -70,16 +70,11 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       client_secret: oidcLoginOptions.client.clientSecret,
     });
 
-    // This information must be in storage for the refresh flow to succeed.
-    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-      issuer: oidcLoginOptions.issuer,
-      dpop: oidcLoginOptions.dpop ? "true" : "false",
-      clientId: oidcLoginOptions.client.clientId,
-      // Note: We assume here that a client secret is present, which is checked for when validating the options.
-      clientSecret: oidcLoginOptions.client.clientSecret as string,
-    });
+    let dpopKey: JWK.ECKey | undefined;
 
-    const dpopKey = await JWK.generate("EC", "P-256");
+    if (oidcLoginOptions.dpop) {
+      dpopKey = await JWK.generate("EC", "P-256");
+    }
 
     const tokens = await client.grant(
       {
@@ -89,43 +84,45 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
         token_endpoint_auth_method: "client_secret_post",
       },
       {
-        DPoP: dpopKey?.toJWK(true),
+        DPoP: oidcLoginOptions.dpop
+          ? (dpopKey as JWK.ECKey).toJWK(true)
+          : undefined,
       }
     );
 
     if (tokens.access_token === undefined) {
       throw new Error(
-        `Invalid response from Solid Identity Provider: ${JSON.stringify(
-          tokens
-        )} is missing 'access_token'.`
+        `Invalid response from Solid Identity Provider [${
+          oidcLoginOptions.issuer
+        }]: ${JSON.stringify(tokens)} is missing 'access_token'.`
       );
     }
 
-    const authFetch = await buildDpopFetch(
-      tokens.access_token,
+    if (tokens.id_token === undefined) {
+      throw new Error(
+        `Invalid response from Solid Identity Provider [${
+          oidcLoginOptions.issuer
+        }]: ${JSON.stringify(tokens)} is missing 'id_token'`
+      );
+    }
+
+    const authFetch = await buildAuthenticatedFetch(tokens.access_token, {
       dpopKey,
-      tokens.refresh_token
+      refreshOptions: tokens.refresh_token
         ? {
-            // The type assertion is okay, because it is tested for in canHandle.
             refreshToken: tokens.refresh_token,
             sessionId: oidcLoginOptions.sessionId,
             tokenRefresher: this.tokenRefresher,
             onNewRefreshToken: oidcLoginOptions.onNewRefreshToken,
           }
-        : undefined
-    );
+        : undefined,
+    });
 
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
+      webId: await getWebidFromTokenPayload(tokens.claims()),
     };
-
-    if (tokens.id_token === undefined) {
-      throw new Error(
-        `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
-      );
-    }
-    sessionInfo.webId = await getWebidFromTokenPayload(tokens.claims());
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
