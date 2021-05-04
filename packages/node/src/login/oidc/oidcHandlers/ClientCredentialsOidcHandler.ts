@@ -40,8 +40,8 @@ import {
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return (
-      oidcLoginOptions.client.clientId !== undefined &&
-      oidcLoginOptions.client.clientSecret !== undefined
+      typeof oidcLoginOptions.client.clientId === "string" &&
+      typeof oidcLoginOptions.client.clientSecret === "string"
     );
   }
 

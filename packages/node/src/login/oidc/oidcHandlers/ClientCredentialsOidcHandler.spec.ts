@@ -28,11 +28,42 @@ import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
 
 describe("ClientCredentialsOidcHandler", () => {
   describe("canHandle", () => {
-    it("doesn't handle anything", async () => {
+    it("cannot handle if the client ID is missing", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
       await expect(
-        clientCredentialsOidcHandler.canHandle(standardOidcOptions)
+        clientCredentialsOidcHandler.canHandle({
+          ...standardOidcOptions,
+          client: {
+            clientId: (undefined as unknown) as string,
+          },
+        })
       ).resolves.toEqual(false);
+    });
+
+    it("cannot handle if the client secret is missing", async () => {
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      await expect(
+        clientCredentialsOidcHandler.canHandle({
+          ...standardOidcOptions,
+          client: {
+            clientId: "some client ID",
+            clientSecret: undefined,
+          },
+        })
+      ).resolves.toEqual(false);
+    });
+
+    it("can handle if both client ID and secret are present", async () => {
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      await expect(
+        clientCredentialsOidcHandler.canHandle({
+          ...standardOidcOptions,
+          client: {
+            clientId: "some client ID",
+            clientSecret: "some client secret",
+          },
+        })
+      ).resolves.toEqual(true);
     });
   });
 
