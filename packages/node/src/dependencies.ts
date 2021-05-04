@@ -100,16 +100,16 @@ container.register<IOidcHandler>("node:oidcHandler", {
 container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: RefreshTokenOidcHandler,
 });
-
+// The client credential handler must be called before the auth code one,
+// since it is less generic.
+container.register<IOidcHandler>("node:oidcHandlers", {
+  useClass: ClientCredentialsOidcHandler,
+});
 container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: AuthorizationCodeOidcHandler,
 });
 container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler,
-});
-
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: ClientCredentialsOidcHandler,
 });
 container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: PrimaryDeviceOidcHandler,

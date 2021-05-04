@@ -22,14 +22,19 @@
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import "reflect-metadata";
+import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
 
 describe("ClientCredentialsOidcHandler", () => {
   describe("canHandle", () => {
     it("cannot handle if the client ID is missing", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
@@ -41,7 +46,10 @@ describe("ClientCredentialsOidcHandler", () => {
     });
 
     it("cannot handle if the client secret is missing", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
@@ -54,7 +62,10 @@ describe("ClientCredentialsOidcHandler", () => {
     });
 
     it("cannot handle if the client is public", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
@@ -68,7 +79,10 @@ describe("ClientCredentialsOidcHandler", () => {
     });
 
     it("cannot handle if the client's nature (public or confidential) is unknown", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
@@ -82,7 +96,10 @@ describe("ClientCredentialsOidcHandler", () => {
     });
 
     it("can handle if both client ID and secret are present for a confidential client", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
@@ -98,7 +115,10 @@ describe("ClientCredentialsOidcHandler", () => {
 
   describe("handle", () => {
     it("isn't implemented yet", async () => {
-      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler();
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({})
+      );
       await expect(() =>
         clientCredentialsOidcHandler.handle(standardOidcOptions)
       ).rejects.toThrow("not implemented");
