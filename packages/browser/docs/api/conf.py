@@ -28,11 +28,7 @@ copyright = u'{0} Inrupt Inc.'.format(datetime.date.today().year)
 
 name = 'solid-client-authn-browser'
 repo_name = 'solid-client-authn-js'
-replacement_string = '.. |product|  replace:: ``{0}``'.format(name)
 
-rst_epilog = '\n'.join([
-    replacement_string,
-])
 
 pygments_style = 'sphinx'
 
@@ -61,7 +57,7 @@ extlinks = {
 }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['./_templates']
+templates_path = ['./build/docs-assets/_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -76,7 +72,7 @@ exclude_patterns = ['./source/reference/api']
 #html_theme = 'alabaster'
 
 html_theme = 'inrupt'
-html_theme_path = ['./themes']
+html_theme_path = ['./build/docs-assets/themes']
 
 html_copy_source = False
 
@@ -94,9 +90,8 @@ html_theme_options = {
     'github_org': 'inrupt',
     'github_repo': repo_name,
     'github_branch': 'main',
-    'ess_docs': 'https://docs.inrupt.com/ess/',
-    'clientlibjs_docs': 'https://docs.inrupt.com/developer-tools/javascript/client-libraries/',
-    'reactsdk_docs': 'https://docs.inrupt.com/developer-tools/javascript/react-sdk',
+    'docs_project': 'developer-tools/api/javascript/{0}'.format(name),
+    'show_api_menu': True,
     
     # below are pydata_sphinx_theme
     "footer_items": [ "copyright.html"],
@@ -130,7 +125,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['./build/docs-assets/_static']
 
 html_sidebars = {
     '**': [  'search-field.html',  'docs-sidebar.html'],

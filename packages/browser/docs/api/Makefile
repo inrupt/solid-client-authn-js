@@ -22,14 +22,19 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCECOPYDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 
-.PHONY: help clean Makefile migrate html 
+.PHONY: help clean Makefile migrate html
 
 clean:
 	if [ -d $(BUILDDIR) ]; then rm -rf $(BUILDDIR) ; fi;
+	if [ -d build/docs-assets ]; then rm -rf build/docs-assets ; fi;
+
 migrate: clean
 	mkdir -p $(SOURCECOPYDIR)
 
-   # Copying to SOURCECOPYDIR instead of copying source dir to BUILDDIR
+   # Using https (not ssh) to clone
+   git clone https://github.com/inrupt/docs-assets.git build/docs-assets
+   
+	# Copying to SOURCECOPYDIR instead of copying source dir to BUILDDIR
    # in case someone forgets to backslash after build/
 
 	cp -R $(SOURCEDIR)/index.rst $(SOURCECOPYDIR)
