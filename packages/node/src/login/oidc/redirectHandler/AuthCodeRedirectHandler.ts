@@ -38,7 +38,7 @@ import {
   getSessionIdFromOauthState,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
-import { IdTokenClaims, Issuer, TokenSet } from "openid-client";
+import { DPoPInput, IdTokenClaims, Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose/types";
 import generateKeyPair from "jose/util/generate_key_pair";
 import fromKeyLike from "jose/jwk/from_key_like";
@@ -165,7 +165,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         // openid-client does not support yet jose@3.x, and expects
         // type definitions that are no longer present. However, the JWK
         // type that we pass here is compatible with the API.
-        { DPoP: dpopKey as any }
+        { DPoP: dpopKey as DPoPInput }
       );
     } else {
       tokenSet = await client.callback(url.href, params, {

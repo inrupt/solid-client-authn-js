@@ -33,7 +33,7 @@ import {
   loadOidcContextFromStorage,
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer, TokenSet } from "openid-client";
+import { DPoPInput, Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose/types";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
@@ -114,7 +114,7 @@ export default class TokenRefresher implements ITokenRefresher {
       // type definitions that are no longer present. However, the JWK
       // type that we pass here is compatible with the API, hence the `any`
       // assertion.
-      DPoP: dpopKey as any,
+      DPoP: dpopKey as DPoPInput,
     });
 
     if (tokenSet.access_token === undefined) {

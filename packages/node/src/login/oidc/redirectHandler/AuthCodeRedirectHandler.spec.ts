@@ -198,7 +198,7 @@ describe("AuthCodeRedirectHandler", () => {
       },
     });
 
-  const setupOidcClientMock = (tokenSet?: TokenSet, callback?: any) => {
+  const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
     const { Issuer } = jest.requireMock("openid-client");
     function clientConstructor() {
       // this is untyped, which makes TS complain
