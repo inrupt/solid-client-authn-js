@@ -39,5 +39,7 @@ module.exports = {
     "import/prefer-default-export": "off",
     // The following rule should be re-enabled after a refactoring of the handler pattern
     "class-methods-use-this": "off",
+    // This rule trips over modules with exports maps, like jose@3.x
+    "import/no-unresolved": "off",
   },
 };
