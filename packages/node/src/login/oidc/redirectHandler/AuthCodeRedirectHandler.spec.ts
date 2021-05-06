@@ -25,7 +25,7 @@ import {
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims, TokenSet } from "openid-client";
-import { JWK } from "jose";
+import { JWK } from "jose/types";
 import {
   AuthCodeRedirectHandler,
   getWebidFromTokenPayload,
@@ -42,8 +42,8 @@ import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 jest.mock("openid-client");
 jest.mock("cross-fetch");
 
-const mockJwk = (): JWK.ECKey =>
-  JWK.asKey({
+const mockJwk = (): JWK => {
+  return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
     alg: "ES256",
@@ -51,7 +51,8 @@ const mockJwk = (): JWK.ECKey =>
     x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
     y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
     d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  });
+  };
+};
 
 const mockWebId = (): string => "https://my.webid/";
 
@@ -79,7 +80,7 @@ type AccessJwt = {
   };
 };
 
-const mockKeyBoundToken = (): AccessJwt => {
+const mockKeyBoundToken = async (): Promise<AccessJwt> => {
   return {
     sub: mockWebId(),
     iss: mockDefaultIssuerConfig().issuer.toString(),
@@ -197,7 +198,7 @@ describe("AuthCodeRedirectHandler", () => {
       },
     });
 
-  const setupOidcClientMock = (tokenSet?: TokenSet, callback?: any) => {
+  const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
     const { Issuer } = jest.requireMock("openid-client");
     function clientConstructor() {
       // this is untyped, which makes TS complain
