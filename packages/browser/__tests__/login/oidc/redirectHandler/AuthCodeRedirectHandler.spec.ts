@@ -28,8 +28,9 @@ import {
   IClientRegistrarOptions,
   IIssuerConfigFetcher,
   USER_SESSION_PREFIX,
+  IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
-import { IIssuerConfig, TokenEndpointResponse } from "@inrupt/oidc-client-ext";
+import { TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
 import { Response } from "cross-fetch";
 import {

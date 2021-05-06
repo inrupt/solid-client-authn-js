@@ -31,6 +31,7 @@
     "rollup-plugin-typescript2": "^0.30.0"
   },
   "dependencies": {
+    "@inrupt/solid-client-authn-core": "^1.8.1",
     "@types/form-urlencoded": "^2.0.1",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node-jose": "^1.1.5",

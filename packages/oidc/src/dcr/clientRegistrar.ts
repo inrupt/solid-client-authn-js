@@ -27,12 +27,10 @@
 import {
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
-} from "../common/negotiation";
-import {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
-} from "../common/types";
+} from "@inrupt/solid-client-authn-core";
 
 function processErrorResponse(
   // The type is any here because the object is parsed from a JSON response

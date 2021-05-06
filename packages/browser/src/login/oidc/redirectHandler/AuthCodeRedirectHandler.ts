@@ -32,6 +32,7 @@ import {
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
+  IIssuerConfig,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import {
@@ -40,7 +41,6 @@ import {
   TokenEndpointResponse,
   TokenEndpointDpopResponse,
   validateIdToken,
-  IIssuerConfig,
 } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
 import {

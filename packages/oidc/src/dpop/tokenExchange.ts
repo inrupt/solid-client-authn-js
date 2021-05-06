@@ -22,7 +22,7 @@
 import { JSONWebKey } from "jose";
 import formurlencoded from "form-urlencoded";
 import { OidcClient } from "oidc-client";
-import { IClient, IIssuerConfig } from "../common/types";
+import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
 import { createDpopHeader, decodeJwt } from "./dpop";
 import { generateJwkForDpop } from "./keyGeneration";
 
