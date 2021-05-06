@@ -163,6 +163,14 @@ important to declare the dependencies from the most specialized to the most gene
 because if a fallback handler that can handle all requests is declared first,
 the other more specialized handlers will not be called.
 
+Note that the label for the containers of the aggregator and the underlying handlers
+differ (respectively `browser:oidcHandler` and `browser:oidcHandlers`, with an 's',
+in the above example). In this case, the order in which the dependencies are
+declared is irrelevant, because they do not relate to the same container. The
+Aggregator implements the class from `packages/core/src/util/handlerPattern/AggregateHandler.ts`,
+and uses the `@injectAll` annotation to receive all the handlers registered to a
+given container.
+
 #### Mocks and tests
 
 Dependency injection makes the codebase more flexible, because it is only at
