@@ -13,20 +13,34 @@ related to each other. The following diagram shows an overview of the modules an
 ![Module dependencies](./documentation/diagrams/module_map.svg)
 
 The two modules grouped under the "Client libraries" label are the
-modules we expect our customers to import. As their names imply, each  of these modules is specific to a given environment (NodeJS or the browser). However, they both have a very similar API and architecture, and mostly
-differ by their main dependency, namely the third-party library implementing the [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) protocol. `@inrupt/solid-client-authn-node` depends on [`openid-client`](https://github.com/panva/node-openid-client/). `@inrupt/solid-client-authn-browser` depends on [`oidc-client`](https://github.com/IdentityModel/oidc-client-js), but it does not implement all the features we needed, namely support for [DPoP tokens](https://tools.ietf.org/html/draft-ietf-oauth-dpop-01) and [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html), which are implemented in `@inrupt/oidc-client-ext`.
+modules we expect our customers to import. As their names imply, each  of these 
+modules is specific to a given environment (NodeJS or the browser). However, they
+both have a very similar API and architecture, and mostly differ by their main
+dependency, namely the third-party library implementing the
+[OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) protocol.
+`@inrupt/solid-client-authn-node` depends on [`openid-client`](https://github.com/panva/node-openid-client/).
+`@inrupt/solid-client-authn-browser` depends on [`oidc-client`](https://github.com/IdentityModel/oidc-client-js),
+but it does not implement all the features we needed, namely support for
+[DPoP tokens](https://tools.ietf.org/html/draft-ietf-oauth-dpop-01) and 
+[Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html),
+which are implemented in `@inrupt/oidc-client-ext`.
 
 The four modules are available in the [packages directory](./packages).
 
 ## OAuth2.0/OpenID Connect
 
-This library aims at helping developers authenticating users to their applications using the [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) protocol (often abbreviated OIDC). OIDC is a protocol based on the [OAuth2.0](https://tools.ietf.org/html/rfc6749) framework. In order to understand the library, some understanding of OAuth/OIDC is preferable.
+This library aims at helping developers authenticating users to their applications
+using the [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html)
+protocol (often abbreviated OIDC). OIDC is a protocol based on the
+[OAuth2.0](https://tools.ietf.org/html/rfc6749) framework. In order to understand
+how the library internally works, some understanding of OAuth/OIDC is preferable.
 
 ### Helpful resources
 
-Here is a list of things that helped this library's developers get a better understanding of OAuth/OIDC: 
+Here is a list of things that helped this library's developers get a better
+understanding of OAuth/OIDC: 
 - [OAuth 2 in Action](https://www.manning.com/books/oauth-2-in-action), by Justin Richer and Antonio Sanso
-- [OAuth masterclass](https://www.youtube.com/watch?v=egfyV2NV9Mw), by Justin richer
+- [OAuth masterclass](https://www.youtube.com/watch?v=egfyV2NV9Mw), by Justin Richer
 - [How To Securely Implement Authentication in Single Page Applications](https://betterprogramming.pub/how-to-securely-implement-authentication-in-single-page-applications-670534da746f), by Dennis Stötzel
 
 ### Solid-OIDC
@@ -96,19 +110,31 @@ the call.
 
 #### Login
 
-Logging in is the operation that goes from the Client to the Issuer. It may result in a redirection of the user to the Issuer, but that is not always the case (in the `-node` module in particular). Handlers for the login operation are located in `packages/*/src/login/oidc/oidcHandlers/*Handler.ts`.
+Logging in is the operation that goes from the Client to the Issuer. It may result
+in a redirection of the user to the Issuer, but that is not always the case (in
+the `-node` module in particular). Handlers for the login operation are located
+in `packages/*/src/login/oidc/oidcHandlers/*Handler.ts`.
 
 #### Incoming redirect
 
-At the Issuer webpage, the Resource Owner authenticates (e.g. by entering a username and a password), after which the Issuer sends them to a webpage under the Client app's control (its `redirect_uri`), to which it appends some query parameters that it can use to complete the login flow. This is done when the developer calls `handleIncomingRedirect`, and the Handlers for the incoming redirect are located in `packages/*/src/login/oidc/redirectHandler/*Handler.ts`.
+At the Issuer webpage, the Resource Owner authenticates (e.g. by entering a username
+and a password), after which the Issuer sends them to a webpage under the Client
+app's control (its `redirect_uri`), to which it appends some query parameters that
+it can use to complete the login flow. This is done when the developer calls 
+`handleIncomingRedirect`, and the Handlers for the incoming redirect are located
+in `packages/*/src/login/oidc/redirectHandler/*Handler.ts`.
 
 ### Dependency injection
 
-An important architectural component of this library is dependency injection, implemented here using [TSyringe](https://github.com/Microsoft/tsyringe). Dependencies are declared in `packages/*/src/dependencies.ts`.
+An important architectural component of this library is dependency injection,
+implemented here using [TSyringe](https://github.com/Microsoft/tsyringe). Dependencies
+are declared in `packages/*/src/dependencies.ts`.
 
 #### Declaring order
 
-Something important to realize is that the order in which the dependencies are declared (for a given container) matters. Let's have a look at some code to make things clearer.
+Something important to realize is that the order in which the dependencies are
+declared (for a given container) matters. Let's have a look at some code to make
+things clearer.
 
 ```
 container.register<IOidcHandler>("browser:oidcHandler", {
@@ -125,13 +151,27 @@ container.register<IOidcHandler>("browser:oidcHandlers", {
 });
 ```
 
-Here, `AggregateOidcHandler` is the handler aggregator (as defined in the Handler Pattern section), and `RefreshTokenOidcHandler`, `AuthorizationCodeWithPkceOidcHandler` and `ClientCredentialsOidcHandler` are its underlying handlers. When receiving a request, `AggregateOidcHandler` will first call to its instance of `RefreshTokenOidcHandler` to check if it can handle it. If so, the instance of `RefreshTokenOidcHandler` will handle the request, and the instances of `AuthorizationCodeWithPkceOidcHandler` or `ClientCredentialsOidcHandler` will not be called. This means that it is important to declare the dependencies from the most specialized to the most generic, because if a fallback handler that can handle all requests is declared first, the other more specialized handlers will not be called.
+Here, `AggregateOidcHandler` is the handler aggregator (as defined in the Handler
+Pattern section), and `RefreshTokenOidcHandler`, `AuthorizationCodeWithPkceOidcHandler`
+and `ClientCredentialsOidcHandler` are its underlying handlers. When receiving a
+request, `AggregateOidcHandler` will first call to its instance of `RefreshTokenOidcHandler`
+to check if it can handle it. If so, the instance of `RefreshTokenOidcHandler`
+will handle the request, and the instances of `AuthorizationCodeWithPkceOidcHandler`
+or `ClientCredentialsOidcHandler` will not be called. This means that it is
+important to declare the dependencies from the most specialized to the most generic,
+because if a fallback handler that can handle all requests is declared first,
+the other more specialized handlers will not be called.
 
 #### Mocks and tests
 
-Dependency injection makes the codebase more flexible, because it is only at runtime that each component will be presented with the dependencies it declared, which means it is easier to add a dependency to a component without changing the whole codebase.
+Dependency injection makes the codebase more flexible, because it is only at
+runtime that each component will be presented with the dependencies it declared,
+which means it is easier to add a dependency to a component without changing the
+whole codebase.
 
-However, mocking dependency injection in test code wouldn't bring any value. Instead, the object we want to test can be constructed with mocked dependencies provided to its constructor. For instance, a class such as
+However, mocking dependency injection in test code wouldn't bring any value.
+Instead, the object we want to test can be constructed with mocked dependencies
+provided to its constructor. For instance, a class such as
 
 ```
 @injectable()
@@ -168,5 +208,6 @@ const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
 
 - OIDC handler: `packages/*/src/login/oidc/oidcHandlers/RefreshTokenOidcHandler.ts`
 
-Note that in this case, no redirection happens (i.e. there's only a Back channel exchange): the Access Token is received directly
-as a response to the request containing the Refresh Token.
+Note that in this case, no redirection happens (i.e. there's only a Back channel
+exchange): the Access Token is received directly as a response to the request
+containing the Refresh Token.
