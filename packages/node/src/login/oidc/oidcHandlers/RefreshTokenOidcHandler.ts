@@ -118,6 +118,7 @@ async function refreshAccess(
 
 /**
  * @hidden
+ * Refresh token flow spec: https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokens
  */
 @injectable()
 export default class RefreshTokenOidcHandler implements IOidcHandler {

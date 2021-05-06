@@ -39,6 +39,8 @@ import { OidcClient } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden
+ * Authorization code flow spec: https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
+ * PKCE: https://tools.ietf.org/html/rfc7636
  */
 @injectable()
 export default class AuthorizationCodeWithPkceOidcHandler

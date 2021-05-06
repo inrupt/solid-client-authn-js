@@ -77,6 +77,7 @@ export async function getWebidFromTokenPayload(
 
 /**
  * @hidden
+ * Token endpoint request: https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint
  */
 @injectable()
 export class AuthCodeRedirectHandler implements IRedirectHandler {

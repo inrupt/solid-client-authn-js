@@ -1,0 +1,32 @@
+@startuml
+
+hide footbox
+
+participant Issuer as "OIDC issuer"
+actor RO as "Resource Owner (browser)"
+participant Client
+participant "Solid Server"
+
+== Front channel ==
+
+RO -> Client: Initiates login
+activate Client
+Client -> Client: Session::login
+Client -> Issuer: Discovery
+Client -> Issuer: Registration (optional)
+Client -> Client: OIDC handler
+Client -> RO: Redirect browser to authorization endpoint
+deactivate Client
+RO -> Issuer: Logs in
+Issuer -> RO: Redirects browser with authorization code
+activate Client
+Client -> Client: Handle incoming redirect
+
+== Back channel ==
+
+Client -> Issuer: Sends code to token endpoint
+Issuer -> Client: Sends Access, ID and (optional) Refresh Tokens
+Client -> Client: Initializes authenticated fetch
+Client -> "Solid Server": Accesses the protected resource\nwith the access token
+
+@enduml
