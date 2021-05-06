@@ -110,13 +110,14 @@ the call.
 
 #### Login
 
-Logging in is the operation that goes from the Client to the Issuer. It may result
-in a redirection of the user to the Issuer, but that is not always the case (in
-the `-node` module in particular). Handlers for the login operation are located
-in `packages/*/src/login/oidc/oidcHandlers/*Handler.ts`.
+Logging in is an operation initiated by the Client. It may result in one of the following:
+- a redirection of the Resource Owner to the Issuer's authorization endpoint
+- a request by the Client to the Issuer's token endpoint
+Handlers for the login operation are located in `packages/*/src/login/oidc/oidcHandlers/*Handler.ts`.
 
 #### Incoming redirect
 
+The incoming redirect is an operation initiated by the Issuer.
 At the Issuer webpage, the Resource Owner authenticates (e.g. by entering a username
 and a password), after which the Issuer sends them to a webpage under the Client
 app's control (its `redirect_uri`), to which it appends some query parameters that
