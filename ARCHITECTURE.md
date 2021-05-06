@@ -13,7 +13,7 @@ related to each other. The following diagram shows an overview of the modules an
 ![Module dependencies](./documentation/diagrams/module_map.svg)
 
 The two modules grouped under the "Client libraries" label are the
-mocules we expect our customers to import. As their name imply, each  of these modules is specific to a given environment (NodeJS or the browser). However, they both have a very similar API and architecture, and mostly
+modules we expect our customers to import. As their names imply, each  of these modules is specific to a given environment (NodeJS or the browser). However, they both have a very similar API and architecture, and mostly
 differ by their main dependency, namely the third-party library implementing the [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) protocol. `@inrupt/solid-client-authn-node` depends on [`openid-client`](https://github.com/panva/node-openid-client/). `@inrupt/solid-client-authn-browser` depends on [`oidc-client`](https://github.com/IdentityModel/oidc-client-js), but it does not implement all the features we needed, namely support for [DPoP tokens](https://tools.ietf.org/html/draft-ietf-oauth-dpop-01) and [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html), which are implemented in `@inrupt/oidc-client-ext`.
 
 The four modules are available in the [packages directory](./packages).
@@ -38,16 +38,16 @@ Solid extends the OIDC protocol in order to make it fit into a decentralized eco
 Here is a list of terms having a specific meaning in the context of OIDC:
 - **Resource Server**: The server hosting private resources. In our case, a Solid server. A Resource Server receives requests authenticated with an Access Token
 - **Resource Owner**: the user, who owns some private resources 
-- **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID tokens, and Refresh Tokens.
-- **Client**: the application the Resource Owner uses to access its resources on the Resource Server. Technically, OAuth is a delegation protocol: the Resource Owner allows the Client to interact with the Resource Server on its behalf.  
+- **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID tokens, and Refresh Tokens. These tokens tell the Resource Server that the user has control over a certain identity (WebID), which can then use that information to decide whether to give or deny access. Example: https://broker.pod.inrupt.com.
+- **Client**: the application the Resource Owner uses to access its resources on the Resource Server. Technically, OAuth is a delegation protocol: the Resource Owner allows the Client to interact with the Resource Server on its behalf. Example: https://podbrowser.inrupt.com.
 
 ## Codemap of the client library modules
 
-Most architectural specificities are found in both client libraries modules. This section will give a high-level description of the inner working of either `@inrupt/solid-client-authn-node` or `@inrupt/solid-client-authn-browser`, leaving aside anything too module-specific.
+Most architectural specificities are found in both client libraries modules. This section will give a high-level description of the inner workings of both `@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`, leaving aside anything too module-specific.
 
 ### The API
 
-Most of the code for these modules is internal, and hidden from the user. The public API is located in files available directly in `packages/*/src/`, namely in the `Session.ts` file. Users are expected to build a `Session` object, and to use it to interact with the session. How users are expected to use the public API is documented in our [public documentation](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/).
+Most of the code for these modules is internal, and hidden from the user. The public API is located in a file available directly in `packages/*/src/`, namely in the `Session.ts` file. Users are expected to build a `Session` object, and to use it to interact with the session. How users are expected to use the public API is documented in our [public documentation](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/).
 
 ### The Handler pattern
 
@@ -61,7 +61,7 @@ Logging in is the operation that goes from the Client to the Issuer. It may resu
 
 #### Incoming redirect
 
-OIDC is based on redirection of the user's browser between the Client and the Issuer. The incoming redirect happens after the Resource Owner has authenticated to the Issuer, and the Issuer redirects them to the Client's `redirect_uri` with some relevant information in the query params. Handlers for the incoming redirect are located in `packages/*/src/login/oidc/redirectHandler/*Handler.ts`.
+At the Issuer webpage, the Resource Owner authenticates (e.g. by entering a username and a password), after which the Issuer sends them to a webpage under the Client app's control (its `redirect_uri`), to which it appends some query parameters that it can use to complete the login flow. This is done when the developer calls `handleIncomingRedirect`, and the Handlers for the incoming redirect are located in `packages/*/src/login/oidc/redirectHandler/*Handler.ts`.
 
 ### Dependency injection
 
@@ -129,5 +129,5 @@ const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
 
 - OIDC handler: `packages/*/src/login/oidc/oidcHandlers/RefreshTokenOidcHandler.ts`
 
-Note that in this case, no redirection happens: the Access Token is received directly
+Note that in this case, no redirection happens (i.e. there's only a Back channel exchange): the Access Token is received directly
 as a response to the request containing the Refresh Token.
