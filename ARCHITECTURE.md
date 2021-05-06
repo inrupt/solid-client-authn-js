@@ -62,17 +62,37 @@ https://podbrowser.inrupt.com.
 
 ## Codemap of the client library modules
 
-Most architectural specificities are found in both client libraries modules. This section will give a high-level description of the inner workings of both `@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`, leaving aside anything too module-specific.
+Most architectural specificities are found in both client libraries modules. This
+section will give a high-level description of the inner workings of both 
+`@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`, leaving
+aside anything too module-specific.
 
 ### The API
 
-Most of the code for these modules is internal, and hidden from the user. The public API is located in a file available directly in `packages/*/src/`, namely in the `Session.ts` file. Users are expected to build a `Session` object, and to use it to interact with the session. How users are expected to use the public API is documented in our [public documentation](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/).
+Most of the code for these modules is internal, and hidden from the user. The
+public API is located in a file available directly in `packages/*/src/`, namely
+in the `Session.ts` file. Users are expected to build a `Session` object, and to
+use it to interact with the session. How users are expected to use the public API
+is documented in our [public documentation](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/).
 
 ### The Handler pattern
 
-Important components of this library are based on the Handler design pattern: given data contained in a request, a set of classes implementing a similar API will declare whether or not they may handle said request. Handlers declare two functions: `canHandle(request)` and `handle(request)`. `canHandle` simply returns a boolean indicating the ability of the handler to handle the request, and `handle` actually processes it. All of the handlers for a given type of requests are tracked by a handler aggregator, which will have the first handle for which `canHandle` returns `true` process the request. The handler aggregator has the same API as the handlers it aggregates, and brokers the request to the underlying handlers. More on that in the Dependency Injection section.
+Important components of this library are based on the Handler design pattern.
+Given data contained in a request, a set of classes implementing a similar API
+will declare whether or not they may handle said request. Handlers declare two
+functions: `canHandle(request)` and `handle(request)`. `canHandle` simply returns
+a boolean indicating the ability of the handler to handle the request, and `handle`
+actually processes it. All of the handlers for a given type of requests are tracked
+by a handler aggregator, which will have the first handle for which `canHandle`
+returns `true` process the request. The handler aggregator has the same API as
+the handlers it aggregates, and brokers the request to the underlying handlers.
+More on that in the Dependency Injection section.
 
-In the context of this library, a request is an API to execute some OIDC-related operation. Handlers will determine whether they can handle the request based on the options specified by the user when making the call.
+In the context of this library, a request is an API call to execute some OIDC-related
+operation, for instance redirect the Resource Owner to the OIDC issuer, or process
+the data sent by the OIDC issuer to the Client. Handlers will determine whether 
+they can handle the request based on the options specified by the code snippet making
+the call.
 
 #### Login
 
