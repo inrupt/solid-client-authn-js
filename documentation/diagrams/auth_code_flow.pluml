@@ -19,6 +19,7 @@ Client -> RO: Redirect browser to authorization endpoint
 deactivate Client
 RO -> Issuer: Logs in
 Issuer -> RO: Redirects browser with authorization code
+RO -> Client: Reloads app at redirect IRI
 activate Client
 Client -> Client: Handle incoming redirect
 
