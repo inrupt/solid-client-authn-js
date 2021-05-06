@@ -23,7 +23,7 @@ import { it, describe } from "@jest/globals";
 
 import { JWKECKey } from "jose";
 import { Response } from "cross-fetch";
-import { IClient, IIssuerConfig } from "../common/types";
+import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
 import {
   getBearerToken,

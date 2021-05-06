@@ -58,11 +58,6 @@ export {
   TokenEndpointDpopResponse,
 } from "./dpop/tokenExchange";
 export {
-  IClient,
-  IClientRegistrarOptions,
-  IIssuerConfig,
-} from "./common/types";
-export {
   removeOidcQueryParam,
   clearOidcPersistentStorage,
 } from "./cleanup/cleanup";
