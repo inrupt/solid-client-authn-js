@@ -202,6 +202,23 @@ const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
 
 ## Mapping OIDC flows to the code
 
+### Unsupported flows
+
+There are some OIDC flows that we intentionally don't plan on supporting:
+- The [Implicit flow](https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth),
+which is widely recognized as having security issues, and doesn't bring value compared
+to the Auth Code flow.
+- The Refresh flow **in a browser context**. We do implement the efresh flow for
+NodeJS, but there are limitations that prevent it from being applicable in a
+browser context:
+  - Users must always be prompted when a refresh token is requested, which prevents
+  silent authentication.
+  - There is no secure place where the Refresh Token may be stored in the browser
+  across page reload,  which means the token would be lost on reload, which defeats
+  the purpose of having a long-lived token anyway. The 
+  [best security practices document for OAuth](https://tools.ietf.org/html/draft-ietf-oauth-security-topics-18#section-4.13)
+  contains some recommandations on handling Refresh Tokens securely.
+
 ### Auth code flow
 
 ![Module dependencies](./documentation/diagrams/auth_code_flow.svg)
@@ -209,9 +226,9 @@ const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
 - Discovery: `packages/*/src/login/oidc/IssuerConfigFetcher.ts`
 - Registration: `packages/*/src/login/oidc/ClientRegistrar.ts`
 - OIDC handler: `packages/*/src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler.ts`
-- Handle incoming redirect: `packages/*/src/login/oidc/redirectHandler/AuthCodeRedirectHandler.ts`
-if the Client is authorized by the user, `packages/*/src/login/oidc/redirectHandler/FallbackRedirectHandler.ts`
-if no information from the Issuer is found in the redirect IRI query params.
+- Handle incoming redirect: `packages/*/src/login/oidc/redirectHandler/*Handler.ts`,
+the specific Handler depends on which Handler's `canHandle()` method first returns
+`true`.
 
 ### Refresh flow
 
