@@ -47,10 +47,18 @@ decentralized ecosystem such as Solid's.
 ### A short glossary
 
 Here is a list of terms having a specific meaning in the context of OIDC:
-- **Resource Server**: The server hosting private resources. In our case, a Solid server. A Resource Server receives requests authenticated with an Access Token
+- **Resource Server**: The server hosting private resources. In our case, a Solid
+server. A Resource Server receives requests authenticated with an Access Token.
+Example: https://pod.inrupt.com. 
 - **Resource Owner**: the user, who owns some private resources 
-- **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID tokens, and Refresh Tokens. These tokens tell the Resource Server that the user has control over a certain identity (WebID), which can then use that information to decide whether to give or deny access. Example: https://broker.pod.inrupt.com.
-- **Client**: the application the Resource Owner uses to access its resources on the Resource Server. Technically, OAuth is a delegation protocol: the Resource Owner allows the Client to interact with the Resource Server on its behalf. Example: https://podbrowser.inrupt.com.
+- **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID
+tokens, and Refresh Tokens. These tokens tell the Resource Server that the user
+has control over a certain identity (WebID), which can then use that information
+to decide whether to give or deny access. Example: https://broker.pod.inrupt.com.
+- **Client**: the application the Resource Owner uses to access its resources on
+the Resource Server. Technically, OAuth is a delegation protocol: the Resource
+Owner allows the Client to interact with the Resource Server on its behalf. Example:
+https://podbrowser.inrupt.com.
 
 ## Codemap of the client library modules
 
