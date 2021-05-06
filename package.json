@@ -28,6 +28,7 @@
     "build-demo-app": "npm run build; cd packages/browser/examples/demoClientApp/; npm ci; npm run build; mkdir -p ../../../../dist/website/demo/; cp -r dist/. ../../../../dist/website/demo/"
   },
   "dependencies": {
+    "jose": "^3.11.6",
     "lerna": "^4.0.0"
   },
   "devDependencies": {

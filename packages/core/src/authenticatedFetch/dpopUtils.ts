@@ -1,0 +1,68 @@
+/*
+ * Copyright 2021 Inrupt Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+ * Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+import { JWK } from "jose/types";
+import SignJWT from "jose/jwt/sign";
+import parseJwk from "jose/jwk/parse";
+import { v4 } from "uuid";
+
+/**
+ * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
+ *
+ * @param audience The URL to normalize.
+ * @returns The normalized URL as a string.
+ * @hidden
+ */
+function normalizeHttpUriClaim(audience: string): string {
+  const cleanedAudience = new URL(audience);
+  cleanedAudience.hash = "";
+  cleanedAudience.username = "";
+  cleanedAudience.password = "";
+  return cleanedAudience.toString();
+}
+
+/**
+ * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
+ * based on the target URL and method, using the provided key.
+ *
+ * @param audience Target URL.
+ * @param method HTTP method allowed.
+ * @param key Key used to sign the token.
+ * @returns A JWT that can be used as a DPoP Authorization header.
+ */
+export async function createDpopHeader(
+  audience: string,
+  method: string,
+  key: JWK
+): Promise<string> {
+  return new SignJWT({
+    htu: normalizeHttpUriClaim(audience),
+    htm: method.toUpperCase(),
+    jti: v4(),
+  })
+    .setProtectedHeader({
+      alg: "ES256",
+      jwk: key,
+      typ: "dpop+jwt",
+    })
+    .setIssuedAt()
+    .sign(await parseJwk(key), {});
+}
