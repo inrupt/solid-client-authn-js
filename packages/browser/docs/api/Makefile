@@ -32,7 +32,7 @@ migrate: clean
 	mkdir -p $(SOURCECOPYDIR)
 
    # Using https (not ssh) to clone
-   git clone https://github.com/inrupt/docs-assets.git build/docs-assets
+	git clone https://github.com/inrupt/docs-assets.git build/docs-assets
    
 	# Copying to SOURCECOPYDIR instead of copying source dir to BUILDDIR
    # in case someone forgets to backslash after build/
