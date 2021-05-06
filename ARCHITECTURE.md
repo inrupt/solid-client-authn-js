@@ -201,7 +201,9 @@ const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
 - Discovery: `packages/*/src/login/oidc/IssuerConfigFetcher.ts`
 - Registration: `packages/*/src/login/oidc/ClientRegistrar.ts`
 - OIDC handler: `packages/*/src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler.ts`
-- Handle incoming redirect: `packages/*/src/login/oidc/redirectHandler/*Handler.ts`
+- Handle incoming redirect: `packages/*/src/login/oidc/redirectHandler/AuthCodeRedirectHandler.ts`
+if the Client is authorized by the user, `packages/*/src/login/oidc/redirectHandler/FallbackRedirectHandler.ts`
+if no information from the Issuer is found in the redirect IRI query params.
 
 ### Refresh flow
 
