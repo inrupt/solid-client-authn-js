@@ -42,8 +42,11 @@ jobs:
           E2E_TEST_IDP_URL: ${{ secrets.E2E_TEST_IDP_URL }}
           E2E_TEST_ESS_POD: ${{ secrets.E2E_TEST_ESS_POD }}
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
+      # Until https://github.com/lerna/lerna/issues/2896 is resolved, a CVE
+      # (https://www.npmjs.com/advisories/1677) will impact us, but it
+      # is lower risk than other dependencies upgrade that need to be merged in.
       - run: npm audit --audit-level=high
-      - run: npm run lerna-audit -- --audit-level=high
+      - run: npm run lerna-audit-production
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         continue-on-error: true
