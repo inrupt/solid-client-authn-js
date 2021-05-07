@@ -215,12 +215,12 @@ because if a fallback handler that can handle all requests is declared first,
 the other more specialized handlers will not be called.
 
 Note that the label for the containers of the aggregator and the underlying handlers
-differ:
+differ in the example above:
 - `browser:oidcHandler` (without an 's') for the aggregator.
 - `browser:oidcHandlers` (with an 's'), for the aggregated handlers.
 
-in the above example). In this case, the order in which the dependencies are
-declared is irrelevant, because they do not relate to the same container. The
+The order in which the `container` object registers dependencies isn't relevant
+in the case they are registered with different labels. The
 Aggregator implements the class from `packages/core/src/util/handlerPattern/AggregateHandler.ts`,
 and uses the `@injectAll` annotation to receive all the handlers registered to a
 given container.
