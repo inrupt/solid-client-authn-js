@@ -76,27 +76,29 @@ https://podbrowser.inrupt.com.
 
 ## Codemap of the client library modules
 
-This section will give a high-level description of the inner workings of both 
-`@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`, leaving
-aside anything too module-specific.
+This section will give a high-level description of the shared inner workings of 
+`@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`,
+omitting anything too module-specific.
 
 ### The API
 
-Most of the code for these modules is internal, and hidden from the user. The
-public API is located in a file available directly in `packages/*/src/`, namely
-in the `Session.ts` file. Users are expected to build a `Session` object, and to
-use it to interact with the session. How users are expected to use the public API
-is documented in our [public documentation](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/).
+Most of the code for these modules is internal and hidden from the user. The
+public API is located in `packages/*/src/Session.ts`. Developers are expected to
+instantiate a `Session` object, and to use it to interact with the session.
+Usage examples can be found in our
+[public documentation](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/).
 
 ### The Handler pattern
 
-Important components of this library are based on the Handler design pattern.
-Given data contained in a request, a set of classes implementing a similar API
-will declare whether or not they may handle said request. Handlers declare two
-functions: `canHandle(request)` and `handle(request)`. `canHandle` simply returns
-a boolean indicating the ability of the handler to handle the request, and `handle`
-actually processes it. All of the handlers for a given type of requests are tracked
-by a handler aggregator, which will have the first handle for which `canHandle`
+Various components, such as the Login and Incoming Redirect components, are based
+on the Handler design pattern. Given data contained in a request, a set of classes
+implementing a similar API will declare whether or not they may handle said request.
+
+- **Handlers** declare two functions: `canHandle(request)` and `handle(request)`. `canHandle`
+simply returns a boolean indicating the ability of the handler to handle the request,
+and `handle` actually processes it. 
+- All of the handlers for a given type of requests
+are tracked by a **Handler Aggregator**, which will have the first handle for which `canHandle`
 returns `true` process the request. The handler aggregator has the same API as
 the handlers it aggregates, and brokers the request to the underlying handlers.
 More on that in the Dependency Injection section.
@@ -109,14 +111,14 @@ the call.
 
 #### Login
 
-Logging in is an operation initiated by the Client. It may result in one of the following:
+The login operation is initiated by the Client. It may result in one of the following:
 - a redirection of the Resource Owner to the Issuer's authorization endpoint
 - a request by the Client to the Issuer's token endpoint
 Handlers for the login operation are located in `packages/*/src/login/oidc/oidcHandlers/*Handler.ts`.
 
 #### Incoming redirect
 
-The incoming redirect is an operation initiated by the Issuer.
+The incoming redirect operation is initiated by the Issuer.
 At the Issuer webpage, the Resource Owner authenticates (e.g. by entering a username
 and a password), after which the Issuer sends them to a webpage under the Client
 app's control (its `redirect_uri`), to which it appends some query parameters that
@@ -132,8 +134,8 @@ are declared in `packages/*/src/dependencies.ts`.
 
 #### Declaring order
 
-Something important to realize is that the order in which the dependencies are
-declared (for a given container) matters. Let's have a look at some code to make
+The order in which the dependencies are declared (for a given container) **matters**.
+Let's have a look at some code to make
 things clearer.
 
 ```
