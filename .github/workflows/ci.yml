@@ -42,8 +42,7 @@ jobs:
           E2E_TEST_IDP_URL: ${{ secrets.E2E_TEST_IDP_URL }}
           E2E_TEST_ESS_POD: ${{ secrets.E2E_TEST_ESS_POD }}
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
-      - run: npm audit --audit-level=moderate
-      - run: npm run lerna-audit -- --audit-level=moderate
+      - run: npm run lerna-audit-production
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         continue-on-error: true
