@@ -50,7 +50,9 @@ Solid extends the OIDC protocol in order to make it fit into a decentralized eco
 In particular, Solid-OIDC introduces the notion of Client WebID, which enables
 Client-managed identifiers instead of Issuer-managed identifiers. By using identifiers
 they control, Clients are no longer required to get their identifiers from the Issuer
-through either static or dynamic client registration. Solid-OIDC also makes the support for [Key-bound Access Tokens](https://tools.ietf.org/html/draft-fett-oauth-dpop-04)
+through either static or dynamic client registration.
+
+Solid-OIDC also makes the support for [Key-bound Access Tokens](https://tools.ietf.org/html/draft-fett-oauth-dpop-04)
 (referred to as DPoP tokens) mandatory: it is only optional in traditional OIDC, where
 Bearer tokens are the default option. DPoP tokens cannot be replayed by a Resource
 Server to another Resource Server, which is an important security feature in a
@@ -59,10 +61,10 @@ decentralized ecosystem such as Solid's.
 ### A short glossary
 
 Here is a list of terms having a specific meaning in the context of OIDC:
-- **Resource Server**: The server hosting private resources. In our case, a Solid
-server. A Resource Server receives requests authenticated with an Access Token.
-Example: https://pod.inrupt.com. 
-- **Resource Owner**: the user, who owns some private resources 
+- **Resource Owner**: the user, who owns resources, some of which are private.
+- **Resource Server**: the server hosting resources owned by the Resource Owner.
+In our case, a Solid server. A Resource Server receives requests authenticated
+with an Access Token. Example: https://pod.inrupt.com. 
 - **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID
 tokens, and Refresh Tokens. These tokens tell the Resource Server that the user
 has control over a certain identity (WebID), which can then use that information
@@ -74,8 +76,7 @@ https://podbrowser.inrupt.com.
 
 ## Codemap of the client library modules
 
-Most architectural specificities are found in both client libraries modules. This
-section will give a high-level description of the inner workings of both 
+This section will give a high-level description of the inner workings of both 
 `@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`, leaving
 aside anything too module-specific.
 
