@@ -11,18 +11,18 @@ related to each other. The following diagram shows an overview of the modules an
 
 ![Module dependencies](./documentation/diagrams/module_map.svg)
 
-The two modules grouped under the "Client libraries" label are the
-modules we expect our customers to import. As their names imply, each  of these 
-modules is specific to a given environment (NodeJS or the browser). However, they
-both have a very similar API and architecture, and mostly differ by their main
-dependency, namely the third-party library implementing the
+`@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`, grouped
+under the "Client libraries" label are the modules we expect developers to import.
+As their names imply, each  of these modules is specific to a given environment 
+(NodeJS or the browser). However, they both have a very similar API and architecture,
+and mostly differ by their main dependency, namely the third-party library implementing the
 [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) protocol.
 `@inrupt/solid-client-authn-node` depends on [`openid-client`](https://github.com/panva/node-openid-client/).
-`@inrupt/solid-client-authn-browser` depends on [`oidc-client`](https://github.com/IdentityModel/oidc-client-js),
-but it does not implement all the features we needed, namely support for
+`@inrupt/solid-client-authn-browser` depends on `@inrupt/oidc-client-ext`. 
+`@inrupt/oidc-client-ext` itself depends on [`oidc-client`](https://github.com/IdentityModel/oidc-client-js),
+extending it with features we need, namely support for
 [DPoP tokens](https://tools.ietf.org/html/draft-ietf-oauth-dpop-01) and 
-[Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html),
-which are implemented in `@inrupt/oidc-client-ext`.
+[Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html).
 
 The four modules are available in the [packages directory](./packages).
 
