@@ -2,14 +2,16 @@
 
 
 package "Client libraries" {
-	[solid-client-authn-browser]
-	[solid-client-authn-node]
+	[@inrupt/solid-client-authn-browser]
+	[@inrupt/solid-client-authn-node]
 }
 
-[solid-client-authn-browser] --> [solid-client-authn-core]: depends on
-[solid-client-authn-browser] --> [oidc-client-ext]: depends on
-[solid-client-authn-node] --> [solid-client-authn-core]: depends on
-[oidc-client-ext] --> [solid-client-authn-core]: depends on
+[@inrupt/solid-client-authn-browser] --> [oidc-client]: depends on
+[@inrupt/solid-client-authn-browser] --> [@inrupt/solid-client-authn-core]: depends on
+[@inrupt/solid-client-authn-browser] --> [@inrupt/oidc-client-ext]: depends on
+[@inrupt/solid-client-authn-node] --> [@inrupt/solid-client-authn-core]: depends on
+[@inrupt/solid-client-authn-node] --> [openid-client]: depends on
+[@inrupt/oidc-client-ext] --> [@inrupt/solid-client-authn-core]: depends on
 
 
 @enduml
