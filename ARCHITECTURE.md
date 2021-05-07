@@ -38,6 +38,11 @@ how the library internally works, some understanding of OAuth/OIDC is preferable
 
 Here is a list of terms having a specific meaning in the context of OIDC:
 - **Resource Owner**: the user, who owns resources, some of which are private.
+The notion of Resource Owner in the OIDC sense is broader than the notion of Pod Owner
+in Solid: anyone with a WebID is a Resource Owner, in the authentication sense.
+Whether a particular Resource Owner is authorized to access a particular Resource
+is a different matter, up to the authozization system, so ACP or ACL, which is
+outside of the scope of this document.
 - **Resource Server**: the server hosting resources owned by the Resource Owner.
 In our case, a Solid server. A Resource Server receives requests authenticated
 with an Access Token. Example: https://pod.inrupt.com. 
