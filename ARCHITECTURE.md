@@ -28,7 +28,7 @@ The four modules are available in the [packages directory](./packages).
 
 ## OAuth2.0/OpenID Connect
 
-This library aims at helping developers authenticating users to their applications
+The client libraries aim at helping developers authenticating users to their applications
 using the [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html)
 protocol (often abbreviated OIDC). OIDC is a protocol based on the
 [OAuth2.0](https://tools.ietf.org/html/rfc6749) framework. In order to understand
@@ -44,15 +44,14 @@ understanding of OAuth/OIDC:
 
 ### Solid-OIDC
 
-Solid extends the OIDC protocol in order to make it fit into a decentralized ecosystem. 
-The [Solid-OIDC specification](https://solid.github.io/authentication-panel/solid-oidc/) 
-is the reference document to learn about this extension.
+With the [Solid-OIDC specification](https://solid.github.io/authentication-panel/solid-oidc/), 
+Solid extends the OIDC protocol in order to make it fit into a decentralized ecosystem.
 
 In particular, Solid-OIDC introduces the notion of Client WebID, which enables
-Client-managed identifiers, and prevents from requiring Clients to get Issuer-managed
-identifiers through either static or dynamic client registration. Solid-OIDC also
-makes mandatory the support for [Key-bound Access Tokens](https://tools.ietf.org/html/draft-fett-oauth-dpop-04)
-(referred to as DPoP tokens), which is only optional in traditional OIDC, where
+Client-managed identifiers instead of Issuer-managed identifiers. By using identifiers
+they control, Clients are no longer required to get their identifiers from the Issuer
+through either static or dynamic client registration. Solid-OIDC also makes the support for [Key-bound Access Tokens](https://tools.ietf.org/html/draft-fett-oauth-dpop-04)
+(referred to as DPoP tokens) mandatory: it is only optional in traditional OIDC, where
 Bearer tokens are the default option. DPoP tokens cannot be replayed by a Resource
 Server to another Resource Server, which is an important security feature in a
 decentralized ecosystem such as Solid's.
