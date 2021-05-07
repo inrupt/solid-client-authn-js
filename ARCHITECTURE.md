@@ -1,8 +1,7 @@
 # Solid-client-authn-* architecture
 
 This document summarizes the architecture of the `@inrupt/solid-client-authn-*`
-modules. It applies to both `@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`, 
-which are based on similar architectural patterns.
+modules. It applies to both `@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`.
 
 ## Module map
 
