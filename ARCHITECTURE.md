@@ -34,13 +34,21 @@ protocol (often abbreviated OIDC). OIDC is a protocol based on the
 [OAuth2.0](https://tools.ietf.org/html/rfc6749) framework. In order to understand
 how the library internally works, some understanding of OAuth/OIDC is preferable.
 
-### Helpful resources
+### A short glossary
 
-Here is a list of things that helped this library's developers get a better
-understanding of OAuth/OIDC: 
-- [OAuth 2 in Action](https://www.manning.com/books/oauth-2-in-action), by Justin Richer and Antonio Sanso
-- [OAuth masterclass](https://www.youtube.com/watch?v=egfyV2NV9Mw), by Justin Richer
-- [How To Securely Implement Authentication in Single Page Applications](https://betterprogramming.pub/how-to-securely-implement-authentication-in-single-page-applications-670534da746f), by Dennis Stötzel
+Here is a list of terms having a specific meaning in the context of OIDC:
+- **Resource Owner**: the user, who owns resources, some of which are private.
+- **Resource Server**: the server hosting resources owned by the Resource Owner.
+In our case, a Solid server. A Resource Server receives requests authenticated
+with an Access Token. Example: https://pod.inrupt.com. 
+- **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID
+tokens, and Refresh Tokens. These tokens tell the Resource Server that the user
+has control over a certain identity (WebID), which can then use that information
+to decide whether to give or deny access. Example: https://broker.pod.inrupt.com.
+- **Client**: the application the Resource Owner uses to access its resources on
+the Resource Server. Technically, OAuth is a delegation protocol: the Resource
+Owner allows the Client to interact with the Resource Server on its behalf. Example:
+https://podbrowser.inrupt.com.
 
 ### Solid-OIDC
 
@@ -58,21 +66,56 @@ Bearer tokens are the default option. DPoP tokens cannot be replayed by a Resour
 Server to another Resource Server, which is an important security feature in a
 decentralized ecosystem such as Solid's.
 
-### A short glossary
+### Mapping OIDC flows to the code
 
-Here is a list of terms having a specific meaning in the context of OIDC:
-- **Resource Owner**: the user, who owns resources, some of which are private.
-- **Resource Server**: the server hosting resources owned by the Resource Owner.
-In our case, a Solid server. A Resource Server receives requests authenticated
-with an Access Token. Example: https://pod.inrupt.com. 
-- **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID
-tokens, and Refresh Tokens. These tokens tell the Resource Server that the user
-has control over a certain identity (WebID), which can then use that information
-to decide whether to give or deny access. Example: https://broker.pod.inrupt.com.
-- **Client**: the application the Resource Owner uses to access its resources on
-the Resource Server. Technically, OAuth is a delegation protocol: the Resource
-Owner allows the Client to interact with the Resource Server on its behalf. Example:
-https://podbrowser.inrupt.com.
+#### Unsupported flows
+
+There are some OIDC flows that we intentionally don't plan on supporting:
+- The [Implicit flow](https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth),
+which is widely recognized as having security issues, and doesn't bring value compared
+to the Auth Code flow.
+- The Refresh flow **in a browser context**. We do implement the refresh flow for
+NodeJS, but there are limitations that prevent it from being applicable in a
+browser context:
+  - Users must always be prompted when a refresh token is requested, which prevents
+  silent authentication.
+  - There is no secure place where the Refresh Token may be stored in the browser
+  across page reload,  which means the token would be lost on reload, which defeats
+  the purpose of having a long-lived token anyway. The 
+  [best security practices document for OAuth](https://tools.ietf.org/html/draft-ietf-oauth-security-topics-18#section-4.13)
+  contains some recommendations on handling Refresh Tokens securely.
+
+#### Auth code flow
+
+![Module dependencies](./documentation/diagrams/auth_code_flow.svg)
+
+- Discovery: `packages/*/src/login/oidc/IssuerConfigFetcher.ts`
+- Registration: `packages/*/src/login/oidc/ClientRegistrar.ts`
+- OIDC handler: `packages/*/src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler.ts`
+- Handle incoming redirect: `packages/*/src/login/oidc/redirectHandler/*Handler.ts`,
+the specific Handler depends on which Handler's `canHandle()` method first returns
+`true`.
+
+#### Refresh flow
+
+![Module dependencies](./documentation/diagrams/refresh_flow.svg)
+
+- OIDC handler: `packages/*/src/login/oidc/oidcHandlers/RefreshTokenOidcHandler.ts`
+
+Note that in this case, no redirection happens (i.e. there's only a Back channel
+exchange): the Access Token is received directly as a response to the request
+containing the Refresh Token.
+
+### Helpful resources
+
+Here is a list of things that helped this library's developers get a better
+understanding of OAuth/OIDC: 
+- [OAuth 2 in Action](https://www.manning.com/books/oauth-2-in-action), by Justin Richer and Antonio Sanso
+- [OAuth masterclass](https://www.youtube.com/watch?v=egfyV2NV9Mw), by Justin Richer
+- [How To Securely Implement Authentication in Single Page Applications](https://betterprogramming.pub/how-to-securely-implement-authentication-in-single-page-applications-670534da746f), by Dennis Stötzel
+
+In particular, these resources may help getting a better understanding of the authentication
+flows described in the previous section, and in which use cases they are relevant.
 
 ## Codemap of the client library modules
 
@@ -204,43 +247,3 @@ const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
   someMockedStorageUtility
 );
 ```
-
-## Mapping OIDC flows to the code
-
-### Unsupported flows
-
-There are some OIDC flows that we intentionally don't plan on supporting:
-- The [Implicit flow](https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth),
-which is widely recognized as having security issues, and doesn't bring value compared
-to the Auth Code flow.
-- The Refresh flow **in a browser context**. We do implement the refresh flow for
-NodeJS, but there are limitations that prevent it from being applicable in a
-browser context:
-  - Users must always be prompted when a refresh token is requested, which prevents
-  silent authentication.
-  - There is no secure place where the Refresh Token may be stored in the browser
-  across page reload,  which means the token would be lost on reload, which defeats
-  the purpose of having a long-lived token anyway. The 
-  [best security practices document for OAuth](https://tools.ietf.org/html/draft-ietf-oauth-security-topics-18#section-4.13)
-  contains some recommendations on handling Refresh Tokens securely.
-
-### Auth code flow
-
-![Module dependencies](./documentation/diagrams/auth_code_flow.svg)
-
-- Discovery: `packages/*/src/login/oidc/IssuerConfigFetcher.ts`
-- Registration: `packages/*/src/login/oidc/ClientRegistrar.ts`
-- OIDC handler: `packages/*/src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler.ts`
-- Handle incoming redirect: `packages/*/src/login/oidc/redirectHandler/*Handler.ts`,
-the specific Handler depends on which Handler's `canHandle()` method first returns
-`true`.
-
-### Refresh flow
-
-![Module dependencies](./documentation/diagrams/refresh_flow.svg)
-
-- OIDC handler: `packages/*/src/login/oidc/oidcHandlers/RefreshTokenOidcHandler.ts`
-
-Note that in this case, no redirection happens (i.e. there's only a Back channel
-exchange): the Access Token is received directly as a response to the request
-containing the Refresh Token.
