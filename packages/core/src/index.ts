@@ -37,6 +37,7 @@ export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 export {
   default as IRedirectHandler,
   RedirectResult,
+  getWebidFromTokenPayload,
 } from "./login/oidc/redirectHandler/IRedirectHandler";
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 

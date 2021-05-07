@@ -36,6 +36,7 @@ import {
   loadOidcContextFromStorage,
   saveSessionInfoToStorage,
   getSessionIdFromOauthState,
+  getWebidFromTokenPayload,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
 import { DPoPInput, IdTokenClaims, Issuer, TokenSet } from "openid-client";
@@ -50,30 +51,6 @@ import {
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
-
-/**
- * Extract a WebID from an ID token payload. Note that this does not yet implement the
- * user endpoint lookup, and only checks for webid or IRI-like sub claims.
- *
- * @param idToken the payload of the ID token from which the WebID can be extracted.
- * @returns a WebID extracted from the ID token.
- * @internal
- */
-export async function getWebidFromTokenPayload(
-  idToken: IdTokenClaims
-): Promise<string> {
-  if (idToken.webid !== undefined && typeof idToken.webid === "string") {
-    return idToken.webid;
-  }
-  try {
-    const webid = new URL(idToken.sub);
-    return webid.href;
-  } catch (e) {
-    throw new Error(
-      `The ID token has no 'webid' claim, and its 'sub' claim of [${idToken.sub}] is invalid as a URL - error [${e}].`
-    );
-  }
-}
 
 /**
  * @hidden

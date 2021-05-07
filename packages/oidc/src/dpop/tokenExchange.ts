@@ -19,12 +19,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JSONWebKey } from "jose";
 import formurlencoded from "form-urlencoded";
 import { OidcClient } from "oidc-client";
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
-import { createDpopHeader, decodeJwt } from "./dpop";
-import { generateJwkForDpop } from "./keyGeneration";
+import {
+  IClient,
+  IIssuerConfig,
+  createDpopHeader,
+  deriveWebIdFromIdToken,
+} from "@inrupt/solid-client-authn-core";
+import { JWK } from "jose/types";
+import { jwtVerify } from "jose/jwt/verify";
+import generateKeyPair from "jose/util/generate_key_pair";
+import fromKeyLike from "jose/jwk/from_key_like";
+import { createRemoteJWKSet } from "jose/jwks/remote";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */
@@ -89,12 +96,12 @@ export type TokenEndpointResponse = {
   idToken: string;
   webId: string;
   refreshToken?: string;
-  dpopJwk?: JSONWebKey;
+  dpopJwk?: JWK;
   expiresIn?: number;
 };
 
 export type TokenEndpointDpopResponse = TokenEndpointResponse & {
-  dpopJwk: JSONWebKey;
+  dpopJwk: JWK;
 };
 
 export type TokenEndpointInput = {
@@ -122,37 +129,6 @@ function isWebIdOidcIdToken(
       !token.webid) ||
     typeof token.webid === "string"
   );
-}
-
-/**
- * Extracts a WebId from an ID token based on https://github.com/solid/webid-oidc-spec.
- * The upcoming spec is still a work in progress.
- *
- * Note: this function does not implement the userinfo WebId lookup yet.
- * @param idToken
- */
-export async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
-  const decoded = await decodeJwt(idToken);
-  if (!isWebIdOidcIdToken(decoded)) {
-    throw new Error(
-      `Invalid ID token: ${JSON.stringify(
-        decoded
-      )} is missing 'sub' or 'iss' claims`
-    );
-  }
-  if (decoded.webid) {
-    return decoded.webid;
-  }
-  try {
-    // The constructor is here only used to verify that the URL is valid.
-    // eslint-disable-next-line no-new
-    new URL(decoded.sub);
-  } catch (error) {
-    throw new Error(
-      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]. Attempting to construct a URL from the 'sub' claim threw: ${error}`
-    );
-  }
-  return decoded.sub;
 }
 
 function validatePreconditions(
@@ -265,9 +241,9 @@ export async function getTokens(
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
   };
-  let dpopJwk: JSONWebKey | undefined;
+  let dpopJwk: JWK | undefined;
   if (dpop) {
-    dpopJwk = await generateJwkForDpop();
+    dpopJwk = await fromKeyLike((await generateKeyPair("ES256")).privateKey);
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
@@ -303,7 +279,12 @@ export async function getTokens(
   ).json()) as Record<string, unknown>;
 
   const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
-  const webId = await deriveWebIdFromIdToken(tokenResponse.id_token);
+  const jwks = createRemoteJWKSet(new URL(issuer.jwksUri));
+  const { payload } = await jwtVerify(tokenResponse.id_token, jwks, {
+    issuer: issuer.issuer,
+    audience: client.clientId,
+  });
+  const webId = await deriveWebIdFromIdToken(payload);
 
   return {
     accessToken: tokenResponse.access_token,

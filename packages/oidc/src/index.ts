@@ -43,14 +43,6 @@ export {
 
 export { registerClient } from "./dcr/clientRegistrar";
 export {
-  decodeJwt,
-  signJwt,
-  createDpopHeader,
-  privateJwkToPublicJwk,
-  validateIdToken,
-} from "./dpop/dpop";
-export { generateJwkForDpop, generateJwkRsa } from "./dpop/keyGeneration";
-export {
   getDpopToken,
   getBearerToken,
   TokenEndpointInput,
