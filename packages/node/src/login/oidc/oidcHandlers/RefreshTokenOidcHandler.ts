@@ -33,6 +33,7 @@ import {
   IStorageUtility,
   LoginResult,
   saveSessionInfoToStorage,
+  getWebidFromTokenPayload,
 } from "@inrupt/solid-client-authn-core";
 import fromKeyLike from "jose/jwk/from_key_like";
 import generateKeyPair from "jose/util/generate_key_pair";
@@ -44,7 +45,6 @@ import {
   buildDpopFetch,
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
-import { getWebidFromTokenPayload } from "../redirectHandler/AuthCodeRedirectHandler";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 function validateOptions(
@@ -171,7 +171,12 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
       );
     }
-    sessionInfo.webId = await getWebidFromTokenPayload(accessInfo.claims());
+    sessionInfo.webId = await getWebidFromTokenPayload(
+      accessInfo.id_token,
+      oidcLoginOptions.issuerConfiguration.jwksUri,
+      oidcLoginOptions.issuer,
+      oidcLoginOptions.client.clientId
+    );
 
     await saveSessionInfoToStorage(
       this.storageUtility,

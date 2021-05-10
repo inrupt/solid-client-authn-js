@@ -27,6 +27,9 @@
 import type { fetch } from "cross-fetch";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
+import { jwtVerify } from "jose/jwt/verify";
+import { createRemoteJWKSet } from "jose/jwks/remote";
+import { IIssuerConfig } from "../IIssuerConfig";
 
 export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
 
@@ -51,17 +54,32 @@ export default IRedirectHandler;
  * @internal
  */
 export async function getWebidFromTokenPayload(
-  idTokenClaims: Record<string, string>
+  idToken: string,
+  jwksIri: string,
+  issuerIri: string,
+  clientId: string
 ): Promise<string> {
-  if (typeof idTokenClaims.webid === "string") {
-    return idTokenClaims.webid;
+  const jwks = createRemoteJWKSet(new URL(jwksIri));
+  const { payload } = await jwtVerify(idToken, jwks, {
+    issuer: issuerIri,
+    audience: clientId,
+  });
+  if (typeof payload.webid === "string") {
+    return payload.webid;
   }
   try {
-    const webid = new URL(idTokenClaims.sub);
+    if (typeof payload.sub !== "string") {
+      throw new Error(
+        `The ID token ${JSON.stringify(
+          payload
+        )} is invalid: it has no 'webid' claim and no 'sub' claim.`
+      );
+    }
+    const webid = new URL(payload.sub);
     return webid.href;
   } catch (e) {
     throw new Error(
-      `The ID token has no 'webid' claim, and its 'sub' claim of [${idTokenClaims.sub}] is invalid as a URL - error [${e}].`
+      `The ID token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`
     );
   }
 }

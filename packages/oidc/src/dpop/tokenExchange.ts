@@ -25,13 +25,11 @@ import {
   IClient,
   IIssuerConfig,
   createDpopHeader,
-  deriveWebIdFromIdToken,
+  getWebidFromTokenPayload,
 } from "@inrupt/solid-client-authn-core";
 import { JWK } from "jose/types";
-import { jwtVerify } from "jose/jwt/verify";
 import generateKeyPair from "jose/util/generate_key_pair";
 import fromKeyLike from "jose/jwk/from_key_like";
-import { createRemoteJWKSet } from "jose/jwks/remote";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */
@@ -279,12 +277,13 @@ export async function getTokens(
   ).json()) as Record<string, unknown>;
 
   const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
-  const jwks = createRemoteJWKSet(new URL(issuer.jwksUri));
-  const { payload } = await jwtVerify(tokenResponse.id_token, jwks, {
-    issuer: issuer.issuer,
-    audience: client.clientId,
-  });
-  const webId = await deriveWebIdFromIdToken(payload);
+
+  const webId = await getWebidFromTokenPayload(
+    tokenResponse.id_token,
+    issuer.jwksUri,
+    issuer.issuer,
+    client.clientId
+  );
 
   return {
     accessToken: tokenResponse.access_token,
@@ -309,7 +308,7 @@ export async function getBearerToken(
 ): Promise<TokenEndpointResponse> {
   let signinResponse;
   try {
-    signinResponse = await new OidcClient({
+    const client = new OidcClient({
       // TODO: We should look at the various interfaces being used for storage,
       //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
       //  (which has an interface Storage), and our own proprietary interface
@@ -332,27 +331,32 @@ export async function getBearerToken(
       // against NSS, and not in general.
       // Issue tracker: https://github.com/solid/node-solid-server/issues/1490
       loadUserInfo: false,
-    }).processSigninResponse(redirectUrl);
+    });
+    signinResponse = await client.processSigninResponse(redirectUrl);
+    const webId = await getWebidFromTokenPayload(
+      signinResponse.id_token,
+      client.settings.metadata?.jwks_uri!,
+      client.settings.metadata?.issuer!,
+      client.settings.client_id!
+    );
+    return {
+      accessToken: signinResponse.access_token,
+      idToken: signinResponse.id_token,
+      webId,
+      // Although not a field in the TypeScript response interface, the refresh
+      // token (which can optionally come back with the access token (if, as per
+      // the OAuth2 spec, we requested one using the scope of 'offline_access')
+      // will be included in the signin response object.
+      // eslint-disable-next-line camelcase
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      refreshToken: signinResponse.refresh_token,
+    };
   } catch (err) {
     throw new Error(
       `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
     );
   }
-  const webId = await deriveWebIdFromIdToken(signinResponse.id_token);
-
-  return {
-    accessToken: signinResponse.access_token,
-    idToken: signinResponse.id_token,
-    webId,
-    // Although not a field in the TypeScript response interface, the refresh
-    // token (which can optionally come back with the access token (if, as per
-    // the OAuth2 spec, we requested one using the scope of 'offline_access')
-    // will be included in the signin response object.
-    // eslint-disable-next-line camelcase
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    refreshToken: signinResponse.refresh_token,
-  };
 }
 
 export async function getDpopToken(

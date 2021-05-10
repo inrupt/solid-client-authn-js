@@ -187,7 +187,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns
     // its payload as a JSON object.
-    const webid = await getWebidFromTokenPayload(tokenSet.claims());
+    const webid = await getWebidFromTokenPayload(
+      tokenSet.id_token,
+      issuer.metadata.jwks_uri!,
+      issuer.metadata.issuer,
+      client.metadata.client_id
+    );
 
     await saveSessionInfoToStorage(
       this.storageUtility,
