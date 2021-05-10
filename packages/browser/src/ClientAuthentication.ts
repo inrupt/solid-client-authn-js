@@ -36,9 +36,11 @@ import {
   ISessionInternalInfo,
   ILoginOptions,
 } from "@inrupt/solid-client-authn-core";
-import { removeOidcQueryParam, validateIdToken } from "@inrupt/oidc-client-ext";
+import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { KEY_CURRENT_SESSION } from "./constant";
 import { getJwks } from "./login/oidc/IssuerConfigFetcher";
+import { jwtVerify } from "jose/jwt/verify";
+import { createRemoteJWKSet } from "jose/jwks/remote";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a
@@ -136,19 +138,14 @@ export default class ClientAuthentication {
     );
 
     try {
-      const jwks = await getJwks(issuerConfig);
-      if (
-        await validateIdToken(
-          sessionInfo.idToken,
-          jwks,
-          sessionInfo.issuer,
-          sessionInfo.clientAppId
-        )
-      ) {
-        return sessionInfo;
-      }
+      const jwks = createRemoteJWKSet(new URL(issuerConfig.jwksUri));
+      jwtVerify(sessionInfo.idToken, jwks, {
+        audience: sessionInfo.clientAppId,
+        issuer: issuerConfig.issuer,
+      });
+      return sessionInfo;
     } catch (e) {
-      // If an error happens when fetching the keys, the issuer cannot be trusted.
+      // The jwt verification function throws on invalid token.
       // The error is swallowed, and `null` is eventually returned.
     }
     return null;

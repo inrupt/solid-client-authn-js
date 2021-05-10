@@ -41,12 +41,12 @@ import {
   TokenEndpointResponse,
   TokenEndpointDpopResponse,
 } from "@inrupt/oidc-client-ext";
-import { JSONWebKey } from "jose";
 import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
+import { JWK } from "jose/types";
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
 // configure the server to return the remaining lifespan of the cookie.
@@ -203,7 +203,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       authFetch = await buildDpopFetch(
         tokens.accessToken,
         tokens.refreshToken,
-        tokens.dpopJwk as JSONWebKey
+        tokens.dpopJwk as JWK
       );
     } else {
       tokens = await getBearerToken(url.toString());
