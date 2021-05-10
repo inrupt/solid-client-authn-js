@@ -19,8 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JSONWebKey } from "jose";
-import { createDpopHeader } from "@inrupt/oidc-client-ext";
+import { JWK } from "jose/types";
+import { createDpopHeader } from "@inrupt/solid-client-authn-core";
 
 /**
  * @param authToken A bearer token.
@@ -50,7 +50,7 @@ export function buildBearerFetch(
 async function buildDpopFetchOptions(
   targetUrl: string,
   authToken: string,
-  dpopKey: JSONWebKey,
+  dpopKey: JWK,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   return {
@@ -87,7 +87,7 @@ export async function buildDpopFetch(
   // TODO: We need to push this refresh token into a wrapper around the fetch,
   //  so dependent on that wrapper existing first!
   _refreshToken: string | undefined,
-  dpopKey: JSONWebKey
+  dpopKey: JWK
 ): Promise<typeof fetch> {
   return async (url, options): Promise<Response> => {
     const response = await fetch(
