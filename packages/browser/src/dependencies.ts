@@ -63,10 +63,6 @@ import Redirector from "./login/oidc/Redirector";
 import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
 import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
-import TokenRefresher, {
-  ITokenRefresher,
-} from "./login/oidc/refresh/TokenRefresher";
-import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
 import { ISessionManager, SessionManager } from "./SessionManager";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
@@ -133,9 +129,6 @@ container.register<IRedirector>("browser:redirector", {
 container.register<IClientRegistrar>("browser:clientRegistrar", {
   useClass: ClientRegistrar,
 });
-container.register<ITokenRequester>("browser:tokenRequester", {
-  useClass: TokenRequester,
-});
 
 // Login/OIDC/redirectHandler
 container.register<IRedirectHandler>("browser:redirectHandler", {
@@ -153,11 +146,6 @@ container.register<IRedirectHandler>("browser:redirectHandlers", {
 // Login/OIDC/Issuer
 container.register<IIssuerConfigFetcher>("browser:issuerConfigFetcher", {
   useClass: IssuerConfigFetcher,
-});
-
-// Login/OIDC/Refresh
-container.register<ITokenRefresher>("browser:tokenRefresher", {
-  useClass: TokenRefresher,
 });
 
 // Logout
