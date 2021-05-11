@@ -239,13 +239,25 @@ export async function getTokens(
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
   };
-  let dpopJwk: JWK | undefined;
+  let dpopPrivateJwk: JWK | undefined;
   if (dpop) {
-    dpopJwk = await fromKeyLike((await generateKeyPair("ES256")).privateKey);
+    // const { publicKey, privateKey } = await generateKeyPair("ES256");
+    const { privateKey } = await window.crypto.subtle.generateKey(
+      {
+        name: "ECDSA",
+        namedCurve: "P-256",
+      },
+      true,
+      ["sign", "verify"]
+    );
+    dpopPrivateJwk = await fromKeyLike(privateKey);
+    const dpopPublicKey = await fromKeyLike(publicKey);
+    dpopPublicKey.alg = "ES256";
+    dpopPrivateJwk.alg = "ES256";
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
-      dpopJwk
+      dpopPrivateJwk
     );
   }
 
@@ -292,7 +304,7 @@ export async function getTokens(
       ? tokenResponse.refresh_token
       : undefined,
     webId,
-    dpopJwk,
+    dpopJwk: dpopPrivateJwk,
     expiresIn: tokenResponse.expires_in,
   };
 }
