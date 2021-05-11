@@ -31,7 +31,7 @@ The four modules are available in the standard Lerna [packages directory](./pack
 
 ## OAuth2.0/OpenID Connect
 
-The client libraries aim to help developers authenticating the users of their applications
+The client libraries aim to help developers authenticate their application users
 via the [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html)
 protocol (often abbreviated OIDC). OIDC is an industry-wide standard protocol based on the
 [OAuth2.0](https://tools.ietf.org/html/rfc6749) framework. In order to understand
@@ -42,7 +42,7 @@ how our libraries work internally, some understanding of OAuth/OIDC is definitel
 Here is a list of terms having a specific meaning in the context of OIDC:
 - **Resource Owner**: the user, who owns resources, some of which are private.
 The notion of Resource Owner in the OIDC sense is broader than the notion of Pod Owner
-in Solid: anyone with a WebID is a Resource Owner, in the authentication sense.
+in Solid: anyone with a WebID is a Resource Owner.
 Whether a particular Resource Owner is **_authorized_** to access a particular Resource
 is a different matter, up to the Solid authorization system (e.g., ACP or ACL), which is
 outside the scope of this document.
@@ -51,15 +51,12 @@ In our case, a Solid server. A Resource Server receives requests authenticated
 with an Access Token. Example: https://pod.inrupt.com. 
 - **OIDC issuer**: the Solid Identity Provider, which issues Access Tokens, ID
 tokens, and Refresh Tokens. These tokens tell the Resource Server that the user
-has control over a certain identity (WebID), which can then use that information
-to decide whether to give or deny access. Example: https://broker.pod.inrupt.com.
+has control over a certain identity (WebID). The Resource Server can then use that
+information to decide whether to give or deny access. 
+Example: https://broker.pod.inrupt.com.
 - **Client**: the application the Resource Owner uses to access resources on
-a Resource Server. Those resources may be owned directly by the Resource Owner
-(i.e., resources in a Pod created by the resource owner), or on a Resource Server
-hosting someone else's resources, but to which this client application and user
-have been explicitly granted access).
- Technically, OAuth is a delegation protocol: the Resource Owner allows the
-Client to interact with a Resource Server on its behalf. Example: 
+a Resource Server. Technically, OAuth is a delegation protocol: the Resource Owner
+allows the Client to interact with a Resource Server on its behalf. Example: 
 https://podbrowser.inrupt.com.
 
 ### Solid-OIDC
@@ -151,16 +148,13 @@ on the Handler design pattern. Given data contained in a request, a set of class
 implementing a similar API will declare whether or not they may handle said request.
 
 - **Handlers** declare two functions:
-  - `canHandle(request)`
-  - `handle(request)`
+  - `canHandle(request)`, which returns a boolean indicating the handler's ability to handle the request
+  - `handle(request)`, which actually processes the request
   
-  `canHandle()` simply returns a boolean indicating the ability of the handler to handle the 
-  request, and `handle()` actually processes it.
-  
-- All the handlers for a given type of request are tracked by a **Handler Aggregator**, 
-  which invokes the first handler for which `canHandle()`   returns `true` process the request. 
-  The handler aggregator has the same API as the handlers it aggregates, and brokers the 
-  request to the underlying handlers.
+- A **Handler Aggregator** tracks all the handlers for a given type of request. The
+  Handler Aggregator invokes the first handler for which `canHandle()`   returns
+  `true` process the request. The handler aggregator has the same API as the handlers
+  it aggregates, and brokers the request to the underlying handlers.
   More on that in the Dependency Injection section.
 
 In the context of this library, a request is an API call to execute some OIDC-related
@@ -196,7 +190,7 @@ are declared in `packages/*/src/dependencies.ts`.
 
 #### Declaring order
 
-The order in which the dependencies are declared (for a given container) **matters**.
+The order in which the dependencies sharing the same label are declared **matters**.
 Let's have a look at some code to make things clearer.
 
 ```
