@@ -241,7 +241,11 @@ export async function getTokens(
   };
   let dpopPrivateJwk: JWK | undefined;
   if (dpop) {
-    // const { publicKey, privateKey } = await generateKeyPair("ES256");
+    // The following line is commented out because of the issue reported in
+    // https://github.com/panva/jose/issues/196. Once it is resolved, the call
+    // to the native API may be replaced with the jose wrapper, and building the
+    // DPoP header may be moved to the `core` module.
+    // const { privateKey } = await generateKeyPair("ES256");
     const { privateKey } = await window.crypto.subtle.generateKey(
       {
         name: "ECDSA",
@@ -251,8 +255,6 @@ export async function getTokens(
       ["sign", "verify"]
     );
     dpopPrivateJwk = await fromKeyLike(privateKey);
-    const dpopPublicKey = await fromKeyLike(publicKey);
-    dpopPublicKey.alg = "ES256";
     dpopPrivateJwk.alg = "ES256";
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
