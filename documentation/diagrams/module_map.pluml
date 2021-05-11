@@ -1,0 +1,17 @@
+@startuml
+
+
+package "Client libraries" {
+	[@inrupt/solid-client-authn-browser]
+	[@inrupt/solid-client-authn-node]
+}
+
+[@inrupt/oidc-client-ext] --> [oidc-client]: depends on
+[@inrupt/solid-client-authn-browser] --> [@inrupt/solid-client-authn-core]: depends on
+[@inrupt/solid-client-authn-browser] --> [@inrupt/oidc-client-ext]: depends on
+[@inrupt/solid-client-authn-node] --> [@inrupt/solid-client-authn-core]: depends on
+[@inrupt/solid-client-authn-node] --> [openid-client]: depends on
+[@inrupt/oidc-client-ext] --> [@inrupt/solid-client-authn-core]: depends on
+
+
+@enduml

@@ -1,0 +1,8 @@
+The diagrams in this directory are generated using [PlantUML](https://plantuml.com/).
+
+Example usage: 
+```
+plantuml auth_code_flow.pluml -tsvg
+```
+
+This command will generate `auth_code_flow.svg`.

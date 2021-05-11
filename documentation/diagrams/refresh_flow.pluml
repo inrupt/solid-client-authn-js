@@ -1,0 +1,22 @@
+@startuml
+
+actor RO as "Resource Owner (browser)"
+participant Issuer as "OIDC issuer"
+participant Client
+participant RS as "Solid Server"
+
+hide footbox
+
+note over Issuer, Client
+Assuming that the Client already has a Refresh Token
+end note
+
+== Back channel ==
+
+activate Client
+Client -> Issuer: Sends Refresh Token to token endpoint
+Issuer -> Client: Sends Access, ID and (optional) rotated Refresh Tokens
+Client -> Client: Initializes authenticated fetch
+Client -> RS: Accesses the protected resource\nwith the access token
+
+@enduml
