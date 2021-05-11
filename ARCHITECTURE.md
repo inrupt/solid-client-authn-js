@@ -210,7 +210,14 @@ container.register<IOidcHandler>("browser:oidcHandlers", {
 
 Here, `AggregateOidcHandler` is the handler aggregator (as defined in the Handler
 Pattern section), and `RefreshTokenOidcHandler`, `AuthorizationCodeWithPkceOidcHandler`
-and `ClientCredentialsOidcHandler` are its underlying handlers. When receiving a
+and `ClientCredentialsOidcHandler` are its underlying handlers. 
+
+Note that the label for the containers of the aggregator and the underlying handlers
+differ in the example above:
+- `browser:oidcHandler` (without an 's') for the aggregator.
+- `browser:oidcHandlers` (with an 's'), for the aggregated handlers.
+
+When receiving a
 request, `AggregateOidcHandler` will first invoke its instance of `RefreshTokenOidcHandler`
 to check if it can handle it. If so, that instance of `RefreshTokenOidcHandler`
 will handle the request, and the instances of `AuthorizationCodeWithPkceOidcHandler`
@@ -218,11 +225,6 @@ and `ClientCredentialsOidcHandler` will not be called. This means that it is
 important to declare the dependencies from the most specialized to the most generic,
 because if a fallback handler that can handle all requests is declared first,
 the other more specialized handlers will never be called.
-
-Note that the label for the containers of the aggregator and the underlying handlers
-differ in the example above:
-- `browser:oidcHandler` (without an 's') for the aggregator.
-- `browser:oidcHandlers` (with an 's'), for the aggregated handlers.
 
 The order in which the `container` object registers dependencies isn't relevant
 in the case they are registered with different labels. The
