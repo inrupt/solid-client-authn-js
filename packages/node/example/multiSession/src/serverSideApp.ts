@@ -24,9 +24,10 @@
 // into "@inrupt/solid-client-authn-node", and to npm install this module.
 import {
   getSessionFromStorage,
-  Session,
   getSessionIdFromStorageAll,
-} from "../../../dist/Session";
+} from "../../../dist/multiSession";
+
+import { Session } from "../../../dist/Session";
 
 import cookieSession from "cookie-session";
 
