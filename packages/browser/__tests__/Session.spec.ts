@@ -1020,5 +1020,49 @@ describe("Session", () => {
         inIframe: true,
       });
     });
+
+    it("sets the updated session info after silently refreshing", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const incomingRedirectPromise = Promise.resolve({
+        isLoggedIn: true,
+        webId: "https://some.pod/profile#me",
+        sessionId: "someSessionId",
+        expirationDate: 961106400,
+      });
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockReturnValueOnce(incomingRedirectPromise);
+
+      const windowAddEventListener = jest.spyOn(window, "addEventListener");
+      // ../src/iframe is mocked for other tests,
+      // but we need `setupIframeListener` to actually be executed
+      // so that the callback gets called:
+      const iframeMock = jest.requireMock("../src/iframe");
+      const iframeActual = jest.requireActual("../src/iframe");
+      iframeMock.setupIframeListener.mockImplementationOnce(
+        iframeActual.setupIframeListener
+      );
+      const mySession = new Session({ clientAuthentication });
+
+      // `window.addEventListener` gets called once with ("message", handler)
+      // — get that handler.
+      const messageEventHandler = windowAddEventListener.mock
+        .calls[0][1] as EventListener;
+      const mockedEvent = {
+        origin: window.location.origin,
+        source: null,
+        data: {
+          redirectUrl: "http://arbitrary.com",
+        },
+      } as MessageEvent;
+      // This handler will call `clientAuthentication.handleIncomingRedirect`,
+      // which will return our sessionInfo values:
+      messageEventHandler(mockedEvent);
+
+      await incomingRedirectPromise;
+      expect(mySession.info.webId).toBe("https://some.pod/profile#me");
+      expect(mySession.info.sessionId).toBe("someSessionId");
+      expect(mySession.info.expirationDate).toBe(961106400);
+    });
   });
 });
