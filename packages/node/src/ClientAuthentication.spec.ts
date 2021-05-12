@@ -98,10 +98,10 @@ describe("ClientAuthentication", () => {
       const mockedLoginHandler: jest.Mocked<ILoginHandler> = {
         canHandle: jest.fn((_options: ILoginOptions) => Promise.resolve(true)),
         handle: jest.fn((_options: ILoginOptions) =>
-          Promise.resolve(({
+          Promise.resolve({
             fetch: mockedAuthFetch,
             webId: "https://my.webid/",
-          } as unknown) as LoginResult)
+          } as unknown as LoginResult)
         ),
       };
       const clientAuthn = getClientAuthentication({

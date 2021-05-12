@@ -41,8 +41,8 @@ import {
   generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
-import { DPoPInput, IdTokenClaims, Issuer, TokenSet } from "openid-client";
-import { JWK } from "jose/types";
+import { Issuer, TokenSet } from "openid-client";
+import { KeyObject } from "crypto";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
   buildBearerFetch,
@@ -50,7 +50,6 @@ import {
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
-import { KeyObject } from "crypto";
 
 /**
  * @hidden

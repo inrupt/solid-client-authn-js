@@ -34,11 +34,10 @@ import {
   PREFERRED_SIGNING_ALG,
   DpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
-import { DPoPInput, Issuer, TokenSet } from "openid-client";
-import { JWK } from "jose/types";
+import { Issuer, TokenSet } from "openid-client";
+import { KeyObject } from "crypto";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
-import { KeyObject } from "crypto";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.

@@ -34,7 +34,6 @@ import {
   LoginResult,
   saveSessionInfoToStorage,
   getWebidFromTokenPayload,
-  DpopKeyPair,
   ISessionInfo,
   generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";

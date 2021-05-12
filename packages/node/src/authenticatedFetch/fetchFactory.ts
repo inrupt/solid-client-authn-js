@@ -19,10 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JWK } from "jose/types";
 import { fetch } from "cross-fetch";
-import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
 import { createDpopHeader, DpopKeyPair } from "@inrupt/solid-client-authn-core";
+import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
 
 export type RefreshOptions = {
   sessionId: string;

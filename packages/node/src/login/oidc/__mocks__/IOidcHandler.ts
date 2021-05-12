@@ -27,7 +27,8 @@ import {
 
 import { SessionCreatorGetSessionResponse } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 
-export const OidcHandlerHandleResponse: ISessionInfo = SessionCreatorGetSessionResponse;
+export const OidcHandlerHandleResponse: ISessionInfo =
+  SessionCreatorGetSessionResponse;
 
 export const OidcHandlerMock: jest.Mocked<IOidcHandler> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

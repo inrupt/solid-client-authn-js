@@ -32,7 +32,8 @@ export const SessionCreatorCreateResponse: ISessionInfo = {
   isLoggedIn: true,
   webId: "https://pod.com/profile/card#me",
 };
-export const SessionCreatorGetSessionResponse: ISessionInfo = SessionCreatorCreateResponse;
+export const SessionCreatorGetSessionResponse: ISessionInfo =
+  SessionCreatorCreateResponse;
 
 export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   update: jest.fn(

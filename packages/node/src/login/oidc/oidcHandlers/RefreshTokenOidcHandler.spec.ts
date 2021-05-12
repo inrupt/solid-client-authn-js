@@ -259,7 +259,7 @@ describe("RefreshTokenOidcHandler", () => {
       mockTokenRefresher({
         access_token: "some access token",
         expired: () => false,
-        claims: () => (null as unknown) as IdTokenClaims,
+        claims: () => null as unknown as IdTokenClaims,
       }),
       mockStorageUtility({})
     );
@@ -384,7 +384,7 @@ describe("RefreshTokenOidcHandler", () => {
     const tokenRefresher = mockTokenRefresher({
       access_token: "some access token",
       expired: () => false,
-      claims: () => (null as unknown) as IdTokenClaims,
+      claims: () => null as unknown as IdTokenClaims,
     });
     tokenRefresher.refresh = jest.fn().mockRejectedValue("Invalid credentials");
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
