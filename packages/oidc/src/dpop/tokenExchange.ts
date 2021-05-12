@@ -251,11 +251,16 @@ export async function getTokens(
     }),
   };
 
-  const rawTokenResponse = (await (
-    await fetch(issuer.tokenEndpoint, tokenRequestInit)
-  ).json()) as Record<string, unknown>;
+  const rawTokenResponse = await window.fetch(
+    issuer.tokenEndpoint,
+    tokenRequestInit
+  );
+  const jsonTokenResponse = (await rawTokenResponse.json()) as Record<
+    string,
+    unknown
+  >;
 
-  const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
+  const tokenResponse = validateTokenEndpointResponse(jsonTokenResponse, dpop);
 
   const webId = await getWebidFromTokenPayload(
     tokenResponse.id_token,

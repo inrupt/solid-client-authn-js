@@ -24,5 +24,5 @@ module.exports = {
     "!**/dist/**",
     "!**/*.spec.ts",
   ],
-  testEnvironment: "<rootDir>/../../tests/environment/customEnvironment.js",
+  testEnvironment: "<rootDir>/tests/environment/customEnvironment.js",
 };

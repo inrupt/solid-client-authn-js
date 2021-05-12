@@ -25,7 +25,6 @@ import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
 import { JWK } from "jose/types";
 
 import SignJWT from "jose/jwt/sign";
-import { jwtVerify } from "jose/jwt/verify";
 import { parseJwk } from "jose/jwk/parse";
 
 import {
@@ -39,12 +38,7 @@ import {
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
 
-const parseJwt = (jwt: string): unknown => {
-  // A JWT has three components, <headers.payload.signature>. Here, only the payload
-  // is of interest.
-  const payload = jwt.split(".")[1];
-  return JSON.parse(window.atob(payload));
-};
+jest.mock("@inrupt/solid-client-authn-core");
 
 const mockJwk = (): JWK => {
   return {
@@ -99,16 +93,16 @@ async function generateMockJwt(): Promise<void> {
   const payload = {
     sub: "https://my.webid",
   };
-  // const jwt = await new SignJWT(payload)
-  //   .setProtectedHeader({ alg: "ES256" })
-  //   .setIssuedAt()
-  //   .setIssuer(mockIssuer().issuer.toString())
-  //   .setAudience("solid")
-  //   .setExpirationTime("2h")
-  //   .sign(await parseJwk(mockJwk()));
+  const jwt = await new SignJWT(payload)
+    .setProtectedHeader({ alg: "ES256" })
+    .setIssuedAt()
+    .setIssuer(mockIssuer().issuer.toString())
+    .setAudience("solid")
+    .setExpirationTime("2h")
+    .sign(await parseJwk(mockJwk()));
   // This is for manual use.
   // eslint-disable-next-line no-console
-  // console.log(jwt.toString());
+  console.log(jwt.toString());
 }
 
 // result of generateMockJwt()
@@ -180,7 +174,7 @@ const mockFetch = (
       _init?: RequestInit
     ): ReturnType<typeof window.fetch> => new Response(payload, { status })
   );
-  global.fetch = mockedFetch;
+  window.fetch = mockedFetch;
   return mockedFetch;
 };
 
@@ -296,18 +290,14 @@ describe("getTokens", () => {
 
   it("can request a key-bound token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
+    const core = jest.requireMock("@inrupt/solid-client-authn-core");
+    core.createDpopHeader = jest.fn().mockResolvedValue("some DPoP header");
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const { payload: dpopJwt } = await jwtVerify(
-      headers.DPoP,
-      await parseJwk(mockJwk())
-    );
-    expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
-    expect(dpopJwt.htm).toEqual("POST");
-    expect(dpopJwt.jti).toEqual("1234");
+    expect(headers.DPoP).toBe("some DPoP header");
   });
 
   it("does not use basic auth if a client secret is not available", async () => {
@@ -400,13 +390,17 @@ describe("getTokens", () => {
 
   it("returns the generated key along with the tokens", async () => {
     mockFetch(JSON.stringify(mockDpopTokens()), 200);
+    const core = jest.requireMock("@inrupt/solid-client-authn-core");
+    core.generateDpopKeyPair = jest
+      .fn()
+      .mockResolvedValue("some DPoP key pair");
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
       true
     );
-    expect(result?.dpopKey).not.toBeUndefined();
+    expect(result?.dpopKey).toBe("some DPoP key pair");
   });
 
   it("returns the tokens provided by the IdP", async () => {
@@ -510,152 +504,29 @@ describe("getTokens", () => {
     expect(result?.dpopKey).toBeUndefined();
   });
 
-  it("derives a WebId from the custom claim if available", async () => {
-    const payload = {
-      webid: "https://my.webid",
-      sub: "some subject",
-      iss: mockIssuer().issuer.toString(),
-    };
-    const idJwt = await new SignJWT(payload)
-      .setProtectedHeader({ alg: "ES256" })
-      .setIssuedAt()
-      .setIssuer(mockIssuer().issuer.toString())
-      .setAudience("https://some.client/webid")
-      .setExpirationTime("2h")
-      .sign(await parseJwk(mockJwk()));
+  it("derives a WebId from the ID token", async () => {
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    const core = jest.requireMock("@inrupt/solid-client-authn-core");
+    core.getWebidFromTokenPayload = jest
+      .fn()
+      .mockResolvedValueOnce("https://some.webid#me");
 
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
       false
     );
-    expect(result?.webId).toEqual(payload.webid);
-  });
-
-  it("derives a WebID from a localhost IRI in the sub", async () => {
-    const payload = {
-      sub: "https://localhost:8443/profile/card#me",
-    };
-    const idJwt = await new SignJWT(payload)
-      .setProtectedHeader({ alg: "ES256" })
-      .setIssuedAt()
-      .setIssuer(mockIssuer().issuer.toString())
-      .setAudience("https://some.client/webid")
-      .setExpirationTime("2h")
-      .sign(await parseJwk(mockJwk()));
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    const result = await getTokens(
-      mockIssuer(),
-      mockClient(),
-      mockEndpointInput(),
-      false
-    );
-    expect(result?.webId).toEqual(payload.sub);
-  });
-
-  it("throws if no webid can be derived from the ID token", async () => {
-    const payload = {
-      sub: "some subject",
-      iss: mockIssuer().issuer.toString(),
-    };
-    const idJwt = await new SignJWT(payload)
-      .setProtectedHeader({ alg: "ES256" })
-      .setIssuedAt()
-      .setIssuer(mockIssuer().issuer.toString())
-      .setAudience("https://some.client/webid")
-      .setExpirationTime("2h")
-      .sign(await parseJwk(mockJwk()));
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
-    ).rejects.toThrow(
-      `Cannot extract WebID from ID token: the ID token returned by [${mockIssuer().issuer.toString()}] has no 'webid' claim, nor an IRI-like 'sub' claim: [some subject]`
-    );
-  });
-
-  it("throws if the ID token has no sub claim", async () => {
-    const payload = {
-      iss: mockIssuer().issuer.toString(),
-    };
-    const idJwt = await new SignJWT(payload)
-      .setProtectedHeader({ alg: "ES256" })
-      .setIssuedAt()
-      .setIssuer(mockIssuer().issuer.toString())
-      .setAudience("https://some.client/webid")
-      .setExpirationTime("2h")
-      .sign(await parseJwk(mockJwk()));
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
-    ).rejects.toThrow(
-      /Invalid ID token: {.+} is missing 'sub' or 'iss' claims/
-    );
-  });
-
-  it("throws if the ID token has no iss claim", async () => {
-    const payload = {
-      sub: "https://my.webid",
-    };
-    const idJwt = await new SignJWT(payload)
-      .setProtectedHeader({ alg: "ES256" })
-      .setIssuedAt()
-      .setIssuer(mockIssuer().issuer.toString())
-      .setAudience("https://some.client/webid")
-      .setExpirationTime("2h")
-      .sign(await parseJwk(mockJwk()));
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
-    ).rejects.toThrow(
-      /Invalid ID token: {.+} is missing 'sub' or 'iss' claims/
-    );
+    expect(result?.webId).toBe("https://some.webid#me");
   });
 });
 
 describe("getDpopToken", () => {
   it("requests a key-bound token, and returns the appropriate key with the token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
+    const core = jest.requireMock("@inrupt/solid-client-authn-core");
+    core.createDpopHeader = jest.fn().mockResolvedValue("some DPoP header");
+    core.generateDpopKeyPair = jest.fn().mockResolvedValue("some DPoP keys");
     const tokens = await getDpopToken(
       mockIssuer(),
       mockClient(),
@@ -665,14 +536,8 @@ describe("getDpopToken", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const { payload: dpopJwt } = await jwtVerify(
-      headers.DPoP,
-      await parseJwk(mockJwk())
-    );
-    expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
-    expect(dpopJwt.htm).toEqual("POST");
-    expect(dpopJwt.jti).toEqual("1234");
-    expect(tokens.dpopKey).not.toBeUndefined();
+    expect(headers.DPoP).toBe("some DPoP header");
+    expect(tokens.dpopKey).toBe("some DPoP keys");
   });
 });
 
@@ -693,6 +558,13 @@ jest.mock("oidc-client", () => {
             access_token: mockBearerAccessToken(),
             id_token: mockIdToken(),
           });
+        },
+        settings: {
+          metadata: {
+            jwks_uri: "https://some.jwks",
+            issuer: "https://some.issuer",
+          },
+          client_id: "some client id",
         },
       };
     }),
