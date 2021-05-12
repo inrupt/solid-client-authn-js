@@ -37,6 +37,7 @@ import {
   saveSessionInfoToStorage,
   getSessionIdFromOauthState,
   getWebidFromTokenPayload,
+  DpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
 import { DPoPInput, IdTokenClaims, Issuer, TokenSet } from "openid-client";
@@ -51,6 +52,7 @@ import {
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
+import { KeyObject } from "crypto";
 
 /**
  * @hidden
@@ -128,14 +130,18 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     const params = client.callbackParams(inputRedirectUrl);
 
-    let dpopKey: JWK;
+    let dpopKeys: DpopKeyPair | undefined;
     let tokenSet: TokenSet;
     let authFetch: typeof fetch;
 
     if (oidcContext.dpop) {
-      dpopKey = await fromKeyLike((await generateKeyPair("ES256")).privateKey);
+      const { privateKey, publicKey } = await generateKeyPair("ES256");
+      dpopKeys = {
+        privateKey,
+        publicKey: await fromKeyLike(publicKey),
+      };
       // The alg property isn't set by fromKeyLike, so set it manually.
-      dpopKey.alg = "ES256";
+      dpopKeys.publicKey.alg = "ES256";
       tokenSet = await client.callback(
         url.href,
         params,
@@ -143,7 +149,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         // openid-client does not support yet jose@3.x, and expects
         // type definitions that are no longer present. However, the JWK
         // type that we pass here is compatible with the API.
-        { DPoP: dpopKey as DPoPInput }
+        { DPoP: dpopKeys.privateKey as KeyObject }
       );
     } else {
       tokenSet = await client.callback(url.href, params, {
@@ -175,10 +181,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     if (oidcContext.dpop) {
       authFetch = await buildDpopFetch(
         tokenSet.access_token,
-        // TS thinks dpopKey isn't initialized, when it is.
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        dpopKey,
+        dpopKeys!,
         refreshOptions
       );
     } else {

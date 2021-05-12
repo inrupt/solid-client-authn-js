@@ -34,6 +34,7 @@ import {
   LoginResult,
   saveSessionInfoToStorage,
   getWebidFromTokenPayload,
+  DpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
 import fromKeyLike from "jose/jwk/from_key_like";
 import generateKeyPair from "jose/util/generate_key_pair";
@@ -74,15 +75,17 @@ async function refreshAccess(
   let tokens: TokenSet & { access_token: string };
   try {
     if (dpop) {
-      const dpopKey = await fromKeyLike(
-        (await generateKeyPair("ES256")).privateKey
-      );
+      const { privateKey, publicKey } = await generateKeyPair("ES256");
+      const dpopKeys = {
+        privateKey,
+        publicKey: await fromKeyLike(publicKey),
+      };
       // The alg property isn't set by fromKeyLike, so set it manually.
-      dpopKey.alg = "ES256";
+      dpopKeys.publicKey.alg = "ES256";
       tokens = await refreshOptions.tokenRefresher.refresh(
         refreshOptions.sessionId,
         refreshOptions.refreshToken,
-        dpopKey,
+        dpopKeys,
         refreshOptions.onNewRefreshToken
       );
       // Rotate the refresh token if applicable
@@ -92,7 +95,7 @@ async function refreshAccess(
       };
       authFetch = await buildDpopFetch(
         tokens.access_token,
-        dpopKey,
+        dpopKeys,
         rotatedRefreshOptions
       );
     } else {

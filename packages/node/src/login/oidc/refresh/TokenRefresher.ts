@@ -32,11 +32,13 @@ import {
   IStorageUtility,
   loadOidcContextFromStorage,
   PREFERRED_SIGNING_ALG,
+  DpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
 import { DPoPInput, Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose/types";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
+import { KeyObject } from "crypto";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.
@@ -49,7 +51,7 @@ export interface ITokenRefresher {
   refresh(
     localUserId: string,
     refreshToken?: string,
-    dpopKey?: JWK,
+    dpopKey?: DpopKeyPair,
     onNewRefreshToken?: (token: string) => unknown
   ): Promise<TokenSet & { access_token: string }>;
 }
@@ -69,7 +71,7 @@ export default class TokenRefresher implements ITokenRefresher {
   async refresh(
     sessionId: string,
     refreshToken?: string,
-    dpopKey?: JWK,
+    dpopKey?: DpopKeyPair,
     onNewRefreshToken?: (newToken: string) => unknown
   ): Promise<TokenSet & { access_token: string }> {
     const oidcContext = await loadOidcContextFromStorage(
@@ -114,7 +116,7 @@ export default class TokenRefresher implements ITokenRefresher {
       // type definitions that are no longer present. However, the JWK
       // type that we pass here is compatible with the API, hence the `any`
       // assertion.
-      DPoP: dpopKey as DPoPInput,
+      DPoP: dpopKey ? (dpopKey.privateKey as KeyObject) : undefined,
     });
 
     if (tokenSet.access_token === undefined) {

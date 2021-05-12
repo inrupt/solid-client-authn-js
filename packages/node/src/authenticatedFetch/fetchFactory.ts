@@ -22,7 +22,7 @@
 import { JWK } from "jose/types";
 import { fetch } from "cross-fetch";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
-import { createDpopHeader } from "@inrupt/solid-client-authn-core";
+import { createDpopHeader, DpopKeyPair } from "@inrupt/solid-client-authn-core";
 
 export type RefreshOptions = {
   sessionId: string;
@@ -115,7 +115,7 @@ export type DpopHeaderPayload = {
 async function buildDpopFetchOptions(
   targetUrl: string,
   authToken: string,
-  dpopKey: JWK,
+  dpopKey: DpopKeyPair,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   const options: RequestInit = { ...defaultOptions };
@@ -140,7 +140,7 @@ async function buildDpopFetchOptions(
  */
 export async function buildDpopFetch(
   accessToken: string,
-  dpopKey: JWK,
+  dpopKey: DpopKeyPair,
   refreshOptions?: RefreshOptions
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;
