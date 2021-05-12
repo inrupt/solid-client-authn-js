@@ -200,14 +200,10 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       });
 
       // The type assertion should not be necessary...
-      authFetch = await buildDpopFetch(
-        tokens.accessToken,
-        tokens.refreshToken,
-        tokens.dpopJwk as JWK
-      );
+      authFetch = await buildDpopFetch(tokens.accessToken, tokens.dpopKey!);
     } else {
       tokens = await getBearerToken(url.toString());
-      authFetch = buildBearerFetch(tokens.accessToken, tokens.refreshToken);
+      authFetch = buildBearerFetch(tokens.accessToken);
     }
 
     await this.storageUtility.setForUser(

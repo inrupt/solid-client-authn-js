@@ -20,7 +20,7 @@
  */
 
 import { JWK } from "jose/types";
-import { createDpopHeader } from "@inrupt/solid-client-authn-core";
+import { createDpopHeader, DpopKeyPair } from "@inrupt/solid-client-authn-core";
 
 /**
  * @param authToken A bearer token.
@@ -29,12 +29,7 @@ import { createDpopHeader } from "@inrupt/solid-client-authn-core";
  * bearer token.
  * @hidden
  */
-export function buildBearerFetch(
-  authToken: string,
-  // TODO: We need to push this refresh token into a wrapper around the fetch,
-  //  so dependent on that wrapper existing first!
-  _refreshToken: string | undefined
-): typeof fetch {
+export function buildBearerFetch(authToken: string): typeof fetch {
   return (init, options): Promise<Response> => {
     return fetch(init, {
       ...options,
@@ -50,7 +45,7 @@ export function buildBearerFetch(
 async function buildDpopFetchOptions(
   targetUrl: string,
   authToken: string,
-  dpopKey: JWK,
+  dpopKey: DpopKeyPair,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   return {
@@ -84,10 +79,7 @@ function isExpectedAuthError(statusCode: number): boolean {
  */
 export async function buildDpopFetch(
   authToken: string,
-  // TODO: We need to push this refresh token into a wrapper around the fetch,
-  //  so dependent on that wrapper existing first!
-  _refreshToken: string | undefined,
-  dpopKey: JWK
+  dpopKey: DpopKeyPair
 ): Promise<typeof fetch> {
   return async (url, options): Promise<Response> => {
     const response = await fetch(

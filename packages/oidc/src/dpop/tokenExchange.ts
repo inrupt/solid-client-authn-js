@@ -26,10 +26,11 @@ import {
   IIssuerConfig,
   createDpopHeader,
   getWebidFromTokenPayload,
+  DpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
-import { JWK } from "jose/types";
-import generateKeyPair from "jose/util/generate_key_pair";
+import { JWK, KeyLike } from "jose/types";
 import fromKeyLike from "jose/jwk/from_key_like";
+import { generateKeyPair } from "jose/util/generate_key_pair";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */
@@ -94,7 +95,7 @@ export type TokenEndpointResponse = {
   idToken: string;
   webId: string;
   refreshToken?: string;
-  dpopJwk?: JWK;
+  dpopKey?: DpopKeyPair;
   expiresIn?: number;
 };
 
@@ -108,26 +109,6 @@ export type TokenEndpointInput = {
   code: string;
   codeVerifier: string;
 };
-
-type WebIdOidcIdToken = {
-  sub: string;
-  iss: string;
-  // The spec requires this capitalization of webid
-  webid?: string;
-};
-
-function isWebIdOidcIdToken(
-  token: WebIdOidcIdToken | Record<string, unknown>
-): token is WebIdOidcIdToken {
-  return (
-    (token.sub !== undefined &&
-      typeof token.sub === "string" &&
-      token.iss !== undefined &&
-      typeof token.iss === "string" &&
-      !token.webid) ||
-    typeof token.webid === "string"
-  );
-}
 
 function validatePreconditions(
   issuer: IIssuerConfig,
@@ -239,27 +220,18 @@ export async function getTokens(
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
   };
-  let dpopPrivateJwk: JWK | undefined;
+  let dpopKey: DpopKeyPair | undefined = undefined;
   if (dpop) {
-    // The following line is commented out because of the issue reported in
-    // https://github.com/panva/jose/issues/196. Once it is resolved, the call
-    // to the native API may be replaced with the jose wrapper, and building the
-    // DPoP header may be moved to the `core` module.
-    // const { privateKey } = await generateKeyPair("ES256");
-    const { privateKey } = await window.crypto.subtle.generateKey(
-      {
-        name: "ECDSA",
-        namedCurve: "P-256",
-      },
-      true,
-      ["sign", "verify"]
-    );
-    dpopPrivateJwk = await fromKeyLike(privateKey);
-    dpopPrivateJwk.alg = "ES256";
+    const { privateKey, publicKey } = await generateKeyPair("ES256");
+    dpopKey = {
+      privateKey,
+      publicKey: await fromKeyLike(publicKey),
+    };
+    dpopKey.publicKey.alg = "ES256";
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
-      dpopPrivateJwk
+      dpopKey
     );
   }
 
@@ -306,7 +278,7 @@ export async function getTokens(
       ? tokenResponse.refresh_token
       : undefined,
     webId,
-    dpopJwk: dpopPrivateJwk,
+    dpopKey: dpopKey,
     expiresIn: tokenResponse.expires_in,
   };
 }
@@ -347,11 +319,31 @@ export async function getBearerToken(
       loadUserInfo: false,
     });
     signinResponse = await client.processSigninResponse(redirectUrl);
+    if (client.settings.metadata === undefined) {
+      throw new Error(
+        "Cannot retrieve issuer metadata from client information in storage."
+      );
+    }
+    if (client.settings.metadata.jwks_uri === undefined) {
+      throw new Error(
+        "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined"
+      );
+    }
+    if (client.settings.metadata.issuer === undefined) {
+      throw new Error(
+        "Missing some issuer metadata from client information in storage: 'issuer' is undefined"
+      );
+    }
+    if (client.settings.client_id === undefined) {
+      throw new Error(
+        "Missing some client information in storage: 'client_id' is undefined"
+      );
+    }
     const webId = await getWebidFromTokenPayload(
       signinResponse.id_token,
-      client.settings.metadata?.jwks_uri!,
-      client.settings.metadata?.issuer!,
-      client.settings.client_id!
+      client.settings.metadata.jwks_uri,
+      client.settings.metadata.issuer,
+      client.settings.client_id
     );
     return {
       accessToken: signinResponse.access_token,
