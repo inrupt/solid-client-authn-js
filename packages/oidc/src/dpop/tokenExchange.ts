@@ -27,10 +27,9 @@ import {
   createDpopHeader,
   getWebidFromTokenPayload,
   DpopKeyPair,
+  generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
-import { JWK, KeyLike } from "jose/types";
-import fromKeyLike from "jose/jwk/from_key_like";
-import { generateKeyPair } from "jose/util/generate_key_pair";
+import { JWK } from "jose/types";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */
@@ -222,12 +221,7 @@ export async function getTokens(
   };
   let dpopKey: DpopKeyPair | undefined = undefined;
   if (dpop) {
-    const { privateKey, publicKey } = await generateKeyPair("ES256");
-    dpopKey = {
-      privateKey,
-      publicKey: await fromKeyLike(publicKey),
-    };
-    dpopKey.publicKey.alg = "ES256";
+    dpopKey = await generateDpopKeyPair();
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",

@@ -21,8 +21,9 @@
 
 import { JWK, KeyLike } from "jose/types";
 import SignJWT from "jose/jwt/sign";
-import parseJwk from "jose/jwk/parse";
 import { v4 } from "uuid";
+import generateKeyPair from "jose/util/generate_key_pair";
+import fromKeyLike from "jose/jwk/from_key_like";
 
 /**
  * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
@@ -70,4 +71,15 @@ export async function createDpopHeader(
     })
     .setIssuedAt()
     .sign(dpopKey.privateKey, {});
+}
+
+export async function generateDpopKeyPair(): Promise<DpopKeyPair> {
+  const { privateKey, publicKey } = await generateKeyPair("ES256");
+  const dpopKeyPair = {
+    privateKey,
+    publicKey: await fromKeyLike(publicKey),
+  };
+  // The alg property isn't set by fromKeyLike, so set it manually.
+  dpopKeyPair.publicKey.alg = "ES256";
+  return dpopKeyPair;
 }

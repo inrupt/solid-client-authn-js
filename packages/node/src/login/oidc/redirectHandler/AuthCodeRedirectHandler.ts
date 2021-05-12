@@ -38,13 +38,11 @@ import {
   getSessionIdFromOauthState,
   getWebidFromTokenPayload,
   DpopKeyPair,
+  generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
 import { URL } from "url";
 import { DPoPInput, IdTokenClaims, Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose/types";
-import generateKeyPair from "jose/util/generate_key_pair";
-import fromKeyLike from "jose/jwk/from_key_like";
-
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
   buildBearerFetch,
@@ -135,13 +133,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     let authFetch: typeof fetch;
 
     if (oidcContext.dpop) {
-      const { privateKey, publicKey } = await generateKeyPair("ES256");
-      dpopKeys = {
-        privateKey,
-        publicKey: await fromKeyLike(publicKey),
-      };
-      // The alg property isn't set by fromKeyLike, so set it manually.
-      dpopKeys.publicKey.alg = "ES256";
+      dpopKeys = await generateDpopKeyPair();
       tokenSet = await client.callback(
         url.href,
         params,
