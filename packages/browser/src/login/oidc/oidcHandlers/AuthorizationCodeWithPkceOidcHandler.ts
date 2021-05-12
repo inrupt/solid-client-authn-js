@@ -44,7 +44,8 @@ import { OidcClient } from "@inrupt/oidc-client-ext";
  */
 @injectable()
 export default class AuthorizationCodeWithPkceOidcHandler
-  implements IOidcHandler {
+  implements IOidcHandler
+{
   constructor(
     @inject("browser:storageUtility") private storageUtility: IStorageUtility,
     @inject("browser:redirector") private redirector: IRedirector

@@ -89,9 +89,8 @@ export default class OidcLoginHandler implements ILoginHandler {
     }
 
     // Fetch issuer config.
-    const issuerConfig: IIssuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      options.oidcIssuer
-    );
+    const issuerConfig: IIssuerConfig =
+      await this.issuerConfigFetcher.fetchConfig(options.oidcIssuer);
 
     const clientRegistration = await handleRegistration(
       options,

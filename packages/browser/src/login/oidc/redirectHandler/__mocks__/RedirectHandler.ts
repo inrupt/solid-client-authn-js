@@ -29,7 +29,8 @@ import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/
 /**
  * @hidden
  */
-export const RedirectHandlerResponse: ISessionInfo = SessionCreatorCreateResponse;
+export const RedirectHandlerResponse: ISessionInfo =
+  SessionCreatorCreateResponse;
 
 /**
  * @hidden

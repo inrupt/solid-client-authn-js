@@ -37,10 +37,9 @@ import {
   ILoginOptions,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
-import { KEY_CURRENT_SESSION } from "./constant";
-import { getJwks } from "./login/oidc/IssuerConfigFetcher";
 import { jwtVerify } from "jose/jwt/verify";
 import { createRemoteJWKSet } from "jose/jwks/remote";
+import { KEY_CURRENT_SESSION } from "./constant";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a
@@ -139,7 +138,7 @@ export default class ClientAuthentication {
 
     try {
       const jwks = createRemoteJWKSet(new URL(issuerConfig.jwksUri));
-      jwtVerify(sessionInfo.idToken, jwks, {
+      await jwtVerify(sessionInfo.idToken, jwks, {
         audience: sessionInfo.clientAppId,
         issuer: issuerConfig.issuer,
       });

@@ -19,12 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JWK } from "jose/types";
 import { createDpopHeader, DpopKeyPair } from "@inrupt/solid-client-authn-core";
 
 /**
  * @param authToken A bearer token.
- * @param _refreshToken An optional refresh token.
  * @returns A fetch function that adds an Authorization header with the provided
  * bearer token.
  * @hidden
@@ -72,7 +70,6 @@ function isExpectedAuthError(statusCode: number): boolean {
 
 /**
  * @param authToken a DPoP token.
- * @param _refreshToken An optional refresh token.
  * @param dpopKey The private key the token is bound to.
  * @returns A fetch function that adds an Authorization header with the provided
  * DPoP token, and adds a dpop header.

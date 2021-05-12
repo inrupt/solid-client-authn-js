@@ -28,15 +28,15 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManager } from "../SessionInfoManager";
 
-export const SessionCreatorCreateResponse: ISessionInfo &
-  ISessionInternalInfo = {
-  sessionId: "global",
-  isLoggedIn: true,
-  webId: "https://pod.com/profile/card#me",
+export const SessionCreatorCreateResponse: ISessionInfo & ISessionInternalInfo =
+  {
+    sessionId: "global",
+    isLoggedIn: true,
+    webId: "https://pod.com/profile/card#me",
 
-  // Internal info fields...
-  idToken: "test ID token",
-};
+    // Internal info fields...
+    idToken: "test ID token",
+  };
 export const SessionCreatorGetSessionResponse: ISessionInfo &
   ISessionInternalInfo = SessionCreatorCreateResponse;
 

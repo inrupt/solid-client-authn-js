@@ -32,7 +32,6 @@ import {
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
-  IIssuerConfig,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import {
@@ -46,7 +45,6 @@ import {
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
-import { JWK } from "jose/types";
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
 // configure the server to return the remaining lifespan of the cookie.
