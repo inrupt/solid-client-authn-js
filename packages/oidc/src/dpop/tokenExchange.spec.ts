@@ -541,38 +541,42 @@ describe("getDpopToken", () => {
   });
 });
 
-jest.mock("oidc-client", () => {
+jest.mock("oidc-client");
+
+const defaultOidcClient = {
+  metadata: {
+    jwks_uri: "https://some.jwks",
+    issuer: "https://some.issuer",
+  },
+  client_id: "some client id",
+};
+
+const mockOidcClient = (clientSettings: any = defaultOidcClient) => {
   const { processSigninResponse } = jest.requireActual("oidc-client");
-  return {
-    OidcClient: jest.fn().mockImplementation(() => {
-      return {
-        processSigninResponse: async (
-          redirectUrl: string
-        ): Promise<ReturnType<typeof processSigninResponse>> => {
-          if (redirectUrl === "https://invalid.url") {
-            throw new Error("Dummy error");
-          }
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore Ignore because we don't need to mock out all data fields.
-          return Promise.resolve({
-            access_token: mockBearerAccessToken(),
-            id_token: mockIdToken(),
-          });
-        },
-        settings: {
-          metadata: {
-            jwks_uri: "https://some.jwks",
-            issuer: "https://some.issuer",
-          },
-          client_id: "some client id",
-        },
-      };
-    }),
-  };
-});
+  const oidcModule = jest.requireMock("oidc-client");
+  oidcModule.OidcClient = jest.fn().mockImplementation(() => {
+    return {
+      processSigninResponse: async (
+        redirectUrl: string
+      ): Promise<ReturnType<typeof processSigninResponse>> => {
+        if (redirectUrl === "https://invalid.url") {
+          throw new Error("Dummy error");
+        }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore Ignore because we don't need to mock out all data fields.
+        return Promise.resolve({
+          access_token: mockBearerAccessToken(),
+          id_token: mockIdToken(),
+        });
+      },
+      settings: clientSettings,
+    };
+  });
+};
 
 describe("getBearerToken", () => {
   it("returns the tokens returned by the endpoint", async () => {
+    mockOidcClient();
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const tokens = await getBearerToken("https://my.app/redirect");
     expect(tokens.accessToken).toEqual(mockBearerAccessToken());
@@ -580,7 +584,61 @@ describe("getBearerToken", () => {
     expect(tokens.dpopKey).toBeUndefined();
   });
 
+  it("throws if client metadata are undefined", async () => {
+    mockOidcClient({
+      metadata: undefined,
+      client_id: "some client id",
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Cannot retrieve issuer metadata from client information in storage."
+    );
+  });
+
+  it("throws if client metadata don't include a JWKS URI", async () => {
+    mockOidcClient({
+      metadata: {
+        jwks_uri: undefined,
+        issuer: "https://some.issuer",
+      },
+      client_id: "some client id",
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined"
+    );
+  });
+
+  it("throws if client metadata don't include an issuer URI", async () => {
+    mockOidcClient({
+      metadata: {
+        jwks_uri: "https://some.jwks",
+        issuer: undefined,
+      },
+      client_id: "some client id",
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Missing some issuer metadata from client information in storage: 'issuer' is undefined"
+    );
+  });
+
+  it("throws if client metadata don't include a client ID", async () => {
+    mockOidcClient({
+      metadata: {
+        jwks_uri: "https://some.jwks",
+        issuer: "https://some.jwks",
+      },
+      client_id: undefined,
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Missing some client information in storage: 'client_id' is undefined"
+    );
+  });
+
   it("wraps oidc-client errors", async () => {
+    mockOidcClient();
     mockFetch("", 200);
     const tokenRequest = getBearerToken("https://invalid.url");
     await expect(tokenRequest).rejects.toThrow(
