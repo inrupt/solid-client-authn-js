@@ -23,7 +23,8 @@ import { it, describe } from "@jest/globals";
 import { Response } from "cross-fetch";
 import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
 import { JWK } from "jose/types";
-import { SignJWT } from "jose/jwt/sign";
+
+import SignJWT from "jose/jwt/sign";
 import { jwtVerify } from "jose/jwt/verify";
 import { parseJwk } from "jose/jwk/parse";
 
@@ -37,6 +38,13 @@ import {
 
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
+
+const parseJwt = (jwt: string): unknown => {
+  // A JWT has three components, <headers.payload.signature>. Here, only the payload
+  // is of interest.
+  const payload = jwt.split(".")[1];
+  return JSON.parse(window.atob(payload));
+};
 
 const mockJwk = (): JWK => {
   return {
@@ -91,16 +99,16 @@ async function generateMockJwt(): Promise<void> {
   const payload = {
     sub: "https://my.webid",
   };
-  const jwt = await new SignJWT(payload)
-    .setProtectedHeader({ alg: "ES256" })
-    .setIssuedAt()
-    .setIssuer(mockIssuer().issuer.toString())
-    .setAudience("solid")
-    .setExpirationTime("2h")
-    .sign(await parseJwk(mockJwk()));
+  // const jwt = await new SignJWT(payload)
+  //   .setProtectedHeader({ alg: "ES256" })
+  //   .setIssuedAt()
+  //   .setIssuer(mockIssuer().issuer.toString())
+  //   .setAudience("solid")
+  //   .setExpirationTime("2h")
+  //   .sign(await parseJwk(mockJwk()));
   // This is for manual use.
   // eslint-disable-next-line no-console
-  console.log(jwt.toString());
+  // console.log(jwt.toString());
 }
 
 // result of generateMockJwt()
