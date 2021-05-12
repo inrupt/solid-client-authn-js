@@ -20,10 +20,12 @@
  */
 
 import { it, describe } from "@jest/globals";
-
-import { JWKECKey } from "jose";
 import { Response } from "cross-fetch";
 import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import { JWK } from "jose/types";
+import { SignJWT } from "jose/jwt/sign";
+import { jwtVerify } from "jose/jwt/verify";
+import { parseJwk } from "jose/jwk/parse";
 
 import {
   getBearerToken,
@@ -32,12 +34,11 @@ import {
   TokenEndpointInput,
   validateTokenEndpointResponse,
 } from "./tokenExchange";
-import { decodeJwt, signJwt } from "./dpop";
 
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
 
-const mockJwk = (): JWKECKey => {
+const mockJwk = (): JWK => {
   return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
@@ -49,14 +50,9 @@ const mockJwk = (): JWKECKey => {
   };
 };
 
-// The two following modules introduce randomness in the process, which prevents
+// The following module introduce randomness in the process, which prevents
 // making assumptions on the returned values. Mocking them out makes keys and
 // DPoP headers predictible.
-jest.mock("./keyGeneration", () => {
-  return {
-    generateJwkForDpop: (): JWKECKey => mockJwk(),
-  };
-});
 
 jest.mock("uuid", () => {
   return {
@@ -94,11 +90,14 @@ const mockEndpointInput = (): TokenEndpointInput => {
 async function generateMockJwt(): Promise<void> {
   const payload = {
     sub: "https://my.webid",
-    iss: mockIssuer().issuer.toString(),
   };
-  const jwt = await signJwt(payload, mockJwk(), {
-    algorithm: "ES256",
-  });
+  const jwt = await new SignJWT(payload)
+    .setProtectedHeader({ alg: "ES256" })
+    .setIssuedAt()
+    .setIssuer(mockIssuer().issuer.toString())
+    .setAudience("solid")
+    .setExpirationTime("2h")
+    .sign(await parseJwk(mockJwk()));
   // This is for manual use.
   // eslint-disable-next-line no-console
   console.log(jwt.toString());
@@ -294,7 +293,10 @@ describe("getTokens", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const dpopJwt = await decodeJwt(headers.DPoP, mockJwk());
+    const { payload: dpopJwt } = await jwtVerify(
+      headers.DPoP,
+      await parseJwk(mockJwk())
+    );
     expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
     expect(dpopJwt.htm).toEqual("POST");
     expect(dpopJwt.jti).toEqual("1234");
@@ -396,7 +398,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       true
     );
-    expect(result?.dpopJwk).toEqual(mockJwk());
+    expect(result?.dpopKey).not.toBeUndefined();
   });
 
   it("returns the tokens provided by the IdP", async () => {
@@ -497,7 +499,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       false
     );
-    expect(result?.dpopJwk).toBeUndefined();
+    expect(result?.dpopKey).toBeUndefined();
   });
 
   it("derives a WebId from the custom claim if available", async () => {
@@ -506,9 +508,13 @@ describe("getTokens", () => {
       sub: "some subject",
       iss: mockIssuer().issuer.toString(),
     };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
+    const idJwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "ES256" })
+      .setIssuedAt()
+      .setIssuer(mockIssuer().issuer.toString())
+      .setAudience("https://some.client/webid")
+      .setExpirationTime("2h")
+      .sign(await parseJwk(mockJwk()));
 
     mockFetch(
       JSON.stringify({
@@ -530,11 +536,14 @@ describe("getTokens", () => {
   it("derives a WebID from a localhost IRI in the sub", async () => {
     const payload = {
       sub: "https://localhost:8443/profile/card#me",
-      iss: mockIssuer().issuer.toString(),
     };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
+    const idJwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "ES256" })
+      .setIssuedAt()
+      .setIssuer(mockIssuer().issuer.toString())
+      .setAudience("https://some.client/webid")
+      .setExpirationTime("2h")
+      .sign(await parseJwk(mockJwk()));
 
     mockFetch(
       JSON.stringify({
@@ -558,9 +567,13 @@ describe("getTokens", () => {
       sub: "some subject",
       iss: mockIssuer().issuer.toString(),
     };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
+    const idJwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "ES256" })
+      .setIssuedAt()
+      .setIssuer(mockIssuer().issuer.toString())
+      .setAudience("https://some.client/webid")
+      .setExpirationTime("2h")
+      .sign(await parseJwk(mockJwk()));
 
     mockFetch(
       JSON.stringify({
@@ -581,9 +594,13 @@ describe("getTokens", () => {
     const payload = {
       iss: mockIssuer().issuer.toString(),
     };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
+    const idJwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "ES256" })
+      .setIssuedAt()
+      .setIssuer(mockIssuer().issuer.toString())
+      .setAudience("https://some.client/webid")
+      .setExpirationTime("2h")
+      .sign(await parseJwk(mockJwk()));
 
     mockFetch(
       JSON.stringify({
@@ -604,9 +621,13 @@ describe("getTokens", () => {
     const payload = {
       sub: "https://my.webid",
     };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
+    const idJwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "ES256" })
+      .setIssuedAt()
+      .setIssuer(mockIssuer().issuer.toString())
+      .setAudience("https://some.client/webid")
+      .setExpirationTime("2h")
+      .sign(await parseJwk(mockJwk()));
 
     mockFetch(
       JSON.stringify({
@@ -636,11 +657,14 @@ describe("getDpopToken", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const dpopJwt = await decodeJwt(headers.DPoP, mockJwk());
+    const { payload: dpopJwt } = await jwtVerify(
+      headers.DPoP,
+      await parseJwk(mockJwk())
+    );
     expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
     expect(dpopJwt.htm).toEqual("POST");
     expect(dpopJwt.jti).toEqual("1234");
-    expect(tokens.dpopJwk).not.toBeUndefined();
+    expect(tokens.dpopKey).not.toBeUndefined();
   });
 });
 
@@ -673,7 +697,7 @@ describe("getBearerToken", () => {
     const tokens = await getBearerToken("https://my.app/redirect");
     expect(tokens.accessToken).toEqual(mockBearerAccessToken());
     expect(tokens.idToken).toEqual(mockIdToken());
-    expect(tokens.dpopJwk).toBeUndefined();
+    expect(tokens.dpopKey).toBeUndefined();
   });
 
   it("wraps oidc-client errors", async () => {

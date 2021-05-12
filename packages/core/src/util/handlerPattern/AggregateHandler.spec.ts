@@ -27,7 +27,8 @@ describe("AggregateHandler", () => {
   type MockHandler = IHandleable<[string], string>;
   class AggregateMockHandler
     extends AggregateHandler<[string], string>
-    implements MockHandler {
+    implements MockHandler
+  {
     constructor(mockHandlers: MockHandler[]) {
       super(mockHandlers);
     }

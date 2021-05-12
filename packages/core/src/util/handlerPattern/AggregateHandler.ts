@@ -34,7 +34,8 @@ import InruptError from "../../errors/InruptError";
  * @hidden
  */
 export default class AggregateHandler<P extends Array<unknown>, R>
-  implements IHandleable<P, R> {
+  implements IHandleable<P, R>
+{
   constructor(private handleables: IHandleable<P, R>[]) {}
 
   /**

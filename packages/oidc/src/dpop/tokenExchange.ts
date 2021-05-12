@@ -29,7 +29,6 @@ import {
   DpopKeyPair,
   generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
-import { JWK } from "jose/types";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */
@@ -99,7 +98,7 @@ export type TokenEndpointResponse = {
 };
 
 export type TokenEndpointDpopResponse = TokenEndpointResponse & {
-  dpopJwk: JWK;
+  dpopKey: DpopKeyPair;
 };
 
 export type TokenEndpointInput = {
@@ -219,7 +218,7 @@ export async function getTokens(
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
   };
-  let dpopKey: DpopKeyPair | undefined = undefined;
+  let dpopKey: DpopKeyPair | undefined;
   if (dpop) {
     dpopKey = await generateDpopKeyPair();
     headers.DPoP = await createDpopHeader(
@@ -272,7 +271,7 @@ export async function getTokens(
       ? tokenResponse.refresh_token
       : undefined,
     webId,
-    dpopKey: dpopKey,
+    dpopKey,
     expiresIn: tokenResponse.expires_in,
   };
 }

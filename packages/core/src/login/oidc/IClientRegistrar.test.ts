@@ -36,7 +36,7 @@ describe("handleRegistration", () => {
     await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
-      (jest.fn() as unknown) as IStorageUtility,
+      jest.fn() as unknown as IStorageUtility,
       clientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
@@ -53,7 +53,7 @@ describe("handleRegistration", () => {
     await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
-      (jest.fn() as unknown) as IStorageUtility,
+      jest.fn() as unknown as IStorageUtility,
       clientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
@@ -68,9 +68,9 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    const storageUtility: IStorageUtility = ({
+    const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
-    } as unknown) as IStorageUtility;
+    } as unknown as IStorageUtility;
     await handleRegistration(
       options,
       {
@@ -94,9 +94,9 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    const storageUtility: IStorageUtility = ({
+    const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
-    } as unknown) as IStorageUtility;
+    } as unknown as IStorageUtility;
     await handleRegistration(
       options,
       {

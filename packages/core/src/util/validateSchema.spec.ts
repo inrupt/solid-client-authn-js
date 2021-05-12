@@ -190,8 +190,7 @@ describe("validateSchema", () => {
 
       expect(() =>
         validateSchema(schema, {
-          foo:
-            "some words in this order but not necessarily with just those words ",
+          foo: "some words in this order but not necessarily with just those words ",
         })
       ).toThrow();
     });
