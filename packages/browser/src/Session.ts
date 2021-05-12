@@ -126,6 +126,12 @@ export async function silentlyAuthenticate(
   }
 }
 
+function isLoggedIn(
+  sessionInfo?: ISessionInfo
+): sessionInfo is ISessionInfo & { isLoggedIn: true } {
+  return !!sessionInfo?.isLoggedIn;
+}
+
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
@@ -187,7 +193,21 @@ export class Session extends EventEmitter {
       };
     }
     // Listen for messages from children iframes.
-    setupIframeListener(this.clientAuthentication.handleIncomingRedirect);
+    setupIframeListener(async (redirectUrl: string) => {
+      const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
+        redirectUrl
+      );
+
+      // If silent authentication was not successful, do nothing;
+      // the existing session might still be valid for a while,
+      // and will expire by itself.
+      if (!isLoggedIn(sessionInfo)) {
+        return;
+      }
+      // After having revalidated the session,
+      // make sure to apply the new expiration time:
+      this.setSessionInfo(sessionInfo);
+    });
     // Listen for the 'tokenRenewal' signal to trigger the silent token renewal.
     this.on("tokenRenewal", () =>
       silentlyAuthenticate(this.info.sessionId, this.clientAuthentication, {
@@ -346,10 +366,8 @@ export class Session extends EventEmitter {
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url
     );
-    if (sessionInfo?.isLoggedIn) {
-      this.info.isLoggedIn = sessionInfo.isLoggedIn;
-      this.info.webId = sessionInfo.webId;
-      this.info.sessionId = sessionInfo.sessionId;
+    if (isLoggedIn(sessionInfo)) {
+      this.setSessionInfo(sessionInfo);
       const currentUrl = window.localStorage.getItem(KEY_CURRENT_URL);
       if (currentUrl === null) {
         // The login event can only be triggered **after** the user has been
@@ -361,12 +379,6 @@ export class Session extends EventEmitter {
         // to clean up our state now that we are completing the re-login process.
         window.localStorage.removeItem(KEY_CURRENT_URL);
         this.emit("sessionRestore", currentUrl);
-      }
-
-      if (typeof sessionInfo.expirationDate === "number") {
-        setTimeout(async () => {
-          await this.logout();
-        }, sessionInfo.expirationDate - Date.now());
       }
     } else if (options.restorePreviousSession === true) {
       // Silent authentication happens after a refresh, which means there are no
@@ -423,5 +435,19 @@ export class Session extends EventEmitter {
    */
   onSessionRestore(callback: (currentUrl: string) => unknown): void {
     this.on("sessionRestore", callback);
+  }
+
+  private setSessionInfo(
+    sessionInfo: ISessionInfo & { isLoggedIn: true }
+  ): void {
+    this.info.isLoggedIn = sessionInfo.isLoggedIn;
+    this.info.webId = sessionInfo.webId;
+    this.info.sessionId = sessionInfo.sessionId;
+    this.info.expirationDate = sessionInfo.expirationDate;
+    if (typeof sessionInfo.expirationDate === "number") {
+      setTimeout(async () => {
+        await this.logout();
+      }, sessionInfo.expirationDate - Date.now());
+    }
   }
 }
