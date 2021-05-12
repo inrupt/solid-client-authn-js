@@ -83,7 +83,7 @@ export { default as InMemoryStorage } from "./storage/InMemoryStorage";
 export { default as ConfigurationError } from "./errors/ConfigurationError";
 export { default as NotImplementedError } from "./errors/NotImplementedError";
 
-export { createDpopHeader } from "./authenticatedFetch/dpopUtils";
+export { createDpopHeader, DpopKeyPair } from "./authenticatedFetch/dpopUtils";
 
 // Mocks.
 export {

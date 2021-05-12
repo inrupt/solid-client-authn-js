@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JWK } from "jose/types";
+import { JWK, KeyLike } from "jose/types";
 import SignJWT from "jose/jwt/sign";
 import parseJwk from "jose/jwk/parse";
 import { v4 } from "uuid";
@@ -39,6 +39,11 @@ function normalizeHttpUriClaim(audience: string): string {
   return cleanedAudience.toString();
 }
 
+export type DpopKeyPair = {
+  privateKey: KeyLike;
+  publicKey: JWK;
+};
+
 /**
  * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
  * based on the target URL and method, using the provided key.
@@ -51,7 +56,7 @@ function normalizeHttpUriClaim(audience: string): string {
 export async function createDpopHeader(
   audience: string,
   method: string,
-  key: JWK
+  dpopKey: DpopKeyPair
 ): Promise<string> {
   return new SignJWT({
     htu: normalizeHttpUriClaim(audience),
@@ -60,9 +65,9 @@ export async function createDpopHeader(
   })
     .setProtectedHeader({
       alg: "ES256",
-      jwk: key,
+      jwk: dpopKey.publicKey,
       typ: "dpop+jwt",
     })
     .setIssuedAt()
-    .sign(await parseJwk(key), {});
+    .sign(dpopKey.privateKey, {});
 }
