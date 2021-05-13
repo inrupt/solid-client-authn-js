@@ -24,9 +24,10 @@
  * @packageDocumentation
  */
 
-import type { fetch } from "cross-fetch";
-import { jwtVerify } from "jose/jwt/verify";
-import { createRemoteJWKSet } from "jose/jwks/remote";
+import { fetch } from "cross-fetch";
+import { JWTPayload, jwtVerify } from "jose/jwt/verify";
+import { parseJwk } from "jose/jwk/parse";
+import { JWK } from "jose/types";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
 
@@ -58,24 +59,57 @@ export async function getWebidFromTokenPayload(
   issuerIri: string,
   clientId: string
 ): Promise<string> {
-  const jwks = createRemoteJWKSet(new URL(jwksIri));
-  const { payload } = await jwtVerify(idToken, jwks, {
-    issuer: issuerIri,
-    audience: clientId,
-  });
+  // FIXME: the following line works, but the underlying network calls don't seem
+  // to be mocked properly by our test code.
+  // const jwks = createRemoteJWKSet(new URL(jwksIri));
+  const jwksResponse = await fetch(jwksIri);
+  if (jwksResponse.status !== 200) {
+    throw new Error(
+      `Could not fetch JWKS for [${issuerIri}] at [${jwksIri}]: ${jwksResponse.status} ${jwksResponse.statusText}`
+    );
+  }
+  // The JWKS should only contain the current key for the issuer.
+  let jwk: JWK;
+  try {
+    jwk = (await jwksResponse.json()).keys[0] as JWK;
+  } catch (e) {
+    throw new Error(
+      `Malformed JWKS for [${issuerIri}] at [${jwksIri}]: ${e.message}`
+    );
+  }
+
+  let payload: JWTPayload;
+  try {
+    const { payload: verifiedPayload } = await jwtVerify(
+      idToken,
+      await parseJwk(jwk),
+      {
+        issuer: issuerIri,
+        audience: clientId,
+      }
+    );
+    payload = verifiedPayload;
+  } catch (e) {
+    throw new Error(`ID token verification failed: ${e.stack}`);
+  }
+
   if (typeof payload.webid === "string") {
     return payload.webid;
   }
+  if (typeof payload.sub !== "string") {
+    throw new Error(
+      `The ID token ${JSON.stringify(
+        payload
+      )} is invalid: it has no 'webid' claim and no 'sub' claim.`
+    );
+  }
   try {
-    if (typeof payload.sub !== "string") {
-      throw new Error(
-        `The ID token ${JSON.stringify(
-          payload
-        )} is invalid: it has no 'webid' claim and no 'sub' claim.`
-      );
-    }
-    const webid = new URL(payload.sub);
-    return webid.href;
+    // This parses the 'sub' claim to check if it is a well-formed IRI.
+    // However, the normalized value isn't returned to make sure the WebID is returned
+    // as specified by the Identity Provider.
+    // eslint-disable-next-line no-new
+    new URL(payload.sub);
+    return payload.sub;
   } catch (e) {
     throw new Error(
       `The ID token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`
