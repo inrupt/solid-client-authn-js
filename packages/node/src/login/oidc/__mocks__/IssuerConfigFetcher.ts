@@ -70,6 +70,7 @@ export const mockIssuerMetadata = (
 
 export const mockDefaultIssuerConfig = (): IIssuerConfig =>
   configFromIssuerMetadata(mockDefaultIssuerMetadata());
+
 export const mockIssuerConfig = (
   config: Partial<IIssuerConfig>
 ): IIssuerConfig => {

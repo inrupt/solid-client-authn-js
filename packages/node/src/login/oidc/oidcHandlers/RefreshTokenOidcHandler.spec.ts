@@ -40,6 +40,17 @@ import {
 
 jest.mock("cross-fetch");
 
+jest.mock("@inrupt/solid-client-authn-core", () => {
+  const actualCoreModule = jest.requireActual(
+    "@inrupt/solid-client-authn-core"
+  );
+  return {
+    ...actualCoreModule,
+    // This works around the network lookup to the JWKS in order to validate the ID token.
+    getWebidFromTokenPayload: jest.fn().mockResolvedValue("https://my.webid/"),
+  };
+});
+
 describe("RefreshTokenOidcHandler", () => {
   describe("canHandle", () => {
     it("doesn't handle options missing a refresh token", async () => {

@@ -183,6 +183,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     // its payload as a JSON object.
     const webid = await getWebidFromTokenPayload(
       tokenSet.id_token,
+      // The JWKS URI is mandatory in the spec, so the non-null assertion is valid.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       issuer.metadata.jwks_uri!,
       issuer.metadata.issuer,
       client.metadata.client_id
