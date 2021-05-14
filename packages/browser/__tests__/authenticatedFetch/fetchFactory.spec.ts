@@ -21,7 +21,9 @@
 
 import "reflect-metadata";
 import { describe, it } from "@jest/globals";
-import { decodeJwt, generateJwkForDpop } from "@inrupt/oidc-client-ext";
+import { generateDpopKeyPair } from "@inrupt/solid-client-authn-core";
+import { jwtVerify } from "jose/jwt/verify";
+import { parseJwk } from "jose/jwk/parse";
 import {
   buildBearerFetch,
   buildDpopFetch,
@@ -54,7 +56,7 @@ const mockFetch = (response: MockedRedirectResponse): typeof window.fetch => {
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
     mockFetch(mockNotRedirectedResponse());
-    const myFetch = buildBearerFetch("myToken", undefined);
+    const myFetch = buildBearerFetch("myToken");
     await myFetch("someUrl");
 
     expect(
@@ -65,7 +67,7 @@ describe("buildBearerFetch", () => {
 
   it("returns a fetch preserving the optional headers", async () => {
     mockFetch(mockNotRedirectedResponse());
-    const myFetch = buildBearerFetch("myToken", undefined);
+    const myFetch = buildBearerFetch("myToken");
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
     expect(
@@ -81,7 +83,7 @@ describe("buildBearerFetch", () => {
 
   it("returns a fetch overriding any pre-existing authorization headers", async () => {
     mockFetch(mockNotRedirectedResponse());
-    const myFetch = buildBearerFetch("myToken", undefined);
+    const myFetch = buildBearerFetch("myToken");
     await myFetch("someUrl", { headers: { Authorization: "some token" } });
 
     expect(
@@ -94,8 +96,8 @@ describe("buildBearerFetch", () => {
 describe("buildDpopFetch", () => {
   it("returns a fetch holding the provided token and key", async () => {
     mockFetch(mockNotRedirectedResponse());
-    const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    const key = await generateDpopKeyPair();
+    const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url");
 
     expect(
@@ -104,15 +106,18 @@ describe("buildDpopFetch", () => {
     ).toEqual("DPoP myToken");
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers.DPoP as string;
-    const decodedHeader = await decodeJwt(dpopHeader, key);
+    const { payload: decodedHeader } = await jwtVerify(
+      dpopHeader,
+      await parseJwk(key.publicKey)
+    );
     expect(decodedHeader.htu).toEqual("http://some.url/");
     expect(decodedHeader.htm).toEqual("GET");
   });
 
   it("builds the appropriate DPoP header for a given HTTP verb.", async () => {
     mockFetch(mockNotRedirectedResponse());
-    const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    const key = await generateDpopKeyPair();
+    const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", {
       method: "POST",
     });
@@ -123,15 +128,18 @@ describe("buildDpopFetch", () => {
     ).toEqual("DPoP myToken");
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers.DPoP as string;
-    const decodedHeader = await decodeJwt(dpopHeader, key);
+    const { payload: decodedHeader } = await jwtVerify(
+      dpopHeader,
+      await parseJwk(key.publicKey)
+    );
     expect(decodedHeader.htu).toEqual("http://some.url/");
     expect(decodedHeader.htm).toEqual("POST");
   });
 
   it("returns a fetch preserving the provided optional headers", async () => {
     mockFetch(mockNotRedirectedResponse());
-    const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    const key = await generateDpopKeyPair();
+    const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
 
     expect(
@@ -140,7 +148,10 @@ describe("buildDpopFetch", () => {
     ).toEqual("DPoP myToken");
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers.DPoP as string;
-    const decodedHeader = await decodeJwt(dpopHeader, key);
+    const { payload: decodedHeader } = await jwtVerify(
+      dpopHeader,
+      await parseJwk(key.publicKey)
+    );
     expect(decodedHeader.htu).toEqual("http://some.url/");
     expect(decodedHeader.htm).toEqual("GET");
 
@@ -152,8 +163,8 @@ describe("buildDpopFetch", () => {
 
   it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
     mockFetch(mockNotRedirectedResponse());
-    const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    const key = await generateDpopKeyPair();
+    const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("http://some.url", {
       headers: {
         Authorization: "some token",
@@ -167,7 +178,10 @@ describe("buildDpopFetch", () => {
     ).toEqual("DPoP myToken");
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[0][1].headers.DPoP as string;
-    const decodedHeader = await decodeJwt(dpopHeader, key);
+    const { payload: decodedHeader } = await jwtVerify(
+      dpopHeader,
+      await parseJwk(key.publicKey)
+    );
     expect(decodedHeader.htu).toEqual("http://some.url/");
     expect(decodedHeader.htm).toEqual("GET");
   });
@@ -195,8 +209,8 @@ describe("buildDpopFetch", () => {
         })
       );
 
-    const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    const key = await generateDpopKeyPair();
+    const myFetch = await buildDpopFetch("myToken", key);
     await myFetch("https://my.pod/container");
 
     expect(
@@ -205,7 +219,10 @@ describe("buildDpopFetch", () => {
     ).toEqual("https://my.pod/container/");
     // @ts-ignore
     const dpopHeader = window.fetch.mock.calls[1][1].headers.DPoP as string;
-    const decodedHeader = await decodeJwt(dpopHeader, key);
+    const { payload: decodedHeader } = await jwtVerify(
+      dpopHeader,
+      await parseJwk(key.publicKey)
+    );
     expect(decodedHeader.htu).toEqual("https://my.pod/container/");
   });
 
@@ -221,8 +238,8 @@ describe("buildDpopFetch", () => {
       })
     );
 
-    const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    const key = await generateDpopKeyPair();
+    const myFetch = await buildDpopFetch("myToken", key);
     const response = await myFetch("https://my.pod/container");
 
     expect(
@@ -244,8 +261,8 @@ describe("buildDpopFetch", () => {
       })
     );
 
-    const key = await generateJwkForDpop();
-    const myFetch = await buildDpopFetch("myToken", undefined, key);
+    const key = await generateDpopKeyPair();
+    const myFetch = await buildDpopFetch("myToken", key);
     const response = await myFetch("https://my.pod/resource");
 
     expect(
