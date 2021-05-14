@@ -26,6 +26,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { JWK } from "jose/types";
 import { IdTokenClaims, TokenSet } from "openid-client";
+import { parseJwk } from "jose/jwk/parse";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockClientRegistrar,
@@ -47,6 +48,15 @@ const mockJwk = (): JWK => {
     x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
     y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
     d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+  };
+};
+
+const mockKeyPair = async () => {
+  return {
+    privateKey: await parseJwk(mockJwk()),
+    // Use the same JWK for public and private key out of convenience, don't do
+    // this in real life.
+    publicKey: mockJwk(),
   };
 };
 
@@ -230,7 +240,7 @@ describe("TokenRefresher", () => {
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some refresh token",
-      mockJwk()
+      await mockKeyPair()
     );
 
     expect(refreshedTokens.access_token).toBe(mockDpopTokens().access_token);
@@ -247,7 +257,7 @@ describe("TokenRefresher", () => {
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some refresh token",
-      mockJwk()
+      await mockKeyPair()
     );
 
     expect(refreshedTokens.access_token).toEqual(mockDpopTokens().access_token);
@@ -290,7 +300,7 @@ describe("TokenRefresher", () => {
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some old refresh token",
-      mockJwk()
+      await mockKeyPair()
     );
     expect(refreshedTokens.refresh_token).toEqual("some new refresh token");
 
@@ -314,7 +324,7 @@ describe("TokenRefresher", () => {
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some old refresh token",
-      mockJwk(),
+      await mockKeyPair(),
       refreshTokenRotationHandler
     );
 
@@ -336,7 +346,11 @@ describe("TokenRefresher", () => {
     });
 
     await expect(
-      refresher.refresh("mySession", "some old refresh token", mockJwk())
+      refresher.refresh(
+        "mySession",
+        "some old refresh token",
+        await mockKeyPair()
+      )
     ).rejects.toThrow(
       `The Identity Provider [${
         mockDefaultIssuerConfig().issuer
