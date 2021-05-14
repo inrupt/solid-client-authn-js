@@ -29,9 +29,9 @@ import {
   mockStorage,
 } from "@inrupt/solid-client-authn-core";
 
-import { Response } from "cross-fetch";
-import { JSONWebKey } from "jose";
-import { signJwt } from "@inrupt/oidc-client-ext";
+import { JWK } from "jose/types";
+import SignJWT from "jose/jwt/sign";
+import { parseJwk } from "jose/jwk/parse";
 import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
@@ -47,12 +47,18 @@ import {
 } from "../src/login/oidc/__mocks__/IssuerConfigFetcher";
 import { LocalStorageMock } from "../src/storage/__mocks__/LocalStorage";
 
-const mockFetch = (response: Response): typeof window.fetch => {
-  window.fetch = jest.fn().mockReturnValueOnce(response);
-  return window.fetch;
-};
+jest.mock("@inrupt/solid-client-authn-core", () => {
+  const actualCoreModule = jest.requireActual(
+    "@inrupt/solid-client-authn-core"
+  );
+  return {
+    // We only want to fetch specific functions that result in a network fetch,
+    // but the rest of the module (e.g. the storage utilities) can be used unmocked.
+    ...actualCoreModule,
+  };
+});
 
-const mockJwk = (): JSONWebKey => {
+const mockJwk = (): JWK => {
   return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
@@ -64,7 +70,7 @@ const mockJwk = (): JSONWebKey => {
   };
 };
 
-const mockAnotherJwk = (): JSONWebKey => {
+const mockAnotherJwk = (): JWK => {
   return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
@@ -112,9 +118,12 @@ const mockSessionStorage = async (
     }),
     mockStorage({
       [`${USER_SESSION_PREFIX}:${sessionId}`]: {
-        idToken: await signJwt(idTokenPayload, mockJwk(), {
-          algorithm: "ES256",
-        }),
+        idToken: await new SignJWT(idTokenPayload)
+          .setProtectedHeader({
+            alg: "ES256",
+          })
+          .setIssuedAt()
+          .sign(await parseJwk(mockJwk()), {}),
         clientId: options.clientId,
         issuer: options.issuer,
       },
@@ -500,7 +509,8 @@ describe("ClientAuthentication", () => {
         jwksUri: "https://some.issuer/jwks",
       } as IIssuerConfig);
       const mockedStorage = await mockSessionStorage(sessionId);
-      mockFetch(new Response("Not a valid JWKS"));
+      const coreModule = jest.requireMock("@inrupt/solid-client-authn-core");
+      coreModule.fetchJwks = jest.fn().mockRejectedValue("Not a valid JWK");
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -517,6 +527,7 @@ describe("ClientAuthentication", () => {
       });
       const mockedIssuerConfig = mockIssuerConfigFetcher({
         jwksUri: "https://some.issuer/jwks",
+        issuer: "https://some.issuer",
       } as IIssuerConfig);
       const mockedStorage = await mockSessionStorage(
         sessionId,
@@ -532,7 +543,8 @@ describe("ClientAuthentication", () => {
           clientId: "https://some.app/registration",
         }
       );
-      mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
+      const coreModule = jest.requireMock("@inrupt/solid-client-authn-core");
+      coreModule.fetchJwks = jest.fn().mockResolvedValue(mockJwk());
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -564,7 +576,8 @@ describe("ClientAuthentication", () => {
           clientId: "https://some.app/registration",
         }
       );
-      mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
+      const coreModule = jest.requireMock("@inrupt/solid-client-authn-core");
+      coreModule.fetchJwks = jest.fn().mockResolvedValue(mockJwk());
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -591,7 +604,8 @@ describe("ClientAuthentication", () => {
         )
       );
 
-      mockFetch(new Response(JSON.stringify({ keys: [mockAnotherJwk()] })));
+      const coreModule = jest.requireMock("@inrupt/solid-client-authn-core");
+      coreModule.fetchJwks = jest.fn().mockResolvedValue(mockAnotherJwk());
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -618,7 +632,8 @@ describe("ClientAuthentication", () => {
         "https://some.app/registration"
       )
     );
-    mockFetch(new Response(JSON.stringify({ keys: [mockJwk()] })));
+    const coreModule = jest.requireMock("@inrupt/solid-client-authn-core");
+    coreModule.fetchJwks = jest.fn().mockResolvedValue(mockJwk());
 
     const clientAuthn = getClientAuthentication({
       issuerConfigFetcher: mockedIssuerConfig,

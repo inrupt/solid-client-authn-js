@@ -35,10 +35,11 @@ import {
   IIssuerConfigFetcher,
   ISessionInternalInfo,
   ILoginOptions,
+  fetchJwks,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { jwtVerify } from "jose/jwt/verify";
-import { createRemoteJWKSet } from "jose/jwks/remote";
+import { parseJwk } from "jose/jwk/parse";
 import { KEY_CURRENT_SESSION } from "./constant";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
@@ -137,8 +138,8 @@ export default class ClientAuthentication {
     );
 
     try {
-      const jwks = createRemoteJWKSet(new URL(issuerConfig.jwksUri));
-      await jwtVerify(sessionInfo.idToken, jwks, {
+      const jwk = await fetchJwks(issuerConfig.jwksUri, issuerConfig.issuer);
+      await jwtVerify(sessionInfo.idToken, await parseJwk(jwk), {
         audience: sessionInfo.clientAppId,
         issuer: issuerConfig.issuer,
       });

@@ -31,8 +31,9 @@ import {
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
 import { TokenEndpointResponse } from "@inrupt/oidc-client-ext";
-import { JSONWebKey } from "jose";
 import { Response } from "cross-fetch";
+import { JWK } from "jose/types";
+import { parseJwk } from "jose/jwk/parse";
 import {
   AuthCodeRedirectHandler,
   DEFAULT_LIFESPAN,
@@ -42,7 +43,7 @@ import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/Se
 import { KEY_CURRENT_SESSION } from "../../../../src/constant";
 import { LocalStorageMock } from "../../../../src/storage/__mocks__/LocalStorage";
 
-const mockJwk = (): JSONWebKey => {
+const mockJwk = (): JWK => {
   return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
@@ -109,15 +110,21 @@ const mockTokenEndpointBearerResponse = (): TokenEndpointResponse => {
   };
 };
 
-const mockTokenEndpointDpopResponse = (): TokenEndpointResponse => {
-  return {
-    accessToken: JSON.stringify(mockAccessTokenDpop()),
-    idToken: mockIdToken(),
-    webId: mockWebId(),
-    dpopJwk: mockJwk(),
-    expiresIn: MOCK_EXPIRE_TIME,
+const mockTokenEndpointDpopResponse =
+  async (): Promise<TokenEndpointResponse> => {
+    return {
+      accessToken: JSON.stringify(mockAccessTokenDpop()),
+      idToken: mockIdToken(),
+      webId: mockWebId(),
+      dpopKey: {
+        privateKey: await parseJwk(mockJwk()),
+        // Note that here for convenience the private key is also used as public key.
+        // Obviously, this should never be done in non-test code.
+        publicKey: mockJwk(),
+      },
+      expiresIn: MOCK_EXPIRE_TIME,
+    };
   };
-};
 
 const mockLocalStorage = (stored: Record<string, string>) => {
   // Kinda weird: `(window as any).localStorage = new LocalStorageMock(stored)` does
@@ -129,12 +136,6 @@ const mockLocalStorage = (stored: Record<string, string>) => {
     writable: true,
   });
 };
-
-jest.mock("../../../../src/login/oidc/IssuerConfigFetcher", () => {
-  return {
-    getJwks: () => [mockJwk()],
-  };
-});
 
 jest.mock("@inrupt/oidc-client-ext");
 
@@ -351,35 +352,6 @@ describe("AuthCodeRedirectHandler", () => {
         // @ts-ignore
         header
       ).toMatch(/^Bearer some token$/);
-    });
-
-    it("throws if the ID token isn't valid", async () => {
-      const mockedOidcClient = mockOidcClient();
-      mockedOidcClient.validateIdToken = jest.fn().mockResolvedValue(false);
-      mockLocalStorage({});
-
-      const storage = mockStorageUtility({
-        "solidClientAuthenticationUser:oauth2StateValue": {
-          sessionId: "mySession",
-        },
-        "solidClientAuthenticationUser:mySession": {
-          dpop: "true",
-          issuer: mockIssuer().issuer.toString(),
-          codeVerifier: "some code verifier",
-          redirectUrl: "https://some.redirect.uri",
-        },
-      });
-
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: storage,
-      });
-      await expect(
-        authCodeRedirectHandler.handle(
-          "https://coolsite.com/?code=someCode&state=oauth2StateValue"
-        )
-      ).rejects.toThrow(
-        `Invalid ID token [${mockIdToken()}]. Possible issues are bad signature, or mismatching audience (expected [some client])`
-      );
     });
 
     it("returns an authenticated DPoP fetch if requested", async () => {
