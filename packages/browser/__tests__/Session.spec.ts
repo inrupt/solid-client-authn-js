@@ -304,9 +304,9 @@ describe("Session", () => {
       // take advantage that we return the Promise from the callback in
       // `setTimeout`, so that we can `await` it in this test before checking
       // whether logout was successful:
-      const expireTimeout = ((setTimeout as unknown) as jest.Mock<
-        typeof setTimeout
-      >).mock.calls[0][0];
+      const expireTimeout = (
+        setTimeout as unknown as jest.Mock<typeof setTimeout>
+      ).mock.calls[0][0];
       await expireTimeout();
       expect(mySession.info.isLoggedIn).toBe(false);
     });

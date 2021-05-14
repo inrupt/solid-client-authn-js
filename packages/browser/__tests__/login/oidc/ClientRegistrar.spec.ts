@@ -47,14 +47,14 @@ describe("ClientRegistrar", () => {
       // actual OIDC provider response.
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable camelcase */
-        (new NodeResponse(
+        new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
             redirect_uris: ["https://example.com"],
             id_token_signed_response_alg: "RS256",
           })
-        ) as unknown) as Response
+        ) as unknown as Response
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -97,12 +97,12 @@ describe("ClientRegistrar", () => {
     it("can register a public client without secret", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable camelcase */
-        (new NodeResponse(
+        new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
             redirect_uris: ["https://example.com"],
           })
-        ) as unknown) as Response
+        ) as unknown as Response
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -143,9 +143,9 @@ describe("ClientRegistrar", () => {
     it("handles a failure to dynamically register elegantly", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable camelcase */
-        (new NodeResponse('{"error":"bad stuff that\'s an error"}', {
+        new NodeResponse('{"error":"bad stuff that\'s an error"}', {
           status: 400,
-        }) as unknown) as Response
+        }) as unknown as Response
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -201,13 +201,13 @@ describe("ClientRegistrar", () => {
 
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable camelcase */
-        (new NodeResponse(
+        new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
             redirect_uris: ["https://example.com"],
           })
-        ) as unknown) as Response
+        ) as unknown as Response
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -245,13 +245,13 @@ describe("ClientRegistrar", () => {
 
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable camelcase */
-        (new NodeResponse(
+        new NodeResponse(
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
             redirect_uris: ["https://example.com"],
           })
-        ) as unknown) as Response
+        ) as unknown as Response
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -277,13 +277,13 @@ describe("ClientRegistrar", () => {
     it("saves dynamic registration information", async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(
         /* eslint-disable camelcase */
-        (new NodeResponse(
+        new NodeResponse(
           JSON.stringify({
             client_id: "some id",
             client_secret: "some secret",
             redirect_uris: ["https://example.com"],
           })
-        ) as unknown) as Response
+        ) as unknown as Response
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;

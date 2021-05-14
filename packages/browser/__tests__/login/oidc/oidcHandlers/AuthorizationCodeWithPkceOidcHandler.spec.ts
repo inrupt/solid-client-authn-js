@@ -72,7 +72,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   }
 
   describe("canHandle", () => {
-    const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+    const authorizationCodeWithPkceOidcHandler =
+      getAuthorizationCodeWithPkceOidcHandler();
     canHandleTests.authorizationCodeWithPkceOidcHandler.forEach(
       (testConfig) => {
         // eslint-disable-next-line jest/valid-title
@@ -99,9 +100,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         ),
       };
 
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        { redirector: redirectorThatThrowsMock }
-      );
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
+          redirector: redirectorThatThrowsMock,
+        });
 
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
@@ -118,7 +120,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("handles login properly with PKCE", async () => {
       mockOidcModule();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
         issuerConfiguration: {
@@ -141,11 +144,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         mockStorage({}),
         mockStorage({})
       );
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        {
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
           storageUtility: mockedStorage,
-        }
-      );
+        });
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
         redirectUrl: "https://app.example.com?someQuery=someValue",
@@ -169,7 +171,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("passes our the 'prompt' option down to our OIDC client library implementation", async () => {
       const oidcModule = mockOidcModule();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         prompt: "none",
         ...standardOidcOptions,
@@ -188,7 +191,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("handles login when a client secret is present", async () => {
       mockOidcModule();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
         client: {

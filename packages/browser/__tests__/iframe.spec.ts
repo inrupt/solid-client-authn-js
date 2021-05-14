@@ -180,9 +180,9 @@ describe("setupIframeListener", () => {
 describe("postRedirectUrlToParent", () => {
   it("posts a message to the parent window with the provided url", () => {
     const spyPost = jest.spyOn(window.top, "postMessage");
-    jest.spyOn(window, "location", "get").mockReturnValue(({
+    jest.spyOn(window, "location", "get").mockReturnValue({
       origin: "https://some.origin/",
-    } as unknown) as Location);
+    } as unknown as Location);
     postRedirectUrlToParent("https://some.redirect.url/");
     expect(spyPost).toHaveBeenCalledWith(
       { redirectUrl: "https://some.redirect.url/" },
