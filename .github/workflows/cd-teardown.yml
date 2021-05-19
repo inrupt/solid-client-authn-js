@@ -23,10 +23,11 @@ jobs:
       run: echo "TAG_SLUG=$(echo "${{ github.event.ref }}" | tr -cd '[:alnum:]-')" >> $GITHUB_ENV
     - name: Remove npm tag for the deleted branch
       run: |
+        export EXISTING_TAGS=$(npm dist-tag ls @inrupt/solid-client-authn-core | grep --count $TAG_SLUG)
         # Unfortunately GitHub Actions does not currently let us do something like
         #     if: secrets.NPM_TOKEN != ''
         # so simply skip the command if the env var is not set:
-        if [ -n $NODE_AUTH_TOKEN ]; then
+        if [ -n $NODE_AUTH_TOKEN ] && [ $EXISTING_TAGS -eq 1 ]; then
         npm dist-tag rm @inrupt/solid-client-authn-browser $TAG_SLUG;
         npm dist-tag rm @inrupt/solid-client-authn-core $TAG_SLUG;
         npm dist-tag rm @inrupt/oidc-client-ext $TAG_SLUG;
