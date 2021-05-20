@@ -37,7 +37,7 @@
     "@types/node-jose": "^1.1.5",
     "@types/uuid": "^8.3.0",
     "form-urlencoded": "~6.0.3",
-    "jose": "^2.0.4",
+    "jose": "^3.12.2",
     "jsonwebtoken": "^8.5.1",
     "node-jose": "^2.0.0",
     "oidc-client": "^1.11.3",
