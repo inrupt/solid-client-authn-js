@@ -21,7 +21,7 @@
 
 // The following is required by tsyringe
 import "reflect-metadata";
-import { it, describe } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   ISessionInfo,
   StorageUtility,
@@ -304,9 +304,9 @@ describe("Session", () => {
       // take advantage that we return the Promise from the callback in
       // `setTimeout`, so that we can `await` it in this test before checking
       // whether logout was successful:
-      const expireTimeout = ((setTimeout as unknown) as jest.Mock<
-        typeof setTimeout
-      >).mock.calls[0][0];
+      const expireTimeout = (
+        setTimeout as unknown as jest.Mock<typeof setTimeout>
+      ).mock.calls[0][0];
       await expireTimeout();
       expect(mySession.info.isLoggedIn).toBe(false);
     });
@@ -605,7 +605,8 @@ describe("Session", () => {
 
       const mySession = new Session({}, "mySession");
       const iframe = jest.requireMock("../src/iframe");
-      const postIri = jest.spyOn(iframe, "postRedirectUrlToParent");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const postIri = jest.spyOn(iframe as any, "postRedirectUrlToParent");
       await mySession.handleIncomingRedirect({
         url: "https://some.redirect.url?code=someCode&state=someState",
       });
@@ -629,7 +630,9 @@ describe("Session", () => {
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockReturnValue(incomingRedirectPromise);
+        .mockReturnValue(
+          incomingRedirectPromise
+        ) as typeof clientAuthentication.handleIncomingRedirect;
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
       void mySession.handleIncomingRedirect({
@@ -663,13 +666,17 @@ describe("Session", () => {
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockReturnValueOnce(incomingRedirectPromise);
+        .mockReturnValueOnce(
+          incomingRedirectPromise
+        ) as typeof clientAuthentication.handleIncomingRedirect;
       const validateCurrentSessionPromise = Promise.resolve(
         "https://some.issuer/"
       );
       clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockReturnValue(validateCurrentSessionPromise);
+        .mockReturnValue(
+          validateCurrentSessionPromise
+        ) as typeof clientAuthentication.validateCurrentSession;
 
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
@@ -705,9 +712,13 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
-      clientAuthentication.handleIncomingRedirect = jest
-        .fn()
-        .mockResolvedValue(undefined);
+      clientAuthentication.handleIncomingRedirect = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValue(
+        undefined
+      ) as typeof clientAuthentication.handleIncomingRedirect;
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
       void mySession.handleIncomingRedirect({
@@ -743,11 +754,15 @@ describe("Session", () => {
       });
       clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockReturnValue(validateCurrentSessionPromise);
+        .mockReturnValue(
+          validateCurrentSessionPromise
+        ) as typeof clientAuthentication.validateCurrentSession;
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockReturnValueOnce(incomingRedirectPromise);
+        .mockReturnValueOnce(
+          incomingRedirectPromise
+        ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
@@ -787,17 +802,22 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
-      clientAuthentication.validateCurrentSession = jest
-        .fn()
-        .mockResolvedValue({
-          issuer: "https://some.issuer",
-          clientAppId: "some client ID",
-          clientAppSecret: "some client secret",
-          redirectUrl: "https://some.redirect/url",
-        });
-      clientAuthentication.handleIncomingRedirect = jest
-        .fn()
-        .mockResolvedValue(undefined);
+      clientAuthentication.validateCurrentSession = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValue({
+        issuer: "https://some.issuer",
+        clientAppId: "some client ID",
+        clientAppSecret: "some client secret",
+        redirectUrl: "https://some.redirect/url",
+      }) as typeof clientAuthentication.validateCurrentSession;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clientAuthentication.handleIncomingRedirect = (
+        jest.fn() as any
+      ).mockResolvedValue(
+        undefined
+      ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
@@ -824,17 +844,21 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
-      clientAuthentication.validateCurrentSession = jest
-        .fn()
-        .mockResolvedValue({
-          issuer: "https://some.issuer",
-          clientAppId: "some client ID",
-          clientAppSecret: "some client secret",
-          redirectUrl: "https://some.redirect/url",
-        });
-      clientAuthentication.handleIncomingRedirect = jest
-        .fn()
-        .mockResolvedValue(undefined);
+      clientAuthentication.validateCurrentSession = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValue({
+        issuer: "https://some.issuer",
+        clientAppId: "some client ID",
+        clientAppSecret: "some client secret",
+        redirectUrl: "https://some.redirect/url",
+      });
+      clientAuthentication.handleIncomingRedirect = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValue(undefined);
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
@@ -852,13 +876,15 @@ describe("Session", () => {
     it("calls the registered callback on login", async () => {
       const myCallback = jest.fn();
       const clientAuthentication = mockClientAuthentication();
-      clientAuthentication.handleIncomingRedirect = jest
-        .fn()
-        .mockResolvedValue({
-          isLoggedIn: true,
-          sessionId: "a session ID",
-          webId: "https://some.webid#them",
-        });
+      clientAuthentication.handleIncomingRedirect = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValue({
+        isLoggedIn: true,
+        sessionId: "a session ID",
+        webId: "https://some.webid#them",
+      });
       mockLocalStorage({});
       const mySession = new Session({ clientAuthentication });
       mySession.onLogin(myCallback);
@@ -947,13 +973,15 @@ describe("Session", () => {
       mockLocation(currentLocation);
       // This pretends the login is successful.
       const clientAuthentication = mockClientAuthentication();
-      clientAuthentication.handleIncomingRedirect = jest
-        .fn()
-        .mockResolvedValue({
-          isLoggedIn: true,
-          sessionId: "a session ID",
-          webId: "https://some.webid#them",
-        });
+      clientAuthentication.handleIncomingRedirect = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValue({
+        isLoggedIn: true,
+        sessionId: "a session ID",
+        webId: "https://some.webid#them",
+      });
 
       const mySession = new Session({
         clientAuthentication,
@@ -997,11 +1025,15 @@ describe("Session", () => {
       });
       clientAuthentication.validateCurrentSession = jest
         .fn()
-        .mockReturnValue(validateCurrentSessionPromise);
+        .mockReturnValue(
+          validateCurrentSessionPromise
+        ) as typeof clientAuthentication.validateCurrentSession;
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockReturnValueOnce(incomingRedirectPromise);
+        .mockReturnValueOnce(
+          incomingRedirectPromise
+        ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication }, sessionId);
@@ -1031,14 +1063,18 @@ describe("Session", () => {
       });
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
-        .mockReturnValueOnce(incomingRedirectPromise);
+        .mockReturnValueOnce(
+          incomingRedirectPromise
+        ) as typeof clientAuthentication.handleIncomingRedirect;
 
       const windowAddEventListener = jest.spyOn(window, "addEventListener");
       // ../src/iframe is mocked for other tests,
       // but we need `setupIframeListener` to actually be executed
       // so that the callback gets called:
-      const iframeMock = jest.requireMock("../src/iframe");
-      const iframeActual = jest.requireActual("../src/iframe");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const iframeMock = jest.requireMock("../src/iframe") as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const iframeActual = jest.requireActual("../src/iframe") as any;
       iframeMock.setupIframeListener.mockImplementationOnce(
         iframeActual.setupIframeListener
       );

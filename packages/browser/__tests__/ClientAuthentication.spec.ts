@@ -21,6 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   IIssuerConfig,
   mockStorageUtility,
@@ -48,7 +49,7 @@ import {
 import { LocalStorageMock } from "../src/storage/__mocks__/LocalStorage";
 
 const mockFetch = (response: Response): typeof window.fetch => {
-  window.fetch = jest.fn().mockReturnValueOnce(response);
+  window.fetch = jest.fn().mockReturnValueOnce(response) as typeof window.fetch;
   return window.fetch;
 };
 

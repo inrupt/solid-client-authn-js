@@ -37,6 +37,7 @@ import {
   saveSessionInfoToStorage,
   getSessionIdFromOauthState,
 } from "@inrupt/solid-client-authn-core";
+// eslint-disable-next-line no-shadow
 import { URL } from "url";
 import { DPoPInput, IdTokenClaims, Issuer, TokenSet } from "openid-client";
 import { JWK } from "jose/types";

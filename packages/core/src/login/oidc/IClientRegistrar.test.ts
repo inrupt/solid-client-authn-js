@@ -19,9 +19,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import { IIssuerConfig, ILoginOptions, IStorageUtility } from "../..";
-import { determineSigningAlg, handleRegistration } from "./IClientRegistrar";
+import {
+  determineSigningAlg,
+  handleRegistration,
+  IClientRegistrar,
+} from "./IClientRegistrar";
 
 describe("handleRegistration", () => {
   it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
@@ -36,8 +40,8 @@ describe("handleRegistration", () => {
     await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
-      (jest.fn() as unknown) as IStorageUtility,
-      clientRegistrar
+      jest.fn() as unknown as IStorageUtility,
+      clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
   });
@@ -53,8 +57,8 @@ describe("handleRegistration", () => {
     await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
-      (jest.fn() as unknown) as IStorageUtility,
-      clientRegistrar
+      jest.fn() as unknown as IStorageUtility,
+      clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
   });
@@ -68,16 +72,16 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    const storageUtility: IStorageUtility = ({
+    const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
-    } as unknown) as IStorageUtility;
+    } as unknown as IStorageUtility;
     await handleRegistration(
       options,
       {
         solidOidcSupported: "https://solidproject.org/TR/solid-oidc",
       } as IIssuerConfig,
       storageUtility,
-      clientRegistrar
+      clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
@@ -94,16 +98,16 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    const storageUtility: IStorageUtility = ({
+    const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
-    } as unknown) as IStorageUtility;
+    } as unknown as IStorageUtility;
     await handleRegistration(
       options,
       {
         solidOidcSupported: undefined,
       } as IIssuerConfig,
       storageUtility,
-      clientRegistrar
+      clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();

@@ -20,4 +20,5 @@ module.exports = {
     "!**/dist/**",
     "!**/*.spec.ts",
   ],
+  injectGlobals: false,
 };

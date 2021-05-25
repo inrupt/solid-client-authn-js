@@ -30,6 +30,6 @@ describe("isSupportedTokenType", () => {
   it("returns false for unkonwn token types", async () => {
     expect(isSupportedTokenType("SomeTokenType")).toBe(false);
     expect(isSupportedTokenType("")).toBe(false);
-    expect(isSupportedTokenType((undefined as unknown) as string)).toBe(false);
+    expect(isSupportedTokenType(undefined as unknown as string)).toBe(false);
   });
 });

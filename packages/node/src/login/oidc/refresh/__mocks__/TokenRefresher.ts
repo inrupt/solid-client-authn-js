@@ -20,6 +20,7 @@
  */
 
 import { IdTokenClaims, TokenSet } from "openid-client";
+import { jest } from "@jest/globals";
 import { ITokenRefresher } from "../TokenRefresher";
 
 // Some identifiers are in camelcase on purpose.
@@ -29,7 +30,12 @@ export const mockTokenRefresher = (
   tokenSet: TokenSet & { access_token: string }
 ): ITokenRefresher => {
   return {
-    refresh: jest.fn().mockResolvedValue(tokenSet),
+    refresh: jest
+      .fn<
+        ReturnType<ITokenRefresher["refresh"]>,
+        Parameters<ITokenRefresher["refresh"]>
+      >()
+      .mockResolvedValue(tokenSet),
   };
 };
 

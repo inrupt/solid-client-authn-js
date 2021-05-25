@@ -21,6 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   IIssuerConfigFetcher,
   mockStorage,
@@ -71,6 +72,7 @@ describe("OidcLoginHandler", () => {
     });
 
     // TODO: Move this to appropriate handlers (auth code, implicit)
+    // eslint-disable-next-line jest/no-commented-out-tests
     // it("cannot handle options without an redirect url", async () => {
     //   const handler = getInitialisedHandler();
     //   await expect(
@@ -108,6 +110,7 @@ describe("OidcLoginHandler", () => {
     });
 
     // TODO: Move this to appropriate handlers (auth code, implicit)
+    // eslint-disable-next-line jest/no-commented-out-tests
     // it("throws if config misses a redirect URL", async () => {
     //   const handler = getInitialisedHandler();
     //   await expect(
@@ -122,9 +125,11 @@ describe("OidcLoginHandler", () => {
     it("performs DCR if client ID and secret aren't specified", async () => {
       const { oidcHandler } = defaultMocks;
       const clientRegistrar = mockDefaultClientRegistrar();
-      clientRegistrar.getClient = jest
-        .fn()
-        .mockResolvedValueOnce(mockDefaultClient());
+      clientRegistrar.getClient = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValueOnce(mockDefaultClient());
       const handler = getInitialisedHandler({ oidcHandler, clientRegistrar });
       await handler.handle({
         sessionId: "mySession",
@@ -139,9 +144,11 @@ describe("OidcLoginHandler", () => {
       const { oidcHandler } = defaultMocks;
       const mockedStorage = mockStorageUtility({});
       const clientRegistrar = mockDefaultClientRegistrar();
-      clientRegistrar.getClient = jest
-        .fn()
-        .mockResolvedValueOnce(mockDefaultClient());
+      clientRegistrar.getClient = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValueOnce(mockDefaultClient());
       const handler = getInitialisedHandler({
         oidcHandler,
         clientRegistrar,
@@ -208,7 +215,8 @@ describe("OidcLoginHandler", () => {
     it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
       const { oidcHandler } = defaultMocks;
       const clientRegistrar = mockDefaultClientRegistrar();
-      clientRegistrar.getClient = jest.fn().mockResolvedValueOnce({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce({
         clientId: "a dynamically registered client id",
         clientSecret: "a dynamically registered client secret",
       });
@@ -248,9 +256,11 @@ describe("OidcLoginHandler", () => {
       const { oidcHandler } = defaultMocks;
       const mockedStorage = mockStorageUtility({});
       const clientRegistrar = mockDefaultClientRegistrar();
-      clientRegistrar.getClient = jest
-        .fn()
-        .mockResolvedValueOnce(mockDefaultClient());
+      clientRegistrar.getClient = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValueOnce(mockDefaultClient());
       const handler = getInitialisedHandler({
         oidcHandler,
         clientRegistrar,
@@ -276,9 +286,11 @@ describe("OidcLoginHandler", () => {
         refreshToken: "some token",
       });
       const clientRegistrar = mockDefaultClientRegistrar();
-      clientRegistrar.getClient = jest
-        .fn()
-        .mockResolvedValueOnce(mockDefaultClient());
+      clientRegistrar.getClient = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValueOnce(mockDefaultClient());
       const handler = getInitialisedHandler({
         oidcHandler,
         clientRegistrar,
@@ -304,9 +316,11 @@ describe("OidcLoginHandler", () => {
         refreshToken: "some token",
       });
       const clientRegistrar = mockDefaultClientRegistrar();
-      clientRegistrar.getClient = jest
-        .fn()
-        .mockResolvedValueOnce(mockDefaultClient());
+      clientRegistrar.getClient = (
+        jest
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .fn() as any
+      ).mockResolvedValueOnce(mockDefaultClient());
       const handler = getInitialisedHandler({
         oidcHandler,
         clientRegistrar,

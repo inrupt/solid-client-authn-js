@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { jest, describe, it, expect } from "@jest/globals";
 import IHandleable from "./IHandleable";
 import AggregateHandler from "./AggregateHandler";
 
@@ -27,7 +28,8 @@ describe("AggregateHandler", () => {
   type MockHandler = IHandleable<[string], string>;
   class AggregateMockHandler
     extends AggregateHandler<[string], string>
-    implements MockHandler {
+    implements MockHandler
+  {
     constructor(mockHandlers: MockHandler[]) {
       super(mockHandlers);
     }
@@ -38,14 +40,14 @@ describe("AggregateHandler", () => {
     configs: { canHandle: boolean; executeTime: number; toReturn: string }[]
   ) {
     const mockHandlerInfo = configs.map((config) => {
-      const canHandleFunction: jest.Mock<Promise<boolean>, [string]> = jest.fn(
+      const canHandleFunction = jest.fn(
         async (_input: string): Promise<boolean> => {
           return new Promise((resolve, _reject) => {
             setTimeout(() => resolve(config.canHandle), config.executeTime);
           });
         }
       );
-      const handleFunction: jest.Mock<Promise<string>, [string]> = jest.fn(
+      const handleFunction = jest.fn(
         async (_input: string): Promise<string> => {
           return new Promise((resolve, _reject) => {
             setTimeout(() => resolve(config.toReturn), config.executeTime);
@@ -101,13 +103,13 @@ describe("AggregateHandler", () => {
       expect(result).toBe("allGood");
     });
 
-    it.skip("should run the correct handler even when it is preceded by the incorrect handler", () => {
-      // TODO: complete
-    });
+    it.todo(
+      "should run the correct handler even when it is preceded by the incorrect handler"
+    );
 
-    it.skip("should run the first correct handler even when succeeded by a handler that takes a shorter time to execute", () => {
-      // TODO: complete
-    });
+    it.todo(
+      "should run the first correct handler even when succeeded by a handler that takes a shorter time to execute"
+    );
 
     it("should error when there is no correct handler", async () => {
       const mocks = initMocks([

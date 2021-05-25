@@ -75,7 +75,9 @@ async function refreshAccess(
   try {
     if (dpop) {
       const dpopKey = await fromKeyLike(
-        (await generateKeyPair("ES256")).privateKey
+        (
+          await generateKeyPair("ES256")
+        ).privateKey
       );
       // The alg property isn't set by fromKeyLike, so set it manually.
       dpopKey.alg = "ES256";

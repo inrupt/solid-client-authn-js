@@ -20,6 +20,7 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";

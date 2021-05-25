@@ -41,7 +41,8 @@ import {
 @injectable()
 export default class AggregatePostPopUpLoginHandler
   extends AggregateHandler<[ILoginOptions], LoginResult>
-  implements ILoginHandler {
+  implements ILoginHandler
+{
   constructor(
     @injectAll("browser:postPopUpLoginHandlers") loginHandlers: ILoginHandler[]
   ) {

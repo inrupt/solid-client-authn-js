@@ -34,6 +34,7 @@ import {
   ISessionInternalInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
+// eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 
 /**

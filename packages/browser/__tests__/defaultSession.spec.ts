@@ -68,7 +68,8 @@ it("all functions pass on their arguments to the default session", () => {
   const logoutSpy = jest.fn();
   defaultSession.logout = logoutSpy as typeof defaultSession.logout;
   const handleIncomingRedirectSpy = jest.fn();
-  defaultSession.handleIncomingRedirect = handleIncomingRedirectSpy as typeof defaultSession.handleIncomingRedirect;
+  defaultSession.handleIncomingRedirect =
+    handleIncomingRedirectSpy as typeof defaultSession.handleIncomingRedirect;
   const onLoginSpy = jest.spyOn(defaultSession, "onLogin");
   const onLogoutSpy = jest.spyOn(defaultSession, "onLogout");
   const onSessionRestoreSpy = jest.spyOn(defaultSession, "onSessionRestore");

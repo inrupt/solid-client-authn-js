@@ -20,6 +20,7 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import ClientRegistrar from "./ClientRegistrar";
 import {
@@ -50,7 +51,8 @@ describe("ClientRegistrar", () => {
   describe("getClient", () => {
     it("fails if there is not registration endpoint", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuerConfig = mockIssuerMetadata({
         registration_endpoint: undefined,
       });
@@ -107,11 +109,13 @@ describe("ClientRegistrar", () => {
 
     it("properly performs dynamic registration and saves client information", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: jest.fn().mockResolvedValueOnce({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
         },
@@ -158,11 +162,13 @@ describe("ClientRegistrar", () => {
 
     it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: jest.fn().mockResolvedValueOnce({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
         },
@@ -191,11 +197,13 @@ describe("ClientRegistrar", () => {
 
     it("throws if no signing algorithm supported by the issuer match the client preferences", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: jest.fn().mockResolvedValueOnce({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
         },
@@ -225,12 +233,16 @@ describe("ClientRegistrar", () => {
 
     it("retrieves client information from storage after dynamic registration", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: jest
-            .fn()
+          register: (
+            jest
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              .fn() as any
+          )
             .mockResolvedValueOnce({
               metadata: mockDefaultClientConfig(),
             })
@@ -270,11 +282,13 @@ describe("ClientRegistrar", () => {
 
     it("retrieves a registration bearer token if present in storage", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: jest.fn().mockResolvedValueOnce({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
         },
@@ -314,11 +328,13 @@ describe("ClientRegistrar", () => {
 
     it("uses a registration bearer token if provided", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: jest.fn().mockResolvedValueOnce({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
         },
@@ -349,14 +365,16 @@ describe("ClientRegistrar", () => {
 
     it("saves the registered client information for a public client in storage", async () => {
       // Sets up the mock-up for DCR
-      const { Issuer } = jest.requireMock("openid-client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedClientConfig = mockClientConfig({
         client_secret: undefined,
       });
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: jest.fn().mockResolvedValueOnce({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockedClientConfig,
           }),
         },

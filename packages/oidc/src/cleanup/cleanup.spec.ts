@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import { OidcClient } from "oidc-client";
 import { removeOidcQueryParam, clearOidcPersistentStorage } from "./cleanup";
 
@@ -31,7 +31,7 @@ jest.mock("oidc-client", () => {
     OidcClient: jest.fn().mockImplementation(() => {
       return mockClient;
     }),
-    WebStorageStateStore: jest.fn().mockImplementation(),
+    WebStorageStateStore: jest.fn(),
   };
 });
 

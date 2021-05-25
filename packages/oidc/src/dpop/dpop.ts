@@ -25,7 +25,7 @@ import JWT, { VerifyOptions } from "jsonwebtoken";
 import { v4 } from "uuid";
 
 type internalJwks = {
-  keys: any[];
+  keys: unknown[];
 };
 
 export async function validateIdToken(

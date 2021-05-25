@@ -20,7 +20,7 @@
  */
 
 import "reflect-metadata";
-import { it, describe } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import Redirector from "../../../src/login/oidc/Redirector";
 
 jest.mock("../../../src/iframe");
@@ -78,7 +78,8 @@ describe("Redirector", () => {
 
     it("redirects in an iframe if specified", () => {
       const iframe = jest.requireMock("../../../src/iframe");
-      const redirectInIframe = jest.spyOn(iframe, "redirectInIframe");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const redirectInIframe = jest.spyOn(iframe as any, "redirectInIframe");
       const redirector = new Redirector();
       redirector.redirect("https://someUrl.com/redirect", {
         redirectInIframe: true,

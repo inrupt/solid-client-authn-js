@@ -19,7 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it, describe } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
+// eslint-disable-next-line no-shadow
 import { Response } from "cross-fetch";
 import {
   IIssuerConfig,
@@ -47,7 +48,7 @@ const getMockOptions = (): IClientRegistrarOptions => {
 };
 
 const getSuccessfulFetch = (): typeof fetch =>
-  jest.fn().mockResolvedValue(
+  (jest.fn().mockResolvedValue as any)(
     new Response(
       JSON.stringify({
         // eslint-disable-next-line camelcase
@@ -61,7 +62,7 @@ const getSuccessfulFetch = (): typeof fetch =>
       }),
       { status: 200 }
     )
-  );
+  ) as typeof fetch;
 
 describe("registerClient", () => {
   global.fetch = getSuccessfulFetch();

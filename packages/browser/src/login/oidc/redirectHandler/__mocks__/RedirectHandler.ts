@@ -23,13 +23,15 @@ import {
   IRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 
 import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
 
 /**
  * @hidden
  */
-export const RedirectHandlerResponse: ISessionInfo = SessionCreatorCreateResponse;
+export const RedirectHandlerResponse: ISessionInfo =
+  SessionCreatorCreateResponse;
 
 /**
  * @hidden
@@ -41,4 +43,5 @@ export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
   handle: jest.fn((url: string) =>
     Promise.resolve({ ...RedirectHandlerResponse, fetch: jest.fn() })
   ),
-};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;

@@ -41,7 +41,8 @@ import {
 @injectable()
 export default class AggregateLoginHandler
   extends AggregateHandler<[ILoginOptions], LoginResult>
-  implements ILoginHandler {
+  implements ILoginHandler
+{
   constructor(@injectAll("node:loginHandlers") loginHandlers: ILoginHandler[]) {
     super(loginHandlers);
   }

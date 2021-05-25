@@ -30,6 +30,7 @@ import {
   USER_SESSION_PREFIX,
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
+import { jest, it, describe, expect } from "@jest/globals";
 import { TokenEndpointResponse } from "@inrupt/oidc-client-ext";
 import { JSONWebKey } from "jose";
 import { Response } from "cross-fetch";
@@ -144,13 +145,22 @@ const defaultJwt = {
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 function mockOidcClient(jwt: typeof defaultJwt = defaultJwt): any {
-  const mockedOidcClient = jest.requireMock("@inrupt/oidc-client-ext");
-  mockedOidcClient.generateJwkForDpop = jest.fn().mockResolvedValue(mockJwk());
-  mockedOidcClient.createDpopHeader = jest.fn().mockResolvedValue("someToken");
-  mockedOidcClient.decodeJwt = jest.fn().mockResolvedValue(jwt);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mockedOidcClient = jest.requireMock("@inrupt/oidc-client-ext") as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedOidcClient.generateJwkForDpop = (jest.fn() as any).mockResolvedValue(
+    mockJwk()
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedOidcClient.createDpopHeader = (jest.fn() as any).mockResolvedValue(
+    "someToken"
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedOidcClient.decodeJwt = (jest.fn() as any).mockResolvedValue(jwt);
   mockedOidcClient.getDpopToken = mockTokenEndpointDpopResponse;
   mockedOidcClient.getBearerToken = mockTokenEndpointBearerResponse;
-  mockedOidcClient.validateIdToken = jest.fn().mockResolvedValue(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedOidcClient.validateIdToken = (jest.fn() as any).mockResolvedValue(true);
   return mockedOidcClient;
 }
 
@@ -176,10 +186,10 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
 }
 
 const mockFetch = (response: Response): void => {
-  window.fetch = jest.fn().mockResolvedValue(response) as jest.Mock<
-    ReturnType<typeof window.fetch>,
-    [RequestInfo, RequestInit?]
-  >;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  window.fetch = (jest.fn() as any).mockResolvedValue(
+    response
+  ) as typeof window.fetch;
 };
 
 const defaultMocks = {
@@ -355,7 +365,10 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("throws if the ID token isn't valid", async () => {
       const mockedOidcClient = mockOidcClient();
-      mockedOidcClient.validateIdToken = jest.fn().mockResolvedValue(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockedOidcClient.validateIdToken = (jest.fn() as any).mockResolvedValue(
+        false
+      );
       mockLocalStorage({});
 
       const storage = mockStorageUtility({
@@ -386,7 +399,8 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       mockLocalStorage({});
 
-      window.fetch = jest.fn().mockReturnValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      window.fetch = (jest.fn() as any).mockReturnValue(
         new Promise((resolve) => {
           resolve(
             new Response("", {
@@ -430,7 +444,8 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       mockLocalStorage({});
 
-      window.fetch = jest.fn().mockReturnValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      window.fetch = (jest.fn() as any).mockReturnValue(
         new Promise((resolve) => {
           resolve(
             new Response("", {
@@ -479,7 +494,8 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       mockLocalStorage({});
 
-      window.fetch = jest.fn().mockReturnValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      window.fetch = (jest.fn() as any).mockReturnValue(
         new Promise((resolve) => {
           resolve(
             new Response("", {
@@ -527,7 +543,7 @@ describe("AuthCodeRedirectHandler", () => {
         // Date.now is called twice: once to be able to calculate the auth token expiry time,
         // and once to set the cookie expiry. We only care about the second in this test.
         .mockReturnValueOnce(MOCK_TIMESTAMP)
-        .mockReturnValueOnce(MOCK_TIMESTAMP);
+        .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
       const testIssuer = "some test Issuer";
       const mockedStorage = mockStorageUtility({
@@ -572,7 +588,7 @@ describe("AuthCodeRedirectHandler", () => {
       // Date.now is called twice: once to be able to calculate the auth token expiry time,
       // and once to set the cookie expiry. We only care about the second in this test.
       .mockReturnValueOnce(MOCK_TIMESTAMP)
-      .mockReturnValueOnce(MOCK_TIMESTAMP);
+      .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
     const testIssuer = "some test Issuer";
     const mockedStorage = mockStorageUtility({
@@ -626,7 +642,7 @@ describe("AuthCodeRedirectHandler", () => {
       // Date.now is called twice: once to be able to calculate the auth token expiry time,
       // and once to set the cookie expiry. We only care about the second in this test.
       .mockReturnValueOnce(MOCK_TIMESTAMP)
-      .mockReturnValueOnce(MOCK_TIMESTAMP);
+      .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
     const testIssuer = "some test Issuer";
     const mockedStorage = mockStorageUtility({
@@ -690,8 +706,11 @@ describe("AuthCodeRedirectHandler", () => {
   it("swallows the exception if the fetch to the session endpoint fails", async () => {
     mockOidcClient();
     mockLocalStorage({});
-    window.fetch = jest
-      .fn()
+    window.fetch = (
+      jest
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .fn() as any
+    )
       .mockResolvedValueOnce(
         new Response("https://my.webid", {
           status: 200,

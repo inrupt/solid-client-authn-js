@@ -105,9 +105,8 @@ export function configFromIssuerMetadata(
     solidOidcSupported: metadata.solid_oidc_supported as
       | "https://solidproject.org/TR/solid-oidc"
       | undefined,
-    idTokenSigningAlgValuesSupported: metadata.id_token_signing_alg_values_supported as
-      | string[]
-      | undefined,
+    idTokenSigningAlgValuesSupported:
+      metadata.id_token_signing_alg_values_supported as string[] | undefined,
   };
 }
 

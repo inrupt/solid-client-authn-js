@@ -62,19 +62,15 @@ export async function loadOidcContextFromStorage(
   configFetcher: IIssuerConfigFetcher
 ): Promise<OidcContext> {
   try {
-    const [
-      issuerIri,
-      codeVerifier,
-      storedRedirectIri,
-      dpop,
-    ] = await Promise.all([
-      storageUtility.getForUser(sessionId, "issuer", {
-        errorIfNull: true,
-      }),
-      storageUtility.getForUser(sessionId, "codeVerifier"),
-      storageUtility.getForUser(sessionId, "redirectUrl"),
-      storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
-    ]);
+    const [issuerIri, codeVerifier, storedRedirectIri, dpop] =
+      await Promise.all([
+        storageUtility.getForUser(sessionId, "issuer", {
+          errorIfNull: true,
+        }),
+        storageUtility.getForUser(sessionId, "codeVerifier"),
+        storageUtility.getForUser(sessionId, "redirectUrl"),
+        storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
+      ]);
 
     // Unlike openid-client, this looks up the configuration from storage
     const issuerConfig = await configFetcher.fetchConfig(issuerIri as string);

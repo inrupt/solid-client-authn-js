@@ -41,7 +41,8 @@ import {
 @injectable()
 export default class AggregateOidcHandler
   extends AggregateHandler<[IOidcOptions], LoginResult>
-  implements IOidcHandler {
+  implements IOidcHandler
+{
   constructor(
     @injectAll("browser:oidcHandlers") oidcLoginHandlers: IOidcHandler[]
   ) {

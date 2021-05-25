@@ -20,6 +20,7 @@
  */
 
 import { IOidcOptions } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 
 export const standardOidcOptions: IOidcOptions = {
   sessionId: "mySession",

@@ -23,6 +23,7 @@ import {
   IIssuerConfig,
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 import { IssuerMetadata } from "openid-client";
 import { configFromIssuerMetadata } from "../IssuerConfigFetcher";
 
@@ -37,12 +38,12 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   idTokenSigningAlgValuesSupported: ["ES256", "RS256"],
 };
 
-export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
+export const IssuerConfigFetcherMock = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchConfig: jest.fn((_issuer: string) =>
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
   ),
-};
+} as unknown as jest.Mocked<IIssuerConfigFetcher>;
 
 // Note that this returns an instance of IssuerMetadata, which is the equivalent
 // of our IIssuerConfig for openid-client

@@ -58,7 +58,7 @@ export function compileJoinedStringOf(strings: string[]) {
 export function traverseObject(
   data: any,
   schema: any,
-  parent?: any,
+  parentObject?: any,
   parentKey?: any
 ): void {
   if (schema.type === "object") {
@@ -73,12 +73,12 @@ export function traverseObject(
         traverseObject(item, schema.items, data, index);
       }
     });
-  } else if (schema.shouldConvertToUrl && parent && parentKey) {
+  } else if (schema.shouldConvertToUrl && parentObject && parentKey) {
     // Set custom rules here
     // Convert to URL
     // TODO: Fix this properly
     // eslint-disable-next-line no-param-reassign
-    parent[parentKey] = data;
+    parentObject[parentKey] = data;
   }
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

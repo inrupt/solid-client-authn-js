@@ -21,6 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
+import { it, describe, expect } from "@jest/globals";
 import PopUpLoginHandler from "../../../src/login/popUp/PopUpLoginHandler";
 import { SessionInfoManagerMock } from "../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { LoginHandlerMock } from "../../../src/login/__mocks__/LoginHandler";

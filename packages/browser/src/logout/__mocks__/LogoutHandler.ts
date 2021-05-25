@@ -23,6 +23,7 @@ import {
   ILogoutHandler,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 import { clear } from "../../sessionInfo/SessionInfoManager";
 
 export const LogoutHandlerMock: jest.Mocked<ILogoutHandler> = {
@@ -30,7 +31,8 @@ export const LogoutHandlerMock: jest.Mocked<ILogoutHandler> = {
   handle: jest.fn(async (_localUserId: string) => {
     /* Do nothing */
   }),
-};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 export const mockLogoutHandler = (
   storageUtility: IStorageUtility
@@ -40,5 +42,6 @@ export const mockLogoutHandler = (
     handle: jest.fn(async (localUserId: string) => {
       return clear(localUserId, storageUtility);
     }),
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
 };

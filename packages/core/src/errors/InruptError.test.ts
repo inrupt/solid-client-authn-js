@@ -26,6 +26,7 @@
 
 import { describe, it, expect } from "@jest/globals";
 
+// eslint-disable-next-line no-shadow
 import { Response } from "cross-fetch";
 import { INRUPT_TEST, UI_COMMON } from "@inrupt/vocab-inrupt-common";
 
