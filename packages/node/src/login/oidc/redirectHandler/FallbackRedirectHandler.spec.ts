@@ -20,6 +20,7 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
 
 jest.mock("cross-fetch");

@@ -194,9 +194,8 @@ export class Session extends EventEmitter {
     }
     // Listen for messages from children iframes.
     setupIframeListener(async (redirectUrl: string) => {
-      const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
-        redirectUrl
-      );
+      const sessionInfo =
+        await this.clientAuthentication.handleIncomingRedirect(redirectUrl);
 
       // If silent authentication was not successful, do nothing;
       // the existing session might still be valid for a while,

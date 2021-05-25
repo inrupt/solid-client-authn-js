@@ -25,6 +25,7 @@ import {
   IClientRegistrarOptions,
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 
 export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",
@@ -40,14 +41,16 @@ export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
     (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
       Promise.resolve(ClientRegistrarResponse)
   ),
-};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
     (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
       Promise.resolve(PublicClientRegistrarResponse)
   ),
-};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 export const mockDefaultClientRegistrar = (): IClientRegistrar => {
   return {

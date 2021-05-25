@@ -150,7 +150,7 @@ function processConfig(
     }
   });
 
-  return (parsedConfig as unknown) as IIssuerConfig;
+  return parsedConfig as unknown as IIssuerConfig;
 }
 
 /**

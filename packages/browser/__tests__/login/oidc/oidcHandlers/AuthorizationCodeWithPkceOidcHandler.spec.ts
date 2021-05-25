@@ -31,6 +31,7 @@ import {
   StorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
+import { jest, it, describe, expect } from "@jest/globals";
 import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
@@ -45,9 +46,11 @@ const mockOidcModule = (
   url: string = expectedSigninRedirectUrl,
   state = "test state"
 ) => {
-  const oidcModule = jest.requireMock("@inrupt/oidc-client-ext");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const oidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
   oidcModule.OidcClient = jest.fn().mockReturnValue({
-    createSigninRequest: jest.fn().mockResolvedValue({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createSigninRequest: (jest.fn() as any).mockResolvedValue({
       url,
       state,
     }),
@@ -72,7 +75,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   }
 
   describe("canHandle", () => {
-    const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+    const authorizationCodeWithPkceOidcHandler =
+      getAuthorizationCodeWithPkceOidcHandler();
     canHandleTests.authorizationCodeWithPkceOidcHandler.forEach(
       (testConfig) => {
         // eslint-disable-next-line jest/valid-title
@@ -97,11 +101,13 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
             );
           }
         ),
-      };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any;
 
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        { redirector: redirectorThatThrowsMock }
-      );
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
+          redirector: redirectorThatThrowsMock,
+        });
 
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
@@ -118,7 +124,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("handles login properly with PKCE", async () => {
       mockOidcModule();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
         issuerConfiguration: {
@@ -141,11 +148,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         mockStorage({}),
         mockStorage({})
       );
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        {
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
           storageUtility: mockedStorage,
-        }
-      );
+        });
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
         redirectUrl: "https://app.example.com?someQuery=someValue",
@@ -169,7 +175,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("passes our the 'prompt' option down to our OIDC client library implementation", async () => {
       const oidcModule = mockOidcModule();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         prompt: "none",
         ...standardOidcOptions,
@@ -188,7 +195,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("handles login when a client secret is present", async () => {
       mockOidcModule();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
         client: {

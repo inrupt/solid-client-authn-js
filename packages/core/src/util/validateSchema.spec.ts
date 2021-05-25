@@ -190,13 +190,13 @@ describe("validateSchema", () => {
 
       expect(() =>
         validateSchema(schema, {
-          foo:
-            "some words in this order but not necessarily with just those words ",
+          foo: "some words in this order but not necessarily with just those words ",
         })
       ).toThrow();
     });
 
     // This test fails (i.e. a subset of the given words validates); not sure yet if it should:
+    // eslint-disable-next-line jest/no-disabled-tests
     it.skip("should not validate if the checked string includes not all the given words", () => {
       const schema = {
         type: "object",

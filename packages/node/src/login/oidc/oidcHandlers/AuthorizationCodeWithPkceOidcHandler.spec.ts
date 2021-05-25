@@ -23,10 +23,12 @@
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   mockStorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
+// eslint-disable-next-line no-shadow
 import { URL } from "url";
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
 import canHandleTests from "./OidcHandlerCanHandleTests";
@@ -54,7 +56,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   }
 
   describe("canHandle", () => {
-    const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler();
+    const authorizationCodeWithPkceOidcHandler =
+      getAuthorizationCodeWithPkceOidcHandler();
     canHandleTests.authorizationCodeWithPkceOidcHandler.forEach(
       (testConfig) => {
         // eslint-disable-next-line jest/valid-title
@@ -71,11 +74,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   describe("handle", () => {
     it("redirects the user to the specified IdP", async () => {
       const mockedRedirector = mockRedirector();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        {
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
           redirector: mockedRedirector,
-        }
-      );
+        });
 
       await authorizationCodeWithPkceOidcHandler.handle(
         mockDefaultOidcOptions()
@@ -90,11 +92,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("sets the specified options in the query params", async () => {
       const mockedRedirector = mockRedirector();
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        {
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
           redirector: mockedRedirector,
-        }
-      );
+        });
       const oidcOptions = mockDefaultOidcOptions();
 
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
@@ -113,11 +114,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("saves relevant information in storage", async () => {
       const mockedStorage = mockStorageUtility({});
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        {
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
           storageUtility: mockedStorage,
-        }
-      );
+        });
       const oidcOptions = mockDefaultOidcOptions();
 
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
@@ -138,11 +138,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
     it("serializes the token type boolean appropriately", async () => {
       const mockedStorage = mockStorageUtility({});
-      const authorizationCodeWithPkceOidcHandler = getAuthorizationCodeWithPkceOidcHandler(
-        {
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
           storageUtility: mockedStorage,
-        }
-      );
+        });
       const oidcOptions = mockOidcOptions({
         dpop: false,
       });

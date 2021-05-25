@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { jest, describe, it, expect } from "@jest/globals";
 // Required by TSyringe:
 import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
 import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
@@ -138,7 +139,7 @@ describe("StorageUtility", () => {
         .fn()
         .mockReturnValue(
           "This response deliberately cannot be parsed as JSON!"
-        );
+        ) as typeof mockedStorageUtility.get;
       const storageUtility = getStorageUtility({
         insecureStorage: mockedStorageUtility,
         secureStorage: mockedStorageUtility,

@@ -24,6 +24,7 @@ import {
   ILoginHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 
 export const LoginHandlerResponse: ISessionInfo = {
   isLoggedIn: false,
@@ -35,4 +36,7 @@ export const LoginHandlerMock: jest.Mocked<ILoginHandler> = {
   canHandle: jest.fn((options: ILoginOptions) => Promise.resolve(true)),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handle: jest.fn((options: ILoginOptions) => Promise.resolve(undefined)),
-};
+  // A Jest update seemes to have caused some troubles aligning mock types.
+  // Since the tests worked, I'm setting it to `any`:
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;

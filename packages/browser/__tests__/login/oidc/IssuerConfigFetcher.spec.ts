@@ -20,6 +20,7 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { Response as NodeResponse } from "node-fetch";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
@@ -41,19 +42,20 @@ describe("IssuerConfigFetcher", () => {
   }
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    const fetchResponse = (new NodeResponse(
+    const fetchResponse = new NodeResponse(
       JSON.stringify({
         issuer: "https://example.com",
         // eslint-disable-next-line camelcase
         claim_types_supported: "oidc",
         bleepBloop: "Meep Moop",
       })
-    ) as unknown) as Response;
+    ) as unknown as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    const mockFetch = jest.fn().mockResolvedValueOnce(fetchResponse);
-    window.fetch = mockFetch;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
+    window.fetch = mockFetch as typeof window.fetch;
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );
@@ -68,11 +70,11 @@ describe("IssuerConfigFetcher", () => {
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
     const mockFetch = (): Promise<Response> =>
-      Promise.resolve(({
+      Promise.resolve({
         json: () => {
           throw new Error("Some error");
         },
-      } as unknown) as Response);
+      } as unknown as Response);
     window.fetch = mockFetch;
     const configFetcher = new IssuerConfigFetcher(mockStorageUtility({}));
 
@@ -82,19 +84,20 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
-    const fetchResponse = (new NodeResponse(
+    const fetchResponse = new NodeResponse(
       JSON.stringify({
         issuer: "https://example.com",
         // eslint-disable-next-line camelcase
         claim_types_supported: "oidc",
         solid_oidc_supported: "https://solidproject.org/TR/solid-oidc",
       })
-    ) as unknown) as Response;
+    ) as unknown as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    const mockFetch = jest.fn().mockResolvedValueOnce(fetchResponse);
-    window.fetch = mockFetch;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
+    window.fetch = mockFetch as typeof window.fetch;
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );

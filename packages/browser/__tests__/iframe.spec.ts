@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it, describe } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   postRedirectUrlToParent,
   redirectInIframe,
@@ -86,7 +86,8 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(false, true);
-    setupIframeListener(callback);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setupIframeListener(callback as any);
 
     window.postMessage(
       {
@@ -104,7 +105,8 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, false);
-    setupIframeListener(callback);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setupIframeListener(callback as any);
 
     window.postMessage(
       {
@@ -122,7 +124,8 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, true);
-    setupIframeListener(callback);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setupIframeListener(callback as any);
 
     window.postMessage(
       {
@@ -141,7 +144,8 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, true);
-    setupIframeListener(callback);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setupIframeListener(callback as any);
 
     window.postMessage(
       {
@@ -159,7 +163,8 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, true);
-    setupIframeListener(callback);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setupIframeListener(callback as any);
 
     expect(document.getElementsByTagName("iframe")[0]).not.toBeUndefined();
 
@@ -180,9 +185,9 @@ describe("setupIframeListener", () => {
 describe("postRedirectUrlToParent", () => {
   it("posts a message to the parent window with the provided url", () => {
     const spyPost = jest.spyOn(window.top, "postMessage");
-    jest.spyOn(window, "location", "get").mockReturnValue(({
+    jest.spyOn(window, "location", "get").mockReturnValue({
       origin: "https://some.origin/",
-    } as unknown) as Location);
+    } as unknown as Location);
     postRedirectUrlToParent("https://some.redirect.url/");
     expect(spyPost).toHaveBeenCalledWith(
       { redirectUrl: "https://some.redirect.url/" },

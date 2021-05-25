@@ -19,13 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { jest, it, describe, expect } from "@jest/globals";
 import UuidGenerator from "./UuidGenerator";
 
 jest.mock("uuid");
 
 describe("UuidGenerator", () => {
   it("should simply wrap the `uuid` module", () => {
-    const uuidMock: { v4: jest.Mock } = jest.requireMock("uuid");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const uuidMock: { v4: jest.Mock } = jest.requireMock("uuid") as any;
     uuidMock.v4.mockReturnValueOnce("some uuid");
 
     const generator = new UuidGenerator();

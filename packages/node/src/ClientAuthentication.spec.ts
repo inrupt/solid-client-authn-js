@@ -21,10 +21,10 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   ILoginHandler,
   mockStorageUtility,
-  LoginResult,
   ILoginOptions,
 } from "@inrupt/solid-client-authn-core";
 import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
@@ -96,13 +96,20 @@ describe("ClientAuthentication", () => {
     it("may return after login if no redirect is required", async () => {
       const mockedAuthFetch = jest.fn();
       const mockedLoginHandler: jest.Mocked<ILoginHandler> = {
-        canHandle: jest.fn((_options: ILoginOptions) => Promise.resolve(true)),
-        handle: jest.fn((_options: ILoginOptions) =>
-          Promise.resolve(({
-            fetch: mockedAuthFetch,
-            webId: "https://my.webid/",
-          } as unknown) as LoginResult)
-        ),
+        // jest's Mock types don't seem to align here after an update.
+        // Not sure what happened; taking the `any` escape since the tests worked.
+        canHandle: jest.fn(
+          (_options: ILoginOptions) => Promise.resolve(true)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ) as any,
+        handle: jest.fn(
+          (_options: ILoginOptions) =>
+            Promise.resolve({
+              fetch: mockedAuthFetch,
+              webId: "https://my.webid/",
+            })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ) as any,
       };
       const clientAuthn = getClientAuthentication({
         loginHandler: mockedLoginHandler,

@@ -21,6 +21,7 @@
 
 // Required by TSyringe:
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   IIssuerConfigFetcher,
   StorageUtility,
@@ -103,8 +104,10 @@ describe("OidcLoginHandler", () => {
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
-    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext");
-    mockedOidcModule.registerClient = jest.fn().mockResolvedValue({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
       clientId: "some dynamically registered ID",
       clientSecret: "some dynamically registered secret",
     });
@@ -132,8 +135,10 @@ describe("OidcLoginHandler", () => {
   });
 
   it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
-    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext");
-    mockedOidcModule.registerClient = jest.fn().mockResolvedValue({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
       clientId: "some dynamically registered ID",
       clientSecret: "some dynamically registered secret",
     });

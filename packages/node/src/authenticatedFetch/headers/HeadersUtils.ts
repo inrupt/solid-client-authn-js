@@ -19,8 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { Headers } from "cross-fetch";
-
 /**
  * @hidden
  * @packageDocumentation

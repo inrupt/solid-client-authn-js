@@ -20,6 +20,7 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   mockStorageUtility,
   StorageUtilityMock,
@@ -100,7 +101,8 @@ const mockDpopTokens = (): TokenSet => {
 };
 
 const setupOidcClientMock = (tokenSet: TokenSet) => {
-  const { Issuer } = jest.requireMock("openid-client");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { Issuer } = jest.requireMock("openid-client") as any;
   function clientConstructor() {
     // this is untyped, which makes TS complain
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

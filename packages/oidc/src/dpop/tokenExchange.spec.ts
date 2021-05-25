@@ -19,9 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it, describe } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 
 import { JWKECKey } from "jose";
+// eslint-disable-next-line no-shadow
 import { Response } from "cross-fetch";
 import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
@@ -163,15 +164,13 @@ const mockClient = (): IClient => {
   };
 };
 
-const mockFetch = (
-  payload: string,
-  status: number
-): jest.Mock<ReturnType<typeof window.fetch>, [RequestInfo, RequestInit?]> => {
+const mockFetch = (payload: string, statusCode: number) => {
   const mockedFetch = jest.fn(
     async (
       _url: RequestInfo,
       _init?: RequestInit
-    ): ReturnType<typeof window.fetch> => new Response(payload, { status })
+    ): ReturnType<typeof window.fetch> =>
+      new Response(payload, { status: statusCode })
   );
   global.fetch = mockedFetch;
   return mockedFetch;
@@ -329,6 +328,7 @@ describe("getTokens", () => {
   // token_type: 'Bearer' even when returning a DPoP token.
   // https://github.com/solid/oidc-op/issues/26
   // Fixed, but unreleased for the ESS (current version: inrupt-oidc-server-0.5.2)
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip("throws if a key-bound token was requested, but a bearer token is returned", async () => {
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const request = getTokens(
@@ -645,7 +645,7 @@ describe("getDpopToken", () => {
 });
 
 jest.mock("oidc-client", () => {
-  const { processSigninResponse } = jest.requireActual("oidc-client");
+  const { processSigninResponse } = jest.requireActual("oidc-client") as any;
   return {
     OidcClient: jest.fn().mockImplementation(() => {
       return {

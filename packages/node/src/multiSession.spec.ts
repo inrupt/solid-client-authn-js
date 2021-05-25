@@ -21,6 +21,7 @@
 
 import "reflect-metadata";
 import { InMemoryStorage } from "@inrupt/solid-client-authn-core";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
@@ -42,19 +43,32 @@ jest.mock("./dependencies");
 describe("getSessionFromStorage", () => {
   it("returns a logged in Session if a refresh token is available in storage", async () => {
     const clientAuthentication = mockClientAuthentication();
-    clientAuthentication.getSessionInfo = jest.fn().mockResolvedValue({
-      webId: "https://my.webid",
-      isLoggedIn: true,
-      refreshToken: "some token",
-      issuer: "https://my.idp",
-      sessionId: "mySession",
-    });
-    clientAuthentication.login = jest.fn().mockResolvedValue({
-      webId: "https://my.webid",
-      isLoggedIn: true,
-      sessionId: "mySession",
-    });
-    const dependencies = jest.requireMock("./dependencies");
+    clientAuthentication.getSessionInfo = jest
+      .fn<
+        ReturnType<typeof clientAuthentication.getSessionInfo>,
+        Parameters<typeof clientAuthentication.getSessionInfo>
+      >()
+      .mockResolvedValue({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        refreshToken: "some token",
+        issuer: "https://my.idp",
+        sessionId: "mySession",
+      });
+    clientAuthentication.login = jest
+      .fn<
+        ReturnType<typeof clientAuthentication.login>,
+        Parameters<typeof clientAuthentication.login>
+      >()
+      .mockResolvedValue({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        sessionId: "mySession",
+      });
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
@@ -68,17 +82,27 @@ describe("getSessionFromStorage", () => {
 
   it("returns a logged out Session if no refresh token is available", async () => {
     const clientAuthentication = mockClientAuthentication();
-    clientAuthentication.getSessionInfo = jest.fn().mockResolvedValueOnce({
-      webId: "https://my.webid",
-      isLoggedIn: true,
-      issuer: "https://my.idp",
-      sessionId: "mySession",
-    });
-    clientAuthentication.logout = jest.fn().mockResolvedValueOnce({
-      isLoggedIn: false,
-      sessionId: "mySession",
-    });
-    const dependencies = jest.requireMock("./dependencies");
+    clientAuthentication.getSessionInfo = jest
+      .fn<
+        ReturnType<typeof clientAuthentication.getSessionInfo>,
+        Parameters<typeof clientAuthentication.getSessionInfo>
+      >()
+      .mockResolvedValueOnce({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        issuer: "https://my.idp",
+        sessionId: "mySession",
+      });
+    clientAuthentication.logout = jest
+      .fn<
+        ReturnType<typeof clientAuthentication.logout>,
+        Parameters<typeof clientAuthentication.logout>
+      >()
+      .mockResolvedValueOnce();
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
@@ -93,9 +117,15 @@ describe("getSessionFromStorage", () => {
   it("returns undefined if no session id matches in storage", async () => {
     const clientAuthentication = mockClientAuthentication();
     clientAuthentication.getSessionInfo = jest
-      .fn()
+      .fn<
+        ReturnType<typeof clientAuthentication.getSessionInfo>,
+        Parameters<typeof clientAuthentication.getSessionInfo>
+      >()
       .mockResolvedValueOnce(undefined);
-    const dependencies = jest.requireMock("./dependencies");
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
@@ -106,9 +136,15 @@ describe("getSessionFromStorage", () => {
   it("falls back to the environment storage if none is specified", async () => {
     const clientAuthentication = mockClientAuthentication();
     clientAuthentication.getSessionInfo = jest
-      .fn()
+      .fn<
+        ReturnType<typeof clientAuthentication.getSessionInfo>,
+        Parameters<typeof clientAuthentication.getSessionInfo>
+      >()
       .mockResolvedValueOnce(undefined);
-    const dependencies = jest.requireMock("./dependencies");
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
@@ -135,7 +171,10 @@ describe("getStoredSessionIdAll", () => {
     const clientAuthentication = mockCustomClientAuthentication({
       sessionInfoManager: mockSessionInfoManager(storage),
     });
-    const dependencies = jest.requireMock("./dependencies");
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
@@ -154,7 +193,10 @@ describe("getStoredSessionIdAll", () => {
     const clientAuthentication = mockCustomClientAuthentication({
       sessionInfoManager: mockSessionInfoManager(storage),
     });
-    const dependencies = jest.requireMock("./dependencies");
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
@@ -181,7 +223,10 @@ describe("clearSessionAll", () => {
     const clientAuthentication = mockCustomClientAuthentication({
       sessionInfoManager: mockSessionInfoManager(storage),
     });
-    const dependencies = jest.requireMock("./dependencies");
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
@@ -197,7 +242,10 @@ describe("clearSessionAll", () => {
     const clientAuthentication = mockCustomClientAuthentication({
       sessionInfoManager: mockSessionInfoManager(storage),
     });
-    const dependencies = jest.requireMock("./dependencies");
+    // Mocking the type definitions of the entire DI framework is a bit too
+    // involved at this time, so settling for `any`:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);

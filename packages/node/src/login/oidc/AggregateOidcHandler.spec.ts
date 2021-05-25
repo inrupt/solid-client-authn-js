@@ -25,6 +25,7 @@ import {
   IOidcHandler,
   AggregateHandler,
 } from "@inrupt/solid-client-authn-core";
+import { jest, it, describe, expect } from "@jest/globals";
 import AggregateOidcHandler from "./AggregateOidcHandler";
 
 jest.mock("@inrupt/solid-client-authn-core");
@@ -33,7 +34,7 @@ describe("AggregateOidcHandler", () => {
   it("should pass injected handlers to its superclass", () => {
     // We just test if the parent is called.
     // eslint-disable-next-line no-new
-    new AggregateOidcHandler((["Some handler"] as unknown) as IOidcHandler[]);
+    new AggregateOidcHandler(["Some handler"] as unknown as IOidcHandler[]);
 
     expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
       [["Some handler"]],

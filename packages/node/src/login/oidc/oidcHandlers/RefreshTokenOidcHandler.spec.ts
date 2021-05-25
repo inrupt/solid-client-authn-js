@@ -25,6 +25,7 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims } from "openid-client";
 import {
@@ -121,7 +122,7 @@ describe("RefreshTokenOidcHandler", () => {
       );
       expect(result?.webId).toEqual("https://my.webid/");
 
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
         status: 401,
         url: "https://my.pod/resource",
@@ -151,7 +152,7 @@ describe("RefreshTokenOidcHandler", () => {
       expect(result).not.toBeUndefined();
       expect(result?.webId).toEqual("https://my.webid/");
 
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
         status: 401,
         url: "https://some.pod/resource",
@@ -183,7 +184,7 @@ describe("RefreshTokenOidcHandler", () => {
       );
       expect(result).not.toBeUndefined();
 
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
         status: 401,
         url: "https://some.pod/resource",
@@ -259,7 +260,7 @@ describe("RefreshTokenOidcHandler", () => {
       mockTokenRefresher({
         access_token: "some access token",
         expired: () => false,
-        claims: () => (null as unknown) as IdTokenClaims,
+        claims: () => null as unknown as IdTokenClaims,
       }),
       mockStorageUtility({})
     );
@@ -299,7 +300,7 @@ describe("RefreshTokenOidcHandler", () => {
     );
     expect(result?.webId).toEqual("https://my.webid/");
 
-    const mockedFetch = jest.requireMock("cross-fetch");
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     mockedFetch.mockResolvedValue({
       status: 401,
       url: "https://my.pod/resource",
@@ -366,7 +367,7 @@ describe("RefreshTokenOidcHandler", () => {
     );
     expect(result?.webId).toEqual("https://my.webid/");
 
-    const mockedFetch = jest.requireMock("cross-fetch");
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     mockedFetch.mockResolvedValue({
       status: 401,
       url: "https://my.pod/resource",
@@ -384,9 +385,12 @@ describe("RefreshTokenOidcHandler", () => {
     const tokenRefresher = mockTokenRefresher({
       access_token: "some access token",
       expired: () => false,
-      claims: () => (null as unknown) as IdTokenClaims,
+      claims: () => null as unknown as IdTokenClaims,
     });
-    tokenRefresher.refresh = jest.fn().mockRejectedValue("Invalid credentials");
+    tokenRefresher.refresh = jest
+      .fn()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockRejectedValue("Invalid credentials") as any;
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       tokenRefresher,
       mockStorageUtility({})

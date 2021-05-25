@@ -22,6 +22,7 @@
 import { JWK } from "jose/types";
 import SignJWT from "jose/jwt/sign";
 import parseJwk from "jose/jwk/parse";
+// eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 import { v4 } from "uuid";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
@@ -92,7 +93,7 @@ export function buildBearerFetch(
       // Once the token has been refreshed, re-issue the authenticated request.
       // If it has an auth failure again, the user legitimately doesn't have access
       // to the target resource.
-      return fetch(init, {
+      return await fetch(init, {
         ...options,
         headers: {
           ...options?.headers,
@@ -244,7 +245,7 @@ export async function buildDpopFetch(
         // Once the token has been refreshed, re-issue the authenticated request.
         // If it has an auth failure again, the user legitimately doesn't have access
         // to the target resource.
-        return fetch(
+        return await fetch(
           url.toString(),
           await buildDpopFetchOptions(
             url.toString(),

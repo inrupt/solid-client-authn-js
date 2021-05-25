@@ -20,6 +20,7 @@
  */
 
 import "reflect-metadata";
+import { it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import LogoutHandler from "./GeneralLogoutHandler";
 import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";

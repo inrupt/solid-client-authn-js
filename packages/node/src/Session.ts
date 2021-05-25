@@ -30,6 +30,7 @@ import {
   IStorage,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
+// eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";

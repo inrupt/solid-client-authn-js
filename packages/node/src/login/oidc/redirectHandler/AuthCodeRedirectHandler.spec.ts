@@ -20,6 +20,7 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   StorageUtilityMock,
   mockStorageUtility,
@@ -199,7 +200,8 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
   const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
-    const { Issuer } = jest.requireMock("openid-client");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { Issuer } = jest.requireMock("openid-client") as any;
     function clientConstructor() {
       // this is untyped, which makes TS complain
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -261,7 +263,7 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toEqual("true");
 
       // Check that the returned fetch function is authenticated
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValueOnce({} as Response);
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
@@ -287,7 +289,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
 
       // Check that the returned fetch function is authenticated
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValueOnce({} as Response);
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
@@ -297,7 +299,10 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("cleans up the redirect IRI from the OIDC parameters", async () => {
       // This function represents the openid-client callback
-      const callback = jest.fn().mockResolvedValueOnce(mockDpopTokens());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const callback = (jest.fn() as any).mockResolvedValueOnce(
+        mockDpopTokens()
+      );
       setupOidcClientMock(undefined, callback);
       const mockedStorage = mockDefaultRedirectStorage();
 
@@ -339,7 +344,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
 
       // Check that the returned fetch function is authenticated
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValueOnce({ status: 401 } as Response);
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
@@ -440,7 +445,9 @@ describe("AuthCodeRedirectHandler", () => {
       setupDefaultOidcClientMock();
       const mockedStorage = mockDefaultRedirectStorage();
       const mockedSessionManager = mockSessionInfoManager(mockedStorage);
-      mockedSessionManager.get = jest.fn().mockReturnValue(undefined);
+      mockedSessionManager.get = jest
+        .fn()
+        .mockReturnValue(undefined) as typeof mockedSessionManager.get;
 
       // Run the test
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({

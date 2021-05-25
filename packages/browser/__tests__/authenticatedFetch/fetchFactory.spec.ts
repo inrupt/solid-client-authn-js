@@ -20,7 +20,7 @@
  */
 
 import "reflect-metadata";
-import { describe, it } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import { decodeJwt, generateJwkForDpop } from "@inrupt/oidc-client-ext";
 import {
   buildBearerFetch,
@@ -44,7 +44,7 @@ const mockFetch = (response: MockedRedirectResponse): typeof window.fetch => {
     new Promise((resolve) => {
       resolve(response as Response);
     })
-  );
+  ) as typeof window.fetch;
   return window.fetch;
 };
 
@@ -193,7 +193,7 @@ describe("buildDpopFetch", () => {
             status: 200,
           } as Response);
         })
-      );
+      ) as typeof window.fetch;
 
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined, key);
@@ -219,7 +219,7 @@ describe("buildDpopFetch", () => {
           ok: false,
         } as Response);
       })
-    );
+    ) as typeof window.fetch;
 
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined, key);
@@ -242,7 +242,7 @@ describe("buildDpopFetch", () => {
           ok: false,
         } as Response);
       })
-    );
+    ) as typeof window.fetch;
 
     const key = await generateJwkForDpop();
     const myFetch = await buildDpopFetch("myToken", undefined, key);

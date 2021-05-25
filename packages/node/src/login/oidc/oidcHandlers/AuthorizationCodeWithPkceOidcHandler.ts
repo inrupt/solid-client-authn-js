@@ -45,7 +45,8 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
  */
 @injectable()
 export default class AuthorizationCodeWithPkceOidcHandler
-  implements IOidcHandler {
+  implements IOidcHandler
+{
   constructor(
     @inject("node:storageUtility") private storageUtility: IStorageUtility,
     @inject("node:redirector") private redirector: IRedirector

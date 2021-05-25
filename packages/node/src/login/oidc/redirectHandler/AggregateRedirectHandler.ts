@@ -40,7 +40,8 @@ import {
 @injectable()
 export default class AggregateRedirectHandler
   extends AggregateHandler<[string], ISessionInfo & { fetch: typeof fetch }>
-  implements IRedirectHandler {
+  implements IRedirectHandler
+{
   constructor(
     @injectAll("node:redirectHandlers") redirectHandlers: IRedirectHandler[]
   ) {

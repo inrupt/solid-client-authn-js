@@ -25,6 +25,7 @@ import {
   ISessionInfoManagerOptions,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 import { SessionInfoManager } from "../SessionInfoManager";
 
 export const SessionCreatorCreateResponse: ISessionInfo = {
@@ -32,7 +33,8 @@ export const SessionCreatorCreateResponse: ISessionInfo = {
   isLoggedIn: true,
   webId: "https://pod.com/profile/card#me",
 };
-export const SessionCreatorGetSessionResponse: ISessionInfo = SessionCreatorCreateResponse;
+export const SessionCreatorGetSessionResponse: ISessionInfo =
+  SessionCreatorCreateResponse;
 
 export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   update: jest.fn(
@@ -46,7 +48,10 @@ export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   register: jest.fn(async (_sessionId: string) => Promise.resolve()),
   clearAll: jest.fn(async () => Promise.resolve()),
   getRegisteredSessionIdAll: jest.fn(async () => Promise.resolve([])),
-};
+  // A Jest update seemes to have caused some troubles aligning mock types.
+  // Since the tests worked, I'm setting it to `any`:
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 export function mockSessionInfoManager(
   storageUtility: IStorageUtility

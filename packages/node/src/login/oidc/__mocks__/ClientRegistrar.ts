@@ -25,6 +25,7 @@ import {
   IClientRegistrarOptions,
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 import { ClientMetadata } from "openid-client";
 
 export const ClientRegistrarResponse: IClient = {
@@ -42,7 +43,8 @@ export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
     (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(ClientRegistrarResponse)
   ),
-};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
@@ -50,7 +52,8 @@ export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
     (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
       Promise.resolve(PublicClientRegistrarResponse)
   ),
-};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 export const mockDefaultClientConfig = (): ClientMetadata => {
   return {

@@ -23,6 +23,7 @@ import {
   IIssuerConfig,
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
+import { jest } from "@jest/globals";
 
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: "https://idp.com",
@@ -40,20 +41,24 @@ export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
   fetchConfig: jest.fn((_issuer: string) =>
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
   ),
-};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
 export const mockDefaultIssuerConfigFetcher = (): IIssuerConfigFetcher => {
   return {
-    fetchConfig: jest
-      .fn()
-      .mockResolvedValue(IssuerConfigFetcherFetchConfigResponse),
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fetchConfig: (jest.fn() as any).mockResolvedValue(
+      IssuerConfigFetcherFetchConfigResponse
+    ),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
 };
 
 export const mockIssuerConfigFetcher = (
   config: IIssuerConfig
 ): IIssuerConfigFetcher => {
   return {
-    fetchConfig: jest.fn().mockResolvedValue(config),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fetchConfig: (jest.fn() as any).mockResolvedValue(config),
   };
 };

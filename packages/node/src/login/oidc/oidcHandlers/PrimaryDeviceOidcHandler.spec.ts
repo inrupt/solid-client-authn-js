@@ -24,6 +24,7 @@
  * @packageDocumentation
  */
 
+import { it, describe, expect } from "@jest/globals";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import PrimaryDeviceOidcHandler from "./PrimaryDeviceOidcHandler";
 

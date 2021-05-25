@@ -17,6 +17,11 @@ module.exports = {
       files: ["**/__mocks__/**"],
     },
   ],
+  env: {
+    // eslint will complain about imports from @jest/globals shadowing global
+    // variables if this is enabled:
+    "jest/globals": false,
+  },
   rules: {
     // The DI framework uses empty constructors to inject dependencies
     "no-useless-constructor": "off",

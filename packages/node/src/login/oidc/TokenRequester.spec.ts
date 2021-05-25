@@ -20,6 +20,8 @@
  */
 
 import "reflect-metadata";
+import { jest, it, describe, expect } from "@jest/globals";
+// eslint-disable-next-line no-shadow
 import { Response as NodeResponse, fetch } from "cross-fetch";
 import {
   IIssuerConfig,
@@ -93,13 +95,13 @@ describe("TokenRequester", () => {
       issuerConfig
     );
 
-    const mockedFetch = jest
-      .requireMock("cross-fetch")
-      .mockResolvedValueOnce(
-        (new NodeResponse(
-          values.responseBody ?? defaultReturnValues.responseBody
-        ) as unknown) as Response
-      );
+    const mockedFetch = (
+      jest.requireMock("cross-fetch") as jest.Mock
+    ).mockResolvedValueOnce(
+      new NodeResponse(
+        values.responseBody ?? defaultReturnValues.responseBody
+      ) as unknown as Response
+    );
     return mockedFetch;
   }
 
