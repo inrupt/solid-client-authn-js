@@ -41,10 +41,6 @@ export default interface ILoginInputOptions {
    */
   clientName?: string;
   /**
-   * If true, the login process will initiate via a popup. This only works on web clients.
-   */
-  popUp?: boolean;
-  /**
    * If a function is provided, the browser will not auto-redirect and will instead trigger that function to redirect.
    * Required in non-browser environments, ignored in the browser.
    */

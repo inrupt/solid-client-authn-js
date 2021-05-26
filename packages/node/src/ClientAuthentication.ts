@@ -68,7 +68,6 @@ export default class ClientAuthentication {
       clientId: options.clientId,
       clientSecret: options.clientSecret,
       clientName: options.clientName ?? options.clientId,
-      popUp: options.popUp || false,
       refreshToken: options.refreshToken,
       handleRedirect: options.handleRedirect,
       // Defaults to DPoP
