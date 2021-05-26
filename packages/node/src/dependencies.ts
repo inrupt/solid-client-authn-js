@@ -89,10 +89,6 @@ container.register<ILoginHandler>("node:loginHandlers", {
   useClass: OidcLoginHandler,
 });
 
-container.register<ILoginHandler>("node:postPopUpLoginHandlers", {
-  useClass: OidcLoginHandler,
-});
-
 // Login/OIDC
 container.register<IOidcHandler>("node:oidcHandler", {
   useClass: AggregateOidcHandler,

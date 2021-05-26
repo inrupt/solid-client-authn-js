@@ -85,8 +85,6 @@ export default class ClientAuthentication {
       redirectUrl,
       // If no clientName is provided, the clientId may be used instead.
       clientName: options.clientName ?? options.clientId,
-      // Defaults to no popup.
-      popUp: options.popUp || false,
     });
   };
 

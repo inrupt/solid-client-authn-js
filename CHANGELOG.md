@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Changed
+
+#### browser
+
+- The `popUp` option for the `login` method, although listed in the API docs,
+  never had any effect. It has now been removed.
+
 The following sections document changes that have been released already:
 
 ## 1.8.1 - 2021-04-30

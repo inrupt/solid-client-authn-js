@@ -60,8 +60,6 @@ import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRe
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
-import PopUpLoginHandler from "./login/popUp/PopUpLoginHandler";
-import AggregatePostPopUpLoginHandler from "./login/popUp/AggregatePostPopUpLoginHandler";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import { ISessionManager, SessionManager } from "./SessionManager";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
@@ -85,16 +83,6 @@ container.register<ILoginHandler>("browser:loginHandler", {
   useClass: AggregateLoginHandler,
 });
 container.register<ILoginHandler>("browser:loginHandlers", {
-  useClass: PopUpLoginHandler,
-});
-container.register<ILoginHandler>("browser:loginHandlers", {
-  useClass: OidcLoginHandler,
-});
-
-container.register<ILoginHandler>("browser:postPopUpLoginHandler", {
-  useClass: AggregatePostPopUpLoginHandler,
-});
-container.register<ILoginHandler>("browser:postPopUpLoginHandlers", {
   useClass: OidcLoginHandler,
 });
 
