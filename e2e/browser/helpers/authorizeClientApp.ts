@@ -15,9 +15,9 @@ export async function authorizeNss() {
 }
 
 export async function authorizeEss() {
-  const approveButton = Selector("button").withText("Approve");
+  // Ideally we'd find the button using the `.withText` Selector method,
+  // to simulate how a regular user finds the relevant button,
+  // but for some reason that doesn't work.
+  const approveButton = Selector('button[form="approve"]');
   await t.click(approveButton);
-
-  // Previous ESS Broker IdP (based on MitreID Connect) used this selector:
-  // await t.click("[name=authorize]");
 }
