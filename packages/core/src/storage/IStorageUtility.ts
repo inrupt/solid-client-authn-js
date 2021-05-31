@@ -72,24 +72,4 @@ export default interface IStorageUtility {
    * @param resourceServerIri
    */
   clearResourceServerSessionInfo(resourceServerIri: string): Promise<void>;
-
-  /**
-   * Retrieve from local storage
-   * @param key The key of the item
-   * @param options.schema The schema it should follow. If it does not follow this schema, it will
-   * be deleted
-   * @param options.postProcess A function that can be applied after the item is retrieved
-   */
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  safeGet(
-    key: string,
-    options?: Partial<{
-      //
-      schema?: Record<string, any>;
-      postProcess?: (retrievedObject: any) => any;
-      userId?: string;
-      secure?: boolean;
-    }>
-  ): Promise<any | undefined>;
-  /* eslint-enable @typescript-eslint/no-explicit-any */
 }

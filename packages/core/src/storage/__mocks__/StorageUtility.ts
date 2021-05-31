@@ -23,9 +23,6 @@ import { IStorage, StorageUtility } from "../..";
 import IStorageUtility from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
-export const StorageUtilitySafeGetResponse = {
-  someKey: "someValue",
-};
 
 export const StorageUtilityMock: IStorageUtility = {
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -59,16 +56,6 @@ export const StorageUtilityMock: IStorageUtility = {
   deleteAllUserData: async (userId: string, options?: { secure?: boolean }) => {
     /* do nothing */
   },
-  safeGet: async (
-    key: string,
-    options?: Partial<{
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      schema?: Record<string, any>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      postProcess?: (retrievedObject: any) => any;
-      userId?: string;
-    }>
-  ) => StorageUtilitySafeGetResponse,
   /* eslint-enable @typescript-eslint/no-unused-vars */
   storeResourceServerSessionInfo: async (
     _webId: string,

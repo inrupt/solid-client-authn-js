@@ -27,7 +27,6 @@
 /**
  * A helper class that will validate items taken from local storage
  */
-import validateSchema from "../util/validateSchema";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
 import InruptError from "../errors/InruptError";
@@ -306,60 +305,5 @@ export default class StorageUtility implements IStorageUtility {
         );
       }
     }
-  }
-
-  /**
-   * Get an object from storage with the guarantee that it matches a given schema.
-   *
-   * @param key The key to look up in storage.
-   * @param options Optional parameters:
-   *  - schema describing the expected JSON structure
-   *  - secure switch to specify the target storage
-   * @returns The storad object associated with the provided key iff it matches the
-   * provided schema.
-   */
-  async safeGet(
-    key: string,
-    options: {
-      schema?: Record<string, unknown>;
-      userId?: string;
-      secure?: boolean;
-    } = {}
-  ): Promise<unknown | undefined> {
-    // Check if key is stored locally
-    const locallyStored: string | undefined = options.userId
-      ? await this.getForUser(options.userId, key, { secure: options.secure })
-      : await this.get(key, { secure: options.secure });
-
-    // If it is stored locally, check the validity of the value
-    if (locallyStored) {
-      try {
-        const parsedObject = JSON.parse(locallyStored);
-        if (options.schema) {
-          const val = validateSchema(options.schema, parsedObject);
-          return val;
-        }
-        return parsedObject;
-      } catch (err) {
-        let invalidObject;
-        if (options.userId) {
-          invalidObject = await this.getForUser(options.userId, key, {
-            secure: options.secure,
-          });
-        } else {
-          invalidObject = await this.get(key, {
-            secure: options.secure,
-          });
-        }
-        throw new InruptError(
-          `Object ${JSON.stringify(
-            invalidObject
-          )} does not match expected schema: ${JSON.stringify(
-            options.schema
-          )}: ${err.toString()}. \n Please clear your local storage.`
-        );
-      }
-    }
-    return undefined;
   }
 }
