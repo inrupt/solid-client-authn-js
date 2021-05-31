@@ -60,14 +60,11 @@ export {
   determineSigningAlg,
 } from "./login/oidc/IClientRegistrar";
 export { IClient } from "./login/oidc/IClient";
-export { issuerConfigSchema } from "./login/oidc/issuerConfigSchema";
 
 // Storage.
 export { default as IStorage } from "./storage/IStorage";
 
 // Utility functions.
-export { default as validateSchema } from "./util/validateSchema";
-
 export { default as IStorageUtility } from "./storage/IStorageUtility";
 export {
   default as StorageUtility,
@@ -88,5 +85,4 @@ export {
   mockStorageUtility,
   StorageUtilityMock,
   StorageUtilityGetResponse,
-  StorageUtilitySafeGetResponse,
 } from "./storage/__mocks__/StorageUtility";

@@ -197,6 +197,7 @@ describe("Session", () => {
           ReturnType<typeof clientAuthentication.fetch>,
           Parameters<typeof clientAuthentication.fetch>
         >()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce({} as any);
       const mySession = new Session({ clientAuthentication });
       await mySession.login({});
