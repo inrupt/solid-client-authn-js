@@ -26,6 +26,7 @@ jest.mock("uuid");
 
 describe("UuidGenerator", () => {
   it("should simply wrap the `uuid` module", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const uuidMock: { v4: jest.Mock } = jest.requireMock("uuid") as any;
     uuidMock.v4.mockReturnValueOnce("some uuid");
 

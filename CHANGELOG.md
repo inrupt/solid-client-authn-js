@@ -13,6 +13,9 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 - The `popUp` option for the `login` method, although listed in the API docs,
   never had any effect. It has now been removed.
+- The Promise returned by `login` will no longer resolve, because no code is
+  able to reliably run after it is called; it redirects the user away from the
+  app and thereby terminates all running scripts.
 
 The following sections document changes that have been released already:
 
