@@ -230,6 +230,11 @@ export class Session extends EventEmitter {
       // Defaults the token type to DPoP
       tokenType: options.tokenType ?? "DPoP",
     });
+    // `login` redirects the user away from the app,
+    // so unless it throws an error, there is no code that should run afterwards
+    // (since there is no "after" in the lifetime of the script).
+    // Hence, this Promise never resolves:
+    return new Promise(() => undefined);
   };
 
   /**

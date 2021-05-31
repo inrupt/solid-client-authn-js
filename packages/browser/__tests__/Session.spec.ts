@@ -116,19 +116,25 @@ describe("Session", () => {
   });
 
   describe("login", () => {
-    it("wraps up ClientAuthentication login", async () => {
+    it("wraps up ClientAuthentication login", () => {
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnLogin = jest.spyOn(clientAuthentication, "login");
       const mySession = new Session({ clientAuthentication });
-      await mySession.login({});
+      // login never resolves if there are no errors,
+      // because a login redirects the user away from the page:
+      // eslint-disable-next-line no-void
+      void mySession.login({});
       expect(clientAuthnLogin).toHaveBeenCalled();
     });
 
-    it("Uses the token type provided (if any)", async () => {
+    it("Uses the token type provided (if any)", () => {
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnLogin = jest.spyOn(clientAuthentication, "login");
       const mySession = new Session({ clientAuthentication });
-      await mySession.login({
+      // login never resolves if there are no errors,
+      // because a login redirects the user away from the page:
+      // eslint-disable-next-line no-void
+      void mySession.login({
         tokenType: "Bearer",
       });
       expect(clientAuthnLogin).toHaveBeenCalledWith(
@@ -138,14 +144,17 @@ describe("Session", () => {
       );
     });
 
-    it("preserves a binding to its Session instance", async () => {
+    it("preserves a binding to its Session instance", () => {
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnLogin = jest.spyOn(clientAuthentication, "login");
       const mySession = new Session({ clientAuthentication });
       const objectWithLogin = {
         login: mySession.login,
       };
-      await objectWithLogin.login({});
+      // login never resolves if there are no errors,
+      // because a login redirects the user away from the page:
+      // eslint-disable-next-line no-void
+      void objectWithLogin.login({});
       expect(clientAuthnLogin).toHaveBeenCalled();
     });
   });
@@ -812,12 +821,11 @@ describe("Session", () => {
         clientAppSecret: "some client secret",
         redirectUrl: "https://some.redirect/url",
       }) as typeof clientAuthentication.validateCurrentSession;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      clientAuthentication.handleIncomingRedirect = (
-        jest.fn() as any
-      ).mockResolvedValue(
-        undefined
-      ) as typeof clientAuthentication.handleIncomingRedirect;
+      clientAuthentication.handleIncomingRedirect =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (jest.fn() as any).mockResolvedValue(
+          undefined
+        ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
