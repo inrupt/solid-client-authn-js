@@ -21,10 +21,10 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 
-import { JWKECKey } from "jose";
 // eslint-disable-next-line no-shadow
 import { Response } from "cross-fetch";
 import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import { JWK, SignJWT, parseJwk } from "@inrupt/jose-legacy-modules";
 
 import {
   getBearerToken,
@@ -33,12 +33,13 @@ import {
   TokenEndpointInput,
   validateTokenEndpointResponse,
 } from "./tokenExchange";
-import { decodeJwt, signJwt } from "./dpop";
 
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
 
-const mockJwk = (): JWKECKey => {
+jest.mock("@inrupt/solid-client-authn-core");
+
+const mockJwk = (): JWK => {
   return {
     kty: "EC",
     kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
@@ -50,15 +51,9 @@ const mockJwk = (): JWKECKey => {
   };
 };
 
-// The two following modules introduce randomness in the process, which prevents
+// The following module introduces randomness in the process, which prevents
 // making assumptions on the returned values. Mocking them out makes keys and
 // DPoP headers predictible.
-jest.mock("./keyGeneration", () => {
-  return {
-    generateJwkForDpop: (): JWKECKey => mockJwk(),
-  };
-});
-
 jest.mock("uuid", () => {
   return {
     v4: (): string => "1234",
@@ -95,11 +90,14 @@ const mockEndpointInput = (): TokenEndpointInput => {
 async function generateMockJwt(): Promise<void> {
   const payload = {
     sub: "https://my.webid",
-    iss: mockIssuer().issuer.toString(),
   };
-  const jwt = await signJwt(payload, mockJwk(), {
-    algorithm: "ES256",
-  });
+  const jwt = await new SignJWT(payload)
+    .setProtectedHeader({ alg: "ES256" })
+    .setIssuedAt()
+    .setIssuer(mockIssuer().issuer.toString())
+    .setAudience("solid")
+    .setExpirationTime("2h")
+    .sign(await parseJwk(mockJwk()));
   // This is for manual use.
   // eslint-disable-next-line no-console
   console.log(jwt.toString());
@@ -172,7 +170,7 @@ const mockFetch = (payload: string, statusCode: number) => {
     ): ReturnType<typeof window.fetch> =>
       new Response(payload, { status: statusCode })
   );
-  global.fetch = mockedFetch;
+  window.fetch = mockedFetch;
   return mockedFetch;
 };
 
@@ -288,15 +286,15 @@ describe("getTokens", () => {
 
   it("can request a key-bound token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const dpopJwt = await decodeJwt(headers.DPoP, mockJwk());
-    expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
-    expect(dpopJwt.htm).toEqual("POST");
-    expect(dpopJwt.jti).toEqual("1234");
+    expect(headers.DPoP).toBe("some DPoP header");
   });
 
   it("does not use basic auth if a client secret is not available", async () => {
@@ -390,13 +388,18 @@ describe("getTokens", () => {
 
   it("returns the generated key along with the tokens", async () => {
     mockFetch(JSON.stringify(mockDpopTokens()), 200);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    core.generateDpopKeyPair = jest.fn(() =>
+      Promise.resolve("some DPoP key pair")
+    );
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
       true
     );
-    expect(result?.dpopJwk).toEqual(mockJwk());
+    expect(result?.dpopKey).toBe("some DPoP key pair");
   });
 
   it("returns the tokens provided by the IdP", async () => {
@@ -497,136 +500,34 @@ describe("getTokens", () => {
       mockEndpointInput(),
       false
     );
-    expect(result?.dpopJwk).toBeUndefined();
+    expect(result?.dpopKey).toBeUndefined();
   });
 
-  it("derives a WebId from the custom claim if available", async () => {
-    const payload = {
-      webid: "https://my.webid",
-      sub: "some subject",
-      iss: mockIssuer().issuer.toString(),
-    };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
+  it("derives a WebId from the ID token", async () => {
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    core.getWebidFromTokenPayload = jest.fn(() =>
+      Promise.resolve("https://some.webid#me")
     );
+
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
       false
     );
-    expect(result?.webId).toEqual(payload.webid);
-  });
-
-  it("derives a WebID from a localhost IRI in the sub", async () => {
-    const payload = {
-      sub: "https://localhost:8443/profile/card#me",
-      iss: mockIssuer().issuer.toString(),
-    };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    const result = await getTokens(
-      mockIssuer(),
-      mockClient(),
-      mockEndpointInput(),
-      false
-    );
-    expect(result?.webId).toEqual(payload.sub);
-  });
-
-  it("throws if no webid can be derived from the ID token", async () => {
-    const payload = {
-      sub: "some subject",
-      iss: mockIssuer().issuer.toString(),
-    };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
-    ).rejects.toThrow(
-      `Cannot extract WebID from ID token: the ID token returned by [${mockIssuer().issuer.toString()}] has no 'webid' claim, nor an IRI-like 'sub' claim: [some subject]`
-    );
-  });
-
-  it("throws if the ID token has no sub claim", async () => {
-    const payload = {
-      iss: mockIssuer().issuer.toString(),
-    };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
-    ).rejects.toThrow(
-      /Invalid ID token: {.+} is missing 'sub' or 'iss' claims/
-    );
-  });
-
-  it("throws if the ID token has no iss claim", async () => {
-    const payload = {
-      sub: "https://my.webid",
-    };
-    const idJwt = await signJwt(payload, mockJwk(), {
-      algorithm: "ES256",
-    });
-
-    mockFetch(
-      JSON.stringify({
-        access_token: mockBearerAccessToken(),
-        id_token: idJwt,
-        token_type: "Bearer",
-      }),
-      200
-    );
-    await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), false)
-    ).rejects.toThrow(
-      /Invalid ID token: {.+} is missing 'sub' or 'iss' claims/
-    );
+    expect(result?.webId).toBe("https://some.webid#me");
   });
 });
 
 describe("getDpopToken", () => {
   it("requests a key-bound token, and returns the appropriate key with the token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
+    core.generateDpopKeyPair = jest.fn(() => Promise.resolve("some DPoP keys"));
     const tokens = await getDpopToken(
       mockIssuer(),
       mockClient(),
@@ -636,47 +537,110 @@ describe("getDpopToken", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    const dpopJwt = await decodeJwt(headers.DPoP, mockJwk());
-    expect(dpopJwt.htu).toEqual(mockIssuer().tokenEndpoint.toString());
-    expect(dpopJwt.htm).toEqual("POST");
-    expect(dpopJwt.jti).toEqual("1234");
-    expect(tokens.dpopJwk).not.toBeUndefined();
+    expect(headers.DPoP).toBe("some DPoP header");
+    expect(tokens.dpopKey).toBe("some DPoP keys");
   });
 });
 
-jest.mock("oidc-client", () => {
+jest.mock("oidc-client");
+
+const defaultOidcClient = {
+  metadata: {
+    jwks_uri: "https://some.jwks",
+    issuer: "https://some.issuer",
+  },
+  client_id: "some client id",
+};
+const mockOidcClient = (clientSettings: any = defaultOidcClient) => {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const { processSigninResponse } = jest.requireActual("oidc-client") as any;
-  return {
-    OidcClient: jest.fn().mockImplementation(() => {
-      return {
-        processSigninResponse: async (
-          redirectUrl: string
-        ): Promise<ReturnType<typeof processSigninResponse>> => {
-          if (redirectUrl === "https://invalid.url") {
-            throw new Error("Dummy error");
-          }
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore Ignore because we don't need to mock out all data fields.
-          return Promise.resolve({
-            access_token: mockBearerAccessToken(),
-            id_token: mockIdToken(),
-          });
-        },
-      };
-    }),
-  };
-});
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const oidcModule = jest.requireMock("oidc-client") as any;
+  oidcModule.OidcClient = jest.fn().mockImplementation(() => {
+    return {
+      processSigninResponse: async (
+        redirectUrl: string
+      ): Promise<ReturnType<typeof processSigninResponse>> => {
+        if (redirectUrl === "https://invalid.url") {
+          throw new Error("Dummy error");
+        }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore Ignore because we don't need to mock out all data fields.
+        return Promise.resolve({
+          access_token: mockBearerAccessToken(),
+          id_token: mockIdToken(),
+        });
+      },
+      settings: clientSettings,
+    };
+  });
+};
 
 describe("getBearerToken", () => {
   it("returns the tokens returned by the endpoint", async () => {
+    mockOidcClient();
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const tokens = await getBearerToken("https://my.app/redirect");
     expect(tokens.accessToken).toEqual(mockBearerAccessToken());
     expect(tokens.idToken).toEqual(mockIdToken());
-    expect(tokens.dpopJwk).toBeUndefined();
+    expect(tokens.dpopKey).toBeUndefined();
+  });
+
+  it("throws if client metadata are undefined", async () => {
+    mockOidcClient({
+      metadata: undefined,
+      client_id: "some client id",
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Cannot retrieve issuer metadata from client information in storage."
+    );
+  });
+
+  it("throws if client metadata don't include a JWKS URI", async () => {
+    mockOidcClient({
+      metadata: {
+        jwks_uri: undefined,
+        issuer: "https://some.issuer",
+      },
+      client_id: "some client id",
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined"
+    );
+  });
+
+  it("throws if client metadata don't include an issuer URI", async () => {
+    mockOidcClient({
+      metadata: {
+        jwks_uri: "https://some.jwks",
+        issuer: undefined,
+      },
+      client_id: "some client id",
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Missing some issuer metadata from client information in storage: 'issuer' is undefined"
+    );
+  });
+
+  it("throws if client metadata don't include a client ID", async () => {
+    mockOidcClient({
+      metadata: {
+        jwks_uri: "https://some.jwks",
+        issuer: "https://some.jwks",
+      },
+      client_id: undefined,
+    });
+    mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
+      "Missing some client information in storage: 'client_id' is undefined"
+    );
   });
 
   it("wraps oidc-client errors", async () => {
+    mockOidcClient();
     mockFetch("", 200);
     const tokenRequest = getBearerToken("https://invalid.url");
     await expect(tokenRequest).rejects.toThrow(

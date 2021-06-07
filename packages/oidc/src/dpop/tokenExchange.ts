@@ -19,12 +19,16 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JSONWebKey } from "jose";
 import formurlencoded from "form-urlencoded";
 import { OidcClient } from "oidc-client";
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
-import { createDpopHeader, decodeJwt } from "./dpop";
-import { generateJwkForDpop } from "./keyGeneration";
+import {
+  IClient,
+  IIssuerConfig,
+  createDpopHeader,
+  getWebidFromTokenPayload,
+  KeyPair,
+  generateDpopKeyPair,
+} from "@inrupt/solid-client-authn-core";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */
@@ -89,12 +93,12 @@ export type TokenEndpointResponse = {
   idToken: string;
   webId: string;
   refreshToken?: string;
-  dpopJwk?: JSONWebKey;
+  dpopKey?: KeyPair;
   expiresIn?: number;
 };
 
 export type TokenEndpointDpopResponse = TokenEndpointResponse & {
-  dpopJwk: JSONWebKey;
+  dpopKey: KeyPair;
 };
 
 export type TokenEndpointInput = {
@@ -103,57 +107,6 @@ export type TokenEndpointInput = {
   code: string;
   codeVerifier: string;
 };
-
-type WebIdOidcIdToken = {
-  sub: string;
-  iss: string;
-  // The spec requires this capitalization of webid
-  webid?: string;
-};
-
-function isWebIdOidcIdToken(
-  token: WebIdOidcIdToken | Record<string, unknown>
-): token is WebIdOidcIdToken {
-  return (
-    (token.sub !== undefined &&
-      typeof token.sub === "string" &&
-      token.iss !== undefined &&
-      typeof token.iss === "string" &&
-      !token.webid) ||
-    typeof token.webid === "string"
-  );
-}
-
-/**
- * Extracts a WebId from an ID token based on https://github.com/solid/webid-oidc-spec.
- * The upcoming spec is still a work in progress.
- *
- * Note: this function does not implement the userinfo WebId lookup yet.
- * @param idToken
- */
-export async function deriveWebIdFromIdToken(idToken: string): Promise<string> {
-  const decoded = await decodeJwt(idToken);
-  if (!isWebIdOidcIdToken(decoded)) {
-    throw new Error(
-      `Invalid ID token: ${JSON.stringify(
-        decoded
-      )} is missing 'sub' or 'iss' claims`
-    );
-  }
-  if (decoded.webid) {
-    return decoded.webid;
-  }
-  try {
-    // The constructor is here only used to verify that the URL is valid.
-    // eslint-disable-next-line no-new
-    new URL(decoded.sub);
-  } catch (error) {
-    throw new Error(
-      `Cannot extract WebID from ID token: the ID token returned by [${decoded.iss}] has no 'webid' claim, nor an IRI-like 'sub' claim: [${decoded.sub}]. Attempting to construct a URL from the 'sub' claim threw: ${error}`
-    );
-  }
-  return decoded.sub;
-}
 
 function validatePreconditions(
   issuer: IIssuerConfig,
@@ -265,13 +218,13 @@ export async function getTokens(
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
   };
-  let dpopJwk: JSONWebKey | undefined;
+  let dpopKey: KeyPair | undefined;
   if (dpop) {
-    dpopJwk = await generateJwkForDpop();
+    dpopKey = await generateDpopKeyPair();
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
-      dpopJwk
+      dpopKey
     );
   }
 
@@ -298,12 +251,24 @@ export async function getTokens(
     }),
   };
 
-  const rawTokenResponse = (await (
-    await fetch(issuer.tokenEndpoint, tokenRequestInit)
-  ).json()) as Record<string, unknown>;
+  const rawTokenResponse = await await fetch(
+    issuer.tokenEndpoint,
+    tokenRequestInit
+  );
 
-  const tokenResponse = validateTokenEndpointResponse(rawTokenResponse, dpop);
-  const webId = await deriveWebIdFromIdToken(tokenResponse.id_token);
+  const jsonTokenResponse = (await rawTokenResponse.json()) as Record<
+    string,
+    unknown
+  >;
+
+  const tokenResponse = validateTokenEndpointResponse(jsonTokenResponse, dpop);
+
+  const webId = await getWebidFromTokenPayload(
+    tokenResponse.id_token,
+    issuer.jwksUri,
+    issuer.issuer,
+    client.clientId
+  );
 
   return {
     accessToken: tokenResponse.access_token,
@@ -312,7 +277,7 @@ export async function getTokens(
       ? tokenResponse.refresh_token
       : undefined,
     webId,
-    dpopJwk,
+    dpopKey,
     expiresIn: tokenResponse.expires_in,
   };
 }
@@ -328,7 +293,7 @@ export async function getBearerToken(
 ): Promise<TokenEndpointResponse> {
   let signinResponse;
   try {
-    signinResponse = await new OidcClient({
+    const client = new OidcClient({
       // TODO: We should look at the various interfaces being used for storage,
       //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
       //  (which has an interface Storage), and our own proprietary interface
@@ -351,27 +316,52 @@ export async function getBearerToken(
       // against NSS, and not in general.
       // Issue tracker: https://github.com/solid/node-solid-server/issues/1490
       loadUserInfo: false,
-    }).processSigninResponse(redirectUrl);
+    });
+    signinResponse = await client.processSigninResponse(redirectUrl);
+    if (client.settings.metadata === undefined) {
+      throw new Error(
+        "Cannot retrieve issuer metadata from client information in storage."
+      );
+    }
+    if (client.settings.metadata.jwks_uri === undefined) {
+      throw new Error(
+        "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined"
+      );
+    }
+    if (client.settings.metadata.issuer === undefined) {
+      throw new Error(
+        "Missing some issuer metadata from client information in storage: 'issuer' is undefined"
+      );
+    }
+    if (client.settings.client_id === undefined) {
+      throw new Error(
+        "Missing some client information in storage: 'client_id' is undefined"
+      );
+    }
+    const webId = await getWebidFromTokenPayload(
+      signinResponse.id_token,
+      client.settings.metadata.jwks_uri,
+      client.settings.metadata.issuer,
+      client.settings.client_id
+    );
+    return {
+      accessToken: signinResponse.access_token,
+      idToken: signinResponse.id_token,
+      webId,
+      // Although not a field in the TypeScript response interface, the refresh
+      // token (which can optionally come back with the access token (if, as per
+      // the OAuth2 spec, we requested one using the scope of 'offline_access')
+      // will be included in the signin response object.
+      // eslint-disable-next-line camelcase
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      refreshToken: signinResponse.refresh_token,
+    };
   } catch (err) {
     throw new Error(
       `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
     );
   }
-  const webId = await deriveWebIdFromIdToken(signinResponse.id_token);
-
-  return {
-    accessToken: signinResponse.access_token,
-    idToken: signinResponse.id_token,
-    webId,
-    // Although not a field in the TypeScript response interface, the refresh
-    // token (which can optionally come back with the access token (if, as per
-    // the OAuth2 spec, we requested one using the scope of 'offline_access')
-    // will be included in the signin response object.
-    // eslint-disable-next-line camelcase
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    refreshToken: signinResponse.refresh_token,
-  };
 }
 
 export async function getDpopToken(

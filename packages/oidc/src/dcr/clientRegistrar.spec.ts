@@ -48,6 +48,7 @@ const getMockOptions = (): IClientRegistrarOptions => {
 };
 
 const getSuccessfulFetch = (): typeof fetch =>
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   (jest.fn().mockResolvedValue as any)(
     new Response(
       JSON.stringify({

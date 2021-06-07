@@ -19,8 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JSONWebKey } from "jose";
-import { createDpopHeader } from "@inrupt/oidc-client-ext";
+import { createDpopHeader, KeyPair } from "@inrupt/solid-client-authn-core";
 
 /**
  * @param authToken A bearer token.
@@ -29,12 +28,7 @@ import { createDpopHeader } from "@inrupt/oidc-client-ext";
  * bearer token.
  * @hidden
  */
-export function buildBearerFetch(
-  authToken: string,
-  // TODO: We need to push this refresh token into a wrapper around the fetch,
-  //  so dependent on that wrapper existing first!
-  _refreshToken: string | undefined
-): typeof fetch {
+export function buildBearerFetch(authToken: string): typeof fetch {
   return (init, options): Promise<Response> => {
     return fetch(init, {
       ...options,
@@ -50,7 +44,7 @@ export function buildBearerFetch(
 async function buildDpopFetchOptions(
   targetUrl: string,
   authToken: string,
-  dpopKey: JSONWebKey,
+  dpopKey: KeyPair,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   return {
@@ -84,10 +78,7 @@ function isExpectedAuthError(statusCode: number): boolean {
  */
 export async function buildDpopFetch(
   authToken: string,
-  // TODO: We need to push this refresh token into a wrapper around the fetch,
-  //  so dependent on that wrapper existing first!
-  _refreshToken: string | undefined,
-  dpopKey: JSONWebKey
+  dpopKey: KeyPair
 ): Promise<typeof fetch> {
   return async (url, options): Promise<Response> => {
     const response = await fetch(

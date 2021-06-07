@@ -27,10 +27,8 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import { JWK } from "jose/types";
-import {
-  AuthCodeRedirectHandler,
-  getWebidFromTokenPayload,
-} from "./AuthCodeRedirectHandler";
+import { Response as NodeResponse } from "node-fetch";
+import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import {
@@ -39,9 +37,23 @@ import {
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
+import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
 jest.mock("cross-fetch");
+jest.mock("@inrupt/solid-client-authn-core", () => {
+  const actualCoreModule = jest.requireActual(
+    "@inrupt/solid-client-authn-core"
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any;
+  return {
+    ...actualCoreModule,
+    // This works around the network lookup to the JWKS in order to validate the ID token.
+    getWebidFromTokenPayload: jest.fn(() =>
+      Promise.resolve("https://my.webid/")
+    ),
+  };
+});
 
 const mockJwk = (): JWK => {
   return {
@@ -214,9 +226,15 @@ describe("AuthCodeRedirectHandler", () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       this.callback = callback ?? jest.fn().mockResolvedValueOnce(tokenSet);
+      // this is untyped, which makes TS complain
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.metadata = {
+        client_id: "https://some.client#id",
+      };
     }
     const mockedIssuer = {
-      metadata: mockDefaultIssuerConfig(),
+      metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
       Client: clientConstructor,
     };
     Issuer.mockReturnValueOnce(mockedIssuer);
@@ -264,7 +282,7 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the returned fetch function is authenticated
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-      mockedFetch.mockResolvedValueOnce({} as Response);
+      mockedFetch.mockResolvedValueOnce({} as NodeResponse);
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
         "DPoP"
@@ -290,7 +308,7 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the returned fetch function is authenticated
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-      mockedFetch.mockResolvedValueOnce({} as Response);
+      mockedFetch.mockResolvedValueOnce({} as NodeResponse);
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
         "Bearer"
@@ -345,7 +363,7 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the returned fetch function is authenticated
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-      mockedFetch.mockResolvedValueOnce({ status: 401 } as Response);
+      mockedFetch.mockResolvedValueOnce({ status: 401 } as NodeResponse);
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
         "Bearer some refreshed access token"
@@ -479,47 +497,6 @@ describe("AuthCodeRedirectHandler", () => {
         )
       ).rejects.toThrow(
         "No stored session is associated with the state [someState]"
-      );
-    });
-  });
-
-  describe("deriveWebidFromTokenPayload", () => {
-    it("extracts a WebID from a custom webid claim", async () => {
-      await expect(
-        getWebidFromTokenPayload({
-          webid: "https://my.webid/",
-          sub: "some sub",
-          iss: "https://my.idp/",
-          aud: "https://resource.example.org",
-          exp: 1662266216,
-          iat: 1462266216,
-        })
-      ).resolves.toEqual("https://my.webid/");
-    });
-
-    it("extracts a WebID from an IRI-like sub claim", async () => {
-      await expect(
-        getWebidFromTokenPayload({
-          sub: "https://my.webid/",
-          iss: "https://my.idp/",
-          aud: "https://resource.example.org",
-          exp: 1662266216,
-          iat: 1462266216,
-        })
-      ).resolves.toEqual("https://my.webid/");
-    });
-
-    it("throws if a WebID cannot be extracted", async () => {
-      await expect(
-        getWebidFromTokenPayload({
-          sub: "some sub",
-          iss: "https://my.idp/",
-          aud: "https://resource.example.org",
-          exp: 1662266216,
-          iat: 1462266216,
-        })
-      ).rejects.toThrow(
-        "The ID token has no 'webid' claim, and its 'sub' claim of [some sub] is invalid as a URL"
       );
     });
   });

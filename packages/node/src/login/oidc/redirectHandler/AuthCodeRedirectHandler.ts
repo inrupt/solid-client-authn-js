@@ -36,13 +36,14 @@ import {
   loadOidcContextFromStorage,
   saveSessionInfoToStorage,
   getSessionIdFromOauthState,
+  getWebidFromTokenPayload,
+  KeyPair,
+  generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
-import { DPoPInput, IdTokenClaims, Issuer, TokenSet } from "openid-client";
-import { JWK } from "jose/types";
-import generateKeyPair from "jose/util/generate_key_pair";
-import fromKeyLike from "jose/jwk/from_key_like";
+import { Issuer, TokenSet } from "openid-client";
+import { KeyObject } from "crypto";
 
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import {
@@ -51,30 +52,6 @@ import {
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
-
-/**
- * Extract a WebID from an ID token payload. Note that this does not yet implement the
- * user endpoint lookup, and only checks for webid or IRI-like sub claims.
- *
- * @param idToken the payload of the ID token from which the WebID can be extracted.
- * @returns a WebID extracted from the ID token.
- * @internal
- */
-export async function getWebidFromTokenPayload(
-  idToken: IdTokenClaims
-): Promise<string> {
-  if (idToken.webid !== undefined && typeof idToken.webid === "string") {
-    return idToken.webid;
-  }
-  try {
-    const webid = new URL(idToken.sub);
-    return webid.href;
-  } catch (e) {
-    throw new Error(
-      `The ID token has no 'webid' claim, and its 'sub' claim of [${idToken.sub}] is invalid as a URL - error [${e}].`
-    );
-  }
-}
 
 /**
  * @hidden
@@ -152,14 +129,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     const params = client.callbackParams(inputRedirectUrl);
 
-    let dpopKey: JWK;
+    let dpopKeys: KeyPair | undefined;
     let tokenSet: TokenSet;
     let authFetch: typeof fetch;
 
     if (oidcContext.dpop) {
-      dpopKey = await fromKeyLike((await generateKeyPair("ES256")).privateKey);
-      // The alg property isn't set by fromKeyLike, so set it manually.
-      dpopKey.alg = "ES256";
+      dpopKeys = await generateDpopKeyPair();
       tokenSet = await client.callback(
         url.href,
         params,
@@ -167,7 +142,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         // openid-client does not support yet jose@3.x, and expects
         // type definitions that are no longer present. However, the JWK
         // type that we pass here is compatible with the API.
-        { DPoP: dpopKey as DPoPInput }
+        { DPoP: dpopKeys.privateKey as KeyObject }
       );
     } else {
       tokenSet = await client.callback(url.href, params, {
@@ -199,10 +174,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     if (oidcContext.dpop) {
       authFetch = await buildDpopFetch(
         tokenSet.access_token,
-        // TS thinks dpopKey isn't initialized, when it is.
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        dpopKey,
+        // The assertion holds because it gets assigned in another
+        // `if (oidcContext.dpop)` above:
+        dpopKeys as KeyPair,
         refreshOptions
       );
     } else {
@@ -211,7 +185,14 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns
     // its payload as a JSON object.
-    const webid = await getWebidFromTokenPayload(tokenSet.claims());
+    const webid = await getWebidFromTokenPayload(
+      tokenSet.id_token,
+      // The JWKS URI is mandatory in the spec, so the non-null assertion is valid.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      issuer.metadata.jwks_uri!,
+      issuer.metadata.issuer,
+      client.metadata.client_id
+    );
 
     await saveSessionInfoToStorage(
       this.storageUtility,
