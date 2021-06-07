@@ -32,7 +32,6 @@ import {
   IRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
-  IIssuerConfig,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import {
@@ -40,25 +39,12 @@ import {
   getBearerToken,
   TokenEndpointResponse,
   TokenEndpointDpopResponse,
-  validateIdToken,
 } from "@inrupt/oidc-client-ext";
-import { JSONWebKey } from "jose";
 import {
   buildBearerFetch,
   buildDpopFetch,
 } from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
-import { getJwks } from "../IssuerConfigFetcher";
-
-async function verifyIdToken(
-  issuerConfig: IIssuerConfig,
-  client: IClient,
-  issuer: string,
-  idToken: string
-): Promise<boolean> {
-  const jwks = await getJwks(issuerConfig);
-  return validateIdToken(idToken, jwks, issuer, client.clientId);
-}
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
 // configure the server to return the remaining lifespan of the cookie.
@@ -211,21 +197,13 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         redirectUrl: storedRedirectIri,
       });
 
-      // The type assertion should not be necessary...
       authFetch = await buildDpopFetch(
         tokens.accessToken,
-        tokens.refreshToken,
-        tokens.dpopJwk as JSONWebKey
+        (tokens as TokenEndpointDpopResponse).dpopKey
       );
     } else {
       tokens = await getBearerToken(url.toString());
-      authFetch = buildBearerFetch(tokens.accessToken, tokens.refreshToken);
-    }
-
-    if (!(await verifyIdToken(issuerConfig, client, issuer, tokens.idToken))) {
-      throw new Error(
-        `Invalid ID token [${tokens.idToken}]. Possible issues are bad signature, or mismatching audience (expected [${client.clientId}])`
-      );
+      authFetch = buildBearerFetch(tokens.accessToken);
     }
 
     await this.storageUtility.setForUser(

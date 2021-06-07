@@ -130,12 +130,6 @@ const issuerConfigKeyMap: Record<
 };
 /* eslint-enable camelcase */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getJwks(issuerConfig: IIssuerConfig): Promise<any> {
-  const issuerResponse = await fetch(issuerConfig.jwksUri);
-  return issuerResponse.json();
-}
-
 function processConfig(
   config: Record<string, string | string[]>
 ): IIssuerConfig {

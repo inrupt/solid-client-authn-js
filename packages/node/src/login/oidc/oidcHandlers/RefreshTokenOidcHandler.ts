@@ -33,18 +33,17 @@ import {
   IStorageUtility,
   LoginResult,
   saveSessionInfoToStorage,
+  getWebidFromTokenPayload,
+  ISessionInfo,
+  generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
-import fromKeyLike from "jose/jwk/from_key_like";
-import generateKeyPair from "jose/util/generate_key_pair";
 import { TokenSet } from "openid-client";
 import { inject, injectable } from "tsyringe";
-import { ISessionInfo } from "../../../../../core/dist";
 import {
   buildBearerFetch,
   buildDpopFetch,
   RefreshOptions,
 } from "../../../authenticatedFetch/fetchFactory";
-import { getWebidFromTokenPayload } from "../redirectHandler/AuthCodeRedirectHandler";
 import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 function validateOptions(
@@ -74,17 +73,13 @@ async function refreshAccess(
   let tokens: TokenSet & { access_token: string };
   try {
     if (dpop) {
-      const dpopKey = await fromKeyLike(
-        (
-          await generateKeyPair("ES256")
-        ).privateKey
-      );
+      const dpopKeys = await generateDpopKeyPair();
       // The alg property isn't set by fromKeyLike, so set it manually.
-      dpopKey.alg = "ES256";
+      dpopKeys.publicKey.alg = "ES256";
       tokens = await refreshOptions.tokenRefresher.refresh(
         refreshOptions.sessionId,
         refreshOptions.refreshToken,
-        dpopKey,
+        dpopKeys,
         refreshOptions.onNewRefreshToken
       );
       // Rotate the refresh token if applicable
@@ -94,7 +89,7 @@ async function refreshAccess(
       };
       authFetch = await buildDpopFetch(
         tokens.access_token,
-        dpopKey,
+        dpopKeys,
         rotatedRefreshOptions
       );
     } else {
@@ -173,7 +168,12 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
       );
     }
-    sessionInfo.webId = await getWebidFromTokenPayload(accessInfo.claims());
+    sessionInfo.webId = await await getWebidFromTokenPayload(
+      accessInfo.id_token,
+      oidcLoginOptions.issuerConfiguration.jwksUri,
+      oidcLoginOptions.issuer,
+      oidcLoginOptions.client.clientId
+    );
 
     await saveSessionInfoToStorage(
       this.storageUtility,

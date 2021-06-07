@@ -19,12 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { JWK } from "jose/types";
-import SignJWT from "jose/jwt/sign";
-import parseJwk from "jose/jwk/parse";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
-import { v4 } from "uuid";
+import { createDpopHeader, KeyPair } from "@inrupt/solid-client-authn-core";
 import { ITokenRefresher } from "../login/oidc/refresh/TokenRefresher";
 
 export type RefreshOptions = {
@@ -115,53 +112,10 @@ export type DpopHeaderPayload = {
   jti: string;
 };
 
-/**
- * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
- *
- * @param audience The URL to normalize.
- * @returns The normalized URL as a string.
- * @hidden
- */
-export function normalizeHttpUriClaim(audience: string): string {
-  const cleanedAudience = new URL(audience);
-  cleanedAudience.hash = "";
-  cleanedAudience.username = "";
-  cleanedAudience.password = "";
-  return cleanedAudience.toString();
-}
-
-/**
- * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
- * based on the target URL and method, using the provided key.
- *
- * @param audience Target URL.
- * @param method HTTP method allowed.
- * @param key Key used to sign the token.
- * @returns A JWT that can be used as a DPoP Authorization header.
- */
-export async function createDpopHeader(
-  audience: string,
-  method: string,
-  key: JWK
-): Promise<string> {
-  return new SignJWT({
-    htu: normalizeHttpUriClaim(audience),
-    htm: method.toUpperCase(),
-    jti: v4(),
-  })
-    .setProtectedHeader({
-      alg: "ES256",
-      jwk: key,
-      typ: "dpop+jwt",
-    })
-    .setIssuedAt()
-    .sign(await parseJwk(key), {});
-}
-
 async function buildDpopFetchOptions(
   targetUrl: string,
   authToken: string,
-  dpopKey: JWK,
+  dpopKey: KeyPair,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
   const options: RequestInit = { ...defaultOptions };
@@ -186,7 +140,7 @@ async function buildDpopFetchOptions(
  */
 export async function buildDpopFetch(
   accessToken: string,
-  dpopKey: JWK,
+  dpopKey: KeyPair,
   refreshOptions?: RefreshOptions
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;

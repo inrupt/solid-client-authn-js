@@ -37,6 +37,8 @@ export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 export {
   default as IRedirectHandler,
   RedirectResult,
+  getWebidFromTokenPayload,
+  fetchJwks,
 } from "./login/oidc/redirectHandler/IRedirectHandler";
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 
@@ -78,6 +80,12 @@ export { default as InMemoryStorage } from "./storage/InMemoryStorage";
 
 export { default as ConfigurationError } from "./errors/ConfigurationError";
 export { default as NotImplementedError } from "./errors/NotImplementedError";
+
+export {
+  createDpopHeader,
+  KeyPair,
+  generateDpopKeyPair,
+} from "./authenticatedFetch/dpopUtils";
 
 // Mocks.
 export {
