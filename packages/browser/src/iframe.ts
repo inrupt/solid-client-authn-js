@@ -23,9 +23,18 @@
 // which initializes it, and `setupIframeListener`, which reads from it. It avoids
 // creating a DOM element with identifying attributes such as an ID which may clash
 // with some other element set up by the library user.
-const iframe: HTMLIFrameElement = window.document.createElement("iframe");
-iframe.setAttribute("hidden", "true");
-iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+let redirectIframe: HTMLIFrameElement;
+
+// The iframe is dynamically created rather than on import,
+// to avoid accessing `window` when an app is doing server-side rendering:
+function getRedirectIframe(): HTMLIFrameElement {
+  if (typeof redirectIframe === "undefined") {
+    redirectIframe = window.document.createElement("iframe");
+    redirectIframe.setAttribute("hidden", "true");
+    redirectIframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  }
+  return redirectIframe;
+}
 
 /**
  * Redirects the browser to a provided IRI, but does such redirection in a child
@@ -35,6 +44,7 @@ iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
  * @param redirectUrl The IRI to which the iframe should be redirected.
  */
 export function redirectInIframe(redirectUrl: string): void {
+  const iframe = getRedirectIframe();
   window.document.body.appendChild(iframe);
   iframe.src = redirectUrl;
 }
@@ -52,7 +62,15 @@ export function redirectInIframe(redirectUrl: string): void {
 export function setupIframeListener(
   handleIframeRedirect: (redirectUrl: string) => Promise<unknown>
 ): void {
+  // If an app is doing server-side rendering, setting up an iframe listener
+  // is pointless (since there is no iframe, and there will be no expiring
+  // session to renew) and might even throw a `window` not defined error, so
+  // skip this in that case:
+  if (typeof window === "undefined") {
+    return;
+  }
   window.addEventListener("message", async (evt: MessageEvent) => {
+    const iframe = getRedirectIframe();
     if (
       evt.origin === window.location.origin &&
       evt.source === iframe.contentWindow

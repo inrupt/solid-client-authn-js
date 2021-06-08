@@ -14,6 +14,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - If `restorePreviousSession` was set to true, yet the user's session at their
   Pod server had expired, the Promise returned by `handleIncomingRedirect` would
   never resolve.
+- When initialising a new `Session` in Node, e.g. when doing server-side
+  rendering, an error would be thrown about trying to access `window`.
 
 ### Changed
 
