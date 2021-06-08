@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.8.2 - 2021-06-08
+
 ### Bugs fixed
 
 #### browser
@@ -26,8 +30,6 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - The Promise returned by `login` will no longer resolve, because no code is
   able to reliably run after it is called; it redirects the user away from the
   app and thereby terminates all running scripts.
-
-The following sections document changes that have been released already:
 
 ## 1.8.1 - 2021-04-30
 
