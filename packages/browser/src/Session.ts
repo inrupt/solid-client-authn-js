@@ -101,7 +101,7 @@ export async function silentlyAuthenticate(
   } = {
     inIframe: false,
   }
-): Promise<void> {
+): Promise<boolean> {
   // Check if we have an ID Token in storage - if we do then we may be
   // currently logged in, and the user has refreshed their browser page. The ID
   // token is validated, and on success the current session information are returned,
@@ -123,7 +123,9 @@ export async function silentlyAuthenticate(
       tokenType: storedSessionInfo.tokenType ?? "DPoP",
       inIframe: options.inIframe,
     });
+    return true;
   }
+  return false;
 }
 
 function isLoggedIn(
@@ -397,12 +399,17 @@ export class Session extends EventEmitter {
         // TODO: iframe-based authentication being still experimental, it is disabled
         // by default here. When it settles down, the following could be set to true,
         // in which case the unresolving promise afterwards would need to be changed.
-        await silentlyAuthenticate(storedSessionId, this.clientAuthentication);
+        const attemptedSilentAuthentication = await silentlyAuthenticate(
+          storedSessionId,
+          this.clientAuthentication
+        );
         // At this point, we know that the main window will imminently be redirected.
         // However, this redirect is asynchronous and there is no way to halt execution
         // until it happens precisely. That's why the current Promise simply does not
         // resolve.
-        return new Promise(() => {});
+        if (attemptedSilentAuthentication) {
+          return new Promise(() => {});
+        }
       }
     }
     this.tokenRequestInProgress = false;
