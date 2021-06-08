@@ -794,6 +794,47 @@ describe("Session", () => {
       });
     });
 
+    it("resolves handleIncomingRedirect if silent authentication could not be started", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({})
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+      const validateCurrentSessionPromise = Promise.resolve(null);
+      clientAuthentication.validateCurrentSession = jest
+        .fn()
+        .mockReturnValue(
+          validateCurrentSessionPromise
+        ) as typeof clientAuthentication.validateCurrentSession;
+      const incomingRedirectPromise = Promise.resolve();
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockReturnValueOnce(
+          incomingRedirectPromise
+        ) as typeof clientAuthentication.handleIncomingRedirect;
+      clientAuthentication.login = jest.fn();
+
+      const mySession = new Session({ clientAuthentication });
+      const handleIncomingRedirectPromise = mySession.handleIncomingRedirect({
+        url: "https://arbitrary.redirect/url",
+        restorePreviousSession: true,
+      });
+      await incomingRedirectPromise;
+      await validateCurrentSessionPromise;
+      await expect(handleIncomingRedirectPromise).resolves.not.toBeNull();
+    });
+
     it("does nothing if the developer has not explicitly enabled silent authentication", async () => {
       const sessionId = "mySession";
       mockLocalStorage({

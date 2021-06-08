@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugs fixed
+
+#### browser
+
+- If `restorePreviousSession` was set to true, yet the user's session at their
+  Pod server had expired, the Promise returned by `handleIncomingRedirect` would
+  never resolve.
+
 ### Changed
 
 #### browser
