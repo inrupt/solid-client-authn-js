@@ -43,7 +43,10 @@ jobs:
           E2E_TEST_ESS_POD: ${{ secrets.E2E_TEST_ESS_POD }}
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
       - run: npm audit --audit-level=moderate
-      - run: npm run lerna-audit
+      # We can't just run `lerna exec "npm audit"`, because that would fail when
+      # preparing a new version: when the versions are bumped, but not published
+      # yet, `npm audit` would fail.
+      - run: npm run audit-all -- --no-fix
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         continue-on-error: true
