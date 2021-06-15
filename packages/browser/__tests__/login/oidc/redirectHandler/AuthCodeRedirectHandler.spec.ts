@@ -535,6 +535,39 @@ describe("AuthCodeRedirectHandler", () => {
         MOCK_TIMESTAMP + MOCK_EXPIRE_TIME * 1000
       );
     });
+
+    it("returns null for the expiration time if none was provided", async () => {
+      mockOidcClient();
+      const mockedOidcClient = jest.requireMock(
+        "@inrupt/oidc-client-ext"
+      ) as any;
+      jest.spyOn(mockedOidcClient, "getBearerToken").mockReturnValueOnce({
+        accessToken: mockAccessTokenBearer(),
+        idToken: mockIdToken(),
+        webId: mockWebId(),
+        // no expiresIn
+      });
+
+      const testIssuer = "some test Issuer";
+      const mockedStorage = mockStorageUtility({
+        "solidClientAuthenticationUser:mySession": {
+          issuer: testIssuer,
+        },
+        "solidClientAuthenticationUser:oauth2_state_value": {
+          sessionId: "mySession",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+      });
+
+      const sessionInfo = await authCodeRedirectHandler.handle(
+        "https://coolsite.com/?code=someCode&state=oauth2_state_value"
+      );
+
+      expect(sessionInfo.expirationDate).toBeNull();
+    });
   });
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
