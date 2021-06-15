@@ -21,7 +21,6 @@
 
 export { Session, ISessionOptions } from "./Session";
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
 export { getClientAuthenticationWithDependencies } from "./dependencies";
 
 export * from "./defaultSession";

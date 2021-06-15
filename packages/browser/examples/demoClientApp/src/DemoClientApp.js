@@ -62,10 +62,6 @@ class DemoClientApp extends Component {
   constructor(props) {
     super(props);
 
-    // const sessionManager = new SessionManager();
-    // const session = sessionManager.getSession(defaultLocalClientAppSessionId);
-    // I actually want to be able to create multiple sessions, so I guess we
-    // should use the SessionManager, but for now we just hard-code the one...
     const session = new Session(
       {
         clientAuthentication: getClientAuthenticationWithDependencies({}),
@@ -89,12 +85,10 @@ class DemoClientApp extends Component {
 
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
-    this.handleOpenIdentityProvider = this.handleOpenIdentityProvider.bind(
-      this
-    );
-    this.handleLogoutIdentityProvider = this.handleLogoutIdentityProvider.bind(
-      this
-    );
+    this.handleOpenIdentityProvider =
+      this.handleOpenIdentityProvider.bind(this);
+    this.handleLogoutIdentityProvider =
+      this.handleLogoutIdentityProvider.bind(this);
     this.handleFetch = this.handleFetch.bind(this);
   }
 
