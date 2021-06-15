@@ -61,7 +61,6 @@ import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedi
 import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
-import { ISessionManager, SessionManager } from "./SessionManager";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
 const container = emptyContainer;
@@ -73,9 +72,6 @@ container.register<IStorageUtility>("browser:storageUtility", {
 // Session
 container.register<ISessionInfoManager>("browser:sessionInfoManager", {
   useClass: SessionInfoManager,
-});
-container.register<ISessionManager>("browser:sessionManager", {
-  useClass: SessionManager,
 });
 
 // Login
