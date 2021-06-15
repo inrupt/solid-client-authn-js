@@ -47,7 +47,6 @@ import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
-import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
@@ -92,10 +91,6 @@ container.register<IOidcHandler>("node:oidcHandlers", {
 
 container.register<IOidcHandler>("node:oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler,
-});
-
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: ClientCredentialsOidcHandler,
 });
 
 container.register<IRedirector>("node:redirector", {
