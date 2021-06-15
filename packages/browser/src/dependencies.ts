@@ -46,7 +46,6 @@ import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
-import AuthorizationCodeOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
@@ -88,9 +87,6 @@ container.register<IOidcHandler>("browser:oidcHandlers", {
   useClass: RefreshTokenOidcHandler,
 });
 
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: AuthorizationCodeOidcHandler,
-});
 container.register<IOidcHandler>("browser:oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler,
 });
