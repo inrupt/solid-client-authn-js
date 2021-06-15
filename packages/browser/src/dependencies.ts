@@ -47,7 +47,6 @@ import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
-import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
@@ -81,9 +80,6 @@ container.register<ILoginHandler>("browser:loginHandlers", {
 // Login/OIDC
 container.register<IOidcHandler>("browser:oidcHandler", {
   useClass: AggregateOidcHandler,
-});
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: RefreshTokenOidcHandler,
 });
 
 container.register<IOidcHandler>("browser:oidcHandlers", {
