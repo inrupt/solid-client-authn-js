@@ -49,8 +49,6 @@ import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
-import PrimaryDeviceOidcHandler from "./login/oidc/oidcHandlers/PrimaryDeviceOidcHandler";
-import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDeviceOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
@@ -99,12 +97,6 @@ container.register<IOidcHandler>("browser:oidcHandlers", {
 
 container.register<IOidcHandler>("browser:oidcHandlers", {
   useClass: ClientCredentialsOidcHandler,
-});
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: PrimaryDeviceOidcHandler,
-});
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: SecondaryDeviceOidcHandler,
 });
 
 container.register<IRedirector>("browser:redirector", {
