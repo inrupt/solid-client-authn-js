@@ -402,5 +402,50 @@ describe("ClientRegistrar", () => {
         mockStorage.getForUser("mySession", "clientSecret")
       ).resolves.toBeUndefined();
     });
+
+    it("uses stores the signing algorithm preferred by the client when the registration didn't return the used algorithm", async () => {
+      // Sets up the mock-up for DCR
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { Issuer } = jest.requireMock("openid-client") as any;
+      const metadata = mockDefaultClientConfig();
+      delete metadata.id_token_signed_response_alg;
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerMetadata(),
+        Client: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          register: (jest.fn() as any).mockResolvedValueOnce({
+            metadata,
+          }),
+        },
+      };
+      Issuer.mockReturnValue(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+
+      // Check that the returned algorithm value is what we expect
+      expect(client.idTokenSignedResponseAlg).toBe(
+        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0]
+      );
+
+      // Check that the expected algorithm information have been saved in storage
+      await expect(
+        mockStorage.getForUser("mySession", "idTokenSignedResponseAlg")
+      ).resolves.toBe(
+        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0]
+      );
+    });
   });
 });
