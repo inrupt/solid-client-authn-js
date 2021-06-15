@@ -64,7 +64,6 @@ import TokenRefresher, {
   ITokenRefresher,
 } from "./login/oidc/refresh/TokenRefresher";
 import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
-import { ISessionManager, SessionManager } from "./SessionManager";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
 const container = emptyContainer;
@@ -76,9 +75,6 @@ container.register<IStorageUtility>("node:storageUtility", {
 // Session
 container.register<ISessionInfoManager>("node:sessionInfoManager", {
   useClass: SessionInfoManager,
-});
-container.register<ISessionManager>("node:sessionManager", {
-  useClass: SessionManager,
 });
 
 // Login

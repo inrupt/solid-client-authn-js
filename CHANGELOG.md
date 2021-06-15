@@ -14,6 +14,11 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - The SessionManager has been removed. Since there is no active use of this
   class that we are aware of, we are not bumping the major version for this.
 
+#### node
+
+- The SessionManager has been removed. Since there is no active use of this
+  class that we are aware of, we are not bumping the major version for this.
+
 ### New features
 
 #### browser
