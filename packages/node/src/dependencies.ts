@@ -96,6 +96,8 @@ export function getClientAuthenticationWithDependencies(dependencies: {
         clientRegistrar,
         tokenRefresher
       ),
+      // This catch-all class will always be able to handle the
+      // redirect IRI, so it must be registered last.
       new FallbackRedirectHandler(),
     ]),
     new GeneralLogoutHandler(sessionInfoManager),
