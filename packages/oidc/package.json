@@ -33,7 +33,6 @@
   "dependencies": {
     "@inrupt/jose-legacy-modules": "0.0.3-3.12.3",
     "@inrupt/solid-client-authn-core": "^1.8.2",
-    "@types/form-urlencoded": "^4.4.0",
     "@types/uuid": "^8.3.0",
     "form-urlencoded": "~6.0.3",
     "oidc-client": "^1.11.3",
