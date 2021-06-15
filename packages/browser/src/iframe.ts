@@ -66,6 +66,7 @@ export function setupIframeListener(
   // is pointless (since there is no iframe, and there will be no expiring
   // session to renew) and might even throw a `window` not defined error, so
   // skip this in that case:
+  /* istanbul ignore if (window is always defined in tests) */
   if (typeof window === "undefined") {
     return;
   }

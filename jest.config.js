@@ -11,6 +11,14 @@ module.exports = {
     // By default we only run unit tests:
     "e2e/*",
   ],
+  coverageThreshold: {
+    global: {
+      branches: 100,
+      functions: 100,
+      lines: 100,
+      statements: 100,
+    },
+  },
   collectCoverageFrom: [
     "**/src/**/*.ts",
     "!**/node_modules/**",
