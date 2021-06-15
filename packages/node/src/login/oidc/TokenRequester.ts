@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
 import {
   IClientRegistrar,
   IStorageUtility,
@@ -42,13 +41,11 @@ export interface ITokenRequester {
 /**
  * @hidden
  */
-@injectable()
 export default class TokenRequester {
   constructor(
-    @inject("node:storageUtility") private storageUtility: IStorageUtility,
-    @inject("node:issuerConfigFetcher")
+    private storageUtility: IStorageUtility,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar
   ) {}
 
   async request(

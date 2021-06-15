@@ -25,9 +25,8 @@
  */
 
 /**
- * Responsible for decided which Login Handler should be used given the Login Options
+ * Responsible for decided which Login Handler should be used given the Login Options.
  */
-import { injectable, injectAll } from "tsyringe";
 import {
   ILoginHandler,
   ILoginOptions,
@@ -38,12 +37,11 @@ import {
 /**
  * @hidden
  */
-@injectable()
 export default class AggregateLoginHandler
   extends AggregateHandler<[ILoginOptions], LoginResult>
   implements ILoginHandler
 {
-  constructor(@injectAll("node:loginHandlers") loginHandlers: ILoginHandler[]) {
+  constructor(loginHandlers: ILoginHandler[]) {
     super(loginHandlers);
   }
 }

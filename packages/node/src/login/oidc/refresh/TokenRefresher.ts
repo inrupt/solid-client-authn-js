@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { injectable, inject } from "tsyringe";
 import {
   IClient,
   IClientRegistrar,
@@ -58,13 +57,11 @@ export interface ITokenRefresher {
 /**
  * @hidden
  */
-@injectable()
 export default class TokenRefresher implements ITokenRefresher {
   constructor(
-    @inject("node:storageUtility") private storageUtility: IStorageUtility,
-    @inject("node:issuerConfigFetcher")
+    private storageUtility: IStorageUtility,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar
   ) {}
 
   async refresh(

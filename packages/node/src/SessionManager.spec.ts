@@ -19,8 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// The following is required by tsyringe
-import "reflect-metadata";
 import { it, describe } from "@jest/globals";
 import { SessionManager } from "./SessionManager";
 

@@ -33,7 +33,6 @@ import {
   IStorageUtility,
   ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
-import { injectable, inject } from "tsyringe";
 import { Issuer, IssuerMetadata } from "openid-client";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
@@ -141,11 +140,8 @@ export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
 /**
  * @hidden
  */
-@injectable()
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
-  constructor(
-    @inject("node:storageUtility") private storageUtility: IStorageUtility
-  ) {}
+  constructor(private storageUtility: IStorageUtility) {}
 
   // This method needs no state (so can be static), and can be exposed to allow
   // callers to know where this implementation puts state it needs.

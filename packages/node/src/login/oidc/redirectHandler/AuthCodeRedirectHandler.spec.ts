@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import "reflect-metadata";
 import { jest, it, describe, expect } from "@jest/globals";
 import {
   StorageUtilityMock,

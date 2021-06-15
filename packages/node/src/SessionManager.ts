@@ -21,7 +21,6 @@
 
 import { EventEmitter } from "events";
 import { ISessionInfo, IStorage } from "@inrupt/solid-client-authn-core";
-import { injectable } from "tsyringe";
 import { Session } from "./Session";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
@@ -40,7 +39,6 @@ export interface ISessionManager {
  * application, each session being associated with an individual user.
  * @deprecated
  */
-@injectable()
 export class SessionManager extends EventEmitter implements ISessionManager {
   private clientAuthn: ClientAuthentication;
 

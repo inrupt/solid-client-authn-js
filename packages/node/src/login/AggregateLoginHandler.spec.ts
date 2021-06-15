@@ -19,8 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Required by TSyringe:
-import "reflect-metadata";
 import {
   ILoginHandler,
   AggregateHandler,

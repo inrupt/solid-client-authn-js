@@ -38,7 +38,6 @@ import {
   generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
 import { TokenSet } from "openid-client";
-import { inject, injectable } from "tsyringe";
 import {
   buildBearerFetch,
   buildDpopFetch,
@@ -117,11 +116,10 @@ async function refreshAccess(
  * @hidden
  * Refresh token flow spec: https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokens
  */
-@injectable()
 export default class RefreshTokenOidcHandler implements IOidcHandler {
   constructor(
-    @inject("node:tokenRefresher") private tokenRefresher: ITokenRefresher,
-    @inject("node:storageUtility") private storageUtility: IStorageUtility
+    private tokenRefresher: ITokenRefresher,
+    private storageUtility: IStorageUtility
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

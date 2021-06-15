@@ -27,30 +27,12 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
-import "reflect-metadata";
-import { container as emptyContainer } from "tsyringe";
-import {
-  IClientRegistrar,
-  IIssuerConfigFetcher,
-  ILoginHandler,
-  ILogoutHandler,
-  IOidcHandler,
-  IRedirector,
-  IRedirectHandler,
-  IStorage,
-  IStorageUtility,
-  ISessionInfoManager,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+import { IStorage, InMemoryStorage } from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
-import AuthorizationCodeOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
-import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
-import PrimaryDeviceOidcHandler from "./login/oidc/oidcHandlers/PrimaryDeviceOidcHandler";
-import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDeviceOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
@@ -60,98 +42,8 @@ import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRe
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
-import TokenRefresher, {
-  ITokenRefresher,
-} from "./login/oidc/refresh/TokenRefresher";
-import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
-import { ISessionManager, SessionManager } from "./SessionManager";
+import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
-
-const container = emptyContainer;
-
-container.register<IStorageUtility>("node:storageUtility", {
-  useClass: StorageUtilityNode,
-});
-
-// Session
-container.register<ISessionInfoManager>("node:sessionInfoManager", {
-  useClass: SessionInfoManager,
-});
-container.register<ISessionManager>("node:sessionManager", {
-  useClass: SessionManager,
-});
-
-// Login
-container.register<ILoginHandler>("node:loginHandler", {
-  useClass: AggregateLoginHandler,
-});
-container.register<ILoginHandler>("node:loginHandlers", {
-  useClass: OidcLoginHandler,
-});
-
-// Login/OIDC
-container.register<IOidcHandler>("node:oidcHandler", {
-  useClass: AggregateOidcHandler,
-});
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: RefreshTokenOidcHandler,
-});
-
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: AuthorizationCodeOidcHandler,
-});
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: AuthorizationCodeWithPkceOidcHandler,
-});
-
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: ClientCredentialsOidcHandler,
-});
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: PrimaryDeviceOidcHandler,
-});
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: SecondaryDeviceOidcHandler,
-});
-
-container.register<IRedirector>("node:redirector", {
-  useClass: Redirector,
-});
-container.register<IClientRegistrar>("node:clientRegistrar", {
-  useClass: ClientRegistrar,
-});
-container.register<ITokenRequester>("node:tokenRequester", {
-  useClass: TokenRequester,
-});
-
-// Login/OIDC/redirectHandler
-container.register<IRedirectHandler>("node:redirectHandler", {
-  useClass: AggregateRedirectHandler,
-});
-container.register<IRedirectHandler>("node:redirectHandlers", {
-  useClass: AuthCodeRedirectHandler,
-});
-
-// This catch-all class will always be able to handle the
-// redirect IRI, so it must be registered last in the container
-container.register<IRedirectHandler>("node:redirectHandlers", {
-  useClass: FallbackRedirectHandler,
-});
-
-// Login/OIDC/Issuer
-container.register<IIssuerConfigFetcher>("node:issuerConfigFetcher", {
-  useClass: IssuerConfigFetcher,
-});
-
-// Login/OIDC/Refresh
-container.register<ITokenRefresher>("node:tokenRefresher", {
-  useClass: TokenRefresher,
-});
-
-// Logout
-container.register<ILogoutHandler>("node:logoutHandler", {
-  useClass: GeneralLogoutHandler,
-});
 
 /**
  *
@@ -162,16 +54,51 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }): ClientAuthentication {
-  const storage = new InMemoryStorage();
-  const secureStorage = dependencies.secureStorage || storage;
-  const insecureStorage = dependencies.insecureStorage || storage;
+  const inMemoryStorage = new InMemoryStorage();
+  const secureStorage = dependencies.secureStorage || inMemoryStorage;
+  const insecureStorage = dependencies.insecureStorage || inMemoryStorage;
 
-  const authenticatorContainer = container.createChildContainer();
-  authenticatorContainer.register<IStorage>("node:secureStorage", {
-    useValue: secureStorage,
-  });
-  authenticatorContainer.register<IStorage>("node:insecureStorage", {
-    useValue: insecureStorage,
-  });
-  return authenticatorContainer.resolve(ClientAuthentication);
+  const storageUtility = new StorageUtilityNode(secureStorage, insecureStorage);
+
+  const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
+  const clientRegistrar = new ClientRegistrar(storageUtility);
+
+  const sessionInfoManager = new SessionInfoManager(storageUtility);
+
+  const tokenRefresher = new TokenRefresher(
+    storageUtility,
+    issuerConfigFetcher,
+    clientRegistrar
+  );
+
+  return new ClientAuthentication(
+    // TODO: I don't think we need an Aggregate login handler here at all, since we only use one
+    //  anyways...!
+    new AggregateLoginHandler([
+      new OidcLoginHandler(
+        storageUtility,
+        new AggregateOidcHandler([
+          new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
+          new AuthorizationCodeWithPkceOidcHandler(
+            storageUtility,
+            new Redirector()
+          ),
+        ]),
+        issuerConfigFetcher,
+        clientRegistrar
+      ),
+    ]),
+    new AggregateRedirectHandler([
+      new AuthCodeRedirectHandler(
+        storageUtility,
+        sessionInfoManager,
+        issuerConfigFetcher,
+        clientRegistrar,
+        tokenRefresher
+      ),
+      new FallbackRedirectHandler(),
+    ]),
+    new GeneralLogoutHandler(sessionInfoManager),
+    sessionInfoManager
+  );
 }

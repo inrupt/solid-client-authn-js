@@ -28,7 +28,6 @@
  * Handles Common Oidc login functions (Like fetching the configuration)
  */
 
-import { injectable, inject } from "tsyringe";
 import {
   IClientRegistrar,
   IIssuerConfigFetcher,
@@ -59,14 +58,12 @@ function hasIssuer(
 /**
  * @hidden
  */
-@injectable()
 export default class OidcLoginHandler implements ILoginHandler {
   constructor(
-    @inject("node:storageUtility") private storageUtility: IStorageUtility,
-    @inject("node:oidcHandler") private oidcHandler: IOidcHandler,
-    @inject("node:issuerConfigFetcher")
+    private storageUtility: IStorageUtility,
+    private oidcHandler: IOidcHandler,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar
   ) {}
 
   async canHandle(options: ILoginOptions): Promise<boolean> {

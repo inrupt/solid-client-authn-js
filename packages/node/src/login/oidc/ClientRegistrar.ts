@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
 import {
   IStorageUtility,
   IClientRegistrar,
@@ -69,11 +68,8 @@ export function negotiateClientSigningAlg(
 /**
  * @hidden
  */
-@injectable()
 export default class ClientRegistrar implements IClientRegistrar {
-  constructor(
-    @inject("node:storageUtility") private storageUtility: IStorageUtility
-  ) {}
+  constructor(private storageUtility: IStorageUtility) {}
 
   async getClient(
     options: IClientRegistrarOptions,
