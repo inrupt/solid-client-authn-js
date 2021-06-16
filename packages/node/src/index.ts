@@ -27,8 +27,6 @@ export {
   clearSessionFromStorageAll,
 } from "./multiSession";
 
-export { SessionManager, ISessionManagerOptions } from "./SessionManager";
-
 // Re-export of types defined in the core module and produced/consumed by our API
 
 export {

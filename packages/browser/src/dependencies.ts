@@ -46,12 +46,7 @@ import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
-import AuthorizationCodeOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
-import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
-import PrimaryDeviceOidcHandler from "./login/oidc/oidcHandlers/PrimaryDeviceOidcHandler";
-import SecondaryDeviceOidcHandler from "./login/oidc/oidcHandlers/SecondaryDeviceOidcHandler";
-import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
@@ -61,7 +56,6 @@ import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedi
 import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
-import { ISessionManager, SessionManager } from "./SessionManager";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
 const container = emptyContainer;
@@ -73,9 +67,6 @@ container.register<IStorageUtility>("browser:storageUtility", {
 // Session
 container.register<ISessionInfoManager>("browser:sessionInfoManager", {
   useClass: SessionInfoManager,
-});
-container.register<ISessionManager>("browser:sessionManager", {
-  useClass: SessionManager,
 });
 
 // Login
@@ -90,25 +81,9 @@ container.register<ILoginHandler>("browser:loginHandlers", {
 container.register<IOidcHandler>("browser:oidcHandler", {
   useClass: AggregateOidcHandler,
 });
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: RefreshTokenOidcHandler,
-});
 
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: AuthorizationCodeOidcHandler,
-});
 container.register<IOidcHandler>("browser:oidcHandlers", {
   useClass: AuthorizationCodeWithPkceOidcHandler,
-});
-
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: ClientCredentialsOidcHandler,
-});
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: PrimaryDeviceOidcHandler,
-});
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: SecondaryDeviceOidcHandler,
 });
 
 container.register<IRedirector>("browser:redirector", {

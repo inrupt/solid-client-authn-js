@@ -1149,5 +1149,60 @@ describe("Session", () => {
       expect(mySession.info.sessionId).toBe("someSessionId");
       expect(mySession.info.expirationDate).toBe(961106400);
     });
+
+    it("does not change the existing session if silent authentication failed", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const incomingRedirectPromise = Promise.resolve({
+        isLoggedIn: false,
+      });
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockReturnValueOnce(
+          incomingRedirectPromise
+        ) as typeof clientAuthentication.handleIncomingRedirect;
+
+      const windowAddEventListener = jest.spyOn(window, "addEventListener");
+      // ../src/iframe is mocked for other tests,
+      // but we need `setupIframeListener` to actually be executed
+      // so that the callback gets called:
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const iframeMock = jest.requireMock("../src/iframe") as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const iframeActual = jest.requireActual("../src/iframe") as any;
+      iframeMock.setupIframeListener.mockImplementationOnce(
+        iframeActual.setupIframeListener
+      );
+      const mySession = new Session({ clientAuthentication });
+      // The `any` assertion is necessary because Session.info is not meant to
+      // be written to; we only do so for tests to pretend we have an existing
+      // logged-in session that remains logged in after failed silent
+      // authentication.
+      (mySession as any).info = {
+        isLoggedIn: true,
+        webId: "https://some.pod/profile#me",
+        sessionId: "someSessionId",
+        expirationDate: 961106400,
+      };
+
+      // `window.addEventListener` gets called once with ("message", handler)
+      // — get that handler.
+      const messageEventHandler = windowAddEventListener.mock
+        .calls[0][1] as EventListener;
+      const mockedEvent = {
+        origin: window.location.origin,
+        source: null,
+        data: {
+          redirectUrl: "http://arbitrary.com",
+        },
+      } as MessageEvent;
+      // This handler will call `clientAuthentication.handleIncomingRedirect`,
+      // which will return our sessionInfo values:
+      messageEventHandler(mockedEvent);
+
+      await incomingRedirectPromise;
+      expect(mySession.info.webId).toBe("https://some.pod/profile#me");
+      expect(mySession.info.sessionId).toBe("someSessionId");
+      expect(mySession.info.expirationDate).toBe(961106400);
+    });
   });
 });
