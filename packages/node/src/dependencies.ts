@@ -27,21 +27,7 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
-import "reflect-metadata";
-import { container as emptyContainer } from "tsyringe";
-import {
-  IClientRegistrar,
-  IIssuerConfigFetcher,
-  ILoginHandler,
-  ILogoutHandler,
-  IOidcHandler,
-  IRedirector,
-  IRedirectHandler,
-  IStorage,
-  IStorageUtility,
-  ISessionInfoManager,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+import { IStorage, InMemoryStorage } from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
@@ -56,81 +42,8 @@ import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRe
 import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
-import TokenRefresher, {
-  ITokenRefresher,
-} from "./login/oidc/refresh/TokenRefresher";
-import TokenRequester, { ITokenRequester } from "./login/oidc/TokenRequester";
+import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 import AggregateLoginHandler from "./login/AggregateLoginHandler";
-
-const container = emptyContainer;
-
-container.register<IStorageUtility>("node:storageUtility", {
-  useClass: StorageUtilityNode,
-});
-
-// Session
-container.register<ISessionInfoManager>("node:sessionInfoManager", {
-  useClass: SessionInfoManager,
-});
-
-// Login
-container.register<ILoginHandler>("node:loginHandler", {
-  useClass: AggregateLoginHandler,
-});
-container.register<ILoginHandler>("node:loginHandlers", {
-  useClass: OidcLoginHandler,
-});
-
-// Login/OIDC
-container.register<IOidcHandler>("node:oidcHandler", {
-  useClass: AggregateOidcHandler,
-});
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: RefreshTokenOidcHandler,
-});
-
-container.register<IOidcHandler>("node:oidcHandlers", {
-  useClass: AuthorizationCodeWithPkceOidcHandler,
-});
-
-container.register<IRedirector>("node:redirector", {
-  useClass: Redirector,
-});
-container.register<IClientRegistrar>("node:clientRegistrar", {
-  useClass: ClientRegistrar,
-});
-container.register<ITokenRequester>("node:tokenRequester", {
-  useClass: TokenRequester,
-});
-
-// Login/OIDC/redirectHandler
-container.register<IRedirectHandler>("node:redirectHandler", {
-  useClass: AggregateRedirectHandler,
-});
-container.register<IRedirectHandler>("node:redirectHandlers", {
-  useClass: AuthCodeRedirectHandler,
-});
-
-// This catch-all class will always be able to handle the
-// redirect IRI, so it must be registered last in the container
-container.register<IRedirectHandler>("node:redirectHandlers", {
-  useClass: FallbackRedirectHandler,
-});
-
-// Login/OIDC/Issuer
-container.register<IIssuerConfigFetcher>("node:issuerConfigFetcher", {
-  useClass: IssuerConfigFetcher,
-});
-
-// Login/OIDC/Refresh
-container.register<ITokenRefresher>("node:tokenRefresher", {
-  useClass: TokenRefresher,
-});
-
-// Logout
-container.register<ILogoutHandler>("node:logoutHandler", {
-  useClass: GeneralLogoutHandler,
-});
 
 /**
  *
@@ -141,16 +54,53 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }): ClientAuthentication {
-  const storage = new InMemoryStorage();
-  const secureStorage = dependencies.secureStorage || storage;
-  const insecureStorage = dependencies.insecureStorage || storage;
+  const inMemoryStorage = new InMemoryStorage();
+  const secureStorage = dependencies.secureStorage || inMemoryStorage;
+  const insecureStorage = dependencies.insecureStorage || inMemoryStorage;
 
-  const authenticatorContainer = container.createChildContainer();
-  authenticatorContainer.register<IStorage>("node:secureStorage", {
-    useValue: secureStorage,
-  });
-  authenticatorContainer.register<IStorage>("node:insecureStorage", {
-    useValue: insecureStorage,
-  });
-  return authenticatorContainer.resolve(ClientAuthentication);
+  const storageUtility = new StorageUtilityNode(secureStorage, insecureStorage);
+
+  const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
+  const clientRegistrar = new ClientRegistrar(storageUtility);
+
+  const sessionInfoManager = new SessionInfoManager(storageUtility);
+
+  const tokenRefresher = new TokenRefresher(
+    storageUtility,
+    issuerConfigFetcher,
+    clientRegistrar
+  );
+
+  return new ClientAuthentication(
+    // TODO: I don't think we need an Aggregate login handler here at all, since we only use one
+    //  anyways...!
+    new AggregateLoginHandler([
+      new OidcLoginHandler(
+        storageUtility,
+        new AggregateOidcHandler([
+          new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
+          new AuthorizationCodeWithPkceOidcHandler(
+            storageUtility,
+            new Redirector()
+          ),
+        ]),
+        issuerConfigFetcher,
+        clientRegistrar
+      ),
+    ]),
+    new AggregateRedirectHandler([
+      new AuthCodeRedirectHandler(
+        storageUtility,
+        sessionInfoManager,
+        issuerConfigFetcher,
+        clientRegistrar,
+        tokenRefresher
+      ),
+      // This catch-all class will always be able to handle the
+      // redirect IRI, so it must be registered last.
+      new FallbackRedirectHandler(),
+    ]),
+    new GeneralLogoutHandler(sessionInfoManager),
+    sessionInfoManager
+  );
 }

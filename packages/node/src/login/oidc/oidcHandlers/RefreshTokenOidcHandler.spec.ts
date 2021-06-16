@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import "reflect-metadata";
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims } from "openid-client";

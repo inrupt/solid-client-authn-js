@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { injectable } from "tsyringe";
 import {
   IRedirector,
   IRedirectorOptions,
@@ -33,7 +32,6 @@ import {
 /**
  * @hidden
  */
-@injectable()
 export default class Redirector implements IRedirector {
   redirect(redirectUrl: string, options?: IRedirectorOptions): void {
     if (options && options.handleRedirect) {

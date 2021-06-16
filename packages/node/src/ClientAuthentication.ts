@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { injectable, inject } from "tsyringe";
 import {
   ILoginInputOptions,
   ILoginHandler,
@@ -40,13 +39,11 @@ import { fetch } from "cross-fetch";
 /**
  * @hidden
  */
-@injectable()
 export default class ClientAuthentication {
   constructor(
-    @inject("node:loginHandler") private loginHandler: ILoginHandler,
-    @inject("node:redirectHandler") private redirectHandler: IRedirectHandler,
-    @inject("node:logoutHandler") private logoutHandler: ILogoutHandler,
-    @inject("node:sessionInfoManager")
+    private loginHandler: ILoginHandler,
+    private redirectHandler: IRedirectHandler,
+    private logoutHandler: ILogoutHandler,
     private sessionInfoManager: ISessionInfoManager
   ) {}
 

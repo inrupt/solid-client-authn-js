@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
 import {
   IClient,
   IClientRegistrar,
@@ -57,16 +56,13 @@ import { ITokenRefresher } from "../refresh/TokenRefresher";
  * @hidden
  * Token endpoint request: https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint
  */
-@injectable()
 export class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("node:storageUtility") private storageUtility: IStorageUtility,
-    @inject("node:sessionInfoManager")
+    private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,
-    @inject("node:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("node:clientRegistrar") private clientRegistrar: IClientRegistrar,
-    @inject("node:tokenRefresher") private tokenRefresher: ITokenRefresher
+    private clientRegistrar: IClientRegistrar,
+    private tokenRefresher: ITokenRefresher
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {

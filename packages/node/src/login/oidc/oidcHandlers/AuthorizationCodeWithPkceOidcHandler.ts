@@ -35,7 +35,6 @@ import {
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
-import { injectable, inject } from "tsyringe";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
@@ -43,13 +42,12 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
  * Authorization code flow spec: https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
  * PKCE: https://tools.ietf.org/html/rfc7636
  */
-@injectable()
 export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler
 {
   constructor(
-    @inject("node:storageUtility") private storageUtility: IStorageUtility,
-    @inject("node:redirector") private redirector: IRedirector
+    private storageUtility: IStorageUtility,
+    private redirector: IRedirector
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {

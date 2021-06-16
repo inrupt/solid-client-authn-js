@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { injectable } from "tsyringe";
 import {
   IRedirectHandler,
   ISessionInfo,
@@ -40,7 +39,6 @@ import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManag
  * for the query params themselves, and can always try to use them as a redirect IRI.
  * @hidden
  */
-@injectable()
 export class FallbackRedirectHandler implements IRedirectHandler {
   async canHandle(redirectUrl: string): Promise<boolean> {
     try {
