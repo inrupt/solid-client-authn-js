@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.9.0 - 2021-06-16
+
 ### Breaking changes
 
 #### browser
@@ -27,8 +31,6 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
   available for) modules built into Node.js but not available in the browser,
   except for `events`, which will be removed later. This should not cause any
   change in behaviour, but let us know if you encounter any issues.
-
-The following sections document changes that have been released already:
 
 ## 1.8.2 - 2021-06-08
 
