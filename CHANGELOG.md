@@ -9,6 +9,11 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following sections document changes that have been released already:
 
+## 1.9.1 - 2021-06-16
+
+Something went wrong publishing @inrupt/solid-client-authn-core version 1.9.0;
+this is another attempt containing the same changes.
+
 ## 1.9.0 - 2021-06-16
 
 ### Breaking changes
