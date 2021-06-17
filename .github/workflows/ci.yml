@@ -48,7 +48,7 @@ jobs:
       # yet, `npm audit` would fail.
       - run: npm run audit-all -- --no-fix
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         continue-on-error: true
         with:
           name: code-coverage-report
