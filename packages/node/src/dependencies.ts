@@ -43,7 +43,6 @@ import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedi
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
-import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
 /**
  *
@@ -71,35 +70,39 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     clientRegistrar
   );
 
+  const loginHandler =
+    // We don't need an Aggregate login handler here at all, since we only use one handler, but
+    // for future reference, if we want to register multiple, just use an AggregateLoginHandler:
+    //   new AggregateLoginHandler([ loginHandler1, loginHandler2 ]);
+    new OidcLoginHandler(
+      storageUtility,
+      new AggregateOidcHandler([
+        new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
+        new AuthorizationCodeWithPkceOidcHandler(
+          storageUtility,
+          new Redirector()
+        ),
+      ]),
+      issuerConfigFetcher,
+      clientRegistrar
+    );
+
+  const redirectHandler = new AggregateRedirectHandler([
+    new AuthCodeRedirectHandler(
+      storageUtility,
+      sessionInfoManager,
+      issuerConfigFetcher,
+      clientRegistrar,
+      tokenRefresher
+    ),
+    // This catch-all class will always be able to handle the
+    // redirect IRI, so it must be registered last.
+    new FallbackRedirectHandler(),
+  ]);
+
   return new ClientAuthentication(
-    // TODO: I don't think we need an Aggregate login handler here at all, since we only use one
-    //  anyways...!
-    new AggregateLoginHandler([
-      new OidcLoginHandler(
-        storageUtility,
-        new AggregateOidcHandler([
-          new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
-          new AuthorizationCodeWithPkceOidcHandler(
-            storageUtility,
-            new Redirector()
-          ),
-        ]),
-        issuerConfigFetcher,
-        clientRegistrar
-      ),
-    ]),
-    new AggregateRedirectHandler([
-      new AuthCodeRedirectHandler(
-        storageUtility,
-        sessionInfoManager,
-        issuerConfigFetcher,
-        clientRegistrar,
-        tokenRefresher
-      ),
-      // This catch-all class will always be able to handle the
-      // redirect IRI, so it must be registered last.
-      new FallbackRedirectHandler(),
-    ]),
+    loginHandler,
+    redirectHandler,
     new GeneralLogoutHandler(sessionInfoManager),
     sessionInfoManager
   );
