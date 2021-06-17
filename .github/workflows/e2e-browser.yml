@@ -56,7 +56,7 @@ jobs:
           E2E_NSS_PASSWORD: ${{ secrets.E2E_NSS_PASSWORD }}
           E2E_TESTCAFE_WAIT_TIME: 20000
       - name: Archive browser-based end-to-end test failure screenshots, if any
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         continue-on-error: true
         if: failure()
         with:
