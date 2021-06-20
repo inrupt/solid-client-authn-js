@@ -1,0 +1,5 @@
+# TestCafe test failures can record screenshots, which can be placed here.
+e2e-browser-failures/
+
+# TestCafe can record requests (and responses), but we don't want those in Git.
+testcafe-requests
