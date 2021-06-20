@@ -27,7 +27,6 @@
 /**
  * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
-import { injectable, injectAll } from "tsyringe";
 import {
   IRedirectHandler,
   ISessionInfo,
@@ -37,14 +36,11 @@ import {
 /**
  * @hidden
  */
-@injectable()
 export default class AggregateRedirectHandler
   extends AggregateHandler<[string], ISessionInfo & { fetch: typeof fetch }>
   implements IRedirectHandler
 {
-  constructor(
-    @injectAll("browser:redirectHandlers") redirectHandlers: IRedirectHandler[]
-  ) {
+  constructor(redirectHandlers: IRedirectHandler[]) {
     super(redirectHandlers);
   }
 }

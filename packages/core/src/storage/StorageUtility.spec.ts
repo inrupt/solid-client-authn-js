@@ -20,7 +20,6 @@
  */
 
 import { jest, describe, it, expect } from "@jest/globals";
-// Required by TSyringe:
 import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
 import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
 import StorageUtility, {
@@ -505,6 +504,23 @@ describe("StorageUtility", () => {
 });
 
 describe("getSessionIdFromOauthState", () => {
+  it("returns stored OIDC 'state' for request's OIDC 'state' value", async () => {
+    const oauthState = "some existent 'state'";
+    const oauthStateValue = "some existent 'state' value";
+    const mockedStorage = mockStorageUtility(
+      {
+        [`solidClientAuthenticationUser:${oauthState}`]: {
+          sessionId: oauthStateValue,
+        },
+      },
+      false
+    );
+
+    await expect(
+      getSessionIdFromOauthState(mockedStorage, oauthState)
+    ).resolves.toBe(oauthStateValue);
+  });
+
   it("returns undefined if no stored OIDC 'state' matches the current request's OIDC 'state' value", async () => {
     const mockedStorage = mockStorageUtility({});
 

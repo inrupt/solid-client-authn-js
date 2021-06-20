@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import "reflect-metadata";
 import {
   StorageUtilityMock,
   mockStorageUtility,
@@ -540,6 +539,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       const mockedOidcClient = jest.requireMock(
         "@inrupt/oidc-client-ext"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ) as any;
       jest.spyOn(mockedOidcClient, "getBearerToken").mockReturnValueOnce({
         accessToken: mockAccessTokenBearer(),

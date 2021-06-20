@@ -29,17 +29,11 @@ import {
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
 
-import { inject, injectable } from "tsyringe";
-
 /**
  * @hidden
  */
-@injectable()
 export default class GeneralLogoutHandler implements ILogoutHandler {
-  constructor(
-    @inject("browser:sessionInfoManager")
-    private sessionInfoManager: ISessionInfoManager
-  ) {}
+  constructor(private sessionInfoManager: ISessionInfoManager) {}
 
   async canHandle(): Promise<boolean> {
     return true;

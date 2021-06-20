@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
 import {
   ISessionInfo,
   ISessionInfoManager,
@@ -77,11 +76,8 @@ export async function clear(
 /**
  * @hidden
  */
-@injectable()
 export class SessionInfoManager implements ISessionInfoManager {
-  constructor(
-    @inject("browser:storageUtility") private storageUtility: IStorageUtility
-  ) {}
+  constructor(private storageUtility: IStorageUtility) {}
 
   // eslint-disable-next-line class-methods-use-this
   update(
