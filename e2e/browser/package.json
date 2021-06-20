@@ -4,7 +4,8 @@
   "description": "TestCafe end-2-end authentication test runner",
   "main": "index.ts",
   "scripts": {
-    "test": "testcafe"
+    "test": "testcafe",
+    "e2e-test-ci": "testcafe firefox:headless,chrome:headless:userAgent=\"Browser-based solid-client-authn end-to-end tests running in CI (only Chrome supports userAgent overide).\" --screenshots takeOnFails=true,path=./e2e-browser-failures --retry-test-pages --hostname localhost"
   },
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"

@@ -40,10 +40,12 @@ jobs:
         # That also requires adding `--hostname localhost` to run over HTTPS:
         # https://testcafe.io/documentation/402638/reference/configuration-file#retrytestpages
         # Setting a test-specific user agent is only possible for Chrome: https://stackoverflow.com/a/59358925
+        #
+        # Attempt to run our End-2-End tests multiple times if necessary (as they can be flaky!).
         run: |
           cd e2e/browser
           npm ci
-          npm run test -- "firefox:headless,chrome:headless:userAgent='Browser-based solid-client-authn end-to-end tests running in CI. Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) $(chrome --version) Safari/537.36'" --screenshots takeOnFails=true,path=./e2e-browser-failures --retry-test-pages --hostname localhost
+          npm run e2e-test-ci || npm run e2e-test-ci || npm run e2e-test-ci
         # Dependabot does not have access to our secrets,
         # so end-to-end tests for Dependabot PRs can only be manually started.
         # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
