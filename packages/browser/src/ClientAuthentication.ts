@@ -24,8 +24,6 @@
  * @packageDocumentation
  */
 
-import "reflect-metadata";
-import { injectable, inject } from "tsyringe";
 import {
   ILoginHandler,
   ILogoutHandler,
@@ -50,16 +48,12 @@ const globalFetch: typeof window.fetch = (request, init) =>
 /**
  * @hidden
  */
-@injectable()
 export default class ClientAuthentication {
   constructor(
-    @inject("browser:loginHandler") private loginHandler: ILoginHandler,
-    @inject("browser:redirectHandler")
+    private loginHandler: ILoginHandler,
     private redirectHandler: IRedirectHandler,
-    @inject("browser:logoutHandler") private logoutHandler: ILogoutHandler,
-    @inject("browser:sessionInfoManager")
+    private logoutHandler: ILogoutHandler,
     private sessionInfoManager: ISessionInfoManager,
-    @inject("browser:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher
   ) {}
 

@@ -27,7 +27,6 @@
 /**
  * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
-import { injectable, injectAll } from "tsyringe";
 import {
   IOidcHandler,
   IOidcOptions,
@@ -38,14 +37,11 @@ import {
 /**
  * @hidden
  */
-@injectable()
 export default class AggregateOidcHandler
   extends AggregateHandler<[IOidcOptions], LoginResult>
   implements IOidcHandler
 {
-  constructor(
-    @injectAll("browser:oidcHandlers") oidcLoginHandlers: IOidcHandler[]
-  ) {
+  constructor(oidcLoginHandlers: IOidcHandler[]) {
     super(oidcLoginHandlers);
   }
 }

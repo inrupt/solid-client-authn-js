@@ -27,7 +27,6 @@
 /**
  * A helper class that will validate items taken from local storage
  */
-import { injectable, inject } from "tsyringe";
 import { IStorage, StorageUtility } from "@inrupt/solid-client-authn-core";
 
 /**
@@ -37,12 +36,8 @@ import { IStorage, StorageUtility } from "@inrupt/solid-client-authn-core";
  * the browser module, with the dependancy container in dependencies.ts).
  * @hidden
  */
-@injectable()
 export default class StorageUtilityBrowser extends StorageUtility {
-  constructor(
-    @inject("browser:secureStorage") secureStorage: IStorage,
-    @inject("browser:insecureStorage") insecureStorage: IStorage
-  ) {
+  constructor(secureStorage: IStorage, insecureStorage: IStorage) {
     super(secureStorage, insecureStorage);
   }
 }

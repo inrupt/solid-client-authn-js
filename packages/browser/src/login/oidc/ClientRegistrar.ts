@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
 import {
   IStorageUtility,
   IClientRegistrar,
@@ -37,11 +36,8 @@ import { registerClient } from "@inrupt/oidc-client-ext";
 /**
  * @hidden
  */
-@injectable()
 export default class ClientRegistrar implements IClientRegistrar {
-  constructor(
-    @inject("browser:storageUtility") private storageUtility: IStorageUtility
-  ) {}
+  constructor(private storageUtility: IStorageUtility) {}
 
   async getClient(
     options: IClientRegistrarOptions,

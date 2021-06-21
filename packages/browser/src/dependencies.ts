@@ -27,25 +27,10 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
-import "reflect-metadata";
-import { container as emptyContainer } from "tsyringe";
-import {
-  IClientRegistrar,
-  IIssuerConfigFetcher,
-  ILoginHandler,
-  ILogoutHandler,
-  IOidcHandler,
-  IRedirector,
-  IRedirectHandler,
-  IStorage,
-  IStorageUtility,
-  ISessionInfoManager,
-  InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+import { IStorage, InMemoryStorage } from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
-import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
@@ -56,65 +41,6 @@ import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedi
 import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
-import AggregateLoginHandler from "./login/AggregateLoginHandler";
-
-const container = emptyContainer;
-
-container.register<IStorageUtility>("browser:storageUtility", {
-  useClass: StorageUtilityBrowser,
-});
-
-// Session
-container.register<ISessionInfoManager>("browser:sessionInfoManager", {
-  useClass: SessionInfoManager,
-});
-
-// Login
-container.register<ILoginHandler>("browser:loginHandler", {
-  useClass: AggregateLoginHandler,
-});
-container.register<ILoginHandler>("browser:loginHandlers", {
-  useClass: OidcLoginHandler,
-});
-
-// Login/OIDC
-container.register<IOidcHandler>("browser:oidcHandler", {
-  useClass: AggregateOidcHandler,
-});
-
-container.register<IOidcHandler>("browser:oidcHandlers", {
-  useClass: AuthorizationCodeWithPkceOidcHandler,
-});
-
-container.register<IRedirector>("browser:redirector", {
-  useClass: Redirector,
-});
-container.register<IClientRegistrar>("browser:clientRegistrar", {
-  useClass: ClientRegistrar,
-});
-
-// Login/OIDC/redirectHandler
-container.register<IRedirectHandler>("browser:redirectHandler", {
-  useClass: AggregateRedirectHandler,
-});
-container.register<IRedirectHandler>("browser:redirectHandlers", {
-  useClass: AuthCodeRedirectHandler,
-});
-// This catch-all class will always be able to handle the
-// redirect IRI, so it must be registered last in the container
-container.register<IRedirectHandler>("browser:redirectHandlers", {
-  useClass: FallbackRedirectHandler,
-});
-
-// Login/OIDC/Issuer
-container.register<IIssuerConfigFetcher>("browser:issuerConfigFetcher", {
-  useClass: IssuerConfigFetcher,
-});
-
-// Logout
-container.register<ILogoutHandler>("browser:logoutHandler", {
-  useClass: GeneralLogoutHandler,
-});
 
 /**
  *
@@ -125,15 +51,51 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
   insecureStorage?: IStorage;
 }): ClientAuthentication {
-  const secureStorage = dependencies.secureStorage || new InMemoryStorage();
+  const inMemoryStorage = new InMemoryStorage();
+  const secureStorage = dependencies.secureStorage || inMemoryStorage;
   const insecureStorage = dependencies.insecureStorage || new BrowserStorage();
 
-  const authenticatorContainer = container.createChildContainer();
-  authenticatorContainer.register<IStorage>("browser:secureStorage", {
-    useValue: secureStorage,
-  });
-  authenticatorContainer.register<IStorage>("browser:insecureStorage", {
-    useValue: insecureStorage,
-  });
-  return authenticatorContainer.resolve(ClientAuthentication);
+  const storageUtility = new StorageUtilityBrowser(
+    secureStorage,
+    insecureStorage
+  );
+
+  const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
+  const clientRegistrar = new ClientRegistrar(storageUtility);
+
+  const sessionInfoManager = new SessionInfoManager(storageUtility);
+
+  const loginHandler =
+    // We don't need an Aggregate login handler here at all, since we only use one handler, but
+    // for future reference, if we want to register multiple, just use an AggregateLoginHandler:
+    //   new AggregateLoginHandler([ loginHandler1, loginHandler2 ]);
+    new OidcLoginHandler(
+      storageUtility,
+      new AuthorizationCodeWithPkceOidcHandler(
+        storageUtility,
+        new Redirector()
+      ),
+      issuerConfigFetcher,
+      clientRegistrar
+    );
+
+  const redirectHandler = new AggregateRedirectHandler([
+    new AuthCodeRedirectHandler(
+      storageUtility,
+      sessionInfoManager,
+      issuerConfigFetcher,
+      clientRegistrar
+    ),
+    // This catch-all class will always be able to handle the
+    // redirect IRI, so it must be registered last.
+    new FallbackRedirectHandler(),
+  ]);
+
+  return new ClientAuthentication(
+    loginHandler,
+    redirectHandler,
+    new GeneralLogoutHandler(sessionInfoManager),
+    sessionInfoManager,
+    issuerConfigFetcher
+  );
 }

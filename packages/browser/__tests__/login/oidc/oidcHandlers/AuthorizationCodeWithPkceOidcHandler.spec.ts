@@ -22,7 +22,6 @@
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
-import "reflect-metadata";
 import {
   IOidcOptions,
   IRedirector,

@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { inject, injectable } from "tsyringe";
 import {
   IClient,
   IClientRegistrar,
@@ -105,15 +104,12 @@ async function setupResourceServerSession(
 /**
  * @hidden
  */
-@injectable()
 export class AuthCodeRedirectHandler implements IRedirectHandler {
   constructor(
-    @inject("browser:storageUtility") private storageUtility: IStorageUtility,
-    @inject("browser:sessionInfoManager")
+    private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,
-    @inject("browser:issuerConfigFetcher")
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    @inject("browser:clientRegistrar") private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {

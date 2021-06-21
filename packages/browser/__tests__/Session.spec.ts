@@ -19,8 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// The following is required by tsyringe
-import "reflect-metadata";
 import { jest, it, describe, expect } from "@jest/globals";
 import {
   ISessionInfo,
@@ -1177,6 +1175,7 @@ describe("Session", () => {
       // be written to; we only do so for tests to pretend we have an existing
       // logged-in session that remains logged in after failed silent
       // authentication.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mySession as any).info = {
         isLoggedIn: true,
         webId: "https://some.pod/profile#me",
