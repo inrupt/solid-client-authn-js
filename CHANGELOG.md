@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugs fixed
+
+#### browser
+
+- Trying to call `Session.fetch` for a Session that had not yet authenticated
+  would result in the following error:
+    'fetch' called on an object that does not implement interface Window.
+
 The following sections document changes that have been released already:
 
 ## 1.9.0 - 2021-06-16
