@@ -147,7 +147,11 @@ export default class ClientAuthentication {
   ): Promise<ISessionInfo | undefined> => {
     const redirectInfo = await this.redirectHandler.handle(url);
 
-    this.fetch = redirectInfo.fetch;
+    // The `FallbackRedirectHandler` directly returns the global `fetch` for
+    // his value, so we should ensure it's bound to `window` rather than to
+    // ClientAuthentication, to avoid the following error:
+    // > 'fetch' called on an object that does not implement interface Window.
+    this.fetch = redirectInfo.fetch.bind(window);
 
     const cleanedUpUrl = new URL(url);
     cleanedUpUrl.searchParams.delete("state");
