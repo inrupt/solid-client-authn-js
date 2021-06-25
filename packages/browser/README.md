@@ -6,18 +6,11 @@ The main documentation is at the [root of the repository](https://github.com/inr
 ## Required polyfills
 
 Our JavaScript Client Libraries use relatively modern JavaScript features that
-will work in all commonly used browsers, except Internet Explorer. However, one of
-the libraries we currently use expects some Node.js modules to be present, which must
-be polyfilled by the bundler. Here is the list of modules that need to be polyfilled:
-- `crypto`
-- `stream`
-- `util`
-- `buffer`
-
-Prior to Webpack version 5 these modules were polyfilled by default, but that is no longer the case.
-See
-[our Webpack configuration](https://github.com/inrupt/solid-client-authn-js/blob/main/packages/browser/webpack.common.js)
-for packages that can provide the necessary polyfills.
+will work in all commonly used browsers, except Internet Explorer. Additionally,
+`@inrupt/solid-client-authn-browser` currently expects the Node.js `events`
+module. Webpack versions before version 5 used to add a polyfill for that by
+default; if you do not use Webpack, or use version 5 or later, please install
+the `events` npm package as well.
 
 ## Underlying libraries
 
