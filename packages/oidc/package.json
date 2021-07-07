@@ -31,7 +31,7 @@
     "rollup-plugin-typescript2": "^0.30.0"
   },
   "dependencies": {
-    "@inrupt/jose-legacy-modules": "0.0.3-3.13.0",
+    "@inrupt/jose-legacy-modules": "0.0.3-3.14.0",
     "@inrupt/solid-client-authn-core": "^1.9.1",
     "@types/uuid": "^8.3.0",
     "form-urlencoded": "~6.0.3",
