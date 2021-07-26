@@ -391,6 +391,31 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toEqual("some refresh token");
     });
 
+    it("stores the DPoP key pair if the refresh token is DPoP-bound", async () => {
+      const mockedTokens = mockDpopTokens();
+      mockedTokens.refresh_token = "some refresh token";
+      setupOidcClientMock(mockedTokens);
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      // Check that the session information is stored in the provided storage
+      await expect(
+        mockedStorage.getForUser("mySession", "privateKey")
+      ).resolves.not.toBeUndefined();
+      await expect(
+        mockedStorage.getForUser("mySession", "publicKey")
+      ).resolves.not.toBeUndefined();
+    });
+
     it("calls the refresh token handler if one is provided", async () => {
       const mockedTokens = mockDpopTokens();
       mockedTokens.refresh_token = "some refresh token";

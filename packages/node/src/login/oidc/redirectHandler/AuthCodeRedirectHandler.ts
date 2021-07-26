@@ -196,7 +196,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       tokenSet.id_token,
       webid,
       "true",
-      tokenSet.refresh_token
+      tokenSet.refresh_token,
+      undefined,
+      dpopKeys
     );
 
     const sessionInfo = await this.sessionInfoManager.get(sessionId);
