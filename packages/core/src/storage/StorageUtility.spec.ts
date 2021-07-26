@@ -19,6 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {
+  fromKeyLike,
+  generateKeyPair,
+  KeyLike,
+} from "@inrupt/jose-legacy-modules";
 import { jest, describe, it, expect } from "@jest/globals";
 import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
 import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
@@ -666,5 +671,65 @@ describe("saveSessionInfoToStorage", () => {
     await expect(
       mockedStorage.getForUser("some session", "isLoggedIn", { secure: true })
     ).resolves.toEqual("true");
+  });
+
+  let publicKey: KeyLike | undefined;
+  let privateKey: KeyLike | undefined;
+
+  const mockJwk = async (): Promise<{
+    publicKey: KeyLike;
+    privateKey: KeyLike;
+  }> => {
+    if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
+      const generatedPair = await generateKeyPair("ES256");
+      publicKey = generatedPair.publicKey;
+      privateKey = generatedPair.privateKey;
+    }
+    return {
+      publicKey,
+      privateKey,
+    };
+  };
+
+  const mockKeyPair = async () => {
+    const { privateKey: prvt, publicKey: pblc } = await mockJwk();
+    const dpopKeyPair = {
+      privateKey: prvt,
+      publicKey: await fromKeyLike(pblc),
+    };
+    // The alg property isn't set by fromKeyLike, so set it manually.
+    dpopKeyPair.publicKey.alg = "ES256";
+    return dpopKeyPair;
+  };
+
+  it("saves the DPoP key if provided in the given storage", async () => {
+    const mockedStorage = mockStorageUtility({});
+    const dpopKey = await mockKeyPair();
+    await saveSessionInfoToStorage(
+      mockedStorage,
+      "some session",
+      "an ID token",
+      "https://my.webid",
+      "true",
+      "a refresh token",
+      true,
+      dpopKey
+    );
+
+    expect(
+      JSON.parse(
+        (await mockedStorage.getForUser("some session", "publicKey", {
+          secure: true,
+        }))!
+      )
+    ).toEqual(dpopKey.publicKey);
+    const privateJwk = await mockedStorage.getForUser(
+      "some session",
+      "privateKey",
+      { secure: true }
+    );
+    expect(JSON.parse(privateJwk!)).toEqual(
+      await fromKeyLike(dpopKey.privateKey)
+    );
   });
 });
