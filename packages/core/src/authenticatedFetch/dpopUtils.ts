@@ -86,6 +86,6 @@ export async function generateDpopKeyPair(): Promise<KeyPair> {
     publicKey: await fromKeyLike(publicKey),
   };
   // The alg property isn't set by fromKeyLike, so set it manually.
-  dpopKeyPair.publicKey.alg = PREFERRED_SIGNING_ALG[0];
+  [dpopKeyPair.publicKey.alg] = PREFERRED_SIGNING_ALG;
   return dpopKeyPair;
 }
