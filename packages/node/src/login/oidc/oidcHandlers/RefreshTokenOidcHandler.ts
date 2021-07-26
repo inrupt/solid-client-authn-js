@@ -36,8 +36,11 @@ import {
   getWebidFromTokenPayload,
   ISessionInfo,
   generateDpopKeyPair,
+  KeyPair,
+  PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
 import { TokenSet } from "openid-client";
+import { JWK, parseJwk } from "jose/jwk/parse";
 import {
   buildBearerFetch,
   buildDpopFetch,
@@ -65,16 +68,17 @@ function validateOptions(
  */
 async function refreshAccess(
   refreshOptions: RefreshOptions,
-  dpop: boolean
+  dpop: boolean,
+  refreshBindingKey?: KeyPair
 ): Promise<TokenSet & { fetch: typeof fetch }> {
   let authFetch: typeof fetch;
   // eslint-disable-next-line camelcase
   let tokens: TokenSet & { access_token: string };
   try {
     if (dpop) {
-      const dpopKeys = await generateDpopKeyPair();
+      const dpopKeys = refreshBindingKey || (await generateDpopKeyPair());
       // The alg property isn't set by fromKeyLike, so set it manually.
-      dpopKeys.publicKey.alg = "ES256";
+      [dpopKeys.publicKey.alg] = PREFERRED_SIGNING_ALG;
       tokens = await refreshOptions.tokenRefresher.refresh(
         refreshOptions.sessionId,
         refreshOptions.refreshToken,
@@ -151,9 +155,31 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       clientSecret: oidcLoginOptions.client.clientSecret as string,
     });
 
+    // In the case when the refresh token is bound to a DPoP key, said key must
+    // be used during the refresh grant.
+    const publicKey = await this.storageUtility.getForUser(
+      oidcLoginOptions.sessionId,
+      "publicKey"
+    );
+    const privateKey = await this.storageUtility.getForUser(
+      oidcLoginOptions.sessionId,
+      "privateKey"
+    );
+    let keyPair: undefined | KeyPair;
+    if (publicKey !== undefined && privateKey !== undefined) {
+      keyPair = {
+        publicKey: JSON.parse(publicKey) as JWK,
+        privateKey: await parseJwk(
+          JSON.parse(privateKey),
+          PREFERRED_SIGNING_ALG[0]
+        ),
+      };
+    }
+
     const accessInfo = await refreshAccess(
       refreshOptions,
-      oidcLoginOptions.dpop
+      oidcLoginOptions.dpop,
+      keyPair
     );
 
     const sessionInfo: ISessionInfo = {
@@ -166,7 +192,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
       );
     }
-    sessionInfo.webId = await await getWebidFromTokenPayload(
+    sessionInfo.webId = await getWebidFromTokenPayload(
       accessInfo.id_token,
       oidcLoginOptions.issuerConfiguration.jwksUri,
       oidcLoginOptions.issuer,
@@ -179,7 +205,9 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       undefined,
       undefined,
       "true",
-      accessInfo.refresh_token ?? refreshOptions.refreshToken
+      accessInfo.refresh_token ?? refreshOptions.refreshToken,
+      undefined,
+      keyPair
     );
 
     await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
