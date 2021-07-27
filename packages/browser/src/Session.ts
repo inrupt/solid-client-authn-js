@@ -273,8 +273,12 @@ export class Session extends EventEmitter {
    * @param options See {@see IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
-    inputOptions: string | IHandleIncomingRedirectOptions = {}
+    errorCallback: (error: string | null, errorDescription: string | null) => void,
+    inputOptions: string | IHandleIncomingRedirectOptions = {},
   ): Promise<ISessionInfo | undefined> => {
+    // call errorCallback somewhere...
+
+
     if (this.info.isLoggedIn) {
       return this.info;
     }
@@ -434,6 +438,15 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
+  }
+
+  onLoginError(): void {
+    this.setSessionInfo({
+      isLoggedIn : false,
+      webId : undefined,
+      sessionId : undefined,
+      experirationDate : undefined
+    });
   }
 
   /**
