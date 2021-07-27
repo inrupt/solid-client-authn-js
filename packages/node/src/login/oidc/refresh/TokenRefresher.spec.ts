@@ -235,6 +235,7 @@ describe("TokenRefresher", () => {
         clientId: "some client ID",
         clientSecret: "some client secret",
         idTokenSignedResponseAlg: "ES256",
+        clientType: "static",
       }),
     });
 
