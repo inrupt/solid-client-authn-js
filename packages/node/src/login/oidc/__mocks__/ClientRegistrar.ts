@@ -31,10 +31,12 @@ import { ClientMetadata } from "openid-client";
 export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",
   clientSecret: "12345",
+  clientType: "dynamic",
 };
 
 export const PublicClientRegistrarResponse: IClient = {
   clientId: "abcde",
+  clientType: "dynamic",
 };
 
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {

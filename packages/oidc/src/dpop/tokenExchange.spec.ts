@@ -159,6 +159,7 @@ const mockDpopTokens = (): TokenEndpointRawResponse => {
 const mockClient = (): IClient => {
   return {
     clientId: "some client",
+    clientType: "dynamic",
   };
 };
 

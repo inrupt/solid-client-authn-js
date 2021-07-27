@@ -37,14 +37,13 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    const client = await handleRegistration(
+    await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
       clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
-    expect(client.clientType).toBe("dynamic");
   });
 
   it("should perform DCR if no client ID is provided", async () => {
@@ -55,14 +54,13 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    const client = await handleRegistration(
+    await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
       clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
-    expect(client.clientType).toBe("dynamic");
   });
 
   it("should store provided client WebID if one provided and the Identity Provider supports Solid-OIDC", async () => {
