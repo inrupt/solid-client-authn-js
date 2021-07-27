@@ -78,6 +78,7 @@ export const mockDefaultClient = (): IClient => {
   return {
     clientId: "a client id",
     clientSecret: "a client secret",
+    clientType: "dynamic",
   };
 };
 

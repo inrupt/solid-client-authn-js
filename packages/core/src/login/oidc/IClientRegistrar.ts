@@ -99,17 +99,14 @@ export async function handleRegistration(
 ): Promise<IClient> {
   const clientType = determineClientType(options, issuerConfig);
   if (clientType === "dynamic") {
-    return {
-      ...clientRegistrar.getClient(
-        {
-          sessionId: options.sessionId,
-          clientName: options.clientName,
-          redirectUrl: options.redirectUrl,
-        },
-        issuerConfig
-      ),
-      clientType,
-    };
+    return clientRegistrar.getClient(
+      {
+        sessionId: options.sessionId,
+        clientName: options.clientName,
+        redirectUrl: options.redirectUrl,
+      },
+      issuerConfig
+    );
   }
   // If a client_id was provided, and the Identity Provider is Solid-OIDC compliant,
   // or it is not compliant but the client_id isn't an IRI (we assume it has already

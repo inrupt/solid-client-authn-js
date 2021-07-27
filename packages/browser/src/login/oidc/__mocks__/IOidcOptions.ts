@@ -39,5 +39,6 @@ export const standardOidcOptions: IOidcOptions = {
   },
   client: {
     clientId: "coolApp",
+    clientType: "dynamic",
   },
 };
