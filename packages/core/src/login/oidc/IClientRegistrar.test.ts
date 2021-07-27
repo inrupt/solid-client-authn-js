@@ -37,13 +37,14 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    await handleRegistration(
+    const client = await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
       clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
+    expect(client.clientType).toBe("dynamic");
   });
 
   it("should perform DCR if no client ID is provided", async () => {
@@ -54,13 +55,14 @@ describe("handleRegistration", () => {
     const clientRegistrar = {
       getClient: jest.fn(),
     };
-    await handleRegistration(
+    const client = await handleRegistration(
       options,
       { solidOidcSupported: undefined } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
       clientRegistrar as IClientRegistrar
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
+    expect(client.clientType).toBe("dynamic");
   });
 
   it("should store provided client WebID if one provided and the Identity Provider supports Solid-OIDC", async () => {
@@ -75,7 +77,7 @@ describe("handleRegistration", () => {
     const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
     } as unknown as IStorageUtility;
-    await handleRegistration(
+    const client = await handleRegistration(
       options,
       {
         solidOidcSupported: "https://solidproject.org/TR/solid-oidc",
@@ -85,6 +87,7 @@ describe("handleRegistration", () => {
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
+    expect(client.clientType).toBe("solid-oidc");
   });
 
   it("should store provided client registration information when the client ID is not a WebID", async () => {
@@ -101,7 +104,7 @@ describe("handleRegistration", () => {
     const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
     } as unknown as IStorageUtility;
-    await handleRegistration(
+    const client = await handleRegistration(
       options,
       {
         solidOidcSupported: undefined,
@@ -111,6 +114,7 @@ describe("handleRegistration", () => {
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
+    expect(client.clientType).toBe("static");
   });
 });
 
