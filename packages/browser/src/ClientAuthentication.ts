@@ -160,6 +160,9 @@ export default class ClientAuthentication {
     // For implicit flow
     cleanedUpUrl.searchParams.delete("id_token");
     cleanedUpUrl.searchParams.delete("access_token");
+    // For login error
+    cleanedUpUrl.searchParams.delete("error");
+    cleanedUpUrl.searchParams.delete("errorDescription");
 
     // Remove OAuth-specific query params (since the login flow finishes with
     // the browser being redirected back with OAuth2 query params (e.g. for
