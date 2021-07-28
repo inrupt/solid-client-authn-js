@@ -211,6 +211,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
         })
       );
