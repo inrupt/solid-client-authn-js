@@ -81,9 +81,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     const tokens = await client.grant(
       {
         grant_type: "client_credentials",
-        client_id: oidcLoginOptions.client.clientId,
-        client_secret: oidcLoginOptions.client.clientSecret,
-        token_endpoint_auth_method: "client_secret_post",
+        token_endpoint_auth_method: "client_secret_basic",
       },
       {
         DPoP:
