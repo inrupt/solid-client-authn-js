@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.10.0 - 2021-07-28
+
 ### New features
 
 #### node
@@ -27,8 +31,6 @@ to their identity provider (which requires some technical background).
 
 - When not using a bundler that automatically provided a polyfill for Node.js
   built-in modules, the `events` package had to be installed manually.
-
-The following sections document changes that have been released already:
 
 ## 1.9.1 - 2021-06-24
 
