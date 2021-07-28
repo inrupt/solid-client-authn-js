@@ -114,6 +114,7 @@ export async function handleRegistration(
   // to be stored so that it can be retrieved later after redirect.
   await storageUtility.setForUser(options.sessionId, {
     // If the client is either static or solid-oidc compliant, its client ID cannot be undefined.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     clientId: options.clientId!,
   });
   if (options.clientSecret) {
@@ -127,6 +128,7 @@ export async function handleRegistration(
     });
   }
   return {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     clientId: options.clientId!,
     clientSecret: options.clientSecret,
     clientName: options.clientName,

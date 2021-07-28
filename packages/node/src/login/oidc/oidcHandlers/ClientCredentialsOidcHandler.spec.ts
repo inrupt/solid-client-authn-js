@@ -120,6 +120,7 @@ const mockBearerTokens = (): TokenSet => {
 };
 
 const setupOidcClientMock = (tokenSet: TokenSet) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as any;
   function clientConstructor() {
     // this is untyped, which makes TS complain
