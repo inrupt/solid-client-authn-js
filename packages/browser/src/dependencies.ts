@@ -42,6 +42,7 @@ import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import { ErrorOidcHandler } from "./login/oidc/redirectHandler/ErrorOidcHandler"
+import AggregateLoginHandler from "./login/AggregateLoginHandler";
 
 /**
  *
@@ -66,8 +67,8 @@ export function getClientAuthenticationWithDependencies(dependencies: {
 
   const sessionInfoManager = new SessionInfoManager(storageUtility);
 
-  const loginHandler = new AggregateRedirectHandler([
-      new ErrorOidcHandler(),
+  // make new handler for redirect and login
+  const loginHandler = 
       new OidcLoginHandler(
         storageUtility,
         new AuthorizationCodeWithPkceOidcHandler(
@@ -76,10 +77,10 @@ export function getClientAuthenticationWithDependencies(dependencies: {
         ),
         issuerConfigFetcher,
         clientRegistrar
-      )
-  ])
+      );
 
   const redirectHandler = new AggregateRedirectHandler([
+    new ErrorOidcHandler(),
     new AuthCodeRedirectHandler(
       storageUtility,
       sessionInfoManager,

@@ -24,11 +24,10 @@
  * @packageDocumentation
  */
 
- import {
+import {
     IRedirectHandler,
     ISessionInfo,
   } from "@inrupt/solid-client-authn-core";
-import { getDefaultSession, handleIncomingRedirect } from "../../../defaultSession";
   
   import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
   
@@ -39,19 +38,21 @@ import { getDefaultSession, handleIncomingRedirect } from "../../../defaultSessi
    * @hidden
    */
   export class ErrorOidcHandler implements IRedirectHandler {
-    async canHandle(redirectUrl: string): Promise<boolean> {
-      try {
-        // eslint-disable-next-line no-new
-        return new URL(redirectUrl).searchParams.has("error");
-      } catch (e) {
-        throw new Error(
-          `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
-        );
+    async canHandle( redirectUrl: string ): Promise<boolean> {
+        try {
+          // eslint-disable-next-line no-new
+          return new URL(redirectUrl).searchParams.has("error");
+        } catch (e) {
+          throw new Error(
+            `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
+          );
+        }
       }
-    }
   
     async handle(
       redirectUrl: string,
+      // The argument is ignored, but must be present to implement the interface
+      _onToken?:(newToken: string) => unknown,
       onError?: (error: string | null, errorDescription: string | null) => unknown
     ): Promise<ISessionInfo & { fetch: typeof fetch }> {
       
