@@ -440,15 +440,6 @@ export class Session extends EventEmitter {
     this.on("logout", callback);
   }
 
-  onLoginError(): void {
-    this.setSessionInfo({
-      isLoggedIn : false,
-      webId : undefined,
-      sessionId : undefined,
-      experirationDate : undefined
-    });
-  }
-
   /**
    * Register a callback function to be called when a session is restored.
    *

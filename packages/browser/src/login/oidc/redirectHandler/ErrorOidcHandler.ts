@@ -51,46 +51,18 @@ import { getDefaultSession, handleIncomingRedirect } from "../../../defaultSessi
     }
   
     async handle(
-      redirectUrl: string
+      redirectUrl: string,
+      onError?: (error: string | null, errorDescription: string | null) => unknown
     ): Promise<ISessionInfo & { fetch: typeof fetch }> {
       
-      let sessionInfo : ISessionInfo;
-      const url = new URL(redirectUrl);
-
-      // calls private setSessionInfo() with correct credentials
-      const session = getDefaultSession();
-      session.onLoginError();
-
-      // maybe this instead?
-      sessionInfo = {
-          isLoggedIn : false,
-          webId : undefined,
-          sessionId : undefined,
-          experirationDate : undefined
+      if (onError){
+        const url = new URL(redirectUrl);
+        const errorUrl = url.searchParams.get("error");
+        const errorDescriptionUrl = url.searchParams.get("errorDescription");
+        onError(errorUrl, errorDescriptionUrl);
       }
 
-      // will need to pass these in somewhere
-      const errorUrl = url.searchParams.get("error");
-      const errorDescriptionUrl = url.searchParams.get("errorDescription");
-      // don't call here
-      errorCallback(errorUrl, errorDescriptionUrl);
-
-      // example error callback function
-      function errorCallback(error: string | null, errorDescription: string | null){
-        throw new Error(error + " : " + errorDescription); 
-      }
-
-      // run callback
-      handleIncomingRedirect(errorCallback, {});
-
-      // clean up URL, return somewhere...
-      url.searchParams.delete("error");
-      url.searchParams.delete("errorDescription");
-
-      return sessionInfo;
-
-      // return session
-      
+      return getUnauthenticatedSession();
     }
   }
   
