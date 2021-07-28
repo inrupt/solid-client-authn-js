@@ -149,7 +149,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientType: "static",
           },
         })
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     it("cannot handle if the client secret is missing", async () => {

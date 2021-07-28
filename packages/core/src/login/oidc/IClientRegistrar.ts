@@ -84,7 +84,7 @@ function determineClientType(
   ) {
     return "solid-oidc";
   }
-  // If no client_id is provided, the client must go through DCR.
+  // If no client_id is provided, the client must go through Dynamic Client Registration.
   // If a client_id is provided and it looks like a URI, yet the Identity Provider
   // does *not* support Solid-OIDC, then we also perform DCR (and discard the
   // provided client_id).
