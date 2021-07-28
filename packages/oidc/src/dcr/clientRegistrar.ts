@@ -143,6 +143,7 @@ export async function registerClient(
       clientId: responseBody.client_id,
       clientSecret: responseBody.client_secret,
       idTokenSignedResponseAlg: responseBody.id_token_signed_response_alg,
+      clientType: "dynamic",
     };
   }
   if (registerResponse.status === 400) {

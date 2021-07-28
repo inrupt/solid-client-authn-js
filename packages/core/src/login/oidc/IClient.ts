@@ -24,6 +24,8 @@
  * @packageDocumentation
  */
 
+export type ClientType = "static" | "dynamic" | "solid-oidc";
+
 /**
  * @hidden
  */
@@ -32,4 +34,5 @@ export interface IClient {
   clientSecret?: string;
   clientName?: string;
   idTokenSignedResponseAlg?: string;
+  clientType: ClientType;
 }

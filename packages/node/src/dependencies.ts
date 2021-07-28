@@ -43,6 +43,7 @@ import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedi
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
+import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
 
 /**
  *
@@ -77,6 +78,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     new OidcLoginHandler(
       storageUtility,
       new AggregateOidcHandler([
+        new ClientCredentialsOidcHandler(tokenRefresher, storageUtility),
         new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
         new AuthorizationCodeWithPkceOidcHandler(
           storageUtility,

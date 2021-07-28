@@ -26,7 +26,7 @@
 
 import IStorageUtility from "../../storage/IStorageUtility";
 import ILoginOptions from "../ILoginOptions";
-import { IClient } from "./IClient";
+import { ClientType, IClient } from "./IClient";
 import { IIssuerConfig } from "./IIssuerConfig";
 
 export interface IClientRegistrarOptions {
@@ -69,22 +69,36 @@ export function determineSigningAlg(
   );
 }
 
+function determineClientType(
+  options: ILoginOptions,
+  issuerConfig: IIssuerConfig
+): ClientType {
+  if (options.clientId !== undefined && !isValidUrl(options.clientId)) {
+    return "static";
+  }
+  if (
+    issuerConfig.solidOidcSupported ===
+      "https://solidproject.org/TR/solid-oidc" &&
+    options.clientId !== undefined &&
+    isValidUrl(options.clientId)
+  ) {
+    return "solid-oidc";
+  }
+  // If no client_id is provided, the client must go through Dynamic Client Registration.
+  // If a client_id is provided and it looks like a URI, yet the Identity Provider
+  // does *not* support Solid-OIDC, then we also perform DCR (and discard the
+  // provided client_id).
+  return "dynamic";
+}
+
 export async function handleRegistration(
   options: ILoginOptions,
   issuerConfig: IIssuerConfig,
   storageUtility: IStorageUtility,
   clientRegistrar: IClientRegistrar
 ): Promise<IClient> {
-  if (
-    options.clientId === undefined ||
-    (issuerConfig.solidOidcSupported !==
-      "https://solidproject.org/TR/solid-oidc" &&
-      isValidUrl(options.clientId))
-  ) {
-    // If no client_id is provided, the client must go through DCR.
-    // If a client_id is provided and it looks like a URI, yet the Identity Provider
-    // does *not* support Solid-OIDC, then we also perform DCR (and discard the
-    // provided client_id).
+  const clientType = determineClientType(options, issuerConfig);
+  if (clientType === "dynamic") {
     return clientRegistrar.getClient(
       {
         sessionId: options.sessionId,
@@ -99,7 +113,9 @@ export async function handleRegistration(
   // been registered with the IdP), then the client registration information needs
   // to be stored so that it can be retrieved later after redirect.
   await storageUtility.setForUser(options.sessionId, {
-    clientId: options.clientId,
+    // If the client is either static or solid-oidc compliant, its client ID cannot be undefined.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    clientId: options.clientId!,
   });
   if (options.clientSecret) {
     await storageUtility.setForUser(options.sessionId, {
@@ -112,8 +128,10 @@ export async function handleRegistration(
     });
   }
   return {
-    clientId: options.clientId,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    clientId: options.clientId!,
     clientSecret: options.clientSecret,
     clientName: options.clientName,
+    clientType,
   };
 }

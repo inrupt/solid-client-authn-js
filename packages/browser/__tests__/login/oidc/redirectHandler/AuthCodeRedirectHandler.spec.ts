@@ -172,6 +172,7 @@ function mockIssuerConfigFetcher(config: IIssuerConfig): IIssuerConfigFetcher {
 const mockClient = (): IClient => {
   return {
     clientId: "some client",
+    clientType: "dynamic",
   };
 };
 

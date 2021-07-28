@@ -30,7 +30,11 @@ import {
   mockDefaultTokenSet,
   mockTokenRefresher,
 } from "../login/oidc/refresh/__mocks__/TokenRefresher";
-import { buildBearerFetch, buildDpopFetch } from "./fetchFactory";
+import {
+  buildAuthenticatedFetch,
+  buildBearerFetch,
+  buildDpopFetch,
+} from "./fetchFactory";
 
 jest.mock("cross-fetch");
 
@@ -514,5 +518,80 @@ describe("buildDpopFetch", () => {
     // The mocked fetch will 401, which triggers the refresh flow.
     // The test checks that the refresh failure is silent.
     expect(response.status).toEqual(401);
+  });
+});
+
+describe("buildAuthenticatedFetch", () => {
+  it("builds a DPoP fetch if a DPoP key is provided", async () => {
+    // eslint-disable-next-line no-shadow
+    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
+    fetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const keylikePair = await mockJwk();
+    const myFetch = await buildAuthenticatedFetch("myToken", {
+      dpopKey: {
+        privateKey: keylikePair.privateKey,
+        publicKey: await fromKeyLike(keylikePair.publicKey),
+      },
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: {
+          refresh: jest.fn(),
+        },
+      },
+    });
+    await myFetch("https://my.pod/resource");
+    expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
+    const dpopHeader = fetch.mock.calls[0][1].headers.DPoP as string;
+    const decodedHeader = await jwtVerify(
+      dpopHeader,
+      (
+        await mockJwk()
+      ).publicKey
+    );
+    expect(decodedHeader.payload).toMatchObject({
+      htu: "https://my.pod/resource",
+    });
+  });
+
+  it("builds a Bearer fetch if no DPoP key is provided", async () => {
+    // eslint-disable-next-line no-shadow
+    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
+    fetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
+    await myFetch("https://my.pod/resource");
+    expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
+    const authorizationHeader = fetch.mock.calls[0][1].headers
+      .Authorization as string;
+    expect(authorizationHeader.startsWith("Bearer")).toBe(true);
+  });
+
+  it("passes the appropriate refresh options to the built fetch if applicable", async () => {
+    // eslint-disable-next-line no-shadow
+    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
+    fetch.mockResolvedValue({
+      status: 401,
+      url: "https://my.pod/resource",
+    });
+    const myFetch = await buildAuthenticatedFetch("myToken", {
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: {
+          refresh: jest.fn(),
+        },
+      },
+    });
+    await myFetch("https://my.pod/resource");
+    expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
+    const authorizationHeader = fetch.mock.calls[0][1].headers
+      .Authorization as string;
+    expect(authorizationHeader.startsWith("Bearer")).toBe(true);
   });
 });

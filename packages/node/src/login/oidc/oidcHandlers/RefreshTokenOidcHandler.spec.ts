@@ -74,6 +74,7 @@ describe("RefreshTokenOidcHandler", () => {
             client: {
               clientId: "some client id",
               clientSecret: "some client secret",
+              clientType: "dynamic",
             },
           })
         )
@@ -95,6 +96,7 @@ describe("RefreshTokenOidcHandler", () => {
               // @ts-ignore
               clientId: undefined,
               clientSecret: "some client secret",
+              clientType: "dynamic",
             },
           })
         )
@@ -115,6 +117,7 @@ describe("RefreshTokenOidcHandler", () => {
             client: {
               clientId: "some client id",
               clientSecret: "some client secret",
+              clientType: "dynamic",
             },
           })
         )
@@ -136,6 +139,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
         })
       );
@@ -165,6 +169,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
         })
       );
@@ -206,6 +211,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
         })
       );
@@ -238,6 +244,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
           dpop: false,
         })
@@ -271,6 +278,7 @@ describe("RefreshTokenOidcHandler", () => {
             clientId: "some client id",
             clientSecret: "some client secret",
             clientName: "some client name",
+            clientType: "dynamic",
           },
         })
       );
@@ -308,6 +316,7 @@ describe("RefreshTokenOidcHandler", () => {
           clientId: "some client id",
           clientSecret: undefined,
           clientName: "some client name",
+          clientType: "dynamic",
         },
       })
     );
@@ -330,6 +339,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
       })
     );
@@ -355,6 +365,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
       })
     );
@@ -391,6 +402,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
         onNewRefreshToken: refreshTokenRotationHandler,
       })
@@ -421,6 +433,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
         dpop: false,
       })
@@ -461,6 +474,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
       })
     );
