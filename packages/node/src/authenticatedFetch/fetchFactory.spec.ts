@@ -46,6 +46,35 @@ const mockNotRedirectedResponse = (): MockedRedirectResponse => {
   };
 };
 
+let publicKey: KeyLike | undefined;
+let privateKey: KeyLike | undefined;
+
+const mockJwk = async (): Promise<{
+  publicKey: KeyLike;
+  privateKey: KeyLike;
+}> => {
+  if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
+    const generatedPair = await generateKeyPair("ES256");
+    publicKey = generatedPair.publicKey;
+    privateKey = generatedPair.privateKey;
+  }
+  return {
+    publicKey,
+    privateKey,
+  };
+};
+
+const mockKeyPair = async () => {
+  const { privateKey: prvt, publicKey: pblc } = await mockJwk();
+  const dpopKeyPair = {
+    privateKey: prvt,
+    publicKey: await fromKeyLike(pblc),
+  };
+  // The alg property isn't set by fromKeyLike, so set it manually.
+  dpopKeyPair.publicKey.alg = "ES256";
+  return dpopKeyPair;
+};
+
 describe("buildBearerFetch", () => {
   it("returns a fetch holding the provided token", async () => {
     // eslint-disable-next-line no-shadow
@@ -220,35 +249,6 @@ describe("buildBearerFetch", () => {
     expect(response.status).toEqual(401);
   });
 });
-
-let publicKey: KeyLike | undefined;
-let privateKey: KeyLike | undefined;
-
-const mockJwk = async (): Promise<{
-  publicKey: KeyLike;
-  privateKey: KeyLike;
-}> => {
-  if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
-    const generatedPair = await generateKeyPair("ES256");
-    publicKey = generatedPair.publicKey;
-    privateKey = generatedPair.privateKey;
-  }
-  return {
-    publicKey,
-    privateKey,
-  };
-};
-
-const mockKeyPair = async () => {
-  const { privateKey: prvt, publicKey: pblc } = await mockJwk();
-  const dpopKeyPair = {
-    privateKey: prvt,
-    publicKey: await fromKeyLike(pblc),
-  };
-  // The alg property isn't set by fromKeyLike, so set it manually.
-  dpopKeyPair.publicKey.alg = "ES256";
-  return dpopKeyPair;
-};
 
 describe("buildDpopFetch", () => {
   it("returns a fetch holding the provided token and key", async () => {

@@ -718,6 +718,7 @@ describe("saveSessionInfoToStorage", () => {
 
     expect(
       JSON.parse(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (await mockedStorage.getForUser("some session", "publicKey", {
           secure: true,
         }))!
@@ -728,6 +729,7 @@ describe("saveSessionInfoToStorage", () => {
       "privateKey",
       { secure: true }
     );
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(JSON.parse(privateJwk!)).toEqual(
       await fromKeyLike(dpopKey.privateKey)
     );
