@@ -27,11 +27,13 @@
 /**
  * A helper class that will validate items taken from local storage
  */
+import { fromKeyLike } from "@inrupt/jose-legacy-modules";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
 import InruptError from "../errors/InruptError";
 import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
+import { KeyPair } from "../authenticatedFetch/dpopUtils";
 
 export type OidcContext = {
   issuerConfig: IIssuerConfig;
@@ -86,6 +88,20 @@ export async function loadOidcContextFromStorage(
   }
 }
 
+/**
+ * Stores information about the session in the provided storage. Note that not
+ * all storage are equally secure, and it is strongly advised not to store either
+ * the refresh token or the DPoP key in the browser's local storage.
+ *
+ * @param storageUtility
+ * @param sessionId
+ * @param idToken
+ * @param webId
+ * @param isLoggedIn
+ * @param refreshToken
+ * @param secure
+ * @param dpopKey
+ */
 export async function saveSessionInfoToStorage(
   storageUtility: IStorageUtility,
   sessionId: string,
@@ -93,7 +109,8 @@ export async function saveSessionInfoToStorage(
   webId?: string,
   isLoggedIn?: string,
   refreshToken?: string,
-  secure?: boolean
+  secure?: boolean,
+  dpopKey?: KeyPair
 ): Promise<void> {
   // TODO: Investigate why this does not work with a Promise.all
   if (refreshToken !== undefined) {
@@ -107,6 +124,16 @@ export async function saveSessionInfoToStorage(
   }
   if (isLoggedIn !== undefined) {
     await storageUtility.setForUser(sessionId, { isLoggedIn }, { secure });
+  }
+  if (dpopKey !== undefined) {
+    await storageUtility.setForUser(
+      sessionId,
+      {
+        publicKey: JSON.stringify(dpopKey.publicKey),
+        privateKey: JSON.stringify(await fromKeyLike(dpopKey.privateKey)),
+      },
+      { secure }
+    );
   }
 }
 

@@ -22,6 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { KeyLike } from "jose/types";
 import jwtVerify from "jose/jwt/verify";
+import { parseJwk } from "jose/jwk/parse";
 import { generateKeyPair } from "jose/util/generate_key_pair";
 import { fromKeyLike } from "jose/jwk/from_key_like";
 import {
@@ -43,6 +44,35 @@ const mockNotRedirectedResponse = (): MockedRedirectResponse => {
     redirected: false,
     url: "http://some.url",
   };
+};
+
+let publicKey: KeyLike | undefined;
+let privateKey: KeyLike | undefined;
+
+const mockJwk = async (): Promise<{
+  publicKey: KeyLike;
+  privateKey: KeyLike;
+}> => {
+  if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
+    const generatedPair = await generateKeyPair("ES256");
+    publicKey = generatedPair.publicKey;
+    privateKey = generatedPair.privateKey;
+  }
+  return {
+    publicKey,
+    privateKey,
+  };
+};
+
+const mockKeyPair = async () => {
+  const { privateKey: prvt, publicKey: pblc } = await mockJwk();
+  const dpopKeyPair = {
+    privateKey: prvt,
+    publicKey: await fromKeyLike(pblc),
+  };
+  // The alg property isn't set by fromKeyLike, so set it manually.
+  dpopKeyPair.publicKey.alg = "ES256";
+  return dpopKeyPair;
 };
 
 describe("buildBearerFetch", () => {
@@ -99,6 +129,31 @@ describe("buildBearerFetch", () => {
     expect(fetch.mock.calls[1][1].headers.Authorization).toEqual(
       "Bearer some refreshed access token"
     );
+  });
+
+  it("does not rebind the token on refresh", async () => {
+    // eslint-disable-next-line no-shadow
+    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
+    fetch.mockResolvedValueOnce({
+      status: 401,
+      url: "https://somedomain.sometld",
+    });
+    const dpopKey = await mockKeyPair();
+    const myFetch = await buildDpopFetch("myToken", dpopKey, {
+      refreshToken: "some refresh token",
+      sessionId: "mySession",
+      tokenRefresher: mockDefaultTokenRefresher(),
+    });
+    await myFetch("https://somedomain.sometld");
+    // The mocked fetch will 401, which triggers the refresh flow.
+    // The test checks that the mocked refreshed token is bound to the same DPoP
+    // key as the previous access token (which is also the key to which the DPoP
+    // token may be bound).
+    const dpopHeader = fetch.mock.calls[1][1].headers.DPoP;
+
+    await expect(
+      jwtVerify(dpopHeader, await parseJwk(dpopKey.publicKey))
+    ).resolves.not.toThrow();
   });
 
   it("returns a fetch preserving the optional headers even after refresh", async () => {
@@ -194,35 +249,6 @@ describe("buildBearerFetch", () => {
     expect(response.status).toEqual(401);
   });
 });
-
-let publicKey: KeyLike | undefined;
-let privateKey: KeyLike | undefined;
-
-const mockJwk = async (): Promise<{
-  publicKey: KeyLike;
-  privateKey: KeyLike;
-}> => {
-  if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
-    const generatedPair = await generateKeyPair("ES256");
-    publicKey = generatedPair.publicKey;
-    privateKey = generatedPair.privateKey;
-  }
-  return {
-    publicKey,
-    privateKey,
-  };
-};
-
-const mockKeyPair = async () => {
-  const { privateKey: prvt, publicKey: pblc } = await mockJwk();
-  const dpopKeyPair = {
-    privateKey: prvt,
-    publicKey: await fromKeyLike(pblc),
-  };
-  // The alg property isn't set by fromKeyLike, so set it manually.
-  dpopKeyPair.publicKey.alg = "ES256";
-  return dpopKeyPair;
-};
 
 describe("buildDpopFetch", () => {
   it("returns a fetch holding the provided token and key", async () => {

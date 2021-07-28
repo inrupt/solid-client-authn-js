@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
+#### node
+
+- DPoP-bound refresh tokens are now supported, which allows for an increased protection
+against refresh token extraction.
+
 ### Bugs fixed
 
 #### browser

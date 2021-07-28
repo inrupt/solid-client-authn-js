@@ -25,8 +25,14 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  generateDpopKeyPair,
+  mockStorageUtility,
+  USER_SESSION_PREFIX,
+} from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims } from "openid-client";
+import fromKeyLike from "jose/jwk/from_key_like";
+import { jwtVerify } from "@inrupt/solid-client-authn-core/node_modules/@inrupt/jose-legacy-modules";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
@@ -177,6 +183,47 @@ describe("RefreshTokenOidcHandler", () => {
       expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
         "DPoP some refreshed access token"
       );
+    });
+
+    it("reuses stored DPoP keys if any when refreshing the access token", async () => {
+      const dpopKeyPair = await generateDpopKeyPair();
+
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({
+          [`${USER_SESSION_PREFIX}:mySession`]: {
+            publicKey: JSON.stringify(dpopKeyPair.publicKey),
+            privateKey: JSON.stringify(
+              await fromKeyLike(dpopKeyPair.privateKey)
+            ),
+          },
+        })
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+          },
+        })
+      );
+
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://some.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      const dpopProof = mockedFetch.mock.calls[1][1].headers.DPoP;
+      // This checks that the refreshed access token is bound to the initial DPoP key.
+      await expect(
+        jwtVerify(dpopProof, dpopKeyPair.privateKey)
+      ).resolves.not.toThrow();
     });
 
     it("returns a bearer-authenticated fetch if the credentials are valid", async () => {
