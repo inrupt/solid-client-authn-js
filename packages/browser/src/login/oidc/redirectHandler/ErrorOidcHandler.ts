@@ -53,7 +53,7 @@ import {
       redirectUrl: string,
       // The argument is ignored, but must be present to implement the interface
       _onToken?:(newToken: string) => unknown,
-      onError?: (error: string | null, errorDescription: string | null) => unknown
+      onError?: (error: string | null , errorDescription?: string | null) => unknown
     ): Promise<ISessionInfo & { fetch: typeof fetch }> {
       
       if (onError){
