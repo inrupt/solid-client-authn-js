@@ -24,46 +24,47 @@
  * @packageDocumentation
  */
 
- import {
-    IRedirectHandler,
-    ISessionInfo,
-  } from "@inrupt/solid-client-authn-core";
-  
-  import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
-  
-  /**
-   * This class handles redirect IRIs without any query params, and returns an unauthenticated
-   * session. It serves as a fallback so that consuming libraries don't have to test
-   * for the query params themselves, and can always try to use them as a redirect IRI.
-   * @hidden
-   */
-  export class ErrorOidcHandler implements IRedirectHandler {
-    async canHandle( redirectUrl: string ): Promise<boolean> {
-        try {
-          // eslint-disable-next-line no-new
-          return new URL(redirectUrl).searchParams.has("error");
-        } catch (e) {
-          throw new Error(
-            `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
-          );
-        }
-      }
-  
-    async handle(
-      redirectUrl: string,
-      // The argument is ignored, but must be present to implement the interface
-      _onToken?:(newToken: string) => unknown,
-      onError?: (error: string | null , errorDescription?: string | null) => unknown
-    ): Promise<ISessionInfo & { fetch: typeof fetch }> {
-      
-      if (onError){
-        const url = new URL(redirectUrl);
-        const errorUrl = url.searchParams.get("error");
-        const errorDescriptionUrl = url.searchParams.get("errorDescription");
-        onError(errorUrl, errorDescriptionUrl);
-      }
+import {
+  IRedirectHandler,
+  ISessionInfo,
+} from "@inrupt/solid-client-authn-core";
 
-      return getUnauthenticatedSession();
+import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
+
+/**
+ * This class handles redirect IRIs without any query params, and returns an unauthenticated
+ * session. It serves as a fallback so that consuming libraries don't have to test
+ * for the query params themselves, and can always try to use them as a redirect IRI.
+ * @hidden
+ */
+export class ErrorOidcHandler implements IRedirectHandler {
+  async canHandle(redirectUrl: string): Promise<boolean> {
+    try {
+      // eslint-disable-next-line no-new
+      return new URL(redirectUrl).searchParams.has("error");
+    } catch (e) {
+      throw new Error(
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
+      );
     }
   }
-  
+
+  async handle(
+    redirectUrl: string,
+    // The argument is ignored, but must be present to implement the interface
+    _onToken?: (newToken: string) => unknown,
+    onError?: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+    if (onError) {
+      const url = new URL(redirectUrl);
+      const errorUrl = url.searchParams.get("error");
+      const errorDescriptionUrl = url.searchParams.get("errorDescription");
+      onError(errorUrl, errorDescriptionUrl);
+    }
+
+    return getUnauthenticatedSession();
+  }
+}

@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { ErrorOidcHandler } from "../../../../src/login/oidc/redirectHandler/ErrorOidcHandler";
+import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
 describe("ErrorOidcHandler", () => {
   describe("canHandle", () => {
@@ -53,21 +53,19 @@ describe("ErrorOidcHandler", () => {
       await expect(
         redirectHandler.canHandle("beep boop I am a robot")
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot"
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL"
       );
     });
   });
 
   describe("handle", () => {
     it("returns an unauthenticated session", async () => {
-      window.fetch = jest.fn();
       const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toEqual(false);
       expect(mySession.webId).toBeUndefined();
     });
     it("calls on Error if given", async () => {
-      window.fetch = jest.fn();
       const redirectHandler = new ErrorOidcHandler();
       const mockCallback = jest.fn();
       const mySession = await redirectHandler.handle(

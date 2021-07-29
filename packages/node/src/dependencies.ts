@@ -44,6 +44,7 @@ import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
+import { ErrorOidcHandler } from "./login/oidc/redirectHandler/ErrorOidcHandler";
 
 /**
  *
@@ -90,6 +91,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     );
 
   const redirectHandler = new AggregateRedirectHandler([
+    new ErrorOidcHandler(),
     new AuthCodeRedirectHandler(
       storageUtility,
       sessionInfoManager,
