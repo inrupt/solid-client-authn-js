@@ -38,6 +38,10 @@ import {
   getWebidFromTokenPayload,
   KeyPair,
   generateDpopKeyPair,
+  buildBearerFetch,
+  buildDpopFetch,
+  RefreshOptions,
+  ITokenRefresher,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
@@ -45,12 +49,6 @@ import { Issuer, TokenSet } from "openid-client";
 import { KeyObject } from "crypto";
 
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import {
-  buildBearerFetch,
-  buildDpopFetch,
-  RefreshOptions,
-} from "../../../authenticatedFetch/fetchFactory";
-import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 /**
  * @hidden

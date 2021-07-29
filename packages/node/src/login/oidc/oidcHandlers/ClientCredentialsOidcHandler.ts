@@ -37,12 +37,12 @@ import {
   generateDpopKeyPair,
   PREFERRED_SIGNING_ALG,
   getWebidFromTokenPayload,
+  buildAuthenticatedFetch,
+  ITokenRefresher,
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
-import { buildAuthenticatedFetch } from "../../../authenticatedFetch/fetchFactory";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 /**
  * @hidden

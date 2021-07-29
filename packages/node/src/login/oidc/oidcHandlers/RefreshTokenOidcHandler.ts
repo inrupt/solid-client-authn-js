@@ -38,15 +38,14 @@ import {
   generateDpopKeyPair,
   KeyPair,
   PREFERRED_SIGNING_ALG,
-} from "@inrupt/solid-client-authn-core";
-import { TokenSet } from "openid-client";
-import { JWK, parseJwk } from "jose/jwk/parse";
-import {
   buildBearerFetch,
   buildDpopFetch,
   RefreshOptions,
-} from "../../../authenticatedFetch/fetchFactory";
-import { ITokenRefresher } from "../refresh/TokenRefresher";
+  ITokenRefresher,
+  TokenEndpointResponse,
+} from "@inrupt/solid-client-authn-core";
+import { TokenSet } from "openid-client";
+import { JWK, parseJwk } from "jose/jwk/parse";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions
@@ -70,10 +69,10 @@ async function refreshAccess(
   refreshOptions: RefreshOptions,
   dpop: boolean,
   refreshBindingKey?: KeyPair
-): Promise<TokenSet & { fetch: typeof fetch }> {
+): Promise<TokenEndpointResponse & { fetch: typeof fetch }> {
   let authFetch: typeof fetch;
   // eslint-disable-next-line camelcase
-  let tokens: TokenSet & { access_token: string };
+  let tokens: TokenEndpointResponse;
   try {
     if (dpop) {
       const dpopKeys = refreshBindingKey || (await generateDpopKeyPair());
@@ -88,10 +87,10 @@ async function refreshAccess(
       // Rotate the refresh token if applicable
       const rotatedRefreshOptions = {
         ...refreshOptions,
-        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
+        refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
       };
       authFetch = await buildDpopFetch(
-        tokens.access_token,
+        tokens.accessToken,
         dpopKeys,
         rotatedRefreshOptions
       );
@@ -104,9 +103,9 @@ async function refreshAccess(
       );
       const rotatedRefreshOptions = {
         ...refreshOptions,
-        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
+        refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
       };
-      authFetch = buildBearerFetch(tokens.access_token, rotatedRefreshOptions);
+      authFetch = buildBearerFetch(tokens.accessToken, rotatedRefreshOptions);
     }
   } catch (e) {
     throw new Error(`Invalid refresh credentials: ${e.toString()}`);
@@ -187,13 +186,13 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       sessionId: oidcLoginOptions.sessionId,
     };
 
-    if (accessInfo.id_token === undefined) {
+    if (accessInfo.idToken === undefined) {
       throw new Error(
         `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
       );
     }
     sessionInfo.webId = await getWebidFromTokenPayload(
-      accessInfo.id_token,
+      accessInfo.idToken,
       oidcLoginOptions.issuerConfiguration.jwksUri,
       oidcLoginOptions.issuer,
       oidcLoginOptions.client.clientId
@@ -205,7 +204,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       undefined,
       undefined,
       "true",
-      accessInfo.refresh_token ?? refreshOptions.refreshToken,
+      accessInfo.refreshToken ?? refreshOptions.refreshToken,
       undefined,
       keyPair
     );
