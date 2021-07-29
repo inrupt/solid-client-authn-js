@@ -24,7 +24,7 @@ import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
 describe("ErrorOidcHandler", () => {
   describe("canHandle", () => {
-    it("always accept the given IRI", async () => {
+    it("Does not handle IRIs without an error parameter", async () => {
       const redirectHandler = new ErrorOidcHandler();
       expect(
         await redirectHandler.canHandle(
@@ -65,17 +65,29 @@ describe("ErrorOidcHandler", () => {
       expect(mySession.isLoggedIn).toEqual(false);
       expect(mySession.webId).toBeUndefined();
     });
-    it("calls on Error if given", async () => {
+    it("calls the onError callback if given with both parameters", async () => {
       const redirectHandler = new ErrorOidcHandler();
       const mockCallback = jest.fn();
       const mySession = await redirectHandler.handle(
-        "https://coolparty.com/?error=fetchError&errorDescription=unable_to_fetch",
+        "https://coolparty.com/?error=error&errorDescription=unable_to_fetch",
         undefined,
         mockCallback
       );
       expect(mySession.isLoggedIn).toEqual(false);
       expect(mySession.webId).toBeUndefined();
-      expect(mockCallback.mock.calls).toHaveLength(1);
+      expect(mockCallback).toHaveBeenCalledWith("error", "unable_to_fetch");
+    });
+    it("calls the onError callback if given with just error parameters", async () => {
+      const redirectHandler = new ErrorOidcHandler();
+      const mockCallback = jest.fn();
+      const mySession = await redirectHandler.handle(
+        "https://coolparty.com/?error=error",
+        undefined,
+        mockCallback
+      );
+      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.webId).toBeUndefined();
+      expect(mockCallback).toHaveBeenCalledWith("error", null);
     });
   });
 });
