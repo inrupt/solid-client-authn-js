@@ -275,8 +275,6 @@ export class Session extends EventEmitter {
   handleIncomingRedirect = async (
     inputOptions: string | IHandleIncomingRedirectOptions = {}
   ): Promise<ISessionInfo | undefined> => {
-    // call errorCallback somewhere...
-
     if (this.info.isLoggedIn) {
       return this.info;
     }
