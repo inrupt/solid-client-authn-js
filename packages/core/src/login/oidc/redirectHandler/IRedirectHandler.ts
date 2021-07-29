@@ -43,7 +43,11 @@ export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
 type IRedirectHandler = IHandleable<
   // Tuple of the URL to redirect to, an optional event listener for when
   // we receive a new refresh token, and, an optional onError function:
-  [string, ((newToken: string) => unknown)?, ((error: string | null, errorDescription?: string | null) => unknown)?],
+  [
+    string,
+    ((newToken: string) => unknown)?,
+    ((error: string | null, errorDescription?: string | null) => unknown)?
+  ],
   RedirectResult
 >;
 export default IRedirectHandler;
