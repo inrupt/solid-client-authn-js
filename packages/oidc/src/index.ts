@@ -46,8 +46,7 @@ export {
   getDpopToken,
   getBearerToken,
   TokenEndpointInput,
-  TokenEndpointResponse,
-  TokenEndpointDpopResponse,
+  CodeExchangeResult,
 } from "./dpop/tokenExchange";
 export {
   removeOidcQueryParam,

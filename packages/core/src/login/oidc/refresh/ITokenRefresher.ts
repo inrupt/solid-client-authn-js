@@ -47,6 +47,11 @@ export type TokenEndpointResponse = {
    * Expiration of the access token.
    */
   expiresAt?: number;
+
+  /**
+   * ExpiresAt should be computed from expiresIn when receiving the token.
+   */
+  expiresIn?: number;
 };
 
 export interface ITokenRefresher {
