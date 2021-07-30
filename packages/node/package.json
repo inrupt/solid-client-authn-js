@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^1.10.0",
-    "@types/node": "^15.0.1",
+    "@types/node": "^16.4.7",
     "@types/uuid": "^8.3.0",
     "cross-fetch": "^3.0.6",
     "jose": "^3.11.6",
