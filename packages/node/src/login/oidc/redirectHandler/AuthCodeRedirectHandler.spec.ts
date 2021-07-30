@@ -25,7 +25,12 @@ import {
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims, TokenSet } from "openid-client";
-import { JWK } from "jose/types";
+// Until there is a broader support for submodules exports in the ecosystem,
+// (e.g. jest supports them), we'll depend on an intermediary package that exports
+// a single ES module. The submodule exports should be kept commented out to make
+// it easier to transition back when possible.
+// import { JWK } from "jose/types";
+import { JWK } from "@inrupt/jose-legacy-modules";
 import { Response as NodeResponse } from "node-fetch";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
