@@ -38,15 +38,15 @@ import {
   getWebidFromTokenPayload,
   KeyPair,
   generateDpopKeyPair,
-  buildBearerFetch,
-  buildDpopFetch,
   RefreshOptions,
   ITokenRefresher,
+  buildAuthenticatedFetch,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
-import { Issuer, TokenSet } from "openid-client";
+import { Issuer } from "openid-client";
 import { KeyObject } from "crypto";
+import { fetch as globalFetch } from "cross-fetch";
 
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
@@ -80,7 +80,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
   async handle(
     inputRedirectUrl: string,
     onNewRefreshToken?: (newToken: string) => unknown
-  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+  ): Promise<ISessionInfo & { fetch: typeof globalFetch }> {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${inputRedirectUrl}]: it is missing one of [code, state].`
@@ -122,28 +122,21 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     });
 
     const params = client.callbackParams(inputRedirectUrl);
-
-    let dpopKeys: KeyPair | undefined;
-    let tokenSet: TokenSet;
-    let authFetch: typeof fetch;
+    let dpopKey: KeyPair | undefined;
 
     if (oidcContext.dpop) {
-      dpopKeys = await generateDpopKeyPair();
-      tokenSet = await client.callback(
-        url.href,
-        params,
-        { code_verifier: oidcContext.codeVerifier, state: oauthState },
-        // openid-client does not support yet jose@3.x, and expects
-        // type definitions that are no longer present. However, the JWK
-        // type that we pass here is compatible with the API.
-        { DPoP: dpopKeys.privateKey as KeyObject }
-      );
-    } else {
-      tokenSet = await client.callback(url.href, params, {
-        code_verifier: oidcContext.codeVerifier,
-        state: oauthState,
-      });
+      dpopKey = await generateDpopKeyPair();
     }
+    const tokenSet = await client.callback(
+      url.href,
+      params,
+      { code_verifier: oidcContext.codeVerifier, state: oauthState },
+      // openid-client does not support yet jose@3.x, and expects
+      // type definitions that are no longer present. However, the JWK
+      // type that we pass here is compatible with the API.
+      { DPoP: dpopKey?.privateKey as KeyObject }
+    );
+
     if (
       tokenSet.access_token === undefined ||
       tokenSet.id_token === undefined
@@ -165,17 +158,14 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         onNewRefreshToken(tokenSet.refresh_token);
       }
     }
-    if (oidcContext.dpop) {
-      authFetch = await buildDpopFetch(
-        tokenSet.access_token,
-        // The assertion holds because it gets assigned in another
-        // `if (oidcContext.dpop)` above:
-        dpopKeys as KeyPair,
-        refreshOptions
-      );
-    } else {
-      authFetch = buildBearerFetch(tokenSet.access_token, refreshOptions);
-    }
+    const authFetch = await buildAuthenticatedFetch(
+      globalFetch,
+      tokenSet.access_token,
+      {
+        dpopKey,
+        refreshOptions,
+      }
+    );
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns
     // its payload as a JSON object.
@@ -196,7 +186,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       "true",
       tokenSet.refresh_token,
       undefined,
-      dpopKeys
+      dpopKey
     );
 
     const sessionInfo = await this.sessionInfoManager.get(sessionId);

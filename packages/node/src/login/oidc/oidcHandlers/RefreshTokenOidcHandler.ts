@@ -38,13 +38,13 @@ import {
   generateDpopKeyPair,
   KeyPair,
   PREFERRED_SIGNING_ALG,
-  buildBearerFetch,
-  buildDpopFetch,
   RefreshOptions,
   ITokenRefresher,
   TokenEndpointResponse,
+  buildAuthenticatedFetch,
 } from "@inrupt/solid-client-authn-core";
 import { JWK, parseJwk } from "jose/jwk/parse";
+import { fetch as globalFetch } from "cross-fetch";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions
@@ -68,50 +68,39 @@ async function refreshAccess(
   refreshOptions: RefreshOptions,
   dpop: boolean,
   refreshBindingKey?: KeyPair
-): Promise<TokenEndpointResponse & { fetch: typeof fetch }> {
-  let authFetch: typeof fetch;
-  // eslint-disable-next-line camelcase
-  let tokens: TokenEndpointResponse;
+): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
   try {
+    let dpopKey: KeyPair | undefined;
     if (dpop) {
-      const dpopKeys = refreshBindingKey || (await generateDpopKeyPair());
+      dpopKey = refreshBindingKey || (await generateDpopKeyPair());
       // The alg property isn't set by fromKeyLike, so set it manually.
-      [dpopKeys.publicKey.alg] = PREFERRED_SIGNING_ALG;
-      tokens = await refreshOptions.tokenRefresher.refresh(
-        refreshOptions.sessionId,
-        refreshOptions.refreshToken,
-        dpopKeys,
-        refreshOptions.onNewRefreshToken
-      );
-      // Rotate the refresh token if applicable
-      const rotatedRefreshOptions = {
-        ...refreshOptions,
-        refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
-      };
-      authFetch = await buildDpopFetch(
-        tokens.accessToken,
-        dpopKeys,
-        rotatedRefreshOptions
-      );
-    } else {
-      tokens = await refreshOptions.tokenRefresher.refresh(
-        refreshOptions.sessionId,
-        refreshOptions.refreshToken,
-        undefined,
-        refreshOptions.onNewRefreshToken
-      );
-      const rotatedRefreshOptions = {
-        ...refreshOptions,
-        refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
-      };
-      authFetch = buildBearerFetch(tokens.accessToken, rotatedRefreshOptions);
+      [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
     }
+    const tokens = await refreshOptions.tokenRefresher.refresh(
+      refreshOptions.sessionId,
+      refreshOptions.refreshToken,
+      dpopKey,
+      refreshOptions.onNewRefreshToken
+    );
+    // Rotate the refresh token if applicable
+    const rotatedRefreshOptions = {
+      ...refreshOptions,
+      refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
+    };
+    const authFetch = await buildAuthenticatedFetch(
+      globalFetch,
+      tokens.accessToken,
+      {
+        dpopKey,
+        refreshOptions: rotatedRefreshOptions,
+      }
+    );
+    return Object.assign(tokens, {
+      fetch: authFetch,
+    });
   } catch (e) {
     throw new Error(`Invalid refresh credentials: ${e.toString()}`);
   }
-  return Object.assign(tokens, {
-    fetch: authFetch,
-  });
 }
 
 /**

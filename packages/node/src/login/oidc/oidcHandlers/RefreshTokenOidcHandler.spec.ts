@@ -30,7 +30,6 @@ import {
   mockStorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-import { IdTokenClaims } from "openid-client";
 import fromKeyLike from "jose/jwk/from_key_like";
 import { jwtVerify } from "@inrupt/solid-client-authn-core/node_modules/@inrupt/jose-legacy-modules";
 import {
@@ -44,8 +43,7 @@ import {
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
 
-// The fetch factory in the core module resolves cross-fetch to the environment-specific fetch
-jest.mock("node-fetch");
+jest.mock("cross-fetch");
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -328,9 +326,7 @@ describe("RefreshTokenOidcHandler", () => {
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       mockTokenRefresher({
-        access_token: "some access token",
-        expired: () => false,
-        claims: () => null as unknown as IdTokenClaims,
+        accessToken: "some access token",
       }),
       mockStorageUtility({})
     );
@@ -351,7 +347,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("uses the rotated refresh token to build the DPoP-authenticated fetch if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
 
@@ -388,7 +384,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("calls the refresh token rotation handler if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const refreshTokenRotationHandler = jest.fn();
 
@@ -419,7 +415,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("uses the rotated refresh token to build the Bearer-authenticated fetch if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
 
@@ -457,9 +453,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("throws if the credentials are incorrect", async () => {
     const tokenRefresher = mockTokenRefresher({
-      access_token: "some access token",
-      expired: () => false,
-      claims: () => null as unknown as IdTokenClaims,
+      accessToken: "some access token",
     });
     tokenRefresher.refresh = jest
       .fn()

@@ -359,4 +359,28 @@ describe("TokenRefresher", () => {
       }] did not return an access token on refresh`
     );
   });
+
+  it("throws if the IdP returns an unknown token type", async () => {
+    const mockedTokens = mockDpopTokens();
+    mockedTokens.token_type = "Some unknown token type";
+    setupOidcClientMock(mockedTokens);
+
+    const mockedStorage = mockRefresherDefaultStorageUtility();
+
+    const refresher = getTokenRefresher({
+      storageUtility: mockedStorage,
+    });
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some old refresh token",
+        await mockKeyPair()
+      )
+    ).rejects.toThrow(
+      `The Identity Provider [${
+        mockDefaultIssuerConfig().issuer
+      }] returned an unknown token type: [Some unknown token type]`
+    );
+  });
 });

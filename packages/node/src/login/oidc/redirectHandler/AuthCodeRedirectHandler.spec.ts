@@ -40,7 +40,7 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
 // The fetch factory in the core module resolves cross-fetch to the environment-specific fetch
-jest.mock("node-fetch");
+jest.mock("cross-fetch");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
