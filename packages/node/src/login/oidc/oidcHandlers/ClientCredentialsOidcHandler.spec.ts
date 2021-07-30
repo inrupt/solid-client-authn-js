@@ -34,6 +34,7 @@ import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
 
 jest.mock("openid-client");
 jest.mock("cross-fetch");
+jest.mock("cross-fetch");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"

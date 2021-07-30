@@ -44,7 +44,6 @@ import {
   ITokenRefresher,
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
-import { TokenSet } from "openid-client";
 import { JWK, parseJwk } from "jose/jwk/parse";
 
 function validateOptions(

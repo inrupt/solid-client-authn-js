@@ -245,7 +245,7 @@ describe("TokenRefresher", () => {
       await mockKeyPair()
     );
 
-    expect(refreshedTokens.access_token).toBe(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toBe(mockDpopTokens().access_token);
   });
 
   it("refreshes a DPoP token properly", async () => {
@@ -262,7 +262,7 @@ describe("TokenRefresher", () => {
       await mockKeyPair()
     );
 
-    expect(refreshedTokens.access_token).toEqual(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
   });
 
   it("refreshes a bearer token properly", async () => {
@@ -285,7 +285,7 @@ describe("TokenRefresher", () => {
       "some refresh token"
     );
 
-    expect(refreshedTokens.access_token).toEqual(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
   });
 
   it("stores the refresh token if one is returned", async () => {
@@ -304,7 +304,7 @@ describe("TokenRefresher", () => {
       "some old refresh token",
       await mockKeyPair()
     );
-    expect(refreshedTokens.refresh_token).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
 
     // Check that the session information is stored in the provided storage
     await expect(
@@ -330,7 +330,7 @@ describe("TokenRefresher", () => {
       refreshTokenRotationHandler
     );
 
-    expect(refreshedTokens.refresh_token).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
     expect(refreshTokenRotationHandler).toHaveBeenCalledWith(
       "some new refresh token"
     );

@@ -44,7 +44,8 @@ import {
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
 
-jest.mock("cross-fetch");
+// The fetch factory in the core module resolves cross-fetch to the environment-specific fetch
+jest.mock("node-fetch");
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
