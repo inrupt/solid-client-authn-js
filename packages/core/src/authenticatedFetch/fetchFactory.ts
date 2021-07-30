@@ -46,6 +46,7 @@ function isExpectedAuthError(statusCode: number): boolean {
  * @hidden
  */
 export function buildBearerFetch(
+  unauthFetch: typeof fetch,
   accessToken: string,
   refreshOptions?: RefreshOptions
 ): typeof fetch {
@@ -59,7 +60,7 @@ export function buildBearerFetch(
     init: RequestInfo,
     options?: RequestInit
   ): Promise<Response> => {
-    const response = await fetch(init, {
+    const response = await unauthFetch(init, {
       ...options,
       headers: {
         ...options?.headers,
@@ -90,7 +91,7 @@ export function buildBearerFetch(
       // Once the token has been refreshed, re-issue the authenticated request.
       // If it has an auth failure again, the user legitimately doesn't have access
       // to the target resource.
-      return await fetch(init, {
+      return await unauthFetch(init, {
         ...options,
         headers: {
           ...options?.headers,
@@ -139,6 +140,7 @@ async function buildDpopFetchOptions(
  * DPoP token, and adds a dpop header.
  */
 export async function buildDpopFetch(
+  unauthFetch: typeof fetch,
   accessToken: string,
   dpopKey: KeyPair,
   refreshOptions?: RefreshOptions
@@ -146,7 +148,7 @@ export async function buildDpopFetch(
   let currentAccessToken = accessToken;
   const currentRefreshOptions: RefreshOptions | undefined = refreshOptions;
   return async (url, options): Promise<Response> => {
-    let response = await fetch(
+    let response = await unauthFetch(
       url,
       await buildDpopFetchOptions(
         url.toString(),
@@ -166,7 +168,7 @@ export async function buildDpopFetch(
     if (hasBeenRedirected) {
       // If the request failed for auth reasons, and has been redirected, we should
       // replay it with a new DPoP token.
-      response = await fetch(
+      response = await unauthFetch(
         response.url,
         await buildDpopFetchOptions(
           response.url,
@@ -199,7 +201,7 @@ export async function buildDpopFetch(
         // Once the token has been refreshed, re-issue the authenticated request.
         // If it has an auth failure again, the user legitimately doesn't have access
         // to the target resource.
-        return await fetch(
+        return await unauthFetch(
           url.toString(),
           await buildDpopFetchOptions(
             url.toString(),
@@ -229,6 +231,7 @@ export async function buildDpopFetch(
  * DPoP token, and adds a dpop header.
  */
 export async function buildAuthenticatedFetch(
+  unauthFetch: typeof fetch,
   accessToken: string,
   options?: {
     dpopKey?: KeyPair;
@@ -236,7 +239,12 @@ export async function buildAuthenticatedFetch(
   }
 ): Promise<typeof fetch> {
   if (options?.dpopKey) {
-    return buildDpopFetch(accessToken, options.dpopKey, options.refreshOptions);
+    return buildDpopFetch(
+      unauthFetch,
+      accessToken,
+      options.dpopKey,
+      options.refreshOptions
+    );
   }
-  return buildBearerFetch(accessToken, options?.refreshOptions);
+  return buildBearerFetch(unauthFetch, accessToken, options?.refreshOptions);
 }
