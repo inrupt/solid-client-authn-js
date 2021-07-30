@@ -40,7 +40,6 @@ config({
 // the environment wasn't properly set.
 describe("Environment", () => {
   it("contains the expected environment variables", () => {
-    expect(process.env.E2E_TEST_REFRESH_TOKEN).not.toBeUndefined();
     expect(process.env.E2E_TEST_CLIENT_ID).not.toBeUndefined();
     expect(process.env.E2E_TEST_CLIENT_SECRET).not.toBeUndefined();
     expect(process.env.E2E_TEST_IDP_URL).not.toBeUndefined();
@@ -53,7 +52,6 @@ describe("Authenticated fetch", () => {
     await session.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     expect(session.info.isLoggedIn).toEqual(true);
@@ -66,7 +64,6 @@ describe("Authenticated fetch", () => {
     await session.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -83,7 +80,6 @@ describe("Authenticated fetch", () => {
     await session.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -103,7 +99,6 @@ describe("Authenticated fetch", () => {
     await session.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
 
@@ -123,7 +118,6 @@ describe("Authenticated fetch", () => {
     await authenticatedSession.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
 
@@ -142,7 +136,6 @@ describe("Unauthenticated fetch", () => {
     await authenticatedSession.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -171,7 +164,6 @@ describe("Post-logout fetch", () => {
     await session.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -191,7 +183,6 @@ describe("Post-logout fetch", () => {
     await session.login({
       clientId: process.env.E2E_TEST_CLIENT_ID,
       clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      refreshToken: process.env.E2E_TEST_REFRESH_TOKEN,
       oidcIssuer: process.env.E2E_TEST_IDP_URL,
     });
     await session.logout();
