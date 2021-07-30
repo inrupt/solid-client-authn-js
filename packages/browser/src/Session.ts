@@ -149,6 +149,7 @@ export class Session extends EventEmitter {
 
   // Remove this when removing the `useEssSession` workaround:
   private tmpFetchWithCookies = false;
+  onError: ((error: string | null, errorDescription?: string | null | undefined) => unknown) | undefined;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -273,7 +274,11 @@ export class Session extends EventEmitter {
    * @param options See {@see IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
-    inputOptions: string | IHandleIncomingRedirectOptions = {}
+    inputOptions: string | IHandleIncomingRedirectOptions = {},
+    onError?: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
       return this.info;
@@ -370,7 +375,8 @@ export class Session extends EventEmitter {
 
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
-      url
+      url,
+      onError
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);

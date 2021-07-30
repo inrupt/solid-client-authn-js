@@ -143,10 +143,13 @@ export default class ClientAuthentication {
   };
 
   handleIncomingRedirect = async (
-    url: string
+    url: string,
+    onError?: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(url);
-
+    const redirectInfo = await this.redirectHandler.handle(url, onError);
     // The `FallbackRedirectHandler` directly returns the global `fetch` for
     // his value, so we should ensure it's bound to `window` rather than to
     // ClientAuthentication, to avoid the following error:
