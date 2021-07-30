@@ -36,7 +36,6 @@ jobs:
         if: ${{ github.actor != 'dependabot[bot]' && false  }}
         run: npm run e2e-test
         env: 
-          E2E_TEST_REFRESH_TOKEN: ${{ secrets.E2E_TEST_REFRESH_TOKEN }}
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
           E2E_TEST_CLIENT_SECRET: ${{ secrets.E2E_TEST_CLIENT_SECRET }}
           E2E_TEST_IDP_URL: ${{ secrets.E2E_TEST_IDP_URL }}
