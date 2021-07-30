@@ -23,8 +23,14 @@ import { jest } from "@jest/globals";
 // eslint-disable-next-line no-shadow
 import { Response } from "cross-fetch";
 import { JWK, parseJwk, SignJWT } from "@inrupt/jose-legacy-modules";
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import {
+  IClient,
+  IIssuerConfig,
+  KeyPair,
+} from "@inrupt/solid-client-authn-core";
 import { TokenEndpointInput } from "../dpop/tokenExchange";
+
+/* eslint-disable camelcase */
 
 export const mockJwk = (): JWK => {
   return {
@@ -35,6 +41,15 @@ export const mockJwk = (): JWK => {
     x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
     y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
     d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+  };
+};
+
+export const mockKeyPair = async (): Promise<KeyPair> => {
+  const publicKey = mockJwk();
+  delete publicKey.d;
+  return {
+    privateKey: await parseJwk(mockJwk()),
+    publicKey,
   };
 };
 
@@ -51,7 +66,7 @@ export const mockIssuer = (): IIssuerConfig => {
   };
 };
 
-export const mockWebId = (): string => "https://my.webid";
+export const mockWebId = (): string => "https://my.webid/";
 
 export const mockEndpointInput = (): TokenEndpointInput => {
   return {

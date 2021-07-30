@@ -20,14 +20,12 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
-import { JWK, SignJWT, parseJwk } from "@inrupt/jose-legacy-modules";
+import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
 import {
   getBearerToken,
   getDpopToken,
   getTokens,
-  TokenEndpointInput,
   validateTokenEndpointResponse,
 } from "./tokenExchange";
 import {
