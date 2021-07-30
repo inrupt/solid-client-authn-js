@@ -231,7 +231,10 @@ describe("Session", () => {
 
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect();
-      expect(incomingRedirectHandler).toHaveBeenCalledWith("https://some.url");
+      expect(incomingRedirectHandler).toHaveBeenCalledWith(
+        "https://some.url",
+        undefined
+      );
     });
 
     it("wraps up ClientAuthentication handleIncomingRedirect", async () => {

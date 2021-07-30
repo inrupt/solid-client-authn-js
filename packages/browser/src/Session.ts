@@ -52,6 +52,13 @@ export interface ISessionOptions {
    * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
    */
   clientAuthentication: ClientAuthentication;
+  /**
+   * Error callback to be called when errors occur during login.
+   */
+  onError?: (
+    error: string | null,
+    errorDescription?: string | null | undefined
+  ) => unknown;
 }
 
 export interface IHandleIncomingRedirectOptions {
@@ -149,7 +156,11 @@ export class Session extends EventEmitter {
 
   // Remove this when removing the `useEssSession` workaround:
   private tmpFetchWithCookies = false;
-  onError: ((error: string | null, errorDescription?: string | null | undefined) => unknown) | undefined;
+
+  private onError?: (
+    error: string | null,
+    errorDescription?: string | null | undefined
+  ) => unknown;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -195,6 +206,9 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
+
+    this.onError = sessionOptions.onError;
+
     // Listen for messages from children iframes.
     setupIframeListener(async (redirectUrl: string) => {
       const sessionInfo =
@@ -274,11 +288,7 @@ export class Session extends EventEmitter {
    * @param options See {@see IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
-    inputOptions: string | IHandleIncomingRedirectOptions = {},
-    onError?: (
-      error: string | null,
-      errorDescription?: string | null
-    ) => unknown
+    inputOptions: string | IHandleIncomingRedirectOptions = {}
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
       return this.info;
@@ -376,7 +386,7 @@ export class Session extends EventEmitter {
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
-      onError
+      this.onError
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);

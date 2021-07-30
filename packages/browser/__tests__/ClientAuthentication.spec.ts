@@ -339,7 +339,10 @@ describe("ClientAuthentication", () => {
       expect(redirectInfo?.expirationDate).toEqual(
         RedirectHandlerResponse.expirationDate
       );
-      expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(url);
+      expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
+        url,
+        undefined
+      );
 
       // Calling the redirect handler should have updated the fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
