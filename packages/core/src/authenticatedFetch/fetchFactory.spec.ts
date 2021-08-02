@@ -20,11 +20,22 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { KeyLike } from "jose/types";
-import jwtVerify from "jose/jwt/verify";
-import { parseJwk } from "jose/jwk/parse";
-import { generateKeyPair } from "jose/util/generate_key_pair";
-import { fromKeyLike } from "jose/jwk/from_key_like";
+// Until there is a broader support for submodules exports in the ecosystem,
+// (e.g. jest supports them), we'll depend on an intermediary package that exports
+// a single ES module. The submodule exports should be kept commented out to make
+// it easier to transition back when possible.
+// import { KeyLike } from "jose/types";
+// import jwtVerify from "jose/jwt/verify";
+// import { parseJwk } from "jose/jwk/parse";
+// import { generateKeyPair } from "jose/util/generate_key_pair";
+// import { fromKeyLike } from "jose/jwk/from_key_like";
+import {
+  KeyLike,
+  jwtVerify,
+  parseJwk,
+  generateKeyPair,
+  fromKeyLike,
+} from "@inrupt/jose-legacy-modules";
 
 import {
   buildAuthenticatedFetch,
