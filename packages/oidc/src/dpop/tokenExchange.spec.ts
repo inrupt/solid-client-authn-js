@@ -20,36 +20,30 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-
-// eslint-disable-next-line no-shadow
-import { Response } from "cross-fetch";
-import { IClient, IIssuerConfig } from "@inrupt/solid-client-authn-core";
-import { JWK, SignJWT, parseJwk } from "@inrupt/jose-legacy-modules";
+import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
 import {
   getBearerToken,
   getDpopToken,
   getTokens,
-  TokenEndpointInput,
   validateTokenEndpointResponse,
 } from "./tokenExchange";
+import {
+  mockBearerAccessToken,
+  mockBearerTokens,
+  mockClient,
+  mockDpopTokens,
+  mockEndpointInput,
+  mockFetch,
+  mockIdToken,
+  mockIssuer,
+  mockKeyBoundToken,
+} from "../__mocks__/issuer.mocks";
 
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
 
 jest.mock("@inrupt/solid-client-authn-core");
-
-const mockJwk = (): JWK => {
-  return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
-};
 
 // The following module introduces randomness in the process, which prevents
 // making assumptions on the returned values. Mocking them out makes keys and
@@ -59,121 +53,6 @@ jest.mock("uuid", () => {
     v4: (): string => "1234",
   };
 });
-
-const mockIssuer = (): IIssuerConfig => {
-  return {
-    issuer: "https://some.issuer",
-    authorizationEndpoint: "https://some.issuer/autorization",
-    tokenEndpoint: "https://some.issuer/token",
-    jwksUri: "https://some.issuer/keys",
-    claimsSupported: ["code", "openid"],
-    subjectTypesSupported: ["public", "pairwise"],
-    registrationEndpoint: "https://some.issuer/registration",
-    grantTypesSupported: ["authorization_code"],
-  };
-};
-
-const mockWebId = (): string => "https://my.webid";
-
-const mockEndpointInput = (): TokenEndpointInput => {
-  return {
-    grantType: "authorization_code",
-    code: "some code",
-    codeVerifier: "some pkce token",
-    redirectUrl: "https://my.app/redirect",
-  };
-};
-
-// The following function is only there to be used manually if
-// the JWT needed to be manually re-generated.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function generateMockJwt(): Promise<void> {
-  const payload = {
-    sub: "https://my.webid",
-  };
-  const jwt = await new SignJWT(payload)
-    .setProtectedHeader({ alg: "ES256" })
-    .setIssuedAt()
-    .setIssuer(mockIssuer().issuer.toString())
-    .setAudience("solid")
-    .setExpirationTime("2h")
-    .sign(await parseJwk(mockJwk()));
-  // This is for manual use.
-  // eslint-disable-next-line no-console
-  console.log(jwt.toString());
-}
-
-// result of generateMockJwt()
-const mockIdToken = (): string =>
-  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9zb21lLmlzc3VlciIsImlhdCI6MTYwMjQ5MTk5N30.R0hNKpCR3J8fS6JkTGTuFdz43_2zBMAQvCejSEO5S88DEaMQ4ktOYT__VfPmS7DHLt6Mju-J9bEc4twCnPxXjA";
-
-type AccessJwt = {
-  sub: string;
-  iss: string;
-  aud: string;
-  nbf: number;
-  exp: number;
-  cnf: {
-    jkt: string;
-  };
-};
-
-const mockKeyBoundToken = (): AccessJwt => {
-  return {
-    sub: mockWebId(),
-    iss: mockIssuer().issuer.toString(),
-    aud: "https://resource.example.org",
-    nbf: 1562262611,
-    exp: 1562266216,
-    cnf: {
-      jkt: mockJwk().kid as string,
-    },
-  };
-};
-
-const mockBearerAccessToken = (): string => "some token";
-
-type TokenEndpointRawResponse = {
-  access_token: string;
-  id_token: string;
-  refresh_token?: string;
-  token_type: string;
-};
-
-const mockBearerTokens = (): TokenEndpointRawResponse => {
-  return {
-    access_token: mockBearerAccessToken(),
-    id_token: mockIdToken(),
-    token_type: "Bearer",
-  };
-};
-
-const mockDpopTokens = (): TokenEndpointRawResponse => {
-  return {
-    access_token: JSON.stringify(mockKeyBoundToken()),
-    id_token: mockIdToken(),
-    token_type: "DPoP",
-  };
-};
-
-const mockClient = (): IClient => {
-  return {
-    clientId: "some client",
-    clientType: "dynamic",
-  };
-};
-
-const mockFetch = (payload: string, statusCode: number) => {
-  const mockedFetch = jest.fn(
-    async (
-      _url: RequestInfo,
-      _init?: RequestInit
-    ): ReturnType<typeof window.fetch> =>
-      new Response(payload, { status: statusCode })
-  );
-  window.fetch = mockedFetch;
-  return mockedFetch;
-};
 
 describe("validateTokenEndpointResponse", () => {
   describe("for DPoP tokens", () => {
