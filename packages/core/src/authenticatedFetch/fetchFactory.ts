@@ -148,6 +148,7 @@ export async function buildDpopFetch(
   let currentAccessToken = accessToken;
   const currentRefreshOptions: RefreshOptions | undefined = refreshOptions;
   return async (url, options): Promise<Response> => {
+    console.log("coucou");
     let response = await unauthFetch(
       url,
       await buildDpopFetchOptions(
