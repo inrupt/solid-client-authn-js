@@ -28,6 +28,7 @@ import {
   getWebidFromTokenPayload,
   KeyPair,
   generateDpopKeyPair,
+  TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
@@ -88,17 +89,11 @@ function hasExpiresIn(
   return value.expires_in === undefined || typeof value.expires_in === "number";
 }
 
-export type TokenEndpointResponse = {
-  accessToken: string;
+export type CodeExchangeResult = TokenEndpointResponse & {
+  // The idToken must not be undefined after the auth code exchange
   idToken: string;
   webId: string;
-  refreshToken?: string;
   dpopKey?: KeyPair;
-  expiresIn?: number;
-};
-
-export type TokenEndpointDpopResponse = TokenEndpointResponse & {
-  dpopKey: KeyPair;
 };
 
 export type TokenEndpointInput = {
@@ -201,19 +196,19 @@ export async function getTokens(
   client: IClient,
   data: TokenEndpointInput,
   dpop: true
-): Promise<TokenEndpointDpopResponse>;
+): Promise<CodeExchangeResult>;
 export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
   dpop: false
-): Promise<TokenEndpointResponse>;
+): Promise<CodeExchangeResult>;
 export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
   dpop: boolean
-): Promise<TokenEndpointResponse> {
+): Promise<CodeExchangeResult> {
   validatePreconditions(issuer, data);
   const headers: Record<string, string> = {
     "content-type": "application/x-www-form-urlencoded",
@@ -290,7 +285,7 @@ export async function getTokens(
  */
 export async function getBearerToken(
   redirectUrl: string
-): Promise<TokenEndpointResponse> {
+): Promise<CodeExchangeResult> {
   let signinResponse;
   try {
     const client = new OidcClient({
@@ -368,6 +363,6 @@ export async function getDpopToken(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput
-): Promise<TokenEndpointDpopResponse> {
+): Promise<CodeExchangeResult> {
   return getTokens(issuer, client, data, true);
 }

@@ -25,6 +25,7 @@
  */
 
 import {
+  buildAuthenticatedFetch,
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
@@ -36,13 +37,8 @@ import {
 import {
   getDpopToken,
   getBearerToken,
-  TokenEndpointResponse,
-  TokenEndpointDpopResponse,
+  CodeExchangeResult,
 } from "@inrupt/oidc-client-ext";
-import {
-  buildBearerFetch,
-  buildDpopFetch,
-} from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
@@ -167,8 +163,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       issuerConfig
     );
 
-    let tokens: TokenEndpointResponse | TokenEndpointDpopResponse;
-    let authFetch: typeof fetch;
+    let tokens: CodeExchangeResult;
     const referenceTime = Date.now();
 
     if (isDpop) {
@@ -192,15 +187,13 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         codeVerifier,
         redirectUrl: storedRedirectIri,
       });
-
-      authFetch = await buildDpopFetch(
-        tokens.accessToken,
-        (tokens as TokenEndpointDpopResponse).dpopKey
-      );
     } else {
       tokens = await getBearerToken(url.toString());
-      authFetch = buildBearerFetch(tokens.accessToken);
     }
+
+    const authFetch = await buildAuthenticatedFetch(fetch, tokens.accessToken, {
+      dpopKey: tokens.dpopKey,
+    });
 
     await this.storageUtility.setForUser(
       storedSessionId,

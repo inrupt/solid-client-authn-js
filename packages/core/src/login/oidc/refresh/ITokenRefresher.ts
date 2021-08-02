@@ -19,36 +19,46 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export {
-  Version,
-  Log,
-  OidcClient,
-  OidcClientSettings,
-  WebStorageStateStore,
-  InMemoryWebStorage,
-  UserManager,
-  AccessTokenEvents,
-  MetadataService,
-  CordovaPopupNavigator,
-  CordovaIFrameNavigator,
-  CheckSessionIFrame,
-  SigninRequest,
-  SigninResponse,
-  // TODO: Investigate why this fails
-  // TokenRevocationClient,
-  SessionMonitor,
-  // Global,
-  User,
-} from "oidc-client";
+import { KeyPair } from "../../../authenticatedFetch/dpopUtils";
 
-export { registerClient } from "./dcr/clientRegistrar";
-export {
-  getDpopToken,
-  getBearerToken,
-  TokenEndpointInput,
-  CodeExchangeResult,
-} from "./dpop/tokenExchange";
-export {
-  removeOidcQueryParam,
-  clearOidcPersistentStorage,
-} from "./cleanup/cleanup";
+/**
+ * Based on openid-client's TokenSetParameters. Re-creating the type allows not
+ * to depend on the Node-specific library at the environment-agnostic level.
+ */
+export type TokenEndpointResponse = {
+  /**
+   * JWT-serialized access token
+   */
+  accessToken: string;
+  /**
+   * Usually "Bearer"
+   */
+  tokenType?: "Bearer" | "DPoP";
+  /**
+   * JWT-serialized id token
+   */
+  idToken?: string;
+  /**
+   * Refresh token (not necessarily a JWT)
+   */
+  refreshToken?: string;
+
+  /**
+   * Expiration of the access token.
+   */
+  expiresAt?: number;
+
+  /**
+   * ExpiresAt should be computed from expiresIn when receiving the token.
+   */
+  expiresIn?: number;
+};
+
+export interface ITokenRefresher {
+  refresh(
+    localUserId: string,
+    refreshToken?: string,
+    dpopKey?: KeyPair,
+    onNewRefreshToken?: (token: string) => unknown
+  ): Promise<TokenEndpointResponse>;
+}
