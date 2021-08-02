@@ -156,6 +156,10 @@ export const mockClient = (): IClient => {
   };
 };
 
+// Since this is only for tests, the ESLint warning may be disabled.
+// I'm not sure why, but the type definitions I would expect conflict either with
+// the object actually returned or with the .mock calls in the tests.
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const mockFetch = (payload: string, statusCode: number) => {
   const mockedFetch = jest.fn(
     async (
