@@ -31,7 +31,7 @@ import {
 import formUrlEncoded from "form-urlencoded";
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 
-// Identifiers in camelcase are mandated by the OAuth spec.
+// Identifiers in snake_case are mandated by the OAuth spec.
 /* eslint-disable camelcase */
 
 export async function refresh(
