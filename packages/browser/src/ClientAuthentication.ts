@@ -60,11 +60,7 @@ export default class ClientAuthentication {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (
-    options: ILoginOptions,
-    onError?: (
-      error: string | null,
-      errorDescription?: string | null | undefined
-    ) => unknown
+    options: ILoginOptions
   ): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
@@ -85,8 +81,7 @@ export default class ClientAuthentication {
       ...options,
       redirectUrl,
       // If no clientName is provided, the clientId may be used instead.
-      clientName: options.clientName ?? options.clientId,
-      onError,
+      clientName: options.clientName ?? options.clientId
     });
   };
 

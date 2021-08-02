@@ -45,15 +45,16 @@ export default function App() {
   useEffect(() => {
     // After redirect, the current URL contains login information.
     handleIncomingRedirect({
-      restorePreviousSession: true
-    }, onError).then((info) => {
+      restorePreviousSession: true,
+      onError: errorHandle,
+    }).then((info) => {
       setWebId(info.webId);
       setResource(webId);
     });
   }, [webId]);
 
-  const onError = (error, errorDescription) => {
-    console.log("Yep we got an error");
+  const errorHandle = (error, errorDescription) => {
+    alert("Oops an error has occured");
   }
 
   const handleLogin = (e) => {
