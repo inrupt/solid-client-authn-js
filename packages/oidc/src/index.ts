@@ -48,6 +48,7 @@ export {
   TokenEndpointInput,
   CodeExchangeResult,
 } from "./dpop/tokenExchange";
+export { refresh } from "./refresh/refreshGrant";
 export {
   removeOidcQueryParam,
   clearOidcPersistentStorage,
