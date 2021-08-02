@@ -39,6 +39,10 @@ export type TokenEndpointResponse = {
    */
   idToken?: string;
   /**
+   * URL identifying the subject of the ID token.
+   */
+  webId?: string;
+  /**
    * Refresh token (not necessarily a JWT)
    */
   refreshToken?: string;
@@ -52,6 +56,11 @@ export type TokenEndpointResponse = {
    * ExpiresAt should be computed from expiresIn when receiving the token.
    */
   expiresIn?: number;
+
+  /**
+   * DPoP key to which the access token, and potentially the refresh token, are bound.
+   */
+  dpopKey?: KeyPair;
 };
 
 export interface ITokenRefresher {
