@@ -126,7 +126,7 @@ export default class TokenRefresher implements ITokenRefresher {
       await client.refresh(refreshToken, {
         // openid-client does not support yet jose@3.x, and expects
         // type definitions that are no longer present. However, the JWK
-        // type that we pass here is compatible with the API, hence the `any`
+        // type that we pass here is compatible with the API, hence the type
         // assertion.
         DPoP: dpopKey ? (dpopKey.privateKey as KeyObject) : undefined,
       }),
