@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### node
+
+- A transitive dependency used submodule exports, which aren't supported yet by
+significant parts of the ecosystem, such as Jest. With an internal change, we enabled
+using @inrupt/solid-client-authn-node without encountering submodule exports.
+
 The following sections document changes that have been released already:
 
 ## 1.10.0 - 2021-07-28
