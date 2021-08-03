@@ -20,21 +20,33 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { KeyLike } from "jose/types";
-import jwtVerify from "jose/jwt/verify";
-import { parseJwk } from "jose/jwk/parse";
-import { generateKeyPair } from "jose/util/generate_key_pair";
-import { fromKeyLike } from "jose/jwk/from_key_like";
+// Until there is a broader support for submodules exports in the ecosystem,
+// (e.g. jest supports them), we'll depend on an intermediary package that exports
+// a single ES module. The submodule exports should be kept commented out to make
+// it easier to transition back when possible.
+// import { KeyLike } from "jose/types";
+// import jwtVerify from "jose/jwt/verify";
+// import { parseJwk } from "jose/jwk/parse";
+// import { generateKeyPair } from "jose/util/generate_key_pair";
+// import { fromKeyLike } from "jose/jwk/from_key_like";
 import {
-  mockDefaultTokenRefresher,
-  mockDefaultTokenSet,
-  mockTokenRefresher,
-} from "../login/oidc/refresh/__mocks__/TokenRefresher";
+  KeyLike,
+  jwtVerify,
+  parseJwk,
+  generateKeyPair,
+  fromKeyLike,
+} from "@inrupt/jose-legacy-modules";
+
 import {
   buildAuthenticatedFetch,
   buildBearerFetch,
   buildDpopFetch,
 } from "./fetchFactory";
+import {
+  mockDefaultTokenRefresher,
+  mockDefaultTokenSet,
+  mockTokenRefresher,
+} from "../login/oidc/refresh/__mocks__/TokenRefresher";
 
 jest.mock("cross-fetch");
 
@@ -84,7 +96,7 @@ describe("buildBearerFetch", () => {
     // eslint-disable-next-line no-shadow
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValueOnce(mockNotRedirectedResponse());
-    const myFetch = buildBearerFetch("myToken", undefined);
+    const myFetch = buildBearerFetch(fetch, "myToken", undefined);
     await myFetch("someUrl");
 
     expect(fetch.mock.calls[0][1].headers.Authorization).toEqual(
@@ -96,7 +108,7 @@ describe("buildBearerFetch", () => {
     // eslint-disable-next-line no-shadow
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValueOnce(mockNotRedirectedResponse());
-    const myFetch = buildBearerFetch("myToken", undefined);
+    const myFetch = buildBearerFetch(fetch, "myToken", undefined);
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
     expect(fetch.mock.calls[0][1].headers.Authorization).toEqual(
@@ -110,7 +122,7 @@ describe("buildBearerFetch", () => {
     // eslint-disable-next-line no-shadow
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValueOnce(mockNotRedirectedResponse());
-    const myFetch = buildBearerFetch("myToken", undefined);
+    const myFetch = buildBearerFetch(fetch, "myToken", undefined);
     await myFetch("someUrl", { headers: { Authorization: "some token" } });
 
     expect(fetch.mock.calls[0][1].headers.Authorization).toEqual(
@@ -122,7 +134,7 @@ describe("buildBearerFetch", () => {
     // eslint-disable-next-line no-shadow
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValueOnce({ status: 401 });
-    const myFetch = buildBearerFetch("myToken", {
+    const myFetch = buildBearerFetch(fetch, "myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockDefaultTokenRefresher(),
@@ -143,7 +155,7 @@ describe("buildBearerFetch", () => {
       url: "https://somedomain.sometld",
     });
     const dpopKey = await mockKeyPair();
-    const myFetch = await buildDpopFetch("myToken", dpopKey, {
+    const myFetch = await buildDpopFetch(fetch, "myToken", dpopKey, {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockDefaultTokenRefresher(),
@@ -164,7 +176,7 @@ describe("buildBearerFetch", () => {
     // eslint-disable-next-line no-shadow
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValueOnce({ status: 401 });
-    const myFetch = buildBearerFetch("myToken", {
+    const myFetch = buildBearerFetch(fetch, "myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockDefaultTokenRefresher(),
@@ -183,11 +195,11 @@ describe("buildBearerFetch", () => {
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValue({ status: 401 });
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const refreshCall = jest.spyOn(mockedFreshener, "refresh");
 
-    const myFetch = buildBearerFetch("myToken", {
+    const myFetch = buildBearerFetch(fetch, "myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockedFreshener,
@@ -203,10 +215,10 @@ describe("buildBearerFetch", () => {
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValue({ status: 401 });
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const refreshHandler = jest.fn();
-    const myFetch = buildBearerFetch("myToken", {
+    const myFetch = buildBearerFetch(fetch, "myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockedFreshener,
@@ -225,7 +237,7 @@ describe("buildBearerFetch", () => {
     const mockedRefresher = mockDefaultTokenRefresher();
     const refreshCall = jest.spyOn(mockedRefresher, "refresh");
 
-    const myFetch = buildBearerFetch("myToken", {
+    const myFetch = buildBearerFetch(fetch, "myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockedRefresher,
@@ -238,7 +250,7 @@ describe("buildBearerFetch", () => {
     // eslint-disable-next-line no-shadow
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValueOnce({ status: 401 });
-    const myFetch = buildBearerFetch("myToken", {
+    const myFetch = buildBearerFetch(fetch, "myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: {
@@ -259,7 +271,11 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair());
+    const myFetch = await buildDpopFetch(
+      mockedFetch,
+      "myToken",
+      await mockKeyPair()
+    );
     await myFetch("http://some.url");
 
     expect(mockedFetch.mock.calls[0][1].headers.Authorization).toEqual(
@@ -281,7 +297,11 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair());
+    const myFetch = await buildDpopFetch(
+      mockedFetch,
+      "myToken",
+      await mockKeyPair()
+    );
     await myFetch("http://some.url", {
       method: "POST",
     });
@@ -301,7 +321,11 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair());
+    const myFetch = await buildDpopFetch(
+      mockedFetch,
+      "myToken",
+      await mockKeyPair()
+    );
     await myFetch("http://some.url", { headers: { someHeader: "SomeValue" } });
 
     expect(mockedFetch.mock.calls[0][1].headers.someHeader).toEqual(
@@ -313,7 +337,11 @@ describe("buildDpopFetch", () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair());
+    const myFetch = await buildDpopFetch(
+      mockedFetch,
+      "myToken",
+      await mockKeyPair()
+    );
     await myFetch("http://some.url", {
       headers: {
         Authorization: "some token",
@@ -342,7 +370,11 @@ describe("buildDpopFetch", () => {
         status: 200,
       } as Response);
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair());
+    const myFetch = await buildDpopFetch(
+      mockedFetch,
+      "myToken",
+      await mockKeyPair()
+    );
     await myFetch("https://my.pod/container");
 
     expect(mockedFetch.mock.calls[1][0]).toEqual("https://my.pod/container/");
@@ -366,7 +398,11 @@ describe("buildDpopFetch", () => {
       ok: false,
     } as Response);
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair());
+    const myFetch = await buildDpopFetch(
+      mockedFetch,
+      "myToken",
+      await mockKeyPair()
+    );
     const response = await myFetch("https://my.pod/container");
 
     expect(mockedFetch.mock.calls).toHaveLength(1);
@@ -382,7 +418,11 @@ describe("buildDpopFetch", () => {
       ok: false,
     } as Response);
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair());
+    const myFetch = await buildDpopFetch(
+      mockedFetch,
+      "myToken",
+      await mockKeyPair()
+    );
     const response = await myFetch("https://my.pod/resource");
 
     expect(mockedFetch.mock.calls).toHaveLength(1);
@@ -396,11 +436,16 @@ describe("buildDpopFetch", () => {
       status: 401,
       url: "https://my.pod/resource",
     });
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair(), {
-      refreshToken: "some refresh token",
-      sessionId: "mySession",
-      tokenRefresher: mockDefaultTokenRefresher(),
-    });
+    const myFetch = await buildDpopFetch(
+      fetch,
+      "myToken",
+      await mockKeyPair(),
+      {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockDefaultTokenRefresher(),
+      }
+    );
     await myFetch("https://my.pod/resource");
     // The mocked fetch will 401, which triggers the refresh flow.
     // The test checks that the mocked refreshed token is used silently.
@@ -416,11 +461,16 @@ describe("buildDpopFetch", () => {
       status: 401,
       url: "https://my.pod/resource",
     });
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair(), {
-      refreshToken: "some refresh token",
-      sessionId: "mySession",
-      tokenRefresher: mockDefaultTokenRefresher(),
-    });
+    const myFetch = await buildDpopFetch(
+      fetch,
+      "myToken",
+      await mockKeyPair(),
+      {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockDefaultTokenRefresher(),
+      }
+    );
     await myFetch("https://my.pod/resource", {
       headers: { someHeader: "SomeValue" },
     });
@@ -440,15 +490,20 @@ describe("buildDpopFetch", () => {
       url: "https://my.pod/resource",
     });
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const refreshCall = jest.spyOn(mockedFreshener, "refresh");
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair(), {
-      refreshToken: "some refresh token",
-      sessionId: "mySession",
-      tokenRefresher: mockedFreshener,
-    });
+    const myFetch = await buildDpopFetch(
+      fetch,
+      "myToken",
+      await mockKeyPair(),
+      {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+      }
+    );
 
     await myFetch("https://my.pod/resource");
     // We make two requests in a row to see that the second uses a different refresh token
@@ -464,16 +519,21 @@ describe("buildDpopFetch", () => {
       url: "https://my.pod/resource",
     });
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const refreshHandler = jest.fn();
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair(), {
-      refreshToken: "some refresh token",
-      sessionId: "mySession",
-      tokenRefresher: mockedFreshener,
-      onNewRefreshToken: refreshHandler,
-    });
+    const myFetch = await buildDpopFetch(
+      fetch,
+      "myToken",
+      await mockKeyPair(),
+      {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+        onNewRefreshToken: refreshHandler,
+      }
+    );
 
     await myFetch("https://my.pod/resource");
     expect(refreshHandler).toHaveBeenCalledWith("some rotated refresh token");
@@ -489,11 +549,16 @@ describe("buildDpopFetch", () => {
     const mockedFreshener = mockDefaultTokenRefresher();
     const refreshCall = jest.spyOn(mockedFreshener, "refresh");
 
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair(), {
-      refreshToken: "some refresh token",
-      sessionId: "mySession",
-      tokenRefresher: mockedFreshener,
-    });
+    const myFetch = await buildDpopFetch(
+      fetch,
+      "myToken",
+      await mockKeyPair(),
+      {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+      }
+    );
     await myFetch("https://my.pod/resource");
     expect(refreshCall).not.toHaveBeenCalled();
   });
@@ -505,15 +570,20 @@ describe("buildDpopFetch", () => {
       status: 401,
       url: "https://my.pod/resource",
     });
-    const myFetch = await buildDpopFetch("myToken", await mockKeyPair(), {
-      refreshToken: "some refresh token",
-      sessionId: "mySession",
-      tokenRefresher: {
-        refresh: () => {
-          throw new Error("Some error");
+    const myFetch = await buildDpopFetch(
+      fetch,
+      "myToken",
+      await mockKeyPair(),
+      {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: {
+          refresh: () => {
+            throw new Error("Some error");
+          },
         },
-      },
-    });
+      }
+    );
     const response = await myFetch("https://my.pod/resource");
     // The mocked fetch will 401, which triggers the refresh flow.
     // The test checks that the refresh failure is silent.
@@ -530,7 +600,7 @@ describe("buildAuthenticatedFetch", () => {
       url: "https://my.pod/resource",
     });
     const keylikePair = await mockJwk();
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
         publicKey: await fromKeyLike(keylikePair.publicKey),
@@ -564,7 +634,7 @@ describe("buildAuthenticatedFetch", () => {
       status: 401,
       url: "https://my.pod/resource",
     });
-    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
+    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", undefined);
     await myFetch("https://my.pod/resource");
     expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
     const authorizationHeader = fetch.mock.calls[0][1].headers
@@ -579,7 +649,7 @@ describe("buildAuthenticatedFetch", () => {
       status: 401,
       url: "https://my.pod/resource",
     });
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",

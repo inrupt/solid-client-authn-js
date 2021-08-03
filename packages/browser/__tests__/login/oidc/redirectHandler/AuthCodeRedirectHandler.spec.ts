@@ -30,7 +30,7 @@ import {
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import { TokenEndpointResponse } from "@inrupt/oidc-client-ext";
+import { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
 import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import {
@@ -100,7 +100,7 @@ const mockAccessTokenDpop = (): AccessJwt => {
 const mockAccessTokenBearer = (): string => "some token";
 
 const MOCK_EXPIRE_TIME = 1337;
-const mockTokenEndpointBearerResponse = (): TokenEndpointResponse => {
+const mockTokenEndpointBearerResponse = (): CodeExchangeResult => {
   return {
     accessToken: mockAccessTokenBearer(),
     idToken: mockIdToken(),
@@ -109,21 +109,20 @@ const mockTokenEndpointBearerResponse = (): TokenEndpointResponse => {
   };
 };
 
-const mockTokenEndpointDpopResponse =
-  async (): Promise<TokenEndpointResponse> => {
-    return {
-      accessToken: JSON.stringify(mockAccessTokenDpop()),
-      idToken: mockIdToken(),
-      webId: mockWebId(),
-      dpopKey: {
-        privateKey: await parseJwk(mockJwk()),
-        // Note that here for convenience the private key is also used as public key.
-        // Obviously, this should never be done in non-test code.
-        publicKey: mockJwk(),
-      },
-      expiresIn: MOCK_EXPIRE_TIME,
-    };
+const mockTokenEndpointDpopResponse = async (): Promise<CodeExchangeResult> => {
+  return {
+    accessToken: JSON.stringify(mockAccessTokenDpop()),
+    idToken: mockIdToken(),
+    webId: mockWebId(),
+    dpopKey: {
+      privateKey: await parseJwk(mockJwk()),
+      // Note that here for convenience the private key is also used as public key.
+      // Obviously, this should never be done in non-test code.
+      publicKey: mockJwk(),
+    },
+    expiresIn: MOCK_EXPIRE_TIME,
   };
+};
 
 const mockLocalStorage = (stored: Record<string, string>) => {
   // Kinda weird: `(window as any).localStorage = new LocalStorageMock(stored)` does

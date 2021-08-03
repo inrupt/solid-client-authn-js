@@ -20,10 +20,7 @@
  */
 
 import { jest } from "@jest/globals";
-import {
-  ITokenRefresher,
-  TokenEndpointResponse,
-} from "@inrupt/solid-client-authn-core";
+import { ITokenRefresher, TokenEndpointResponse } from "../ITokenRefresher";
 
 // Some identifiers are in camelcase on purpose.
 /* eslint-disable camelcase */
