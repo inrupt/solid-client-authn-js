@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import Redirector from "../../../src/login/oidc/Redirector";
+import Redirector from "./Redirector";
 
 jest.mock("../../../src/iframe");
 

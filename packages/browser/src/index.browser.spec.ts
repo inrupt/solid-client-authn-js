@@ -20,7 +20,7 @@
  */
 
 import { it } from "@jest/globals";
-import * as solidClientAuthentication from "../src/index.browser";
+import * as solidClientAuthentication from "./index.browser";
 
 it("exports the public API from the entrypoint", () => {
   expect(solidClientAuthentication).toBeDefined();

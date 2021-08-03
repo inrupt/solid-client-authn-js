@@ -36,15 +36,15 @@ import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import {
   AuthCodeRedirectHandler,
   DEFAULT_LIFESPAN,
-} from "../../../../src/login/oidc/redirectHandler/AuthCodeRedirectHandler";
-import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
-import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { KEY_CURRENT_SESSION } from "../../../../src/constant";
-import { LocalStorageMock } from "../../../../src/storage/__mocks__/LocalStorage";
+} from "./AuthCodeRedirectHandler";
+import { RedirectorMock } from "../__mocks__/Redirector";
+import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
+import { KEY_CURRENT_SESSION } from "../../../constant";
+import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
 import {
   mockDefaultTokenRefresher,
   mockTokenRefresher,
-} from "../../../../src/login/oidc/refresh/__mocks__/TokenRefresher";
+} from "../../../login/oidc/refresh/__mocks__/TokenRefresher";
 
 const mockJwk = (): JWK => {
   return {

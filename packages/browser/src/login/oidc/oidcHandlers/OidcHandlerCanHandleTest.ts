@@ -20,7 +20,7 @@
  */
 
 import { IOidcOptions } from "@inrupt/solid-client-authn-core";
-import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
+import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 
 const canHandleTests: {
   [key: string]: {

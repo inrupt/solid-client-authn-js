@@ -29,20 +29,20 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 import { JWK, SignJWT, parseJwk } from "@inrupt/jose-legacy-modules";
-import { LoginHandlerMock } from "../src/login/__mocks__/LoginHandler";
+import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
   RedirectHandlerResponse,
-} from "../src/login/oidc/redirectHandler/__mocks__/RedirectHandler";
-import { LogoutHandlerMock } from "../src/logout/__mocks__/LogoutHandler";
-import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
-import ClientAuthentication from "../src/ClientAuthentication";
-import { KEY_CURRENT_SESSION } from "../src/constant";
+} from "./login/oidc/redirectHandler/__mocks__/RedirectHandler";
+import { LogoutHandlerMock } from "./logout/__mocks__/LogoutHandler";
+import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
+import ClientAuthentication from "./ClientAuthentication";
+import { KEY_CURRENT_SESSION } from "./constant";
 import {
   mockDefaultIssuerConfigFetcher,
   mockIssuerConfigFetcher,
-} from "../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import { LocalStorageMock } from "../src/storage/__mocks__/LocalStorage";
+} from "./login/oidc/__mocks__/IssuerConfigFetcher";
+import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(

@@ -19,23 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  IOidcHandler,
-  AggregateHandler,
-} from "@inrupt/solid-client-authn-core";
-import { jest, it, describe, expect } from "@jest/globals";
-import AggregateOidcHandler from "../../../src/login/oidc/AggregateOidcHandler";
+/**
+ * @jest-environment node
+ */
+import { getClientAuthenticationWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
 
-jest.mock("@inrupt/solid-client-authn-core");
-
-describe("AggregateOidcHandler", () => {
-  it("should pass injected handlers to its superclass", () => {
-    // We just test if the parent is called.
-    // eslint-disable-next-line no-new
-    new AggregateOidcHandler(["Some handler"] as unknown as IOidcHandler[]);
-
-    expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
-      [["Some handler"]],
-    ]);
+describe("dependencies.node", () => {
+  it("performs dependency injection in a node environment", () => {
+    const clientAuthn = getClientAuthenticationWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
   });
 });

@@ -26,9 +26,9 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 
-import { UuidGeneratorMock } from "../../src/util/__mocks__/UuidGenerator";
-import { LogoutHandlerMock } from "../../src/logout/__mocks__/LogoutHandler";
-import { SessionInfoManager } from "../../src/sessionInfo/SessionInfoManager";
+import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
+import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
+import { SessionInfoManager } from "./SessionInfoManager";
 
 const mockClearFunction = jest.fn();
 

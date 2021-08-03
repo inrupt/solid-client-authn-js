@@ -19,20 +19,23 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { getClientAuthenticationWithDependencies } from "../src/dependencies";
-import ClientAuthentication from "../src/ClientAuthentication";
+import {
+  ILoginHandler,
+  AggregateHandler,
+} from "@inrupt/solid-client-authn-core";
+import { jest, it, describe, expect } from "@jest/globals";
+import AggregateLoginHandler from "./AggregateLoginHandler";
 
-describe("dependencies", () => {
-  it("performs dependency injection", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
+jest.mock("@inrupt/solid-client-authn-core");
 
-  it("performs dependency injection with a given input", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: mockStorageUtility({}),
-    });
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+describe("AggregateLoginHandler", () => {
+  it("should pass injected handlers to its superclass", () => {
+    // We just test if the parent is called.
+    // eslint-disable-next-line no-new
+    new AggregateLoginHandler(["Some handler"] as unknown as ILoginHandler[]);
+
+    expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
+      [["Some handler"]],
+    ]);
   });
 });

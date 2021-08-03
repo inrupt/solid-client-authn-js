@@ -29,8 +29,8 @@ import {
   onLogin,
   onSessionRestore,
   onLogout,
-} from "../src/defaultSession";
-import type * as SessionModuleType from "../src/Session";
+} from "./defaultSession";
+import type * as SessionModuleType from "./Session";
 
 jest.mock("../src/Session.ts");
 

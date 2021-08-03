@@ -19,11 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it } from "@jest/globals";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { getClientAuthenticationWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
 
-import { Session, getClientAuthenticationWithDependencies } from "../src/index";
+describe("dependencies", () => {
+  it("performs dependency injection", () => {
+    const clientAuthn = getClientAuthenticationWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+  });
 
-it("exports the public API from the entrypoint", () => {
-  expect(Session).toBeDefined();
-  expect(getClientAuthenticationWithDependencies).toBeDefined();
+  it("performs dependency injection with a given input", () => {
+    const clientAuthn = getClientAuthenticationWithDependencies({
+      secureStorage: mockStorageUtility({}),
+    });
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+  });
 });

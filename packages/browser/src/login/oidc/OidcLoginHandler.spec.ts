@@ -26,15 +26,15 @@ import {
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
-import { OidcHandlerMock } from "../../../src/login/oidc/__mocks__/IOidcHandler";
+import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
 import {
   IssuerConfigFetcherFetchConfigResponse,
   mockDefaultIssuerConfigFetcher,
   mockIssuerConfigFetcher,
-} from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import OidcLoginHandler from "../../../src/login/oidc/OidcLoginHandler";
-import { mockDefaultClientRegistrar } from "../../../src/login/oidc/__mocks__/ClientRegistrar";
-import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
+} from "./__mocks__/IssuerConfigFetcher";
+import OidcLoginHandler from "./OidcLoginHandler";
+import { mockDefaultClientRegistrar } from "./__mocks__/ClientRegistrar";
+import ClientRegistrar from "./ClientRegistrar";
 
 jest.mock("@inrupt/oidc-client-ext");
 

@@ -31,11 +31,11 @@ import {
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import AuthorizationCodeWithPkceOidcHandler from "../../../../src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
-import canHandleTests from "./OidcHandlerCanHandleTests";
-import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
-import { standardOidcOptions } from "../../../../src/login/oidc/__mocks__/IOidcOptions";
-import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector";
+import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
+import canHandleTests from "./OidcHandlerCanHandleTest";
+import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
+import { standardOidcOptions } from "../__mocks__/IOidcOptions";
+import { RedirectorMock } from "../__mocks__/Redirector";
 
 jest.mock("@inrupt/oidc-client-ext");
 

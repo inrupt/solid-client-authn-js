@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { FallbackRedirectHandler } from "../../../../src/login/oidc/redirectHandler/FallbackRedirectHandler";
+import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
 
 describe("FallbackRedirectHandler", () => {
   describe("canHandle", () => {
