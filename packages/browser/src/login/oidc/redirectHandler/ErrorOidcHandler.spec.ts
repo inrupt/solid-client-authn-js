@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { ErrorOidcHandler } from "../../../../src/login/oidc/redirectHandler/ErrorOidcHandler";
+import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
 describe("ErrorOidcHandler", () => {
   describe("canHandle", () => {
