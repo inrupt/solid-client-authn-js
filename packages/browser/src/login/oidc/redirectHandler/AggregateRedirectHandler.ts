@@ -29,15 +29,16 @@
  */
 import {
   IRedirectHandler,
-  ISessionInfo,
   AggregateHandler,
+  RedirectInput,
+  RedirectResult,
 } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden
  */
 export default class AggregateRedirectHandler
-  extends AggregateHandler<[string], ISessionInfo & { fetch: typeof fetch }>
+  extends AggregateHandler<RedirectInput, RedirectResult>
   implements IRedirectHandler
 {
   constructor(redirectHandlers: IRedirectHandler[]) {

@@ -36,6 +36,7 @@ export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 
 export {
   default as IRedirectHandler,
+  RedirectInput,
   RedirectResult,
   getWebidFromTokenPayload,
   fetchJwks,

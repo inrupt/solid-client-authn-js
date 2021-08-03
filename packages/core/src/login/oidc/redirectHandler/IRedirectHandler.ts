@@ -36,6 +36,11 @@ import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
 
 export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
+export type RedirectInput = [
+  string,
+  ((newToken: string) => unknown)?,
+  ((error: string | null, errorDescription?: string | null) => unknown)?
+];
 
 /**
  * @hidden
@@ -43,11 +48,7 @@ export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
 type IRedirectHandler = IHandleable<
   // Tuple of the URL to redirect to, an optional event listener for when
   // we receive a new refresh token, and, an optional onError function:
-  [
-    string,
-    ((newToken: string) => unknown)?,
-    ((error: string | null, errorDescription?: string | null) => unknown)?
-  ],
+  RedirectInput,
   RedirectResult
 >;
 export default IRedirectHandler;
