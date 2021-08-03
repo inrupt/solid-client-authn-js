@@ -19,15 +19,17 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IdTokenClaims, TokenSet } from "openid-client";
 import { jest } from "@jest/globals";
-import { ITokenRefresher } from "../TokenRefresher";
+import {
+  ITokenRefresher,
+  TokenEndpointResponse,
+} from "@inrupt/solid-client-authn-core";
 
 // Some identifiers are in camelcase on purpose.
 /* eslint-disable camelcase */
 
 export const mockTokenRefresher = (
-  tokenSet: TokenSet & { access_token: string }
+  tokenSet: TokenEndpointResponse
 ): ITokenRefresher => {
   return {
     refresh: jest
@@ -39,7 +41,7 @@ export const mockTokenRefresher = (
   };
 };
 
-const mockIdTokenPayload = (): IdTokenClaims => {
+const mockIdTokenPayload = () => {
   return {
     sub: "https://my.webid",
     iss: "https://my.idp/",
@@ -49,12 +51,10 @@ const mockIdTokenPayload = (): IdTokenClaims => {
   };
 };
 
-export const mockDefaultTokenSet = (): TokenSet & { access_token: string } => {
+export const mockDefaultTokenSet = (): TokenEndpointResponse => {
   return {
-    access_token: "some refreshed access token",
-    id_token: JSON.stringify(mockIdTokenPayload()),
-    expired: () => false,
-    claims: mockIdTokenPayload,
+    accessToken: "some refreshed access token",
+    idToken: JSON.stringify(mockIdTokenPayload()),
   };
 };
 

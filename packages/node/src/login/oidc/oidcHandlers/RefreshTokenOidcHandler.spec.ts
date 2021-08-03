@@ -25,8 +25,17 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { IdTokenClaims } from "openid-client";
+import {
+  generateDpopKeyPair,
+  mockStorageUtility,
+  USER_SESSION_PREFIX,
+} from "@inrupt/solid-client-authn-core";
+// Until there is a broader support for submodules exports in the ecosystem,
+// (e.g. jest supports them), we'll depend on an intermediary package that exports
+// a single ES module. The submodule exports should be kept commented out to make
+// it easier to transition back when possible.
+// import fromKeyLike from "jose/jwk/from_key_like";
+import { jwtVerify, fromKeyLike } from "@inrupt/jose-legacy-modules";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
@@ -68,6 +77,7 @@ describe("RefreshTokenOidcHandler", () => {
             client: {
               clientId: "some client id",
               clientSecret: "some client secret",
+              clientType: "dynamic",
             },
           })
         )
@@ -89,6 +99,7 @@ describe("RefreshTokenOidcHandler", () => {
               // @ts-ignore
               clientId: undefined,
               clientSecret: "some client secret",
+              clientType: "dynamic",
             },
           })
         )
@@ -109,6 +120,7 @@ describe("RefreshTokenOidcHandler", () => {
             client: {
               clientId: "some client id",
               clientSecret: "some client secret",
+              clientType: "dynamic",
             },
           })
         )
@@ -130,6 +142,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
         })
       );
@@ -159,6 +172,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
         })
       );
@@ -179,6 +193,48 @@ describe("RefreshTokenOidcHandler", () => {
       );
     });
 
+    it("reuses stored DPoP keys if any when refreshing the access token", async () => {
+      const dpopKeyPair = await generateDpopKeyPair();
+
+      // This builds the fetch function holding the refresh token...
+      const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
+        mockDefaultTokenRefresher(),
+        mockStorageUtility({
+          [`${USER_SESSION_PREFIX}:mySession`]: {
+            publicKey: JSON.stringify(dpopKeyPair.publicKey),
+            privateKey: JSON.stringify(
+              await fromKeyLike(dpopKeyPair.privateKey)
+            ),
+          },
+        })
+      );
+      const result = await refreshTokenOidcHandler.handle(
+        mockOidcOptions({
+          refreshToken: "some refresh token",
+          client: {
+            clientId: "some client id",
+            clientSecret: "some client secret",
+            clientType: "dynamic",
+          },
+        })
+      );
+
+      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+      mockedFetch.mockResolvedValue({
+        status: 401,
+        url: "https://some.pod/resource",
+      });
+      if (result !== undefined) {
+        // ... and this should trigger the refresh flow.
+        await result.fetch("https://some.pod/resource");
+      }
+      const dpopProof = mockedFetch.mock.calls[1][1].headers.DPoP;
+      // This checks that the refreshed access token is bound to the initial DPoP key.
+      await expect(
+        jwtVerify(dpopProof, dpopKeyPair.privateKey)
+      ).resolves.not.toThrow();
+    });
+
     it("returns a bearer-authenticated fetch if the credentials are valid", async () => {
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
@@ -191,6 +247,7 @@ describe("RefreshTokenOidcHandler", () => {
           client: {
             clientId: "some client id",
             clientSecret: "some client secret",
+            clientType: "dynamic",
           },
           dpop: false,
         })
@@ -224,6 +281,7 @@ describe("RefreshTokenOidcHandler", () => {
             clientId: "some client id",
             clientSecret: "some client secret",
             clientName: "some client name",
+            clientType: "dynamic",
           },
         })
       );
@@ -261,6 +319,7 @@ describe("RefreshTokenOidcHandler", () => {
           clientId: "some client id",
           clientSecret: undefined,
           clientName: "some client name",
+          clientType: "dynamic",
         },
       })
     );
@@ -271,9 +330,7 @@ describe("RefreshTokenOidcHandler", () => {
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       mockTokenRefresher({
-        access_token: "some access token",
-        expired: () => false,
-        claims: () => null as unknown as IdTokenClaims,
+        accessToken: "some access token",
       }),
       mockStorageUtility({})
     );
@@ -283,6 +340,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
       })
     );
@@ -293,7 +351,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("uses the rotated refresh token to build the DPoP-authenticated fetch if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
 
@@ -308,6 +366,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
       })
     );
@@ -329,7 +388,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("calls the refresh token rotation handler if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const refreshTokenRotationHandler = jest.fn();
 
@@ -344,6 +403,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
         onNewRefreshToken: refreshTokenRotationHandler,
       })
@@ -359,7 +419,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("uses the rotated refresh token to build the Bearer-authenticated fetch if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
-    tokenSet.refresh_token = "some rotated refresh token";
+    tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
 
@@ -374,6 +434,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
         dpop: false,
       })
@@ -396,9 +457,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("throws if the credentials are incorrect", async () => {
     const tokenRefresher = mockTokenRefresher({
-      access_token: "some access token",
-      expired: () => false,
-      claims: () => null as unknown as IdTokenClaims,
+      accessToken: "some access token",
     });
     tokenRefresher.refresh = jest
       .fn()
@@ -414,6 +473,7 @@ describe("RefreshTokenOidcHandler", () => {
         client: {
           clientId: "some client id",
           clientSecret: "some client secret",
+          clientType: "dynamic",
         },
       })
     );

@@ -27,6 +27,7 @@ import {
   fromKeyLike,
 } from "@inrupt/jose-legacy-modules";
 import { v4 } from "uuid";
+import { PREFERRED_SIGNING_ALG } from "../constant";
 
 /**
  * Normalizes a URL in order to generate the DPoP token based on a consistent scheme.
@@ -68,7 +69,7 @@ export async function createDpopHeader(
     jti: v4(),
   })
     .setProtectedHeader({
-      alg: "ES256",
+      alg: PREFERRED_SIGNING_ALG[0],
       jwk: dpopKey.publicKey,
       typ: "dpop+jwt",
     })
@@ -77,12 +78,14 @@ export async function createDpopHeader(
 }
 
 export async function generateDpopKeyPair(): Promise<KeyPair> {
-  const { privateKey, publicKey } = await generateKeyPair("ES256");
+  const { privateKey, publicKey } = await generateKeyPair(
+    PREFERRED_SIGNING_ALG[0]
+  );
   const dpopKeyPair = {
     privateKey,
     publicKey: await fromKeyLike(publicKey),
   };
   // The alg property isn't set by fromKeyLike, so set it manually.
-  dpopKeyPair.publicKey.alg = "ES256";
+  [dpopKeyPair.publicKey.alg] = PREFERRED_SIGNING_ALG;
   return dpopKeyPair;
 }

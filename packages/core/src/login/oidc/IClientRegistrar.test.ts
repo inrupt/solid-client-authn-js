@@ -75,7 +75,7 @@ describe("handleRegistration", () => {
     const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
     } as unknown as IStorageUtility;
-    await handleRegistration(
+    const client = await handleRegistration(
       options,
       {
         solidOidcSupported: "https://solidproject.org/TR/solid-oidc",
@@ -85,6 +85,7 @@ describe("handleRegistration", () => {
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
+    expect(client.clientType).toBe("solid-oidc");
   });
 
   it("should store provided client registration information when the client ID is not a WebID", async () => {
@@ -101,7 +102,7 @@ describe("handleRegistration", () => {
     const storageUtility: IStorageUtility = {
       setForUser: jest.fn(),
     } as unknown as IStorageUtility;
-    await handleRegistration(
+    const client = await handleRegistration(
       options,
       {
         solidOidcSupported: undefined,
@@ -111,6 +112,7 @@ describe("handleRegistration", () => {
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
+    expect(client.clientType).toBe("static");
   });
 });
 

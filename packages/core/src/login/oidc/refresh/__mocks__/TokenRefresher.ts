@@ -19,39 +19,41 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IOidcOptions } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
+import { ITokenRefresher, TokenEndpointResponse } from "../ITokenRefresher";
 
-export const standardOidcOptions: IOidcOptions = {
-  sessionId: "mySession",
-  issuer: "https://example.com",
-  dpop: true,
-  redirectUrl: "https://app.example.com",
-  handleRedirect: jest.fn((url) => url),
-  // This will be fixed in a different pull request
-  issuerConfiguration: {
-    issuer: "https://example.com",
-    authorizationEndpoint: "https://example.com/auth",
-    tokenEndpoint: "https://example.com/token",
-    jwksUri: "https://example.com/jwks",
-    subjectTypesSupported: [],
-    claimsSupported: [],
-  },
-  client: {
-    clientId: "coolApp",
-    clientType: "dynamic",
-  },
-};
+// Some identifiers are in camelcase on purpose.
+/* eslint-disable camelcase */
 
-export const mockDefaultOidcOptions = (): IOidcOptions => {
-  return { ...standardOidcOptions };
-};
-
-export const mockOidcOptions = (
-  overriddenOptions: Partial<IOidcOptions>
-): IOidcOptions => {
+export const mockTokenRefresher = (
+  tokenSet: TokenEndpointResponse
+): ITokenRefresher => {
   return {
-    ...standardOidcOptions,
-    ...overriddenOptions,
+    refresh: jest
+      .fn<
+        ReturnType<ITokenRefresher["refresh"]>,
+        Parameters<ITokenRefresher["refresh"]>
+      >()
+      .mockResolvedValue(tokenSet),
   };
 };
+
+const mockIdTokenPayload = () => {
+  return {
+    sub: "https://my.webid",
+    iss: "https://my.idp/",
+    aud: "https://resource.example.org",
+    exp: 1662266216,
+    iat: 1462266216,
+  };
+};
+
+export const mockDefaultTokenSet = (): TokenEndpointResponse => {
+  return {
+    accessToken: "some refreshed access token",
+    idToken: JSON.stringify(mockIdTokenPayload()),
+  };
+};
+
+export const mockDefaultTokenRefresher = (): ITokenRefresher =>
+  mockTokenRefresher(mockDefaultTokenSet());

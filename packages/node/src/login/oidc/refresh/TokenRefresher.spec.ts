@@ -24,9 +24,14 @@ import {
   mockStorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { JWK } from "jose/types";
+// Until there is a broader support for submodules exports in the ecosystem,
+// (e.g. jest supports them), we'll depend on an intermediary package that exports
+// a single ES module. The submodule exports should be kept commented out to make
+// it easier to transition back when possible.
+// import { JWK } from "jose/types";
+// import { parseJwk } from "jose/jwk/parse";
+import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import { IdTokenClaims, TokenSet } from "openid-client";
-import { parseJwk } from "jose/jwk/parse";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockClientRegistrar,
@@ -235,6 +240,7 @@ describe("TokenRefresher", () => {
         clientId: "some client ID",
         clientSecret: "some client secret",
         idTokenSignedResponseAlg: "ES256",
+        clientType: "static",
       }),
     });
 
@@ -244,7 +250,7 @@ describe("TokenRefresher", () => {
       await mockKeyPair()
     );
 
-    expect(refreshedTokens.access_token).toBe(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toBe(mockDpopTokens().access_token);
   });
 
   it("refreshes a DPoP token properly", async () => {
@@ -261,7 +267,7 @@ describe("TokenRefresher", () => {
       await mockKeyPair()
     );
 
-    expect(refreshedTokens.access_token).toEqual(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
   });
 
   it("refreshes a bearer token properly", async () => {
@@ -284,7 +290,7 @@ describe("TokenRefresher", () => {
       "some refresh token"
     );
 
-    expect(refreshedTokens.access_token).toEqual(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
   });
 
   it("stores the refresh token if one is returned", async () => {
@@ -303,7 +309,7 @@ describe("TokenRefresher", () => {
       "some old refresh token",
       await mockKeyPair()
     );
-    expect(refreshedTokens.refresh_token).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
 
     // Check that the session information is stored in the provided storage
     await expect(
@@ -329,7 +335,7 @@ describe("TokenRefresher", () => {
       refreshTokenRotationHandler
     );
 
-    expect(refreshedTokens.refresh_token).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
     expect(refreshTokenRotationHandler).toHaveBeenCalledWith(
       "some new refresh token"
     );
@@ -356,6 +362,30 @@ describe("TokenRefresher", () => {
       `The Identity Provider [${
         mockDefaultIssuerConfig().issuer
       }] did not return an access token on refresh`
+    );
+  });
+
+  it("throws if the IdP returns an unknown token type", async () => {
+    const mockedTokens = mockDpopTokens();
+    mockedTokens.token_type = "Some unknown token type";
+    setupOidcClientMock(mockedTokens);
+
+    const mockedStorage = mockRefresherDefaultStorageUtility();
+
+    const refresher = getTokenRefresher({
+      storageUtility: mockedStorage,
+    });
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some old refresh token",
+        await mockKeyPair()
+      )
+    ).rejects.toThrow(
+      `The Identity Provider [${
+        mockDefaultIssuerConfig().issuer
+      }] returned an unknown token type: [Some unknown token type]`
     );
   });
 });

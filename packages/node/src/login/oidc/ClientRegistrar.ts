@@ -96,6 +96,7 @@ export default class ClientRegistrar implements IClientRegistrar {
         clientSecret: storedClientSecret,
         clientName: storedClientName as string | undefined,
         idTokenSignedResponseAlg: storedIdTokenSignedResponseAlg,
+        clientType: "dynamic",
       };
     }
     const extendedOptions = { ...options };
@@ -155,6 +156,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       clientName: registeredClient.metadata.client_name as string | undefined,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
+      clientType: "dynamic",
     };
   }
 }

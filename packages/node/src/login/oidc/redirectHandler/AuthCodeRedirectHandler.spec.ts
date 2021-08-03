@@ -25,7 +25,12 @@ import {
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims, TokenSet } from "openid-client";
-import { JWK } from "jose/types";
+// Until there is a broader support for submodules exports in the ecosystem,
+// (e.g. jest supports them), we'll depend on an intermediary package that exports
+// a single ES module. The submodule exports should be kept commented out to make
+// it easier to transition back when possible.
+// import { JWK } from "jose/types";
+import { JWK } from "@inrupt/jose-legacy-modules";
 import { Response as NodeResponse } from "node-fetch";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
@@ -39,6 +44,7 @@ import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
+// The fetch factory in the core module resolves cross-fetch to the environment-specific fetch
 jest.mock("cross-fetch");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -389,6 +395,31 @@ describe("AuthCodeRedirectHandler", () => {
       await expect(
         mockedStorage.getForUser("mySession", "refreshToken")
       ).resolves.toEqual("some refresh token");
+    });
+
+    it("stores the DPoP key pair if the refresh token is DPoP-bound", async () => {
+      const mockedTokens = mockDpopTokens();
+      mockedTokens.refresh_token = "some refresh token";
+      setupOidcClientMock(mockedTokens);
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      // Check that the session information is stored in the provided storage
+      await expect(
+        mockedStorage.getForUser("mySession", "privateKey")
+      ).resolves.not.toBeUndefined();
+      await expect(
+        mockedStorage.getForUser("mySession", "publicKey")
+      ).resolves.not.toBeUndefined();
     });
 
     it("calls the refresh token handler if one is provided", async () => {

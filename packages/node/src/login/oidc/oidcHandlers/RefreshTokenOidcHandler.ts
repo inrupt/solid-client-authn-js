@@ -36,14 +36,20 @@ import {
   getWebidFromTokenPayload,
   ISessionInfo,
   generateDpopKeyPair,
-} from "@inrupt/solid-client-authn-core";
-import { TokenSet } from "openid-client";
-import {
-  buildBearerFetch,
-  buildDpopFetch,
+  KeyPair,
+  PREFERRED_SIGNING_ALG,
   RefreshOptions,
-} from "../../../authenticatedFetch/fetchFactory";
-import { ITokenRefresher } from "../refresh/TokenRefresher";
+  ITokenRefresher,
+  TokenEndpointResponse,
+  buildAuthenticatedFetch,
+} from "@inrupt/solid-client-authn-core";
+// Until there is a broader support for submodules exports in the ecosystem,
+// (e.g. jest supports them), we'll depend on an intermediary package that exports
+// a single ES module. The submodule exports should be kept commented out to make
+// it easier to transition back when possible.
+// import { JWK, parseJwk } from "jose/jwk/parse";
+import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { fetch as globalFetch } from "cross-fetch";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions
@@ -65,51 +71,41 @@ function validateOptions(
  */
 async function refreshAccess(
   refreshOptions: RefreshOptions,
-  dpop: boolean
-): Promise<TokenSet & { fetch: typeof fetch }> {
-  let authFetch: typeof fetch;
-  // eslint-disable-next-line camelcase
-  let tokens: TokenSet & { access_token: string };
+  dpop: boolean,
+  refreshBindingKey?: KeyPair
+): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
   try {
+    let dpopKey: KeyPair | undefined;
     if (dpop) {
-      const dpopKeys = await generateDpopKeyPair();
+      dpopKey = refreshBindingKey || (await generateDpopKeyPair());
       // The alg property isn't set by fromKeyLike, so set it manually.
-      dpopKeys.publicKey.alg = "ES256";
-      tokens = await refreshOptions.tokenRefresher.refresh(
-        refreshOptions.sessionId,
-        refreshOptions.refreshToken,
-        dpopKeys,
-        refreshOptions.onNewRefreshToken
-      );
-      // Rotate the refresh token if applicable
-      const rotatedRefreshOptions = {
-        ...refreshOptions,
-        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
-      };
-      authFetch = await buildDpopFetch(
-        tokens.access_token,
-        dpopKeys,
-        rotatedRefreshOptions
-      );
-    } else {
-      tokens = await refreshOptions.tokenRefresher.refresh(
-        refreshOptions.sessionId,
-        refreshOptions.refreshToken,
-        undefined,
-        refreshOptions.onNewRefreshToken
-      );
-      const rotatedRefreshOptions = {
-        ...refreshOptions,
-        refreshToken: tokens.refresh_token ?? refreshOptions.refreshToken,
-      };
-      authFetch = buildBearerFetch(tokens.access_token, rotatedRefreshOptions);
+      [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
     }
+    const tokens = await refreshOptions.tokenRefresher.refresh(
+      refreshOptions.sessionId,
+      refreshOptions.refreshToken,
+      dpopKey,
+      refreshOptions.onNewRefreshToken
+    );
+    // Rotate the refresh token if applicable
+    const rotatedRefreshOptions = {
+      ...refreshOptions,
+      refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
+    };
+    const authFetch = await buildAuthenticatedFetch(
+      globalFetch,
+      tokens.accessToken,
+      {
+        dpopKey,
+        refreshOptions: rotatedRefreshOptions,
+      }
+    );
+    return Object.assign(tokens, {
+      fetch: authFetch,
+    });
   } catch (e) {
     throw new Error(`Invalid refresh credentials: ${e.toString()}`);
   }
-  return Object.assign(tokens, {
-    fetch: authFetch,
-  });
 }
 
 /**
@@ -151,9 +147,31 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       clientSecret: oidcLoginOptions.client.clientSecret as string,
     });
 
+    // In the case when the refresh token is bound to a DPoP key, said key must
+    // be used during the refresh grant.
+    const publicKey = await this.storageUtility.getForUser(
+      oidcLoginOptions.sessionId,
+      "publicKey"
+    );
+    const privateKey = await this.storageUtility.getForUser(
+      oidcLoginOptions.sessionId,
+      "privateKey"
+    );
+    let keyPair: undefined | KeyPair;
+    if (publicKey !== undefined && privateKey !== undefined) {
+      keyPair = {
+        publicKey: JSON.parse(publicKey) as JWK,
+        privateKey: await parseJwk(
+          JSON.parse(privateKey),
+          PREFERRED_SIGNING_ALG[0]
+        ),
+      };
+    }
+
     const accessInfo = await refreshAccess(
       refreshOptions,
-      oidcLoginOptions.dpop
+      oidcLoginOptions.dpop,
+      keyPair
     );
 
     const sessionInfo: ISessionInfo = {
@@ -161,13 +179,13 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       sessionId: oidcLoginOptions.sessionId,
     };
 
-    if (accessInfo.id_token === undefined) {
+    if (accessInfo.idToken === undefined) {
       throw new Error(
         `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
       );
     }
-    sessionInfo.webId = await await getWebidFromTokenPayload(
-      accessInfo.id_token,
+    sessionInfo.webId = await getWebidFromTokenPayload(
+      accessInfo.idToken,
       oidcLoginOptions.issuerConfiguration.jwksUri,
       oidcLoginOptions.issuer,
       oidcLoginOptions.client.clientId
@@ -179,7 +197,9 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       undefined,
       undefined,
       "true",
-      accessInfo.refresh_token ?? refreshOptions.refreshToken
+      accessInfo.refreshToken ?? refreshOptions.refreshToken,
+      undefined,
+      keyPair
     );
 
     await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {

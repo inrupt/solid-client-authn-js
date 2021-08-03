@@ -436,6 +436,7 @@ describe("ClientRegistrar", () => {
 
       // Check that the returned algorithm value is what we expect
       expect(client.idTokenSignedResponseAlg).toBe(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0]
       );
 
@@ -443,6 +444,7 @@ describe("ClientRegistrar", () => {
       await expect(
         mockStorage.getForUser("mySession", "idTokenSignedResponseAlg")
       ).resolves.toBe(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0]
       );
     });

@@ -64,6 +64,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
+        clientType: "dynamic",
       };
     }
     const extendedOptions = { ...options };

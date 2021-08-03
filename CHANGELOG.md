@@ -7,14 +7,40 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.10.1 - 2021-09-02
+
+### Bugfixes
+
+#### node
+
+- A transitive dependency used submodule exports, which aren't supported yet by
+significant parts of the ecosystem, such as Jest. With an internal change, we enabled
+using @inrupt/solid-client-authn-node without encountering submodule exports.
+
+## 1.10.0 - 2021-07-28
+
+### New features
+
+#### node
+
+- DPoP-bound refresh tokens are now supported, which allows for an increased protection
+against refresh token extraction.
+- Client credential grant: for Solid Identity Providers which support it, a client
+may statically register, and use the obtained credentials (client ID and secret)
+to log in to an Identity Provider. This is convenient in some cases, such as CI
+environment. However, it requires offline provider/client interaction, which does
+not scale well in the decentralized ecosystem of Solid. As such, it should only be
+used in specific cases, where the user is able to statically register their app 
+to their identity provider (which requires some technical background).
+
 ### Bugs fixed
 
 #### browser
 
 - When not using a bundler that automatically provided a polyfill for Node.js
   built-in modules, the `events` package had to be installed manually.
-
-The following sections document changes that have been released already:
 
 ## 1.9.1 - 2021-06-24
 
