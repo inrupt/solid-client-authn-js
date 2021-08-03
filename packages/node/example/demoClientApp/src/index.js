@@ -43,7 +43,7 @@ const markerLogoutStatus = "{{labelLogoutStatus}}";
 const markerResourceToRead = "{{resourceToRead}}";
 const markerResourceValueRetrieved = "{{resourceValueRetrieved}}";
 
-const oidcIssuer = "https://broker.demo-ess.inrupt.com/";
+const oidcIssuer = "https://broker.pod.inrupt.com/";
 
 const enterResourceUriMessage =
   "...but enter any resource URI to attempt to read it...";
@@ -108,7 +108,7 @@ app.get("/redirect", async (req, res) => {
   try {
     log.debug(`Got redirect: [${getRequestFullUrl(req)}]`);
     await session
-      .handleIncomingRedirect(getRequestFullUrl(req))
+      .handleIncomingRedirect(getRequestFullUrl(req), onError)
       .then((info) => {
         log.info(`Got INFO: [${JSON.stringify(info, null, 2)}]`);
         if (info === undefined) {
@@ -195,6 +195,10 @@ app.listen(PORT, async () => {
     `[${clientApplicationName}] successfully initialized - listening at: [http://localhost:${PORT}]`
   );
 });
+
+function onError(error, errorDescription){
+  console.log(`${error} has occured: `, errorDescription);
+}
 
 function sendHtmlResponse(response) {
   response

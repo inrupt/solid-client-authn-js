@@ -58,10 +58,10 @@ export class ErrorOidcHandler implements IRedirectHandler {
       errorDescription?: string | null
     ) => unknown
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
-    if (onError) {
+    if (typeof onError === "function") {
       const url = new URL(redirectUrl);
       const errorUrl = url.searchParams.get("error");
-      const errorDescriptionUrl = url.searchParams.get("errorDescription");
+      const errorDescriptionUrl = url.searchParams.get("error_description");
       onError(errorUrl, errorDescriptionUrl);
     }
 

@@ -122,11 +122,16 @@ export default class ClientAuthentication {
 
   handleIncomingRedirect = async (
     url: string,
-    onNewRefreshToken?: (newToken: string) => unknown
+    onNewRefreshToken?: (newToken: string) => unknown,
+    onError?: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
   ): Promise<ISessionInfo | undefined> => {
     const redirectInfo = await this.redirectHandler.handle(
       url,
-      onNewRefreshToken
+      onNewRefreshToken,
+      onError
     );
 
     this.fetch = redirectInfo.fetch;

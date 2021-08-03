@@ -201,12 +201,17 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * Completes the login process by processing the information provided by the identity provider through redirect.
+   * Completes the login process by processing the information provided by the
+   * Solid identity provider through redirect.
    *
-   * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
+   * @param options See {@see IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
-    url: string
+    url: string,
+    onError?: (
+      error: string | null,
+      errorDescription?: string | null | undefined
+    ) => unknown
   ): Promise<ISessionInfo | undefined> => {
     let sessionInfo;
 
@@ -222,7 +227,8 @@ export class Session extends EventEmitter {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
           url,
-          this.onNewRefreshToken
+          this.onNewRefreshToken,
+          onError
         );
 
         if (sessionInfo) {

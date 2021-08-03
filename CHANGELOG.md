@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+#### node
+
+- `handleIncomingRedirect` now accepts `onError` callback as an additional parameter. This will be called in the event that authentication is unsuccessful or if some other error occurs.
+
+#### browser
+
+- `handleIncomingRedirect` now accepts `onError` callback as an `inputOption`. This will be called in the event that authentication is unsuccessful or if some other error occurs.
+
 The following sections document changes that have been released already:
 
 ## 1.10.0 - 2021-07-28

@@ -69,7 +69,7 @@ describe("ErrorOidcHandler", () => {
       const redirectHandler = new ErrorOidcHandler();
       const mockCallback = jest.fn();
       const mySession = await redirectHandler.handle(
-        "https://coolparty.com/?error=error&errorDescription=unable_to_fetch",
+        "https://coolparty.com/?error=error&error_description=unable_to_fetch",
         undefined,
         mockCallback
       );

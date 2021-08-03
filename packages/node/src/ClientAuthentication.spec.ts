@@ -251,6 +251,7 @@ describe("ClientAuthentication", () => {
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
+        undefined,
         undefined
       );
 
@@ -273,7 +274,8 @@ describe("ClientAuthentication", () => {
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        refreshTokenHandler
+        refreshTokenHandler,
+        undefined
       );
 
       // Calling the redirect handler should have updated the fetch.
