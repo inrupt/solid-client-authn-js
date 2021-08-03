@@ -204,7 +204,8 @@ export class Session extends EventEmitter {
    * Completes the login process by processing the information provided by the
    * Solid identity provider through redirect.
    *
-   * @param options See {@see IHandleIncomingRedirectOptions}.
+   * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
+   * @param onError The error callback provided to be called in the event of an error during authentication.
    */
   handleIncomingRedirect = async (
     url: string,
