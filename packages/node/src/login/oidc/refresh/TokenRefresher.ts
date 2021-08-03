@@ -32,8 +32,10 @@ import {
   loadOidcContextFromStorage,
   PREFERRED_SIGNING_ALG,
   KeyPair,
+  ITokenRefresher,
+  TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer, TokenSet } from "openid-client";
+import { Issuer, IssuerMetadata, TokenSet } from "openid-client";
 import { KeyObject } from "crypto";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
@@ -42,17 +44,30 @@ import { negotiateClientSigningAlg } from "../ClientRegistrar";
 // official names from the OIDC/OAuth2 specifications.
 /* eslint-disable camelcase */
 
-/**
- * @hidden
- */
-export interface ITokenRefresher {
-  refresh(
-    localUserId: string,
-    refreshToken?: string,
-    dpopKey?: KeyPair,
-    onNewRefreshToken?: (token: string) => unknown
-  ): Promise<TokenSet & { access_token: string }>;
-}
+const tokenSetToTokenEndpointResponse = (
+  tokenSet: TokenSet,
+  issuerMetadata: IssuerMetadata
+): TokenEndpointResponse => {
+  if (tokenSet.access_token === undefined) {
+    // The error message is left minimal on purpose not to leak the tokens.
+    throw new Error(
+      `The Identity Provider [${issuerMetadata.issuer}] did not return an access token on refresh.`
+    );
+  }
+
+  if (tokenSet.token_type !== "Bearer" && tokenSet.token_type !== "DPoP") {
+    throw new Error(
+      `The Identity Provider [${issuerMetadata.issuer}] returned an unknown token type: [${tokenSet.token_type}].`
+    );
+  }
+  return {
+    accessToken: tokenSet.access_token,
+    tokenType: tokenSet.token_type,
+    idToken: tokenSet.id_token,
+    refreshToken: tokenSet.refresh_token,
+    expiresAt: tokenSet.expires_at,
+  };
+};
 
 /**
  * @hidden
@@ -69,7 +84,7 @@ export default class TokenRefresher implements ITokenRefresher {
     refreshToken?: string,
     dpopKey?: KeyPair,
     onNewRefreshToken?: (newToken: string) => unknown
-  ): Promise<TokenSet & { access_token: string }> {
+  ): Promise<TokenEndpointResponse> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
       this.storageUtility,
@@ -107,30 +122,25 @@ export default class TokenRefresher implements ITokenRefresher {
       );
     }
 
-    const tokenSet = await client.refresh(refreshToken, {
-      // openid-client does not support yet jose@3.x, and expects
-      // type definitions that are no longer present. However, the JWK
-      // type that we pass here is compatible with the API, hence the `any`
-      // assertion.
-      DPoP: dpopKey ? (dpopKey.privateKey as KeyObject) : undefined,
-    });
+    const tokenSet = tokenSetToTokenEndpointResponse(
+      await client.refresh(refreshToken, {
+        // openid-client does not support yet jose@3.x, and expects
+        // type definitions that are no longer present. However, the JWK
+        // type that we pass here is compatible with the API, hence the type
+        // assertion.
+        DPoP: dpopKey ? (dpopKey.privateKey as KeyObject) : undefined,
+      }),
+      issuer.metadata
+    );
 
-    if (tokenSet.access_token === undefined) {
-      // The error message is left minimal on purpose not to leak the tokens.
-      throw new Error(
-        `The Identity Provider [${issuer.metadata.issuer}] did not return an access token on refresh.`
-      );
-    }
-
-    if (tokenSet.refresh_token !== undefined) {
+    if (tokenSet.refreshToken !== undefined) {
       await this.storageUtility.setForUser(sessionId, {
-        refreshToken: tokenSet.refresh_token,
+        refreshToken: tokenSet.refreshToken,
       });
       if (typeof onNewRefreshToken === "function") {
-        onNewRefreshToken(tokenSet.refresh_token);
+        onNewRefreshToken(tokenSet.refreshToken);
       }
     }
-    // The type assertion is fine, since we throw on undefined access_token
-    return tokenSet as TokenSet & { access_token: string };
+    return tokenSet;
   }
 }

@@ -91,6 +91,13 @@ export interface IHandleIncomingRedirectOptions {
    * using the browser's current location.
    */
   url?: string;
+  /**
+   * Error callback to be called when errors occur during login.
+   */
+  onError?: (
+    error: string | null,
+    errorDescription?: string | null | undefined
+  ) => unknown;
 }
 
 export async function silentlyAuthenticate(
@@ -194,6 +201,7 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
+
     // Listen for messages from children iframes.
     setupIframeListener(async (redirectUrl: string) => {
       const sessionInfo =
@@ -370,7 +378,8 @@ export class Session extends EventEmitter {
 
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
-      url
+      url,
+      options.onError
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);

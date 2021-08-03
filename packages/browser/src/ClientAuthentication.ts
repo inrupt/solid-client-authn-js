@@ -143,10 +143,17 @@ export default class ClientAuthentication {
   };
 
   handleIncomingRedirect = async (
-    url: string
+    url: string,
+    onError?: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(url);
-
+    const redirectInfo = await this.redirectHandler.handle(
+      url,
+      undefined,
+      onError
+    );
     // The `FallbackRedirectHandler` directly returns the global `fetch` for
     // his value, so we should ensure it's bound to `window` rather than to
     // ClientAuthentication, to avoid the following error:
@@ -160,6 +167,9 @@ export default class ClientAuthentication {
     // For implicit flow
     cleanedUpUrl.searchParams.delete("id_token");
     cleanedUpUrl.searchParams.delete("access_token");
+    // For login error
+    cleanedUpUrl.searchParams.delete("error");
+    cleanedUpUrl.searchParams.delete("error_description");
 
     // Remove OAuth-specific query params (since the login flow finishes with
     // the browser being redirected back with OAuth2 query params (e.g. for

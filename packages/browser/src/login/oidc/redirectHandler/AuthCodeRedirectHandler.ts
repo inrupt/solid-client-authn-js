@@ -25,6 +25,7 @@
  */
 
 import {
+  buildAuthenticatedFetch,
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
@@ -32,17 +33,14 @@ import {
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
+  ITokenRefresher,
+  RefreshOptions,
 } from "@inrupt/solid-client-authn-core";
 import {
   getDpopToken,
   getBearerToken,
-  TokenEndpointResponse,
-  TokenEndpointDpopResponse,
+  CodeExchangeResult,
 } from "@inrupt/oidc-client-ext";
-import {
-  buildBearerFetch,
-  buildDpopFetch,
-} from "../../../authenticatedFetch/fetchFactory";
 import { KEY_CURRENT_SESSION } from "../../../constant";
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
@@ -109,7 +107,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar,
+    private tokerRefresher: ITokenRefresher
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -127,7 +126,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
   }
 
   async handle(
-    redirectUrl: string
+    redirectUrl: string,
+    onNewRefreshToken?: (newToken: string) => unknown
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
@@ -167,8 +167,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       issuerConfig
     );
 
-    let tokens: TokenEndpointResponse | TokenEndpointDpopResponse;
-    let authFetch: typeof fetch;
+    let tokens: CodeExchangeResult;
     const referenceTime = Date.now();
 
     if (isDpop) {
@@ -192,15 +191,24 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         codeVerifier,
         redirectUrl: storedRedirectIri,
       });
-
-      authFetch = await buildDpopFetch(
-        tokens.accessToken,
-        (tokens as TokenEndpointDpopResponse).dpopKey
-      );
     } else {
       tokens = await getBearerToken(url.toString());
-      authFetch = buildBearerFetch(tokens.accessToken);
     }
+
+    let refreshOptions: RefreshOptions | undefined;
+    if (tokens.refreshToken !== undefined) {
+      refreshOptions = {
+        sessionId: storedSessionId,
+        refreshToken: tokens.refreshToken,
+        tokenRefresher: this.tokerRefresher,
+        onNewRefreshToken,
+      };
+    }
+
+    const authFetch = await buildAuthenticatedFetch(fetch, tokens.accessToken, {
+      dpopKey: tokens.dpopKey,
+      refreshOptions,
+    });
 
     await this.storageUtility.setForUser(
       storedSessionId,

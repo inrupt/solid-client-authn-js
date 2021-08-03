@@ -37,12 +37,13 @@ import {
   generateDpopKeyPair,
   PREFERRED_SIGNING_ALG,
   getWebidFromTokenPayload,
+  buildAuthenticatedFetch,
+  ITokenRefresher,
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
-import { buildAuthenticatedFetch } from "../../../authenticatedFetch/fetchFactory";
+import { fetch as globalFetch } from "cross-fetch";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import { ITokenRefresher } from "../refresh/TokenRefresher";
 
 /**
  * @hidden
@@ -107,17 +108,21 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       );
     }
 
-    const authFetch = await buildAuthenticatedFetch(tokens.access_token, {
-      dpopKey,
-      refreshOptions: tokens.refresh_token
-        ? {
-            refreshToken: tokens.refresh_token,
-            sessionId: oidcLoginOptions.sessionId,
-            tokenRefresher: this.tokenRefresher,
-            onNewRefreshToken: oidcLoginOptions.onNewRefreshToken,
-          }
-        : undefined,
-    });
+    const authFetch = await buildAuthenticatedFetch(
+      globalFetch,
+      tokens.access_token,
+      {
+        dpopKey,
+        refreshOptions: tokens.refresh_token
+          ? {
+              refreshToken: tokens.refresh_token,
+              sessionId: oidcLoginOptions.sessionId,
+              tokenRefresher: this.tokenRefresher,
+              onNewRefreshToken: oidcLoginOptions.onNewRefreshToken,
+            }
+          : undefined,
+      }
+    );
 
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,

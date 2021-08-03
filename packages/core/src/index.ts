@@ -36,6 +36,7 @@ export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 
 export {
   default as IRedirectHandler,
+  RedirectInput,
   RedirectResult,
   getWebidFromTokenPayload,
   fetchJwks,
@@ -86,6 +87,19 @@ export {
   KeyPair,
   generateDpopKeyPair,
 } from "./authenticatedFetch/dpopUtils";
+
+export {
+  buildAuthenticatedFetch,
+  buildBearerFetch,
+  buildDpopFetch,
+  DpopHeaderPayload,
+  RefreshOptions,
+} from "./authenticatedFetch/fetchFactory";
+
+export {
+  ITokenRefresher,
+  TokenEndpointResponse,
+} from "./login/oidc/refresh/ITokenRefresher";
 
 // Mocks.
 export {
