@@ -27,12 +27,12 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import { refresh } from "@inrupt/oidc-client-ext";
-import TokenRefresher from "../../../../src/login/oidc/refresh/TokenRefresher";
+import TokenRefresher from "./TokenRefresher";
 import {
   mockDefaultIssuerConfigFetcher,
   IssuerConfigFetcherFetchConfigResponse,
-} from "../../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import { mockDefaultClientRegistrar } from "../../../../src/login/oidc/__mocks__/ClientRegistrar";
+} from "../__mocks__/IssuerConfigFetcher";
+import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 
 jest.mock("@inrupt/oidc-client-ext");
 

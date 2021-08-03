@@ -44,7 +44,7 @@ import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
 import {
   mockDefaultTokenRefresher,
   mockTokenRefresher,
-} from "../../../login/oidc/refresh/__mocks__/TokenRefresher";
+} from "../refresh/__mocks__/TokenRefresher";
 
 const mockJwk = (): JWK => {
   return {
