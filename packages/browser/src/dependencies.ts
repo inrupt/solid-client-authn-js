@@ -42,6 +42,7 @@ import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import { ErrorOidcHandler } from "./login/oidc/redirectHandler/ErrorOidcHandler";
+import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 
 /**
  *
@@ -74,13 +75,20 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     clientRegistrar
   );
 
+  const refresher = new TokenRefresher(
+    storageUtility,
+    issuerConfigFetcher,
+    clientRegistrar
+  );
+
   const redirectHandler = new AggregateRedirectHandler([
     new ErrorOidcHandler(),
     new AuthCodeRedirectHandler(
       storageUtility,
       sessionInfoManager,
       issuerConfigFetcher,
-      clientRegistrar
+      clientRegistrar,
+      refresher
     ),
     // This catch-all class will always be able to handle the
     // redirect IRI, so it must be registered last.

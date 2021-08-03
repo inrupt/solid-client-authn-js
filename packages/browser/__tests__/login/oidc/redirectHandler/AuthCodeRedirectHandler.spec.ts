@@ -41,6 +41,10 @@ import { RedirectorMock } from "../../../../src/login/oidc/__mocks__/Redirector"
 import { SessionInfoManagerMock } from "../../../../src/sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_CURRENT_SESSION } from "../../../../src/constant";
 import { LocalStorageMock } from "../../../../src/storage/__mocks__/LocalStorage";
+import {
+  mockDefaultTokenRefresher,
+  mockTokenRefresher,
+} from "../../../../src/login/oidc/refresh/__mocks__/TokenRefresher";
 
 const mockJwk = (): JWK => {
   return {
@@ -106,6 +110,7 @@ const mockTokenEndpointBearerResponse = (): CodeExchangeResult => {
     idToken: mockIdToken(),
     webId: mockWebId(),
     expiresIn: MOCK_EXPIRE_TIME,
+    refreshToken: "some refresh token",
   };
 };
 
@@ -121,6 +126,7 @@ const mockTokenEndpointDpopResponse = async (): Promise<CodeExchangeResult> => {
       publicKey: mockJwk(),
     },
     expiresIn: MOCK_EXPIRE_TIME,
+    refreshToken: "some DPoP-bound refresh token",
   };
 };
 
@@ -134,6 +140,20 @@ const mockLocalStorage = (stored: Record<string, string>) => {
     writable: true,
   });
 };
+
+const mockDefaultRedirectStorage = () =>
+  mockStorageUtility({
+    "solidClientAuthenticationUser:someState": {
+      sessionId: "mySession",
+    },
+    "solidClientAuthenticationUser:mySession": {
+      issuer: "https://my.idp/",
+      codeVerifier: "some code verifier",
+      redirectUrl: "https://my.app/redirect",
+      dpop: "true",
+      idTokenSignedResponseAlg: "RS256",
+    },
+  });
 
 jest.mock("@inrupt/oidc-client-ext");
 
@@ -159,6 +179,11 @@ function mockOidcClient(jwt: typeof defaultJwt = defaultJwt): any {
   mockedOidcClient.getBearerToken = mockTokenEndpointBearerResponse;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mockedOidcClient.validateIdToken = (jest.fn() as any).mockResolvedValue(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedOidcClient.refresh = (jest.fn() as any).mockResolvedValueOnce({
+    ...mockTokenEndpointBearerResponse(),
+    refreshToken: "some rotated refresh token",
+  });
   return mockedOidcClient;
 }
 
@@ -197,6 +222,7 @@ const defaultMocks = {
   sessionInfoManager: SessionInfoManagerMock,
   clientRegistrar: mockClientRegistrar(mockClient()),
   issuerConfigFetcher: mockIssuerConfigFetcher(mockIssuer()),
+  tokenRefresher: mockDefaultTokenRefresher(),
 };
 
 function getAuthCodeRedirectHandler(
@@ -206,7 +232,8 @@ function getAuthCodeRedirectHandler(
     mocks.storageUtility ?? defaultMocks.storageUtility,
     mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
     mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-    mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+    mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
+    mocks.tokenRefresher ?? defaultMocks.tokenRefresher
   );
 }
 
@@ -775,5 +802,37 @@ describe("AuthCodeRedirectHandler", () => {
         (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
       )
     ).toEqual({});
+  });
+
+  it("returns a fetch that supports the refresh flow", async () => {
+    window.localStorage.setItem("tmp-resource-server-session-enabled", "false");
+    mockOidcClient();
+    const mockedStorage = mockDefaultRedirectStorage();
+
+    const tokenRefresher = mockTokenRefresher(
+      await mockTokenEndpointDpopResponse()
+    );
+    // Run the test
+    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+      storageUtility: mockedStorage,
+      tokenRefresher,
+    });
+
+    // Check that the returned fetch function is authenticated
+    const response = new Response("", {
+      status: 401,
+    });
+
+    jest.spyOn(response, "url", "get").mockReturnValue("https://some.url/");
+
+    mockFetch(response);
+
+    const result = await authCodeRedirectHandler.handle(
+      "https://my.app/redirect?code=someCode&state=someState"
+    );
+
+    await result.fetch("https://some.url/");
+
+    expect(tokenRefresher.refresh).toHaveBeenCalled();
   });
 });

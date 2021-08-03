@@ -33,6 +33,8 @@ import {
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
+  ITokenRefresher,
+  RefreshOptions,
 } from "@inrupt/solid-client-authn-core";
 import {
   getDpopToken,
@@ -105,7 +107,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar,
+    private tokerRefresher: ITokenRefresher
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -123,7 +126,8 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
   }
 
   async handle(
-    redirectUrl: string
+    redirectUrl: string,
+    onNewRefreshToken?: (newToken: string) => unknown
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
@@ -191,8 +195,19 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       tokens = await getBearerToken(url.toString());
     }
 
+    let refreshOptions: RefreshOptions | undefined;
+    if (tokens.refreshToken !== undefined) {
+      refreshOptions = {
+        sessionId: storedSessionId,
+        refreshToken: tokens.refreshToken,
+        tokenRefresher: this.tokerRefresher,
+        onNewRefreshToken,
+      };
+    }
+
     const authFetch = await buildAuthenticatedFetch(fetch, tokens.accessToken, {
       dpopKey: tokens.dpopKey,
+      refreshOptions,
     });
 
     await this.storageUtility.setForUser(
