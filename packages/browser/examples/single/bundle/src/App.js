@@ -46,11 +46,16 @@ export default function App() {
     // After redirect, the current URL contains login information.
     handleIncomingRedirect({
       restorePreviousSession: true,
+      onError: errorHandle,
     }).then((info) => {
       setWebId(info.webId);
       setResource(webId);
     });
   }, [webId]);
+
+  const errorHandle = (error, errorDescription) => {
+    console.log(`${error} has occured: `, errorDescription);
+  }
 
   const handleLogin = (e) => {
     // The default behaviour of the button is to resubmit.
