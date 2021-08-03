@@ -54,7 +54,7 @@ export default function App() {
   }, [webId]);
 
   const errorHandle = (error, errorDescription) => {
-    alert("Oops an error has occured");
+    console.log(`${error} has occured: `, errorDescription);
   }
 
   const handleLogin = (e) => {

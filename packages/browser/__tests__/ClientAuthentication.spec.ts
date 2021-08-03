@@ -341,6 +341,7 @@ describe("ClientAuthentication", () => {
       );
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
+        undefined,
         undefined
       );
 
