@@ -22,7 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { Response as NodeResponse } from "node-fetch";
-import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
+import IssuerConfigFetcher from "./IssuerConfigFetcher";
 
 /**
  * Test for IssuerConfigFetcher

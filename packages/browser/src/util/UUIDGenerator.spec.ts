@@ -19,37 +19,18 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { jest, it, describe, expect } from "@jest/globals";
+import UuidGenerator from "./UuidGenerator";
 
-/**
- * @hidden
- * This function feels unnecessarily complicated, but is required in order to
- * have Headers according to type definitions in both Node and browser environments.
- * This might require a fix upstream to be cleaned up.
- *
- * @param headersToFlatten A structure containing headers potentially in several formats
- */
-export function flattenHeaders(
-  headersToFlatten: Headers | Record<string, string> | string[][] | undefined
-): Record<string, string> {
-  if (typeof headersToFlatten === "undefined") {
-    return {};
-  }
-  const flatHeaders: Record<string, string> = {};
+jest.mock("uuid");
 
-  // If the headers are already a Record<string, string>,
-  // they can directly be returned.
-  if (typeof headersToFlatten.forEach !== "function") {
-    // FIXME: This will break when passed a string[][]
-    //        (as shown when the type assertions are removed).
-    return headersToFlatten as Record<string, string>;
-  }
+describe("UuidGenerator", () => {
+  it("should simply wrap the `uuid` module", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const uuidMock: { v4: jest.Mock } = jest.requireMock("uuid") as any;
+    uuidMock.v4.mockReturnValueOnce("some uuid");
 
-  (headersToFlatten as Headers).forEach((value: string, key: string) => {
-    flatHeaders[key] = value;
+    const generator = new UuidGenerator();
+    expect(generator.v4()).toBe("some uuid");
   });
-  return flatHeaders;
-}
+});

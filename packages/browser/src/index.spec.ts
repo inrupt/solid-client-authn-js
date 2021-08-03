@@ -19,23 +19,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  ILoginHandler,
-  AggregateHandler,
-} from "@inrupt/solid-client-authn-core";
-import { jest, it, describe, expect } from "@jest/globals";
-import AggregateLoginHandler from "../../src/login/AggregateLoginHandler";
+import { it } from "@jest/globals";
 
-jest.mock("@inrupt/solid-client-authn-core");
+import { Session, getClientAuthenticationWithDependencies } from "./index";
 
-describe("AggregateLoginHandler", () => {
-  it("should pass injected handlers to its superclass", () => {
-    // We just test if the parent is called.
-    // eslint-disable-next-line no-new
-    new AggregateLoginHandler(["Some handler"] as unknown as ILoginHandler[]);
-
-    expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
-      [["Some handler"]],
-    ]);
-  });
+it("exports the public API from the entrypoint", () => {
+  expect(Session).toBeDefined();
+  expect(getClientAuthenticationWithDependencies).toBeDefined();
 });

@@ -22,8 +22,8 @@
 /**
  * @jest-environment node
  */
-import { getClientAuthenticationWithDependencies } from "../src/dependencies";
-import ClientAuthentication from "../src/ClientAuthentication";
+import { getClientAuthenticationWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
 
 describe("dependencies.node", () => {
   it("performs dependency injection in a node environment", () => {

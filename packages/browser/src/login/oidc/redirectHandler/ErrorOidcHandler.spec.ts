@@ -20,27 +20,36 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { FallbackRedirectHandler } from "../../../../src/login/oidc/redirectHandler/FallbackRedirectHandler";
+import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
-describe("FallbackRedirectHandler", () => {
+describe("ErrorOidcHandler", () => {
   describe("canHandle", () => {
-    it("always accept the given IRI", async () => {
-      const redirectHandler = new FallbackRedirectHandler();
+    it("Does not handle IRIs without an error parameter", async () => {
+      const redirectHandler = new ErrorOidcHandler();
       expect(
         await redirectHandler.canHandle(
           "https://coolparty.com/?code=someCode&state=oauth2_state_value"
         )
-      ).toBe(true);
+      ).toBe(false);
       expect(await redirectHandler.canHandle("https://coolparty.com/")).toBe(
-        true
+        false
       );
       expect(
         await redirectHandler.canHandle("https://coolparty.com/?test=test")
+      ).toBe(false);
+    });
+
+    it("handles url with error params", async () => {
+      const redirectHandler = new ErrorOidcHandler();
+      expect(
+        await redirectHandler.canHandle(
+          "https://coolparty.com/?error=some_error"
+        )
       ).toBe(true);
     });
 
     it("throws on invalid url", async () => {
-      const redirectHandler = new FallbackRedirectHandler();
+      const redirectHandler = new ErrorOidcHandler();
       await expect(
         redirectHandler.canHandle("beep boop I am a robot")
       ).rejects.toThrow(
@@ -52,10 +61,36 @@ describe("FallbackRedirectHandler", () => {
   describe("handle", () => {
     it("returns an unauthenticated session", async () => {
       window.fetch = jest.fn();
-      const redirectHandler = new FallbackRedirectHandler();
+      const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toEqual(false);
       expect(mySession.webId).toBeUndefined();
+    });
+    it("calls the onError callback if given with both parameters", async () => {
+      window.fetch = jest.fn();
+      const redirectHandler = new ErrorOidcHandler();
+      const mockCallback = jest.fn();
+      const mySession = await redirectHandler.handle(
+        "https://coolparty.com/?error=error&error_description=unable_to_fetch",
+        undefined,
+        mockCallback
+      );
+      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.webId).toBeUndefined();
+      expect(mockCallback).toHaveBeenCalledWith("error", "unable_to_fetch");
+    });
+    it("calls the onError callback if given with just error parameters", async () => {
+      window.fetch = jest.fn();
+      const redirectHandler = new ErrorOidcHandler();
+      const mockCallback = jest.fn();
+      const mySession = await redirectHandler.handle(
+        "https://coolparty.com/?error=error",
+        undefined,
+        mockCallback
+      );
+      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.webId).toBeUndefined();
+      expect(mockCallback).toHaveBeenCalledWith("error", null);
     });
   });
 });

@@ -25,12 +25,12 @@ import {
   StorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-import { mockClientAuthentication } from "../src/__mocks__/ClientAuthentication";
-import { Session } from "../src/Session";
+import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
+import { Session } from "./Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
-import { LocalStorageMock } from "../src/storage/__mocks__/LocalStorage";
-import { mockSessionInfoManager } from "../src/sessionInfo/__mocks__/SessionInfoManager";
-import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "../src/constant";
+import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
+import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
+import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 

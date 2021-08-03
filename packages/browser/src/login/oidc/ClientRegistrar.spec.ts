@@ -25,8 +25,8 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { Response as NodeResponse } from "node-fetch";
-import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
-import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
+import ClientRegistrar from "./ClientRegistrar";
+import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfigFetcher";
 
 /**
  * Test for ClientRegistrar

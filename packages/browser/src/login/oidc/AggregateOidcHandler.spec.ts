@@ -19,18 +19,23 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {
+  IOidcHandler,
+  AggregateHandler,
+} from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import UuidGenerator from "../../src/util/UuidGenerator";
+import AggregateOidcHandler from "./AggregateOidcHandler";
 
-jest.mock("uuid");
+jest.mock("@inrupt/solid-client-authn-core");
 
-describe("UuidGenerator", () => {
-  it("should simply wrap the `uuid` module", () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const uuidMock: { v4: jest.Mock } = jest.requireMock("uuid") as any;
-    uuidMock.v4.mockReturnValueOnce("some uuid");
+describe("AggregateOidcHandler", () => {
+  it("should pass injected handlers to its superclass", () => {
+    // We just test if the parent is called.
+    // eslint-disable-next-line no-new
+    new AggregateOidcHandler(["Some handler"] as unknown as IOidcHandler[]);
 
-    const generator = new UuidGenerator();
-    expect(generator.v4()).toBe("some uuid");
+    expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
+      [["Some handler"]],
+    ]);
   });
 });

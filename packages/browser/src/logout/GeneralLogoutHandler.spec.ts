@@ -21,8 +21,8 @@
 
 import { it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import LogoutHandler from "../../src/logout/GeneralLogoutHandler";
-import { mockSessionInfoManager } from "../../src/sessionInfo/__mocks__/SessionInfoManager";
+import LogoutHandler from "./GeneralLogoutHandler";
+import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";
 
 describe("GeneralLogoutHandler", () => {
   const defaultMocks = {

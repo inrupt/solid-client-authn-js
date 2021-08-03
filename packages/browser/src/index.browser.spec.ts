@@ -19,20 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { getClientAuthenticationWithDependencies } from "../src/dependencies";
-import ClientAuthentication from "../src/ClientAuthentication";
+import { it } from "@jest/globals";
+import * as solidClientAuthentication from "./index.browser";
 
-describe("dependencies", () => {
-  it("performs dependency injection", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
-
-  it("performs dependency injection with a given input", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: mockStorageUtility({}),
-    });
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
+it("exports the public API from the entrypoint", () => {
+  expect(solidClientAuthentication).toBeDefined();
 });

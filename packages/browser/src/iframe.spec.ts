@@ -24,7 +24,7 @@ import {
   postRedirectUrlToParent,
   redirectInIframe,
   setupIframeListener,
-} from "../src/iframe";
+} from "./iframe";
 
 describe("redirectInIframe", () => {
   it("creates an iframe with the appropriate attributes and performs the redirection in it", () => {
