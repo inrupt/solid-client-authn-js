@@ -59,9 +59,7 @@ export default class ClientAuthentication {
 
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
-  login = async (
-    options: ILoginOptions
-  ): Promise<void> => {
+  login = async (options: ILoginOptions): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
     // But we may want to preserve our client application info, particularly if
@@ -81,7 +79,7 @@ export default class ClientAuthentication {
       ...options,
       redirectUrl,
       // If no clientName is provided, the clientId may be used instead.
-      clientName: options.clientName ?? options.clientId
+      clientName: options.clientName ?? options.clientId,
     });
   };
 
@@ -151,7 +149,11 @@ export default class ClientAuthentication {
       errorDescription?: string | null
     ) => unknown
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(url, onError);
+    const redirectInfo = await this.redirectHandler.handle(
+      url,
+      undefined,
+      onError
+    );
     // The `FallbackRedirectHandler` directly returns the global `fetch` for
     // his value, so we should ensure it's bound to `window` rather than to
     // ClientAuthentication, to avoid the following error:

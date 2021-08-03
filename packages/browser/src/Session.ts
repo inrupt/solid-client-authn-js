@@ -52,13 +52,6 @@ export interface ISessionOptions {
    * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
    */
   clientAuthentication: ClientAuthentication;
-  /**
-   * Error callback to be called when errors occur during login.
-   */
-  onError?: (
-    error: string | null,
-    errorDescription?: string | null | undefined
-  ) => unknown;
 }
 
 export interface IHandleIncomingRedirectOptions {
@@ -98,6 +91,13 @@ export interface IHandleIncomingRedirectOptions {
    * using the browser's current location.
    */
   url?: string;
+  /**
+   * Error callback to be called when errors occur during login.
+   */
+  onError?: (
+    error: string | null,
+    errorDescription?: string | null | undefined
+  ) => unknown;
 }
 
 export async function silentlyAuthenticate(
@@ -157,11 +157,6 @@ export class Session extends EventEmitter {
   // Remove this when removing the `useEssSession` workaround:
   private tmpFetchWithCookies = false;
 
-  private onError?: (
-    error: string | null,
-    errorDescription?: string | null | undefined
-  ) => unknown;
-
   /**
    * Session object constructor. Typically called as follows:
    *
@@ -207,12 +202,10 @@ export class Session extends EventEmitter {
       };
     }
 
-    this.onError = sessionOptions.onError;
-
     // Listen for messages from children iframes.
     setupIframeListener(async (redirectUrl: string) => {
       const sessionInfo =
-        await this.clientAuthentication.handleIncomingRedirect(redirectUrl, this.onError);
+        await this.clientAuthentication.handleIncomingRedirect(redirectUrl);
 
       // If silent authentication was not successful, do nothing;
       // the existing session might still be valid for a while,
@@ -386,7 +379,7 @@ export class Session extends EventEmitter {
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
-      this.onError
+      options.onError
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);
