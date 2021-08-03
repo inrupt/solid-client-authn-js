@@ -179,6 +179,7 @@ function mockOidcClient(jwt: typeof defaultJwt = defaultJwt): any {
   mockedOidcClient.getBearerToken = mockTokenEndpointBearerResponse;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mockedOidcClient.validateIdToken = (jest.fn() as any).mockResolvedValue(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mockedOidcClient.refresh = (jest.fn() as any).mockResolvedValueOnce({
     ...mockTokenEndpointBearerResponse(),
     refreshToken: "some rotated refresh token",
