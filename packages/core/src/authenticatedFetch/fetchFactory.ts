@@ -88,7 +88,10 @@ export function buildBearerFetch(
       if (tokenSet.refreshToken) {
         // If the refresh token is rotated, update it in the closure.
         currentRefreshOptions.refreshToken = tokenSet.refreshToken;
-        currentRefreshOptions.eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN);
+        currentRefreshOptions.eventEmitter?.emit(
+          EVENTS.NEW_REFRESH_TOKEN,
+          tokenSet.refreshToken
+        );
       }
       // Once the token has been refreshed, re-issue the authenticated request.
       // If it has an auth failure again, the user legitimately doesn't have access
@@ -197,7 +200,10 @@ export async function buildDpopFetch(
         if (tokenSet.refreshToken) {
           // If the refresh token is rotated, update it in the closure.
           currentRefreshOptions.refreshToken = tokenSet.refreshToken;
-          currentRefreshOptions.eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN);
+          currentRefreshOptions.eventEmitter?.emit(
+            EVENTS.NEW_REFRESH_TOKEN,
+            tokenSet.refreshToken
+          );
         }
         // Once the token has been refreshed, re-issue the authenticated request.
         // If it has an auth failure again, the user legitimately doesn't have access

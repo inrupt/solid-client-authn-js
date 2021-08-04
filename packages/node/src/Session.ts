@@ -94,6 +94,8 @@ export class Session extends EventEmitter {
 
   private tokenRequestInProgress = false;
 
+  private emitter: EventEmitter;
+
   /**
    * Session object constructor. Typically called as follows:
    *
@@ -116,7 +118,7 @@ export class Session extends EventEmitter {
     sessionId?: string
   ) {
     super();
-
+    this.emitter = new EventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {
@@ -167,7 +169,7 @@ export class Session extends EventEmitter {
       {
         ...options,
       },
-      this.onNewRefreshToken
+      this
     );
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
@@ -223,7 +225,7 @@ export class Session extends EventEmitter {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
           url,
-          this.onNewRefreshToken
+          this
         );
 
         if (sessionInfo) {

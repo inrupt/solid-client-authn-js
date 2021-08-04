@@ -229,7 +229,10 @@ describe("buildBearerFetch", () => {
     await myFetch("someUrl");
     // The mocked fetch will 401, which triggers the refresh flow.
     // The test checks that the mocked refreshed token is used silently.
-    expect(mockEmit).toHaveBeenCalledWith(EVENTS.NEW_REFRESH_TOKEN);
+    expect(mockEmit).toHaveBeenCalledWith(
+      EVENTS.NEW_REFRESH_TOKEN,
+      "some rotated refresh token"
+    );
   });
 
   it("does not try to refresh on a non-auth error", async () => {
@@ -538,7 +541,10 @@ describe("buildDpopFetch", () => {
     );
 
     await myFetch("https://my.pod/resource");
-    expect(mockEmit).toHaveBeenCalledWith(EVENTS.NEW_REFRESH_TOKEN);
+    expect(mockEmit).toHaveBeenCalledWith(
+      EVENTS.NEW_REFRESH_TOKEN,
+      "some rotated refresh token"
+    );
   });
 
   it("does not try to refresh on a non-auth error", async () => {
