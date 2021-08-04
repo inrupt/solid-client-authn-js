@@ -411,6 +411,16 @@ describe("Session", () => {
       await mySession.logout();
     });
   });
+
+  describe("onNewRefreshToken", () => {
+    it("calls the registered callback on the newREfreshToken event", async () => {
+      const myCallback = jest.fn();
+      const mySession = new Session();
+      mySession.onNewRefreshToken(myCallback);
+      mySession.emit("newRefreshToken", "some new refresh token");
+      expect(myCallback).toHaveBeenCalledWith("some new refresh token");
+    });
+  });
 });
 
 describe("getSessionFromStorage", () => {
