@@ -443,7 +443,10 @@ describe("AuthCodeRedirectHandler", () => {
         mockEmitter
       );
 
-      expect(mockEmit).toHaveBeenCalledWith(EVENTS.NEW_REFRESH_TOKEN);
+      expect(mockEmit).toHaveBeenCalledWith(
+        EVENTS.NEW_REFRESH_TOKEN,
+        "some refresh token"
+      );
     });
 
     it("throws if the IdP does not return an access token", async () => {

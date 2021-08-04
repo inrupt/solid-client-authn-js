@@ -339,7 +339,10 @@ describe("TokenRefresher", () => {
     );
 
     expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
-    expect(mockEmit).toHaveBeenCalledWith(EVENTS.NEW_REFRESH_TOKEN);
+    expect(mockEmit).toHaveBeenCalledWith(
+      EVENTS.NEW_REFRESH_TOKEN,
+      "some new refresh token"
+    );
   });
 
   it("throws if the IdP does not return an access token", async () => {

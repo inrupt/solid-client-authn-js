@@ -150,7 +150,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     }
     let refreshOptions: RefreshOptions | undefined;
     if (tokenSet.refresh_token !== undefined) {
-      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN);
+      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refresh_token);
       refreshOptions = {
         refreshToken: tokenSet.refresh_token,
         sessionId,

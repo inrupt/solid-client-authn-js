@@ -136,7 +136,7 @@ export default class TokenRefresher implements ITokenRefresher {
     );
 
     if (tokenSet.refreshToken !== undefined) {
-      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN);
+      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
       await this.storageUtility.setForUser(sessionId, {
         refreshToken: tokenSet.refreshToken,
       });

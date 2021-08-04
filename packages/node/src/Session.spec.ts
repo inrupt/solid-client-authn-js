@@ -25,6 +25,7 @@ import {
   ISessionInfo,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "@inrupt/solid-client-authn-core/src";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
@@ -136,6 +137,17 @@ describe("Session", () => {
       expect(mySession.info.isLoggedIn).toEqual(false);
       expect(mySession.info.sessionId).toEqual("mySession");
       expect(mySession.info.webId).toEqual("https://some.webid");
+    });
+
+    it("accepts legacy token rotation callback", () => {
+      const legacyTokenRotationCallback = jest.fn();
+      const mySession = new Session({
+        onNewRefreshToken: legacyTokenRotationCallback,
+      });
+      mySession.emit(EVENTS.NEW_REFRESH_TOKEN, "some refresh token");
+      expect(legacyTokenRotationCallback).toHaveBeenCalledWith(
+        "some refresh token"
+      );
     });
   });
 
