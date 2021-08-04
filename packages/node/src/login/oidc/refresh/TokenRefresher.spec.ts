@@ -23,6 +23,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import {
   mockStorageUtility,
   StorageUtilityMock,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 // Until there is a broader support for submodules exports in the ecosystem,
 // (e.g. jest supports them), we'll depend on an intermediary package that exports
@@ -32,6 +33,7 @@ import {
 // import { parseJwk } from "jose/jwk/parse";
 import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import { IdTokenClaims, TokenSet } from "openid-client";
+import { EventEmitter } from "events";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockClientRegistrar,
@@ -322,7 +324,8 @@ describe("TokenRefresher", () => {
     mockedTokens.refresh_token = "some new refresh token";
     setupOidcClientMock(mockedTokens);
     const mockedStorage = mockRefresherDefaultStorageUtility();
-    const refreshTokenRotationHandler = jest.fn();
+    const mockEmitter = new EventEmitter();
+    const mockEmit = jest.spyOn(mockEmitter, "emit");
 
     const refresher = getTokenRefresher({
       storageUtility: mockedStorage,
@@ -332,13 +335,11 @@ describe("TokenRefresher", () => {
       "mySession",
       "some old refresh token",
       await mockKeyPair(),
-      refreshTokenRotationHandler
+      mockEmitter
     );
 
     expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
-    expect(refreshTokenRotationHandler).toHaveBeenCalledWith(
-      "some new refresh token"
-    );
+    expect(mockEmit).toHaveBeenCalledWith(EVENTS.NEW_REFRESH_TOKEN);
   });
 
   it("throws if the IdP does not return an access token", async () => {
