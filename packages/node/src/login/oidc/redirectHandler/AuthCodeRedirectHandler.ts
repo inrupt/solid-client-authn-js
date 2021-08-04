@@ -49,7 +49,7 @@ import { Issuer } from "openid-client";
 import { KeyObject } from "crypto";
 import { fetch as globalFetch } from "cross-fetch";
 
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
