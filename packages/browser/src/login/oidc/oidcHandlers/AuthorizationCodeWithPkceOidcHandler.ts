@@ -67,11 +67,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       post_logout_redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       response_type: "code",
-      // TODO: The 'webid' scope is still a spec discussion topic
-      //  https://github.com/solid/specification/issues/203, i.e. the 'webid'
-      //  scope does not yet appear in the Solid specification (it's not even
-      //  mentioned in the WebID-OIDC spec).
-      scope: "openid webid",
+      // The offline_access scope requests that a refresh token be returned.
+      scope: "openid offline_access",
       filterProtocolClaims: true,
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the

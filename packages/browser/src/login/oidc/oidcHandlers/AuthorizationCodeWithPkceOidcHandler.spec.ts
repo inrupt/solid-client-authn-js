@@ -192,6 +192,25 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       );
     });
 
+    it("requests both openid and offline_access scopes", async () => {
+      const oidcModule = mockOidcModule();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
+      const oidcOptions: IOidcOptions = {
+        ...standardOidcOptions,
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["authorization_code"],
+        },
+      };
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+      expect(oidcModule.OidcClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scope: "openid offline_access",
+        })
+      );
+    });
+
     it("handles login when a client secret is present", async () => {
       mockOidcModule();
       const authorizationCodeWithPkceOidcHandler =
