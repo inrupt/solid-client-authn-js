@@ -28,6 +28,7 @@ import {
   InMemoryStorage,
   ISessionInfo,
   IStorage,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
@@ -263,6 +264,6 @@ export class Session extends EventEmitter {
   }
 
   onNewRefreshToken(callback: (newToken: string) => unknown): void {
-    this.on("newRefreshToken", callback);
+    this.on(EVENTS.NEW_REFRESH_TOKEN, callback);
   }
 }
