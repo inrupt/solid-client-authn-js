@@ -36,6 +36,7 @@ import {
 // it easier to transition back when possible.
 // import fromKeyLike from "jose/jwk/from_key_like";
 import { jwtVerify, fromKeyLike } from "@inrupt/jose-legacy-modules";
+import { EventEmitter } from "events";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
@@ -386,11 +387,11 @@ describe("RefreshTokenOidcHandler", () => {
     );
   });
 
-  it("calls the refresh token rotation handler if applicable", async () => {
+  it("calls the token refresher if applicable", async () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
-    const refreshTokenRotationHandler = jest.fn();
+    const mockEmitter = new EventEmitter();
 
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
@@ -405,7 +406,7 @@ describe("RefreshTokenOidcHandler", () => {
           clientSecret: "some client secret",
           clientType: "dynamic",
         },
-        onNewRefreshToken: refreshTokenRotationHandler,
+        eventEmitter: mockEmitter,
       })
     );
 
@@ -413,7 +414,7 @@ describe("RefreshTokenOidcHandler", () => {
       expect.anything(),
       expect.anything(),
       expect.anything(),
-      refreshTokenRotationHandler
+      mockEmitter
     );
   });
 

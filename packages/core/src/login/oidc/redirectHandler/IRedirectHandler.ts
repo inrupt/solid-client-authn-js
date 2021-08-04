@@ -37,7 +37,7 @@ import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
 
 export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
-export type RedirectInput = [string, EventEmitter];
+export type RedirectInput = [string, EventEmitter | undefined];
 
 /**
  * @hidden
