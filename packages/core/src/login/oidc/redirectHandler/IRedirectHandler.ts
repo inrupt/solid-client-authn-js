@@ -32,9 +32,9 @@ import {
   jwtVerify,
   parseJwk,
 } from "@inrupt/jose-legacy-modules";
+import { EventEmitter } from "events";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
-import { EventEmitter } from "events";
 
 export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
 export type RedirectInput = [string, EventEmitter];
