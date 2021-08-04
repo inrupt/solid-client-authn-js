@@ -35,6 +35,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
+import { EventEmitter } from "stream";
 
 /**
  * @hidden
@@ -52,7 +53,7 @@ export default class ClientAuthentication {
   login = async (
     sessionId: string,
     options: ILoginInputOptions,
-    onNewRefreshToken?: (newToken: string) => unknown
+    eventEmitter: EventEmitter
   ): Promise<ISessionInfo | undefined> => {
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
@@ -69,7 +70,7 @@ export default class ClientAuthentication {
       handleRedirect: options.handleRedirect,
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
-      onNewRefreshToken,
+      eventEmitter,
     });
 
     if (loginReturn !== undefined) {
@@ -122,12 +123,9 @@ export default class ClientAuthentication {
 
   handleIncomingRedirect = async (
     url: string,
-    onNewRefreshToken?: (newToken: string) => unknown
+    eventEmitter: EventEmitter
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(
-      url,
-      onNewRefreshToken
-    );
+    const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
 
     this.fetch = redirectInfo.fetch;
 

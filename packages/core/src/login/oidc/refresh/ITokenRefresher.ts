@@ -20,6 +20,7 @@
  */
 
 import { KeyPair } from "../../../authenticatedFetch/dpopUtils";
+import { EventEmitter } from "events";
 
 /**
  * Based on openid-client's TokenSetParameters. Re-creating the type allows not
@@ -66,8 +67,8 @@ export type TokenEndpointResponse = {
 export interface ITokenRefresher {
   refresh(
     localUserId: string,
+    eventEmitter: EventEmitter,
     refreshToken?: string,
-    dpopKey?: KeyPair,
-    onNewRefreshToken?: (token: string) => unknown
+    dpopKey?: KeyPair
   ): Promise<TokenEndpointResponse>;
 }

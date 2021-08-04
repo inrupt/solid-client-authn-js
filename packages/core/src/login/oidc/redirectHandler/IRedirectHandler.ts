@@ -34,13 +34,10 @@ import {
 } from "@inrupt/jose-legacy-modules";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
+import { EventEmitter } from "events";
 
 export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
-export type RedirectInput = [
-  string,
-  ((newToken: string) => unknown)?,
-  ((error: string | null, errorDescription?: string | null) => unknown)?
-];
+export type RedirectInput = [string, EventEmitter];
 
 /**
  * @hidden
