@@ -35,7 +35,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 
 /**
  * @hidden

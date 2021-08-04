@@ -38,7 +38,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, IssuerMetadata, TokenSet } from "openid-client";
 import { KeyObject } from "crypto";
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
