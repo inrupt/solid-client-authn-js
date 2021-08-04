@@ -24,8 +24,8 @@
  * @packageDocumentation
  */
 
-import ILoginInputOptions from "../ILoginInputOptions";
 import { EventEmitter } from "events";
+import ILoginInputOptions from "../ILoginInputOptions";
 
 /**
  * We extend our public login option interface to add data and/or constraints
@@ -52,7 +52,7 @@ export default interface ILoginOptions extends ILoginInputOptions {
   /**
    * Event emitter enabling calling user-specified callbacks.
    */
-  eventEmitter: EventEmitter;
+  eventEmitter?: EventEmitter;
 
   /**
    * This boolean specifies redirection to the Identity Provider should happen in

@@ -21,16 +21,16 @@
 
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
+import { EventEmitter } from "events";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 import { createDpopHeader, KeyPair } from "./dpopUtils";
-import { EventEmitter } from "events";
 import { EVENTS } from "../constant";
 
 export type RefreshOptions = {
   sessionId: string;
   refreshToken: string;
   tokenRefresher: ITokenRefresher;
-  eventEmitter: EventEmitter;
+  eventEmitter?: EventEmitter;
 };
 
 function isExpectedAuthError(statusCode: number): boolean {
@@ -80,14 +80,15 @@ export function buildBearerFetch(
     try {
       const tokenSet = await currentRefreshOptions.tokenRefresher.refresh(
         currentRefreshOptions.sessionId,
-        currentRefreshOptions.eventEmitter,
-        currentRefreshOptions.refreshToken
+        currentRefreshOptions.refreshToken,
+        undefined,
+        currentRefreshOptions.eventEmitter
       );
       currentAccessToken = tokenSet.accessToken;
       if (tokenSet.refreshToken) {
         // If the refresh token is rotated, update it in the closure.
         currentRefreshOptions.refreshToken = tokenSet.refreshToken;
-        currentRefreshOptions.eventEmitter.emit(EVENTS.NEW_REFRESH_TOKEN);
+        currentRefreshOptions.eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN);
       }
       // Once the token has been refreshed, re-issue the authenticated request.
       // If it has an auth failure again, the user legitimately doesn't have access
@@ -188,15 +189,15 @@ export async function buildDpopFetch(
       try {
         const tokenSet = await currentRefreshOptions.tokenRefresher.refresh(
           currentRefreshOptions.sessionId,
-          currentRefreshOptions.eventEmitter,
           currentRefreshOptions.refreshToken,
-          dpopKey
+          dpopKey,
+          currentRefreshOptions.eventEmitter
         );
         currentAccessToken = tokenSet.accessToken;
         if (tokenSet.refreshToken) {
           // If the refresh token is rotated, update it in the closure.
           currentRefreshOptions.refreshToken = tokenSet.refreshToken;
-          currentRefreshOptions.eventEmitter.emit(EVENTS.NEW_REFRESH_TOKEN);
+          currentRefreshOptions.eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN);
         }
         // Once the token has been refreshed, re-issue the authenticated request.
         // If it has an auth failure again, the user legitimately doesn't have access

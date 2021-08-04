@@ -19,8 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { KeyPair } from "../../../authenticatedFetch/dpopUtils";
 import { EventEmitter } from "events";
+import { KeyPair } from "../../../authenticatedFetch/dpopUtils";
 
 /**
  * Based on openid-client's TokenSetParameters. Re-creating the type allows not
@@ -67,8 +67,8 @@ export type TokenEndpointResponse = {
 export interface ITokenRefresher {
   refresh(
     localUserId: string,
-    eventEmitter: EventEmitter,
     refreshToken?: string,
-    dpopKey?: KeyPair
+    dpopKey?: KeyPair,
+    eventEmitter?: EventEmitter
   ): Promise<TokenEndpointResponse>;
 }
