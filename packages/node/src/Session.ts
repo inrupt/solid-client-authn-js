@@ -71,6 +71,7 @@ export interface ISessionOptions {
   clientAuthentication: ClientAuthentication;
   /**
    * A callback that gets invoked whenever a new refresh token is obtained.
+   * @deprecated Prefer calling Session::onNewRefreshToken instead.
    */
   onNewRefreshToken?: (newToken: string) => unknown;
 }
@@ -92,8 +93,6 @@ export class Session extends EventEmitter {
   private clientAuthentication: ClientAuthentication;
 
   private tokenRequestInProgress = false;
-
-  private onNewRefreshToken?: (newToken: string) => unknown;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -149,7 +148,9 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
-    this.onNewRefreshToken = sessionOptions.onNewRefreshToken;
+    if (sessionOptions.onNewRefreshToken !== undefined) {
+      this.onNewRefreshToken(sessionOptions.onNewRefreshToken);
+    }
   }
 
   /**
@@ -260,5 +261,9 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
+  }
+
+  onNewRefreshToken(callback: (newToken: string) => unknown): void {
+    this.on("newRefreshToken", callback);
   }
 }
