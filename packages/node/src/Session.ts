@@ -94,8 +94,6 @@ export class Session extends EventEmitter {
 
   private tokenRequestInProgress = false;
 
-  private emitter: EventEmitter;
-
   /**
    * Session object constructor. Typically called as follows:
    *
@@ -118,7 +116,6 @@ export class Session extends EventEmitter {
     sessionId?: string
   ) {
     super();
-    this.emitter = new EventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {
