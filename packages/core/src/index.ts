@@ -90,8 +90,6 @@ export {
 
 export {
   buildAuthenticatedFetch,
-  buildBearerFetch,
-  buildDpopFetch,
   DpopHeaderPayload,
   RefreshOptions,
 } from "./authenticatedFetch/fetchFactory";

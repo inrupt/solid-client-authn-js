@@ -123,11 +123,13 @@ async function refreshAccessToken(
 }
 
 /**
- * @param authToken a DPoP token.
- * @param dpopKey The private key the token is bound to.
- * @param
- * @returns A fetch function that adds an Authorization header with the provided
- * DPoP token, and adds a dpop header.
+ * @param unauthFetch a regular fetch function, compliant with the WHATWG spec.
+ * @param authToken an access token, either a Bearer token or a DPoP one.
+ * @param options The option object may contain two objects: the DPoP key token
+ * is bound to if applicable, and information about refresh.
+ *
+ * @returns A fetch function that adds an appropriate Authorization header with
+ * the provided token, and adds a DPoP header if applicable.
  */
 export async function buildAuthenticatedFetch(
   unauthFetch: typeof fetch,
