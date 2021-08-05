@@ -17,7 +17,7 @@ keeping a session alive for longer than the lifetime of a single access token.
 
 The following sections document changes that have been released already:
 
-## 1.10.1 - 2021-09-02
+## 1.10.1 - 2021-08-02
 
 ### Bugfixes
 
