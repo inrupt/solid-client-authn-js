@@ -32,8 +32,7 @@ jobs:
       - # Dependabot cannot access secrets, so it doesn't have a token to authenticate to ESS.
         # Since all the other jobs of this workflow depend on this one, skipping it should
         # skip the entire workflow.
-        # Temporary: always skip end-to-end tests until authentication is fixed.
-        if: ${{ github.actor != 'dependabot[bot]' && false  }}
+        if: ${{ github.actor != 'dependabot[bot]' }}
         run: npm run e2e-test
         env: 
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
