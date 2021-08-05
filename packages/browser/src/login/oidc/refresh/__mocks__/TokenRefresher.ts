@@ -19,29 +19,44 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
+import { jest } from "@jest/globals";
 import {
-  IRedirectHandler,
-  AggregateHandler,
-  RedirectInput,
-  RedirectResult,
+  ITokenRefresher,
+  TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
 
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+// Some identifiers are in camelcase on purpose.
+/* eslint-disable camelcase */
+
+export const mockTokenRefresher = (
+  tokenSet: TokenEndpointResponse
+): ITokenRefresher => {
+  return {
+    refresh: jest
+      .fn<
+        ReturnType<ITokenRefresher["refresh"]>,
+        Parameters<ITokenRefresher["refresh"]>
+      >()
+      .mockResolvedValue(tokenSet),
+  };
+};
+
+const mockIdTokenPayload = () => {
+  return {
+    sub: "https://my.webid",
+    iss: "https://my.idp/",
+    aud: "https://resource.example.org",
+    exp: 1662266216,
+    iat: 1462266216,
+  };
+};
+
+export const mockDefaultTokenSet = (): TokenEndpointResponse => {
+  return {
+    accessToken: "some refreshed access token",
+    idToken: JSON.stringify(mockIdTokenPayload()),
+  };
+};
+
+export const mockDefaultTokenRefresher = (): ITokenRefresher =>
+  mockTokenRefresher(mockDefaultTokenSet());

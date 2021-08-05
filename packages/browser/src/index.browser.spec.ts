@@ -19,29 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { it } from "@jest/globals";
+import * as solidClientAuthentication from "./index.browser";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import {
-  IRedirectHandler,
-  AggregateHandler,
-  RedirectInput,
-  RedirectResult,
-} from "@inrupt/solid-client-authn-core";
-
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+it("exports the public API from the entrypoint", () => {
+  expect(solidClientAuthentication).toBeDefined();
+});

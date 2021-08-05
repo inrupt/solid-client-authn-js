@@ -19,29 +19,18 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { jest, it, describe, expect } from "@jest/globals";
+import UuidGenerator from "./UuidGenerator";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import {
-  IRedirectHandler,
-  AggregateHandler,
-  RedirectInput,
-  RedirectResult,
-} from "@inrupt/solid-client-authn-core";
+jest.mock("uuid");
 
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+describe("UuidGenerator", () => {
+  it("should simply wrap the `uuid` module", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const uuidMock: { v4: jest.Mock } = jest.requireMock("uuid") as any;
+    uuidMock.v4.mockReturnValueOnce("some uuid");
+
+    const generator = new UuidGenerator();
+    expect(generator.v4()).toBe("some uuid");
+  });
+});

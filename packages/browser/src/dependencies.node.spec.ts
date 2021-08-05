@@ -20,28 +20,14 @@
  */
 
 /**
- * @hidden
- * @packageDocumentation
+ * @jest-environment node
  */
+import { getClientAuthenticationWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import {
-  IRedirectHandler,
-  AggregateHandler,
-  RedirectInput,
-  RedirectResult,
-} from "@inrupt/solid-client-authn-core";
-
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+describe("dependencies.node", () => {
+  it("performs dependency injection in a node environment", () => {
+    const clientAuthn = getClientAuthenticationWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+  });
+});

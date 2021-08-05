@@ -41,6 +41,8 @@ import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedi
 import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
+import { ErrorOidcHandler } from "./login/oidc/redirectHandler/ErrorOidcHandler";
+import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 
 /**
  *
@@ -65,26 +67,28 @@ export function getClientAuthenticationWithDependencies(dependencies: {
 
   const sessionInfoManager = new SessionInfoManager(storageUtility);
 
-  const loginHandler =
-    // We don't need an Aggregate login handler here at all, since we only use one handler, but
-    // for future reference, if we want to register multiple, just use an AggregateLoginHandler:
-    //   new AggregateLoginHandler([ loginHandler1, loginHandler2 ]);
-    new OidcLoginHandler(
-      storageUtility,
-      new AuthorizationCodeWithPkceOidcHandler(
-        storageUtility,
-        new Redirector()
-      ),
-      issuerConfigFetcher,
-      clientRegistrar
-    );
+  // make new handler for redirect and login
+  const loginHandler = new OidcLoginHandler(
+    storageUtility,
+    new AuthorizationCodeWithPkceOidcHandler(storageUtility, new Redirector()),
+    issuerConfigFetcher,
+    clientRegistrar
+  );
+
+  const refresher = new TokenRefresher(
+    storageUtility,
+    issuerConfigFetcher,
+    clientRegistrar
+  );
 
   const redirectHandler = new AggregateRedirectHandler([
+    new ErrorOidcHandler(),
     new AuthCodeRedirectHandler(
       storageUtility,
       sessionInfoManager,
       issuerConfigFetcher,
-      clientRegistrar
+      clientRegistrar,
+      refresher
     ),
     // This catch-all class will always be able to handle the
     // redirect IRI, so it must be registered last.

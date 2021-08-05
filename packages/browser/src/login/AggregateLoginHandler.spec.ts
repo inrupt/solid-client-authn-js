@@ -19,29 +19,23 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
 import {
-  IRedirectHandler,
+  ILoginHandler,
   AggregateHandler,
-  RedirectInput,
-  RedirectResult,
 } from "@inrupt/solid-client-authn-core";
+import { jest, it, describe, expect } from "@jest/globals";
+import AggregateLoginHandler from "./AggregateLoginHandler";
 
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+jest.mock("@inrupt/solid-client-authn-core");
+
+describe("AggregateLoginHandler", () => {
+  it("should pass injected handlers to its superclass", () => {
+    // We just test if the parent is called.
+    // eslint-disable-next-line no-new
+    new AggregateLoginHandler(["Some handler"] as unknown as ILoginHandler[]);
+
+    expect((AggregateHandler as jest.Mock).mock.calls).toEqual([
+      [["Some handler"]],
+    ]);
+  });
+});

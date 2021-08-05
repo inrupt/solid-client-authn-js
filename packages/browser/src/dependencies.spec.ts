@@ -19,29 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { getClientAuthenticationWithDependencies } from "./dependencies";
+import ClientAuthentication from "./ClientAuthentication";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import {
-  IRedirectHandler,
-  AggregateHandler,
-  RedirectInput,
-  RedirectResult,
-} from "@inrupt/solid-client-authn-core";
+describe("dependencies", () => {
+  it("performs dependency injection", () => {
+    const clientAuthn = getClientAuthenticationWithDependencies({});
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+  });
 
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+  it("performs dependency injection with a given input", () => {
+    const clientAuthn = getClientAuthenticationWithDependencies({
+      secureStorage: mockStorageUtility({}),
+    });
+    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+  });
+});
