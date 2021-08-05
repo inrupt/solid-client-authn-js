@@ -22,16 +22,23 @@
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 import { EventEmitter } from "events";
+import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 import { createDpopHeader, KeyPair } from "./dpopUtils";
-import { EVENTS } from "../constant";
 
 export type RefreshOptions = {
   sessionId: string;
   refreshToken: string;
   tokenRefresher: ITokenRefresher;
   eventEmitter?: EventEmitter;
+  expiresIn?: number;
 };
+
+/**
+ * If expires_in isn't specified for the access token, we assume its lifetime is
+ * 10 minutes.
+ */
+const DEFAULT_EXPIRATION_TIME = 600;
 
 function isExpectedAuthError(statusCode: number): boolean {
   // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
@@ -104,7 +111,7 @@ async function makeAuthenticatedRequest(
 async function refreshAccessToken(
   refreshOptions: RefreshOptions,
   dpopKey?: KeyPair
-): Promise<{ accessToken: string; refreshToken?: string }> {
+): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }> {
   const tokenSet = await refreshOptions.tokenRefresher.refresh(
     refreshOptions.sessionId,
     refreshOptions.refreshToken,
@@ -119,6 +126,7 @@ async function refreshAccessToken(
   return {
     accessToken: tokenSet.accessToken,
     refreshToken: tokenSet.refreshToken,
+    expiresIn: tokenSet.expiresIn,
   };
 }
 
@@ -143,6 +151,45 @@ export async function buildAuthenticatedFetch(
   const currentRefreshOptions: RefreshOptions | undefined =
     options?.refreshOptions;
   return async (url, requestInit?): Promise<Response> => {
+    // Setup the refresh timeout
+    if (currentRefreshOptions !== undefined) {
+      const proactivelyRefreshToken = async () => {
+        try {
+          const {
+            accessToken: refreshedAccessToken,
+            refreshToken,
+            expiresIn,
+          } = await refreshAccessToken(currentRefreshOptions, options?.dpopKey);
+          // Update the tokens in the closure if appropriate.
+          currentAccessToken = refreshedAccessToken;
+          if (refreshToken !== undefined) {
+            currentRefreshOptions.refreshToken = refreshToken;
+          }
+          if (expiresIn !== undefined) {
+            // We want to refresh the token 5 seconds before
+            currentRefreshOptions.expiresIn =
+              expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS;
+          }
+          // Each time the access token is refreshed, we must plan fo the next
+          // refresh iteration.
+          setTimeout(
+            proactivelyRefreshToken,
+            currentRefreshOptions.expiresIn ?? DEFAULT_EXPIRATION_TIME
+          );
+        } catch (e) {
+          // It is possible that an underlying library throws an error on refresh flow failure.
+          // If we used a log framework, the error could be logged at the `debug` level,
+          // but otherwise the failure of the refresh flow should not blow up in the user's
+          // face, so we just swallow the error.
+          // TODO: Add error management here.
+        }
+      };
+      setTimeout(
+        proactivelyRefreshToken,
+        currentRefreshOptions.expiresIn ?? DEFAULT_EXPIRATION_TIME
+      );
+    }
+
     let response = await makeAuthenticatedRequest(
       unauthFetch,
       currentAccessToken,
@@ -174,44 +221,6 @@ export async function buildAuthenticatedFetch(
         options.dpopKey
       );
     }
-
-    // If the redirected request still has an auth issue, the access token may
-    // need to be refreshed.
-    if (
-      currentRefreshOptions !== undefined &&
-      isExpectedAuthError(response.status)
-    ) {
-      // With currentRefreshOptions not being undefined, options is necessarily
-      // defined, so it is fine to add a non-null assertion.
-      /* eslint-disable @typescript-eslint/no-non-null-assertion */
-      try {
-        const { accessToken: refreshedAccessToken, refreshToken } =
-          await refreshAccessToken(currentRefreshOptions, options!.dpopKey);
-        // Update the tokens in the closure if appropriate.
-        currentAccessToken = refreshedAccessToken;
-        if (refreshToken !== undefined) {
-          currentRefreshOptions.refreshToken = refreshToken;
-        }
-        // Once the token has been refreshed, re-issue the authenticated request.
-        response = await makeAuthenticatedRequest(
-          unauthFetch,
-          currentAccessToken,
-          response.url,
-          requestInit,
-          options!.dpopKey
-        );
-        /* eslint-enable @typescript-eslint/no-non-null-assertion */
-      } catch (e) {
-        // It is possible that an underlying library throws an error on refresh flow failure.
-        // If we used a log framework, the error could be logged at the `debug` level,
-        // but otherwise the failure of the refresh flow should not blow up in the user's
-        // face, and returning the original authentication error is better.
-        return response;
-      }
-    }
-    // If the access token was refreshed and there is still an auth error, or if
-    // no refresh token is provided, the user legitimately doesn't have access to
-    // the resource and the response should simply be returned.
     return response;
   };
 }
