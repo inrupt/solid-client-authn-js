@@ -172,7 +172,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       ).resolves.not.toBeNull();
     });
 
-    it("passes our the 'prompt' option down to our OIDC client library implementation", async () => {
+    it("passes on the 'prompt' option down to our OIDC client library implementation", async () => {
       const oidcModule = mockOidcModule();
       const authorizationCodeWithPkceOidcHandler =
         getAuthorizationCodeWithPkceOidcHandler();
@@ -188,6 +188,25 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(oidcModule.OidcClient).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: "none",
+        })
+      );
+    });
+
+    it("defaults the 'prompt' option to consent", async () => {
+      const oidcModule = mockOidcModule();
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
+      const oidcOptions: IOidcOptions = {
+        ...standardOidcOptions,
+        issuerConfiguration: {
+          ...standardOidcOptions.issuerConfiguration,
+          grantTypesSupported: ["authorization_code"],
+        },
+      };
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+      expect(oidcModule.OidcClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: "consent",
         })
       );
     });
