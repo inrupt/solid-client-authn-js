@@ -38,7 +38,7 @@ export type RefreshOptions = {
  * If expires_in isn't specified for the access token, we assume its lifetime is
  * 10 minutes.
  */
-const DEFAULT_EXPIRATION_TIME = 600;
+export const DEFAULT_EXPIRATION_TIME_SECONDS = 600;
 
 function isExpectedAuthError(statusCode: number): boolean {
   // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
@@ -150,46 +150,50 @@ export async function buildAuthenticatedFetch(
   let currentAccessToken = accessToken;
   const currentRefreshOptions: RefreshOptions | undefined =
     options?.refreshOptions;
-  return async (url, requestInit?): Promise<Response> => {
-    // Setup the refresh timeout
-    if (currentRefreshOptions !== undefined) {
-      const proactivelyRefreshToken = async () => {
-        try {
-          const {
-            accessToken: refreshedAccessToken,
-            refreshToken,
-            expiresIn,
-          } = await refreshAccessToken(currentRefreshOptions, options?.dpopKey);
-          // Update the tokens in the closure if appropriate.
-          currentAccessToken = refreshedAccessToken;
-          if (refreshToken !== undefined) {
-            currentRefreshOptions.refreshToken = refreshToken;
-          }
-          if (expiresIn !== undefined) {
-            // We want to refresh the token 5 seconds before
-            currentRefreshOptions.expiresIn =
-              expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS;
-          }
-          // Each time the access token is refreshed, we must plan fo the next
-          // refresh iteration.
-          setTimeout(
-            proactivelyRefreshToken,
-            currentRefreshOptions.expiresIn ?? DEFAULT_EXPIRATION_TIME
-          );
-        } catch (e) {
-          // It is possible that an underlying library throws an error on refresh flow failure.
-          // If we used a log framework, the error could be logged at the `debug` level,
-          // but otherwise the failure of the refresh flow should not blow up in the user's
-          // face, so we just swallow the error.
-          // TODO: Add error management here.
+  // Setup the refresh timeout outside of the authenticated fetch, so that
+  // an idle app will not get logged out if it doesn't issue a fetch before
+  // the first expiration date.
+  if (currentRefreshOptions !== undefined) {
+    const proactivelyRefreshToken = async () => {
+      try {
+        const {
+          accessToken: refreshedAccessToken,
+          refreshToken,
+          expiresIn,
+        } = await refreshAccessToken(currentRefreshOptions, options?.dpopKey);
+        // Update the tokens in the closure if appropriate.
+        currentAccessToken = refreshedAccessToken;
+        if (refreshToken !== undefined) {
+          currentRefreshOptions.refreshToken = refreshToken;
         }
-      };
-      setTimeout(
-        proactivelyRefreshToken,
-        currentRefreshOptions.expiresIn ?? DEFAULT_EXPIRATION_TIME
-      );
-    }
-
+        if (expiresIn !== undefined) {
+          // We want to refresh the token 5 seconds before they actually expire.
+          currentRefreshOptions.expiresIn =
+            expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS;
+        }
+        // Each time the access token is refreshed, we must plan fo the next
+        // refresh iteration.
+        setTimeout(
+          proactivelyRefreshToken,
+          (currentRefreshOptions.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS) *
+            1000
+        );
+      } catch (e) {
+        // It is possible that an underlying library throws an error on refresh flow failure.
+        // If we used a log framework, the error could be logged at the `debug` level,
+        // but otherwise the failure of the refresh flow should not blow up in the user's
+        // face, so we just swallow the error.
+        // TODO: Add error management here.
+      }
+    };
+    setTimeout(
+      proactivelyRefreshToken,
+      (currentRefreshOptions.expiresIn !== undefined
+        ? currentRefreshOptions.expiresIn - DEFAULT_EXPIRATION_TIME_SECONDS
+        : DEFAULT_EXPIRATION_TIME_SECONDS) * 1000
+    );
+  }
+  return async (url, requestInit?): Promise<Response> => {
     let response = await makeAuthenticatedRequest(
       unauthFetch,
       currentAccessToken,
