@@ -78,8 +78,8 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     new OidcLoginHandler(
       storageUtility,
       new AggregateOidcHandler([
-        new ClientCredentialsOidcHandler(tokenRefresher, storageUtility),
         new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
+        new ClientCredentialsOidcHandler(tokenRefresher, storageUtility),
         new AuthorizationCodeWithPkceOidcHandler(
           storageUtility,
           new Redirector()
