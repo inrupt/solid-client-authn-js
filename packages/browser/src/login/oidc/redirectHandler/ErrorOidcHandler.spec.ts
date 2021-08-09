@@ -86,7 +86,8 @@ describe("ErrorOidcHandler", () => {
         "unable_to_fetch"
       );
     });
-    it("calls the onError callback if given with just error parameters", async () => {
+
+    it("calls the onError callback if given with just error parameters if no description is provided", async () => {
       window.fetch = jest.fn();
       const mockEmitter = new EventEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");

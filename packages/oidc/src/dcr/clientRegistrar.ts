@@ -119,6 +119,7 @@ export async function registerClient(
     subject_type: "pairwise",
     token_endpoint_auth_method: "client_secret_basic",
     id_token_signed_response_alg: signingAlg,
+    grant_types: ["authorization_code", "refresh_token"],
     /* eslint-enable camelcase */
   };
 

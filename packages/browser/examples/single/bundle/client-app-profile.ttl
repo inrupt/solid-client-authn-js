@@ -4,7 +4,7 @@
     "client_id" : "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.ttl#app",
     "redirect_uris" : ["http://localhost:3113/"],
     "client_name" : "Demo app",
-    "scope" : "openid webid",
+    "scope" : "openid offline_access",
     "grant_types" : ["authorization_code"],
     "response_types" : ["code"]
     }""" .
