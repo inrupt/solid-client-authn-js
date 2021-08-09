@@ -20,6 +20,8 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
+import { EventEmitter } from "events";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
 describe("ErrorOidcHandler", () => {
@@ -68,29 +70,35 @@ describe("ErrorOidcHandler", () => {
     });
     it("calls the onError callback if given with both parameters", async () => {
       window.fetch = jest.fn();
+      const mockEmitter = new EventEmitter();
+      const mockEmit = jest.spyOn(mockEmitter, "emit");
+
       const redirectHandler = new ErrorOidcHandler();
-      const mockCallback = jest.fn();
       const mySession = await redirectHandler.handle(
         "https://coolparty.com/?error=error&error_description=unable_to_fetch",
-        undefined,
-        mockCallback
+        mockEmitter
       );
       expect(mySession.isLoggedIn).toEqual(false);
       expect(mySession.webId).toBeUndefined();
-      expect(mockCallback).toHaveBeenCalledWith("error", "unable_to_fetch");
+      expect(mockEmit).toHaveBeenCalledWith(
+        EVENTS.ERROR,
+        "error",
+        "unable_to_fetch"
+      );
     });
     it("calls the onError callback if given with just error parameters", async () => {
       window.fetch = jest.fn();
+      const mockEmitter = new EventEmitter();
+      const mockEmit = jest.spyOn(mockEmitter, "emit");
+
       const redirectHandler = new ErrorOidcHandler();
-      const mockCallback = jest.fn();
       const mySession = await redirectHandler.handle(
         "https://coolparty.com/?error=error",
-        undefined,
-        mockCallback
+        mockEmitter
       );
       expect(mySession.isLoggedIn).toEqual(false);
       expect(mySession.webId).toBeUndefined();
-      expect(mockCallback).toHaveBeenCalledWith("error", null);
+      expect(mockEmit).toHaveBeenCalledWith(EVENTS.ERROR, "error", null);
     });
   });
 });

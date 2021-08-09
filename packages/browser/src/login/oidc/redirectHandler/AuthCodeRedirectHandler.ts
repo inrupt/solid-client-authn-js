@@ -41,6 +41,7 @@ import {
   getBearerToken,
   CodeExchangeResult,
 } from "@inrupt/oidc-client-ext";
+import { EventEmitter } from "events";
 import { KEY_CURRENT_SESSION } from "../../../constant";
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
@@ -127,7 +128,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
   async handle(
     redirectUrl: string,
-    onNewRefreshToken?: (newToken: string) => unknown
+    eventEmitter?: EventEmitter
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
@@ -201,7 +202,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         sessionId: storedSessionId,
         refreshToken: tokens.refreshToken,
         tokenRefresher: this.tokerRefresher,
-        onNewRefreshToken,
+        eventEmitter,
       };
     }
 

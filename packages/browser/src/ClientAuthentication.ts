@@ -37,6 +37,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { jwtVerify, parseJwk } from "@inrupt/jose-legacy-modules";
+import { EventEmitter } from "events";
 import { KEY_CURRENT_SESSION } from "./constant";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
@@ -59,7 +60,10 @@ export default class ClientAuthentication {
 
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
-  login = async (options: ILoginOptions): Promise<void> => {
+  login = async (
+    options: ILoginOptions,
+    eventEmitter: EventEmitter
+  ): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
     // But we may want to preserve our client application info, particularly if
@@ -80,6 +84,7 @@ export default class ClientAuthentication {
       redirectUrl,
       // If no clientName is provided, the clientId may be used instead.
       clientName: options.clientName ?? options.clientId,
+      eventEmitter,
     });
   };
 
@@ -144,16 +149,9 @@ export default class ClientAuthentication {
 
   handleIncomingRedirect = async (
     url: string,
-    onError?: (
-      error: string | null,
-      errorDescription?: string | null
-    ) => unknown
+    eventEmitter: EventEmitter
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(
-      url,
-      undefined,
-      onError
-    );
+    const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
     // The `FallbackRedirectHandler` directly returns the global `fetch` for
     // his value, so we should ensure it's bound to `window` rather than to
     // ClientAuthentication, to avoid the following error:
