@@ -126,7 +126,7 @@ export async function silentlyAuthenticate(
         tokenType: storedSessionInfo.tokenType ?? "DPoP",
         inIframe: options.inIframe,
       },
-      getDefaultSession()
+      this
     );
     return true;
   }
