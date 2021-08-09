@@ -21,6 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import {
+  EVENTS,
   ISessionInfo,
   StorageUtility,
   USER_SESSION_PREFIX,
@@ -138,7 +139,8 @@ describe("Session", () => {
       expect(clientAuthnLogin).toHaveBeenCalledWith(
         expect.objectContaining({
           tokenType: "Bearer",
-        })
+        }),
+        mySession
       );
     });
 
@@ -233,7 +235,7 @@ describe("Session", () => {
       await mySession.handleIncomingRedirect();
       expect(incomingRedirectHandler).toHaveBeenCalledWith(
         "https://some.url",
-        undefined
+        mySession
       );
     });
 
@@ -626,6 +628,19 @@ describe("Session", () => {
     });
   });
 
+  describe("onError", () => {
+    it("calls the registered callback on error", async () => {
+      const onErrorCallback = jest.fn();
+      const mySession = new Session();
+      mySession.onError(onErrorCallback);
+      mySession.emit(EVENTS.ERROR, "error", "error_description");
+      expect(onErrorCallback).toHaveBeenCalledWith(
+        "error",
+        "error_description"
+      );
+    });
+  });
+
   describe("silent authentication", () => {
     it("does nothing if no previous session is available", async () => {
       mockLocalStorage({});
@@ -783,16 +798,24 @@ describe("Session", () => {
       });
       await incomingRedirectPromise;
       await validateCurrentSessionPromise;
-      expect(clientAuthentication.login).toHaveBeenCalledWith({
-        sessionId: "mySession",
-        tokenType: "DPoP",
-        oidcIssuer: "https://some.issuer",
-        prompt: "none",
-        clientId: "some client ID",
-        clientSecret: "some client secret",
-        redirectUrl: "https://some.redirect/url",
-        inIframe: false,
-      });
+      expect(clientAuthentication.login).toHaveBeenCalledWith(
+        {
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          oidcIssuer: "https://some.issuer",
+          prompt: "none",
+          clientId: "some client ID",
+          clientSecret: "some client secret",
+          redirectUrl: "https://some.redirect/url",
+          inIframe: false,
+        },
+        expect.anything()
+      );
+      // Check that second parameter is of type session
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (clientAuthentication.login as any).mock.calls[0][1]
+      ).toBeInstanceOf(Session);
     });
 
     it("resolves handleIncomingRedirect if silent authentication could not be started", async () => {
@@ -1085,22 +1108,30 @@ describe("Session", () => {
           incomingRedirectPromise
         ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn();
-
       const mySession = new Session({ clientAuthentication }, sessionId);
       // Send the signal to the session
       mySession.emit("tokenRenewal");
       await incomingRedirectPromise;
       await validateCurrentSessionPromise;
-      expect(clientAuthentication.login).toHaveBeenCalledWith({
-        sessionId: "mySession",
-        tokenType: "DPoP",
-        oidcIssuer: "https://some.issuer",
-        prompt: "none",
-        clientId: "some client ID",
-        clientSecret: "some client secret",
-        redirectUrl: "https://some.redirect/url",
-        inIframe: true,
-      });
+
+      expect(clientAuthentication.login).toHaveBeenCalledWith(
+        {
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          oidcIssuer: "https://some.issuer",
+          prompt: "none",
+          clientId: "some client ID",
+          clientSecret: "some client secret",
+          redirectUrl: "https://some.redirect/url",
+          inIframe: true,
+        },
+        expect.anything()
+      );
+      // Check that second parameter is of type session
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (clientAuthentication.login as any).mock.calls[0][1]
+      ).toBeInstanceOf(Session);
     });
 
     it("sets the updated session info after silently refreshing", async () => {

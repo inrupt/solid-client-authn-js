@@ -67,16 +67,16 @@ export function getClientAuthenticationWithDependencies(dependencies: {
 
   const sessionInfoManager = new SessionInfoManager(storageUtility);
 
-  // make new handler for redirect and login
-  const loginHandler = new OidcLoginHandler(
+  const tokenRefresher = new TokenRefresher(
     storageUtility,
-    new AuthorizationCodeWithPkceOidcHandler(storageUtility, new Redirector()),
     issuerConfigFetcher,
     clientRegistrar
   );
 
-  const refresher = new TokenRefresher(
+  // make new handler for redirect and login
+  const loginHandler = new OidcLoginHandler(
     storageUtility,
+    new AuthorizationCodeWithPkceOidcHandler(storageUtility, new Redirector()),
     issuerConfigFetcher,
     clientRegistrar
   );
@@ -88,7 +88,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
       sessionInfoManager,
       issuerConfigFetcher,
       clientRegistrar,
-      refresher
+      tokenRefresher
     ),
     // This catch-all class will always be able to handle the
     // redirect IRI, so it must be registered last.

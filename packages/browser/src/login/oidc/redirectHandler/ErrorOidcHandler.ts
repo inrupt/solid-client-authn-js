@@ -25,9 +25,11 @@
  */
 
 import {
+  EVENTS,
   IRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
+import { EventEmitter } from "stream";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 
@@ -51,20 +53,14 @@ export class ErrorOidcHandler implements IRedirectHandler {
 
   async handle(
     redirectUrl: string,
-    // The argument is ignored, but must be present to implement the interface
-    _onToken?: (newToken: string) => unknown,
-    onError?: (
-      error: string | null,
-      errorDescription?: string | null
-    ) => unknown
+    eventEmitter?: EventEmitter
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
-    if (typeof onError === "function") {
+    if (eventEmitter) {
       const url = new URL(redirectUrl);
       const errorUrl = url.searchParams.get("error");
       const errorDescriptionUrl = url.searchParams.get("error_description");
-      onError(errorUrl, errorDescriptionUrl);
+      eventEmitter.emit(EVENTS.ERROR, errorUrl, errorDescriptionUrl);
     }
-
     return getUnauthenticatedSession();
   }
 }

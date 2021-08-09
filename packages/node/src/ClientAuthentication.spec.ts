@@ -25,6 +25,8 @@ import {
   mockStorageUtility,
   ILoginOptions,
 } from "@inrupt/solid-client-authn-core";
+import { Session } from "inspector";
+import { EventEmitter } from "events";
 import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
@@ -56,14 +58,19 @@ describe("ClientAuthentication", () => {
   }
 
   describe("login", () => {
+    const mockEmitter = new EventEmitter();
     it("calls login, and defaults to a DPoP token", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.login("mySession", {
-        clientId: "coolApp",
-        clientName: "some client app name",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com",
-      });
+      await clientAuthn.login(
+        "mySession",
+        {
+          clientId: "coolApp",
+          clientName: "some client app name",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+        },
+        mockEmitter
+      );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
         clientId: "coolApp",
@@ -73,16 +80,22 @@ describe("ClientAuthentication", () => {
         clientSecret: undefined,
         handleRedirect: undefined,
         tokenType: "DPoP",
+        eventEmitter: mockEmitter,
+        refreshToken: undefined,
       });
     });
 
     it("normalizes the redirect IRI", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.login("mySession", {
-        clientId: "coolApp",
-        redirectUrl: "https://coolapp.com",
-        oidcIssuer: "https://idp.com",
-      });
+      await clientAuthn.login(
+        "mySession",
+        {
+          clientId: "coolApp",
+          redirectUrl: "https://coolapp.com",
+          oidcIssuer: "https://idp.com",
+        },
+        mockEmitter
+      );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
           redirectUrl: "https://coolapp.com/",
@@ -111,11 +124,15 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication({
         loginHandler: mockedLoginHandler,
       });
-      const loginResult = await clientAuthn.login("mySession", {
-        refreshToken: "some refresh token",
-        clientId: "some client ID",
-        clientSecret: "some client secret",
-      });
+      const loginResult = await clientAuthn.login(
+        "mySession",
+        {
+          refreshToken: "some refresh token",
+          clientId: "some client ID",
+          clientSecret: "some client secret",
+        },
+        mockEmitter
+      );
       expect(loginResult).not.toBeUndefined();
       expect(loginResult?.webId).toEqual("https://my.webid/");
       expect(clientAuthn.fetch).toBe(mockedAuthFetch);
@@ -123,12 +140,16 @@ describe("ClientAuthentication", () => {
 
     it("request a bearer token if specified", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.login("mySession", {
-        clientId: "coolApp",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com",
-        tokenType: "Bearer",
-      });
+      await clientAuthn.login(
+        "mySession",
+        {
+          clientId: "coolApp",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+          tokenType: "Bearer",
+        },
+        mockEmitter
+      );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
         clientId: "coolApp",
@@ -138,6 +159,7 @@ describe("ClientAuthentication", () => {
         clientSecret: undefined,
         handleRedirect: undefined,
         tokenType: "Bearer",
+        eventEmitter: mockEmitter,
       });
     });
   });
@@ -155,10 +177,10 @@ describe("ClientAuthentication", () => {
     it("reverts back to un-authenticated fetch on logout", async () => {
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
-
+      const session = new Session();
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      await clientAuthn.handleIncomingRedirect(url);
+      await clientAuthn.handleIncomingRedirect(url, session);
 
       // Calling the redirect handler should give us an authenticated fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
@@ -242,16 +264,20 @@ describe("ClientAuthentication", () => {
   describe("handleIncomingRedirect", () => {
     it("calls handle redirect", async () => {
       const clientAuthn = getClientAuthentication();
+      const session = new Session();
       const unauthFetch = clientAuthn.fetch;
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      const redirectInfo = await clientAuthn.handleIncomingRedirect(url);
+      const redirectInfo = await clientAuthn.handleIncomingRedirect(
+        url,
+        session
+      );
       expect(redirectInfo).toEqual({
         ...RedirectHandlerResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        undefined
+        session
       );
 
       // Calling the redirect handler should have updated the fetch.
@@ -261,19 +287,19 @@ describe("ClientAuthentication", () => {
     it("calls handle redirect with the refresh token handler if one is provided", async () => {
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
-      const refreshTokenHandler = jest.fn();
+      const session = new Session();
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
-        refreshTokenHandler
+        session
       );
       expect(redirectInfo).toEqual({
         ...RedirectHandlerResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        refreshTokenHandler
+        session
       );
 
       // Calling the redirect handler should have updated the fetch.

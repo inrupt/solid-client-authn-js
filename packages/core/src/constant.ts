@@ -33,4 +33,5 @@ export const PREFERRED_SIGNING_ALG = ["ES256", "RS256"];
 
 export const EVENTS = {
   NEW_REFRESH_TOKEN: "newRefreshToken",
+  ERROR: "onError",
 };

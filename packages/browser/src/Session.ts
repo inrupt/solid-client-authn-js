@@ -24,6 +24,7 @@
  */
 import { EventEmitter } from "events";
 import {
+  EVENTS,
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
@@ -34,6 +35,7 @@ import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
 import { postRedirectUrlToParent, setupIframeListener } from "./iframe";
+import { getDefaultSession } from "./defaultSession";
 
 export interface ISessionOptions {
   /**
@@ -91,13 +93,6 @@ export interface IHandleIncomingRedirectOptions {
    * using the browser's current location.
    */
   url?: string;
-  /**
-   * Error callback to be called when errors occur during login.
-   */
-  onError?: (
-    error: string | null,
-    errorDescription?: string | null | undefined
-  ) => unknown;
 }
 
 export async function silentlyAuthenticate(
@@ -120,16 +115,19 @@ export async function silentlyAuthenticate(
     // on incoming redirect. This way, the user is eventually redirected back
     // to the page they were on and not to the app's redirect page.
     window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
-    await clientAuthn.login({
-      sessionId,
-      prompt: "none",
-      oidcIssuer: storedSessionInfo.issuer,
-      redirectUrl: storedSessionInfo.redirectUrl,
-      clientId: storedSessionInfo.clientAppId,
-      clientSecret: storedSessionInfo.clientAppSecret,
-      tokenType: storedSessionInfo.tokenType ?? "DPoP",
-      inIframe: options.inIframe,
-    });
+    await clientAuthn.login(
+      {
+        sessionId,
+        prompt: "none",
+        oidcIssuer: storedSessionInfo.issuer,
+        redirectUrl: storedSessionInfo.redirectUrl,
+        clientId: storedSessionInfo.clientAppId,
+        clientSecret: storedSessionInfo.clientAppSecret,
+        tokenType: storedSessionInfo.tokenType ?? "DPoP",
+        inIframe: options.inIframe,
+      },
+      getDefaultSession()
+    );
     return true;
   }
   return false;
@@ -205,7 +203,10 @@ export class Session extends EventEmitter {
     // Listen for messages from children iframes.
     setupIframeListener(async (redirectUrl: string) => {
       const sessionInfo =
-        await this.clientAuthentication.handleIncomingRedirect(redirectUrl);
+        await this.clientAuthentication.handleIncomingRedirect(
+          redirectUrl,
+          this
+        );
 
       // If silent authentication was not successful, do nothing;
       // the existing session might still be valid for a while,
@@ -234,12 +235,15 @@ export class Session extends EventEmitter {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
-    await this.clientAuthentication.login({
-      sessionId: this.info.sessionId,
-      ...options,
-      // Defaults the token type to DPoP
-      tokenType: options.tokenType ?? "DPoP",
-    });
+    await this.clientAuthentication.login(
+      {
+        sessionId: this.info.sessionId,
+        ...options,
+        // Defaults the token type to DPoP
+        tokenType: options.tokenType ?? "DPoP",
+      },
+      this
+    );
     // `login` redirects the user away from the app,
     // so unless it throws an error, there is no code that should run afterwards
     // (since there is no "after" in the lifetime of the script).
@@ -379,7 +383,7 @@ export class Session extends EventEmitter {
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
-      options.onError
+      this
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);
@@ -443,6 +447,20 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
+  }
+
+  /**
+   * Register a callback function to be called when a user logs out:
+   *
+   * @param callback The function called when an error occurs.
+   */
+  onError(
+    callback: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
+  ): void {
+    this.on(EVENTS.ERROR, callback);
   }
 
   /**

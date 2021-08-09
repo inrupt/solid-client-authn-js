@@ -27,6 +27,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import { refresh } from "@inrupt/oidc-client-ext";
+import { EventEmitter } from "events";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockDefaultIssuerConfigFetcher,
@@ -222,6 +223,9 @@ describe("TokenRefresher", () => {
 
     it("calls the refresh token rotation callback if a new refresh token is isued", async () => {
       const mockedStorage = mockRefresherDefaultStorageUtility();
+      const mockEmitter = new EventEmitter();
+      const mockEmit = jest.spyOn(mockEmitter, "emit");
+
       await mockOidcModule({
         ...mockDpopTokens(),
         refreshToken: "Some rotated refresh token",
@@ -231,14 +235,15 @@ describe("TokenRefresher", () => {
       const refresher = getTokenRefresher({
         storageUtility: mockedStorage,
       });
-      const callback = jest.fn();
+
       await refresher.refresh(
         "mySession",
-        "some refresh token",
+        "some old refresh token",
         await mockKeyPair(),
-        callback
+        mockEmitter
       );
-      expect(callback).toHaveBeenCalled();
+
+      expect(mockEmit).toHaveBeenCalled();
     });
 
     it("accepts a new refresh token without a callback", async () => {
