@@ -36,6 +36,7 @@ import {
   IStorageUtility,
   ILoginHandler,
   ISessionInfoManager,
+  IRedirectHandler,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
@@ -84,7 +85,7 @@ export const buildRedirectHandler = (
   issuerConfigFetcher: IIssuerConfigFetcher,
   clientRegistrar: IClientRegistrar,
   tokenRefresher: ITokenRefresher
-) => {
+): IRedirectHandler => {
   return new AggregateRedirectHandler([
     new AuthCodeRedirectHandler(
       storageUtility,
