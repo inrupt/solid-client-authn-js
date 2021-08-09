@@ -15,6 +15,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 uses it when its access token has expired to get a new access token. This enables
 keeping a session alive for longer than the lifetime of a single access token.
 
+### Bugfixes
+
+#### node
+
+- Trying to log a session in providing dynamically registered client credentials
+along with a refresh token was mistaken for a static client login, leading to an
+"Invalid client credentials" error.
+
 The following sections document changes that have been released already:
 
 ## 1.10.1 - 2021-08-02

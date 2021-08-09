@@ -27,7 +27,17 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
-import { IStorage, InMemoryStorage } from "@inrupt/solid-client-authn-core";
+import {
+  IStorage,
+  InMemoryStorage,
+  ITokenRefresher,
+  IIssuerConfigFetcher,
+  IClientRegistrar,
+  IStorageUtility,
+  ILoginHandler,
+  ISessionInfoManager,
+  IRedirectHandler,
+} from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
@@ -44,6 +54,51 @@ import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
+
+export const buildLoginHandler = (
+  storageUtility: IStorageUtility,
+  tokenRefresher: ITokenRefresher,
+  issuerConfigFetcher: IIssuerConfigFetcher,
+  clientRegistrar: IClientRegistrar
+): ILoginHandler => {
+  // We don't need an Aggregate login handler here at all, since we only use one handler, but
+  // for future reference, if we want to register multiple, just use an AggregateLoginHandler:
+  //   new AggregateLoginHandler([ loginHandler1, loginHandler2 ]);
+  return new OidcLoginHandler(
+    storageUtility,
+    new AggregateOidcHandler([
+      new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
+      new ClientCredentialsOidcHandler(tokenRefresher, storageUtility),
+      new AuthorizationCodeWithPkceOidcHandler(
+        storageUtility,
+        new Redirector()
+      ),
+    ]),
+    issuerConfigFetcher,
+    clientRegistrar
+  );
+};
+
+export const buildRedirectHandler = (
+  storageUtility: IStorageUtility,
+  sessionInfoManager: ISessionInfoManager,
+  issuerConfigFetcher: IIssuerConfigFetcher,
+  clientRegistrar: IClientRegistrar,
+  tokenRefresher: ITokenRefresher
+): IRedirectHandler => {
+  return new AggregateRedirectHandler([
+    new AuthCodeRedirectHandler(
+      storageUtility,
+      sessionInfoManager,
+      issuerConfigFetcher,
+      clientRegistrar,
+      tokenRefresher
+    ),
+    // This catch-all class will always be able to handle the
+    // redirect IRI, so it must be registered last.
+    new FallbackRedirectHandler(),
+  ]);
+};
 
 /**
  *
@@ -71,36 +126,20 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     clientRegistrar
   );
 
-  const loginHandler =
-    // We don't need an Aggregate login handler here at all, since we only use one handler, but
-    // for future reference, if we want to register multiple, just use an AggregateLoginHandler:
-    //   new AggregateLoginHandler([ loginHandler1, loginHandler2 ]);
-    new OidcLoginHandler(
-      storageUtility,
-      new AggregateOidcHandler([
-        new ClientCredentialsOidcHandler(tokenRefresher, storageUtility),
-        new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
-        new AuthorizationCodeWithPkceOidcHandler(
-          storageUtility,
-          new Redirector()
-        ),
-      ]),
-      issuerConfigFetcher,
-      clientRegistrar
-    );
+  const loginHandler = buildLoginHandler(
+    storageUtility,
+    tokenRefresher,
+    issuerConfigFetcher,
+    clientRegistrar
+  );
 
-  const redirectHandler = new AggregateRedirectHandler([
-    new AuthCodeRedirectHandler(
-      storageUtility,
-      sessionInfoManager,
-      issuerConfigFetcher,
-      clientRegistrar,
-      tokenRefresher
-    ),
-    // This catch-all class will always be able to handle the
-    // redirect IRI, so it must be registered last.
-    new FallbackRedirectHandler(),
-  ]);
+  const redirectHandler = buildRedirectHandler(
+    storageUtility,
+    sessionInfoManager,
+    issuerConfigFetcher,
+    clientRegistrar,
+    tokenRefresher
+  );
 
   return new ClientAuthentication(
     loginHandler,
