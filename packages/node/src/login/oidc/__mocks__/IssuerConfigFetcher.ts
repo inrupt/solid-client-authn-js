@@ -57,6 +57,11 @@ export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
     claims_supported: ["sub"],
     subject_types_supported: ["public", "pairwise"],
     id_token_signing_alg_values_supported: ["ES256", "RS256"],
+    grant_types_supported: [
+      "authorization_code",
+      "refresh_token",
+      "client_credentials",
+    ],
   };
 };
 
