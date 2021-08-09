@@ -21,6 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import {
+  EVENTS,
   mockStorageUtility,
   StorageUtilityMock,
   TokenEndpointResponse,
@@ -221,7 +222,7 @@ describe("TokenRefresher", () => {
       });
     });
 
-    it("calls the refresh token rotation callback if a new refresh token is isued", async () => {
+    it("calls the refresh token rotation callback if a new refresh token is issued", async () => {
       const mockedStorage = mockRefresherDefaultStorageUtility();
       const mockEmitter = new EventEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
@@ -242,8 +243,10 @@ describe("TokenRefresher", () => {
         await mockKeyPair(),
         mockEmitter
       );
-
-      expect(mockEmit).toHaveBeenCalled();
+      expect(mockEmit).toHaveBeenCalledWith(
+        EVENTS.NEW_REFRESH_TOKEN,
+        "Some rotated refresh token"
+      );
     });
 
     it("accepts a new refresh token without a callback", async () => {
