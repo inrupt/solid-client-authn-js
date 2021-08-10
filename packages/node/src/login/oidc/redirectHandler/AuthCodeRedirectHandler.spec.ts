@@ -370,7 +370,10 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the returned fetch function is authenticated
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-      mockedFetch.mockResolvedValueOnce({ status: 401 } as NodeResponse);
+      mockedFetch.mockResolvedValueOnce({
+        status: 401,
+        url: "https://some.url",
+      } as NodeResponse);
       await result.fetch("https://some.url");
       expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
         "Bearer some refreshed access token"

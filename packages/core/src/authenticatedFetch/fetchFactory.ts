@@ -40,78 +40,6 @@ function isExpectedAuthError(statusCode: number): boolean {
   return [401, 403].includes(statusCode);
 }
 
-/**
- * @param accessToken A bearer token.
- * @param refreshToken An optional refresh token.
- * @returns A fetch function that adds an Authorization header with the provided
- * bearer token.
- * @hidden
- */
-export function buildBearerFetch(
-  unauthFetch: typeof fetch,
-  accessToken: string,
-  refreshOptions?: RefreshOptions
-): typeof fetch {
-  // These local copies of the the provided parameters may be mutated in the
-  // authenticated fetch closure.
-  let currentAccessToken = accessToken;
-  const currentRefreshOptions: RefreshOptions | undefined = refreshOptions
-    ? { ...refreshOptions }
-    : undefined;
-  return async (
-    init: RequestInfo,
-    options?: RequestInit
-  ): Promise<Response> => {
-    const response = await unauthFetch(init, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Authorization: `Bearer ${currentAccessToken}`,
-      },
-    });
-    if (
-      !isExpectedAuthError(response.status) ||
-      currentRefreshOptions === undefined
-    ) {
-      // Either the request succeeded, or its failure isn't auth-related, or
-      // no refresh token has been provided.
-      return response;
-    }
-    try {
-      const tokenSet = await currentRefreshOptions.tokenRefresher.refresh(
-        currentRefreshOptions.sessionId,
-        currentRefreshOptions.refreshToken,
-        undefined,
-        currentRefreshOptions.eventEmitter
-      );
-      currentAccessToken = tokenSet.accessToken;
-      if (tokenSet.refreshToken) {
-        // If the refresh token is rotated, update it in the closure.
-        currentRefreshOptions.refreshToken = tokenSet.refreshToken;
-        currentRefreshOptions.eventEmitter?.emit(
-          EVENTS.NEW_REFRESH_TOKEN,
-          tokenSet.refreshToken
-        );
-      }
-      // Once the token has been refreshed, re-issue the authenticated request.
-      // If it has an auth failure again, the user legitimately doesn't have access
-      // to the target resource.
-      return await unauthFetch(init, {
-        ...options,
-        headers: {
-          ...options?.headers,
-          Authorization: `Bearer ${currentAccessToken}`,
-        },
-      });
-    } catch (e) {
-      // If we used a log framework, the error could be logged at the `debug` level,
-      // but otherwise the failure of the refresh flow should not blow up in the user's
-      // face, and returning the original authentication error is better.
-      return response;
-    }
-  };
-}
-
 export type DpopHeaderPayload = {
   htu: string;
   htm: string;
@@ -137,105 +65,71 @@ async function buildDpopFetchOptions(
   return options;
 }
 
-/**
- * @param authToken a DPoP token.
- * @param _refreshToken An optional refresh token.
- * @param dpopKey The private key the token is bound to.
- * @returns A fetch function that adds an Authorization header with the provided
- * DPoP token, and adds a dpop header.
- */
-export async function buildDpopFetch(
+async function buildAuthenticatedHeaders(
+  targetUrl: string,
+  authToken: string,
+  dpopKey?: KeyPair,
+  defaultOptions?: RequestInit
+): Promise<RequestInit> {
+  if (dpopKey !== undefined) {
+    return buildDpopFetchOptions(targetUrl, authToken, dpopKey, defaultOptions);
+  }
+  return {
+    ...defaultOptions,
+    headers: {
+      ...defaultOptions?.headers,
+      Authorization: `Bearer ${authToken}`,
+    },
+  };
+}
+
+async function makeAuthenticatedRequest(
   unauthFetch: typeof fetch,
   accessToken: string,
-  dpopKey: KeyPair,
-  refreshOptions?: RefreshOptions
-): Promise<typeof fetch> {
-  let currentAccessToken = accessToken;
-  const currentRefreshOptions: RefreshOptions | undefined = refreshOptions;
-  return async (url, options): Promise<Response> => {
-    let response = await unauthFetch(
-      url,
-      await buildDpopFetchOptions(
-        url.toString(),
-        currentAccessToken,
-        dpopKey,
-        options
-      )
+  url: RequestInfo,
+  defaultRequestInit?: RequestInit,
+  dpopKey?: KeyPair
+) {
+  return unauthFetch(
+    url,
+    await buildAuthenticatedHeaders(
+      url.toString(),
+      accessToken,
+      dpopKey,
+      defaultRequestInit
+    )
+  );
+}
+
+async function refreshAccessToken(
+  refreshOptions: RefreshOptions,
+  dpopKey?: KeyPair
+): Promise<{ accessToken: string; refreshToken?: string }> {
+  const tokenSet = await refreshOptions.tokenRefresher.refresh(
+    refreshOptions.sessionId,
+    refreshOptions.refreshToken,
+    dpopKey
+  );
+  if (typeof tokenSet.refreshToken === "string") {
+    refreshOptions.eventEmitter?.emit(
+      EVENTS.NEW_REFRESH_TOKEN,
+      tokenSet.refreshToken
     );
-    const failedButNotExpectedAuthError =
-      !response.ok && !isExpectedAuthError(response.status);
-    const hasBeenRedirected = response.url !== url;
-    if (response.ok || failedButNotExpectedAuthError) {
-      // If there hasn't been a redirection, or if there has been a non-auth related
-      // issue, it should be handled at the application level
-      return response;
-    }
-    if (hasBeenRedirected) {
-      // If the request failed for auth reasons, and has been redirected, we should
-      // replay it with a new DPoP token.
-      response = await unauthFetch(
-        response.url,
-        await buildDpopFetchOptions(
-          response.url,
-          currentAccessToken,
-          dpopKey,
-          options
-        )
-      );
-    }
-    // If the redirected request has an auth issue, the access token may
-    // need to be refreshed.
-    if (
-      currentRefreshOptions !== undefined &&
-      isExpectedAuthError(response.status)
-    ) {
-      try {
-        const tokenSet = await currentRefreshOptions.tokenRefresher.refresh(
-          currentRefreshOptions.sessionId,
-          currentRefreshOptions.refreshToken,
-          dpopKey,
-          currentRefreshOptions.eventEmitter
-        );
-        currentAccessToken = tokenSet.accessToken;
-        if (tokenSet.refreshToken) {
-          // If the refresh token is rotated, update it in the closure.
-          currentRefreshOptions.refreshToken = tokenSet.refreshToken;
-          currentRefreshOptions.eventEmitter?.emit(
-            EVENTS.NEW_REFRESH_TOKEN,
-            tokenSet.refreshToken
-          );
-        }
-        // Once the token has been refreshed, re-issue the authenticated request.
-        // If it has an auth failure again, the user legitimately doesn't have access
-        // to the target resource.
-        return await unauthFetch(
-          url.toString(),
-          await buildDpopFetchOptions(
-            url.toString(),
-            currentAccessToken,
-            dpopKey,
-            options
-          )
-        );
-      } catch (e) {
-        // If we used a log framework, the error could be logged at the `debug` level,
-        // but otherwise the failure of the refresh flow should not blow up in the user's
-        // face, and returning the original authentication error is better.
-        return response;
-      }
-    }
-    // If there was an auth error, but no refresh token is provided, the response
-    // should simply be returned
-    return response;
+  }
+  return {
+    accessToken: tokenSet.accessToken,
+    refreshToken: tokenSet.refreshToken,
   };
 }
 
 /**
- * @param authToken a DPoP token.
- * @param dpopKey The private key the token is bound to.
- * @param
- * @returns A fetch function that adds an Authorization header with the provided
- * DPoP token, and adds a dpop header.
+ * @param unauthFetch a regular fetch function, compliant with the WHATWG spec.
+ * @param authToken an access token, either a Bearer token or a DPoP one.
+ * @param options The option object may contain two objects: the DPoP key token
+ * is bound to if applicable, and options to customise token renewal behaviour.
+ *
+ * @returns A fetch function that adds an appropriate Authorization header with
+ * the provided token, and adds a DPoP header if applicable.
  */
 export async function buildAuthenticatedFetch(
   unauthFetch: typeof fetch,
@@ -245,13 +139,79 @@ export async function buildAuthenticatedFetch(
     refreshOptions?: RefreshOptions;
   }
 ): Promise<typeof fetch> {
-  if (options?.dpopKey) {
-    return buildDpopFetch(
+  let currentAccessToken = accessToken;
+  const currentRefreshOptions: RefreshOptions | undefined =
+    options?.refreshOptions;
+  return async (url, requestInit?): Promise<Response> => {
+    let response = await makeAuthenticatedRequest(
       unauthFetch,
-      accessToken,
-      options.dpopKey,
-      options.refreshOptions
+      currentAccessToken,
+      url,
+      requestInit,
+      options?.dpopKey
     );
-  }
-  return buildBearerFetch(unauthFetch, accessToken, options?.refreshOptions);
+
+    const failedButNotExpectedAuthError =
+      !response.ok && !isExpectedAuthError(response.status);
+    if (response.ok || failedButNotExpectedAuthError) {
+      // If there hasn't been a redirection, or if there has been a non-auth related
+      // issue, it should be handled at the application level
+      return response;
+    }
+    const hasBeenRedirected = response.url !== url;
+    if (hasBeenRedirected && options?.dpopKey !== undefined) {
+      // If the request failed for auth reasons, and has been redirected, we should
+      // replay it generating a DPoP header for the rediration target IRI. This
+      // doesn't apply to Bearer tokens, as the Bearer tokens aren't specific
+      // to a given resource and method, while the DPoP header (associated to a
+      // DPoP token) is.
+      response = await makeAuthenticatedRequest(
+        unauthFetch,
+        currentAccessToken,
+        // Replace the original target IRI (`url`) by the redirection target
+        response.url,
+        requestInit,
+        options.dpopKey
+      );
+    }
+
+    // If the redirected request still has an auth issue, the access token may
+    // need to be refreshed.
+    if (
+      currentRefreshOptions !== undefined &&
+      isExpectedAuthError(response.status)
+    ) {
+      // With currentRefreshOptions not being undefined, options is necessarily
+      // defined, so it is fine to add a non-null assertion.
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
+      try {
+        const { accessToken: refreshedAccessToken, refreshToken } =
+          await refreshAccessToken(currentRefreshOptions, options!.dpopKey);
+        // Update the tokens in the closure if appropriate.
+        currentAccessToken = refreshedAccessToken;
+        if (refreshToken !== undefined) {
+          currentRefreshOptions.refreshToken = refreshToken;
+        }
+        // Once the token has been refreshed, re-issue the authenticated request.
+        response = await makeAuthenticatedRequest(
+          unauthFetch,
+          currentAccessToken,
+          response.url,
+          requestInit,
+          options!.dpopKey
+        );
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
+      } catch (e) {
+        // It is possible that an underlying library throws an error on refresh flow failure.
+        // If we used a log framework, the error could be logged at the `debug` level,
+        // but otherwise the failure of the refresh flow should not blow up in the user's
+        // face, and returning the original authentication error is better.
+        return response;
+      }
+    }
+    // If the access token was refreshed and there is still an auth error, or if
+    // no refresh token is provided, the user legitimately doesn't have access to
+    // the resource and the response should simply be returned.
+    return response;
+  };
 }
