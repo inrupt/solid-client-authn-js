@@ -163,6 +163,7 @@ export async function buildAuthenticatedFetch(
   }
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;
+  let latestTimeout: Parameters<typeof clearTimeout>[0];
   const currentRefreshOptions: RefreshOptions | undefined =
     options?.refreshOptions;
   // Setup the refresh timeout outside of the authenticated fetch, so that
@@ -185,7 +186,8 @@ export async function buildAuthenticatedFetch(
         }
         // Each time the access token is refreshed, we must plan fo the next
         // refresh iteration.
-        setTimeout(
+        clearTimeout(latestTimeout);
+        latestTimeout = setTimeout(
           proactivelyRefreshToken,
           computeRefreshDelay(expiresIn) * 1000
         );
@@ -197,7 +199,7 @@ export async function buildAuthenticatedFetch(
         // TODO: Add error management here.
       }
     };
-    setTimeout(
+    latestTimeout = setTimeout(
       proactivelyRefreshToken,
       computeRefreshDelay(currentRefreshOptions.expiresIn) * 1000
     );

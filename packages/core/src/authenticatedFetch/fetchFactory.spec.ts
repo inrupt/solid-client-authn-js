@@ -343,7 +343,7 @@ describe("buildAuthenticatedFetch", () => {
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
       // We get a new expiration date every time we refresh the tokens
-      expiresIn: 3,
+      expiresIn: 0,
     });
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: {
@@ -354,7 +354,7 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockRefresher,
-        expiresIn: 3,
+        expiresIn: 0,
       },
     });
 
@@ -439,7 +439,7 @@ describe("buildAuthenticatedFetch", () => {
         sessionId: "mySession",
         tokenRefresher: mockedFreshener,
         onNewRefreshToken: refreshTokenRotationCallback,
-        expiresIn: 3,
+        expiresIn: 0,
       },
     });
     await sleep(200);
@@ -450,7 +450,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("rotates the refresh token if a new one is issued", async () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-    const tokenSet = { ...mockDefaultTokenSet(), expiresIn: 3 };
+    const tokenSet = { ...mockDefaultTokenSet(), expiresIn: 0 };
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const refreshCall = jest.spyOn(mockedFreshener, "refresh");
@@ -460,7 +460,7 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockedFreshener,
-        expiresIn: 3,
+        expiresIn: 0,
       },
     });
     await sleep(200);
