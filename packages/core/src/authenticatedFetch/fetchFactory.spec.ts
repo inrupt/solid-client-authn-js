@@ -45,10 +45,7 @@ import {
   mockDefaultTokenSet,
   mockTokenRefresher,
 } from "../login/oidc/refresh/__mocks__/TokenRefresher";
-<<<<<<< HEAD
 import { EVENTS, REFRESH_BEFORE_EXPIRATION_SECONDS } from "../constant";
-=======
->>>>>>> b34021fe (Fix tests using real timers)
 
 jest.mock("cross-fetch");
 
