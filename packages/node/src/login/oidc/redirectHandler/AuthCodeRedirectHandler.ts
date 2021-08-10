@@ -156,8 +156,6 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         sessionId,
         tokenRefresher: this.tokenRefresher,
         eventEmitter,
-        // We artificially decrease the token lifespan to refresh it before it
-        // actually expires
         expiresIn: tokenSet.expires_in,
       };
     }
