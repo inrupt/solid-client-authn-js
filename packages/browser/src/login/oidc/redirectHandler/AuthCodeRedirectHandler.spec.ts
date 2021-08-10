@@ -157,6 +157,8 @@ const mockDefaultRedirectStorage = () =>
 
 jest.mock("@inrupt/oidc-client-ext");
 
+jest.useFakeTimers();
+
 const defaultJwt = {
   sub: "https://some.webid",
 };
@@ -808,6 +810,14 @@ describe("AuthCodeRedirectHandler", () => {
     window.localStorage.setItem("tmp-resource-server-session-enabled", "false");
     mockOidcClient();
     const mockedStorage = mockDefaultRedirectStorage();
+    const coreModule = jest.requireActual(
+      "@inrupt/solid-client-authn-core"
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+    const mockAuthenticatedFetchBuild = jest.spyOn(
+      coreModule,
+      "buildAuthenticatedFetch"
+    );
 
     const tokenRefresher = mockTokenRefresher(
       await mockTokenEndpointDpopResponse()
@@ -818,21 +828,21 @@ describe("AuthCodeRedirectHandler", () => {
       tokenRefresher,
     });
 
-    // Check that the returned fetch function is authenticated
-    const response = new Response("", {
-      status: 401,
-    });
-
-    jest.spyOn(response, "url", "get").mockReturnValue("https://some.url/");
-
-    mockFetch(response);
-
-    const result = await authCodeRedirectHandler.handle(
+    await authCodeRedirectHandler.handle(
       "https://my.app/redirect?code=someCode&state=someState"
     );
 
-    await result.fetch("https://some.url/");
-
-    expect(tokenRefresher.refresh).toHaveBeenCalled();
+    expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        refreshOptions: {
+          refreshToken: "some DPoP-bound refresh token",
+          sessionId: "mySession",
+          tokenRefresher,
+          expiresIn: 1337,
+        },
+      })
+    );
   });
 });

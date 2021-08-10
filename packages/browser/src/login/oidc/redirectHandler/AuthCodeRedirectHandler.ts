@@ -35,7 +35,6 @@ import {
   IStorageUtility,
   ITokenRefresher,
   RefreshOptions,
-  REFRESH_BEFORE_EXPIRATION_SECONDS,
 } from "@inrupt/solid-client-authn-core";
 import {
   getDpopToken,
