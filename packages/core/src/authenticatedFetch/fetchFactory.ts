@@ -160,23 +160,24 @@ export async function buildAuthenticatedFetch(
           accessToken: refreshedAccessToken,
           refreshToken,
           expiresIn,
-        } = await refreshAccessToken(currentRefreshOptions, options?.dpopKey);
+          // If currentRefreshOptions is defined, options is necessarily defined too.
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        } = await refreshAccessToken(currentRefreshOptions, options!.dpopKey);
         // Update the tokens in the closure if appropriate.
         currentAccessToken = refreshedAccessToken;
         if (refreshToken !== undefined) {
           currentRefreshOptions.refreshToken = refreshToken;
         }
-        if (expiresIn !== undefined) {
-          // We want to refresh the token 5 seconds before they actually expire.
-          currentRefreshOptions.expiresIn =
-            expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS;
-        }
+        // We want to refresh the token 5 seconds before they actually expire.
+        currentRefreshOptions.expiresIn =
+          expiresIn !== undefined
+            ? expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS
+            : DEFAULT_EXPIRATION_TIME_SECONDS;
         // Each time the access token is refreshed, we must plan fo the next
         // refresh iteration.
         setTimeout(
           proactivelyRefreshToken,
-          (currentRefreshOptions.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS) *
-            1000
+          currentRefreshOptions.expiresIn * 1000
         );
       } catch (e) {
         // It is possible that an underlying library throws an error on refresh flow failure.
@@ -189,7 +190,7 @@ export async function buildAuthenticatedFetch(
     setTimeout(
       proactivelyRefreshToken,
       (currentRefreshOptions.expiresIn !== undefined
-        ? currentRefreshOptions.expiresIn - DEFAULT_EXPIRATION_TIME_SECONDS
+        ? currentRefreshOptions.expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS
         : DEFAULT_EXPIRATION_TIME_SECONDS) * 1000
     );
   }
