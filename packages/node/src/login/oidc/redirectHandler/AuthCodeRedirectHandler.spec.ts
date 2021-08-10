@@ -61,6 +61,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ),
   };
 });
+jest.useFakeTimers();
 
 const mockJwk = (): JWK => {
   return {

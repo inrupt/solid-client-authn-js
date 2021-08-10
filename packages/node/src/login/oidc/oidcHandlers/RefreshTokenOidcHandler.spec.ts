@@ -63,6 +63,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ),
   };
 });
+jest.useFakeTimers();
 
 describe("RefreshTokenOidcHandler", () => {
   describe("canHandle", () => {

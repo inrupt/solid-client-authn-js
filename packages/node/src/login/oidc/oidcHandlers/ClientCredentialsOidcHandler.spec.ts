@@ -54,6 +54,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ),
   };
 });
+jest.useFakeTimers();
 
 const mockJwk = (): JWK => {
   return {
@@ -318,12 +319,20 @@ describe("handle", () => {
     const tokens = mockDpopTokens();
     tokens.refresh_token = "some refresh token";
     setupOidcClientMock(tokens);
-    const refresher = mockDefaultTokenRefresher();
+    const coreModule = jest.requireMock(
+      "@inrupt/solid-client-authn-core"
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+    const mockAuthenticatedFetchBuild = jest.spyOn(
+      coreModule,
+      "buildAuthenticatedFetch"
+    );
+    const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
-      refresher,
+      mockedRefresher,
       mockStorageUtility({})
     );
-    const result = await clientCredentialsOidcHandler.handle({
+    await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
       dpop: true,
       client: {
@@ -333,14 +342,17 @@ describe("handle", () => {
       },
     });
 
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-    // A 401 error triggers the refresh flow.
-    mockedFetch.mockResolvedValue({
-      status: 401,
-      url: "https://some.pod/resource",
-    });
-    await result?.fetch("https://some.pod/resource");
-    expect(refresher.refresh).toHaveBeenCalled();
+    expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        refreshOptions: {
+          refreshToken: "some refresh token",
+          sessionId: "mySession",
+          tokenRefresher: mockedRefresher,
+        },
+      })
+    );
   });
 
   it("returns session info with the built fetch", async () => {
