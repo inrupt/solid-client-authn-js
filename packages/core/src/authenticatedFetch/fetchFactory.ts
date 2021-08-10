@@ -161,10 +161,14 @@ export async function buildAuthenticatedFetch(
     const hasBeenRedirected = response.url !== url;
     if (hasBeenRedirected && options?.dpopKey !== undefined) {
       // If the request failed for auth reasons, and has been redirected, we should
-      // replay it with a new DPoP token. It doesn't apply to Bearer tokens.
+      // replay it generating a DPoP header for the rediration target IRI. This
+      // doesn't apply to Bearer tokens, as the Bearer tokens aren't specific
+      // to a given resource and method, while the DPoP header (associated to a
+      // DPoP token) is.
       response = await makeAuthenticatedRequest(
         unauthFetch,
         currentAccessToken,
+        // Replace the original target IRI (`url`) by the redirection target
         response.url,
         requestInit,
         options.dpopKey
