@@ -131,6 +131,21 @@ async function refreshAccessToken(
 }
 
 /**
+ *
+ * @param expiresIn Delay until the access token expires.
+ * @returns a delay until the access token should be refreshed.
+ */
+const computeRefreshDelay = (expiresIn?: number): number => {
+  if (expiresIn !== undefined) {
+    return expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS > 0
+      ? // We want to refresh the token 5 seconds before they actually expire.
+        expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS
+      : expiresIn;
+  }
+  return DEFAULT_EXPIRATION_TIME_SECONDS;
+};
+
+/**
  * @param unauthFetch a regular fetch function, compliant with the WHATWG spec.
  * @param authToken an access token, either a Bearer token or a DPoP one.
  * @param options The option object may contain two objects: the DPoP key token
@@ -168,16 +183,11 @@ export async function buildAuthenticatedFetch(
         if (refreshToken !== undefined) {
           currentRefreshOptions.refreshToken = refreshToken;
         }
-        // We want to refresh the token 5 seconds before they actually expire.
-        currentRefreshOptions.expiresIn =
-          expiresIn !== undefined
-            ? expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS
-            : DEFAULT_EXPIRATION_TIME_SECONDS;
         // Each time the access token is refreshed, we must plan fo the next
         // refresh iteration.
         setTimeout(
           proactivelyRefreshToken,
-          currentRefreshOptions.expiresIn * 1000
+          computeRefreshDelay(expiresIn) * 1000
         );
       } catch (e) {
         // It is possible that an underlying library throws an error on refresh flow failure.
@@ -189,9 +199,7 @@ export async function buildAuthenticatedFetch(
     };
     setTimeout(
       proactivelyRefreshToken,
-      (currentRefreshOptions.expiresIn !== undefined
-        ? currentRefreshOptions.expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS
-        : DEFAULT_EXPIRATION_TIME_SECONDS) * 1000
+      computeRefreshDelay(currentRefreshOptions.expiresIn) * 1000
     );
   }
   return async (url, requestInit?): Promise<Response> => {
