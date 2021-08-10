@@ -33,8 +33,10 @@ import {
   KeyPair,
   ITokenRefresher,
   TokenEndpointResponse,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { refresh } from "@inrupt/oidc-client-ext";
+import { EventEmitter } from "events";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.
@@ -54,7 +56,7 @@ export default class TokenRefresher implements ITokenRefresher {
     sessionId: string,
     refreshToken?: string,
     dpopKey?: KeyPair,
-    onNewRefreshToken?: (newToken: string) => unknown
+    eventEmitter?: EventEmitter
   ): Promise<TokenEndpointResponse> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
@@ -88,12 +90,10 @@ export default class TokenRefresher implements ITokenRefresher {
     );
 
     if (tokenSet.refreshToken !== undefined) {
+      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
       await this.storageUtility.setForUser(sessionId, {
         refreshToken: tokenSet.refreshToken,
       });
-      if (typeof onNewRefreshToken === "function") {
-        onNewRefreshToken(tokenSet.refreshToken);
-      }
     }
     return tokenSet;
   }

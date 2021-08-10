@@ -21,6 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorage } from "@inrupt/solid-client-authn-core";
+import { EventEmitter } from "events";
 import {
   buildLoginHandler,
   buildRedirectHandler,
@@ -140,12 +141,16 @@ describe("resolution order", () => {
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );
-    await clientAuthn.login("someSession", {
-      clientId: "some client ID",
-      clientSecret: "some client secret",
-      refreshToken: "some refresh token",
-      oidcIssuer: "https://some.issuer",
-    });
+    await clientAuthn.login(
+      "someSession",
+      {
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        refreshToken: "some refresh token",
+        oidcIssuer: "https://some.issuer",
+      },
+      new EventEmitter()
+    );
     await expect(
       handlerSelectSpy.mock.results[0].value
     ).resolves.toBeInstanceOf(RefreshTokenOidcHandler);
@@ -161,11 +166,15 @@ describe("resolution order", () => {
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );
-    await clientAuthn.login("someSession", {
-      clientId: "some client ID",
-      clientSecret: "some client secret",
-      oidcIssuer: "https://some.issuer",
-    });
+    await clientAuthn.login(
+      "someSession",
+      {
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        oidcIssuer: "https://some.issuer",
+      },
+      new EventEmitter()
+    );
     await expect(
       handlerSelectSpy.mock.results[0].value
     ).resolves.toBeInstanceOf(ClientCredentialsOidcHandler);
@@ -181,11 +190,15 @@ describe("resolution order", () => {
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );
-    await clientAuthn.login("someSession", {
-      clientId: "some client ID",
-      oidcIssuer: "https://some.issuer",
-      handleRedirect: jest.fn(),
-    });
+    await clientAuthn.login(
+      "someSession",
+      {
+        clientId: "some client ID",
+        oidcIssuer: "https://some.issuer",
+        handleRedirect: jest.fn(),
+      },
+      new EventEmitter()
+    );
     await expect(
       handlerSelectSpy.mock.results[0].value
     ).resolves.toBeInstanceOf(AuthorizationCodeWithPkceOidcHandler);

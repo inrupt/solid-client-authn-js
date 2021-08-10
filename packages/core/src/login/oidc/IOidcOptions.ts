@@ -27,6 +27,7 @@
 /**
  * Defines how OIDC login should proceed
  */
+import { EventEmitter } from "events";
 import { IIssuerConfig } from "./IIssuerConfig";
 import { IClient } from "./IClient";
 
@@ -62,7 +63,7 @@ export interface IOidcOptions {
    */
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
-  onNewRefreshToken?: (newToken: string) => unknown;
+  eventEmitter?: EventEmitter;
   inIframe?: boolean;
 }
 

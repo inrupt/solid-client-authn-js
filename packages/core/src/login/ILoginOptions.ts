@@ -24,6 +24,7 @@
  * @packageDocumentation
  */
 
+import { EventEmitter } from "events";
 import ILoginInputOptions from "../ILoginInputOptions";
 
 /**
@@ -47,13 +48,12 @@ export default interface ILoginOptions extends ILoginInputOptions {
   prompt?: string;
   // Force the token type to be required (i.e. no longer optional).
   tokenType: "DPoP" | "Bearer";
-  /**
-   * This callback will be called if, during the refresh token flow, the refresh token is rotated by the Solid Identity
-   * Provider. In this case, the provided function is called with the new token as a parameter.
-   */
-  onNewRefreshToken?: (newToken: string) => unknown;
 
-  onError?: (error: string | null, errorDescription?: string | null) => unknown;
+  /**
+   * Event emitter enabling calling user-specified callbacks.
+   */
+  eventEmitter?: EventEmitter;
+
   /**
    * This boolean specifies redirection to the Identity Provider should happen in
    * the main window or in an iframe, thus making the redirect invisible to the

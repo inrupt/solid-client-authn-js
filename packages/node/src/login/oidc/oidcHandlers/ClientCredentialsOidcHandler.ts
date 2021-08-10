@@ -118,7 +118,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
               refreshToken: tokens.refresh_token,
               sessionId: oidcLoginOptions.sessionId,
               tokenRefresher: this.tokenRefresher,
-              onNewRefreshToken: oidcLoginOptions.onNewRefreshToken,
+              eventEmitter: oidcLoginOptions.eventEmitter,
             }
           : undefined,
       }

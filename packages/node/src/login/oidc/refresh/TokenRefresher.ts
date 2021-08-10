@@ -34,9 +34,11 @@ import {
   KeyPair,
   ITokenRefresher,
   TokenEndpointResponse,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, IssuerMetadata, TokenSet } from "openid-client";
 import { KeyObject } from "crypto";
+import { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
@@ -83,7 +85,7 @@ export default class TokenRefresher implements ITokenRefresher {
     sessionId: string,
     refreshToken?: string,
     dpopKey?: KeyPair,
-    onNewRefreshToken?: (newToken: string) => unknown
+    eventEmitter?: EventEmitter
   ): Promise<TokenEndpointResponse> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
@@ -134,12 +136,10 @@ export default class TokenRefresher implements ITokenRefresher {
     );
 
     if (tokenSet.refreshToken !== undefined) {
+      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
       await this.storageUtility.setForUser(sessionId, {
         refreshToken: tokenSet.refreshToken,
       });
-      if (typeof onNewRefreshToken === "function") {
-        onNewRefreshToken(tokenSet.refreshToken);
-      }
     }
     return tokenSet;
   }

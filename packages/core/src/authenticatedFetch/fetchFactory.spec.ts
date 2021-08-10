@@ -36,7 +36,7 @@ import {
   generateKeyPair,
   fromKeyLike,
 } from "@inrupt/jose-legacy-modules";
-
+import { EventEmitter } from "events";
 import {
   buildAuthenticatedFetch,
   buildBearerFetch,
@@ -47,6 +47,7 @@ import {
   mockDefaultTokenSet,
   mockTokenRefresher,
 } from "../login/oidc/refresh/__mocks__/TokenRefresher";
+import { EVENTS } from "../constant";
 
 jest.mock("cross-fetch");
 
@@ -215,19 +216,23 @@ describe("buildBearerFetch", () => {
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValue({ status: 401 });
     const tokenSet = mockDefaultTokenSet();
+    const mockEmitter = new EventEmitter();
+    const mockEmit = jest.spyOn(mockEmitter, "emit");
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
-    const refreshHandler = jest.fn();
     const myFetch = buildBearerFetch(fetch, "myToken", {
       refreshToken: "some refresh token",
       sessionId: "mySession",
       tokenRefresher: mockedFreshener,
-      onNewRefreshToken: refreshHandler,
+      eventEmitter: mockEmitter,
     });
     await myFetch("someUrl");
     // The mocked fetch will 401, which triggers the refresh flow.
     // The test checks that the mocked refreshed token is used silently.
-    expect(refreshHandler).toHaveBeenCalledWith("some rotated refresh token");
+    expect(mockEmit).toHaveBeenCalledWith(
+      EVENTS.NEW_REFRESH_TOKEN,
+      "some rotated refresh token"
+    );
   });
 
   it("does not try to refresh on a non-auth error", async () => {
@@ -521,8 +526,8 @@ describe("buildDpopFetch", () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
-    const refreshHandler = jest.fn();
-
+    const mockEmitter = new EventEmitter();
+    const mockEmit = jest.spyOn(mockEmitter, "emit");
     const myFetch = await buildDpopFetch(
       fetch,
       "myToken",
@@ -531,12 +536,15 @@ describe("buildDpopFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockedFreshener,
-        onNewRefreshToken: refreshHandler,
+        eventEmitter: mockEmitter,
       }
     );
 
     await myFetch("https://my.pod/resource");
-    expect(refreshHandler).toHaveBeenCalledWith("some rotated refresh token");
+    expect(mockEmit).toHaveBeenCalledWith(
+      EVENTS.NEW_REFRESH_TOKEN,
+      "some rotated refresh token"
+    );
   });
 
   it("does not try to refresh on a non-auth error", async () => {

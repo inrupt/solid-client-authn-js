@@ -41,6 +41,7 @@ import {
   RefreshOptions,
   ITokenRefresher,
   buildAuthenticatedFetch,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
@@ -48,6 +49,7 @@ import { Issuer } from "openid-client";
 import { KeyObject } from "crypto";
 import { fetch as globalFetch } from "cross-fetch";
 
+import { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
@@ -79,7 +81,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
   async handle(
     inputRedirectUrl: string,
-    onNewRefreshToken?: (newToken: string) => unknown
+    eventEmitter?: EventEmitter
   ): Promise<ISessionInfo & { fetch: typeof globalFetch }> {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
@@ -148,15 +150,13 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     }
     let refreshOptions: RefreshOptions | undefined;
     if (tokenSet.refresh_token !== undefined) {
+      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refresh_token);
       refreshOptions = {
         refreshToken: tokenSet.refresh_token,
         sessionId,
         tokenRefresher: this.tokenRefresher,
-        onNewRefreshToken,
+        eventEmitter,
       };
-      if (typeof onNewRefreshToken === "function") {
-        onNewRefreshToken(tokenSet.refresh_token);
-      }
     }
     const authFetch = await buildAuthenticatedFetch(
       globalFetch,

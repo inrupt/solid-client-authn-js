@@ -28,6 +28,7 @@ import {
   InMemoryStorage,
   ISessionInfo,
   IStorage,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
@@ -71,6 +72,7 @@ export interface ISessionOptions {
   clientAuthentication: ClientAuthentication;
   /**
    * A callback that gets invoked whenever a new refresh token is obtained.
+   * @deprecated Prefer calling Session::onNewRefreshToken instead.
    */
   onNewRefreshToken?: (newToken: string) => unknown;
 }
@@ -92,8 +94,6 @@ export class Session extends EventEmitter {
   private clientAuthentication: ClientAuthentication;
 
   private tokenRequestInProgress = false;
-
-  private onNewRefreshToken?: (newToken: string) => unknown;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -117,7 +117,6 @@ export class Session extends EventEmitter {
     sessionId?: string
   ) {
     super();
-
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {
@@ -149,7 +148,9 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
-    this.onNewRefreshToken = sessionOptions.onNewRefreshToken;
+    if (sessionOptions.onNewRefreshToken !== undefined) {
+      this.onNewRefreshToken(sessionOptions.onNewRefreshToken);
+    }
   }
 
   /**
@@ -166,7 +167,7 @@ export class Session extends EventEmitter {
       {
         ...options,
       },
-      this.onNewRefreshToken
+      this
     );
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
@@ -222,7 +223,7 @@ export class Session extends EventEmitter {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
           url,
-          this.onNewRefreshToken
+          this
         );
 
         if (sessionInfo) {
@@ -260,5 +261,9 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
+  }
+
+  onNewRefreshToken(callback: (newToken: string) => unknown): void {
+    this.on(EVENTS.NEW_REFRESH_TOKEN, callback);
   }
 }

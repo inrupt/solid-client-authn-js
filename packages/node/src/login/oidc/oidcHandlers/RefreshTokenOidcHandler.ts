@@ -85,7 +85,7 @@ async function refreshAccess(
       refreshOptions.sessionId,
       refreshOptions.refreshToken,
       dpopKey,
-      refreshOptions.onNewRefreshToken
+      refreshOptions.eventEmitter
     );
     // Rotate the refresh token if applicable
     const rotatedRefreshOptions = {
@@ -135,7 +135,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       refreshToken: oidcLoginOptions.refreshToken as string,
       sessionId: oidcLoginOptions.sessionId,
       tokenRefresher: this.tokenRefresher,
-      onNewRefreshToken: oidcLoginOptions.onNewRefreshToken,
+      eventEmitter: oidcLoginOptions.eventEmitter,
     };
 
     // This information must be in storage for the refresh flow to succeed.

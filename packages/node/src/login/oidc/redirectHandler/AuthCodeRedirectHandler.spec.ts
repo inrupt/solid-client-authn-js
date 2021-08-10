@@ -23,6 +23,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import {
   StorageUtilityMock,
   mockStorageUtility,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims, TokenSet } from "openid-client";
 // Until there is a broader support for submodules exports in the ecosystem,
@@ -32,6 +33,7 @@ import { IdTokenClaims, TokenSet } from "openid-client";
 // import { JWK } from "jose/types";
 import { JWK } from "@inrupt/jose-legacy-modules";
 import { Response as NodeResponse } from "node-fetch";
+import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
@@ -427,7 +429,8 @@ describe("AuthCodeRedirectHandler", () => {
       mockedTokens.refresh_token = "some refresh token";
       setupOidcClientMock(mockedTokens);
       const mockedStorage = mockDefaultRedirectStorage();
-      const refreshTokenHandler = jest.fn();
+      const mockEmitter = new EventEmitter();
+      const mockEmit = jest.spyOn(mockEmitter, "emit");
 
       // Run the test
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -437,10 +440,13 @@ describe("AuthCodeRedirectHandler", () => {
 
       await authCodeRedirectHandler.handle(
         "https://my.app/redirect?code=someCode&state=someState",
-        refreshTokenHandler
+        mockEmitter
       );
 
-      expect(refreshTokenHandler).toHaveBeenCalledWith("some refresh token");
+      expect(mockEmit).toHaveBeenCalledWith(
+        EVENTS.NEW_REFRESH_TOKEN,
+        "some refresh token"
+      );
     });
 
     it("throws if the IdP does not return an access token", async () => {

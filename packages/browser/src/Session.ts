@@ -24,6 +24,7 @@
  */
 import { EventEmitter } from "events";
 import {
+  EVENTS,
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
@@ -91,13 +92,6 @@ export interface IHandleIncomingRedirectOptions {
    * using the browser's current location.
    */
   url?: string;
-  /**
-   * Error callback to be called when errors occur during login.
-   */
-  onError?: (
-    error: string | null,
-    errorDescription?: string | null | undefined
-  ) => unknown;
 }
 
 export async function silentlyAuthenticate(
@@ -107,7 +101,8 @@ export async function silentlyAuthenticate(
     inIframe?: boolean;
   } = {
     inIframe: false,
-  }
+  },
+  session: Session
 ): Promise<boolean> {
   // Check if we have an ID Token in storage - if we do then we may be
   // currently logged in, and the user has refreshed their browser page. The ID
@@ -120,16 +115,19 @@ export async function silentlyAuthenticate(
     // on incoming redirect. This way, the user is eventually redirected back
     // to the page they were on and not to the app's redirect page.
     window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
-    await clientAuthn.login({
-      sessionId,
-      prompt: "none",
-      oidcIssuer: storedSessionInfo.issuer,
-      redirectUrl: storedSessionInfo.redirectUrl,
-      clientId: storedSessionInfo.clientAppId,
-      clientSecret: storedSessionInfo.clientAppSecret,
-      tokenType: storedSessionInfo.tokenType ?? "DPoP",
-      inIframe: options.inIframe,
-    });
+    await clientAuthn.login(
+      {
+        sessionId,
+        prompt: "none",
+        oidcIssuer: storedSessionInfo.issuer,
+        redirectUrl: storedSessionInfo.redirectUrl,
+        clientId: storedSessionInfo.clientAppId,
+        clientSecret: storedSessionInfo.clientAppSecret,
+        tokenType: storedSessionInfo.tokenType ?? "DPoP",
+        inIframe: options.inIframe,
+      },
+      session
+    );
     return true;
   }
   return false;
@@ -205,7 +203,10 @@ export class Session extends EventEmitter {
     // Listen for messages from children iframes.
     setupIframeListener(async (redirectUrl: string) => {
       const sessionInfo =
-        await this.clientAuthentication.handleIncomingRedirect(redirectUrl);
+        await this.clientAuthentication.handleIncomingRedirect(
+          redirectUrl,
+          this
+        );
 
       // If silent authentication was not successful, do nothing;
       // the existing session might still be valid for a while,
@@ -219,9 +220,14 @@ export class Session extends EventEmitter {
     });
     // Listen for the 'tokenRenewal' signal to trigger the silent token renewal.
     this.on("tokenRenewal", () =>
-      silentlyAuthenticate(this.info.sessionId, this.clientAuthentication, {
-        inIframe: true,
-      })
+      silentlyAuthenticate(
+        this.info.sessionId,
+        this.clientAuthentication,
+        {
+          inIframe: true,
+        },
+        this
+      )
     );
   }
 
@@ -234,12 +240,15 @@ export class Session extends EventEmitter {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
-    await this.clientAuthentication.login({
-      sessionId: this.info.sessionId,
-      ...options,
-      // Defaults the token type to DPoP
-      tokenType: options.tokenType ?? "DPoP",
-    });
+    await this.clientAuthentication.login(
+      {
+        sessionId: this.info.sessionId,
+        ...options,
+        // Defaults the token type to DPoP
+        tokenType: options.tokenType ?? "DPoP",
+      },
+      this
+    );
     // `login` redirects the user away from the app,
     // so unless it throws an error, there is no code that should run afterwards
     // (since there is no "after" in the lifetime of the script).
@@ -379,7 +388,7 @@ export class Session extends EventEmitter {
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
-      options.onError
+      this
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);
@@ -410,7 +419,9 @@ export class Session extends EventEmitter {
         // in which case the unresolving promise afterwards would need to be changed.
         const attemptedSilentAuthentication = await silentlyAuthenticate(
           storedSessionId,
-          this.clientAuthentication
+          this.clientAuthentication,
+          undefined,
+          this
         );
         // At this point, we know that the main window will imminently be redirected.
         // However, this redirect is asynchronous and there is no way to halt execution
@@ -443,6 +454,20 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on("logout", callback);
+  }
+
+  /**
+   * Register a callback function to be called when a user logs out:
+   *
+   * @param callback The function called when an error occurs.
+   */
+  onError(
+    callback: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
+  ): void {
+    this.on(EVENTS.ERROR, callback);
   }
 
   /**

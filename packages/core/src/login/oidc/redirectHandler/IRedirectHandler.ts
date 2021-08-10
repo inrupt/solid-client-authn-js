@@ -32,15 +32,12 @@ import {
   jwtVerify,
   parseJwk,
 } from "@inrupt/jose-legacy-modules";
+import { EventEmitter } from "events";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
 
 export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
-export type RedirectInput = [
-  string,
-  ((newToken: string) => unknown)?,
-  ((error: string | null, errorDescription?: string | null) => unknown)?
-];
+export type RedirectInput = [string, EventEmitter | undefined];
 
 /**
  * @hidden

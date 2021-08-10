@@ -29,6 +29,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 import { JWK, SignJWT, parseJwk } from "@inrupt/jose-legacy-modules";
+import { EventEmitter } from "events";
 import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
 import {
   RedirectHandlerMock,
@@ -162,15 +163,20 @@ describe("ClientAuthentication", () => {
   }
 
   describe("login", () => {
+    const mockEmitter = new EventEmitter();
+
     it("calls login, and defaults to a DPoP token", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.login({
-        sessionId: "mySession",
-        tokenType: "DPoP",
-        clientId: "coolApp",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com",
-      });
+      await clientAuthn.login(
+        {
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          clientId: "coolApp",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+        },
+        mockEmitter
+      );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
         clientId: "coolApp",
@@ -179,19 +185,23 @@ describe("ClientAuthentication", () => {
         clientName: "coolApp",
         clientSecret: undefined,
         handleRedirect: undefined,
+        eventEmitter: mockEmitter,
         tokenType: "DPoP",
       });
     });
 
     it("request a bearer token if specified", async () => {
       const clientAuthn = getClientAuthentication();
-      await clientAuthn.login({
-        sessionId: "mySession",
-        clientId: "coolApp",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com",
-        tokenType: "Bearer",
-      });
+      await clientAuthn.login(
+        {
+          sessionId: "mySession",
+          clientId: "coolApp",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+          tokenType: "Bearer",
+        },
+        mockEmitter
+      );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
         clientId: "coolApp",
@@ -200,6 +210,7 @@ describe("ClientAuthentication", () => {
         clientName: "coolApp",
         clientSecret: undefined,
         handleRedirect: undefined,
+        eventEmitter: mockEmitter,
         tokenType: "Bearer",
       });
     });
@@ -216,14 +227,17 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
       });
-      await clientAuthn.login({
-        sessionId: "someUser",
-        tokenType: "DPoP",
-        clientId: "coolApp",
-        clientName: "coolApp Name",
-        redirectUrl: "https://coolapp.com/redirect",
-        oidcIssuer: "https://idp.com",
-      });
+      await clientAuthn.login(
+        {
+          sessionId: "someUser",
+          tokenType: "DPoP",
+          clientId: "coolApp",
+          clientName: "coolApp Name",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+        },
+        mockEmitter
+      );
       await expect(
         nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
       ).resolves.toBeUndefined();
@@ -250,6 +264,8 @@ describe("ClientAuthentication", () => {
   });
 
   describe("logout", () => {
+    const mockEmitter = new EventEmitter();
+
     it("reverts back to un-authenticated fetch on logout", async () => {
       window.fetch = jest.fn();
       // eslint-disable-next-line no-restricted-globals
@@ -260,7 +276,7 @@ describe("ClientAuthentication", () => {
 
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      await clientAuthn.handleIncomingRedirect(url);
+      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
 
       // Calling the redirect handler should give us an authenticated fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
@@ -315,6 +331,8 @@ describe("ClientAuthentication", () => {
   });
 
   describe("handleIncomingRedirect", () => {
+    const mockEmitter = new EventEmitter();
+
     it("calls handle redirect", async () => {
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
@@ -322,7 +340,10 @@ describe("ClientAuthentication", () => {
       const unauthFetch = clientAuthn.fetch;
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      const redirectInfo = await clientAuthn.handleIncomingRedirect(url);
+      const redirectInfo = await clientAuthn.handleIncomingRedirect(
+        url,
+        mockEmitter
+      );
 
       // Our injected mocked response may also contain internal-only data (for
       // other tests), whereas our response from `handleIncomingRedirect()` can
@@ -341,8 +362,7 @@ describe("ClientAuthentication", () => {
       );
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        undefined,
-        undefined
+        mockEmitter
       );
 
       // Calling the redirect handler should have updated the fetch.
@@ -355,7 +375,7 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       const url =
         "https://coolapp.com/redirect?state=someState&code=someAuthCode";
-      await clientAuthn.handleIncomingRedirect(url);
+      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
       // eslint-disable-next-line no-restricted-globals
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
@@ -370,7 +390,7 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       const url =
         "https://coolapp.com/redirect?state=someState&id_token=idToken&access_token=accessToken";
-      await clientAuthn.handleIncomingRedirect(url);
+      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
       // eslint-disable-next-line no-restricted-globals
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
@@ -385,7 +405,7 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       const url =
         "https://coolapp.com/redirect?state=someState&code=someAuthCode&someQuery=someValue";
-      await clientAuthn.handleIncomingRedirect(url);
+      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
       // eslint-disable-next-line no-restricted-globals
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
