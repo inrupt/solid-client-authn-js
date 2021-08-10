@@ -182,14 +182,12 @@ describe("RefreshTokenOidcHandler", () => {
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
-        status: 401,
+        status: 200,
         url: "https://some.pod/resource",
       });
-      if (result !== undefined) {
-        // ... and this should trigger the refresh flow.
-        await result.fetch("https://some.pod/resource");
-      }
-      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      await result!.fetch("https://some.pod/resource");
+      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
         "DPoP some refreshed access token"
       );
     });
@@ -222,14 +220,12 @@ describe("RefreshTokenOidcHandler", () => {
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
-        status: 401,
+        status: 200,
         url: "https://some.pod/resource",
       });
-      if (result !== undefined) {
-        // ... and this should trigger the refresh flow.
-        await result.fetch("https://some.pod/resource");
-      }
-      const dpopProof = mockedFetch.mock.calls[1][1].headers.DPoP;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      await result!.fetch("https://some.pod/resource");
+      const dpopProof = mockedFetch.mock.calls[0][1].headers.DPoP;
       // This checks that the refreshed access token is bound to the initial DPoP key.
       await expect(
         jwtVerify(dpopProof, dpopKeyPair.privateKey)
@@ -257,14 +253,12 @@ describe("RefreshTokenOidcHandler", () => {
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
-        status: 401,
+        status: 200,
         url: "https://some.pod/resource",
       });
-      if (result !== undefined) {
-        // ... and this should trigger the refresh flow.
-        await result.fetch("https://some.pod/resource");
-      }
-      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      await result!.fetch("https://some.pod/resource");
+      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
         "Bearer some refreshed access token"
       );
     });
@@ -354,7 +348,14 @@ describe("RefreshTokenOidcHandler", () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
-    const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
+    const coreModule = jest.requireMock(
+      "@inrupt/solid-client-authn-core"
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+    const mockAuthenticatedFetchBuild = jest.spyOn(
+      coreModule,
+      "buildAuthenticatedFetch"
+    );
 
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
@@ -373,17 +374,16 @@ describe("RefreshTokenOidcHandler", () => {
     );
     expect(result?.webId).toEqual("https://my.webid/");
 
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-    mockedFetch.mockResolvedValue({
-      status: 401,
-      url: "https://my.pod/resource",
-    });
-    if (result !== undefined) {
-      // ... and this should trigger the refresh flow.
-      await result.fetch("https://some.pod/resource");
-    }
-    expect(mockedRefreshFunction.mock.calls[1]).toContain(
-      "some rotated refresh token"
+    expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        refreshOptions: {
+          refreshToken: "some rotated refresh token",
+          sessionId: "mySession",
+          tokenRefresher: mockedTokenRefresher,
+        },
+      })
     );
   });
 
@@ -415,44 +415,6 @@ describe("RefreshTokenOidcHandler", () => {
       expect.anything(),
       expect.anything(),
       mockEmitter
-    );
-  });
-
-  it("uses the rotated refresh token to build the Bearer-authenticated fetch if applicable", async () => {
-    const tokenSet = mockDefaultTokenSet();
-    tokenSet.refreshToken = "some rotated refresh token";
-    const mockedTokenRefresher = mockTokenRefresher(tokenSet);
-    const mockedRefreshFunction = jest.spyOn(mockedTokenRefresher, "refresh");
-
-    // This builds the fetch function holding the refresh token...
-    const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
-      mockedTokenRefresher,
-      mockStorageUtility({})
-    );
-    const result = await refreshTokenOidcHandler.handle(
-      mockOidcOptions({
-        refreshToken: "some refresh token",
-        client: {
-          clientId: "some client id",
-          clientSecret: "some client secret",
-          clientType: "dynamic",
-        },
-        dpop: false,
-      })
-    );
-    expect(result?.webId).toEqual("https://my.webid/");
-
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-    mockedFetch.mockResolvedValue({
-      status: 401,
-      url: "https://my.pod/resource",
-    });
-    if (result !== undefined) {
-      // ... and this should trigger the refresh flow.
-      await result.fetch("https://some.pod/resource");
-    }
-    expect(mockedRefreshFunction.mock.calls[1]).toContain(
-      "some rotated refresh token"
     );
   });
 
