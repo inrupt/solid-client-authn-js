@@ -14,6 +14,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 - Request refresh tokens: The browser client now requests a refresh token, and 
 uses it when its access token has expired to get a new access token. This enables
 keeping a session alive for longer than the lifetime of a single access token.
+- The `Session` class now exposes an `onError` method, which is a hook where
+error-handling callbacks may be registered.
 
 ### Bugfixes
 
@@ -22,6 +24,7 @@ keeping a session alive for longer than the lifetime of a single access token.
 - Trying to log a session in providing dynamically registered client credentials
 along with a refresh token was mistaken for a static client login, leading to an
 "Invalid client credentials" error.
+
 
 The following sections document changes that have been released already:
 
