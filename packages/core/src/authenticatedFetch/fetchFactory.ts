@@ -126,7 +126,7 @@ async function refreshAccessToken(
  * @param unauthFetch a regular fetch function, compliant with the WHATWG spec.
  * @param authToken an access token, either a Bearer token or a DPoP one.
  * @param options The option object may contain two objects: the DPoP key token
- * is bound to if applicable, and information about refresh.
+ * is bound to if applicable, and options to customise token renewal behaviour.
  *
  * @returns A fetch function that adds an appropriate Authorization header with
  * the provided token, and adds a DPoP header if applicable.
