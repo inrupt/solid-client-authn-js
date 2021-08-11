@@ -154,7 +154,7 @@ export function validateTokenEndpointResponse(
       `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
         tokenResponse
       )}`,
-      "access_token"
+      ["access_token"]
     );
   }
 
@@ -163,7 +163,7 @@ export function validateTokenEndpointResponse(
       `Invalid token endpoint response (missing the field 'id_token'): ${JSON.stringify(
         tokenResponse
       )}.`,
-      "id_token"
+      ["id_token"]
     );
   }
 
@@ -172,7 +172,7 @@ export function validateTokenEndpointResponse(
       `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
         tokenResponse
       )}`,
-      "token_type"
+      ["token_type"]
     );
   }
 
@@ -181,7 +181,7 @@ export function validateTokenEndpointResponse(
       `Invalid token endpoint response (invalid field 'expires_in'): ${JSON.stringify(
         tokenResponse
       )}`,
-      "expires_in"
+      ["expires_in"]
     );
   }
 
