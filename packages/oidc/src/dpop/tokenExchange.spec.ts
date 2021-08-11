@@ -43,7 +43,19 @@ import {
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
 
-jest.mock("@inrupt/solid-client-authn-core");
+jest.mock("@inrupt/solid-client-authn-core", () => {
+  const actualCoreModule = jest.requireActual(
+    "@inrupt/solid-client-authn-core"
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any;
+  return {
+    ...actualCoreModule,
+    // This works around the network lookup to the JWKS in order to validate the ID token.
+    getWebidFromTokenPayload: jest.fn(() =>
+      Promise.resolve("https://my.webid/")
+    ),
+  };
+});
 
 // The following module introduces randomness in the process, which prevents
 // making assumptions on the returned values. Mocking them out makes keys and
