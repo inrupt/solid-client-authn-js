@@ -45,7 +45,7 @@ import {
   mockDefaultTokenSet,
   mockTokenRefresher,
 } from "../login/oidc/refresh/__mocks__/TokenRefresher";
-import { EVENTS, REFRESH_BEFORE_EXPIRATION_SECONDS } from "../constant";
+import { EVENTS } from "../constant";
 
 jest.mock("cross-fetch");
 
@@ -432,18 +432,20 @@ describe("buildAuthenticatedFetch", () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
-    const refreshTokenRotationCallback = jest.fn();
+    const eventEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(eventEmitter, "emit");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockedFreshener,
-        onNewRefreshToken: refreshTokenRotationCallback,
+        eventEmitter,
         expiresIn: 0,
       },
     });
     await sleep(200);
-    expect(refreshTokenRotationCallback).toHaveBeenCalledWith(
+    expect(spiedEmit).toHaveBeenCalledWith(
+      EVENTS.NEW_REFRESH_TOKEN,
       "some rotated refresh token"
     );
   });
