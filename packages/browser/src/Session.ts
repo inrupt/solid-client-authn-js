@@ -482,7 +482,7 @@ export class Session extends EventEmitter {
     this.on("sessionRestore", callback);
   }
 
-  onSessionExpires(callback: () => unknown): void {
+  onSessionExpiration(callback: () => unknown): void {
     this.on(EVENTS.SESSION_EXPIRED, callback);
   }
 

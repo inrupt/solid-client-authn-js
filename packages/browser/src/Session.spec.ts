@@ -1238,4 +1238,16 @@ describe("Session", () => {
       expect(mySession.info.expirationDate).toBe(961106400);
     });
   });
+
+  describe("onSessionExpiration", () => {
+    it("calls the provided callback when receiving the appropriate event", async () => {
+      const myCallback = jest.fn();
+      const mySession = new Session({
+        clientAuthentication: mockClientAuthentication(),
+      });
+      mySession.onSessionExpiration(myCallback);
+      mySession.emit(EVENTS.SESSION_EXPIRED);
+      expect(myCallback).toHaveBeenCalled();
+    });
+  });
 });
