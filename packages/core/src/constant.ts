@@ -35,3 +35,7 @@ export const EVENTS = {
   NEW_REFRESH_TOKEN: "newRefreshToken",
   ERROR: "onError",
 };
+/**
+ * We want to refresh a token 5 seconds before it expires.
+ */
+export const REFRESH_BEFORE_EXPIRATION_SECONDS = 5;

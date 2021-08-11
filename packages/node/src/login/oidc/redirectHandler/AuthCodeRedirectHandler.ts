@@ -156,6 +156,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         sessionId,
         tokenRefresher: this.tokenRefresher,
         eventEmitter,
+        expiresIn: tokenSet.expires_in,
       };
     }
     const authFetch = await buildAuthenticatedFetch(

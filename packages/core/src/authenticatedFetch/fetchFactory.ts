@@ -22,16 +22,23 @@
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 import { EventEmitter } from "events";
+import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 import { createDpopHeader, KeyPair } from "./dpopUtils";
-import { EVENTS } from "../constant";
 
 export type RefreshOptions = {
   sessionId: string;
   refreshToken: string;
   tokenRefresher: ITokenRefresher;
   eventEmitter?: EventEmitter;
+  expiresIn?: number;
 };
+
+/**
+ * If expires_in isn't specified for the access token, we assume its lifetime is
+ * 10 minutes.
+ */
+export const DEFAULT_EXPIRATION_TIME_SECONDS = 600;
 
 function isExpectedAuthError(statusCode: number): boolean {
   // As per https://tools.ietf.org/html/rfc7235#section-3.1 and https://tools.ietf.org/html/rfc7235#section-3.1,
@@ -104,7 +111,7 @@ async function makeAuthenticatedRequest(
 async function refreshAccessToken(
   refreshOptions: RefreshOptions,
   dpopKey?: KeyPair
-): Promise<{ accessToken: string; refreshToken?: string }> {
+): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }> {
   const tokenSet = await refreshOptions.tokenRefresher.refresh(
     refreshOptions.sessionId,
     refreshOptions.refreshToken,
@@ -119,8 +126,24 @@ async function refreshAccessToken(
   return {
     accessToken: tokenSet.accessToken,
     refreshToken: tokenSet.refreshToken,
+    expiresIn: tokenSet.expiresIn,
   };
 }
+
+/**
+ *
+ * @param expiresIn Delay until the access token expires.
+ * @returns a delay until the access token should be refreshed.
+ */
+const computeRefreshDelay = (expiresIn?: number): number => {
+  if (expiresIn !== undefined) {
+    return expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS > 0
+      ? // We want to refresh the token 5 seconds before they actually expire.
+        expiresIn - REFRESH_BEFORE_EXPIRATION_SECONDS
+      : expiresIn;
+  }
+  return DEFAULT_EXPIRATION_TIME_SECONDS;
+};
 
 /**
  * @param unauthFetch a regular fetch function, compliant with the WHATWG spec.
@@ -140,8 +163,47 @@ export async function buildAuthenticatedFetch(
   }
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;
+  let latestTimeout: Parameters<typeof clearTimeout>[0];
   const currentRefreshOptions: RefreshOptions | undefined =
     options?.refreshOptions;
+  // Setup the refresh timeout outside of the authenticated fetch, so that
+  // an idle app will not get logged out if it doesn't issue a fetch before
+  // the first expiration date.
+  if (currentRefreshOptions !== undefined) {
+    const proactivelyRefreshToken = async () => {
+      try {
+        const {
+          accessToken: refreshedAccessToken,
+          refreshToken,
+          expiresIn,
+          // If currentRefreshOptions is defined, options is necessarily defined too.
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        } = await refreshAccessToken(currentRefreshOptions, options!.dpopKey);
+        // Update the tokens in the closure if appropriate.
+        currentAccessToken = refreshedAccessToken;
+        if (refreshToken !== undefined) {
+          currentRefreshOptions.refreshToken = refreshToken;
+        }
+        // Each time the access token is refreshed, we must plan fo the next
+        // refresh iteration.
+        clearTimeout(latestTimeout);
+        latestTimeout = setTimeout(
+          proactivelyRefreshToken,
+          computeRefreshDelay(expiresIn) * 1000
+        );
+      } catch (e) {
+        // It is possible that an underlying library throws an error on refresh flow failure.
+        // If we used a log framework, the error could be logged at the `debug` level,
+        // but otherwise the failure of the refresh flow should not blow up in the user's
+        // face, so we just swallow the error.
+        // TODO: Add error management here.
+      }
+    };
+    latestTimeout = setTimeout(
+      proactivelyRefreshToken,
+      computeRefreshDelay(currentRefreshOptions.expiresIn) * 1000
+    );
+  }
   return async (url, requestInit?): Promise<Response> => {
     let response = await makeAuthenticatedRequest(
       unauthFetch,
@@ -174,44 +236,6 @@ export async function buildAuthenticatedFetch(
         options.dpopKey
       );
     }
-
-    // If the redirected request still has an auth issue, the access token may
-    // need to be refreshed.
-    if (
-      currentRefreshOptions !== undefined &&
-      isExpectedAuthError(response.status)
-    ) {
-      // With currentRefreshOptions not being undefined, options is necessarily
-      // defined, so it is fine to add a non-null assertion.
-      /* eslint-disable @typescript-eslint/no-non-null-assertion */
-      try {
-        const { accessToken: refreshedAccessToken, refreshToken } =
-          await refreshAccessToken(currentRefreshOptions, options!.dpopKey);
-        // Update the tokens in the closure if appropriate.
-        currentAccessToken = refreshedAccessToken;
-        if (refreshToken !== undefined) {
-          currentRefreshOptions.refreshToken = refreshToken;
-        }
-        // Once the token has been refreshed, re-issue the authenticated request.
-        response = await makeAuthenticatedRequest(
-          unauthFetch,
-          currentAccessToken,
-          response.url,
-          requestInit,
-          options!.dpopKey
-        );
-        /* eslint-enable @typescript-eslint/no-non-null-assertion */
-      } catch (e) {
-        // It is possible that an underlying library throws an error on refresh flow failure.
-        // If we used a log framework, the error could be logged at the `debug` level,
-        // but otherwise the failure of the refresh flow should not blow up in the user's
-        // face, and returning the original authentication error is better.
-        return response;
-      }
-    }
-    // If the access token was refreshed and there is still an auth error, or if
-    // no refresh token is provided, the user legitimately doesn't have access to
-    // the resource and the response should simply be returned.
     return response;
   };
 }

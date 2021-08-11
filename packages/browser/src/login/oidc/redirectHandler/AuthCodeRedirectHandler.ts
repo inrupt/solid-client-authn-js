@@ -203,6 +203,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         refreshToken: tokens.refreshToken,
         tokenRefresher: this.tokerRefresher,
         eventEmitter,
+        expiresIn: tokens.expiresIn,
       };
     }
 

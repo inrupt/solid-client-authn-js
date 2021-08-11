@@ -11,9 +11,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 #### browser
 
-- Request refresh tokens: The browser client now requests a refresh token, and 
-uses it when its access token has expired to get a new access token. This enables
-keeping a session alive for longer than the lifetime of a single access token.
+- Use refresh tokens to keep the sesion alive: The browser client now requests a
+refresh token, and uses it when its access token is about to expire to get a new
+access token. This enables keeping a session alive for longer than the lifetime 
+of a single access token.
 - The `Session` class now exposes an `onError` method, which is a hook where
 error-handling callbacks may be registered.
 

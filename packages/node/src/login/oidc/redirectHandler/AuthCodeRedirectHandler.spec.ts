@@ -61,6 +61,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ),
   };
 });
+jest.useFakeTimers();
 
 const mockJwk = (): JWK => {
   return {
@@ -346,37 +347,6 @@ describe("AuthCodeRedirectHandler", () => {
         // The code verifier comes from the mocked storage.
         { code_verifier: "some code verifier", state: "someState" },
         expect.anything()
-      );
-    });
-
-    it("returns a fetch that supports the refresh flow", async () => {
-      const tokenSet = mockBearerTokens();
-      tokenSet.refresh_token = "some refresh token";
-      setupOidcClientMock(tokenSet);
-      const mockedStorage = mockDefaultRedirectStorage();
-      await mockedStorage.setForUser("mySession", {
-        dpop: "false",
-      });
-
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      const result = await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
-      );
-
-      // Check that the returned fetch function is authenticated
-      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-      mockedFetch.mockResolvedValueOnce({
-        status: 401,
-        url: "https://some.url",
-      } as NodeResponse);
-      await result.fetch("https://some.url");
-      expect(mockedFetch.mock.calls[1][1].headers.Authorization).toContain(
-        "Bearer some refreshed access token"
       );
     });
 
