@@ -20,23 +20,27 @@
  */
 
 /**
- * Intended to be used by dependent packages as a common prefix for keys into
- * storage mechanisms (so as to group all keys related to Solid Client Authn
- * within those storage mechanisms, e.g., window.localStorage).
+ * @hidden
+ * @packageDocumentation
  */
-export const SOLID_CLIENT_AUTHN_KEY_PREFIX = "solidClientAuthn:";
 
 /**
- * Ordered list of signature algorithms, from most preferred to least preferred.
+ * Error to be triggered when receiving a response missing mandatory elements
  */
-export const PREFERRED_SIGNING_ALG = ["ES256", "RS256"];
 
-export const EVENTS = {
-  NEW_REFRESH_TOKEN: "newRefreshToken",
-  ERROR: "onError",
-  SESSION_EXPIRED: "sessionExpired",
-};
+// NOTE: There's a bug with istanbul and typescript that prevents full branch coverages
+// https://github.com/gotwarlost/istanbul/issues/690
+// The workaround is to put istanbul ignore on the constructor
 /**
- * We want to refresh a token 5 seconds before it expires.
+ * @hidden
  */
-export const REFRESH_BEFORE_EXPIRATION_SECONDS = 5;
+export class OidcProviderError extends Error {
+  /* istanbul ignore next */
+  constructor(
+    message: string,
+    public readonly error: string,
+    public readonly errorDescription?: string
+  ) {
+    super(message);
+  }
+}

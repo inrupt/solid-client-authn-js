@@ -46,6 +46,8 @@ import {
   mockTokenRefresher,
 } from "../login/oidc/refresh/__mocks__/TokenRefresher";
 import { EVENTS } from "../constant";
+import { OidcProviderError } from "../errors/OidcProviderError";
+import { InvalidResponseError } from "../errors/InvalidResponseError";
 
 jest.mock("cross-fetch");
 
@@ -467,5 +469,66 @@ describe("buildAuthenticatedFetch", () => {
     });
     await sleep(200);
     expect(refreshCall.mock.calls[1][1]).toEqual("some rotated refresh token");
+  });
+
+  it("emits the appropriate events when refreshing the token fails", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedFreshener.refresh = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new OidcProviderError(
+          "Some error message",
+          "error_identifier",
+          "Some error description"
+        )
+      ) as any;
+    const mockEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(mockEmitter, "emit");
+
+    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+        expiresIn: 0,
+        eventEmitter: mockEmitter,
+      },
+    });
+    await sleep(200);
+    expect(spiedEmit).toHaveBeenCalledTimes(2);
+    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
+    expect(spiedEmit).toHaveBeenCalledWith(
+      EVENTS.ERROR,
+      "error_identifier",
+      "Some error description"
+    );
+  });
+
+  it("emits the appropriate events when an unexpected response is received", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedFreshener.refresh = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new InvalidResponseError("Some error message", ["access_token"])
+      ) as any;
+    const mockEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(mockEmitter, "emit");
+
+    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+        expiresIn: 0,
+        eventEmitter: mockEmitter,
+      },
+    });
+    await sleep(100);
+    expect(spiedEmit).toHaveBeenCalledTimes(1);
+    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
   });
 });

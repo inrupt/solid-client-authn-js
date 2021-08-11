@@ -25,6 +25,8 @@ import { EventEmitter } from "events";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 import { createDpopHeader, KeyPair } from "./dpopUtils";
+import { OidcProviderError } from "../errors/OidcProviderError";
+import { InvalidResponseError } from "../errors/InvalidResponseError";
 
 export type RefreshOptions = {
   sessionId: string;
@@ -196,7 +198,32 @@ export async function buildAuthenticatedFetch(
         // If we used a log framework, the error could be logged at the `debug` level,
         // but otherwise the failure of the refresh flow should not blow up in the user's
         // face, so we just swallow the error.
-        // TODO: Add error management here.
+        if (e instanceof OidcProviderError) {
+          // The OIDC provider refused to refresh the access token and returned an error instead.
+          /* istanbul ignore next 100% coverage would require testing that nothing
+              happens here if the emitter is undefined, which is more cumbersome
+              than what it's worth. */
+          currentRefreshOptions.eventEmitter?.emit(
+            EVENTS.ERROR,
+            e.error,
+            e.errorDescription
+          );
+          /* istanbul ignore next 100% coverage would require testing that nothing
+            happens here if the emitter is undefined, which is more cumbersome
+            than what it's worth. */
+          currentRefreshOptions.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+        }
+        if (
+          e instanceof InvalidResponseError &&
+          e.missingFields.includes("access_token")
+        ) {
+          // In this case, the OIDC provider returned a non-standard response, but
+          // did not specify that it was an error. We cannot refresh nonetheless.
+          /* istanbul ignore next 100% coverage would require testing that nothing
+            happens here if the emitter is undefined, which is more cumbersome
+            than what it's worth. */
+          currentRefreshOptions.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+        }
       }
     };
     latestTimeout = setTimeout(
