@@ -17,6 +17,9 @@ access token. This enables keeping a session alive for longer than the lifetime
 of a single access token.
 - The `Session` class now exposes an `onError` method, which is a hook where
 error-handling callbacks may be registered.
+- The `Session` class now exposes an `onSessionExpiration` method, which is a hook
+where a callback may be registered to handle session expiration in the case when
+silent authentication fails.
 
 ### Bugfixes
 
