@@ -101,5 +101,6 @@ export async function refresh(
         : undefined,
     webId,
     dpopKey,
+    expiresIn: validatedResponse.expires_in,
   };
 }
