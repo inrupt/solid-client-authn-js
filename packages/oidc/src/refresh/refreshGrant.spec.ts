@@ -171,7 +171,7 @@ describe("refreshGrant", () => {
     ).rejects.toThrow("Token endpoint returned error [Some error]");
   });
 
-  it("returns the access, ID and refresh tokens, as well as the WebID, DPoP key anr expiration date if applicable", async () => {
+  it("returns the access, ID and refresh tokens, as well as the WebID, DPoP key and expiration date if applicable", async () => {
     mockFetch(
       JSON.stringify({
         ...mockDpopTokens(),
