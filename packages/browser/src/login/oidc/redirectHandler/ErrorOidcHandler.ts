@@ -29,7 +29,7 @@ import {
   IRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
-import { EventEmitter } from "events";
+import type { EventEmitter } from "events";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 
