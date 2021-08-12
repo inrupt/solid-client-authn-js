@@ -128,7 +128,6 @@ describe("AggregateHandler", () => {
       ]);
 
       // Cyclical object that references itself causes JSON.stringify to throw!
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const obj: any = {
         prop: {},
       };

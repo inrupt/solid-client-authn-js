@@ -108,17 +108,14 @@ describe("ClientAuthentication", () => {
       const mockedLoginHandler: jest.Mocked<ILoginHandler> = {
         // jest's Mock types don't seem to align here after an update.
         // Not sure what happened; taking the `any` escape since the tests worked.
-        canHandle: jest.fn(
-          (_options: ILoginOptions) => Promise.resolve(true)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        canHandle: jest.fn((_options: ILoginOptions) =>
+          Promise.resolve(true)
         ) as any,
-        handle: jest.fn(
-          (_options: ILoginOptions) =>
-            Promise.resolve({
-              fetch: mockedAuthFetch,
-              webId: "https://my.webid/",
-            })
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        handle: jest.fn((_options: ILoginOptions) =>
+          Promise.resolve({
+            fetch: mockedAuthFetch,
+            webId: "https://my.webid/",
+          })
         ) as any,
       };
       const clientAuthn = getClientAuthentication({

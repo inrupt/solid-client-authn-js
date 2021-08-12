@@ -46,10 +46,8 @@ describe("IssuerConfigFetcher", () => {
   }
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockDefaultIssuerMetadata();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });
@@ -75,12 +73,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if authorization_endpoint is missing", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       authorization_endpoint: undefined,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });
@@ -95,12 +91,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if token_endpoint is missing", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       token_endpoint: undefined,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });
@@ -115,12 +109,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if jwks_uri is missing", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       jwks_uri: undefined,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });
@@ -135,12 +127,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if claims_supported is missing", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       claims_supported: undefined,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });
@@ -155,12 +145,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if subject_types_supported is missing", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       subject_types_supported: undefined,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });
@@ -175,12 +163,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       solid_oidc_supported: "https://solidproject.org/TR/solid-oidc",
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
     });

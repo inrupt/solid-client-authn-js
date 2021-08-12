@@ -50,7 +50,6 @@ describe("ClientRegistrar", () => {
   describe("getClient", () => {
     it("fails if there is not registration endpoint", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuerConfig = mockIssuerMetadata({
         registration_endpoint: undefined,
@@ -108,12 +107,10 @@ describe("ClientRegistrar", () => {
 
     it("properly performs dynamic registration and saves client information", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
@@ -161,12 +158,10 @@ describe("ClientRegistrar", () => {
 
     it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
@@ -196,12 +191,10 @@ describe("ClientRegistrar", () => {
 
     it("throws if no signing algorithm supported by the issuer match the client preferences", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
@@ -232,16 +225,11 @@ describe("ClientRegistrar", () => {
 
     it("retrieves client information from storage after dynamic registration", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          register: (
-            jest
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              .fn() as any
-          )
+          register: (jest.fn() as any)
             .mockResolvedValueOnce({
               metadata: mockDefaultClientConfig(),
             })
@@ -281,12 +269,10 @@ describe("ClientRegistrar", () => {
 
     it("retrieves a registration bearer token if present in storage", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
@@ -327,12 +313,10 @@ describe("ClientRegistrar", () => {
 
     it("uses a registration bearer token if provided", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockDefaultClientConfig(),
           }),
@@ -364,7 +348,6 @@ describe("ClientRegistrar", () => {
 
     it("saves the registered client information for a public client in storage", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedClientConfig = mockClientConfig({
         client_secret: undefined,
@@ -372,7 +355,6 @@ describe("ClientRegistrar", () => {
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           register: (jest.fn() as any).mockResolvedValueOnce({
             metadata: mockedClientConfig,
           }),
@@ -404,14 +386,12 @@ describe("ClientRegistrar", () => {
 
     it("uses stores the signing algorithm preferred by the client when the registration didn't return the used algorithm", async () => {
       // Sets up the mock-up for DCR
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { Issuer } = jest.requireMock("openid-client") as any;
       const metadata = mockDefaultClientConfig();
       delete metadata.id_token_signed_response_alg;
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           register: (jest.fn() as any).mockResolvedValueOnce({
             metadata,
           }),

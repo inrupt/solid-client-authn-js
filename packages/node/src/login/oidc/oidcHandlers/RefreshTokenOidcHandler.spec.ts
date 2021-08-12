@@ -53,7 +53,6 @@ jest.mock("cross-fetch");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) as any;
   return {
     ...actualCoreModule,
@@ -351,7 +350,6 @@ describe("RefreshTokenOidcHandler", () => {
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const coreModule = jest.requireMock(
       "@inrupt/solid-client-authn-core"
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
@@ -424,7 +422,6 @@ describe("RefreshTokenOidcHandler", () => {
     });
     tokenRefresher.refresh = jest
       .fn()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockRejectedValue("Invalid credentials") as any;
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       tokenRefresher,

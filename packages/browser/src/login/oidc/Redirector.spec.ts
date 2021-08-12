@@ -77,7 +77,6 @@ describe("Redirector", () => {
 
     it("redirects in an iframe if specified", () => {
       const iframe = jest.requireMock("../../../src/iframe");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const redirectInIframe = jest.spyOn(iframe as any, "redirectInIframe");
       const redirector = new Redirector();
       redirector.redirect("https://someUrl.com/redirect", {

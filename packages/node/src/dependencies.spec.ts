@@ -46,7 +46,6 @@ jest.mock("openid-client");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) as any;
   return {
     ...actualCoreModule,
@@ -71,7 +70,6 @@ const setupOidcClientMock = () => {
       token_type: "Bearer",
       expired: () => false,
       claims: jest.fn(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -137,7 +135,6 @@ describe("resolution order", () => {
     const handlerSelectSpy = jest.spyOn(
       // The easiest way to test this is to look into the injected dependencies
       // (which is why we look up private attributes).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );
@@ -162,7 +159,6 @@ describe("resolution order", () => {
     const handlerSelectSpy = jest.spyOn(
       // The easiest way to test this is to look into the injected dependencies
       // (which is why we look up private attributes).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );
@@ -186,7 +182,6 @@ describe("resolution order", () => {
     const handlerSelectSpy = jest.spyOn(
       // The easiest way to test this is to look into the injected dependencies
       // (which is why we look up private attributes).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );

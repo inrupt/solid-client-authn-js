@@ -48,7 +48,6 @@ const mockOidcModule = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const oidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
   oidcModule.OidcClient = jest.fn().mockReturnValue({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createSigninRequest: (jest.fn() as any).mockResolvedValue({
       url,
       state,
@@ -100,7 +99,6 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
             );
           }
         ),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const authorizationCodeWithPkceOidcHandler =

@@ -46,7 +46,6 @@ import {
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) as any;
   return {
     ...actualCoreModule,

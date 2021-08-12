@@ -45,7 +45,6 @@ describe("ClientRegistrar", () => {
     it("properly performs dynamic registration", async () => {
       // FIXME: this should mock out oidc-client-ext, instead of mimicking the
       // actual OIDC provider response.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new NodeResponse(
@@ -97,7 +96,6 @@ describe("ClientRegistrar", () => {
     });
 
     it("can register a public client without secret", async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new NodeResponse(
@@ -144,7 +142,6 @@ describe("ClientRegistrar", () => {
     });
 
     it("handles a failure to dynamically register elegantly", async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new NodeResponse('{"error":"bad stuff that\'s an error"}', {
@@ -203,7 +200,6 @@ describe("ClientRegistrar", () => {
         storage: mockStorageUtility({}),
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new NodeResponse(
@@ -248,7 +244,6 @@ describe("ClientRegistrar", () => {
         ),
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new NodeResponse(
@@ -281,7 +276,6 @@ describe("ClientRegistrar", () => {
     });
 
     it("saves dynamic registration information", async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new NodeResponse(
