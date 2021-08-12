@@ -36,7 +36,9 @@
  */
 export class InvalidResponseError extends Error {
   /* istanbul ignore next */
-  constructor(message: string, public readonly missingFields: string[]) {
-    super(message);
+  constructor(public readonly missingFields: string[]) {
+    super(
+      `Invalid response from OIDC provider: missing fields ${missingFields}`
+    );
   }
 }

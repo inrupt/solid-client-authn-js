@@ -512,9 +512,7 @@ describe("buildAuthenticatedFetch", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedFreshener.refresh = jest
       .fn()
-      .mockRejectedValueOnce(
-        new InvalidResponseError("Some error message", ["access_token"])
-      ) as any;
+      .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 

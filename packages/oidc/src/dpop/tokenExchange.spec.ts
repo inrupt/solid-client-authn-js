@@ -257,11 +257,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       false
     );
-    await expect(request).rejects.toThrow(
-      `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
-        tokenResponse
-      )}`
-    );
+    await expect(request).rejects.toThrow("token_type");
   });
 
   // See https://tools.ietf.org/html/rfc6749#page-29 for the required parameters
@@ -327,11 +323,7 @@ describe("getTokens", () => {
     mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
-    ).rejects.toThrow(
-      `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
-        tokenEndpointResponse
-      )}`
-    );
+    ).rejects.toThrow("access_token");
   });
 
   it("throws if the ID token is missing", async () => {
@@ -341,11 +333,7 @@ describe("getTokens", () => {
     mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
-    ).rejects.toThrow(
-      `Invalid token endpoint response (missing the field 'id_token'): ${JSON.stringify(
-        tokenEndpointResponse
-      )}`
-    );
+    ).rejects.toThrow("id_token");
   });
 
   it("throws if the token endpoint returned an error", async () => {

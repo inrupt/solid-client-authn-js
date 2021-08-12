@@ -150,39 +150,19 @@ export function validateTokenEndpointResponse(
   }
 
   if (!hasAccessToken(tokenResponse)) {
-    throw new InvalidResponseError(
-      `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
-        tokenResponse
-      )}`,
-      ["access_token"]
-    );
+    throw new InvalidResponseError(["access_token"]);
   }
 
   if (!hasIdToken(tokenResponse)) {
-    throw new InvalidResponseError(
-      `Invalid token endpoint response (missing the field 'id_token'): ${JSON.stringify(
-        tokenResponse
-      )}.`,
-      ["id_token"]
-    );
+    throw new InvalidResponseError(["id_token"]);
   }
 
   if (!hasTokenType(tokenResponse)) {
-    throw new InvalidResponseError(
-      `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
-        tokenResponse
-      )}`,
-      ["token_type"]
-    );
+    throw new InvalidResponseError(["token_type"]);
   }
 
   if (!hasExpiresIn(tokenResponse)) {
-    throw new InvalidResponseError(
-      `Invalid token endpoint response (invalid field 'expires_in'): ${JSON.stringify(
-        tokenResponse
-      )}`,
-      ["expires_in"]
-    );
+    throw new InvalidResponseError(["expires_in"]);
   }
 
   // TODO: Due to a bug in both the ESS ID broker AND NSS (what were the odds), a DPoP token is returned
