@@ -32,8 +32,6 @@ export type RefreshOptions = {
   sessionId: string;
   refreshToken: string;
   tokenRefresher: ITokenRefresher;
-  eventEmitter?: EventEmitter;
-  expiresIn?: number;
 };
 
 /**
@@ -112,7 +110,8 @@ async function makeAuthenticatedRequest(
 
 async function refreshAccessToken(
   refreshOptions: RefreshOptions,
-  dpopKey?: KeyPair
+  dpopKey?: KeyPair,
+  eventEmitter?: EventEmitter
 ): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }> {
   const tokenSet = await refreshOptions.tokenRefresher.refresh(
     refreshOptions.sessionId,
@@ -120,10 +119,7 @@ async function refreshAccessToken(
     dpopKey
   );
   if (typeof tokenSet.refreshToken === "string") {
-    refreshOptions.eventEmitter?.emit(
-      EVENTS.NEW_REFRESH_TOKEN,
-      tokenSet.refreshToken
-    );
+    eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
   }
   return {
     accessToken: tokenSet.accessToken,
@@ -162,6 +158,8 @@ export async function buildAuthenticatedFetch(
   options?: {
     dpopKey?: KeyPair;
     refreshOptions?: RefreshOptions;
+    expiresIn?: number;
+    eventEmitter?: EventEmitter;
   }
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;
@@ -180,7 +178,11 @@ export async function buildAuthenticatedFetch(
           expiresIn,
           // If currentRefreshOptions is defined, options is necessarily defined too.
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        } = await refreshAccessToken(currentRefreshOptions, options!.dpopKey);
+        } = await refreshAccessToken(
+          currentRefreshOptions,
+          options!.dpopKey,
+          options!.eventEmitter
+        );
         // Update the tokens in the closure if appropriate.
         currentAccessToken = refreshedAccessToken;
         if (refreshToken !== undefined) {
@@ -203,7 +205,7 @@ export async function buildAuthenticatedFetch(
           /* istanbul ignore next 100% coverage would require testing that nothing
               happens here if the emitter is undefined, which is more cumbersome
               than what it's worth. */
-          currentRefreshOptions.eventEmitter?.emit(
+          options?.eventEmitter?.emit(
             EVENTS.ERROR,
             e.error,
             e.errorDescription
@@ -211,7 +213,7 @@ export async function buildAuthenticatedFetch(
           /* istanbul ignore next 100% coverage would require testing that nothing
             happens here if the emitter is undefined, which is more cumbersome
             than what it's worth. */
-          currentRefreshOptions.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+          options?.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
         }
         if (
           e instanceof InvalidResponseError &&
@@ -222,14 +224,22 @@ export async function buildAuthenticatedFetch(
           /* istanbul ignore next 100% coverage would require testing that nothing
             happens here if the emitter is undefined, which is more cumbersome
             than what it's worth. */
-          currentRefreshOptions.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+          options?.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
         }
       }
     };
     latestTimeout = setTimeout(
       proactivelyRefreshToken,
-      computeRefreshDelay(currentRefreshOptions.expiresIn) * 1000
+      // If currentRefreshOptions is defined, options is necessarily defined too.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      computeRefreshDelay(options!.expiresIn) * 1000
     );
+  } else if (options !== undefined && options.eventEmitter !== undefined) {
+    // If no refresh options are provided, the session expires when the access token does.
+    setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      options.eventEmitter!.emit(EVENTS.SESSION_EXPIRED);
+    }, computeRefreshDelay(options.expiresIn) * 1000);
   }
   return async (url, requestInit?): Promise<Response> => {
     let response = await makeAuthenticatedRequest(
