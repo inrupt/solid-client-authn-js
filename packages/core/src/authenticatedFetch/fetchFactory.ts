@@ -118,6 +118,10 @@ async function refreshAccessToken(
     refreshOptions.refreshToken,
     dpopKey
   );
+  eventEmitter?.emit(
+    EVENTS.SESSION_EXTENDED,
+    tokenSet.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS
+  );
   if (typeof tokenSet.refreshToken === "string") {
     eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
   }

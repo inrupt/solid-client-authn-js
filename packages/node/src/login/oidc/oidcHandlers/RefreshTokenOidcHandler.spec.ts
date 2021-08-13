@@ -414,8 +414,7 @@ describe("RefreshTokenOidcHandler", () => {
     expect(mockedTokenRefresher.refresh).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
-      expect.anything(),
-      mockEmitter
+      expect.anything()
     );
   });
 

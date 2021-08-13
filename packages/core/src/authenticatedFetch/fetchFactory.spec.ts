@@ -440,6 +440,28 @@ describe("buildAuthenticatedFetch", () => {
     );
   });
 
+  it("calls the provided callback when the access token is refreshed", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const tokenSet = mockDefaultTokenSet();
+    const mockedFreshener = mockTokenRefresher({
+      ...tokenSet,
+      expiresIn: 1800,
+    });
+    const eventEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(eventEmitter, "emit");
+    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+      },
+      eventEmitter,
+      expiresIn: 0,
+    });
+    await sleep(200);
+    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXTENDED, 1800);
+  });
+
   it("calls the provided callback when a new refresh token is issued", async () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     const tokenSet = mockDefaultTokenSet();

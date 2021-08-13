@@ -35,6 +35,7 @@ export const EVENTS = {
   NEW_REFRESH_TOKEN: "newRefreshToken",
   ERROR: "onError",
   SESSION_EXPIRED: "sessionExpired",
+  SESSION_EXTENDED: "sessionExtended",
 };
 /**
  * We want to refresh a token 5 seconds before it expires.
