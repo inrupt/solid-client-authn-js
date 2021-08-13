@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.11.0 - 2021-08-12
+
 ### New features
 
 #### browser
@@ -28,9 +32,6 @@ silent authentication fails.
 - Trying to log a session in providing dynamically registered client credentials
 along with a refresh token was mistaken for a static client login, leading to an
 "Invalid client credentials" error.
-
-
-The following sections document changes that have been released already:
 
 ## 1.10.1 - 2021-08-02
 
