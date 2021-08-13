@@ -840,8 +840,8 @@ describe("AuthCodeRedirectHandler", () => {
           refreshToken: "some DPoP-bound refresh token",
           sessionId: "mySession",
           tokenRefresher,
-          expiresIn: 1337,
         },
+        expiresIn: 1337,
       })
     );
   });

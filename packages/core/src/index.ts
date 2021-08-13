@@ -81,6 +81,8 @@ export { default as InMemoryStorage } from "./storage/InMemoryStorage";
 
 export { default as ConfigurationError } from "./errors/ConfigurationError";
 export { default as NotImplementedError } from "./errors/NotImplementedError";
+export { InvalidResponseError } from "./errors/InvalidResponseError";
+export { OidcProviderError } from "./errors/OidcProviderError";
 
 export {
   createDpopHeader,

@@ -50,6 +50,7 @@ import {
 // import { JWK, parseJwk } from "jose/jwk/parse";
 import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import { fetch as globalFetch } from "cross-fetch";
+import { EventEmitter } from "events";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions
@@ -72,7 +73,8 @@ function validateOptions(
 async function refreshAccess(
   refreshOptions: RefreshOptions,
   dpop: boolean,
-  refreshBindingKey?: KeyPair
+  refreshBindingKey?: KeyPair,
+  eventEmitter?: EventEmitter
 ): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
   try {
     let dpopKey: KeyPair | undefined;
@@ -84,8 +86,7 @@ async function refreshAccess(
     const tokens = await refreshOptions.tokenRefresher.refresh(
       refreshOptions.sessionId,
       refreshOptions.refreshToken,
-      dpopKey,
-      refreshOptions.eventEmitter
+      dpopKey
     );
     // Rotate the refresh token if applicable
     const rotatedRefreshOptions = {
@@ -98,6 +99,7 @@ async function refreshAccess(
       {
         dpopKey,
         refreshOptions: rotatedRefreshOptions,
+        eventEmitter,
       }
     );
     return Object.assign(tokens, {
@@ -135,7 +137,6 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       refreshToken: oidcLoginOptions.refreshToken as string,
       sessionId: oidcLoginOptions.sessionId,
       tokenRefresher: this.tokenRefresher,
-      eventEmitter: oidcLoginOptions.eventEmitter,
     };
 
     // This information must be in storage for the refresh flow to succeed.

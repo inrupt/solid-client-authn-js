@@ -46,6 +46,9 @@ import {
   mockTokenRefresher,
 } from "../login/oidc/refresh/__mocks__/TokenRefresher";
 import { EVENTS } from "../constant";
+import { OidcProviderError } from "../errors/OidcProviderError";
+import { InvalidResponseError } from "../errors/InvalidResponseError";
+import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 
 jest.mock("cross-fetch");
 
@@ -301,8 +304,8 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockRefresher,
-        expiresIn: 6,
       },
+      expiresIn: 6,
     });
     // It should not refresh the tokens right away...
     expect(mockRefresher.refresh).not.toHaveBeenCalled();
@@ -340,11 +343,21 @@ describe("buildAuthenticatedFetch", () => {
   it("does not rebind the DPoP token on refresh", async () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     const keylikePair = await mockJwk();
-    const mockRefresher = mockTokenRefresher({
-      ...mockDefaultTokenSet(),
-      // We get a new expiration date every time we refresh the tokens
-      expiresIn: 0,
-    });
+    // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
+    // This would not be necessary with mock timers.
+    const mockedTokenRefresher: ITokenRefresher = {
+      refresh: jest
+        .fn<
+          ReturnType<ITokenRefresher["refresh"]>,
+          Parameters<ITokenRefresher["refresh"]>
+        >()
+        .mockResolvedValueOnce({
+          ...mockDefaultTokenSet(),
+          refreshToken: "some rotated refresh token",
+          expiresIn: 0,
+        })
+        .mockResolvedValue({ ...mockDefaultTokenSet(), expiresIn: 1000 }),
+    };
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
@@ -353,15 +366,15 @@ describe("buildAuthenticatedFetch", () => {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
-        tokenRefresher: mockRefresher,
-        expiresIn: 0,
+        tokenRefresher: mockedTokenRefresher,
       },
+      expiresIn: 0,
     });
 
     await sleep(200);
     // jest.runOnlyPendingTimers();
 
-    expect(mockRefresher.refresh).toHaveBeenCalledWith(
+    expect(mockedTokenRefresher.refresh).toHaveBeenCalledWith(
       expect.anything(),
       "some refresh token",
       {
@@ -384,8 +397,8 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockRefresher,
-        expiresIn: 6,
       },
+      expiresIn: 6,
     });
     // Run the timer to pretend the token is about to expire
     // jest.advanceTimersByTime(1800 * 1000);
@@ -413,8 +426,8 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockRefresher,
-        expiresIn: 6,
       },
+      expiresIn: 6,
     });
     // Run the timer to pretend the token is about to expire
     // jest.runOnlyPendingTimers();
@@ -425,6 +438,28 @@ describe("buildAuthenticatedFetch", () => {
       expect.any(Function),
       DEFAULT_EXPIRATION_TIME_SECONDS * 1000
     );
+  });
+
+  it("calls the provided callback when the access token is refreshed", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const tokenSet = mockDefaultTokenSet();
+    const mockedFreshener = mockTokenRefresher({
+      ...tokenSet,
+      expiresIn: 1800,
+    });
+    const eventEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(eventEmitter, "emit");
+    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+      },
+      eventEmitter,
+      expiresIn: 0,
+    });
+    await sleep(200);
+    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXTENDED, 1800);
   });
 
   it("calls the provided callback when a new refresh token is issued", async () => {
@@ -439,9 +474,9 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockedFreshener,
-        eventEmitter,
-        expiresIn: 0,
       },
+      eventEmitter,
+      expiresIn: 0,
     });
     await sleep(200);
     expect(spiedEmit).toHaveBeenCalledWith(
@@ -452,20 +487,119 @@ describe("buildAuthenticatedFetch", () => {
 
   it("rotates the refresh token if a new one is issued", async () => {
     const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-    const tokenSet = { ...mockDefaultTokenSet(), expiresIn: 0 };
-    tokenSet.refreshToken = "some rotated refresh token";
-    const mockedFreshener = mockTokenRefresher(tokenSet);
-    const refreshCall = jest.spyOn(mockedFreshener, "refresh");
+    // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
+    // This would not be necessary with mock timers.
+    const mockedTokenRefresher: ITokenRefresher = {
+      refresh: jest
+        .fn<
+          ReturnType<ITokenRefresher["refresh"]>,
+          Parameters<ITokenRefresher["refresh"]>
+        >()
+        .mockResolvedValueOnce({
+          ...mockDefaultTokenSet(),
+          refreshToken: "some rotated refresh token",
+          expiresIn: 0,
+        })
+        .mockResolvedValue({ ...mockDefaultTokenSet(), expiresIn: 1000 }),
+    };
+    const refreshCall = jest.spyOn(mockedTokenRefresher, "refresh");
+
+    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedTokenRefresher,
+      },
+      expiresIn: 0,
+    });
+    await sleep(200);
+    expect(refreshCall.mock.calls[1][1]).toEqual("some rotated refresh token");
+  });
+
+  it("emits the appropriate events when refreshing the token fails", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedFreshener.refresh = jest
+      .fn()
+      .mockRejectedValueOnce(
+        new OidcProviderError(
+          "Some error message",
+          "error_identifier",
+          "Some error description"
+        )
+      ) as any;
+    const mockEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: mockedFreshener,
-        expiresIn: 0,
       },
+      expiresIn: 0,
+      eventEmitter: mockEmitter,
     });
     await sleep(200);
-    expect(refreshCall.mock.calls[1][1]).toEqual("some rotated refresh token");
+    expect(spiedEmit).toHaveBeenCalledTimes(2);
+    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
+    expect(spiedEmit).toHaveBeenCalledWith(
+      EVENTS.ERROR,
+      "error_identifier",
+      "Some error description"
+    );
+  });
+
+  it("emits the appropriate events when an unexpected response is received", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedFreshener.refresh = jest
+      .fn()
+      .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
+    const mockEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(mockEmitter, "emit");
+
+    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedFreshener,
+      },
+      expiresIn: 0,
+      eventEmitter: mockEmitter,
+    });
+    await sleep(100);
+    expect(spiedEmit).toHaveBeenCalledTimes(1);
+    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
+  });
+
+  it("emits the appropriate events when the access token expires and may not be refreshed", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockedFreshener.refresh = jest
+      .fn()
+      .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
+    const mockEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(mockEmitter, "emit");
+
+    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+      expiresIn: 0,
+      eventEmitter: mockEmitter,
+    });
+    await sleep(100);
+    expect(spiedEmit).toHaveBeenCalledTimes(1);
+    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
+  });
+
+  it("does not schedule any callback to be called if no event can be fired", async () => {
+    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const spyTimeout = jest.spyOn(global, "setTimeout");
+    await buildAuthenticatedFetch(mockedFetch, "myToken");
+    await sleep(100);
+    // The only call to setTimeout should come from the `sleep` function
+    expect(spyTimeout).toHaveBeenCalledTimes(1);
   });
 });

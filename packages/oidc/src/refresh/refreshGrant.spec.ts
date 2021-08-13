@@ -139,9 +139,7 @@ describe("refreshGrant", () => {
     );
     await expect(
       refresh("some refresh token", mockIssuer(), mockClient())
-    ).rejects.toThrow(
-      "Invalid token endpoint response (missing the field 'access_token')"
-    );
+    ).rejects.toThrow("access_token");
   });
 
   it("throws if the token endpoint does not return an ID token", async () => {
@@ -154,9 +152,7 @@ describe("refreshGrant", () => {
     );
     await expect(
       refresh("some refresh token", mockIssuer(), mockClient())
-    ).rejects.toThrow(
-      "Invalid token endpoint response (missing the field 'id_token')"
-    );
+    ).rejects.toThrow("id_token");
   });
 
   it("throws if the token endpoint returns an error", async () => {

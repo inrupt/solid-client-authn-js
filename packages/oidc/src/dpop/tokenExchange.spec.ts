@@ -43,7 +43,19 @@ import {
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
 
-jest.mock("@inrupt/solid-client-authn-core");
+jest.mock("@inrupt/solid-client-authn-core", () => {
+  const actualCoreModule = jest.requireActual(
+    "@inrupt/solid-client-authn-core"
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any;
+  return {
+    ...actualCoreModule,
+    // This works around the network lookup to the JWKS in order to validate the ID token.
+    getWebidFromTokenPayload: jest.fn(() =>
+      Promise.resolve("https://my.webid/")
+    ),
+  };
+});
 
 // The following module introduces randomness in the process, which prevents
 // making assumptions on the returned values. Mocking them out makes keys and
@@ -245,11 +257,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       false
     );
-    await expect(request).rejects.toThrow(
-      `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
-        tokenResponse
-      )}`
-    );
+    await expect(request).rejects.toThrow("token_type");
   });
 
   // See https://tools.ietf.org/html/rfc6749#page-29 for the required parameters
@@ -315,11 +323,7 @@ describe("getTokens", () => {
     mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
-    ).rejects.toThrow(
-      `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
-        tokenEndpointResponse
-      )}`
-    );
+    ).rejects.toThrow("access_token");
   });
 
   it("throws if the ID token is missing", async () => {
@@ -329,11 +333,7 @@ describe("getTokens", () => {
     mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
       getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
-    ).rejects.toThrow(
-      `Invalid token endpoint response (missing the field 'id_token'): ${JSON.stringify(
-        tokenEndpointResponse
-      )}`
-    );
+    ).rejects.toThrow("id_token");
   });
 
   it("throws if the token endpoint returned an error", async () => {

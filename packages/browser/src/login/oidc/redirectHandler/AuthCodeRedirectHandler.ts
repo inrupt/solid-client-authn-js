@@ -202,14 +202,14 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         sessionId: storedSessionId,
         refreshToken: tokens.refreshToken,
         tokenRefresher: this.tokerRefresher,
-        eventEmitter,
-        expiresIn: tokens.expiresIn,
       };
     }
 
     const authFetch = await buildAuthenticatedFetch(fetch, tokens.accessToken, {
       dpopKey: tokens.dpopKey,
       refreshOptions,
+      eventEmitter,
+      expiresIn: tokens.expiresIn,
     });
 
     await this.storageUtility.setForUser(

@@ -482,6 +482,10 @@ export class Session extends EventEmitter {
     this.on("sessionRestore", callback);
   }
 
+  onSessionExpiration(callback: () => unknown): void {
+    this.on(EVENTS.SESSION_EXPIRED, callback);
+  }
+
   private setSessionInfo(
     sessionInfo: ISessionInfo & { isLoggedIn: true }
   ): void {
@@ -489,10 +493,8 @@ export class Session extends EventEmitter {
     this.info.webId = sessionInfo.webId;
     this.info.sessionId = sessionInfo.sessionId;
     this.info.expirationDate = sessionInfo.expirationDate;
-    if (typeof sessionInfo.expirationDate === "number") {
-      setTimeout(async () => {
-        await this.logout();
-      }, sessionInfo.expirationDate - Date.now());
-    }
+    this.on(EVENTS.SESSION_EXTENDED, (expiresIn: number) => {
+      this.info.expirationDate = Date.now() + expiresIn * 1000;
+    });
   }
 }

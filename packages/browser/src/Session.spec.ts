@@ -291,7 +291,7 @@ describe("Session", () => {
       );
     });
 
-    it("logs the session out when its tokens expire", async () => {
+    it("listens on the token extension signal to keep the expiration date accurate", async () => {
       jest.useFakeTimers();
       const MOCK_TIMESTAMP = 10000;
       jest.spyOn(Date, "now").mockReturnValueOnce(MOCK_TIMESTAMP);
@@ -307,20 +307,11 @@ describe("Session", () => {
       });
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 1337);
-      expect(mySession.info.isLoggedIn).toBe(true);
-
-      // Usually, we'd be able to use `jest.runAllTimers()` here. However,
-      // logout happens asynchronously. While this is inconsequential in
-      // running apps (the timeout complets asynchronously anyway), here, we can
-      // take advantage that we return the Promise from the callback in
-      // `setTimeout`, so that we can `await` it in this test before checking
-      // whether logout was successful:
-      const expireTimeout = (
-        setTimeout as unknown as jest.Mock<typeof setTimeout>
-      ).mock.calls[0][0];
-      await expireTimeout();
-      expect(mySession.info.isLoggedIn).toBe(false);
+      expect(mySession.info.expirationDate).toBe(MOCK_TIMESTAMP + 1337);
+      mySession.emit(EVENTS.SESSION_EXTENDED, 1337 * 2);
+      expect(mySession.info.expirationDate).toBe(
+        MOCK_TIMESTAMP + 1337 * 2 * 1000
+      );
     });
 
     it("leaves the session's info unchanged if no session is obtained after redirect", async () => {
@@ -1236,6 +1227,18 @@ describe("Session", () => {
       expect(mySession.info.webId).toBe("https://some.pod/profile#me");
       expect(mySession.info.sessionId).toBe("someSessionId");
       expect(mySession.info.expirationDate).toBe(961106400);
+    });
+  });
+
+  describe("onSessionExpiration", () => {
+    it("calls the provided callback when receiving the appropriate event", async () => {
+      const myCallback = jest.fn();
+      const mySession = new Session({
+        clientAuthentication: mockClientAuthentication(),
+      });
+      mySession.onSessionExpiration(myCallback);
+      mySession.emit(EVENTS.SESSION_EXPIRED);
+      expect(myCallback).toHaveBeenCalled();
     });
   });
 });

@@ -29,6 +29,8 @@ import {
   KeyPair,
   generateDpopKeyPair,
   TokenEndpointResponse,
+  OidcProviderError,
+  InvalidResponseError,
 } from "@inrupt/solid-client-authn-core";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
@@ -132,45 +134,35 @@ export function validateTokenEndpointResponse(
   expires_in?: number;
 } {
   if (hasError(tokenResponse)) {
-    throw new Error(
+    throw new OidcProviderError(
       `Token endpoint returned error [${tokenResponse.error}]${
         hasErrorDescription(tokenResponse)
           ? `: ${tokenResponse.error_description}`
           : ""
-      }${hasErrorUri(tokenResponse) ? ` (see ${tokenResponse.error_uri})` : ""}`
+      }${
+        hasErrorUri(tokenResponse) ? ` (see ${tokenResponse.error_uri})` : ""
+      }`,
+      tokenResponse.error,
+      hasErrorDescription(tokenResponse)
+        ? tokenResponse.error_description
+        : undefined
     );
   }
 
   if (!hasAccessToken(tokenResponse)) {
-    throw new Error(
-      `Invalid token endpoint response (missing the field 'access_token'): ${JSON.stringify(
-        tokenResponse
-      )}`
-    );
+    throw new InvalidResponseError(["access_token"]);
   }
 
   if (!hasIdToken(tokenResponse)) {
-    throw new Error(
-      `Invalid token endpoint response (missing the field 'id_token'): ${JSON.stringify(
-        tokenResponse
-      )}.`
-    );
+    throw new InvalidResponseError(["id_token"]);
   }
 
   if (!hasTokenType(tokenResponse)) {
-    throw new Error(
-      `Invalid token endpoint response (missing the field 'token_type'): ${JSON.stringify(
-        tokenResponse
-      )}`
-    );
+    throw new InvalidResponseError(["token_type"]);
   }
 
   if (!hasExpiresIn(tokenResponse)) {
-    throw new Error(
-      `Invalid token endpoint response (invalid field 'expires_in'): ${JSON.stringify(
-        tokenResponse
-      )}`
-    );
+    throw new InvalidResponseError(["expires_in"]);
   }
 
   // TODO: Due to a bug in both the ESS ID broker AND NSS (what were the odds), a DPoP token is returned
