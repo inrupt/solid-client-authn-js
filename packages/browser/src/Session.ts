@@ -460,6 +460,7 @@ export class Session extends EventEmitter {
    * Register a callback function to be called when a user logs out:
    *
    * @param callback The function called when an error occurs.
+   * @since 1.11.0
    */
   onError(
     callback: (
@@ -482,6 +483,12 @@ export class Session extends EventEmitter {
     this.on("sessionRestore", callback);
   }
 
+  /**
+   * Register a callback that runs when the session expires and can no longer
+   * make authenticated requests, but following a user logout.
+   * @param callback The function that runs on session expiration.
+   * @since 1.11.0
+   */
   onSessionExpiration(callback: () => unknown): void {
     this.on(EVENTS.SESSION_EXPIRED, callback);
   }
