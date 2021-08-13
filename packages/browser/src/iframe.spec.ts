@@ -86,7 +86,6 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(false, true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setupIframeListener(callback as any);
 
     window.postMessage(
@@ -105,7 +104,6 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setupIframeListener(callback as any);
 
     window.postMessage(
@@ -124,7 +122,6 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setupIframeListener(callback as any);
 
     window.postMessage(
@@ -144,7 +141,6 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setupIframeListener(callback as any);
 
     window.postMessage(
@@ -163,7 +159,6 @@ describe("setupIframeListener", () => {
     const callback = jest.fn();
     const blockingPromise = mockEventListener();
     setupDom(true, true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setupIframeListener(callback as any);
 
     expect(document.getElementsByTagName("iframe")[0]).not.toBeUndefined();

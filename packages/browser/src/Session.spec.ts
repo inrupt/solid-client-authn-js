@@ -608,7 +608,6 @@ describe("Session", () => {
 
       const mySession = new Session({}, "mySession");
       const iframe = jest.requireMock("../src/iframe");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const postIri = jest.spyOn(iframe as any, "postRedirectUrlToParent");
       await mySession.handleIncomingRedirect({
         url: "https://some.redirect.url?code=someCode&state=someState",
@@ -729,9 +728,7 @@ describe("Session", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
       clientAuthentication.handleIncomingRedirect = (
-        jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .fn() as any
+        jest.fn() as any
       ).mockResolvedValue(
         undefined
       ) as typeof clientAuthentication.handleIncomingRedirect;
@@ -804,7 +801,6 @@ describe("Session", () => {
       );
       // Check that second parameter is of type session
       expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (clientAuthentication.login as any).mock.calls[0][1]
       ).toBeInstanceOf(Session);
     });
@@ -868,20 +864,18 @@ describe("Session", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
       clientAuthentication.validateCurrentSession = (
-        jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .fn() as any
+        jest.fn() as any
       ).mockResolvedValue({
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
         redirectUrl: "https://some.redirect/url",
       }) as typeof clientAuthentication.validateCurrentSession;
-      clientAuthentication.handleIncomingRedirect =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (jest.fn() as any).mockResolvedValue(
-          undefined
-        ) as typeof clientAuthentication.handleIncomingRedirect;
+      clientAuthentication.handleIncomingRedirect = (
+        jest.fn() as any
+      ).mockResolvedValue(
+        undefined
+      ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn();
 
       const mySession = new Session({ clientAuthentication });
@@ -909,9 +903,7 @@ describe("Session", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
       clientAuthentication.validateCurrentSession = (
-        jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .fn() as any
+        jest.fn() as any
       ).mockResolvedValue({
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
@@ -919,9 +911,7 @@ describe("Session", () => {
         redirectUrl: "https://some.redirect/url",
       });
       clientAuthentication.handleIncomingRedirect = (
-        jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .fn() as any
+        jest.fn() as any
       ).mockResolvedValue(undefined);
       clientAuthentication.login = jest.fn();
 
@@ -941,9 +931,7 @@ describe("Session", () => {
       const myCallback = jest.fn();
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = (
-        jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .fn() as any
+        jest.fn() as any
       ).mockResolvedValue({
         isLoggedIn: true,
         sessionId: "a session ID",
@@ -1038,9 +1026,7 @@ describe("Session", () => {
       // This pretends the login is successful.
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = (
-        jest
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .fn() as any
+        jest.fn() as any
       ).mockResolvedValue({
         isLoggedIn: true,
         sessionId: "a session ID",
@@ -1120,7 +1106,6 @@ describe("Session", () => {
       );
       // Check that second parameter is of type session
       expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (clientAuthentication.login as any).mock.calls[0][1]
       ).toBeInstanceOf(Session);
     });
@@ -1143,9 +1128,7 @@ describe("Session", () => {
       // ../src/iframe is mocked for other tests,
       // but we need `setupIframeListener` to actually be executed
       // so that the callback gets called:
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const iframeMock = jest.requireMock("../src/iframe") as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const iframeActual = jest.requireActual("../src/iframe") as any;
       iframeMock.setupIframeListener.mockImplementationOnce(
         iframeActual.setupIframeListener
@@ -1188,9 +1171,7 @@ describe("Session", () => {
       // ../src/iframe is mocked for other tests,
       // but we need `setupIframeListener` to actually be executed
       // so that the callback gets called:
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const iframeMock = jest.requireMock("../src/iframe") as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const iframeActual = jest.requireActual("../src/iframe") as any;
       iframeMock.setupIframeListener.mockImplementationOnce(
         iframeActual.setupIframeListener
@@ -1200,7 +1181,6 @@ describe("Session", () => {
       // be written to; we only do so for tests to pretend we have an existing
       // logged-in session that remains logged in after failed silent
       // authentication.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mySession as any).info = {
         isLoggedIn: true,
         webId: "https://some.pod/profile#me",

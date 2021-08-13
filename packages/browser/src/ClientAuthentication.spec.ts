@@ -48,7 +48,6 @@ import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-    /* eslint-disable @typescript-eslint/no-explicit-any */
   ) as any;
   return {
     // We only want to fetch specific functions that result in a network fetch,
@@ -419,7 +418,6 @@ describe("ClientAuthentication", () => {
     // In the following describe block, (window as any) is used
     // multiple types to override the window type definition and
     // allow localStorage to be written.
-    /* eslint-disable @typescript-eslint/no-explicit-any */
     it("returns null no current session is in storage", async () => {
       const clientAuthn = getClientAuthentication({});
 

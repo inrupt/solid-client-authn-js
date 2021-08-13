@@ -85,11 +85,9 @@ describe("getWebidFromTokenPayload", () => {
     const mockedFetch = jest.fn(() =>
       Promise.resolve(new NodeResponse(payload, { status: statusCode }))
     );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const crossFetch = jest.requireMock("cross-fetch") as any;
     crossFetch.fetch = mockedFetch;
     // To avoid having to duplicate the mocked fetch's type definition:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return mockedFetch as any;
   };
 

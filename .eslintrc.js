@@ -16,6 +16,13 @@ module.exports = {
     {
       files: ["**/__mocks__/**"],
     },
+    {
+      files: ["**/*.spec.ts"],
+      rules: {
+        // Using 'any' in the tests is usually justified.
+        "@typescript-eslint/no-explicit-any": "off",
+      },
+    },
   ],
   env: {
     // eslint will complain about imports from @jest/globals shadowing global

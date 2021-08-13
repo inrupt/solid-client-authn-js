@@ -53,7 +53,6 @@ describe("Headers interoperability function", () => {
   });
 
   it("supports non-iterable headers if they provide a reasonably standard way of browsing them", () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const myHeaders: any = {};
     myHeaders.forEach = (
       callback: (value: string, key: string) => void

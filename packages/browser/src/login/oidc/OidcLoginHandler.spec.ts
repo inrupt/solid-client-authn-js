@@ -102,9 +102,7 @@ describe("OidcLoginHandler", () => {
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
       clientId: "some dynamically registered ID",
       clientSecret: "some dynamically registered secret",
@@ -133,9 +131,7 @@ describe("OidcLoginHandler", () => {
   });
 
   it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
       clientId: "some dynamically registered ID",
       clientSecret: "some dynamically registered secret",
@@ -298,7 +294,6 @@ describe("OidcLoginHandler", () => {
 
   it("should indicate it cannot handle logins without an issuer", async () => {
     const handler = getInitialisedHandler();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await expect(handler.canHandle({} as any)).resolves.toBe(false);
   });
 

@@ -51,7 +51,6 @@ jest.mock("cross-fetch");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) as any;
   return {
     ...actualCoreModule,
@@ -220,7 +219,6 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
   const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Issuer } = jest.requireMock("openid-client") as any;
     function clientConstructor() {
       // this is untyped, which makes TS complain
@@ -325,7 +323,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("cleans up the redirect IRI from the OIDC parameters", async () => {
       // This function represents the openid-client callback
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const callback = (jest.fn() as any).mockResolvedValueOnce(
         mockDpopTokens()
       );

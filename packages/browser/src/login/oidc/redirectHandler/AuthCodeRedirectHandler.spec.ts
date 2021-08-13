@@ -395,7 +395,6 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       mockLocalStorage({});
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       window.fetch = (jest.fn() as any).mockReturnValue(
         new Promise((resolve) => {
           resolve(
@@ -440,7 +439,6 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       mockLocalStorage({});
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       window.fetch = (jest.fn() as any).mockReturnValue(
         new Promise((resolve) => {
           resolve(
@@ -490,7 +488,6 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       mockLocalStorage({});
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       window.fetch = (jest.fn() as any).mockReturnValue(
         new Promise((resolve) => {
           resolve(
@@ -568,7 +565,6 @@ describe("AuthCodeRedirectHandler", () => {
       mockOidcClient();
       const mockedOidcClient = jest.requireMock(
         "@inrupt/oidc-client-ext"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ) as any;
       jest.spyOn(mockedOidcClient, "getBearerToken").mockReturnValueOnce({
         accessToken: mockAccessTokenBearer(),
@@ -736,11 +732,7 @@ describe("AuthCodeRedirectHandler", () => {
   it("swallows the exception if the fetch to the session endpoint fails", async () => {
     mockOidcClient();
     mockLocalStorage({});
-    window.fetch = (
-      jest
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .fn() as any
-    )
+    window.fetch = (jest.fn() as any)
       .mockResolvedValueOnce(
         new Response("https://my.webid", {
           status: 200,
@@ -812,7 +804,6 @@ describe("AuthCodeRedirectHandler", () => {
     const mockedStorage = mockDefaultRedirectStorage();
     const coreModule = jest.requireActual(
       "@inrupt/solid-client-authn-core"
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,

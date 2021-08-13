@@ -66,7 +66,6 @@ describe("getSessionFromStorage", () => {
       });
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
@@ -100,7 +99,6 @@ describe("getSessionFromStorage", () => {
       .mockResolvedValueOnce();
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
@@ -123,7 +121,6 @@ describe("getSessionFromStorage", () => {
       .mockResolvedValueOnce(undefined);
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
@@ -142,7 +139,6 @@ describe("getSessionFromStorage", () => {
       .mockResolvedValueOnce(undefined);
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
@@ -172,7 +168,6 @@ describe("getStoredSessionIdAll", () => {
     });
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
@@ -194,7 +189,6 @@ describe("getStoredSessionIdAll", () => {
     });
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
@@ -224,7 +218,6 @@ describe("clearSessionAll", () => {
     });
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
@@ -243,7 +236,6 @@ describe("clearSessionAll", () => {
     });
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dependencies = jest.requireMock("./dependencies") as any;
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()

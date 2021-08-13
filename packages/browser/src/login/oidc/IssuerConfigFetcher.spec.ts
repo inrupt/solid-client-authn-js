@@ -52,7 +52,6 @@ describe("IssuerConfigFetcher", () => {
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
     window.fetch = mockFetch as typeof window.fetch;
     const fetchedConfig = await configFetcher.fetchConfig(
@@ -60,10 +59,8 @@ describe("IssuerConfigFetcher", () => {
     );
     expect(fetchedConfig.issuer.startsWith("https:")).toBeTruthy();
     expect(fetchedConfig.issuer).toBe("https://example.com");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((fetchedConfig as any).claim_types_supported).toBeUndefined();
     expect(fetchedConfig.claimTypesSupported).toBe("oidc");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((fetchedConfig as any).bleepBloop).toBeUndefined();
   });
 
@@ -94,7 +91,6 @@ describe("IssuerConfigFetcher", () => {
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
     window.fetch = mockFetch as typeof window.fetch;
     const fetchedConfig = await configFetcher.fetchConfig(
