@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-node",
-  "version": "1.10.1",
+  "version": "1.11.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@inrupt/jose-legacy-modules": "0.0.3-3.14.3",
-    "@inrupt/solid-client-authn-core": "^1.10.1",
+    "@inrupt/solid-client-authn-core": "^1.11.0",
     "@types/node": "^15.0.1",
     "@types/uuid": "^8.3.0",
     "cross-fetch": "^3.0.6",
