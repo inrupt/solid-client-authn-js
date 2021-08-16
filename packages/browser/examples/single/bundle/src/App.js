@@ -55,7 +55,7 @@ export default function App() {
 
   const errorHandle = (error, errorDescription) => {
     console.log(`${error} has occured: `, errorDescription);
-  }
+  };
 
   const handleLogin = (e) => {
     // The default behaviour of the button is to resubmit.
