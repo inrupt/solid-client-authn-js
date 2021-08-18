@@ -55,7 +55,7 @@ export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
     registration_endpoint: "https://my.idp/register",
     jwks_uri: "https://my.idp/jwks",
     claims_supported: ["sub"],
-    subject_types_supported: ["public", "pairwise"],
+    subject_types_supported: ["public"],
     id_token_signing_alg_values_supported: ["ES256", "RS256"],
     grant_types_supported: [
       "authorization_code",

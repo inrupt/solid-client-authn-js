@@ -82,7 +82,7 @@ const mockIssuer = (): IIssuerConfig => {
     tokenEndpoint: "https://some.issuer/token",
     jwksUri: "https://some.issuer/keys",
     claimsSupported: ["code", "openid"],
-    subjectTypesSupported: ["public", "pairwise"],
+    subjectTypesSupported: ["public"],
     registrationEndpoint: "https://some.issuer/registration",
     grantTypesSupported: ["authorization_code"],
   };

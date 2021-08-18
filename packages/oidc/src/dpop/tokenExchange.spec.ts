@@ -159,7 +159,7 @@ describe("getTokens", () => {
       authorizationEndpoint: "https://some.issuer/autorization",
       jwksUri: "https://some.issuer/keys",
       claimsSupported: ["code", "openid"],
-      subjectTypesSupported: ["public", "pairwise"],
+      subjectTypesSupported: ["public"],
       registrationEndpoint: "https://some.issuer/registration",
       grantTypesSupported: ["authorization_code"],
       // Note that the token endpoint is missing, which mandates the type assertion
