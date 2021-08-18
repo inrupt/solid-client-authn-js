@@ -7,6 +7,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### oidc
+
+- When dynamically registering a Client to a Solid Identity Provider, the subject
+type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
+sense in the context of Solid, where subjects (in this case, users) are uniquely
+identified by their WebID. This was disregarded by current Solid Identity Providers, 
+so it should not have affected dependants, but it's technically more correct.
+
 The following sections document changes that have been released already:
 
 ## 1.11.0 - 2021-08-12
