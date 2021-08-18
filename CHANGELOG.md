@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### node
+
+- The `prompt=consent` parameter was missing when redirecting the user to the Solid
+Identity Provider authorization endpoint. This prevented working with the Community
+Solid Server Identity Provider.
+
 The following sections document changes that have been released already:
 
 ## 1.11.0 - 2021-08-12
