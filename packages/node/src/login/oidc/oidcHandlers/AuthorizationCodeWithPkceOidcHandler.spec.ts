@@ -109,6 +109,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         oidcOptions.redirectUrl
       );
       expect(builtUrl.searchParams.get("code_challenge")).not.toBeNull();
+      expect(builtUrl.searchParams.get("prompt")).toBe("consent");
     });
 
     it("saves relevant information in storage", async () => {
