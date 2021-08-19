@@ -77,6 +77,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       response_type: "code",
       redirect_uri: oidcLoginOptions.redirectUrl,
       code_challenge_method: "S256",
+      prompt: "consent",
       // The offline_access scope asks the provider to issue a refresh token.
       scope: "openid offline_access",
     });
