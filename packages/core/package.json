@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@inrupt/vocab-inrupt-common": "^0.7.2",
-    "@types/jest": "^26.0.19",
+    "@types/jest": "^27.0.1",
     "@types/n3": "^1.4.4",
     "@types/node-fetch": "^2.5.6",
     "eslint": "^7.16.0",
@@ -38,7 +38,7 @@
     "typescript": "^4.0.5"
   },
   "dependencies": {
-    "@inrupt/jose-legacy-modules": "0.0.3-3.14.3",
+    "@inrupt/jose-legacy-modules": "0.0.3-3.14.4",
     "@inrupt/solid-common-vocab": "^1.0.0",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/uuid": "^8.3.0",
