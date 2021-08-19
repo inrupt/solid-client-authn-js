@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Bugfixes
 
+#### oidc
+
+- When dynamically registering a Client to a Solid Identity Provider, the subject
+type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
+sense in the context of Solid, where subjects (in this case, users) are uniquely
+identified by their WebID. This was disregarded by current Solid Identity Providers, 
+so it should not have affected dependants, but it's technically more correct.
+
 #### node
 
 - The `prompt=consent` parameter was missing when redirecting the user to the Solid

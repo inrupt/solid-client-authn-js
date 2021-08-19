@@ -116,7 +116,7 @@ export async function registerClient(
     client_name: options.clientName,
     application_type: "web",
     redirect_uris: [options.redirectUrl?.toString()],
-    subject_type: "pairwise",
+    subject_type: "public",
     token_endpoint_auth_method: "client_secret_basic",
     id_token_signed_response_alg: signingAlg,
     grant_types: ["authorization_code", "refresh_token"],

@@ -35,7 +35,7 @@ const getMockIssuer = (): IIssuerConfig => {
     tokenEndpoint: "https://some.issuer/token",
     jwksUri: "https://some.issuer/keys",
     claimsSupported: ["code", "openid"],
-    subjectTypesSupported: ["public", "pairwise"],
+    subjectTypesSupported: ["public"],
     registrationEndpoint: "https://some.issuer/registration",
     idTokenSigningAlgValuesSupported: ["RS256"],
   };
@@ -134,7 +134,7 @@ describe("registerClient", () => {
         client_name: options.clientName,
         application_type: "web",
         redirect_uris: [options.redirectUrl?.toString()],
-        subject_type: "pairwise",
+        subject_type: "public",
         token_endpoint_auth_method: "client_secret_basic",
         id_token_signed_response_alg: "RS256",
         grant_types: ["authorization_code", "refresh_token"],
