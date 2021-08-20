@@ -36,6 +36,7 @@ export const EVENTS = {
   ERROR: "onError",
   SESSION_EXPIRED: "sessionExpired",
   SESSION_EXTENDED: "sessionExtended",
+  TIMEOUT_SET: "timeoutSet",
 };
 /**
  * We want to refresh a token 5 seconds before it expires.
