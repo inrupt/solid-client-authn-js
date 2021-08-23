@@ -146,6 +146,15 @@ describe("Session", () => {
         "some refresh token"
       );
     });
+
+    it("listens on the timeout event", () => {
+      const mySession = new Session();
+      mySession.emit(EVENTS.TIMEOUT_SET, 0);
+      expect(
+        (mySession as unknown as { lastTimeoutHandle: number })
+          .lastTimeoutHandle
+      ).toBe(0);
+    });
   });
 
   describe("login", () => {
@@ -184,6 +193,18 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       await mySession.logout();
       expect(clientAuthnLogout).toHaveBeenCalled();
+    });
+
+    it("clears the timeouts", async () => {
+      const mySession = new Session({
+        clientAuthentication: mockClientAuthentication(),
+      });
+      (
+        mySession as unknown as { lastTimeoutHandle: number }
+      ).lastTimeoutHandle = 12345;
+      const spiedClearTimeout = jest.spyOn(global, "clearTimeout");
+      await mySession.logout();
+      expect(spiedClearTimeout).toHaveBeenCalledWith(12345);
     });
   });
 

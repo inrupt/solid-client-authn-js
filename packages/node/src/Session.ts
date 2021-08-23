@@ -95,6 +95,8 @@ export class Session extends EventEmitter {
 
   private tokenRequestInProgress = false;
 
+  private lastTimeoutHandle = 0;
+
   /**
    * Session object constructor. Typically called as follows:
    *
@@ -151,6 +153,11 @@ export class Session extends EventEmitter {
     if (sessionOptions.onNewRefreshToken !== undefined) {
       this.onNewRefreshToken(sessionOptions.onNewRefreshToken);
     }
+    // Keeps track of the latest timeout handle in order to clean up on logout
+    // and not leave open timeouts.
+    this.on(EVENTS.TIMEOUT_SET, (timeoutHandle: number) => {
+      this.lastTimeoutHandle = timeoutHandle;
+    });
   }
 
   /**
@@ -197,6 +204,8 @@ export class Session extends EventEmitter {
    */
   logout = async (): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
+    // Clears the timeouts on logout so that Node does not hang.
+    clearTimeout(this.lastTimeoutHandle);
     this.info.isLoggedIn = false;
     this.emit("logout");
   };
