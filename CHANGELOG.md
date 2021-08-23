@@ -22,6 +22,8 @@ so it should not have affected dependants, but it's technically more correct.
 - The `prompt=consent` parameter was missing when redirecting the user to the Solid
 Identity Provider authorization endpoint. This prevented working with the Community
 Solid Server Identity Provider.
+- Proactive refreshing of the token prevented NodeJS from shutting down gracefully.
+Logging out now clear the timeout previously set, which resolves the issue.
 
 The following sections document changes that have been released already:
 
