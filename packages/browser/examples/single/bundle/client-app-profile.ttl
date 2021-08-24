@@ -5,6 +5,6 @@
     "redirect_uris" : ["http://localhost:3113/"],
     "client_name" : "Demo app",
     "scope" : "openid offline_access",
-    "grant_types" : ["authorization_code"],
+    "grant_types" : ["authorization_code", "refresh_token"],
     "response_types" : ["code"]
     }""" .
