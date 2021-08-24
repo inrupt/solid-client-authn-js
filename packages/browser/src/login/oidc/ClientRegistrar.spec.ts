@@ -86,7 +86,7 @@ describe("ClientRegistrar", () => {
           /* eslint-disable camelcase */
           application_type: "web",
           redirect_uris: ["https://example.com"],
-          subject_type: "pairwise",
+          subject_type: "public",
           token_endpoint_auth_method: "client_secret_basic",
           id_token_signed_response_alg: "RS256",
           grant_types: ["authorization_code", "refresh_token"],

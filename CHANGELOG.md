@@ -7,7 +7,41 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### oidc
+
+- When dynamically registering a Client to a Solid Identity Provider, the subject
+type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
+sense in the context of Solid, where subjects (in this case, users) are uniquely
+identified by their WebID. This was disregarded by current Solid Identity Providers, 
+so it should not have affected dependants, but it's technically more correct.
+
+#### node
+
+- The `prompt=consent` parameter was missing when redirecting the user to the Solid
+Identity Provider authorization endpoint. This prevented working with the Community
+Solid Server Identity Provider.
+- Proactive refreshing of the token prevented NodeJS from shutting down gracefully.
+Logging out now clear the timeout previously set, which resolves the issue.
+
 The following sections document changes that have been released already:
+
+## 1.11.1 - 2021-08-20
+
+#### oidc
+
+- When dynamically registering a Client to a Solid Identity Provider, the subject
+type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
+sense in the context of Solid, where subjects (in this case, users) are uniquely
+identified by their WebID. This was disregarded by current Solid Identity Providers, 
+so it should not have affected dependants, but it's technically more correct.
+
+#### node
+
+- The `prompt=consent` parameter was missing when redirecting the user to the Solid
+Identity Provider authorization endpoint. This prevented working with the Community
+Solid Server Identity Provider.
 
 ## 1.11.0 - 2021-08-12
 

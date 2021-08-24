@@ -392,6 +392,8 @@ describe("buildAuthenticatedFetch", () => {
       expiresIn: 7,
     });
     const spyTimeout = jest.spyOn(global, "setTimeout");
+    const mockedEmitter = new EventEmitter();
+    const spiedEmit = jest.spyOn(mockedEmitter, "emit");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
@@ -399,6 +401,7 @@ describe("buildAuthenticatedFetch", () => {
         tokenRefresher: mockRefresher,
       },
       expiresIn: 6,
+      eventEmitter: mockedEmitter,
     });
     // Run the timer to pretend the token is about to expire
     // jest.advanceTimersByTime(1800 * 1000);
@@ -410,6 +413,10 @@ describe("buildAuthenticatedFetch", () => {
       expect.any(Function),
       // 2000 is 7 - 5, which is the number of seconds before refreshing, converted to ms.
       2 * 1000
+    );
+    expect(spiedEmit).toHaveBeenCalledWith(
+      EVENTS.TIMEOUT_SET,
+      expect.anything()
     );
   });
 
@@ -541,7 +548,11 @@ describe("buildAuthenticatedFetch", () => {
       eventEmitter: mockEmitter,
     });
     await sleep(200);
-    expect(spiedEmit).toHaveBeenCalledTimes(2);
+    expect(spiedEmit).toHaveBeenCalledTimes(3);
+    expect(spiedEmit).toHaveBeenCalledWith(
+      EVENTS.TIMEOUT_SET,
+      expect.anything()
+    );
     expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
     expect(spiedEmit).toHaveBeenCalledWith(
       EVENTS.ERROR,
@@ -569,7 +580,11 @@ describe("buildAuthenticatedFetch", () => {
       eventEmitter: mockEmitter,
     });
     await sleep(100);
-    expect(spiedEmit).toHaveBeenCalledTimes(1);
+    expect(spiedEmit).toHaveBeenCalledTimes(2);
+    expect(spiedEmit).toHaveBeenCalledWith(
+      EVENTS.TIMEOUT_SET,
+      expect.anything()
+    );
     expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
   });
 
@@ -588,7 +603,11 @@ describe("buildAuthenticatedFetch", () => {
       eventEmitter: mockEmitter,
     });
     await sleep(100);
-    expect(spiedEmit).toHaveBeenCalledTimes(1);
+    expect(spiedEmit).toHaveBeenCalledTimes(2);
+    expect(spiedEmit).toHaveBeenCalledWith(
+      EVENTS.TIMEOUT_SET,
+      expect.anything()
+    );
     expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
   });
 

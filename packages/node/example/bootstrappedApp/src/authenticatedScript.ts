@@ -44,6 +44,7 @@ async function main(): Promise<void> {
         return response.text();
       })
       .then(console.log);
+    session.logout();
   } else {
     console.log("Not logged in.");
   }

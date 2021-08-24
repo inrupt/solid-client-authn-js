@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "license": "MIT",
   "types": "dist/index",
   "browser": "dist/index.js",
@@ -64,9 +64,9 @@
     "webpack-merge": "^5.7.2"
   },
   "dependencies": {
-    "@inrupt/jose-legacy-modules": "0.0.3-3.14.4",
-    "@inrupt/oidc-client-ext": "^1.11.0",
-    "@inrupt/solid-client-authn-core": "^1.11.0",
+    "@inrupt/jose-legacy-modules": "0.0.3-3.15.4",
+    "@inrupt/oidc-client-ext": "^1.11.1",
+    "@inrupt/solid-client-authn-core": "^1.11.1",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/node": "^15.0.1",
     "@types/uuid": "^8.3.0",

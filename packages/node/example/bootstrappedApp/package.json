@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/inrupt/solid-client-authn-js#readme",
   "dependencies": {
-    "@inrupt/solid-client-authn-core": "^1.1.0",
     "express": "^4.17.1",
     "yargs": "^16.1.1"
   },
