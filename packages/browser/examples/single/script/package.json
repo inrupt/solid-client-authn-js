@@ -15,6 +15,6 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "ts-node": "^10.2.0"
+    "ts-node": "^10.2.1"
   }
 }
