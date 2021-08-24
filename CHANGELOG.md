@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following sections document changes that have been released already:
+
+## 1.11.2 - 2021-08-24
+
 ### Bugfixes
 
 #### oidc
@@ -24,8 +28,6 @@ Identity Provider authorization endpoint. This prevented working with the Commun
 Solid Server Identity Provider.
 - Proactive refreshing of the token prevented NodeJS from shutting down gracefully.
 Logging out now clear the timeout previously set, which resolves the issue.
-
-The following sections document changes that have been released already:
 
 ## 1.11.1 - 2021-08-20
 
