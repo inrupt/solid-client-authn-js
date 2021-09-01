@@ -93,6 +93,7 @@ export function setupIframeListener(
  * the authorization endpoint to the parent window.
  */
 export function postRedirectUrlToParent(redirectUrl: string): void {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   window.top!.postMessage(
     {
       redirectUrl,

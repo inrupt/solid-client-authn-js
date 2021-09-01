@@ -179,7 +179,8 @@ describe("setupIframeListener", () => {
 
 describe("postRedirectUrlToParent", () => {
   it("posts a message to the parent window with the provided url", () => {
-    const spyPost = jest.spyOn(window.top, "postMessage");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const spyPost = jest.spyOn(window.top!, "postMessage");
     jest.spyOn(window, "location", "get").mockReturnValue({
       origin: "https://some.origin/",
     } as unknown as Location);
