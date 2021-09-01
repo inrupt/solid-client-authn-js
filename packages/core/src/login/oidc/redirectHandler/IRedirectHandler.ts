@@ -50,6 +50,9 @@ type IRedirectHandler = IHandleable<
 >;
 export default IRedirectHandler;
 
+type WithMessage = { message: string };
+type WithStack = { stack: string };
+
 export async function fetchJwks(
   jwksIri: string,
   issuerIri: string
@@ -70,7 +73,9 @@ export async function fetchJwks(
     jwk = (await jwksResponse.json()).keys[0] as JWK;
   } catch (e) {
     throw new Error(
-      `Malformed JWKS for [${issuerIri}] at [${jwksIri}]: ${e.message}`
+      `Malformed JWKS for [${issuerIri}] at [${jwksIri}]: ${
+        (e as WithMessage).message
+      }`
     );
   }
   return jwk;
@@ -104,7 +109,7 @@ export async function getWebidFromTokenPayload(
     );
     payload = verifiedPayload;
   } catch (e) {
-    throw new Error(`ID token verification failed: ${e.stack}`);
+    throw new Error(`ID token verification failed: ${(e as WithStack).stack}`);
   }
 
   if (typeof payload.webid === "string") {

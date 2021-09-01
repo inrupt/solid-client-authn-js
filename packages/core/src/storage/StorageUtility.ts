@@ -83,7 +83,7 @@ export async function loadOidcContextFromStorage(
     };
   } catch (e) {
     throw new Error(
-      `Failed to retrieve OIDC context from storage associated with session [${sessionId}]: ${e.toString()}`
+      `Failed to retrieve OIDC context from storage associated with session [${sessionId}]: ${e}`
     );
   }
 }
