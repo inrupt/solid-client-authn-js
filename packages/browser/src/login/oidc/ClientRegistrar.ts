@@ -104,7 +104,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       );
       return registeredClient;
     } catch (error) {
-      throw new Error(`Client registration failed: [${error.toString()}]`);
+      throw new Error(`Client registration failed: [${error}]`);
     }
   }
 }

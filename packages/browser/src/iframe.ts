@@ -93,7 +93,7 @@ export function setupIframeListener(
  * the authorization endpoint to the parent window.
  */
 export function postRedirectUrlToParent(redirectUrl: string): void {
-  window.top.postMessage(
+  window.top!.postMessage(
     {
       redirectUrl,
     },
