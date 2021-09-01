@@ -46,7 +46,7 @@ export class FallbackRedirectHandler implements IRedirectHandler {
       return true;
     } catch (e) {
       throw new Error(
-        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`
       );
     }
   }
