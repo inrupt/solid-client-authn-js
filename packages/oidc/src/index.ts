@@ -39,7 +39,7 @@ export {
   SessionMonitor,
   // Global,
   User,
-} from "oidc-client";
+} from "@inrupt/oidc-client";
 
 export { registerClient } from "./dcr/clientRegistrar";
 export {

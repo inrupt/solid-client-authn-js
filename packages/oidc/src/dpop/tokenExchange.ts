@@ -20,7 +20,7 @@
  */
 
 import formurlencoded from "form-urlencoded";
-import { OidcClient } from "oidc-client";
+import { OidcClient } from "@inrupt/oidc-client";
 import {
   IClient,
   IIssuerConfig,

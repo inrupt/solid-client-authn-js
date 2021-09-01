@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { OidcClient, WebStorageStateStore } from "oidc-client";
+import { OidcClient, WebStorageStateStore } from "@inrupt/oidc-client";
 
 /**
  * Removes OIDC-specific query parameters from a given URL (state, code...), and
