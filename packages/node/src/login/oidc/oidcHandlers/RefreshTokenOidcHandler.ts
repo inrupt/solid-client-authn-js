@@ -106,7 +106,7 @@ async function refreshAccess(
       fetch: authFetch,
     });
   } catch (e) {
-    throw new Error(`Invalid refresh credentials: ${e.toString()}`);
+    throw new Error(`Invalid refresh credentials: ${e}`);
   }
 }
 

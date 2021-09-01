@@ -74,7 +74,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       );
     } catch (e) {
       throw new Error(
-        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e.toString()}`
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`
       );
     }
   }
