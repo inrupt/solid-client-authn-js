@@ -1,6 +1,6 @@
 # oidc-client-ext
 
-This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), and adds the following features to it: 
+This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js) (forked in [`@inrupt/oidc-clienr`](https://github.com/inrupt/oidc-client-js)), and adds the following features to it: 
 - Dynamic client registration
 [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html) is part of the [OpenID](https://openid.net) specification and it allows OAuth client applications to dynamically register with an OAuth server.
 To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/openid-connect/openid-connect-understanding-dcr/)
