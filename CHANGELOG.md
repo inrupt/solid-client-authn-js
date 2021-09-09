@@ -7,6 +7,15 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bugfixes
+
+#### oidc
+
+- Since `oidc-client` has been deprecated, and won't be maintained anymore, the 
+OIDC package now depends on a fork, `@inrupt/oidc-client`, so that we can ensure
+the dependencies are kept up-to-date. This should be transparent for users of
+`@inrupt/solid-client-authn-browser`.
+
 The following sections document changes that have been released already:
 
 ## 1.11.2 - 2021-08-24

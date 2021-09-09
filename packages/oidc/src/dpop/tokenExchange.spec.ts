@@ -421,7 +421,7 @@ describe("getDpopToken", () => {
   });
 });
 
-jest.mock("oidc-client");
+jest.mock("@inrupt/oidc-client");
 
 const defaultOidcClient = {
   metadata: {
@@ -432,9 +432,11 @@ const defaultOidcClient = {
 };
 const mockOidcClient = (clientSettings: any = defaultOidcClient) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const { processSigninResponse } = jest.requireActual("oidc-client") as any;
+  const { processSigninResponse } = jest.requireActual(
+    "@inrupt/oidc-client"
+  ) as any;
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const oidcModule = jest.requireMock("oidc-client") as any;
+  const oidcModule = jest.requireMock("@inrupt/oidc-client") as any;
   oidcModule.OidcClient = jest.fn().mockImplementation(() => {
     return {
       processSigninResponse: async (

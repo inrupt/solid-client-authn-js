@@ -20,10 +20,10 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { OidcClient } from "oidc-client";
+import { OidcClient } from "@inrupt/oidc-client";
 import { removeOidcQueryParam, clearOidcPersistentStorage } from "./cleanup";
 
-jest.mock("oidc-client", () => {
+jest.mock("@inrupt/oidc-client", () => {
   const mockClient = {
     clearStaleState: jest.fn(),
   };

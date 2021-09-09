@@ -22,7 +22,7 @@ and mostly differ by their main dependency, namely the third-party library imple
 - `@inrupt/solid-client-authn-node` depends on [`openid-client`](https://github.com/panva/node-openid-client/).
 - `@inrupt/solid-client-authn-browser` depends on `@inrupt/oidc-client-ext`. 
 `@inrupt/oidc-client-ext` in turn depends on
-[`oidc-client`](https://github.com/IdentityModel/oidc-client-js),
+[`@inrupt/oidc-client`](https://github.com/inrupt/oidc-client-js),
 extending it with support for
 [DPoP tokens](https://tools.ietf.org/html/draft-ietf-oauth-dpop-01) and 
 [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html).
