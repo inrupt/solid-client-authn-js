@@ -98,3 +98,7 @@ Go to http://localhost:3001/.
 #### Running an authenticated script
 
 See [the dedicated documentation](/packages/node/example/bootstrappedApp/README.md).
+
+## Using with jest
+
+Due to [a behavior from jsdom](https://github.com/jsdom/jsdom/issues/2524), `@inrupt/solid-client-authn-browser` needs some adjustments if you want to run it with `jest`. There are multiple options, listed in [a dedicated issue](https://github.com/inrupt/solid-client-authn-js/issues/1676). Thanks to [Angelo V.](https://github.com/angelo-v) for proposing a mitigation.
