@@ -36,157 +36,201 @@ config({
   silent: process.env.CI === "true",
 });
 
-// This first test just saves the trouble of looking for a library failure when
-// the environment wasn't properly set.
-describe("Environment", () => {
-  it("contains the expected environment variables", () => {
-    expect(process.env.E2E_TEST_CLIENT_ID).not.toBeUndefined();
-    expect(process.env.E2E_TEST_CLIENT_SECRET).not.toBeUndefined();
-    expect(process.env.E2E_TEST_IDP_URL).not.toBeUndefined();
-  });
-});
+type OidcIssuer = string;
+type ClientId = string;
+type ClientSecret = string;
+type Pod = string;
+type AuthDetails = [Pod, OidcIssuer, ClientId, ClientSecret];
+// Instructions for obtaining these credentials can be found here:
+// https://github.com/inrupt/solid-client-authn-js/blob/1a97ef79057941d8ac4dc328fff18333eaaeb5d1/packages/node/example/bootstrappedApp/README.md
+const serversUnderTest: AuthDetails[] = [
+  // pod.inrupt.com:
+  [
+    // Cumbersome workaround, but:
+    // Trim `https://` from the start of these URLs,
+    // so that GitHub Actions doesn't replace them with *** in the logs.
+    process.env.E2E_TEST_ESS_POD!.replace(/^https:\/\//, ""),
+    process.env.E2E_TEST_ESS_IDP_URL!.replace(/^https:\/\//, ""),
+    process.env.E2E_TEST_ESS_CLIENT_ID!,
+    process.env.E2E_TEST_ESS_CLIENT_SECRET!,
+  ],
+  // dev-next.inrupt.com:
+  [
+    // Cumbersome workaround, but:
+    // Trim `https://` from the start of these URLs,
+    // so that GitHub Actions doesn't replace them with *** in the logs.
+    process.env.E2E_TEST_DEV_NEXT_POD!.replace(/^https:\/\//, ""),
+    process.env.E2E_TEST_DEV_NEXT_IDP_URL!.replace(/^https:\/\//, ""),
+    process.env.E2E_TEST_DEV_NEXT_CLIENT_ID!,
+    process.env.E2E_TEST_DEV_NEXT_CLIENT_SECRET!,
+  ],
+  // inrupt.net
+  // Unfortunately we cannot authenticate against Node Solid Server yet, due to this issue:
+  // https://github.com/solid/node-solid-server/issues/1533
+  // Once that is fixed, credentials can be added here, and the other `describe()` can be removed.
+];
 
-describe("Authenticated fetch", () => {
-  it("properly sets up session information", async () => {
-    const session = new Session();
-    await session.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
-    });
-    expect(session.info.isLoggedIn).toEqual(true);
-    expect(session.info.sessionId).not.toBeUndefined();
-    expect(session.info.webId).not.toBeUndefined();
-  });
+describe.each(serversUnderTest)(
+  "End-to-end authentication tests against Pod [%s] authenticated to [%s]",
+  (rootContainerDisplayName, oidcIssuerDisplayName, clientId, clientSecret) => {
+    const rootContainer = "https://" + rootContainerDisplayName;
+    const oidcIssuer = "https://" + oidcIssuerDisplayName;
 
-  it("can fetch a public resource when logged in", async () => {
-    const session = new Session();
-    await session.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const publicResourceUrl = session.info.webId!;
-    const response = await session.fetch(publicResourceUrl);
-    expect(response.status).toEqual(200);
-    await expect(response.text()).resolves.toContain(
-      ":PersonalProfileDocument"
-    );
-  });
-
-  it("can fetch a private resource when logged in", async () => {
-    const session = new Session();
-    await session.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
-    const response = await session.fetch(privateResourceUrl);
-    expect(response.status).toEqual(200);
-    await expect(response.text()).resolves.toContain("ldp:BasicContainer");
-  });
-
-  it("can fetch a private resource when logged in after the same fetch failed", async () => {
-    const session = new Session();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
-    let response = await session.fetch(privateResourceUrl);
-    expect(response.status).toEqual(401);
-
-    await session.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
+    // This first test just saves the trouble of looking for a library failure when
+    // the environment wasn't properly set.
+    describe("Environment", () => {
+      it("contains the expected environment variables", () => {
+        expect(rootContainer).not.toBeUndefined();
+        expect(clientSecret).not.toBeUndefined();
+        expect(oidcIssuer).not.toBeUndefined();
+      });
     });
 
-    response = await session.fetch(privateResourceUrl);
-    expect(response.status).toEqual(200);
+    describe("Authenticated fetch", () => {
+      it("properly sets up session information", async () => {
+        const session = new Session();
+        await session.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+        expect(session.info.isLoggedIn).toEqual(true);
+        expect(session.info.sessionId).not.toBeUndefined();
+        expect(session.info.webId).not.toBeUndefined();
+        await session.logout();
+      });
 
-    await session.logout();
-    response = await session.fetch(privateResourceUrl);
-    expect(response.status).toEqual(401);
-  });
+      it("can fetch a public resource when logged in", async () => {
+        const session = new Session();
+        await session.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const publicResourceUrl = session.info.webId!;
+        const response = await session.fetch(publicResourceUrl);
+        expect(response.status).toEqual(200);
+        await expect(response.text()).resolves.toContain(
+          ":PersonalProfileDocument"
+        );
+        await session.logout();
+      });
 
-  it("only logs in the requested session", async () => {
-    const authenticatedSession = new Session();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
+      it("can fetch a private resource when logged in", async () => {
+        const session = new Session();
+        await session.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+        const privateResourceUrl = rootContainer;
+        console.log(`Fetching ${privateResourceUrl}`);
+        const response = await session.fetch(privateResourceUrl);
+        expect(response.status).toEqual(200);
+        await expect(response.text()).resolves.toContain("ldp:BasicContainer");
+        await session.logout();
+      });
 
-    await authenticatedSession.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
+      it("can fetch a private resource when logged in after the same fetch failed", async () => {
+        const session = new Session();
+        const privateResourceUrl = rootContainer;
+        let response = await session.fetch(privateResourceUrl);
+        expect(response.status).toEqual(401);
+
+        await session.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+
+        response = await session.fetch(privateResourceUrl);
+        expect(response.status).toEqual(200);
+
+        await session.logout();
+        response = await session.fetch(privateResourceUrl);
+        expect(response.status).toEqual(401);
+        await session.logout();
+      });
+
+      it("only logs in the requested session", async () => {
+        const authenticatedSession = new Session();
+        const privateResourceUrl = rootContainer;
+
+        await authenticatedSession.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+
+        let response = await authenticatedSession.fetch(privateResourceUrl);
+        expect(response.status).toEqual(200);
+
+        const nonAuthenticatedSession = new Session();
+        response = await nonAuthenticatedSession.fetch(privateResourceUrl);
+        expect(response.status).toEqual(401);
+        await authenticatedSession.logout();
+      });
     });
 
-    let response = await authenticatedSession.fetch(privateResourceUrl);
-    expect(response.status).toEqual(200);
+    describe("Unauthenticated fetch", () => {
+      it("can fetch a public resource when not logged in", async () => {
+        const authenticatedSession = new Session();
+        await authenticatedSession.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const publicResourceUrl = authenticatedSession.info.webId!;
 
-    const nonAuthenticatedSession = new Session();
-    response = await nonAuthenticatedSession.fetch(privateResourceUrl);
-    expect(response.status).toEqual(401);
-  });
-});
+        const unauthenticatedSession = new Session();
+        const response = await unauthenticatedSession.fetch(publicResourceUrl);
+        expect(response.status).toEqual(200);
+        await expect(response.text()).resolves.toContain(
+          ":PersonalProfileDocument"
+        );
+        await authenticatedSession.logout();
+      });
 
-describe("Unauthenticated fetch", () => {
-  it("can fetch a public resource when not logged in", async () => {
-    const authenticatedSession = new Session();
-    await authenticatedSession.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
+      it("cannot fetch a private resource when not logged in", async () => {
+        const session = new Session();
+        const privateResourceUrl = rootContainer;
+        const response = await session.fetch(privateResourceUrl);
+        expect(response.status).toEqual(401);
+      });
     });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const publicResourceUrl = authenticatedSession.info.webId!;
 
-    const unauthenticatedSession = new Session();
-    const response = await unauthenticatedSession.fetch(publicResourceUrl);
-    expect(response.status).toEqual(200);
-    await expect(response.text()).resolves.toContain(
-      ":PersonalProfileDocument"
-    );
-  });
+    describe("Post-logout fetch", () => {
+      it("can fetch a public resource after logging out", async () => {
+        const session = new Session();
+        await session.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const publicResourceUrl = session.info.webId!;
+        await session.logout();
+        const response = await session.fetch(publicResourceUrl);
+        expect(response.status).toEqual(200);
+        await expect(response.text()).resolves.toContain(
+          ":PersonalProfileDocument"
+        );
+      });
 
-  it("cannot fetch a private resource when not logged in", async () => {
-    const session = new Session();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
-    const response = await session.fetch(privateResourceUrl);
-    expect(response.status).toEqual(401);
-  });
-});
-
-describe("Post-logout fetch", () => {
-  it("can fetch a public resource after logging out", async () => {
-    const session = new Session();
-    await session.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
+      it("cannot fetch a private resource after logging out", async () => {
+        const session = new Session();
+        const privateResourceUrl = rootContainer;
+        await session.login({
+          clientId,
+          clientSecret,
+          oidcIssuer,
+        });
+        await session.logout();
+        const response = await session.fetch(privateResourceUrl);
+        expect(response.status).toEqual(401);
+      });
     });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const publicResourceUrl = session.info.webId!;
-    await session.logout();
-    const response = await session.fetch(publicResourceUrl);
-    expect(response.status).toEqual(200);
-    await expect(response.text()).resolves.toContain(
-      ":PersonalProfileDocument"
-    );
-  });
-
-  it("cannot fetch a private resource after logging out", async () => {
-    const session = new Session();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const privateResourceUrl = process.env.E2E_TEST_ESS_POD!;
-    await session.login({
-      clientId: process.env.E2E_TEST_CLIENT_ID,
-      clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-      oidcIssuer: process.env.E2E_TEST_IDP_URL,
-    });
-    await session.logout();
-    const response = await session.fetch(privateResourceUrl);
-    expect(response.status).toEqual(401);
-  });
-});
+  }
+);
