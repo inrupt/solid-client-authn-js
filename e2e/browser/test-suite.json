@@ -21,6 +21,17 @@
       "authorizeClientAppMechanism": "ess",
       "loginTimeout": 10000,
       "fetchTimeout": 2000
+    },
+    {
+      "description": "dev-next - Cognito",
+      "podResourceServer": "https://storage.dev-next.inrupt.com/1890ee6d-48da-431e-bfe0-6ddabba6c283/",
+      "identityProvider": "https://openid.dev-next.inrupt.com",
+      "envTestUserName": "E2E_DEV_NEXT_USERNAME",
+      "envTestUserPassword": "E2E_DEV_NEXT_PASSWORD",
+      "brokeredIdp": "Cognito",
+      "authorizeClientAppMechanism": "ess",
+      "loginTimeout": 10000,
+      "fetchTimeout": 2000
     }
   ],
 
