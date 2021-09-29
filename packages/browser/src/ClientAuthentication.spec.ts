@@ -20,6 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
+import nock from "nock";
 import {
   IIssuerConfig,
   mockStorageUtility,
@@ -28,7 +29,12 @@ import {
   mockStorage,
 } from "@inrupt/solid-client-authn-core";
 
-import { JWK, SignJWT, parseJwk } from "@inrupt/jose-legacy-modules";
+import {
+  SignJWT,
+  fromKeyLike,
+  KeyLike,
+  generateKeyPair,
+} from "@inrupt/jose-legacy-modules";
 import { EventEmitter } from "events";
 import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
 import {
@@ -56,28 +62,45 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 
-const mockJwk = (): JWK => {
+// Singleton keys generated on the first call to mockJwk
+let publicKey: KeyLike | undefined;
+let privateKey: KeyLike | undefined;
+
+const mockJwk = async (): Promise<{
+  publicKey: KeyLike;
+  privateKey: KeyLike;
+}> => {
+  if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
+    const generatedPair = await generateKeyPair("ES256");
+    publicKey = generatedPair.publicKey;
+    privateKey = generatedPair.privateKey;
+  }
   return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
+    publicKey,
+    privateKey,
   };
 };
 
-const mockAnotherJwk = (): JWK => {
-  return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXriUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIr1J0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR8m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
+const mockJwks = async (): Promise<string> => {
+  const { publicKey: issuerPubKey } = await mockJwk();
+  const jwk = await fromKeyLike(issuerPubKey);
+  // This is not set by 'fromKeyLike'
+  jwk.alg = "ES256";
+  jwk.kid = "kid1";
+  return JSON.stringify({ keys: [jwk] });
+};
+
+const mockAnotherJwks = async (): Promise<string> => {
+  const generatedPair = await generateKeyPair("ES256");
+  const jwk = await fromKeyLike(generatedPair.publicKey);
+  // This is not set by 'fromKeyLike'
+  jwk.alg = "ES256";
+  jwk.kid = "kid-xyz";
+  return JSON.stringify({ keys: [jwk] });
+};
+
+const mockFetchJwks = (statusCode: number, payload: string) => {
+  nock("https://some.issuer").get("/jwks").reply(statusCode, payload);
 };
 
 const mockIdTokenPayload = (
@@ -121,7 +144,7 @@ const mockSessionStorage = async (
             alg: "ES256",
           })
           .setIssuedAt()
-          .sign(await parseJwk(mockJwk()), {}),
+          .sign((await mockJwk()).privateKey),
         clientId: options.clientId,
         issuer: options.issuer,
       },
@@ -527,10 +550,7 @@ describe("ClientAuthentication", () => {
         jwksUri: "https://some.issuer/jwks",
       } as IIssuerConfig);
       const mockedStorage = await mockSessionStorage(sessionId);
-      const coreModule = jest.requireMock(
-        "@inrupt/solid-client-authn-core"
-      ) as jest.Mocked<any>;
-      coreModule.fetchJwks = jest.fn().mockRejectedValue("Not a valid JWK");
+      mockFetchJwks(200, "Not a valid JWK");
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -563,10 +583,7 @@ describe("ClientAuthentication", () => {
           clientId: "https://some.app/registration",
         }
       );
-      const coreModule = jest.requireMock(
-        "@inrupt/solid-client-authn-core"
-      ) as jest.Mocked<any>;
-      coreModule.fetchJwks = jest.fn(() => Promise.resolve(mockJwk()));
+      mockFetchJwks(200, await mockJwks());
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -598,10 +615,7 @@ describe("ClientAuthentication", () => {
           clientId: "https://some.app/registration",
         }
       );
-      const coreModule = jest.requireMock(
-        "@inrupt/solid-client-authn-core"
-      ) as jest.Mocked<any>;
-      coreModule.fetchJwks = jest.fn(() => Promise.resolve(mockJwk()));
+      mockFetchJwks(200, await mockJwks());
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -628,10 +642,7 @@ describe("ClientAuthentication", () => {
         )
       );
 
-      const coreModule = jest.requireMock(
-        "@inrupt/solid-client-authn-core"
-      ) as jest.Mocked<any>;
-      coreModule.fetchJwks = jest.fn(() => Promise.resolve(mockAnotherJwk()));
+      mockFetchJwks(200, await mockAnotherJwks());
 
       const clientAuthn = getClientAuthentication({
         issuerConfigFetcher: mockedIssuerConfig,
@@ -658,11 +669,7 @@ describe("ClientAuthentication", () => {
         "https://some.app/registration"
       )
     );
-    const coreModule = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
-    ) as jest.Mocked<any>;
-    coreModule.fetchJwks = jest.fn(() => Promise.resolve(mockJwk()));
-
+    mockFetchJwks(200, await mockJwks());
     const clientAuthn = getClientAuthentication({
       issuerConfigFetcher: mockedIssuerConfig,
       sessionInfoManager: mockSessionInfoManager(mockedStorage),

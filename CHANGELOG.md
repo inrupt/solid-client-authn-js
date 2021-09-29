@@ -16,6 +16,15 @@ OIDC package now depends on a fork, `@inrupt/oidc-client`, so that we can ensure
 the dependencies are kept up-to-date. This should be transparent for users of
 `@inrupt/solid-client-authn-browser`.
 
+- When validating ID token against public key from JWK store at index [0].
+In case another private key was used to sign ID token, validation failed.
+This was changed to use createRemoteJWKSet for ID token validation, to support
+more cases.
+
+#### browser
+
+- Use createRemoteJWKSet for ID token validation.
+
 The following sections document changes that have been released already:
 
 ## 1.11.2 - 2021-08-24

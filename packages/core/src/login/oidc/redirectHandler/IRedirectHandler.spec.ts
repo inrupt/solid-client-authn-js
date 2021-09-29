@@ -19,7 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { jest, it, describe, expect } from "@jest/globals";
+import { it, describe, expect } from "@jest/globals";
+import nock from "nock";
 import {
   JWTPayload,
   KeyLike,
@@ -27,10 +28,15 @@ import {
   generateKeyPair,
   fromKeyLike,
 } from "@inrupt/jose-legacy-modules";
-import { Response as NodeResponse } from "node-fetch";
 import { getWebidFromTokenPayload } from "./IRedirectHandler";
 
-jest.mock("cross-fetch");
+beforeAll(() => {
+  nock.disableNetConnect();
+});
+
+afterAll(() => {
+  nock.enableNetConnect();
+});
 
 describe("getWebidFromTokenPayload", () => {
   // Singleton keys generated on the first call to mockJwk
@@ -57,6 +63,7 @@ describe("getWebidFromTokenPayload", () => {
     const jwk = await fromKeyLike(issuerPubKey);
     // This is not set by 'fromKeyLike'
     jwk.alg = "ES256";
+    jwk.kid = "kid1";
     return JSON.stringify({ keys: [jwk] });
   };
 
@@ -64,10 +71,11 @@ describe("getWebidFromTokenPayload", () => {
     claims: JWTPayload,
     issuer: string,
     audience: string,
-    signingKey?: KeyLike
+    signingKey?: KeyLike,
+    kid?: string
   ): Promise<string> => {
     return new SignJWT(claims)
-      .setProtectedHeader({ alg: "ES256" })
+      .setProtectedHeader({ alg: "ES256", kid: kid ?? "kid1" })
       .setIssuedAt()
       .setIssuer(issuer)
       .setAudience(audience)
@@ -75,29 +83,18 @@ describe("getWebidFromTokenPayload", () => {
       .sign(signingKey ?? (await mockJwk()).privateKey);
   };
 
-  const mockFetch = (
-    payload: string,
-    statusCode: number
-  ): jest.Mock<
-    ReturnType<typeof window.fetch>,
-    [RequestInfo, RequestInit?]
-  > => {
-    const mockedFetch = jest.fn(() =>
-      Promise.resolve(new NodeResponse(payload, { status: statusCode }))
-    );
-    const crossFetch = jest.requireMock("cross-fetch") as any;
-    crossFetch.fetch = mockedFetch;
-    // To avoid having to duplicate the mocked fetch's type definition:
-    return mockedFetch as any;
+  const mockFetchJwks = (statusCode: number, payload: string) => {
+    nock("https://some.jwks").get("/").reply(statusCode, payload);
   };
 
   it("throws if the JWKS cannot be fetched", async () => {
-    mockFetch("", 404);
+    mockFetchJwks(404, "Not Found");
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
       "https://some.clientId"
     );
+
     await expect(
       getWebidFromTokenPayload(
         jwt,
@@ -106,13 +103,13 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.clientId"
       )
     ).rejects.toThrow(
-      "Could not fetch JWKS for [https://some.issuer] at [https://some.jwks]: 404 Not Found"
+      "ID token verification failed: JOSEError: Expected 200 OK from the JSON Web Key Set HTTP response"
     );
   });
 
   it("throws if the JWKS is malformed", async () => {
     // Invalid JSON.
-    mockFetch("", 200);
+    mockFetchJwks(200, "");
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
@@ -126,12 +123,12 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.clientId"
       )
     ).rejects.toThrow(
-      "Malformed JWKS for [https://some.issuer] at [https://some.jwks]:"
+      "ID token verification failed: JOSEError: Failed to parse the JSON Web Key Set HTTP response as JSON"
     );
   });
 
   it("throws if the ID token signature verification fails", async () => {
-    mockFetch(await mockJwks(), 200);
+    mockFetchJwks(200, await mockJwks());
     const { privateKey: anotherKey } = await generateKeyPair("ES256");
     // Sign the returned JWT with a private key unrelated to the public key in the JWKS
     const jwt = await mockJwt(
@@ -152,8 +149,30 @@ describe("getWebidFromTokenPayload", () => {
     );
   });
 
+  it("throws if the ID token kid not in JWKS", async () => {
+    mockFetchJwks(200, await mockJwks());
+    const { privateKey: anotherKey } = await generateKeyPair("ES256");
+    const jwt = await mockJwt(
+      { someClaim: true },
+      "https://some.issuer",
+      "https://some.clientId",
+      anotherKey,
+      "kid-xyz"
+    );
+    await expect(
+      getWebidFromTokenPayload(
+        jwt,
+        "https://some.jwks",
+        "https://some.issuer",
+        "https://some.clientId"
+      )
+    ).rejects.toThrow(
+      "ID token verification failed: JWKSNoMatchingKey: no applicable key found in the JSON Web Key Set"
+    );
+  });
+
   it("throws if the ID token issuer verification fails", async () => {
-    mockFetch(await mockJwks(), 200);
+    mockFetchJwks(200, await mockJwks());
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.other.issuer",
@@ -172,7 +191,7 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("throws if the ID token audience verification fails", async () => {
-    mockFetch(await mockJwks(), 200);
+    mockFetchJwks(200, await mockJwks());
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
@@ -191,7 +210,7 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("throws if the 'webid' and the 'sub' claims are missing", async () => {
-    mockFetch(await mockJwks(), 200);
+    mockFetchJwks(200, await mockJwks());
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
@@ -208,7 +227,7 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("throws if the 'webid' claims is missing and the 'sub' claim is not an IRI", async () => {
-    mockFetch(await mockJwks(), 200);
+    mockFetchJwks(200, await mockJwks());
     const jwt = await mockJwt(
       { sub: "some user ID" },
       "https://some.issuer",
@@ -227,7 +246,7 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("returns the WebID it the 'webid' claim exists", async () => {
-    mockFetch(await mockJwks(), 200);
+    mockFetchJwks(200, await mockJwks());
     const jwt = await mockJwt(
       { webid: "https://some.webid#me" },
       "https://some.issuer",
@@ -244,7 +263,7 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("returns the WebID it the 'sub' claim exists and it is IRI-like", async () => {
-    mockFetch(await mockJwks(), 200);
+    mockFetchJwks(200, await mockJwks());
     const jwt = await mockJwt(
       { sub: "https://some.webid#me" },
       "https://some.issuer",

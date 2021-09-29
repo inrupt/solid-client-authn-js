@@ -39,7 +39,6 @@ export {
   RedirectInput,
   RedirectResult,
   getWebidFromTokenPayload,
-  fetchJwks,
 } from "./login/oidc/redirectHandler/IRedirectHandler";
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 

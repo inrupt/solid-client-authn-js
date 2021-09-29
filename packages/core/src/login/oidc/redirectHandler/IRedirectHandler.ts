@@ -27,10 +27,9 @@
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 import {
-  JWK,
   JWTPayload,
   jwtVerify,
-  parseJwk,
+  createRemoteJWKSet,
 } from "@inrupt/jose-legacy-modules";
 import { EventEmitter } from "events";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
@@ -50,36 +49,7 @@ type IRedirectHandler = IHandleable<
 >;
 export default IRedirectHandler;
 
-type WithMessage = { message: string };
 type WithStack = { stack: string };
-
-export async function fetchJwks(
-  jwksIri: string,
-  issuerIri: string
-): Promise<JWK> {
-  // FIXME: the following line works, but the underlying network calls don't seem
-  // to be mocked properly by our test code. It would be nicer to replace calls to this
-  // function by the following line and to fix the mocks.
-  // const jwks = createRemoteJWKSet(new URL(jwksIri));
-  const jwksResponse = await fetch(jwksIri);
-  if (jwksResponse.status !== 200) {
-    throw new Error(
-      `Could not fetch JWKS for [${issuerIri}] at [${jwksIri}]: ${jwksResponse.status} ${jwksResponse.statusText}`
-    );
-  }
-  // The JWKS should only contain the current key for the issuer.
-  let jwk: JWK;
-  try {
-    jwk = (await jwksResponse.json()).keys[0] as JWK;
-  } catch (e) {
-    throw new Error(
-      `Malformed JWKS for [${issuerIri}] at [${jwksIri}]: ${
-        (e as WithMessage).message
-      }`
-    );
-  }
-  return jwk;
-}
 
 /**
  * Extract a WebID from an ID token payload based on https://github.com/solid/webid-oidc-spec.
@@ -96,17 +66,13 @@ export async function getWebidFromTokenPayload(
   issuerIri: string,
   clientId: string
 ): Promise<string> {
-  const jwk = await fetchJwks(jwksIri, issuerIri);
   let payload: JWTPayload;
   try {
-    const { payload: verifiedPayload } = await jwtVerify(
-      idToken,
-      await parseJwk(jwk),
-      {
-        issuer: issuerIri,
-        audience: clientId,
-      }
-    );
+    const jwks = createRemoteJWKSet(new URL(jwksIri));
+    const { payload: verifiedPayload } = await jwtVerify(idToken, jwks, {
+      issuer: issuerIri,
+      audience: clientId,
+    });
     payload = verifiedPayload;
   } catch (e) {
     throw new Error(`ID token verification failed: ${(e as WithStack).stack}`);
