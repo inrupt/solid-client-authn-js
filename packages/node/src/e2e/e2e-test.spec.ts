@@ -81,6 +81,7 @@ describe.each(serversUnderTest)(
     describe("Environment", () => {
       it("contains the expected environment variables", () => {
         expect(rootContainer).not.toBeUndefined();
+        expect(clientId).not.toBeUndefined();
         expect(clientSecret).not.toBeUndefined();
         expect(oidcIssuer).not.toBeUndefined();
       });
@@ -125,7 +126,6 @@ describe.each(serversUnderTest)(
           oidcIssuer,
         });
         const privateResourceUrl = rootContainer;
-        console.log(`Fetching ${privateResourceUrl}`);
         const response = await session.fetch(privateResourceUrl);
         expect(response.status).toEqual(200);
         await expect(response.text()).resolves.toContain("ldp:BasicContainer");
