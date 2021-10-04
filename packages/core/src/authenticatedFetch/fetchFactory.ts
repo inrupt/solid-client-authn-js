@@ -59,17 +59,17 @@ async function buildDpopFetchOptions(
   dpopKey: KeyPair,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
-  const options: RequestInit = { ...defaultOptions };
-  options.headers = {
-    ...defaultOptions?.headers,
-    Authorization: `DPoP ${authToken}`,
-    DPoP: await createDpopHeader(
-      targetUrl,
-      defaultOptions?.method ?? "get",
-      dpopKey
-    ),
+  const headers = new Headers(defaultOptions?.headers);
+  // Any pre-existing Authorization header should be overriden.
+  headers.set("Authorization", `DPoP ${authToken}`);
+  headers.set(
+    "DPoP",
+    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey)
+  );
+  return {
+    ...defaultOptions,
+    headers,
   };
-  return options;
 }
 
 async function buildAuthenticatedHeaders(
@@ -81,12 +81,12 @@ async function buildAuthenticatedHeaders(
   if (dpopKey !== undefined) {
     return buildDpopFetchOptions(targetUrl, authToken, dpopKey, defaultOptions);
   }
+  const headers = new Headers(defaultOptions?.headers);
+  // Any pre-existing Authorization header should be overriden.
+  headers.set("Authorization", `Bearer ${authToken}`);
   return {
     ...defaultOptions,
-    headers: {
-      ...defaultOptions?.headers,
-      Authorization: `Bearer ${authToken}`,
-    },
+    headers,
   };
 }
 

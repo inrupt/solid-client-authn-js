@@ -117,9 +117,10 @@ describe("buildAuthenticatedFetch", () => {
     });
     await myFetch("https://my.pod/resource");
     expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
-    const dpopHeader = fetch.mock.calls[0][1].headers.DPoP as string;
+    const headers = new Headers(fetch.mock.calls[0][1].headers);
     const decodedHeader = await jwtVerify(
-      dpopHeader,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      headers.get("DPoP")!,
       (
         await mockJwk()
       ).publicKey
@@ -140,9 +141,10 @@ describe("buildAuthenticatedFetch", () => {
       method: "POST",
     });
 
-    const dpopHeader = mockedFetch.mock.calls[0][1].headers.DPoP as string;
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
     const { payload } = await jwtVerify(
-      dpopHeader,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      headers.get("DPoP")!,
       (
         await mockKeyPair()
       ).privateKey
@@ -161,9 +163,9 @@ describe("buildAuthenticatedFetch", () => {
     const myFetch = await buildAuthenticatedFetch(fetch, "myToken", undefined);
     await myFetch("https://my.pod/resource");
     expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
-    const authorizationHeader = fetch.mock.calls[0][1].headers
-      .Authorization as string;
-    expect(authorizationHeader.startsWith("Bearer")).toBe(true);
+    const headers = new Headers(fetch.mock.calls[0][1].headers);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(headers.get("Authorization")!.startsWith("Bearer")).toBe(true);
   });
 
   it("returns a fetch that rebuilds the DPoP token if redirected", async () => {
@@ -188,9 +190,10 @@ describe("buildAuthenticatedFetch", () => {
     await myFetch("https://my.pod/container");
 
     expect(mockedFetch.mock.calls[1][0]).toEqual("https://my.pod/container/");
-    const dpopHeader = mockedFetch.mock.calls[1][1].headers.DPoP as string;
+    const headers = new Headers(mockedFetch.mock.calls[1][1].headers);
     const { payload } = await jwtVerify(
-      dpopHeader,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      headers.get("DPoP")!,
       (
         await mockKeyPair()
       ).privateKey
@@ -215,18 +218,34 @@ describe("buildAuthenticatedFetch", () => {
     expect(mockedFetch.mock.calls).toHaveLength(1);
   });
 
-  it("returns a fetch preserving the optional headers", async () => {
+  it("returns a fetch preserving optional headers passed as a map", async () => {
     // eslint-disable-next-line no-shadow
     const fetch = jest.requireMock("cross-fetch") as jest.Mock;
     fetch.mockResolvedValueOnce(mockNotRedirectedResponse());
     const myFetch = await buildAuthenticatedFetch(fetch, "myToken", undefined);
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
-    expect(fetch.mock.calls[0][1].headers.Authorization).toEqual(
-      "Bearer myToken"
-    );
+    const headers = new Headers(fetch.mock.calls[0][1].headers);
 
-    expect(fetch.mock.calls[0][1].headers.someHeader).toEqual("SomeValue");
+    expect(headers.get("Authorization")).toEqual("Bearer myToken");
+
+    expect(headers.get("someHeader")).toEqual("SomeValue");
+  });
+
+  it("returns a fetch preserving optional headers passed an a Header object", async () => {
+    // eslint-disable-next-line no-shadow
+    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
+    fetch.mockResolvedValueOnce(mockNotRedirectedResponse());
+    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", undefined);
+    await myFetch("someUrl", {
+      headers: new Headers({ someHeader: "SomeValue" }),
+    });
+
+    const headers = new Headers(fetch.mock.calls[0][1].headers);
+
+    expect(headers.get("Authorization")).toEqual("Bearer myToken");
+
+    expect(headers.get("someHeader")).toEqual("SomeValue");
   });
 
   it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
@@ -242,10 +261,8 @@ describe("buildAuthenticatedFetch", () => {
         DPoP: "some header",
       },
     });
-
-    expect(mockedFetch.mock.calls[0][1].headers.Authorization).toEqual(
-      "DPoP myToken"
-    );
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    expect(headers.get("Authorization")).toEqual("DPoP myToken");
   });
 
   it("does not retry a **redirected** fetch if the error is not auth-related", async () => {
