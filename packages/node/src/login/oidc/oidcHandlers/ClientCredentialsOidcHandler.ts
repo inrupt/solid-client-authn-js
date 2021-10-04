@@ -43,7 +43,16 @@ import {
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
 import { fetch as globalFetch } from "cross-fetch";
+import { Headers as NodeHeaders } from "node-fetch";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+
+// Using the cross-fetch polyfill should enforce Headers to be present in the Node environment
+// However, it does not behave as expected, which is why the global.Headers value
+// is manually overwritten.[]
+// import "cross-fetch/polyfill";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.Headers = NodeHeaders;
 
 /**
  * @hidden

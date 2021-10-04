@@ -51,6 +51,14 @@ import {
 import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
 import { fetch as globalFetch } from "cross-fetch";
 import { EventEmitter } from "events";
+// Using the cross-fetch polyfill should enforce Headers to be present in the Node environment
+// However, it does not behave as expected, which is why the global.Headers value
+// is manually overwritten.
+// import "cross-fetch/polyfill";
+import { Headers as NodeHeaders } from "node-fetch";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.Headers = NodeHeaders;
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions

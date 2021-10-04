@@ -32,7 +32,7 @@ import { IdTokenClaims, TokenSet } from "openid-client";
 // it easier to transition back when possible.
 // import { JWK } from "jose/types";
 import { JWK } from "@inrupt/jose-legacy-modules";
-import { Response as NodeResponse } from "node-fetch";
+import { Response as NodeResponse, Headers as NodeHeaders } from "node-fetch";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
@@ -290,9 +290,8 @@ describe("AuthCodeRedirectHandler", () => {
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValueOnce({} as NodeResponse);
       await result.fetch("https://some.url");
-      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
-        "DPoP"
-      );
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      expect(headers.get("Authorization")).toContain("DPoP");
     });
 
     it("properly performs Bearer token exchange", async () => {
@@ -316,9 +315,8 @@ describe("AuthCodeRedirectHandler", () => {
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValueOnce({} as NodeResponse);
       await result.fetch("https://some.url");
-      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
-        "Bearer"
-      );
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      expect(headers.get("Authorization")).toContain("Bearer");
     });
 
     it("cleans up the redirect IRI from the OIDC parameters", async () => {

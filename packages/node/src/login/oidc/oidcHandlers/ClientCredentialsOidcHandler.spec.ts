@@ -281,7 +281,8 @@ describe("handle", () => {
       url: "https://some.pod/resource",
     });
     await result?.fetch("https://some.pod/resource");
-    expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    expect(headers.get("Authorization")).toContain(
       `DPoP ${tokens.access_token}`
     );
   });
@@ -309,7 +310,8 @@ describe("handle", () => {
       url: "https://some.pod/resource",
     });
     await result?.fetch("https://some.pod/resource");
-    expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    expect(headers.get("Authorization")).toContain(
       `Bearer ${tokens.access_token}`
     );
   });
