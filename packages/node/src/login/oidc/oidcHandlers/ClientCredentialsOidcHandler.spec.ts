@@ -31,6 +31,8 @@ import { IdTokenClaims, TokenSet } from "openid-client";
 // it easier to transition back when possible.
 // import { JWK } from "jose/types";
 import { JWK } from "@inrupt/jose-legacy-modules";
+// eslint-disable-next-line no-shadow
+import { Headers } from "node-fetch";
 
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
@@ -39,7 +41,6 @@ import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
 import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
 
 jest.mock("openid-client");
-jest.mock("cross-fetch");
 jest.mock("cross-fetch");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
