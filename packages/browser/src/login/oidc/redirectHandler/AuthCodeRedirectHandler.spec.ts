@@ -211,11 +211,10 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
   };
 }
 
-const mockFetch = (response: Response): void => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  window.fetch = (jest.fn() as any).mockResolvedValue(
-    response
-  ) as typeof window.fetch;
+const mockFetch = (response: Response) => {
+  const mockedFetch = jest.fn(global.fetch).mockResolvedValue(response);
+  window.fetch = mockedFetch;
+  return mockedFetch;
 };
 
 const defaultMocks = {
@@ -348,13 +347,11 @@ describe("AuthCodeRedirectHandler", () => {
       ).rejects.toThrow("Could not retrieve session");
     });
 
-    // We use ts-ignore comments here only to access mock call arguments
-    /* eslint-disable @typescript-eslint/ban-ts-comment */
     it("returns an authenticated bearer fetch by default", async () => {
       mockOidcClient();
       mockLocalStorage({});
 
-      mockFetch(
+      const mockedFetch = mockFetch(
         new Response("", {
           status: 200,
         })
@@ -383,19 +380,14 @@ describe("AuthCodeRedirectHandler", () => {
       // with the value "some token".
       await redirectInfo.fetch("https://some.other.url");
 
-      // @ts-ignore
-      const header = window.fetch.mock.calls[0][1].headers.Authorization;
-      expect(
-        // @ts-ignore
-        header
-      ).toMatch(/^Bearer some token$/);
+      const header = new Headers(mockedFetch.mock.calls[0][1]?.headers);
+      expect(header.get("Authorization")).toMatch(/^Bearer some token$/);
     });
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
       mockLocalStorage({});
-
-      window.fetch = (jest.fn() as any).mockReturnValue(
+      const mockedFetch = jest.fn(global.fetch).mockReturnValue(
         new Promise((resolve) => {
           resolve(
             new Response("", {
@@ -403,10 +395,8 @@ describe("AuthCodeRedirectHandler", () => {
             })
           );
         })
-      ) as jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
+      );
+      window.fetch = mockedFetch;
 
       const storage = mockStorageUtility({
         "solidClientAuthenticationUser:oauth2StateValue": {
@@ -427,19 +417,15 @@ describe("AuthCodeRedirectHandler", () => {
         "https://coolsite.com/?code=someCode&state=oauth2StateValue"
       );
       await redirectInfo.fetch("https://some.other.url");
-      // @ts-ignore
-      const header = window.fetch.mock.calls[0][1].headers.Authorization;
-      expect(
-        // @ts-ignore
-        header
-      ).toMatch(/^DPoP .+$/);
+
+      const header = new Headers(mockedFetch.mock.calls[0][1]?.headers);
+      expect(header.get("Authorization")).toMatch(/^DPoP .+$/);
     });
 
     it("saves session information in storage on successful login", async () => {
       mockOidcClient();
       mockLocalStorage({});
-
-      window.fetch = (jest.fn() as any).mockReturnValue(
+      window.fetch = jest.fn(global.fetch).mockReturnValue(
         new Promise((resolve) => {
           resolve(
             new Response("", {
@@ -447,10 +433,7 @@ describe("AuthCodeRedirectHandler", () => {
             })
           );
         })
-      ) as jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
-      >;
+      );
 
       const mockedStorage = mockStorageUtility({
         [`${USER_SESSION_PREFIX}:oauth2StateValue`]: {

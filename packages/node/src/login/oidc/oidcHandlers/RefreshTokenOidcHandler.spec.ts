@@ -37,6 +37,7 @@ import {
 // import fromKeyLike from "jose/jwk/from_key_like";
 import { jwtVerify, fromKeyLike } from "@inrupt/jose-legacy-modules";
 import { EventEmitter } from "events";
+import { Headers as NodeHeaders } from "node-fetch";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
@@ -187,7 +188,8 @@ describe("RefreshTokenOidcHandler", () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       await result!.fetch("https://some.pod/resource");
-      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      expect(headers.get("Authorization")).toContain(
         "DPoP some refreshed access token"
       );
     });
@@ -225,10 +227,12 @@ describe("RefreshTokenOidcHandler", () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       await result!.fetch("https://some.pod/resource");
-      const dpopProof = mockedFetch.mock.calls[0][1].headers.DPoP;
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      const dpopProof = headers.get("DPoP");
       // This checks that the refreshed access token is bound to the initial DPoP key.
       await expect(
-        jwtVerify(dpopProof, dpopKeyPair.privateKey)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        jwtVerify(dpopProof!, dpopKeyPair.privateKey)
       ).resolves.not.toThrow();
     });
 
@@ -258,7 +262,8 @@ describe("RefreshTokenOidcHandler", () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       await result!.fetch("https://some.pod/resource");
-      expect(mockedFetch.mock.calls[0][1].headers.Authorization).toContain(
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      expect(headers.get("Authorization")).toContain(
         "Bearer some refreshed access token"
       );
     });

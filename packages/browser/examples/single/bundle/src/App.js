@@ -82,7 +82,7 @@ export default function App() {
 
   const handleFetch = (e) => {
     e.preventDefault();
-    fetch(resource)
+    fetch(resource, { headers: new Headers({ Accept: "text/turtle" }) })
       .then((response) => response.text())
       .then(setData);
   };
