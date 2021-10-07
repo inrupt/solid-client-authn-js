@@ -19,6 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// This is necessary to mock fetch
+/* eslint-disable no-shadow */
+
 import { jest, it, describe, expect } from "@jest/globals";
 // Until there is a broader support for submodules exports in the ecosystem,
 // (e.g. jest supports them), we'll depend on an intermediary package that exports
@@ -36,6 +39,7 @@ import {
   fromKeyLike,
 } from "@inrupt/jose-legacy-modules";
 import { EventEmitter } from "events";
+import { Response } from "node-fetch";
 import {
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
@@ -50,18 +54,20 @@ import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 
-jest.mock("cross-fetch");
+jest.mock("cross-fetch", () => {
+  const crossFetchModule = jest.requireActual("cross-fetch") as any;
+  crossFetchModule.default = jest.fn();
+  crossFetchModule.fetch = jest.fn();
+  return crossFetchModule;
+});
 
-type MockedRedirectResponse = {
-  redirected: boolean;
-  url: string;
-};
-
-const mockNotRedirectedResponse = (): MockedRedirectResponse => {
-  return {
-    redirected: false,
-    url: "http://some.url",
-  };
+const mockNotRedirectedResponse = () => {
+  const mockedResponse = new Response(undefined);
+  jest.spyOn(mockedResponse, "redirected", "get").mockReturnValueOnce(false);
+  jest
+    .spyOn(mockedResponse, "url", "get")
+    .mockReturnValueOnce("http://some.url");
+  return mockedResponse;
 };
 
 let publicKey: KeyLike | undefined;
@@ -93,16 +99,24 @@ const mockKeyPair = async () => {
   return dpopKeyPair;
 };
 
+const mockFetch = (response: Response, url: string) => {
+  const { fetch } = jest.requireMock("cross-fetch") as { fetch: any };
+  const mockedResponse = response;
+  jest.spyOn(mockedResponse, "url", "get").mockReturnValue(url);
+  fetch.mockResolvedValueOnce(mockedResponse);
+  return fetch;
+};
+
 describe("buildAuthenticatedFetch", () => {
   it("builds a DPoP fetch if a DPoP key is provided", async () => {
-    // eslint-disable-next-line no-shadow
-    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
-    fetch.mockResolvedValue({
-      status: 401,
-      url: "https://my.pod/resource",
-    });
+    const mockedFetch = mockFetch(
+      new Response(undefined, {
+        status: 401,
+      }),
+      "https://my.pod/resource"
+    );
     const keylikePair = await mockJwk();
-    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", {
+    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
         publicKey: await fromKeyLike(keylikePair.publicKey),
@@ -116,8 +130,8 @@ describe("buildAuthenticatedFetch", () => {
       },
     });
     await myFetch("https://my.pod/resource");
-    expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
-    const headers = new Headers(fetch.mock.calls[0][1].headers);
+    expect(mockedFetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
     const decodedHeader = await jwtVerify(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       headers.get("DPoP")!,
@@ -131,8 +145,10 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("builds the appropriate DPoP header for a given HTTP verb.", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-    mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
+    const mockedFetch = mockFetch(
+      mockNotRedirectedResponse(),
+      "https://my.pod/resource"
+    );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: await mockKeyPair(),
@@ -154,35 +170,34 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("builds a Bearer fetch if no DPoP key is provided", async () => {
-    // eslint-disable-next-line no-shadow
-    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
-    fetch.mockResolvedValue({
-      status: 401,
-      url: "https://my.pod/resource",
-    });
-    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", undefined);
+    const mockedFetch = mockFetch(
+      new Response(undefined, { status: 401 }),
+      "https://my.pod/resource"
+    );
+    const myFetch = await buildAuthenticatedFetch(
+      mockedFetch,
+      "myToken",
+      undefined
+    );
     await myFetch("https://my.pod/resource");
-    expect(fetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
-    const headers = new Headers(fetch.mock.calls[0][1].headers);
+    expect(mockedFetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(headers.get("Authorization")!.startsWith("Bearer")).toBe(true);
   });
 
   it("returns a fetch that rebuilds the DPoP token if redirected", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-
+    // const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const mockedFetch = mockFetch(
+      new Response(undefined, { status: 403 }),
+      "https://my.pod/container/"
+    );
     // Redirects once
-    mockedFetch
-      .mockResolvedValueOnce({
-        url: "https://my.pod/container/",
-        status: 403,
-        ok: false,
-      } as Response)
-      .mockResolvedValueOnce({
-        url: "https://my.pod/container/",
-        ok: true,
-        status: 200,
-      } as Response);
+    mockedFetch.mockResolvedValueOnce({
+      url: "https://my.pod/container/",
+      ok: true,
+      status: 200,
+    } as Response);
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: await mockKeyPair(),
@@ -202,14 +217,10 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("returns a fetch that does not retry fetching with a Bearer token if redirected", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-
-    // Redirects once
-    mockedFetch.mockResolvedValueOnce({
-      url: "https://my.pod/container/",
-      status: 403,
-      ok: false,
-    } as Response);
+    const mockedFetch = mockFetch(
+      new Response(undefined, { status: 403 }),
+      "https://my.pod/container/"
+    );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken");
     const response = await myFetch("https://my.pod/container");
@@ -219,38 +230,48 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("returns a fetch preserving optional headers passed as a map", async () => {
-    // eslint-disable-next-line no-shadow
-    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
-    fetch.mockResolvedValueOnce(mockNotRedirectedResponse());
-    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", undefined);
+    const mockedFetch = mockFetch(
+      mockNotRedirectedResponse(),
+      "https://my.pod/container/"
+    );
+    const myFetch = await buildAuthenticatedFetch(
+      mockedFetch,
+      "myToken",
+      undefined
+    );
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
-    const headers = new Headers(fetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
 
     expect(headers.get("Authorization")).toEqual("Bearer myToken");
-
     expect(headers.get("someHeader")).toEqual("SomeValue");
   });
 
-  it("returns a fetch preserving optional headers passed an a Header object", async () => {
-    // eslint-disable-next-line no-shadow
-    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
-    fetch.mockResolvedValueOnce(mockNotRedirectedResponse());
-    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", undefined);
+  it("returns a fetch preserving optional headers passed as a Header object", async () => {
+    const mockedFetch = mockFetch(
+      mockNotRedirectedResponse(),
+      "https://my.pod/container/"
+    );
+    const myFetch = await buildAuthenticatedFetch(
+      mockedFetch,
+      "myToken",
+      undefined
+    );
     await myFetch("someUrl", {
       headers: new Headers({ someHeader: "SomeValue" }),
     });
 
-    const headers = new Headers(fetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
 
     expect(headers.get("Authorization")).toEqual("Bearer myToken");
-
     expect(headers.get("someHeader")).toEqual("SomeValue");
   });
 
   it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-    mockedFetch.mockResolvedValueOnce(mockNotRedirectedResponse());
+    const mockedFetch = mockFetch(
+      mockNotRedirectedResponse(),
+      "https://my.pod/container/"
+    );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: await mockKeyPair(),
@@ -266,14 +287,11 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("does not retry a **redirected** fetch if the error is not auth-related", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
-
     // Mimics a redirect that lead to a non-auth error.
-    mockedFetch.mockResolvedValueOnce({
-      url: "https://my.pod/container/",
-      status: 400,
-      ok: false,
-    } as Response);
+    const mockedFetch = mockFetch(
+      new Response(undefined, { status: 400 }),
+      "https://my.pod/container/"
+    );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: await mockKeyPair(),
@@ -285,10 +303,11 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("returns the initial response in case of non-redirected auth error", async () => {
-    // eslint-disable-next-line no-shadow
-    const fetch = jest.requireMock("cross-fetch") as jest.Mock;
-    fetch.mockResolvedValueOnce({ status: 401 });
-    const myFetch = await buildAuthenticatedFetch(fetch, "myToken", {
+    const mockedFetch = mockFetch(
+      new Response(undefined, { status: 401 }),
+      "https://my.pod/container/"
+    );
+    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",

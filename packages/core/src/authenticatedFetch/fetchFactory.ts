@@ -20,7 +20,7 @@
  */
 
 // eslint-disable-next-line no-shadow
-import { fetch } from "cross-fetch";
+import { fetch, Headers } from "cross-fetch";
 import { EventEmitter } from "events";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
