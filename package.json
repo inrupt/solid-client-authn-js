@@ -32,7 +32,7 @@
   "devDependencies": {
     "@inrupt/eslint-config-base": "0.1.2",
     "@inrupt/eslint-config-lib": "0.1.2",
-    "@npmcli/arborist": "~2.2.1",
+    "@npmcli/arborist": "~4.0.1",
     "@types/dotenv-flow": "^3.1.0",
     "@types/jest": "^27.0.1",
     "@types/node-fetch": "^2.5.6",
