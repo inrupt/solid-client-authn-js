@@ -30,12 +30,7 @@ import {
   mockStorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import fromKeyLike from "jose/jwk/from_key_like";
-import { jwtVerify, fromKeyLike } from "@inrupt/jose-legacy-modules";
+import { jwtVerify, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import { Headers as NodeHeaders } from "node-fetch";
 import {
@@ -203,9 +198,7 @@ describe("RefreshTokenOidcHandler", () => {
         mockStorageUtility({
           [`${USER_SESSION_PREFIX}:mySession`]: {
             publicKey: JSON.stringify(dpopKeyPair.publicKey),
-            privateKey: JSON.stringify(
-              await fromKeyLike(dpopKeyPair.privateKey)
-            ),
+            privateKey: JSON.stringify(await exportJWK(dpopKeyPair.privateKey)),
           },
         })
       );

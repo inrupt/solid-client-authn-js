@@ -32,7 +32,7 @@ import {
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
-import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK } from "jose";
 import {
   AuthCodeRedirectHandler,
   DEFAULT_LIFESPAN,
@@ -120,7 +120,7 @@ const mockTokenEndpointDpopResponse = async (): Promise<CodeExchangeResult> => {
     idToken: mockIdToken(),
     webId: mockWebId(),
     dpopKey: {
-      privateKey: await parseJwk(mockJwk()),
+      privateKey: await importJWK(mockJwk()),
       // Note that here for convenience the private key is also used as public key.
       // Obviously, this should never be done in non-test code.
       publicKey: mockJwk(),

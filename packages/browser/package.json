@@ -64,13 +64,13 @@
     "webpack-merge": "^5.7.2"
   },
   "dependencies": {
-    "@inrupt/jose-legacy-modules": "0.0.3-3.15.4",
     "@inrupt/oidc-client-ext": "^1.11.2",
     "@inrupt/solid-client-authn-core": "^1.11.2",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/node": "^15.0.1",
     "@types/uuid": "^8.3.0",
     "events": "^3.3.0",
+    "jose": "^4.1.4",
     "lodash.clonedeep": "^4.5.0",
     "uuid": "^8.3.1"
   },

@@ -36,7 +36,7 @@ import {
   fetchJwks,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
-import { jwtVerify, parseJwk } from "@inrupt/jose-legacy-modules";
+import { jwtVerify, importJWK } from "jose";
 import { EventEmitter } from "events";
 import { KEY_CURRENT_SESSION } from "./constant";
 
@@ -135,7 +135,7 @@ export default class ClientAuthentication {
 
     try {
       const jwk = await fetchJwks(issuerConfig.jwksUri, issuerConfig.issuer);
-      await jwtVerify(sessionInfo.idToken, await parseJwk(jwk), {
+      await jwtVerify(sessionInfo.idToken, await importJWK(jwk), {
         audience: sessionInfo.clientAppId,
         issuer: issuerConfig.issuer,
       });

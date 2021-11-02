@@ -22,7 +22,7 @@
 import { jest } from "@jest/globals";
 // eslint-disable-next-line no-shadow
 import { Response } from "cross-fetch";
-import { JWK, parseJwk, SignJWT } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK, SignJWT } from "jose";
 import {
   IClient,
   IIssuerConfig,
@@ -48,7 +48,7 @@ export const mockKeyPair = async (): Promise<KeyPair> => {
   const publicKey = mockJwk();
   delete publicKey.d;
   return {
-    privateKey: await parseJwk(mockJwk()),
+    privateKey: await importJWK(mockJwk()),
     publicKey,
   };
 };
@@ -90,7 +90,7 @@ export async function generateMockJwt(): Promise<void> {
     .setIssuer(mockIssuer().issuer.toString())
     .setAudience("solid")
     .setExpirationTime("2h")
-    .sign(await parseJwk(mockJwk()));
+    .sign(await importJWK(mockJwk()));
   // This is for manual use.
   // eslint-disable-next-line no-console
   console.log(jwt.toString());

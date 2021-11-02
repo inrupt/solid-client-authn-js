@@ -19,11 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  fromKeyLike,
-  generateKeyPair,
-  KeyLike,
-} from "@inrupt/jose-legacy-modules";
+import { exportJWK, generateKeyPair, KeyLike } from "jose";
 import { jest, describe, it, expect } from "@jest/globals";
 import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
 import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
@@ -695,9 +691,9 @@ describe("saveSessionInfoToStorage", () => {
     const { privateKey: prvt, publicKey: pblc } = await mockJwk();
     const dpopKeyPair = {
       privateKey: prvt,
-      publicKey: await fromKeyLike(pblc),
+      publicKey: await exportJWK(pblc),
     };
-    // The alg property isn't set by fromKeyLike, so set it manually.
+    // The alg property isn't set by exportJWK, so set it manually.
     dpopKeyPair.publicKey.alg = "ES256";
     return dpopKeyPair;
   };
@@ -731,7 +727,7 @@ describe("saveSessionInfoToStorage", () => {
     );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(JSON.parse(privateJwk!)).toEqual(
-      await fromKeyLike(dpopKey.privateKey)
+      await exportJWK(dpopKey.privateKey)
     );
   });
 });

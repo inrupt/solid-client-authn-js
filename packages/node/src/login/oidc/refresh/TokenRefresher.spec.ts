@@ -25,13 +25,7 @@ import {
   StorageUtilityMock,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import { JWK } from "jose/types";
-// import { parseJwk } from "jose/jwk/parse";
-import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK } from "jose";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import { EventEmitter } from "events";
 import TokenRefresher from "./TokenRefresher";
@@ -60,7 +54,7 @@ const mockJwk = (): JWK => {
 
 const mockKeyPair = async () => {
   return {
-    privateKey: await parseJwk(mockJwk()),
+    privateKey: await importJWK(mockJwk()),
     // Use the same JWK for public and private key out of convenience, don't do
     // this in real life.
     publicKey: mockJwk(),

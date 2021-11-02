@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { jwtVerify, parseJwk } from "@inrupt/jose-legacy-modules";
+import { jwtVerify, importJWK } from "jose";
 import {
   mockBearerTokens,
   mockClient,
@@ -88,7 +88,7 @@ describe("refreshGrant", () => {
     const dpopHeader = headers.DPoP;
     const dpopProof = await jwtVerify(
       dpopHeader,
-      await parseJwk(keyPair.publicKey)
+      await importJWK(keyPair.publicKey)
     );
     expect(dpopProof.payload.htu).toBe(mockIssuer().tokenEndpoint.toString());
   });

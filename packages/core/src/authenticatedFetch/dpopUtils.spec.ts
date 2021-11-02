@@ -20,12 +20,7 @@
  */
 
 import { it, describe, expect } from "@jest/globals";
-import {
-  KeyLike,
-  generateKeyPair,
-  fromKeyLike,
-  jwtVerify,
-} from "@inrupt/jose-legacy-modules";
+import { KeyLike, generateKeyPair, exportJWK, jwtVerify } from "jose";
 import { createDpopHeader, generateDpopKeyPair } from "./dpopUtils";
 
 let publicKey: KeyLike | undefined;
@@ -50,9 +45,9 @@ const mockKeyPair = async () => {
   const { privateKey: prvt, publicKey: pblc } = await mockJwk();
   const dpopKeyPair = {
     privateKey: prvt,
-    publicKey: await fromKeyLike(pblc),
+    publicKey: await exportJWK(pblc),
   };
-  // The alg property isn't set by fromKeyLike, so set it manually.
+  // The alg property isn't set by exportJWK, so set it manually.
   dpopKeyPair.publicKey.alg = "ES256";
   return dpopKeyPair;
 };

@@ -26,7 +26,7 @@ import {
   StorageUtilityMock,
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
-import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK } from "jose";
 import { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
 import TokenRefresher from "./TokenRefresher";
@@ -65,7 +65,7 @@ const mockJwk = (): JWK => {
 
 const mockKeyPair = async () => {
   return {
-    privateKey: await parseJwk(mockJwk()),
+    privateKey: await importJWK(mockJwk()),
     // Use the same JWK for public and private key out of convenience, don't do
     // this in real life.
     publicKey: mockJwk(),

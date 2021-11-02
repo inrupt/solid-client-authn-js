@@ -23,21 +23,7 @@
 /* eslint-disable no-shadow */
 
 import { jest, it, describe, expect } from "@jest/globals";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import { KeyLike } from "jose/types";
-// import jwtVerify from "jose/jwt/verify";
-// import { parseJwk } from "jose/jwk/parse";
-// import { generateKeyPair } from "jose/util/generate_key_pair";
-// import { fromKeyLike } from "jose/jwk/from_key_like";
-import {
-  KeyLike,
-  jwtVerify,
-  generateKeyPair,
-  fromKeyLike,
-} from "@inrupt/jose-legacy-modules";
+import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import { Response } from "node-fetch";
 import {
@@ -92,9 +78,9 @@ const mockKeyPair = async () => {
   const { privateKey: prvt, publicKey: pblc } = await mockJwk();
   const dpopKeyPair = {
     privateKey: prvt,
-    publicKey: await fromKeyLike(pblc),
+    publicKey: await exportJWK(pblc),
   };
-  // The alg property isn't set by fromKeyLike, so set it manually.
+  // The alg property isn't set by exportJWK, so set it manually.
   dpopKeyPair.publicKey.alg = "ES256";
   return dpopKeyPair;
 };
@@ -119,7 +105,7 @@ describe("buildAuthenticatedFetch", () => {
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
-        publicKey: await fromKeyLike(keylikePair.publicKey),
+        publicKey: await exportJWK(keylikePair.publicKey),
       },
       refreshOptions: {
         refreshToken: "some refresh token",
@@ -397,7 +383,7 @@ describe("buildAuthenticatedFetch", () => {
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
-        publicKey: await fromKeyLike(keylikePair.publicKey),
+        publicKey: await exportJWK(keylikePair.publicKey),
       },
       refreshOptions: {
         refreshToken: "some refresh token",
@@ -415,7 +401,7 @@ describe("buildAuthenticatedFetch", () => {
       "some refresh token",
       {
         privateKey: keylikePair.privateKey,
-        publicKey: await fromKeyLike(keylikePair.publicKey),
+        publicKey: await exportJWK(keylikePair.publicKey),
       }
     );
   });
