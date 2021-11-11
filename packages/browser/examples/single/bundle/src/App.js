@@ -39,6 +39,7 @@ export default function App() {
   const [issuer, setIssuer] = useState("https://broker.pod.inrupt.com/");
   const [resource, setResource] = useState(webId);
   const [data, setData] = useState(null);
+  const worker = new Worker(new URL("./worker.js", import.meta.url));
 
   // The useEffect hook is executed on page load, and in particular when the user
   // is redirected to the page after logging in the identity provider.
@@ -87,6 +88,13 @@ export default function App() {
       .then(setData);
   };
 
+  const handleFetchWorker = (e) => {
+    e.preventDefault();
+
+    worker.postMessage({ resource });
+    worker.onmessage = ({ data: { text } }) => setData(text);
+  };
+
   return (
     <div>
       <main>
@@ -115,6 +123,9 @@ export default function App() {
             }}
           />
           <button onClick={(e) => handleFetch(e)}>Fetch</button>
+          <button onClick={(e) => handleFetchWorker(e)}>
+            Fetch with Web Worker
+          </button>
         </div>
         <pre>{data}</pre>
       </main>
