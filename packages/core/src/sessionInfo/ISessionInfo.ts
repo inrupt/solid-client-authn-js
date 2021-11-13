@@ -92,6 +92,16 @@ export interface ISessionInternalInfo {
   tokenType?: "DPoP" | "Bearer";
 }
 
+/**
+ * An async callback that adds an appropriate Authorization header to the given
+ * headers with the provided token, and adds a DPoP header if applicable.
+ */
+export type HeadersAuthenticator = (
+  resource: string,
+  method: string,
+  headersUnauthenticated: Headers
+) => Promise<Headers>;
+
 export function isSupportedTokenType(
   token: string | "DPoP" | "Bearer"
 ): token is "DPoP" | "Bearer" {

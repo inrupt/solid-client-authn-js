@@ -27,6 +27,7 @@ import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 import { createDpopHeader, KeyPair } from "./dpopUtils";
 import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
+import { HeadersAuthenticator } from "../sessionInfo/ISessionInfo";
 
 export type RefreshOptions = {
   sessionId: string;
@@ -288,5 +289,41 @@ export async function buildAuthenticatedFetch(
       );
     }
     return response;
+  };
+}
+
+/**
+ * @param accessToken an access token, either a Bearer token or a DPoP one.
+ * @param options The option object may contain the DPoP key if applicable.
+ *
+ * @returns An async callback that adds an appropriate Authorization header to the given
+ * headers with the provided token, and adds a DPoP header if applicable.
+ */
+export async function buildHeadersAuthenticator(
+  accessToken: string,
+  options?: {
+    dpopKey?: KeyPair;
+  }
+): Promise<HeadersAuthenticator> {
+  return async (
+    resource: string,
+    method: string,
+    headersUnauthenticated: Headers
+  ): Promise<Headers> => {
+    const headersAuthenticated = new Headers(
+      (
+        await buildAuthenticatedHeaders(
+          resource.toString(),
+          accessToken,
+          options?.dpopKey,
+          { method }
+        )
+      ).headers
+    );
+    headersUnauthenticated.forEach((value, key) =>
+      headersAuthenticated.set(key, value)
+    );
+
+    return headersAuthenticated;
   };
 }

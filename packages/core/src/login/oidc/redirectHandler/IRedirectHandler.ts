@@ -34,9 +34,15 @@ import {
 } from "@inrupt/jose-legacy-modules";
 import { EventEmitter } from "events";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
-import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
+import {
+  HeadersAuthenticator,
+  ISessionInfo,
+} from "../../../sessionInfo/ISessionInfo";
 
-export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
+export type RedirectResult = ISessionInfo & {
+  fetch: typeof fetch;
+  headersAuthenticator: HeadersAuthenticator;
+};
 export type RedirectInput = [string, EventEmitter | undefined];
 
 /**

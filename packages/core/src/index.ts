@@ -47,6 +47,7 @@ export {
   ISessionInfo,
   ISessionInternalInfo,
   isSupportedTokenType,
+  HeadersAuthenticator,
 } from "./sessionInfo/ISessionInfo";
 export {
   ISessionInfoManager,
@@ -92,6 +93,7 @@ export {
 
 export {
   buildAuthenticatedFetch,
+  buildHeadersAuthenticator,
   DpopHeaderPayload,
   RefreshOptions,
 } from "./authenticatedFetch/fetchFactory";
