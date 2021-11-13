@@ -91,8 +91,22 @@ export default function App() {
   const handleFetchWorker = (e) => {
     e.preventDefault();
 
+    const session = getDefaultSession();
+
     worker.postMessage({ resource });
-    worker.onmessage = ({ data: { text } }) => setData(text);
+    worker.onmessage = async ({ data }) => {
+      if (data.text) {
+        setData(data.text);
+      } else if (data.headersRaw) {
+        const headersUnauthenticated = new Headers(data.headersRaw);
+        const headersAuthenticated = await session.authenticateHeaders(
+          data.resource,
+          data.method,
+          headersUnauthenticated
+        );
+        worker.postMessage({ headersRaw: [...headersAuthenticated.entries()] });
+      }
+    };
   };
 
   return (
