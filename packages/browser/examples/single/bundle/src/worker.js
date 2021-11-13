@@ -19,9 +19,27 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-self.onmessage = ({ data: { resource } }) => {
-  fetch(resource, { headers: new Headers({ Accept: "text/turtle" }) })
-    .then((response) => response.text())
-    .catch((error) => self.postMessage({ text: error.message }))
-    .then((text) => self.postMessage({ text }));
+let authenticatedHeadersResolver = undefined;
+self.onmessage = ({ data }) => {
+  if (data.resource) {
+    const resource = data.resource;
+    const headersUnauthenticated = new Headers();
+    headersUnauthenticated.set("Accept", "text/turtle");
+
+    authenticateHeaders(resource, "get", headersUnauthenticated)
+      .then((headers) => fetch(resource, { headers }))
+      .then((response) => response.text())
+      .catch((error) => self.postMessage({ text: error.message }))
+      .then((text) => self.postMessage({ text }));
+  } else if (data.headersRaw) {
+    authenticatedHeadersResolver(new Headers(data.headersRaw));
+  }
 };
+
+function authenticateHeaders(resource, method, headers) {
+  const promise = new Promise((resolve) => {
+    authenticatedHeadersResolver = resolve;
+  });
+  self.postMessage({ resource, method, headersRaw: [...headers.entries()] });
+  return promise;
+}
