@@ -19,27 +19,22 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-let authenticatedHeadersResolver = undefined;
-self.onmessage = ({ data }) => {
-  if (data.resource) {
-    const resource = data.resource;
-    const headersUnauthenticated = new Headers();
-    headersUnauthenticated.set("Accept", "text/turtle");
+import { WorkerToWindowHandler } from "../../../../dist/index";
 
-    authenticateHeaders(resource, "get", headersUnauthenticated)
-      .then((headers) => fetch(resource, { headers }))
+// Setup window communication
+const workerToWindowHandler = new WorkerToWindowHandler(self);
+self.onmessage = (message) => {
+  if (workerToWindowHandler.onmessage(message)) {
+    // This means that the message was taken care of by the handler
+  } else if (message.data.resource) {
+    const resource = message.data.resource;
+    const headers = new Headers();
+    headers.set("Accept", "text/turtle");
+
+    const fetch = workerToWindowHandler.buildAuthenticatedFetch();
+    fetch(resource, { headers })
       .then((response) => response.text())
       .catch((error) => self.postMessage({ text: error.message }))
       .then((text) => self.postMessage({ text }));
-  } else if (data.headersRaw) {
-    authenticatedHeadersResolver(new Headers(data.headersRaw));
   }
 };
-
-function authenticateHeaders(resource, method, headers) {
-  const promise = new Promise((resolve) => {
-    authenticatedHeadersResolver = resolve;
-  });
-  self.postMessage({ resource, method, headersRaw: [...headers.entries()] });
-  return promise;
-}
