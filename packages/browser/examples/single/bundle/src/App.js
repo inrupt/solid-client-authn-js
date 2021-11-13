@@ -28,6 +28,7 @@ import {
   handleIncomingRedirect,
   fetch,
   getDefaultSession,
+  WindowToWorkerHandler,
 } from "../../../../dist/index";
 
 const REDIRECT_URL = "http://localhost:3113/";
@@ -93,18 +94,18 @@ export default function App() {
 
     const session = getDefaultSession();
 
+    // Setup worker communication
+    const windowToWorkerHandler = new WindowToWorkerHandler(
+      this,
+      worker,
+      session
+    );
     worker.postMessage({ resource });
-    worker.onmessage = async ({ data }) => {
-      if (data.text) {
-        setData(data.text);
-      } else if (data.headersRaw) {
-        const headersUnauthenticated = new Headers(data.headersRaw);
-        const headersAuthenticated = await session.authenticateHeaders(
-          data.resource,
-          data.method,
-          headersUnauthenticated
-        );
-        worker.postMessage({ headersRaw: [...headersAuthenticated.entries()] });
+    worker.onmessage = async (message) => {
+      if (windowToWorkerHandler.onmessage(message)) {
+        // This means that the message was taken care of by the handler
+      } else if (message.data.text) {
+        setData(message.data.text);
       }
     };
   };
