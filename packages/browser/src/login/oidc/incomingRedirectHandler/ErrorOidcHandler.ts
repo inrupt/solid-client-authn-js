@@ -28,6 +28,7 @@ import {
   EVENTS,
   IIncomingRedirectHandler,
   ISessionInfo,
+  HeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import type { EventEmitter } from "events";
 
@@ -54,7 +55,12 @@ export class ErrorOidcHandler implements IIncomingRedirectHandler {
   async handle(
     redirectUrl: string,
     eventEmitter?: EventEmitter
-  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+  ): Promise<
+    ISessionInfo & {
+      fetch: typeof fetch;
+      headersAuthenticator: HeadersAuthenticator;
+    }
+  > {
     if (eventEmitter !== undefined) {
       const url = new URL(redirectUrl);
       const errorUrl = url.searchParams.get("error");

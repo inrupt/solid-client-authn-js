@@ -26,19 +26,20 @@ import IIncomingRedirectHandler, {
   IncomingRedirectInput,
   IncomingRedirectResult,
 } from "../IIncomingRedirectHandler";
+import { buildHeadersAuthenticator } from "../../../authenticatedFetch/fetchFactory";
 
 const canHandle = jest.fn<Promise<boolean>, IncomingRedirectInput>(
   (_url: string) => Promise.resolve(true)
 );
 
 const handle = jest.fn<Promise<IncomingRedirectResult>, IncomingRedirectInput>(
-  (_url: string, _emitter: EventEmitter | undefined) =>
-    Promise.resolve({
-      sessionId: "global",
-      isLoggedIn: true,
-      webId: "https://pod.com/profile/card#me",
-      fetch: jest.fn(),
-    })
+  async (_url: string, _emitter: EventEmitter | undefined) => ({
+    sessionId: "global",
+    isLoggedIn: true,
+    webId: "https://pod.com/profile/card#me",
+    fetch: jest.fn(),
+    headersAuthenticator: await buildHeadersAuthenticator(""),
+  })
 );
 
 export const mockCanHandleIncomingRedirect = canHandle;

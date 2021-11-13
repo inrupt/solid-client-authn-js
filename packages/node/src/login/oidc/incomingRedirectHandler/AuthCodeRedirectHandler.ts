@@ -42,6 +42,8 @@ import {
   ITokenRefresher,
   buildAuthenticatedFetch,
   EVENTS,
+  buildHeadersAuthenticator,
+  HeadersAuthenticator
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
@@ -56,7 +58,7 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
  * @hidden
  * Token endpoint request: https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint
  */
-export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
+ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   constructor(
     private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,
@@ -82,7 +84,12 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   async handle(
     inputRedirectUrl: string,
     eventEmitter?: EventEmitter
-  ): Promise<ISessionInfo & { fetch: typeof globalFetch }> {
+  ): Promise<
+    ISessionInfo & {
+      fetch: typeof globalFetch;
+      headersAuthenticator: HeadersAuthenticator;
+    }
+  > {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${inputRedirectUrl}]: it is missing one of [code, state].`
@@ -198,9 +205,16 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         `Could not find any session information associated with SessionID [${sessionId}] in our storage.`
       );
     }
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      tokenSet.access_token,
+      {
+        dpopKey,
+      }
+    );
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      headersAuthenticator,
     });
   }
 }

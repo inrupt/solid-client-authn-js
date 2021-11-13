@@ -31,17 +31,24 @@ import {
   ISessionInfoManagerOptions,
   IStorageUtility,
   isSupportedTokenType,
+  HeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
+  headersAuthenticator: HeadersAuthenticator;
 } {
   return {
     isLoggedIn: false,
     sessionId: v4(),
     fetch,
+    headersAuthenticator: async (
+      resource: string,
+      method: string,
+      headers: Headers
+    ) => headers,
   };
 }
 

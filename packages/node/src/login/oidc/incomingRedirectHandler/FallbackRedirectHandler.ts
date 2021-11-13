@@ -25,6 +25,7 @@
  */
 
 import {
+  HeadersAuthenticator,
   IIncomingRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
@@ -39,7 +40,7 @@ import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManag
  * for the query params themselves, and can always try to use them as a redirect IRI.
  * @hidden
  */
-export class FallbackRedirectHandler implements IIncomingRedirectHandler {
+ export class FallbackRedirectHandler implements IIncomingRedirectHandler {
   async canHandle(redirectUrl: string): Promise<boolean> {
     try {
       // The next URL object is built for validating it.
@@ -56,7 +57,12 @@ export class FallbackRedirectHandler implements IIncomingRedirectHandler {
   async handle(
     // The argument is ignored, but must be present to implement the interface
     _redirectUrl: string
-  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+  ): Promise<
+    ISessionInfo & {
+      fetch: typeof fetch;
+      headersAuthenticator: HeadersAuthenticator;
+    }
+  > {
     return getUnauthenticatedSession();
   }
 }
