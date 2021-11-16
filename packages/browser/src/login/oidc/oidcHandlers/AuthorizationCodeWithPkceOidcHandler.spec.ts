@@ -209,7 +209,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       );
     });
 
-    it("requests both openid and offline_access scopes", async () => {
+    it("requests both openid, offline_access and webid scopes", async () => {
       const oidcModule = mockOidcModule();
       const authorizationCodeWithPkceOidcHandler =
         getAuthorizationCodeWithPkceOidcHandler();
@@ -223,7 +223,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
       expect(oidcModule.OidcClient).toHaveBeenCalledWith(
         expect.objectContaining({
-          scope: "openid offline_access",
+          scope: "openid offline_access webid",
         })
       );
     });

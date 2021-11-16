@@ -13,6 +13,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 - Passing custom headers to a session's fetch as a Headers object would result in the headers
 being overlooked.
+- As per [the Solid-OIDC spec](https://solid.github.io/solid-oidc/#webid-scope), the `webid`
+scope is now added to token requests.
 
 #### oidc
 

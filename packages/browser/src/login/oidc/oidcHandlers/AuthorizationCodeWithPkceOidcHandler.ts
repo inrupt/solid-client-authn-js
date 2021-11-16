@@ -68,7 +68,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
       post_logout_redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       response_type: "code",
       // The offline_access scope requests that a refresh token be returned.
-      scope: "openid offline_access",
+      // The webid scope is required as per https://solid.github.io/solid-oidc/#webid-scope
+      scope: "openid offline_access webid",
       filterProtocolClaims: true,
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the
