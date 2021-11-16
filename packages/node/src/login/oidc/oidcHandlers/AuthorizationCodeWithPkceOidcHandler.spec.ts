@@ -110,6 +110,9 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       );
       expect(builtUrl.searchParams.get("code_challenge")).not.toBeNull();
       expect(builtUrl.searchParams.get("prompt")).toBe("consent");
+      expect(builtUrl.searchParams.get("scope")).toBe(
+        "openid offline_access webid"
+      );
     });
 
     it("saves relevant information in storage", async () => {
