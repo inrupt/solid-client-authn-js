@@ -220,28 +220,18 @@ describe("AuthCodeRedirectHandler", () => {
 
   const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
     const { Issuer } = jest.requireMock("openid-client") as any;
-    function clientConstructor() {
-      // this is untyped, which makes TS complain
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this.callbackParams = jest.fn().mockReturnValueOnce({
-        code: "someCode",
-        state: "someState",
-      });
-      // this is untyped, which makes TS complain
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this.callback = callback ?? jest.fn().mockResolvedValueOnce(tokenSet);
-      // this is untyped, which makes TS complain
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this.metadata = {
-        client_id: "https://some.client#id",
-      };
-    }
     const mockedIssuer = {
       metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
-      Client: clientConstructor,
+      Client: jest.fn().mockReturnValue({
+        callbackParams: jest.fn().mockReturnValue({
+          code: "someCode",
+          state: "someState",
+        }),
+        callback: callback ?? jest.fn().mockResolvedValue(tokenSet as never),
+        metadata: {
+          client_id: "https://some.client#id",
+        },
+      }),
     };
     Issuer.mockReturnValueOnce(mockedIssuer);
     return mockedIssuer;
@@ -292,6 +282,34 @@ describe("AuthCodeRedirectHandler", () => {
       await result.fetch("https://some.url");
       const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
       expect(headers.get("Authorization")).toContain("DPoP");
+    });
+
+    it("uses client_secret_post authentication if using Solid-OIDC client identifiers", async () => {
+      const mockedIssuer = setupDefaultOidcClientMock();
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+        clientRegistrar: {
+          getClient: async () => {
+            return {
+              clientId: "https://some.client.identifier",
+              clientType: "solid-oidc",
+            };
+          },
+        },
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      expect(mockedIssuer.Client).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token_endpoint_auth_method: "client_secret_post",
+        })
+      );
     });
 
     it("properly performs Bearer token exchange", async () => {

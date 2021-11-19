@@ -43,8 +43,10 @@ import {
   mockDefaultIssuerConfig,
   mockIssuerConfigFetcher,
 } from "../__mocks__/IssuerConfigFetcher";
+import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
 jest.mock("openid-client");
+jest.mock("../ClientRegistrar");
 
 const mockJwk = (): JWK => {
   return {
@@ -119,22 +121,17 @@ const mockDpopTokens = (): TokenSet => {
 const setupOidcClientMock = (tokenSet: TokenSet) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as any;
-  function clientConstructor() {
-    // this is untyped, which makes TS complain
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.refresh = jest.fn().mockResolvedValueOnce(tokenSet);
-  }
   const mockedIssuer = {
     metadata: mockDefaultIssuerConfig(),
-    Client: clientConstructor,
+    Client: jest.fn().mockReturnValue({
+      refresh: jest.fn().mockResolvedValueOnce(tokenSet as never),
+    }),
   };
   Issuer.mockReturnValueOnce(mockedIssuer);
+  return mockedIssuer;
 };
 
-const setupDefaultOidcClientMock = () => {
-  setupOidcClientMock(mockDpopTokens());
-};
+const setupDefaultOidcClientMock = () => setupOidcClientMock(mockDpopTokens());
 
 const mockDefaultStorageContent = {
   "solidClientAuthenticationUser:mySession": {
@@ -206,6 +203,12 @@ describe("TokenRefresher", () => {
 
   it("throws if a refresh token isn't provided", async () => {
     setupDefaultOidcClientMock();
+    const mockedModule = jest.requireMock("../ClientRegistrar") as {
+      negotiateClientSigningAlg: typeof negotiateClientSigningAlg;
+    };
+    mockedModule.negotiateClientSigningAlg = jest
+      .fn(negotiateClientSigningAlg)
+      .mockReturnValue("ES256");
     const mockedStorage = mockRefresherDefaultStorageUtility();
 
     const refresher = getTokenRefresher({
@@ -219,6 +222,12 @@ describe("TokenRefresher", () => {
 
   it("throws if a DPoP token is expected, but no DPoP key is provided", async () => {
     setupDefaultOidcClientMock();
+    const mockedModule = jest.requireMock("../ClientRegistrar") as {
+      negotiateClientSigningAlg: typeof negotiateClientSigningAlg;
+    };
+    mockedModule.negotiateClientSigningAlg = jest
+      .fn(negotiateClientSigningAlg)
+      .mockReturnValue("ES256");
     const mockedStorage = mockRefresherDefaultStorageUtility();
 
     const refresher = getTokenRefresher({
@@ -232,10 +241,12 @@ describe("TokenRefresher", () => {
     );
   });
 
-  // FIXME: this test brings coverage to 100%, but has no meaningful expect.
-  // For the time being, it is sufficient, but to be fixed soon.
   it("does not negotiate the signing algorithm if it is already set for the client", async () => {
     setupDefaultOidcClientMock();
+    const mockedModule = jest.requireMock("../ClientRegistrar") as {
+      negotiateClientSigningAlg: typeof negotiateClientSigningAlg;
+    };
+    mockedModule.negotiateClientSigningAlg = jest.fn();
     const refresher = getTokenRefresher({
       storageUtility: mockRefresherDefaultStorageUtility(),
       clientRegistrar: mockClientRegistrar({
@@ -246,13 +257,36 @@ describe("TokenRefresher", () => {
       }),
     });
 
-    const refreshedTokens = await refresher.refresh(
+    await refresher.refresh(
       "mySession",
       "some refresh token",
       await mockKeyPair()
     );
 
-    expect(refreshedTokens.accessToken).toBe(mockDpopTokens().access_token);
+    expect(mockedModule.negotiateClientSigningAlg).not.toHaveBeenCalled();
+  });
+
+  it("uses client_secret_post authentication if using Solid-OIDC client identifiers", async () => {
+    const mockedIssuer = setupDefaultOidcClientMock();
+    const refresher = getTokenRefresher({
+      clientRegistrar: mockClientRegistrar({
+        clientId: "https://some.client.identifier",
+        clientType: "solid-oidc",
+        idTokenSignedResponseAlg: "ES256",
+      }),
+    });
+
+    await refresher.refresh(
+      "mySession",
+      "some refresh token",
+      await mockKeyPair()
+    );
+
+    expect(mockedIssuer.Client).toHaveBeenCalledWith(
+      expect.objectContaining({
+        token_endpoint_auth_method: "client_secret_post",
+      })
+    );
   });
 
   it("refreshes a DPoP token properly", async () => {

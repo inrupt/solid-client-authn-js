@@ -105,6 +105,31 @@ describe("ClientRegistrar", () => {
       expect(client.idTokenSignedResponseAlg).toEqual("ES256");
     });
 
+    it("negotiates signing alg if not found in storage", async () => {
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: "an id",
+              clientSecret: "a secret",
+              clientName: "my client name",
+            },
+          },
+          false
+        ),
+      });
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+      expect(client.idTokenSignedResponseAlg).toEqual("ES256");
+    });
+
     it("properly performs dynamic registration and saves client information", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client") as any;
