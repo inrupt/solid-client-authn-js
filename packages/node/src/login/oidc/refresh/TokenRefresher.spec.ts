@@ -209,6 +209,7 @@ describe("TokenRefresher", () => {
     mockedModule.negotiateClientSigningAlg = jest
       .fn(negotiateClientSigningAlg)
       .mockReturnValue("ES256");
+
     const mockedStorage = mockRefresherDefaultStorageUtility();
 
     const refresher = getTokenRefresher({
@@ -266,7 +267,7 @@ describe("TokenRefresher", () => {
     expect(mockedModule.negotiateClientSigningAlg).not.toHaveBeenCalled();
   });
 
-  it("uses client_secret_post authentication if using Solid-OIDC client identifiers", async () => {
+  it("uses 'none' authentication if using Solid-OIDC client identifiers", async () => {
     const mockedIssuer = setupDefaultOidcClientMock();
     const refresher = getTokenRefresher({
       clientRegistrar: mockClientRegistrar({
@@ -284,7 +285,7 @@ describe("TokenRefresher", () => {
 
     expect(mockedIssuer.Client).toHaveBeenCalledWith(
       expect.objectContaining({
-        token_endpoint_auth_method: "client_secret_post",
+        token_endpoint_auth_method: "none",
       })
     );
   });

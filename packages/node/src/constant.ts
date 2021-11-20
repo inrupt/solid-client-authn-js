@@ -22,5 +22,3 @@
 import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
 
 export const KEY_REGISTERED_SESSIONS = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}registeredSessions`;
-// Currently required, pending a response to https://github.com/panva/node-openid-client/discussions/430.
-export const TMP_ARBITRARY_SECRET = "some arbitrary secret";

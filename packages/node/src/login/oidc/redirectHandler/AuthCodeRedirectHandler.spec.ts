@@ -284,7 +284,7 @@ describe("AuthCodeRedirectHandler", () => {
       expect(headers.get("Authorization")).toContain("DPoP");
     });
 
-    it("uses client_secret_post authentication if using Solid-OIDC client identifiers", async () => {
+    it("uses 'none' client authentication if using Solid-OIDC client identifiers", async () => {
       const mockedIssuer = setupDefaultOidcClientMock();
       const mockedStorage = mockDefaultRedirectStorage();
 
@@ -307,7 +307,7 @@ describe("AuthCodeRedirectHandler", () => {
 
       expect(mockedIssuer.Client).toHaveBeenCalledWith(
         expect.objectContaining({
-          token_endpoint_auth_method: "client_secret_post",
+          token_endpoint_auth_method: "none",
         })
       );
     });

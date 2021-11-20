@@ -41,7 +41,6 @@ import { KeyObject } from "crypto";
 import { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
-import { TMP_ARBITRARY_SECRET } from "../../../constant";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.
@@ -108,10 +107,10 @@ export default class TokenRefresher implements ITokenRefresher {
     }
     const client = new issuer.Client({
       client_id: clientInfo.clientId,
-      client_secret: clientInfo.clientSecret ?? TMP_ARBITRARY_SECRET,
+      client_secret: clientInfo.clientSecret,
       token_endpoint_auth_method: clientInfo.clientSecret
         ? "client_secret_basic"
-        : "client_secret_post",
+        : "none",
       id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
     });
 
