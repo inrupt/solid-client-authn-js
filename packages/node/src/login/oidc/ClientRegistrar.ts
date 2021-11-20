@@ -95,7 +95,9 @@ export default class ClientRegistrar implements IClientRegistrar {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
         clientName: storedClientName as string | undefined,
-        idTokenSignedResponseAlg: storedIdTokenSignedResponseAlg,
+        idTokenSignedResponseAlg:
+          storedIdTokenSignedResponseAlg ??
+          negotiateClientSigningAlg(issuerConfig, PREFERRED_SIGNING_ALG),
         clientType: "dynamic",
       };
     }

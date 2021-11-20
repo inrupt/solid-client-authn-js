@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Bugfixes
 
+#### node
+
+- Using a Client Identifier caused authentication issues at the token endpoint.
+
 #### node and browser
 
 - Passing custom headers to a session's fetch as a Headers object would result in the headers
