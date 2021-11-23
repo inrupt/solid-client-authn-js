@@ -22,13 +22,15 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import {
   EVENTS,
+  KeyPair,
   mockStorageUtility,
   StorageUtilityMock,
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
-import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK } from "jose";
 import { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
+import { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockDefaultIssuerConfigFetcher,
@@ -63,9 +65,9 @@ const mockJwk = (): JWK => {
   };
 };
 
-const mockKeyPair = async () => {
+const mockKeyPair = async (): Promise<KeyPair> => {
   return {
-    privateKey: await parseJwk(mockJwk()),
+    privateKey: (await importJWK(mockJwk())) as KeyObject,
     // Use the same JWK for public and private key out of convenience, don't do
     // this in real life.
     publicKey: mockJwk(),

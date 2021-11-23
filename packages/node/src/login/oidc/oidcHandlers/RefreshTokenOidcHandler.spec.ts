@@ -30,12 +30,7 @@ import {
   mockStorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import fromKeyLike from "jose/jwk/from_key_like";
-import { jwtVerify, fromKeyLike } from "@inrupt/jose-legacy-modules";
+import { jwtVerify, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import { Headers as NodeHeaders } from "node-fetch";
 import {
@@ -83,7 +78,7 @@ describe("RefreshTokenOidcHandler", () => {
             },
           })
         )
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     it("doesn't handle options missing a client ID", async () => {
@@ -105,7 +100,7 @@ describe("RefreshTokenOidcHandler", () => {
             },
           })
         )
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
   });
 
@@ -148,7 +143,7 @@ describe("RefreshTokenOidcHandler", () => {
           },
         })
       );
-      expect(result?.webId).toEqual("https://my.webid/");
+      expect(result?.webId).toBe("https://my.webid/");
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
@@ -178,8 +173,8 @@ describe("RefreshTokenOidcHandler", () => {
           },
         })
       );
-      expect(result).not.toBeUndefined();
-      expect(result?.webId).toEqual("https://my.webid/");
+      expect(result).toBeDefined();
+      expect(result?.webId).toBe("https://my.webid/");
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
@@ -203,9 +198,7 @@ describe("RefreshTokenOidcHandler", () => {
         mockStorageUtility({
           [`${USER_SESSION_PREFIX}:mySession`]: {
             publicKey: JSON.stringify(dpopKeyPair.publicKey),
-            privateKey: JSON.stringify(
-              await fromKeyLike(dpopKeyPair.privateKey)
-            ),
+            privateKey: JSON.stringify(await exportJWK(dpopKeyPair.privateKey)),
           },
         })
       );
@@ -253,7 +246,7 @@ describe("RefreshTokenOidcHandler", () => {
           dpop: false,
         })
       );
-      expect(result).not.toBeUndefined();
+      expect(result).toBeDefined();
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
@@ -287,19 +280,19 @@ describe("RefreshTokenOidcHandler", () => {
       );
       await expect(
         mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "clientId")
-      ).resolves.toEqual("some client id");
+      ).resolves.toBe("some client id");
       await expect(
         mockedStorage.getForUser(
           mockDefaultOidcOptions().sessionId,
           "clientSecret"
         )
-      ).resolves.toEqual("some client secret");
+      ).resolves.toBe("some client secret");
       await expect(
         mockedStorage.getForUser(
           mockDefaultOidcOptions().sessionId,
           "clientName"
         )
-      ).resolves.toEqual("some client name");
+      ).resolves.toBe("some client name");
       await expect(
         mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "issuer")
       ).resolves.toEqual(mockDefaultOidcOptions().issuer);
@@ -323,7 +316,7 @@ describe("RefreshTokenOidcHandler", () => {
         },
       })
     );
-    expect(result).not.toBeUndefined();
+    expect(result).toBeDefined();
   });
 
   it("throws if the IdP does not return an ID token", async () => {
@@ -376,7 +369,7 @@ describe("RefreshTokenOidcHandler", () => {
         },
       })
     );
-    expect(result?.webId).toEqual("https://my.webid/");
+    expect(result?.webId).toBe("https://my.webid/");
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
       expect.anything(),

@@ -19,11 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  fromKeyLike,
-  generateKeyPair,
-  KeyLike,
-} from "@inrupt/jose-legacy-modules";
+import { exportJWK, generateKeyPair, KeyLike } from "jose";
 import { jest, describe, it, expect } from "@jest/globals";
 import { mockIssuerConfig } from "../login/oidc/__mocks__/IssuerConfig";
 import { mockIssuerConfigFetcher } from "../login/oidc/__mocks__/IssuerConfigFetcher";
@@ -272,9 +268,9 @@ describe("StorageUtility", () => {
       await expect(
         storageUtility.getForUser(userId, "jackie")
       ).resolves.toBeUndefined();
-      await expect(
-        storageUtility.getForUser(userId, "sledge")
-      ).resolves.toEqual("The Dog");
+      await expect(storageUtility.getForUser(userId, "sledge")).resolves.toBe(
+        "The Dog"
+      );
     });
 
     it("deletes a value for a user from secure storage", async () => {
@@ -296,7 +292,7 @@ describe("StorageUtility", () => {
       ).resolves.toBeUndefined();
       await expect(
         storageUtility.getForUser("someUser", "sledge", { secure: true })
-      ).resolves.toEqual("The Dog");
+      ).resolves.toBe("The Dog");
     });
   });
 
@@ -312,9 +308,9 @@ describe("StorageUtility", () => {
 
       // Write some user data, and make sure it's there.
       await storageUtility.setForUser(userId, userData);
-      await expect(
-        storageUtility.getForUser(userId, "jackie")
-      ).resolves.toEqual("The Cat");
+      await expect(storageUtility.getForUser(userId, "jackie")).resolves.toBe(
+        "The Cat"
+      );
 
       // Delete that user data, and make sure it's gone.
       await storageUtility.deleteAllUserData(userId);
@@ -336,7 +332,7 @@ describe("StorageUtility", () => {
       await storageUtility.setForUser(userId, userData, { secure: true });
       await expect(
         storageUtility.getForUser(userId, "jackie", { secure: true })
-      ).resolves.toEqual("The Cat");
+      ).resolves.toBe("The Cat");
 
       // Delete that user data, and make sure it's gone.
       await storageUtility.deleteAllUserData(userId, { secure: true });
@@ -619,7 +615,7 @@ describe("saveSessionInfoToStorage", () => {
 
     await expect(
       mockedStorage.getForUser("some session", "refreshToken", { secure: true })
-    ).resolves.toEqual("a refresh token");
+    ).resolves.toBe("a refresh token");
   });
 
   it("saves ID token if provided in the given storage", async () => {
@@ -636,7 +632,7 @@ describe("saveSessionInfoToStorage", () => {
 
     await expect(
       mockedStorage.getForUser("some session", "idToken", { secure: true })
-    ).resolves.toEqual("an ID token");
+    ).resolves.toBe("an ID token");
   });
 
   it("saves the webid if provided in the given storage", async () => {
@@ -653,7 +649,7 @@ describe("saveSessionInfoToStorage", () => {
 
     await expect(
       mockedStorage.getForUser("some session", "webId", { secure: true })
-    ).resolves.toEqual("https://my.webid");
+    ).resolves.toBe("https://my.webid");
   });
 
   it("saves the logged in status if provided in the given storage", async () => {
@@ -670,7 +666,7 @@ describe("saveSessionInfoToStorage", () => {
 
     await expect(
       mockedStorage.getForUser("some session", "isLoggedIn", { secure: true })
-    ).resolves.toEqual("true");
+    ).resolves.toBe("true");
   });
 
   let publicKey: KeyLike | undefined;
@@ -695,9 +691,9 @@ describe("saveSessionInfoToStorage", () => {
     const { privateKey: prvt, publicKey: pblc } = await mockJwk();
     const dpopKeyPair = {
       privateKey: prvt,
-      publicKey: await fromKeyLike(pblc),
+      publicKey: await exportJWK(pblc),
     };
-    // The alg property isn't set by fromKeyLike, so set it manually.
+    // The alg property isn't set by exportJWK, so set it manually.
     dpopKeyPair.publicKey.alg = "ES256";
     return dpopKeyPair;
   };
@@ -731,7 +727,7 @@ describe("saveSessionInfoToStorage", () => {
     );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(JSON.parse(privateJwk!)).toEqual(
-      await fromKeyLike(dpopKey.privateKey)
+      await exportJWK(dpopKey.privateKey)
     );
   });
 });

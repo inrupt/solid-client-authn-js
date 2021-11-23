@@ -37,27 +37,25 @@ jest.mock("@inrupt/oidc-client", () => {
 
 describe("removeOidcQueryParam", () => {
   it("removes the 'code' query string if present", () => {
-    expect(removeOidcQueryParam("https://some.url/?code=aCode")).toEqual(
+    expect(removeOidcQueryParam("https://some.url/?code=aCode")).toBe(
       "https://some.url/"
     );
   });
 
   it("removes the 'state' query string if present", () => {
-    expect(removeOidcQueryParam("https://some.url/?state=arkansas")).toEqual(
+    expect(removeOidcQueryParam("https://some.url/?state=arkansas")).toBe(
       "https://some.url/"
     );
   });
 
   it("removes the hash part of the IRI", () => {
-    expect(removeOidcQueryParam("https://some.url/#some-anchor")).toEqual(
+    expect(removeOidcQueryParam("https://some.url/#some-anchor")).toBe(
       "https://some.url/"
     );
   });
 
   it("returns an URL without query strings as is", () => {
-    expect(removeOidcQueryParam("https://some.url/")).toEqual(
-      "https://some.url/"
-    );
+    expect(removeOidcQueryParam("https://some.url/")).toBe("https://some.url/");
   });
 
   it("preserves other query strings", () => {
@@ -65,7 +63,7 @@ describe("removeOidcQueryParam", () => {
       removeOidcQueryParam(
         "https://some.url/?code=someCode&state=someState&otherQuery=aValue"
       )
-    ).toEqual("https://some.url/?otherQuery=aValue");
+    ).toBe("https://some.url/?otherQuery=aValue");
   });
 });
 

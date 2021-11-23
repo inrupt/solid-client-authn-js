@@ -191,8 +191,8 @@ describe("ClientRegistrar", () => {
           ...IssuerConfigFetcherFetchConfigResponse,
         }
       );
-      expect(client.clientId).toEqual("an id");
-      expect(client.clientSecret).toEqual("a secret");
+      expect(client.clientId).toBe("an id");
+      expect(client.clientSecret).toBe("a secret");
     });
 
     it("passes the registration token if provided", async () => {
@@ -229,7 +229,7 @@ describe("ClientRegistrar", () => {
         string,
         string
       >;
-      expect(registrationHeaders.Authorization).toEqual("Bearer some token");
+      expect(registrationHeaders.Authorization).toBe("Bearer some token");
     });
 
     it("retrieves the registration token from storage if present", async () => {
@@ -272,7 +272,7 @@ describe("ClientRegistrar", () => {
         string,
         string
       >;
-      expect(registrationHeaders.Authorization).toEqual("Bearer some token");
+      expect(registrationHeaders.Authorization).toBe("Bearer some token");
     });
 
     it("saves dynamic registration information", async () => {
@@ -307,10 +307,10 @@ describe("ClientRegistrar", () => {
 
       await expect(
         myStorage.getForUser("mySession", "clientId", { secure: false })
-      ).resolves.toEqual("some id");
+      ).resolves.toBe("some id");
       await expect(
         myStorage.getForUser("mySession", "clientSecret", { secure: false })
-      ).resolves.toEqual("some secret");
+      ).resolves.toBe("some secret");
     });
   });
 });

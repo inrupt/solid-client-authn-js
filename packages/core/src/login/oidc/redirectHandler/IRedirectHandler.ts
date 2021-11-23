@@ -26,12 +26,7 @@
 
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
-import {
-  JWK,
-  JWTPayload,
-  jwtVerify,
-  parseJwk,
-} from "@inrupt/jose-legacy-modules";
+import { JWK, JWTPayload, jwtVerify, importJWK } from "jose";
 import { EventEmitter } from "events";
 import IHandleable from "../../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
@@ -101,7 +96,7 @@ export async function getWebidFromTokenPayload(
   try {
     const { payload: verifiedPayload } = await jwtVerify(
       idToken,
-      await parseJwk(jwk),
+      await importJWK(jwk),
       {
         issuer: issuerIri,
         audience: clientId,

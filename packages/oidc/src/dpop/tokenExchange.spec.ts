@@ -208,7 +208,7 @@ describe("getTokens", () => {
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     // c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ= is 'some client:some secret' encoded in base 64
-    expect(headers.Authorization).toEqual(
+    expect(headers.Authorization).toBe(
       "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ="
     );
   });
@@ -264,11 +264,9 @@ describe("getTokens", () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    expect(headers["content-type"]).toEqual(
-      "application/x-www-form-urlencoded"
-    );
+    expect(headers["content-type"]).toBe("application/x-www-form-urlencoded");
     const body = myFetch.mock.calls[0][1]?.body as string;
-    expect(body).toEqual(
+    expect(body).toBe(
       "grant_type=authorization_code&redirect_uri=https%3A%2F%2Fmy.app%2Fredirect&code=some+code&code_verifier=some+pkce+token&client_id=some+client"
     );
   });
@@ -312,7 +310,7 @@ describe("getTokens", () => {
       mockEndpointInput(),
       true
     );
-    expect(result?.refreshToken).toEqual("some token");
+    expect(result?.refreshToken).toBe("some token");
   });
 
   it("throws if the access token is missing", async () => {

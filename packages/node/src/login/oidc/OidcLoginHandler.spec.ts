@@ -66,7 +66,7 @@ describe("OidcLoginHandler", () => {
           tokenType: "DPoP",
           redirectUrl: "https://my.app/redirect",
         })
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     // TODO: Move this to appropriate handlers (auth code, implicit)
@@ -91,7 +91,7 @@ describe("OidcLoginHandler", () => {
           oidcIssuer: "https://my.idp/",
           redirectUrl: "https://my.app/redirect",
         })
-      ).resolves.toEqual(true);
+      ).resolves.toBe(true);
     });
   });
 
@@ -160,13 +160,13 @@ describe("OidcLoginHandler", () => {
       expect(clientRegistrar.getClient).not.toHaveBeenCalled();
       await expect(
         mockedStorage.getForUser("mySession", "clientId")
-      ).resolves.toEqual("some pre-registered client id");
+      ).resolves.toBe("some pre-registered client id");
       await expect(
         mockedStorage.getForUser("mySession", "clientSecret")
-      ).resolves.toEqual("some pre-registered client secret");
+      ).resolves.toBe("some pre-registered client secret");
       await expect(
         mockedStorage.getForUser("mySession", "clientName")
-      ).resolves.toEqual("My App");
+      ).resolves.toBe("My App");
     });
 
     it("should save client WebID if one is provided, and the target IdP supports Solid-OIDC", async () => {
@@ -203,7 +203,7 @@ describe("OidcLoginHandler", () => {
         "mySession",
         "clientId"
       );
-      expect(storedClientId).toEqual("https://my.app/registration#app");
+      expect(storedClientId).toBe("https://my.app/registration#app");
     });
 
     it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
@@ -240,7 +240,7 @@ describe("OidcLoginHandler", () => {
       });
 
       const calledWith = oidcHandler.handle.mock.calls[0][0];
-      expect(calledWith.client.clientId).toEqual(
+      expect(calledWith.client.clientId).toBe(
         "a dynamically registered client id"
       );
     });
@@ -267,7 +267,7 @@ describe("OidcLoginHandler", () => {
       expect(clientRegistrar.getClient).not.toHaveBeenCalled();
       await expect(
         mockedStorage.getForUser("mySession", "clientId")
-      ).resolves.toEqual("some pre-registered client id");
+      ).resolves.toBe("some pre-registered client id");
     });
 
     it("uses the refresh token from storage if available", async () => {

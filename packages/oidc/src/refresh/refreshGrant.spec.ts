@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { jwtVerify, parseJwk } from "@inrupt/jose-legacy-modules";
+import { jwtVerify, importJWK } from "jose";
 import {
   mockBearerTokens,
   mockClient,
@@ -58,7 +58,7 @@ describe("refreshGrant", () => {
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     // c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ= is 'some client:some secret' encoded in base 64
-    expect(headers.Authorization).toEqual(
+    expect(headers.Authorization).toBe(
       "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ="
     );
   });
@@ -84,11 +84,11 @@ describe("refreshGrant", () => {
       mockIssuer().tokenEndpoint.toString()
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    expect(headers.DPoP).not.toBeUndefined();
+    expect(headers.DPoP).toBeDefined();
     const dpopHeader = headers.DPoP;
     const dpopProof = await jwtVerify(
       dpopHeader,
-      await parseJwk(keyPair.publicKey)
+      await importJWK(keyPair.publicKey)
     );
     expect(dpopProof.payload.htu).toBe(mockIssuer().tokenEndpoint.toString());
   });

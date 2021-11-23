@@ -162,7 +162,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
         })
-      ).resolves.toStrictEqual("https://app.example.com?someQuery=someValue");
+      ).resolves.toBe("https://app.example.com?someQuery=someValue");
       await expect(
         mockedStorage.getForUser("mySession", "codeVerifier", {
           secure: false,

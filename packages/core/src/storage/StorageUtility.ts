@@ -27,7 +27,7 @@
 /**
  * A helper class that will validate items taken from local storage
  */
-import { fromKeyLike } from "@inrupt/jose-legacy-modules";
+import { exportJWK } from "jose";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
 import InruptError from "../errors/InruptError";
@@ -130,7 +130,7 @@ export async function saveSessionInfoToStorage(
       sessionId,
       {
         publicKey: JSON.stringify(dpopKey.publicKey),
-        privateKey: JSON.stringify(await fromKeyLike(dpopKey.privateKey)),
+        privateKey: JSON.stringify(await exportJWK(dpopKey.privateKey)),
       },
       { secure }
     );

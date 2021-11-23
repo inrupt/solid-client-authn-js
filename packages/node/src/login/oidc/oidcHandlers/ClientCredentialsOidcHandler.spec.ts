@@ -25,12 +25,7 @@
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe } from "@jest/globals";
 import { IdTokenClaims, TokenSet } from "openid-client";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import { JWK } from "jose/types";
-import { JWK } from "@inrupt/jose-legacy-modules";
+import { JWK } from "jose";
 // eslint-disable-next-line no-shadow
 import { Headers } from "node-fetch";
 
@@ -175,7 +170,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientType: "static",
           },
         })
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     it("cannot handle if the client is not statically registered", async () => {
@@ -192,7 +187,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientType: "dynamic",
           },
         })
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     it("can handle if both client ID and secret are present for a confidential client", async () => {
@@ -209,7 +204,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientType: "static",
           },
         })
-      ).resolves.toEqual(true);
+      ).resolves.toBe(true);
     });
   });
 });

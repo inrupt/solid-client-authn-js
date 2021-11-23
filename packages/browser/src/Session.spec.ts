@@ -71,19 +71,19 @@ describe("Session", () => {
   describe("constructor", () => {
     it("accepts an empty config", async () => {
       const mySession = new Session({});
-      expect(mySession.info.isLoggedIn).toEqual(false);
+      expect(mySession.info.isLoggedIn).toBe(false);
       expect(mySession.info.sessionId).toBeDefined();
     });
 
     it("accepts no config", async () => {
       const mySession = new Session();
-      expect(mySession.info.isLoggedIn).toEqual(false);
+      expect(mySession.info.isLoggedIn).toBe(false);
       expect(mySession.info.sessionId).toBeDefined();
     });
 
     it("does not generate a session ID if one is provided", () => {
       const mySession = new Session({}, "mySession");
-      expect(mySession.info.sessionId).toEqual("mySession");
+      expect(mySession.info.sessionId).toBe("mySession");
     });
 
     it("accepts input storage", async () => {
@@ -108,9 +108,9 @@ describe("Session", () => {
           webId: "https://some.webid",
         },
       });
-      expect(mySession.info.isLoggedIn).toEqual(false);
-      expect(mySession.info.sessionId).toEqual("mySession");
-      expect(mySession.info.webId).toEqual("https://some.webid");
+      expect(mySession.info.isLoggedIn).toBe(false);
+      expect(mySession.info.sessionId).toBe("mySession");
+      expect(mySession.info.webId).toBe("https://some.webid");
     });
   });
 
@@ -184,7 +184,7 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       mySession.info.isLoggedIn = true;
       await mySession.logout();
-      expect(mySession.info.isLoggedIn).toEqual(false);
+      expect(mySession.info.isLoggedIn).toBe(false);
     });
   });
 
@@ -263,11 +263,11 @@ describe("Session", () => {
         }
       );
       const mySession = new Session({ clientAuthentication });
-      expect(mySession.info.isLoggedIn).toEqual(false);
+      expect(mySession.info.isLoggedIn).toBe(false);
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(mySession.info.isLoggedIn).toEqual(true);
-      expect(mySession.info.sessionId).toEqual("a session ID");
-      expect(mySession.info.webId).toEqual("https://some.webid#them");
+      expect(mySession.info.isLoggedIn).toBe(true);
+      expect(mySession.info.sessionId).toBe("a session ID");
+      expect(mySession.info.webId).toBe("https://some.webid#them");
     });
 
     it("directly returns the session's info if already logged in", async () => {
@@ -283,7 +283,7 @@ describe("Session", () => {
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(mySession.info.isLoggedIn).toEqual(true);
+      expect(mySession.info.isLoggedIn).toBe(true);
       await mySession.handleIncomingRedirect("https://some.url");
       // The second request should not hit the wrapped function
       expect(clientAuthentication.handleIncomingRedirect).toHaveBeenCalledTimes(
@@ -321,8 +321,8 @@ describe("Session", () => {
       );
       const mySession = new Session({ clientAuthentication }, "mySession");
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(mySession.info.isLoggedIn).toEqual(false);
-      expect(mySession.info.sessionId).toEqual("mySession");
+      expect(mySession.info.isLoggedIn).toBe(false);
+      expect(mySession.info.sessionId).toBe("mySession");
     });
 
     it("prevents from hitting the token endpoint twice with the same auth code", async () => {
@@ -390,7 +390,7 @@ describe("Session", () => {
           url: "https://some.url",
           useEssSession: true,
         });
-        expect(mySession.info.isLoggedIn).toEqual(false);
+        expect(mySession.info.isLoggedIn).toBe(false);
         expect(mySession.info.webId).toBeUndefined();
         expect(
           clientAuthentication.handleIncomingRedirect
@@ -398,7 +398,7 @@ describe("Session", () => {
         // The workaround should be enabled by default
         expect(
           window.localStorage.getItem("tmp-resource-server-session-enabled")
-        ).toEqual("true");
+        ).toBe("true");
       });
 
       it("re-initialises the user's WebID without redirection if the proper cookie is set", async () => {
@@ -417,15 +417,15 @@ describe("Session", () => {
           url: "https://some.url",
           useEssSession: true,
         });
-        expect(mySession.info.isLoggedIn).toEqual(true);
-        expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
+        expect(mySession.info.isLoggedIn).toBe(true);
+        expect(mySession.info.webId).toBe("https://my.pod/profile#me");
         expect(
           clientAuthentication.handleIncomingRedirect
         ).toHaveBeenCalledTimes(0);
         // The workaround should be enabled by default
         expect(
           window.localStorage.getItem("tmp-resource-server-session-enabled")
-        ).toEqual("true");
+        ).toBe("true");
       });
 
       it("does not attempt to use the workaround if the long-term solution (silent refresh) is enabled", async () => {
@@ -451,7 +451,7 @@ describe("Session", () => {
         ).toHaveBeenCalledTimes(1);
         expect(
           window.localStorage.getItem("tmp-resource-server-session-enabled")
-        ).toEqual("false");
+        ).toBe("false");
       });
 
       it("overrides the workaround if both silent refresh and the ESS session are enabled", async () => {
@@ -478,7 +478,7 @@ describe("Session", () => {
         ).toHaveBeenCalledTimes(1);
         expect(
           window.localStorage.getItem("tmp-resource-server-session-enabled")
-        ).toEqual("false");
+        ).toBe("false");
       });
 
       it("does not attempt to use the workaround if it is not explicitly enabled", async () => {
@@ -503,7 +503,7 @@ describe("Session", () => {
         ).toHaveBeenCalledTimes(1);
         expect(
           window.localStorage.getItem("tmp-resource-server-session-enabled")
-        ).toEqual("false");
+        ).toBe("false");
       });
 
       it("does not attempt to use the workaround if it is explicitly disabled", async () => {
@@ -529,7 +529,7 @@ describe("Session", () => {
         ).toHaveBeenCalledTimes(1);
         expect(
           window.localStorage.getItem("tmp-resource-server-session-enabled")
-        ).toEqual("false");
+        ).toBe("false");
       });
 
       it("does not mark an almost-expired session as logged in", async () => {
@@ -549,7 +549,7 @@ describe("Session", () => {
           url: "https://some.url",
           useEssSession: true,
         });
-        expect(mySession.info.isLoggedIn).toEqual(false);
+        expect(mySession.info.isLoggedIn).toBe(false);
         expect(mySession.info.webId).toBeUndefined();
         expect(
           clientAuthentication.handleIncomingRedirect
@@ -572,8 +572,8 @@ describe("Session", () => {
           url: "https://some.url",
           useEssSession: true,
         });
-        expect(mySession.info.isLoggedIn).toEqual(true);
-        expect(mySession.info.webId).toEqual("https://my.pod/profile#me");
+        expect(mySession.info.isLoggedIn).toBe(true);
+        expect(mySession.info.webId).toBe("https://my.pod/profile#me");
         expect(
           clientAuthentication.handleIncomingRedirect
         ).toHaveBeenCalledTimes(0);
@@ -593,7 +593,7 @@ describe("Session", () => {
           url: "https://some.url",
           useEssSession: true,
         });
-        expect(mySession.info.isLoggedIn).toEqual(false);
+        expect(mySession.info.isLoggedIn).toBe(false);
         expect(mySession.info.webId).toBeUndefined();
         expect(
           clientAuthentication.handleIncomingRedirect
@@ -701,7 +701,7 @@ describe("Session", () => {
       });
       await incomingRedirectPromise;
       await validateCurrentSessionPromise;
-      expect(window.localStorage.getItem(KEY_CURRENT_URL)).toEqual(
+      expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBe(
         "https://mock.current/location"
       );
     });

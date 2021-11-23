@@ -32,7 +32,8 @@ import {
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
-import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK } from "jose";
+import { KeyObject } from "crypto";
 import {
   AuthCodeRedirectHandler,
   DEFAULT_LIFESPAN,
@@ -120,7 +121,7 @@ const mockTokenEndpointDpopResponse = async (): Promise<CodeExchangeResult> => {
     idToken: mockIdToken(),
     webId: mockWebId(),
     dpopKey: {
-      privateKey: await parseJwk(mockJwk()),
+      privateKey: (await importJWK(mockJwk())) as KeyObject,
       // Note that here for convenience the private key is also used as public key.
       // Obviously, this should never be done in non-test code.
       publicKey: mockJwk(),
@@ -455,16 +456,14 @@ describe("AuthCodeRedirectHandler", () => {
       );
       // Check that the current session is stored correctly __specifically__ in
       // 'localStorage'.
-      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBe(
         "mySession"
       );
       await expect(
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
         })
-      ).resolves.toStrictEqual(
-        "https://coolsite.com/redirect?state=oauth2StateValue"
-      );
+      ).resolves.toBe("https://coolsite.com/redirect?state=oauth2StateValue");
     });
 
     it("preserves any query strings from the redirect URI", async () => {
@@ -506,7 +505,7 @@ describe("AuthCodeRedirectHandler", () => {
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
         })
-      ).resolves.toStrictEqual(
+      ).resolves.toBe(
         "https://coolsite.com/redirect?state=oauth2StateValue&someKey=someValue"
       );
     });

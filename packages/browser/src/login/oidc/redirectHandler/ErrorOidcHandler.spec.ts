@@ -65,7 +65,7 @@ describe("ErrorOidcHandler", () => {
       window.fetch = jest.fn();
       const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle("https://my.app");
-      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
     });
     it("calls the onError callback if given with both parameters", async () => {
@@ -78,7 +78,7 @@ describe("ErrorOidcHandler", () => {
         "https://coolparty.com/?error=error&error_description=unable_to_fetch",
         mockEmitter
       );
-      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
       expect(mockEmit).toHaveBeenCalledWith(
         EVENTS.ERROR,
@@ -97,7 +97,7 @@ describe("ErrorOidcHandler", () => {
         "https://coolparty.com/?error=error",
         mockEmitter
       );
-      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
       expect(mockEmit).toHaveBeenCalledWith(EVENTS.ERROR, "error", null);
     });

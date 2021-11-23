@@ -23,31 +23,31 @@ import { appendToUrlPathname } from "./urlPath";
 
 describe("urlPath", () => {
   it("should remove one slash if empty path", () => {
-    expect(appendToUrlPathname("https://ex.com/", "/test")).toEqual(
+    expect(appendToUrlPathname("https://ex.com/", "/test")).toBe(
       "https://ex.com/test"
     );
 
     expect(
       appendToUrlPathname("https://ex.com/", "////only-remove-one-slash")
-    ).toEqual("https://ex.com////only-remove-one-slash");
+    ).toBe("https://ex.com////only-remove-one-slash");
   });
 
   it("should remove one slash if non-empty path", () => {
-    expect(appendToUrlPathname("https://ex.com/a/", "/test")).toEqual(
+    expect(appendToUrlPathname("https://ex.com/a/", "/test")).toBe(
       "https://ex.com/a/test"
     );
 
     expect(
       appendToUrlPathname("https://ex.com/a/", "////only-remove-one-slash")
-    ).toEqual("https://ex.com/a////only-remove-one-slash");
+    ).toBe("https://ex.com/a////only-remove-one-slash");
   });
 
   it("should add a slash before appending slash", () => {
-    expect(appendToUrlPathname("https://ex.com", "test")).toEqual(
+    expect(appendToUrlPathname("https://ex.com", "test")).toBe(
       "https://ex.com/test"
     );
 
-    expect(appendToUrlPathname("https://ex.com/a", "test")).toEqual(
+    expect(appendToUrlPathname("https://ex.com/a", "test")).toBe(
       "https://ex.com/a/test"
     );
   });
