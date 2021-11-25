@@ -244,6 +244,19 @@ describe("ClientAuthentication", () => {
     });
   });
 
+  describe("headersAuthenticator", () => {
+    it("rejects", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(
+        clientAuthn.headersAuthenticator(
+          "https://html5zombo.com",
+          "GET",
+          new Headers()
+        )
+      ).rejects.toThrow("headersAuthenticator is not initialized yet");
+    });
+  });
+
   describe("logout", () => {
     const mockEmitter = new EventEmitter();
     // TODO: add tests for events & errors
@@ -273,6 +286,32 @@ describe("ClientAuthentication", () => {
       expect(spyFetch).toHaveBeenCalledWith("https://example.com", {
         credentials: "omit",
       });
+    });
+
+    it("reverts back to un-authenticated headersAuthenticator on logout", async () => {
+      const clientAuthn = getClientAuthentication();
+
+      const unauthHeadersAuthenticator = clientAuthn.headersAuthenticator;
+
+      const url =
+        "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
+      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
+
+      // Calling the redirect handler should give us an authenticated fetch.
+      expect(clientAuthn.headersAuthenticator).not.toBe(
+        unauthHeadersAuthenticator
+      );
+
+      await clientAuthn.logout("mySession");
+      await expect(
+        clientAuthn.headersAuthenticator(
+          "https://example.com",
+          "GET",
+          new Headers()
+        )
+      ).rejects.toThrow("headersAuthenticator is not initialized yet");
+      // Calling logout should revert back to our un-authenticated headersAuthenticator.
+      expect(clientAuthn.headersAuthenticator).toBe(unauthHeadersAuthenticator);
     });
   });
 
@@ -322,6 +361,7 @@ describe("ClientAuthentication", () => {
       const expectedResult = SessionCreatorCreateResponse;
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
+      const unauthHeadersAuthenticator = clientAuthn.headersAuthenticator;
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
@@ -345,9 +385,12 @@ describe("ClientAuthentication", () => {
         mockEmitter
       );
 
-      // Calling the redirect handler should have updated the fetch.
+      // Calling the redirect handler should have updated the fetch and headersAuthenticator.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
       expect(mockEmitter.emit).not.toHaveBeenCalled();
+      expect(clientAuthn.headersAuthenticator).not.toBe(
+        unauthHeadersAuthenticator
+      );
     });
 
     it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {

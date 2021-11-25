@@ -56,6 +56,9 @@ describe("FallbackRedirectHandler", () => {
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
+      expect(
+        await mySession.headersAuthenticator("A", "GET", new Headers())
+      ).toEqual(new Headers());
     });
   });
 });
