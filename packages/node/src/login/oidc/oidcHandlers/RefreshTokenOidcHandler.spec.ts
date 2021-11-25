@@ -54,9 +54,9 @@ jest.mock("cross-fetch", () => {
   } as typeof CrossFetch;
 });
 
-jest.mock("@inrupt/solid-client-authn-core", () => {
+jest.mock("@rubensworks/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@rubensworks/solid-client-authn-core"
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
@@ -364,7 +364,7 @@ describe("RefreshTokenOidcHandler", () => {
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const coreModule = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
+      "@rubensworks/solid-client-authn-core"
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,

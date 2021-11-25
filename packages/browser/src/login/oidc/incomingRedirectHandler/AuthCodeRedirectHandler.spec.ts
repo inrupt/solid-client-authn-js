@@ -139,7 +139,7 @@ const mockLocalStorage = (stored: Record<string, string>) => {
   });
 };
 
-jest.mock("@inrupt/oidc-client-ext");
+jest.mock("@rubensworks/oidc-client-ext");
 
 jest.useFakeTimers();
 
@@ -150,7 +150,9 @@ const defaultJwt = {
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 function mockOidcClient(jwt: typeof defaultJwt = defaultJwt): any {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mockedOidcClient = jest.requireMock("@inrupt/oidc-client-ext") as any;
+  const mockedOidcClient = jest.requireMock(
+    "@rubensworks/oidc-client-ext"
+  ) as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mockedOidcClient.generateJwkForDpop = (jest.fn() as any).mockResolvedValue(
     mockJwk()
@@ -574,7 +576,7 @@ describe("AuthCodeRedirectHandler", () => {
     mockOidcClient();
     const mockedStorage = mockDefaultStorageUtility();
     const coreModule = jest.requireActual(
-      "@inrupt/solid-client-authn-core"
+      "@rubensworks/solid-client-authn-core"
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
