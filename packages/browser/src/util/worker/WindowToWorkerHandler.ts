@@ -60,7 +60,10 @@ export class WindowToWorkerHandler {
    * @return True if the message was meant for this handler, false otherwise.
    */
   public onmessage(messageEvent: MessageEvent): boolean {
-    if (WorkerToWindowHandler.MESSAGE_KEY_POST in messageEvent.data) {
+    if (
+      typeof messageEvent.data === "object" &&
+      WorkerToWindowHandler.MESSAGE_KEY_POST in messageEvent.data
+    ) {
       // Authenticate headers from incoming message
       const message: IWorkerMessagePost =
         messageEvent.data[WorkerToWindowHandler.MESSAGE_KEY_POST];

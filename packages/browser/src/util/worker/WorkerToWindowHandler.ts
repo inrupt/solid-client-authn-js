@@ -62,7 +62,10 @@ export class WorkerToWindowHandler {
    * @return True if the message was meant for this handler, false otherwise.
    */
   public onmessage(messageEvent: MessageEvent): boolean {
-    if (WorkerToWindowHandler.MESSAGE_KEY_RESPONSE in messageEvent.data) {
+    if (
+      typeof messageEvent.data === "object" &&
+      WorkerToWindowHandler.MESSAGE_KEY_RESPONSE in messageEvent.data
+    ) {
       // Read message
       const message: IWorkerMessageResponse =
         messageEvent.data[WorkerToWindowHandler.MESSAGE_KEY_RESPONSE];
@@ -109,6 +112,12 @@ export class WorkerToWindowHandler {
         (inputRaw ? init?.method : input.method) || "get",
         new Headers(inputRaw || !input.headers ? init?.headers : input.headers)
       );
+      if (typeof input !== "string") {
+        return global.fetch(
+          { ...input, headers: headersAuthenticated },
+          { ...init }
+        );
+      }
       return global.fetch(input, { ...init, headers: headersAuthenticated });
     };
   }
