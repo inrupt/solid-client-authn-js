@@ -455,16 +455,14 @@ describe("AuthCodeRedirectHandler", () => {
       );
       // Check that the current session is stored correctly __specifically__ in
       // 'localStorage'.
-      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toEqual(
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBe(
         "mySession"
       );
       await expect(
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
         })
-      ).resolves.toStrictEqual(
-        "https://coolsite.com/redirect?state=oauth2StateValue"
-      );
+      ).resolves.toBe("https://coolsite.com/redirect?state=oauth2StateValue");
     });
 
     it("preserves any query strings from the redirect URI", async () => {
@@ -506,7 +504,7 @@ describe("AuthCodeRedirectHandler", () => {
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
         })
-      ).resolves.toStrictEqual(
+      ).resolves.toBe(
         "https://coolsite.com/redirect?state=oauth2StateValue&someKey=someValue"
       );
     });

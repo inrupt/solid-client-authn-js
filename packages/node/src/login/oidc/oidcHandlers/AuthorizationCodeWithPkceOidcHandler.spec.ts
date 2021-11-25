@@ -104,7 +104,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(builtUrl.searchParams.get("client_id")).toEqual(
         oidcOptions.client.clientId
       );
-      expect(builtUrl.searchParams.get("response_type")).toEqual("code");
+      expect(builtUrl.searchParams.get("response_type")).toBe("code");
       expect(builtUrl.searchParams.get("redirect_uri")).toEqual(
         oidcOptions.redirectUrl
       );
@@ -133,7 +133,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       ).resolves.toEqual(oidcOptions.redirectUrl);
       await expect(
         mockedStorage.getForUser(oidcOptions.sessionId, "dpop")
-      ).resolves.toEqual("true");
+      ).resolves.toBe("true");
     });
 
     it("serializes the token type boolean appropriately", async () => {
@@ -150,7 +150,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
       await expect(
         mockedStorage.getForUser(oidcOptions.sessionId, "dpop")
-      ).resolves.toEqual("false");
+      ).resolves.toBe("false");
     });
   });
 });

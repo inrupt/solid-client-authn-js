@@ -130,8 +130,8 @@ describe("ClientAuthentication", () => {
         },
         mockEmitter
       );
-      expect(loginResult).not.toBeUndefined();
-      expect(loginResult?.webId).toEqual("https://my.webid/");
+      expect(loginResult).toBeDefined();
+      expect(loginResult?.webId).toBe("https://my.webid/");
       expect(clientAuthn.fetch).toBe(mockedAuthFetch);
     });
 

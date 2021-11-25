@@ -311,12 +311,12 @@ describe("TokenRefresher", () => {
       "some old refresh token",
       await mockKeyPair()
     );
-    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toBe("some new refresh token");
 
     // Check that the session information is stored in the provided storage
     await expect(
       mockedStorage.getForUser("mySession", "refreshToken")
-    ).resolves.toEqual("some new refresh token");
+    ).resolves.toBe("some new refresh token");
   });
 
   it("calls the refresh token rotation handler if one is provided", async () => {
@@ -338,7 +338,7 @@ describe("TokenRefresher", () => {
       mockEmitter
     );
 
-    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toBe("some new refresh token");
     expect(mockEmit).toHaveBeenCalledWith(
       EVENTS.NEW_REFRESH_TOKEN,
       "some new refresh token"

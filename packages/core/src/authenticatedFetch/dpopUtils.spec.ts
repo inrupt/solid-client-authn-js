@@ -66,7 +66,7 @@ describe("createDpopHeader", () => {
     );
     const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
     expect(payload.htm).toBe("GET");
-    expect(payload.jti).not.toBeUndefined();
+    expect(payload.jti).toBeDefined();
     // The IRI is normalized, hence the trailing '/'
     expect(payload.htu).toBe("https://some.resource/");
   });
@@ -92,8 +92,8 @@ describe("createDpopHeader", () => {
 describe("generateDpopKeyPair", () => {
   it("generates a public, private key pair", async () => {
     const keyPair = await generateDpopKeyPair();
-    expect(keyPair.publicKey).not.toBeUndefined();
-    expect(keyPair.privateKey).not.toBeUndefined();
+    expect(keyPair.publicKey).toBeDefined();
+    expect(keyPair.privateKey).toBeDefined();
     expect(keyPair.publicKey.alg).toBe("ES256");
   });
 });

@@ -27,7 +27,7 @@ describe("InMemoryStorage", () => {
     await expect(nodeStorage.set("a", "A")).resolves.not.toBeNull();
   });
   it("can get an item", async () => {
-    expect(await nodeStorage.get("a")).toEqual("A");
+    expect(await nodeStorage.get("a")).toBe("A");
   });
   it("returns undefined if the key does not exist", async () => {
     expect(await nodeStorage.get("doesNotExist")).toBeUndefined();

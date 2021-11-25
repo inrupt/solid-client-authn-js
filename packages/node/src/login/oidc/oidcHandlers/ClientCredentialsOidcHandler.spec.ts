@@ -175,7 +175,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientType: "static",
           },
         })
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     it("cannot handle if the client is not statically registered", async () => {
@@ -192,7 +192,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientType: "dynamic",
           },
         })
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     it("can handle if both client ID and secret are present for a confidential client", async () => {
@@ -209,7 +209,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientType: "static",
           },
         })
-      ).resolves.toEqual(true);
+      ).resolves.toBe(true);
     });
   });
 });

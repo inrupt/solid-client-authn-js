@@ -98,7 +98,7 @@ describe("registerClient", () => {
     await registerClient(options, getMockIssuer());
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    expect(myFetch.mock.calls[0][1]?.headers.Authorization).toEqual(
+    expect(myFetch.mock.calls[0][1]?.headers.Authorization).toBe(
       "Bearer some token"
     );
   });
@@ -107,9 +107,9 @@ describe("registerClient", () => {
     const myFetch = getSuccessfulFetch();
     global.fetch = myFetch;
     const client = await registerClient(getMockOptions(), getMockIssuer());
-    expect(client.clientId).toEqual("some id");
-    expect(client.clientSecret).toEqual("some secret");
-    expect(client.idTokenSignedResponseAlg).toEqual("RS256");
+    expect(client.clientId).toBe("some id");
+    expect(client.clientSecret).toBe("some secret");
+    expect(client.idTokenSignedResponseAlg).toBe("RS256");
   });
 
   // TODO: this only tests the minimal registration request.

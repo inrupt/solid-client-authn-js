@@ -274,8 +274,8 @@ describe("AuthCodeRedirectHandler", () => {
       );
 
       // Check that the returned session is the one we expected
-      expect(result.sessionId).toEqual("mySession");
-      expect(result.isLoggedIn).toEqual(true);
+      expect(result.sessionId).toBe("mySession");
+      expect(result.isLoggedIn).toBe(true);
       expect(result.webId).toEqual(mockWebId());
 
       // Check that the session information is stored in the provided storage
@@ -284,7 +284,7 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toEqual(mockWebId());
       await expect(
         mockedStorage.getForUser("mySession", "isLoggedIn")
-      ).resolves.toEqual("true");
+      ).resolves.toBe("true");
 
       // Check that the returned fetch function is authenticated
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
@@ -364,7 +364,7 @@ describe("AuthCodeRedirectHandler", () => {
       // Check that the session information is stored in the provided storage
       await expect(
         mockedStorage.getForUser("mySession", "refreshToken")
-      ).resolves.toEqual("some refresh token");
+      ).resolves.toBe("some refresh token");
     });
 
     it("stores the DPoP key pair if the refresh token is DPoP-bound", async () => {
@@ -386,10 +386,10 @@ describe("AuthCodeRedirectHandler", () => {
       // Check that the session information is stored in the provided storage
       await expect(
         mockedStorage.getForUser("mySession", "privateKey")
-      ).resolves.not.toBeUndefined();
+      ).resolves.toBeDefined();
       await expect(
         mockedStorage.getForUser("mySession", "publicKey")
-      ).resolves.not.toBeUndefined();
+      ).resolves.toBeDefined();
     });
 
     it("calls the refresh token handler if one is provided", async () => {

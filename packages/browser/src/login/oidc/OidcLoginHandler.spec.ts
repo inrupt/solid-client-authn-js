@@ -98,7 +98,7 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
-    expect(calledWith.client.clientId).toEqual("some client ID");
+    expect(calledWith.client.clientId).toBe("some client ID");
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
@@ -164,9 +164,7 @@ describe("OidcLoginHandler", () => {
     });
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
-    expect(calledWith.client.clientId).toEqual(
-      "some dynamically registered ID"
-    );
+    expect(calledWith.client.clientId).toBe("some dynamically registered ID");
   });
 
   it("should save statically registered client ID if given one as an input option", async () => {
@@ -221,7 +219,7 @@ describe("OidcLoginHandler", () => {
       "mySession",
       "clientId"
     );
-    expect(storedClientId).toEqual("https://my.app/registration#app");
+    expect(storedClientId).toBe("https://my.app/registration#app");
   });
 
   it("should save client ID, secret and name if given as input options", async () => {

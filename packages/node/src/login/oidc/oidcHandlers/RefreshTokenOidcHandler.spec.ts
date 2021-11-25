@@ -83,7 +83,7 @@ describe("RefreshTokenOidcHandler", () => {
             },
           })
         )
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
 
     it("doesn't handle options missing a client ID", async () => {
@@ -105,7 +105,7 @@ describe("RefreshTokenOidcHandler", () => {
             },
           })
         )
-      ).resolves.toEqual(false);
+      ).resolves.toBe(false);
     });
   });
 
@@ -148,7 +148,7 @@ describe("RefreshTokenOidcHandler", () => {
           },
         })
       );
-      expect(result?.webId).toEqual("https://my.webid/");
+      expect(result?.webId).toBe("https://my.webid/");
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
@@ -178,8 +178,8 @@ describe("RefreshTokenOidcHandler", () => {
           },
         })
       );
-      expect(result).not.toBeUndefined();
-      expect(result?.webId).toEqual("https://my.webid/");
+      expect(result).toBeDefined();
+      expect(result?.webId).toBe("https://my.webid/");
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
@@ -253,7 +253,7 @@ describe("RefreshTokenOidcHandler", () => {
           dpop: false,
         })
       );
-      expect(result).not.toBeUndefined();
+      expect(result).toBeDefined();
 
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
       mockedFetch.mockResolvedValue({
@@ -287,19 +287,19 @@ describe("RefreshTokenOidcHandler", () => {
       );
       await expect(
         mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "clientId")
-      ).resolves.toEqual("some client id");
+      ).resolves.toBe("some client id");
       await expect(
         mockedStorage.getForUser(
           mockDefaultOidcOptions().sessionId,
           "clientSecret"
         )
-      ).resolves.toEqual("some client secret");
+      ).resolves.toBe("some client secret");
       await expect(
         mockedStorage.getForUser(
           mockDefaultOidcOptions().sessionId,
           "clientName"
         )
-      ).resolves.toEqual("some client name");
+      ).resolves.toBe("some client name");
       await expect(
         mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "issuer")
       ).resolves.toEqual(mockDefaultOidcOptions().issuer);
@@ -323,7 +323,7 @@ describe("RefreshTokenOidcHandler", () => {
         },
       })
     );
-    expect(result).not.toBeUndefined();
+    expect(result).toBeDefined();
   });
 
   it("throws if the IdP does not return an ID token", async () => {
@@ -376,7 +376,7 @@ describe("RefreshTokenOidcHandler", () => {
         },
       })
     );
-    expect(result?.webId).toEqual("https://my.webid/");
+    expect(result?.webId).toBe("https://my.webid/");
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
       expect.anything(),

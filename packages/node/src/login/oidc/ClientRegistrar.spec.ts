@@ -99,10 +99,10 @@ describe("ClientRegistrar", () => {
           ...IssuerConfigFetcherFetchConfigResponse,
         }
       );
-      expect(client.clientId).toEqual("an id");
-      expect(client.clientSecret).toEqual("a secret");
-      expect(client.clientName).toEqual("my client name");
-      expect(client.idTokenSignedResponseAlg).toEqual("ES256");
+      expect(client.clientId).toBe("an id");
+      expect(client.clientSecret).toBe("a secret");
+      expect(client.clientName).toBe("my client name");
+      expect(client.idTokenSignedResponseAlg).toBe("ES256");
     });
 
     it("properly performs dynamic registration and saves client information", async () => {
