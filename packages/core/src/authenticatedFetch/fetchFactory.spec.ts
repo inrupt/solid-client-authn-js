@@ -29,8 +29,8 @@ import { Response } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
 import {
   buildAuthenticatedFetch,
-  DEFAULT_EXPIRATION_TIME_SECONDS,
   buildHeadersAuthenticator,
+  DEFAULT_EXPIRATION_TIME_SECONDS,
 } from "./fetchFactory";
 import {
   mockDefaultTokenRefresher,
