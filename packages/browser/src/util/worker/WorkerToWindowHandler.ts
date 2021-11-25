@@ -130,6 +130,8 @@ export class WorkerToWindowHandler {
       messageId,
       resource,
       method,
+      // TODO: this any cast can be removed when updating to TS 4.1
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       headersUnauthenticatedRaw: [...(<any>headers).entries()],
     };
     this.workerSelf.postMessage({

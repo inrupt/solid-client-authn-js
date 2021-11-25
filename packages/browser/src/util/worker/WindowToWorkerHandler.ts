@@ -74,6 +74,8 @@ export class WindowToWorkerHandler {
           // Send response with authenticated headers
           const messageResponse: IWorkerMessageResponse = {
             messageId: message.messageId,
+            // TODO: this any cast can be removed when updating to TS 4.1
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             headersAuthenticatedRaw: [...(<any>headersAuthenticated).entries()],
           };
           this.worker.postMessage({
