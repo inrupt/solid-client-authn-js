@@ -320,9 +320,11 @@ export async function buildHeadersAuthenticator(
         )
       ).headers
     );
-    headersUnauthenticated.forEach((value, key) =>
-      headersAuthenticated.set(key, value)
-    );
+    headersUnauthenticated.forEach((value, key) => {
+      if (!headersAuthenticated.has(key)) {
+        headersAuthenticated.set(key, value);
+      }
+    });
 
     return headersAuthenticated;
   };

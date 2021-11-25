@@ -42,6 +42,7 @@ import { EventEmitter } from "events";
 import { Response } from "node-fetch";
 import {
   buildAuthenticatedFetch,
+  buildHeadersAuthenticator,
   DEFAULT_EXPIRATION_TIME_SECONDS,
 } from "./fetchFactory";
 import {
@@ -654,5 +655,100 @@ describe("buildAuthenticatedFetch", () => {
     await sleep(100);
     // The only call to setTimeout should come from the `sleep` function
     expect(spyTimeout).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("buildHeadersAuthenticator", () => {
+  it("builds HeadersAuthenticator that returns a DPoP header if a DPoP key is provided", async () => {
+    const keylikePair = await mockJwk();
+    const headersAuthenticator = await buildHeadersAuthenticator("myToken", {
+      dpopKey: {
+        privateKey: keylikePair.privateKey,
+        publicKey: await fromKeyLike(keylikePair.publicKey),
+      },
+    });
+    const headers = await headersAuthenticator(
+      "https://my.pod/resource",
+      "GET",
+      new Headers()
+    );
+
+    const decodedHeader = await jwtVerify(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      headers.get("DPoP")!,
+      (
+        await mockJwk()
+      ).publicKey
+    );
+    expect(decodedHeader.payload).toMatchObject({
+      htu: "https://my.pod/resource",
+    });
+  });
+
+  it("builds a HeadersAuthenticator that returns the appropriate DPoP header for a given HTTP verb.", async () => {
+    const headersAuthenticator = await buildHeadersAuthenticator("myToken", {
+      dpopKey: await mockKeyPair(),
+    });
+    const headers = await headersAuthenticator(
+      "http://some.url",
+      "POST",
+      new Headers()
+    );
+
+    const { payload } = await jwtVerify(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      headers.get("DPoP")!,
+      (
+        await mockKeyPair()
+      ).privateKey
+    );
+    expect(payload.htu).toBe("http://some.url/");
+    expect(payload.htm).toBe("POST");
+  });
+
+  it("builds a HeadersAuthenticator that returns a Bearer fetch if no DPoP key is provided", async () => {
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      "myToken",
+      undefined
+    );
+    const headers = await headersAuthenticator(
+      "https://my.pod/resource",
+      "GET",
+      new Headers()
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(headers.get("Authorization")!.startsWith("Bearer")).toBe(true);
+  });
+
+  it("builds a HeadersAuthenticator that preserves headers", async () => {
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      "myToken",
+      undefined
+    );
+    const headers = await headersAuthenticator(
+      "someUrl",
+      "GET",
+      new Headers({ someHeader: "SomeValue" })
+    );
+
+    expect(headers.get("Authorization")).toBe("Bearer myToken");
+    expect(headers.get("someHeader")).toBe("SomeValue");
+  });
+
+  it("builds a HeadersAuthenticator that overrides any pre-existing Authorization or DPoP headers", async () => {
+    const headersAuthenticator = await buildHeadersAuthenticator("myToken", {
+      dpopKey: await mockKeyPair(),
+    });
+    const headers = await headersAuthenticator(
+      "http://some.url",
+      "GET",
+      new Headers({
+        Authorization: "some token",
+        DPoP: "some header",
+      })
+    );
+
+    expect(headers.get("Authorization")).toBe("DPoP myToken");
   });
 });
