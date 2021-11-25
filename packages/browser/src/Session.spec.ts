@@ -222,6 +222,22 @@ describe("Session", () => {
     });
   });
 
+  describe("authenticateHeaders", () => {
+    it("wraps up ClientAuthentication fetch if logged in", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnHeadersAuthenticator = jest.spyOn(
+        clientAuthentication,
+        "headersAuthenticator"
+      );
+      const mySession = new Session({ clientAuthentication });
+      mySession.info.isLoggedIn = true;
+      await expect(
+        mySession.authenticateHeaders("https://some.url", "GET", new Headers())
+      ).rejects.toThrow("headersAuthenticator is not initialized yet");
+      expect(clientAuthnHeadersAuthenticator).toHaveBeenCalled();
+    });
+  });
+
   describe("handleIncomingRedirect", () => {
     it("uses current window location as default redirect URL", async () => {
       mockLocation("https://some.url");
