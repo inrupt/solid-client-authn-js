@@ -200,6 +200,25 @@ export class Session extends EventEmitter {
   };
 
   /**
+   * Provides the necessary headers to perform the given request using this
+   * session's authentication.
+   * @param resource The resource URL to request.
+   * @param method The request method.
+   * @param headersUnauthenticated The headers for the request.
+   */
+  authenticateHeaders = (
+    resource: string,
+    method: string,
+    headersUnauthenticated: Headers
+  ): Promise<Headers> => {
+    return this.clientAuthentication.headersAuthenticator(
+      resource,
+      method,
+      headersUnauthenticated
+    );
+  };
+
+  /**
    * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
    */
   logout = async (): Promise<void> => {

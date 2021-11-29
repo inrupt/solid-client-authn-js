@@ -42,6 +42,8 @@ import {
   ITokenRefresher,
   buildAuthenticatedFetch,
   EVENTS,
+  HeadersAuthenticator,
+  buildHeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
@@ -82,7 +84,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
   async handle(
     inputRedirectUrl: string,
     eventEmitter?: EventEmitter
-  ): Promise<ISessionInfo & { fetch: typeof globalFetch }> {
+  ): Promise<
+    ISessionInfo & {
+      fetch: typeof globalFetch;
+      headersAuthenticator: HeadersAuthenticator;
+    }
+  > {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${inputRedirectUrl}]: it is missing one of [code, state].`
@@ -167,6 +174,12 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         expiresIn: tokenSet.expires_in,
       }
     );
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      tokenSet.access_token,
+      {
+        dpopKey,
+      }
+    );
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns
     // its payload as a JSON object.
@@ -199,6 +212,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      headersAuthenticator,
     });
   }
 }

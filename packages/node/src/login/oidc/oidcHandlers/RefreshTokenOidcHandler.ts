@@ -42,6 +42,8 @@ import {
   ITokenRefresher,
   TokenEndpointResponse,
   buildAuthenticatedFetch,
+  HeadersAuthenticator,
+  buildHeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 // Until there is a broader support for submodules exports in the ecosystem,
 // (e.g. jest supports them), we'll depend on an intermediary package that exports
@@ -75,7 +77,12 @@ async function refreshAccess(
   dpop: boolean,
   refreshBindingKey?: KeyPair,
   eventEmitter?: EventEmitter
-): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
+): Promise<
+  TokenEndpointResponse & {
+    fetch: typeof globalFetch;
+    headersAuthenticator: HeadersAuthenticator;
+  }
+> {
   try {
     let dpopKey: KeyPair | undefined;
     if (dpop) {
@@ -102,8 +109,15 @@ async function refreshAccess(
         eventEmitter,
       }
     );
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      tokens.accessToken,
+      {
+        dpopKey,
+      }
+    );
     return Object.assign(tokens, {
       fetch: authFetch,
+      headersAuthenticator,
     });
   } catch (e) {
     throw new Error(`Invalid refresh credentials: ${e}`);
@@ -222,6 +236,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
 
     return Object.assign(sessionInfo, {
       fetch: accessInfo.fetch,
+      headersAuthenticator: accessInfo.headersAuthenticator,
     });
   }
 }

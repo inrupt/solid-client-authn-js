@@ -39,6 +39,7 @@ import {
   getWebidFromTokenPayload,
   buildAuthenticatedFetch,
   ITokenRefresher,
+  buildHeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
@@ -123,6 +124,12 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
         eventEmitter: oidcLoginOptions.eventEmitter,
       }
     );
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      tokens.access_token,
+      {
+        dpopKey,
+      }
+    );
 
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,
@@ -137,6 +144,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      headersAuthenticator,
     });
   }
 }

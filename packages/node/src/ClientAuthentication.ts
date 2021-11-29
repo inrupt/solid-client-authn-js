@@ -32,10 +32,14 @@ import {
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
+  HeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 import { EventEmitter } from "events";
+
+const headersAuthenticatorDefault: HeadersAuthenticator = () =>
+  Promise.reject(new Error("headersAuthenticator is not initialized yet"));
 
 /**
  * @hidden
@@ -75,6 +79,7 @@ export default class ClientAuthentication {
 
     if (loginReturn !== undefined) {
       this.fetch = loginReturn.fetch;
+      this.headersAuthenticator = loginReturn.headersAuthenticator;
       return {
         isLoggedIn: true,
         sessionId,
@@ -90,12 +95,16 @@ export default class ClientAuthentication {
   // By default, our fetch() resolves to the environment fetch() function.
   fetch = fetch;
 
+  // Headers for auxiliary fetching
+  headersAuthenticator: HeadersAuthenticator = headersAuthenticatorDefault;
+
   logout = async (sessionId: string): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
     this.fetch = fetch;
+    this.headersAuthenticator = headersAuthenticatorDefault;
   };
 
   getSessionInfo = async (
@@ -128,6 +137,7 @@ export default class ClientAuthentication {
     const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
 
     this.fetch = redirectInfo.fetch;
+    this.headersAuthenticator = redirectInfo.headersAuthenticator;
 
     return {
       isLoggedIn: redirectInfo.isLoggedIn,
