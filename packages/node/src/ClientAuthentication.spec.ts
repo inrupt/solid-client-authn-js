@@ -22,7 +22,11 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { EventEmitter } from "events";
 
-import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
+import {
+  ILoginHandler,
+  ILoginOptions,
+} from "@inrupt/solid-client-authn-core";
+import * as crossFetch from "cross-fetch";
 import { Session } from "./Session";
 // FIXME: For some reason jest crashes on trying to handle a subpath import
 // this should import from @inrupt/solid-client-authn-core/mocks
@@ -175,6 +179,19 @@ describe("ClientAuthentication", () => {
     });
   });
 
+  describe("headersAuthenticator", () => {
+    it("rejects", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(
+        clientAuthn.headersAuthenticator(
+          "https://html5zombo.com",
+          "GET",
+          new crossFetch.Headers()
+        )
+      ).rejects.toThrow("headersAuthenticator is not initialized yet");
+    });
+  });
+
   describe("logout", () => {
     it("reverts back to un-authenticated fetch on logout", async () => {
       const clientAuthn = getClientAuthentication();
@@ -191,6 +208,31 @@ describe("ClientAuthentication", () => {
 
       // Calling logout should revert back to our un-authenticated fetch.
       expect(clientAuthn.fetch).toBe(unauthFetch);
+    });
+
+    it("reverts back to un-authenticated headersAuthenticator on logout", async () => {
+      const clientAuthn = getClientAuthentication();
+      const unauthHeadersAuthenticator = clientAuthn.headersAuthenticator;
+      const session = new Session();
+      const url =
+        "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
+      await clientAuthn.handleIncomingRedirect(url, session);
+
+      // Calling the redirect handler should give us an authenticated fetch.
+      expect(clientAuthn.headersAuthenticator).not.toBe(
+        unauthHeadersAuthenticator
+      );
+
+      await clientAuthn.logout("mySession");
+      await expect(
+        clientAuthn.headersAuthenticator(
+          "https://example.com",
+          "GET",
+          new crossFetch.Headers()
+        )
+      ).rejects.toThrow("headersAuthenticator is not initialized yet");
+      // Calling logout should revert back to our un-authenticated headersAuthenticator.
+      expect(clientAuthn.headersAuthenticator).toBe(unauthHeadersAuthenticator);
     });
   });
 
@@ -268,6 +310,7 @@ describe("ClientAuthentication", () => {
       const clientAuthn = getClientAuthentication();
       const session = new Session();
       const unauthFetch = clientAuthn.fetch;
+      const unauthHeadersAuthenticator = clientAuthn.headersAuthenticator;
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
@@ -282,8 +325,11 @@ describe("ClientAuthentication", () => {
         session
       );
 
-      // Calling the redirect handler should have updated the fetch.
+      // Calling the redirect handler should have updated the fetch and headersAuthenticator.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
+      expect(clientAuthn.headersAuthenticator).not.toBe(
+        unauthHeadersAuthenticator
+      );
     });
 
     it("calls handle redirect with the refresh token handler if one is provided", async () => {
