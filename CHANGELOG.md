@@ -9,6 +9,25 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### New features
+
+Merge @rubensworks/solid-client-authn-* 1.12.1 and @rubensworks/solid-client-authn-*
+
+## [@rubensworks/solid-client-authn-*] 1.12.0 - 2022-01-11
+
+### New features
+
+#### node and browser
+
+- Expose `Session#authenticateHeaders` method that constructs the necessary headers to perform a given request using
+  this session's authentication.
+
+#### browser
+
+- The `WindowToWorkerHandler` and `WorkerToWindowHandler` helpers can be used to setup a communication channel between
+  the main window and a Web worker, so that the worker can perform authenticated requests, without any secrets having to
+  be shared with this worker. The actual fetch requests still happen within the Web worker for optimal performance.
+
 ## 1.12.1 - 2022-06-27
 
 - Fix incompatible type definitions for `fetch` following changes to the typescript definitions.
@@ -66,7 +85,7 @@ The following changes have been implemented but not released yet:
 
 ### Bugfixes
 
-- @inrupt/oidc-client-ext: remove ts-jest from package dependencies.
+- @rubensworks/oidc-client-ext: remove ts-jest from package dependencies.
 - The PKCE verifier is now cleared from storage as soon as it has been used in the
   token exchange, regardless of the token type (it used to not be cleared from part
   of the storage when getting a DPoP-bound token).
@@ -117,7 +136,7 @@ No changes; fixed issue with npm publish.
 - Since `oidc-client` has been deprecated, and won't be maintained anymore, the
   OIDC package now depends on a fork, `@inrupt/oidc-client`, so that we can ensure
   the dependencies are kept up-to-date. This should be transparent for users of
-  `@inrupt/solid-client-authn-browser`.
+  `@rubensworks/solid-client-authn-browser`.
 
 ## 1.11.2 - 2021-08-24
 
@@ -187,7 +206,7 @@ No changes; fixed issue with npm publish.
 
 - A transitive dependency used submodule exports, which aren't supported yet by
   significant parts of the ecosystem, such as Jest. With an internal change, we enabled
-  using @inrupt/solid-client-authn-node without encountering submodule exports.
+  using @rubensworks/solid-client-authn-node without encountering submodule exports.
 
 ## 1.10.0 - 2021-07-28
 
@@ -275,7 +294,7 @@ No changes; fixed issue with npm publish.
 
 - With Node.js version 10 [reaching end-of-life on
   2021-04-30](https://github.com/nodejs/Release),
-  @inrupt/solid-client-authn-node no longer actively supports it. It will not
+  @rubensworks/solid-client-authn-node no longer actively supports it. It will not
   stop working right away, but it will no longer be actively tested and no
   special effort will be made to keep it from breaking.
 
@@ -629,8 +648,8 @@ The following sections document changes that have been released already:
 
 ### New features
 
-- NodeJS support: a new NPM package, `@inrupt/solid-client-authn-node`, is now available to use authentication in a server environment.
-- In addition to the features supported by the browser version, `@inrupt/solid-client-authn-node` supports the refresh token grant, which
+- NodeJS support: a new NPM package, `@rubensworks/solid-client-authn-node`, is now available to use authentication in a server environment.
+- In addition to the features supported by the browser version, `@rubensworks/solid-client-authn-node` supports the refresh token grant, which
   makes it possible to maintain long-lived sessions without re-involving the user.
 
 ### Bugfixes
@@ -651,7 +670,7 @@ we will bump the major version when we change our publicly documented interface.
 
 ### Breaking changes
 
-- The package `@inrupt/oidc-dpop-client-browser` is now called `@inrupt/oidc-client-ext`.
+- The package `@inrupt/oidc-dpop-client-browser` is now called `@rubensworks/oidc-client-ext`.
 - The public API doesn't expect environement-specific types anymore. in particular, `URL` has been replaced with `string`.
 
 ### Non-breaking changes
