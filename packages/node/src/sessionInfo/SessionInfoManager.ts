@@ -30,7 +30,7 @@ import {
   ISessionInfoManager,
   ISessionInfoManagerOptions,
   IStorageUtility,
-  HeadersAuthenticator
+  HeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
