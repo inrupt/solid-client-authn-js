@@ -7,6 +7,19 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New features
+
+#### node and browser
+
+- Expose `Session#authenticateHeaders` method that constructs the necessary headers to perform a given request using
+this session's authentication.
+
+#### browser
+
+- The `WindowToWorkerHandler` and `WorkerToWindowHandler` helpers can be used to setup a communication channel between
+the main window and a Web worker, so that the worker can perform authenticated requests, without any secrets having to
+be shared with this worker. The actual fetch requests still happen within the Web worker for optimal performance.
+
 ### Bugfixes
 
 #### node and browser
