@@ -23,7 +23,7 @@
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { jest, it, describe } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import { JWK } from "jose";
 // eslint-disable-next-line no-shadow

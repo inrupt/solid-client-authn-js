@@ -1,0 +1,9 @@
+{
+  "name": "e2e",
+  "private": true,
+  "main": "dist/e2e-test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT"
+}

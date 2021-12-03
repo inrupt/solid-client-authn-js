@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { jest, it } from "@jest/globals";
+import { jest, it, expect } from "@jest/globals";
 import {
   fetch,
   getDefaultSession,
