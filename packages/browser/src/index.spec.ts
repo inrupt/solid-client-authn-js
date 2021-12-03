@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it } from "@jest/globals";
+import { it, expect } from "@jest/globals";
 
 import { Session, getClientAuthenticationWithDependencies } from "./index";
 

@@ -73,17 +73,17 @@ const serversUnderTest: AuthDetails[] = [
 describe.each(serversUnderTest)(
   "End-to-end authentication tests against Pod [%s] authenticated to [%s]",
   (rootContainerDisplayName, oidcIssuerDisplayName, clientId, clientSecret) => {
-    const rootContainer = "https://" + rootContainerDisplayName;
-    const oidcIssuer = "https://" + oidcIssuerDisplayName;
+    const rootContainer = `https://${rootContainerDisplayName}`;
+    const oidcIssuer = `https://${oidcIssuerDisplayName}`;
 
     // This first test just saves the trouble of looking for a library failure when
     // the environment wasn't properly set.
     describe("Environment", () => {
       it("contains the expected environment variables", () => {
-        expect(rootContainer).not.toBeUndefined();
-        expect(clientId).not.toBeUndefined();
-        expect(clientSecret).not.toBeUndefined();
-        expect(oidcIssuer).not.toBeUndefined();
+        expect(rootContainer).toBeDefined();
+        expect(clientId).toBeDefined();
+        expect(clientSecret).toBeDefined();
+        expect(oidcIssuer).toBeDefined();
       });
     });
 
@@ -95,9 +95,9 @@ describe.each(serversUnderTest)(
           clientSecret,
           oidcIssuer,
         });
-        expect(session.info.isLoggedIn).toEqual(true);
-        expect(session.info.sessionId).not.toBeUndefined();
-        expect(session.info.webId).not.toBeUndefined();
+        expect(session.info.isLoggedIn).toBe(true);
+        expect(session.info.sessionId).toBeDefined();
+        expect(session.info.webId).toBeDefined();
         await session.logout();
       });
 
@@ -111,7 +111,7 @@ describe.each(serversUnderTest)(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const publicResourceUrl = session.info.webId!;
         const response = await session.fetch(publicResourceUrl);
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         await expect(response.text()).resolves.toContain(
           ":PersonalProfileDocument"
         );
@@ -127,7 +127,7 @@ describe.each(serversUnderTest)(
         });
         const privateResourceUrl = rootContainer;
         const response = await session.fetch(privateResourceUrl);
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         await expect(response.text()).resolves.toContain("ldp:BasicContainer");
         await session.logout();
       });
@@ -136,7 +136,7 @@ describe.each(serversUnderTest)(
         const session = new Session();
         const privateResourceUrl = rootContainer;
         let response = await session.fetch(privateResourceUrl);
-        expect(response.status).toEqual(401);
+        expect(response.status).toBe(401);
 
         await session.login({
           clientId,
@@ -145,11 +145,11 @@ describe.each(serversUnderTest)(
         });
 
         response = await session.fetch(privateResourceUrl);
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
 
         await session.logout();
         response = await session.fetch(privateResourceUrl);
-        expect(response.status).toEqual(401);
+        expect(response.status).toBe(401);
         await session.logout();
       });
 
@@ -164,11 +164,11 @@ describe.each(serversUnderTest)(
         });
 
         let response = await authenticatedSession.fetch(privateResourceUrl);
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
 
         const nonAuthenticatedSession = new Session();
         response = await nonAuthenticatedSession.fetch(privateResourceUrl);
-        expect(response.status).toEqual(401);
+        expect(response.status).toBe(401);
         await authenticatedSession.logout();
       });
     });
@@ -186,7 +186,7 @@ describe.each(serversUnderTest)(
 
         const unauthenticatedSession = new Session();
         const response = await unauthenticatedSession.fetch(publicResourceUrl);
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         await expect(response.text()).resolves.toContain(
           ":PersonalProfileDocument"
         );
@@ -197,7 +197,7 @@ describe.each(serversUnderTest)(
         const session = new Session();
         const privateResourceUrl = rootContainer;
         const response = await session.fetch(privateResourceUrl);
-        expect(response.status).toEqual(401);
+        expect(response.status).toBe(401);
       });
     });
 
@@ -213,7 +213,7 @@ describe.each(serversUnderTest)(
         const publicResourceUrl = session.info.webId!;
         await session.logout();
         const response = await session.fetch(publicResourceUrl);
-        expect(response.status).toEqual(200);
+        expect(response.status).toBe(200);
         await expect(response.text()).resolves.toContain(
           ":PersonalProfileDocument"
         );
@@ -229,7 +229,7 @@ describe.each(serversUnderTest)(
         });
         await session.logout();
         const response = await session.fetch(privateResourceUrl);
-        expect(response.status).toEqual(401);
+        expect(response.status).toBe(401);
       });
     });
   }

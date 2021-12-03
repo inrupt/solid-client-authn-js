@@ -19,7 +19,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { jest, it, describe, expect } from "@jest/globals";
+import {
+  jest,
+  it,
+  describe,
+  expect,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
 import Redirector from "./Redirector";
 
 jest.mock("../../../src/iframe");

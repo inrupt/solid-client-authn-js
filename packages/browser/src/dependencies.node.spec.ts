@@ -22,6 +22,7 @@
 /**
  * @jest-environment node
  */
+import { describe, it, expect } from "@jest/globals";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import ClientAuthentication from "./ClientAuthentication";
 

@@ -991,22 +991,15 @@ describe("Session", () => {
   });
 
   describe("onLogout", () => {
-    // The `done` callback is used in order to make sure the callback passed to
-    // our event handler is called. If it is not, the test times out, which is why
-    // no additional assertion is required.
-    // eslint-disable-next-line jest/expect-expect, jest/no-done-callback
-    it("calls the registered callback on logout", async (done) => {
-      const myCallback = (): void => {
-        if (done) {
-          done();
-        }
-      };
+    it("calls the registered callback on logout", async () => {
+      const myCallback = jest.fn();
       const mySession = new Session({
         clientAuthentication: mockClientAuthentication(),
       });
 
       mySession.onLogout(myCallback);
       await mySession.logout();
+      expect(myCallback).toHaveBeenCalled();
     });
   });
 

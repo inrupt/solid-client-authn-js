@@ -19,6 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { describe, it, expect } from "@jest/globals";
+
 import BrowserStorage from "./BrowserStorage";
 
 describe("BrowserStorage", () => {
