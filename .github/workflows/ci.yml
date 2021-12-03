@@ -47,11 +47,7 @@ jobs:
           E2E_TEST_DEV_NEXT_IDP_URL: ${{ secrets.E2E_TEST_DEV_NEXT_IDP_URL }}
           E2E_TEST_DEV_NEXT_POD: ${{ secrets.E2E_TEST_DEV_NEXT_POD }}
       - run: npx prettier --check "{packages/*/src,packages/*/__tests__}/**"
-      # FIXME: upgrading the dependencies of lerna-audit causes a bug.
-      # See https://github.com/tnobody/lerna-audit/pull/26. When we can
-      # remove the dependency on "@npmcli/arborist": "~2.2.1", the following line
-      # can be uncommented.
-      # - run: npm audit --audit-level=moderate
+      - run: npm audit --audit-level=moderate
       # We can't just run `lerna exec "npm audit"`, because that would fail when
       # preparing a new version: when the versions are bumped, but not published
       # yet, `npm audit` would fail.
