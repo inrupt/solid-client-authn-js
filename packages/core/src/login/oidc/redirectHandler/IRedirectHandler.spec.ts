@@ -20,13 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import {
-  JWTPayload,
-  KeyLike,
-  SignJWT,
-  generateKeyPair,
-  fromKeyLike,
-} from "@inrupt/jose-legacy-modules";
+import { JWTPayload, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
 import { Response as NodeResponse } from "node-fetch";
 import { getWebidFromTokenPayload } from "./IRedirectHandler";
 
@@ -54,8 +48,8 @@ describe("getWebidFromTokenPayload", () => {
 
   const mockJwks = async (): Promise<string> => {
     const { publicKey: issuerPubKey } = await mockJwk();
-    const jwk = await fromKeyLike(issuerPubKey);
-    // This is not set by 'fromKeyLike'
+    const jwk = await exportJWK(issuerPubKey);
+    // This is not set by 'exportJWK'
     jwk.alg = "ES256";
     return JSON.stringify({ keys: [jwk] });
   };

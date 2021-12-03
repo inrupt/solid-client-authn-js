@@ -24,16 +24,12 @@ import {
   mockStorageUtility,
   StorageUtilityMock,
   EVENTS,
+  KeyPair,
 } from "@inrupt/solid-client-authn-core";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import { JWK } from "jose/types";
-// import { parseJwk } from "jose/jwk/parse";
-import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK } from "jose";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import { EventEmitter } from "events";
+import { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockClientRegistrar,
@@ -60,9 +56,9 @@ const mockJwk = (): JWK => {
   };
 };
 
-const mockKeyPair = async () => {
+const mockKeyPair = async (): Promise<KeyPair> => {
   return {
-    privateKey: await parseJwk(mockJwk()),
+    privateKey: (await importJWK(mockJwk())) as KeyObject,
     // Use the same JWK for public and private key out of convenience, don't do
     // this in real life.
     publicKey: mockJwk(),
@@ -346,12 +342,12 @@ describe("TokenRefresher", () => {
       "some old refresh token",
       await mockKeyPair()
     );
-    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toBe("some new refresh token");
 
     // Check that the session information is stored in the provided storage
     await expect(
       mockedStorage.getForUser("mySession", "refreshToken")
-    ).resolves.toEqual("some new refresh token");
+    ).resolves.toBe("some new refresh token");
   });
 
   it("calls the refresh token rotation handler if one is provided", async () => {
@@ -373,7 +369,7 @@ describe("TokenRefresher", () => {
       mockEmitter
     );
 
-    expect(refreshedTokens.refreshToken).toEqual("some new refresh token");
+    expect(refreshedTokens.refreshToken).toBe("some new refresh token");
     expect(mockEmit).toHaveBeenCalledWith(
       EVENTS.NEW_REFRESH_TOKEN,
       "some new refresh token"

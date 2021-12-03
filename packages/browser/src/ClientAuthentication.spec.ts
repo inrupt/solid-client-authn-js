@@ -28,7 +28,7 @@ import {
   mockStorage,
 } from "@inrupt/solid-client-authn-core";
 
-import { JWK, SignJWT, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, SignJWT, importJWK } from "jose";
 import { EventEmitter } from "events";
 import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
 import {
@@ -121,7 +121,7 @@ const mockSessionStorage = async (
             alg: "ES256",
           })
           .setIssuedAt()
-          .sign(await parseJwk(mockJwk()), {}),
+          .sign(await importJWK(mockJwk()), {}),
         clientId: options.clientId,
         issuer: options.issuer,
       },

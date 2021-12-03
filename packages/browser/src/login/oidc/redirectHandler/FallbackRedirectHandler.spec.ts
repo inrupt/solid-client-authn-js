@@ -54,7 +54,7 @@ describe("FallbackRedirectHandler", () => {
       window.fetch = jest.fn();
       const redirectHandler = new FallbackRedirectHandler();
       const mySession = await redirectHandler.handle("https://my.app");
-      expect(mySession.isLoggedIn).toEqual(false);
+      expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
     });
   });

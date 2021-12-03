@@ -43,14 +43,10 @@ import {
   TokenEndpointResponse,
   buildAuthenticatedFetch,
 } from "@inrupt/solid-client-authn-core";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import { JWK, parseJwk } from "jose/jwk/parse";
-import { JWK, parseJwk } from "@inrupt/jose-legacy-modules";
+import { JWK, importJWK } from "jose";
 import { fetch as globalFetch } from "cross-fetch";
 import { EventEmitter } from "events";
+import { KeyObject } from "crypto";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions
@@ -80,7 +76,7 @@ async function refreshAccess(
     let dpopKey: KeyPair | undefined;
     if (dpop) {
       dpopKey = refreshBindingKey || (await generateDpopKeyPair());
-      // The alg property isn't set by fromKeyLike, so set it manually.
+      // The alg property isn't set by exportJWK, so set it manually.
       [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
     }
     const tokens = await refreshOptions.tokenRefresher.refresh(
@@ -162,10 +158,10 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     if (publicKey !== undefined && privateKey !== undefined) {
       keyPair = {
         publicKey: JSON.parse(publicKey) as JWK,
-        privateKey: await parseJwk(
+        privateKey: (await importJWK(
           JSON.parse(privateKey),
           PREFERRED_SIGNING_ALG[0]
-        ),
+        )) as KeyObject,
       };
     }
 

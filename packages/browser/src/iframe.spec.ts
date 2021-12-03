@@ -34,7 +34,7 @@ describe("redirectInIframe", () => {
 
     // This verifies that the iframe has been added to the DOM, i.e. that
     // window.document.body.appendChild has been called.
-    expect(iframe).not.toBeUndefined();
+    expect(iframe).toBeDefined();
 
     // The iframe has the appropriate attributes.
     expect(iframe.getAttribute("hidden")).toBe("true");
@@ -161,7 +161,7 @@ describe("setupIframeListener", () => {
     setupDom(true, true);
     setupIframeListener(callback as any);
 
-    expect(document.getElementsByTagName("iframe")[0]).not.toBeUndefined();
+    expect(document.getElementsByTagName("iframe")[0]).toBeDefined();
 
     window.postMessage(
       {
