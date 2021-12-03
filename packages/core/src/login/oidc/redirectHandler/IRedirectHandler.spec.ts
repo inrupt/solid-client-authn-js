@@ -21,10 +21,15 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { JWTPayload, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
-import { Response as NodeResponse } from "node-fetch";
+import { Response as NodeResponse } from "cross-fetch";
 import { getWebidFromTokenPayload } from "./IRedirectHandler";
 
-jest.mock("cross-fetch");
+jest.mock("cross-fetch", () => {
+  const crossFetchModule = jest.requireActual("cross-fetch") as any;
+  crossFetchModule.default = jest.fn();
+  crossFetchModule.fetch = jest.fn();
+  return crossFetchModule;
+});
 
 describe("getWebidFromTokenPayload", () => {
   // Singleton keys generated on the first call to mockJwk
