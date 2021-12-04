@@ -19,13 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  JWK,
-  KeyLike,
-  SignJWT,
-  generateKeyPair,
-  fromKeyLike,
-} from "@inrupt/jose-legacy-modules";
+import { JWK, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
 import { v4 } from "uuid";
 import { PREFERRED_SIGNING_ALG } from "../constant";
 
@@ -83,9 +77,9 @@ export async function generateDpopKeyPair(): Promise<KeyPair> {
   );
   const dpopKeyPair = {
     privateKey,
-    publicKey: await fromKeyLike(publicKey),
+    publicKey: await exportJWK(publicKey),
   };
-  // The alg property isn't set by fromKeyLike, so set it manually.
+  // The alg property isn't set by exportJWK, so set it manually.
   [dpopKeyPair.publicKey.alg] = PREFERRED_SIGNING_ALG;
   return dpopKeyPair;
 }

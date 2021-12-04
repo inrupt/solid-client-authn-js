@@ -26,12 +26,7 @@ import {
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims, TokenSet } from "openid-client";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import { JWK } from "jose/types";
-import { JWK } from "@inrupt/jose-legacy-modules";
+import { JWK } from "jose";
 import { Response as NodeResponse, Headers as NodeHeaders } from "node-fetch";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
@@ -220,28 +215,18 @@ describe("AuthCodeRedirectHandler", () => {
 
   const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
     const { Issuer } = jest.requireMock("openid-client") as any;
-    function clientConstructor() {
-      // this is untyped, which makes TS complain
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this.callbackParams = jest.fn().mockReturnValueOnce({
-        code: "someCode",
-        state: "someState",
-      });
-      // this is untyped, which makes TS complain
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this.callback = callback ?? jest.fn().mockResolvedValueOnce(tokenSet);
-      // this is untyped, which makes TS complain
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this.metadata = {
-        client_id: "https://some.client#id",
-      };
-    }
     const mockedIssuer = {
       metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
-      Client: clientConstructor,
+      Client: jest.fn().mockReturnValue({
+        callbackParams: jest.fn().mockReturnValue({
+          code: "someCode",
+          state: "someState",
+        }),
+        callback: callback ?? jest.fn().mockResolvedValue(tokenSet as never),
+        metadata: {
+          client_id: "https://some.client#id",
+        },
+      }),
     };
     Issuer.mockReturnValueOnce(mockedIssuer);
     return mockedIssuer;
@@ -274,8 +259,8 @@ describe("AuthCodeRedirectHandler", () => {
       );
 
       // Check that the returned session is the one we expected
-      expect(result.sessionId).toEqual("mySession");
-      expect(result.isLoggedIn).toEqual(true);
+      expect(result.sessionId).toBe("mySession");
+      expect(result.isLoggedIn).toBe(true);
       expect(result.webId).toEqual(mockWebId());
 
       // Check that the session information is stored in the provided storage
@@ -284,7 +269,7 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toEqual(mockWebId());
       await expect(
         mockedStorage.getForUser("mySession", "isLoggedIn")
-      ).resolves.toEqual("true");
+      ).resolves.toBe("true");
 
       // Check that the returned fetch function is authenticated
       const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
@@ -292,6 +277,34 @@ describe("AuthCodeRedirectHandler", () => {
       await result.fetch("https://some.url");
       const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
       expect(headers.get("Authorization")).toContain("DPoP");
+    });
+
+    it("uses 'none' client authentication if using Solid-OIDC client identifiers", async () => {
+      const mockedIssuer = setupDefaultOidcClientMock();
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+        clientRegistrar: {
+          getClient: async () => {
+            return {
+              clientId: "https://some.client.identifier",
+              clientType: "solid-oidc",
+            };
+          },
+        },
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
+
+      expect(mockedIssuer.Client).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token_endpoint_auth_method: "none",
+        })
+      );
     });
 
     it("properly performs Bearer token exchange", async () => {
@@ -364,7 +377,7 @@ describe("AuthCodeRedirectHandler", () => {
       // Check that the session information is stored in the provided storage
       await expect(
         mockedStorage.getForUser("mySession", "refreshToken")
-      ).resolves.toEqual("some refresh token");
+      ).resolves.toBe("some refresh token");
     });
 
     it("stores the DPoP key pair if the refresh token is DPoP-bound", async () => {
@@ -386,10 +399,10 @@ describe("AuthCodeRedirectHandler", () => {
       // Check that the session information is stored in the provided storage
       await expect(
         mockedStorage.getForUser("mySession", "privateKey")
-      ).resolves.not.toBeUndefined();
+      ).resolves.toBeDefined();
       await expect(
         mockedStorage.getForUser("mySession", "publicKey")
-      ).resolves.not.toBeUndefined();
+      ).resolves.toBeDefined();
     });
 
     it("calls the refresh token handler if one is provided", async () => {

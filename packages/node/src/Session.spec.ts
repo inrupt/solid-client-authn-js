@@ -47,19 +47,19 @@ describe("Session", () => {
   describe("constructor", () => {
     it("accepts an empty config", async () => {
       const mySession = new Session({});
-      expect(mySession.info.isLoggedIn).toEqual(false);
+      expect(mySession.info.isLoggedIn).toBe(false);
       expect(mySession.info.sessionId).toBeDefined();
     });
 
     it("accepts no config", async () => {
       const mySession = new Session();
-      expect(mySession.info.isLoggedIn).toEqual(false);
+      expect(mySession.info.isLoggedIn).toBe(false);
       expect(mySession.info.sessionId).toBeDefined();
     });
 
     it("does not generate a session ID if one is provided", () => {
       const mySession = new Session({}, "mySession");
-      expect(mySession.info.sessionId).toEqual("mySession");
+      expect(mySession.info.sessionId).toBe("mySession");
     });
 
     it("accepts legacy input storage", async () => {
@@ -74,7 +74,7 @@ describe("Session", () => {
         insecureStorage,
         secureStorage,
       });
-      expect(mySession).not.toBeUndefined();
+      expect(mySession).toBeDefined();
       expect(
         dependencies.getClientAuthenticationWithDependencies
       ).toHaveBeenCalledWith({
@@ -92,7 +92,7 @@ describe("Session", () => {
       const mySession = new Session({
         storage,
       });
-      expect(mySession).not.toBeUndefined();
+      expect(mySession).toBeDefined();
       expect(
         dependencies.getClientAuthenticationWithDependencies
       ).toHaveBeenCalledWith({
@@ -114,7 +114,7 @@ describe("Session", () => {
         secureStorage,
         storage,
       });
-      expect(mySession).not.toBeUndefined();
+      expect(mySession).toBeDefined();
       expect(
         dependencies.getClientAuthenticationWithDependencies
       ).toHaveBeenCalledWith({
@@ -131,9 +131,9 @@ describe("Session", () => {
           webId: "https://some.webid",
         },
       });
-      expect(mySession.info.isLoggedIn).toEqual(false);
-      expect(mySession.info.sessionId).toEqual("mySession");
-      expect(mySession.info.webId).toEqual("https://some.webid");
+      expect(mySession.info.isLoggedIn).toBe(false);
+      expect(mySession.info.sessionId).toBe("mySession");
+      expect(mySession.info.webId).toBe("https://some.webid");
     });
 
     it("accepts legacy token rotation callback", () => {
@@ -180,9 +180,9 @@ describe("Session", () => {
         });
       const mySession = new Session({ clientAuthentication });
       await mySession.login({});
-      expect(mySession.info.isLoggedIn).toEqual(true);
-      expect(mySession.info.sessionId).toEqual("mySession");
-      expect(mySession.info.webId).toEqual("https://my.webid/");
+      expect(mySession.info.isLoggedIn).toBe(true);
+      expect(mySession.info.sessionId).toBe("mySession");
+      expect(mySession.info.webId).toBe("https://my.webid/");
     });
   });
 
@@ -265,11 +265,11 @@ describe("Session", () => {
         }
       );
       const mySession = new Session({ clientAuthentication });
-      expect(mySession.info.isLoggedIn).toEqual(false);
+      expect(mySession.info.isLoggedIn).toBe(false);
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(mySession.info.isLoggedIn).toEqual(true);
-      expect(mySession.info.sessionId).toEqual("a session ID");
-      expect(mySession.info.webId).toEqual("https://some.webid#them");
+      expect(mySession.info.isLoggedIn).toBe(true);
+      expect(mySession.info.sessionId).toBe("a session ID");
+      expect(mySession.info.webId).toBe("https://some.webid#them");
     });
 
     it("directly returns the session's info if already logged in", async () => {
@@ -285,7 +285,7 @@ describe("Session", () => {
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(mySession.info.isLoggedIn).toEqual(true);
+      expect(mySession.info.isLoggedIn).toBe(true);
       await mySession.handleIncomingRedirect("https://some.url");
       // The second request should not hit the wrapped function
       expect(clientAuthentication.handleIncomingRedirect).toHaveBeenCalledTimes(
@@ -300,8 +300,8 @@ describe("Session", () => {
       );
       const mySession = new Session({ clientAuthentication }, "mySession");
       await mySession.handleIncomingRedirect("https://some.url");
-      expect(mySession.info.isLoggedIn).toEqual(false);
-      expect(mySession.info.sessionId).toEqual("mySession");
+      expect(mySession.info.isLoggedIn).toBe(false);
+      expect(mySession.info.sessionId).toBe("mySession");
     });
 
     function sleep(ms: number): Promise<void> {

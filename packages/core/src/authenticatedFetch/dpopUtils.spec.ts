@@ -20,12 +20,7 @@
  */
 
 import { it, describe, expect } from "@jest/globals";
-import {
-  KeyLike,
-  generateKeyPair,
-  fromKeyLike,
-  jwtVerify,
-} from "@inrupt/jose-legacy-modules";
+import { KeyLike, generateKeyPair, exportJWK, jwtVerify } from "jose";
 import { createDpopHeader, generateDpopKeyPair } from "./dpopUtils";
 
 let publicKey: KeyLike | undefined;
@@ -50,9 +45,9 @@ const mockKeyPair = async () => {
   const { privateKey: prvt, publicKey: pblc } = await mockJwk();
   const dpopKeyPair = {
     privateKey: prvt,
-    publicKey: await fromKeyLike(pblc),
+    publicKey: await exportJWK(pblc),
   };
-  // The alg property isn't set by fromKeyLike, so set it manually.
+  // The alg property isn't set by exportJWK, so set it manually.
   dpopKeyPair.publicKey.alg = "ES256";
   return dpopKeyPair;
 };
@@ -66,7 +61,7 @@ describe("createDpopHeader", () => {
     );
     const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
     expect(payload.htm).toBe("GET");
-    expect(payload.jti).not.toBeUndefined();
+    expect(payload.jti).toBeDefined();
     // The IRI is normalized, hence the trailing '/'
     expect(payload.htu).toBe("https://some.resource/");
   });
@@ -92,8 +87,8 @@ describe("createDpopHeader", () => {
 describe("generateDpopKeyPair", () => {
   it("generates a public, private key pair", async () => {
     const keyPair = await generateDpopKeyPair();
-    expect(keyPair.publicKey).not.toBeUndefined();
-    expect(keyPair.privateKey).not.toBeUndefined();
+    expect(keyPair.publicKey).toBeDefined();
+    expect(keyPair.privateKey).toBeDefined();
     expect(keyPair.publicKey.alg).toBe("ES256");
   });
 });

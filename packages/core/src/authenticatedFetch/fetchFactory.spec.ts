@@ -23,21 +23,7 @@
 /* eslint-disable no-shadow */
 
 import { jest, it, describe, expect } from "@jest/globals";
-// Until there is a broader support for submodules exports in the ecosystem,
-// (e.g. jest supports them), we'll depend on an intermediary package that exports
-// a single ES module. The submodule exports should be kept commented out to make
-// it easier to transition back when possible.
-// import { KeyLike } from "jose/types";
-// import jwtVerify from "jose/jwt/verify";
-// import { parseJwk } from "jose/jwk/parse";
-// import { generateKeyPair } from "jose/util/generate_key_pair";
-// import { fromKeyLike } from "jose/jwk/from_key_like";
-import {
-  KeyLike,
-  jwtVerify,
-  generateKeyPair,
-  fromKeyLike,
-} from "@inrupt/jose-legacy-modules";
+import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import { Response } from "node-fetch";
 import {
@@ -92,9 +78,9 @@ const mockKeyPair = async () => {
   const { privateKey: prvt, publicKey: pblc } = await mockJwk();
   const dpopKeyPair = {
     privateKey: prvt,
-    publicKey: await fromKeyLike(pblc),
+    publicKey: await exportJWK(pblc),
   };
-  // The alg property isn't set by fromKeyLike, so set it manually.
+  // The alg property isn't set by exportJWK, so set it manually.
   dpopKeyPair.publicKey.alg = "ES256";
   return dpopKeyPair;
 };
@@ -119,7 +105,7 @@ describe("buildAuthenticatedFetch", () => {
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
-        publicKey: await fromKeyLike(keylikePair.publicKey),
+        publicKey: await exportJWK(keylikePair.publicKey),
       },
       refreshOptions: {
         refreshToken: "some refresh token",
@@ -130,7 +116,7 @@ describe("buildAuthenticatedFetch", () => {
       },
     });
     await myFetch("https://my.pod/resource");
-    expect(mockedFetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
+    expect(mockedFetch.mock.calls[0][0]).toBe("https://my.pod/resource");
     const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
     const decodedHeader = await jwtVerify(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -165,8 +151,8 @@ describe("buildAuthenticatedFetch", () => {
         await mockKeyPair()
       ).privateKey
     );
-    expect(payload.htu).toEqual("http://some.url/");
-    expect(payload.htm).toEqual("POST");
+    expect(payload.htu).toBe("http://some.url/");
+    expect(payload.htm).toBe("POST");
   });
 
   it("builds a Bearer fetch if no DPoP key is provided", async () => {
@@ -180,7 +166,7 @@ describe("buildAuthenticatedFetch", () => {
       undefined
     );
     await myFetch("https://my.pod/resource");
-    expect(mockedFetch.mock.calls[0][0]).toEqual("https://my.pod/resource");
+    expect(mockedFetch.mock.calls[0][0]).toBe("https://my.pod/resource");
     const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(headers.get("Authorization")!.startsWith("Bearer")).toBe(true);
@@ -204,7 +190,7 @@ describe("buildAuthenticatedFetch", () => {
     });
     await myFetch("https://my.pod/container");
 
-    expect(mockedFetch.mock.calls[1][0]).toEqual("https://my.pod/container/");
+    expect(mockedFetch.mock.calls[1][0]).toBe("https://my.pod/container/");
     const headers = new Headers(mockedFetch.mock.calls[1][1].headers);
     const { payload } = await jwtVerify(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -213,7 +199,7 @@ describe("buildAuthenticatedFetch", () => {
         await mockKeyPair()
       ).privateKey
     );
-    expect(payload.htu).toEqual("https://my.pod/container/");
+    expect(payload.htu).toBe("https://my.pod/container/");
   });
 
   it("returns a fetch that does not retry fetching with a Bearer token if redirected", async () => {
@@ -243,8 +229,8 @@ describe("buildAuthenticatedFetch", () => {
 
     const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
 
-    expect(headers.get("Authorization")).toEqual("Bearer myToken");
-    expect(headers.get("someHeader")).toEqual("SomeValue");
+    expect(headers.get("Authorization")).toBe("Bearer myToken");
+    expect(headers.get("someHeader")).toBe("SomeValue");
   });
 
   it("returns a fetch preserving optional headers passed as a Header object", async () => {
@@ -263,8 +249,8 @@ describe("buildAuthenticatedFetch", () => {
 
     const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
 
-    expect(headers.get("Authorization")).toEqual("Bearer myToken");
-    expect(headers.get("someHeader")).toEqual("SomeValue");
+    expect(headers.get("Authorization")).toBe("Bearer myToken");
+    expect(headers.get("someHeader")).toBe("SomeValue");
   });
 
   it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
@@ -283,7 +269,7 @@ describe("buildAuthenticatedFetch", () => {
       },
     });
     const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
-    expect(headers.get("Authorization")).toEqual("DPoP myToken");
+    expect(headers.get("Authorization")).toBe("DPoP myToken");
   });
 
   it("does not retry a **redirected** fetch if the error is not auth-related", async () => {
@@ -299,7 +285,7 @@ describe("buildAuthenticatedFetch", () => {
     const response = await myFetch("https://my.pod/container");
 
     expect(mockedFetch.mock.calls).toHaveLength(1);
-    expect(response.status).toEqual(400);
+    expect(response.status).toBe(400);
   });
 
   it("returns the initial response in case of non-redirected auth error", async () => {
@@ -321,7 +307,7 @@ describe("buildAuthenticatedFetch", () => {
     const response = await myFetch("someUrl");
     // The mocked fetch will 401, which triggers the refresh flow.
     // The test checks that the mocked refreshed token is used silently.
-    expect(response.status).toEqual(401);
+    expect(response.status).toBe(401);
   });
 
   // For some reasons Jest doesn't play nice with timers, so right now the tests
@@ -397,7 +383,7 @@ describe("buildAuthenticatedFetch", () => {
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
-        publicKey: await fromKeyLike(keylikePair.publicKey),
+        publicKey: await exportJWK(keylikePair.publicKey),
       },
       refreshOptions: {
         refreshToken: "some refresh token",
@@ -415,7 +401,7 @@ describe("buildAuthenticatedFetch", () => {
       "some refresh token",
       {
         privateKey: keylikePair.privateKey,
-        publicKey: await fromKeyLike(keylikePair.publicKey),
+        publicKey: await exportJWK(keylikePair.publicKey),
       }
     );
   });
@@ -556,7 +542,7 @@ describe("buildAuthenticatedFetch", () => {
       expiresIn: 0,
     });
     await sleep(200);
-    expect(refreshCall.mock.calls[1][1]).toEqual("some rotated refresh token");
+    expect(refreshCall.mock.calls[1][1]).toBe("some rotated refresh token");
   });
 
   it("emits the appropriate events when refreshing the token fails", async () => {

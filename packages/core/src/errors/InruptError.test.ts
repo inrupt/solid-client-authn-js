@@ -42,7 +42,7 @@ describe("InruptError", () => {
       const message = "Normal error string...";
       const error = new InruptError(message);
 
-      expect(error.name).toEqual("Error");
+      expect(error.name).toBe("Error");
       expect(error.toString()).toContain(message);
     });
 
@@ -52,7 +52,7 @@ describe("InruptError", () => {
         ["one", "two"]
       );
 
-      expect(error.name).toEqual("Error");
+      expect(error.name).toBe("Error");
       expect(error.toString()).toContain(
         "Error: Normal [two] error string with [one]..."
       );
@@ -82,10 +82,10 @@ describe("InruptError", () => {
         false
       );
 
-      expect(error.name).toEqual("Error");
-      expect(error.hasHttpResponse()).toEqual(true);
-      expect(error.getHttpStatusCode()).toEqual(404);
-      expect(error.getHttpStatusText()).toEqual("Not Found");
+      expect(error.name).toBe("Error");
+      expect(error.hasHttpResponse()).toBe(true);
+      expect(error.getHttpStatusCode()).toBe(404);
+      expect(error.getHttpStatusText()).toBe("Not Found");
       expect(error.toString()).toContain(message);
       expect(error.toString()).not.toContain("404");
     });
@@ -98,10 +98,10 @@ describe("InruptError", () => {
       const message = "Normal error string...";
       const error = new InruptError(message).httpResponse(failedResponse);
 
-      expect(error.name).toEqual("Error");
-      expect(error.hasHttpResponse()).toEqual(true);
-      expect(error.getHttpStatusCode()).toEqual(404);
-      expect(error.getHttpStatusText()).toEqual("Not Found");
+      expect(error.name).toBe("Error");
+      expect(error.hasHttpResponse()).toBe(true);
+      expect(error.getHttpStatusCode()).toBe(404);
+      expect(error.getHttpStatusText()).toBe("Not Found");
       expect(error.toString()).toContain(message);
       expect(error.toString()).toContain("404");
     });
@@ -144,7 +144,7 @@ describe("InruptError", () => {
         const errorIri = new NamedNode("https://example.com/vocab#errTest1");
         const error = new InruptError(errorIri);
 
-        expect(error.name).toEqual("Error");
+        expect(error.name).toBe("Error");
         expect(error.toString()).toContain(errorIri.value);
 
         // TODO: PMcB55: Replace this when (if?) we do actually lookup vocabs
@@ -157,7 +157,7 @@ describe("InruptError", () => {
         const params = ["one", "two"];
         const error = new InruptError(errorIri, params);
 
-        expect(error.name).toEqual("Error");
+        expect(error.name).toBe("Error");
         expect(error.toString()).toContain(params[0]);
         expect(error.toString()).toContain(params[1]);
         expect(error.toString()).toContain(errorIri.value);
@@ -172,7 +172,7 @@ describe("InruptError", () => {
         const errorIri = INRUPT_TEST.somePredicate;
         const error = new InruptError(errorIri);
 
-        expect(error.name).toEqual("Error");
+        expect(error.name).toBe("Error");
         expect(error.toString()).toContain(errorIri.value);
         expect(error.toString()).toContain("found no message value");
       });
@@ -182,7 +182,7 @@ describe("InruptError", () => {
         const params = ["one", "two", "three"];
         const error = new InruptError(vocabError, params);
 
-        expect(error.name).toEqual("Error");
+        expect(error.name).toBe("Error");
         expect(error.hasHttpResponse()).toBeFalsy();
         expect(error.toString()).toContain(params[0]);
         expect(error.toString()).toContain(params[1]);
@@ -203,7 +203,7 @@ describe("InruptError", () => {
 
           const error = new InruptError(errorIri, params);
 
-          expect(error.name).toEqual("Error");
+          expect(error.name).toBe("Error");
           expect(error.hasHttpResponse()).toBeFalsy();
           expect(error.toString()).toContain(params[0]);
           expect(error.toString()).toContain(params[1]);
@@ -234,10 +234,10 @@ describe("InruptError", () => {
             true
           );
 
-          expect(error.name).toEqual("Error");
-          expect(error.hasHttpResponse()).toEqual(true);
-          expect(error.getHttpStatusCode()).toEqual(404);
-          expect(error.getHttpStatusText()).toEqual("Not Found");
+          expect(error.name).toBe("Error");
+          expect(error.hasHttpResponse()).toBe(true);
+          expect(error.getHttpStatusCode()).toBe(404);
+          expect(error.getHttpStatusText()).toBe("Not Found");
           expect(error.toString()).toContain(params[0]);
           expect(error.toString()).toContain(params[1]);
           expect(error.toString()).toContain(params[2]);

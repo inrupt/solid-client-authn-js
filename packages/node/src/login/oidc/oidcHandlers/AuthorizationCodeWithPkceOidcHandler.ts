@@ -79,7 +79,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
       code_challenge_method: "S256",
       prompt: "consent",
       // The offline_access scope asks the provider to issue a refresh token.
-      scope: "openid offline_access",
+      // The webid scope is required as per https://solid.github.io/solid-oidc/#webid-scope
+      scope: "openid offline_access webid",
     });
 
     // Stores information to be reused after reload

@@ -75,7 +75,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
 
     if (oidcLoginOptions.dpop) {
       dpopKey = await generateDpopKeyPair();
-      // The alg property isn't set by fromKeyLike, so set it manually.
+      // The alg property isn't set by exportJWK, so set it manually.
       [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
     }
 
@@ -83,6 +83,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       {
         grant_type: "client_credentials",
         token_endpoint_auth_method: "client_secret_basic",
+        scope: "openid offline_access webid",
       },
       {
         DPoP:
