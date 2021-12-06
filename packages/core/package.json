@@ -24,7 +24,7 @@
     "@inrupt/vocab-inrupt-common": "^0.7.2",
     "@types/jest": "^27.0.1",
     "@types/n3": "^1.4.4",
-    "@types/node-fetch": "^2.5.6",
+    "@types/node-fetch": "^3.0.3",
     "eslint": "^7.16.0",
     "jest": "^26.6.3",
     "license-checker": "^25.0.1",
