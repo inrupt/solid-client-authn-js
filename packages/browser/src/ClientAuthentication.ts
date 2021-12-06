@@ -33,10 +33,8 @@ import {
   IIssuerConfigFetcher,
   ISessionInternalInfo,
   ILoginOptions,
-  fetchJwks,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
-import { jwtVerify, importJWK } from "jose";
 import { EventEmitter } from "events";
 import { KEY_CURRENT_SESSION } from "./constant";
 
@@ -110,6 +108,10 @@ export default class ClientAuthentication {
     return this.sessionInfoManager.getAll();
   };
 
+  // Collects session information from storage, and returns them. Returns null
+  // if the expected information cannot be found.
+  // Note that the ID token is not stored, which means the session information
+  // cannot be validated at this point.
   validateCurrentSession = async (): Promise<
     (ISessionInfo & ISessionInternalInfo) | null
   > => {
@@ -118,33 +120,14 @@ export default class ClientAuthentication {
       return null;
     }
     const sessionInfo = await this.sessionInfoManager.get(currentSessionId);
-    // Several types of session data are required in order to validate that the ID
-    // token in storage hasn't been tampered with, and has actually been issued
-    // by the issuer present in storage.
     if (
       sessionInfo === undefined ||
-      sessionInfo.idToken === undefined ||
       sessionInfo.clientAppId === undefined ||
       sessionInfo.issuer === undefined
     ) {
       return null;
     }
-    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      sessionInfo.issuer
-    );
-
-    try {
-      const jwk = await fetchJwks(issuerConfig.jwksUri, issuerConfig.issuer);
-      await jwtVerify(sessionInfo.idToken, await importJWK(jwk), {
-        audience: sessionInfo.clientAppId,
-        issuer: issuerConfig.issuer,
-      });
-      return sessionInfo;
-    } catch (e) {
-      // The jwt verification function throws on invalid token.
-      // The error is swallowed, and `null` is eventually returned.
-    }
-    return null;
+    return sessionInfo;
   };
 
   handleIncomingRedirect = async (
