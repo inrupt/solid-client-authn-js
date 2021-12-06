@@ -192,7 +192,6 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       this.storageUtility,
       oidcLoginOptions.sessionId,
       undefined,
-      undefined,
       "true",
       accessInfo.refreshToken ?? refreshOptions.refreshToken,
       undefined,

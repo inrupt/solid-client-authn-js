@@ -606,7 +606,6 @@ describe("saveSessionInfoToStorage", () => {
     await saveSessionInfoToStorage(
       mockedStorage,
       "some session",
-      "an ID token",
       "https://my.webid",
       "true",
       "a refresh token",
@@ -618,29 +617,11 @@ describe("saveSessionInfoToStorage", () => {
     ).resolves.toBe("a refresh token");
   });
 
-  it("saves ID token if provided in the given storage", async () => {
-    const mockedStorage = mockStorageUtility({});
-    await saveSessionInfoToStorage(
-      mockedStorage,
-      "some session",
-      "an ID token",
-      undefined,
-      undefined,
-      undefined,
-      true
-    );
-
-    await expect(
-      mockedStorage.getForUser("some session", "idToken", { secure: true })
-    ).resolves.toBe("an ID token");
-  });
-
   it("saves the webid if provided in the given storage", async () => {
     const mockedStorage = mockStorageUtility({});
     await saveSessionInfoToStorage(
       mockedStorage,
       "some session",
-      undefined,
       "https://my.webid",
       undefined,
       undefined,
@@ -657,7 +638,6 @@ describe("saveSessionInfoToStorage", () => {
     await saveSessionInfoToStorage(
       mockedStorage,
       "some session",
-      undefined,
       undefined,
       "true",
       undefined,
@@ -704,7 +684,6 @@ describe("saveSessionInfoToStorage", () => {
     await saveSessionInfoToStorage(
       mockedStorage,
       "some session",
-      "an ID token",
       "https://my.webid",
       "true",
       "a refresh token",

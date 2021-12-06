@@ -185,7 +185,6 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     await saveSessionInfoToStorage(
       this.storageUtility,
       sessionId,
-      tokenSet.id_token,
       webid,
       "true",
       tokenSet.refresh_token,
