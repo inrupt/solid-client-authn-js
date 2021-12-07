@@ -68,5 +68,8 @@
     "*.{ts,js,css,json}": [
       "prettier --write"
     ]
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.3.2"
   }
 }
