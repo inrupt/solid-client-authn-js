@@ -657,7 +657,7 @@ describe("Session", () => {
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
     });
 
-    it("saves current window location if we have stored ID Token", async () => {
+    it("saves current window location if the current session validates", async () => {
       const sessionId = "mySilentSession";
       mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
@@ -669,11 +669,9 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({
-          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
-            idToken: "value doesn't matter",
-          },
-        })
+        // No session information need to be mocked, because `validateCurrentSession`
+        // itself is mocked.
+        mockStorage({})
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
