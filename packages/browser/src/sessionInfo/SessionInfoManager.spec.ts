@@ -108,7 +108,6 @@ describe("SessionInfoManager", () => {
           [`solidClientAuthenticationUser:${sessionId}`]: {
             clientId: "https://some.app/registration",
             clientSecret: "some client secret",
-            idToken: "some.id.token",
             redirectUrl: "https://some.redirect/url",
             issuer: "https://some.issuer",
             tokenType: "DPoP",
@@ -127,7 +126,6 @@ describe("SessionInfoManager", () => {
         clientAppId: "https://some.app/registration",
         clientAppSecret: "some client secret",
         issuer: "https://some.issuer",
-        idToken: "some.id.token",
         refreshToken: "some refresh token",
         redirectUrl: "https://some.redirect/url",
         tokenType: "DPoP",
@@ -156,7 +154,6 @@ describe("SessionInfoManager", () => {
         clientAppId: undefined,
         clientAppSecret: undefined,
         issuer: undefined,
-        idToken: undefined,
         refreshToken: undefined,
         redirectUrl: undefined,
         tokenType: "DPoP",

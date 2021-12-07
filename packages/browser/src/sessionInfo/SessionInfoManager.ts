@@ -149,10 +149,6 @@ export class SessionInfoManager implements ISessionInfoManager {
       }
     );
 
-    const idToken = await this.storageUtility.getForUser(sessionId, "idToken", {
-      secure: false,
-    });
-
     const redirectUrl = await this.storageUtility.getForUser(
       sessionId,
       "redirectUrl",
@@ -184,7 +180,6 @@ export class SessionInfoManager implements ISessionInfoManager {
 
     if (
       clientId === undefined &&
-      idToken === undefined &&
       isLoggedIn === undefined &&
       webId === undefined &&
       refreshToken === undefined
@@ -197,7 +192,6 @@ export class SessionInfoManager implements ISessionInfoManager {
       webId,
       isLoggedIn: isLoggedIn === "true",
       redirectUrl,
-      idToken,
       refreshToken,
       issuer,
       clientAppId: clientId,
