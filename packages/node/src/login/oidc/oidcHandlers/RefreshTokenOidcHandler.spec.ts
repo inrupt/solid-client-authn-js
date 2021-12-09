@@ -30,9 +30,11 @@ import {
   mockStorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jwtVerify, exportJWK } from "jose";
 import { EventEmitter } from "events";
-import { Headers as NodeHeaders } from "cross-fetch";
+import { Headers as NodeHeaders, Response as NodeResponse } from "cross-fetch";
+import type * as CrossFetch from "cross-fetch";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
@@ -45,16 +47,17 @@ import {
 } from "../refresh/__mocks__/TokenRefresher";
 
 jest.mock("cross-fetch", () => {
-  const crossFetchModule = jest.requireActual("cross-fetch") as any;
-  crossFetchModule.default = jest.fn();
-  crossFetchModule.fetch = jest.fn();
-  return crossFetchModule;
+  return {
+    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
+    default: jest.fn(),
+    fetch: jest.fn(),
+  } as typeof CrossFetch;
 });
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-  ) as any;
+  ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
@@ -150,11 +153,11 @@ describe("RefreshTokenOidcHandler", () => {
       );
       expect(result?.webId).toBe("https://my.webid/");
 
-      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock;
-      };
+      const { fetch: mockedFetch } = jest.requireMock(
+        "cross-fetch"
+      ) as jest.Mocked<typeof CrossFetch>;
       mockedFetch.mockResolvedValue({
-        status: 401,
+        ...new NodeResponse(undefined, { status: 401 }),
         url: "https://my.pod/resource",
       });
       if (result !== undefined) {
@@ -170,7 +173,7 @@ describe("RefreshTokenOidcHandler", () => {
         mockDefaultTokenRefresher(),
         mockStorageUtility({})
       );
-      const result = await refreshTokenOidcHandler.handle(
+      const result = (await refreshTokenOidcHandler.handle(
         mockOidcOptions({
           refreshToken: "some refresh token",
           client: {
@@ -179,20 +182,19 @@ describe("RefreshTokenOidcHandler", () => {
             clientType: "dynamic",
           },
         })
-      );
+      )) as SolidClientAuthnCore.RedirectResult;
       expect(result).toBeDefined();
       expect(result?.webId).toBe("https://my.webid/");
 
-      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock;
-      };
+      const { fetch: mockedFetch } = jest.requireMock(
+        "cross-fetch"
+      ) as jest.Mocked<typeof CrossFetch>;
       mockedFetch.mockResolvedValue({
-        status: 200,
-        url: "https://some.pod/resource",
+        ...new NodeResponse(undefined, { status: 200 }),
+        url: "https://my.pod/resource",
       });
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await result!.fetch("https://some.pod/resource");
-      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      await result.fetch("https://some.pod/resource");
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(
         "DPoP some refreshed access token"
       );
@@ -222,16 +224,16 @@ describe("RefreshTokenOidcHandler", () => {
         })
       );
 
-      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock;
-      };
+      const { fetch: mockedFetch } = jest.requireMock(
+        "cross-fetch"
+      ) as jest.Mocked<typeof CrossFetch>;
       mockedFetch.mockResolvedValue({
-        status: 200,
-        url: "https://some.pod/resource",
+        ...new NodeResponse(undefined, { status: 200 }),
+        url: "https://my.pod/resource",
       });
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       await result!.fetch("https://some.pod/resource");
-      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
       const dpopProof = headers.get("DPoP");
       // This checks that the refreshed access token is bound to the initial DPoP key.
       await expect(
@@ -259,16 +261,17 @@ describe("RefreshTokenOidcHandler", () => {
       );
       expect(result).toBeDefined();
 
-      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
-        fetch: jest.Mock;
-      };
+      const { fetch: mockedFetch } = jest.requireMock(
+        "cross-fetch"
+      ) as jest.Mocked<typeof CrossFetch>;
+
       mockedFetch.mockResolvedValue({
-        status: 200,
-        url: "https://some.pod/resource",
+        ...new NodeResponse(undefined, { status: 200 }),
+        url: "https://my.pod/resource",
       });
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       await result!.fetch("https://some.pod/resource");
-      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1].headers);
+      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(
         "Bearer some refreshed access token"
       );
@@ -361,7 +364,7 @@ describe("RefreshTokenOidcHandler", () => {
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const coreModule = jest.requireMock(
       "@inrupt/solid-client-authn-core"
-    ) as any;
+    ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
       "buildAuthenticatedFetch"

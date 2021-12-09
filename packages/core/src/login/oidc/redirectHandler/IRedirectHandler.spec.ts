@@ -22,13 +22,15 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { JWTPayload, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
 import { Response as NodeResponse } from "cross-fetch";
+import type * as CrossFetch from "cross-fetch";
 import { getWebidFromTokenPayload } from "./IRedirectHandler";
 
 jest.mock("cross-fetch", () => {
-  const crossFetchModule = jest.requireActual("cross-fetch") as any;
-  crossFetchModule.default = jest.fn();
-  crossFetchModule.fetch = jest.fn();
-  return crossFetchModule;
+  return {
+    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
+    default: jest.fn(),
+    fetch: jest.fn(),
+  } as typeof CrossFetch;
 });
 
 describe("getWebidFromTokenPayload", () => {
@@ -74,20 +76,13 @@ describe("getWebidFromTokenPayload", () => {
       .sign(signingKey ?? (await mockJwk()).privateKey);
   };
 
-  const mockFetch = (
-    payload: string,
-    statusCode: number
-  ): jest.Mock<
-    ReturnType<typeof window.fetch>,
-    [RequestInfo, RequestInit?]
-  > => {
-    const mockedFetch = jest.fn(() =>
-      Promise.resolve(new NodeResponse(payload, { status: statusCode }))
+  const mockFetch = (payload: string, statusCode: number): void => {
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
+    mockedFetch.mockResolvedValueOnce(
+      new NodeResponse(payload, { status: statusCode })
     );
-    const crossFetch = jest.requireMock("cross-fetch") as any;
-    crossFetch.fetch = mockedFetch;
-    // To avoid having to duplicate the mocked fetch's type definition:
-    return mockedFetch as any;
   };
 
   it("throws if the JWKS cannot be fetched", async () => {

@@ -21,6 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorage } from "@inrupt/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { EventEmitter } from "events";
 import {
   buildLoginHandler,
@@ -42,11 +43,10 @@ import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCreden
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 
 jest.mock("openid-client");
-// jest.mock("cross-fetch");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-  ) as any;
+  ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
