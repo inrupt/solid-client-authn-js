@@ -23,11 +23,14 @@
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { IdTokenClaims, TokenSet } from "openid-client";
+import type * as OpenidClient from "openid-client";
 import { JWK } from "jose";
 // eslint-disable-next-line no-shadow
-import { Headers } from "cross-fetch";
+import { Headers, Response } from "cross-fetch";
+import type * as CrossFetch from "cross-fetch";
 
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
@@ -38,16 +41,17 @@ import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
 jest.mock("openid-client");
 
 jest.mock("cross-fetch", () => {
-  const crossFetchModule = jest.requireActual("cross-fetch") as any;
-  crossFetchModule.default = jest.fn();
-  crossFetchModule.fetch = jest.fn();
-  return crossFetchModule;
+  return {
+    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
+    default: jest.fn(),
+    fetch: jest.fn(),
+  } as typeof CrossFetch;
 });
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
-  ) as any;
+  ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
@@ -131,7 +135,9 @@ const mockBearerTokens = (): TokenSet => {
 
 const setupOidcClientMock = (tokenSet: TokenSet) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { Issuer } = jest.requireMock("openid-client") as any;
+  const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
+    typeof OpenidClient
+  >;
   function clientConstructor() {
     // this is untyped, which makes TS complain
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -141,7 +147,8 @@ const setupOidcClientMock = (tokenSet: TokenSet) => {
   const mockedIssuer = {
     metadata: mockDefaultIssuerConfig(),
     Client: clientConstructor,
-  };
+    // Cast to unknown because only partially mocked
+  } as unknown as OpenidClient.Issuer<OpenidClient.Client>;
   Issuer.mockReturnValueOnce(mockedIssuer);
 };
 
@@ -278,15 +285,16 @@ describe("handle", () => {
       },
     });
 
-    const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock;
-    };
-    mockedFetch.mockResolvedValue({
-      status: 200,
-      url: "https://some.pod/resource",
-    });
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
+    mockedFetch.mockResolvedValue(
+      new Response(undefined, {
+        status: 200,
+      })
+    );
     await result?.fetch("https://some.pod/resource");
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     expect(headers.get("Authorization")).toContain(
       `DPoP ${tokens.access_token}`
     );
@@ -309,15 +317,16 @@ describe("handle", () => {
       },
     });
 
-    const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
-      fetch: jest.Mock;
-    };
-    mockedFetch.mockResolvedValue({
-      status: 200,
-      url: "https://some.pod/resource",
-    });
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
+    mockedFetch.mockResolvedValue(
+      new Response(undefined, {
+        status: 200,
+      })
+    );
     await result?.fetch("https://some.pod/resource");
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     expect(headers.get("Authorization")).toContain(
       `Bearer ${tokens.access_token}`
     );
@@ -329,7 +338,7 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const coreModule = jest.requireMock(
       "@inrupt/solid-client-authn-core"
-    ) as any;
+    ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
       "buildAuthenticatedFetch"

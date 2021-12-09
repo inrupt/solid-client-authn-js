@@ -26,6 +26,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import { Response } from "cross-fetch";
+import type * as CrossFetch from "cross-fetch";
 import {
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
@@ -41,10 +42,11 @@ import { InvalidResponseError } from "../errors/InvalidResponseError";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 
 jest.mock("cross-fetch", () => {
-  const crossFetchModule = jest.requireActual("cross-fetch") as any;
-  crossFetchModule.default = jest.fn();
-  crossFetchModule.fetch = jest.fn();
-  return crossFetchModule;
+  return {
+    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
+    default: jest.fn(),
+    fetch: jest.fn(),
+  } as typeof CrossFetch;
 });
 
 const mockNotRedirectedResponse = () => {
@@ -86,7 +88,9 @@ const mockKeyPair = async () => {
 };
 
 const mockFetch = (response: Response, url: string) => {
-  const { fetch } = jest.requireMock("cross-fetch") as { fetch: any };
+  const { fetch } = jest.requireMock("cross-fetch") as jest.Mocked<
+    typeof CrossFetch
+  >;
   const mockedResponse = response;
   jest.spyOn(mockedResponse, "url", "get").mockReturnValue(url);
   fetch.mockResolvedValueOnce(mockedResponse);
@@ -117,10 +121,9 @@ describe("buildAuthenticatedFetch", () => {
     });
     await myFetch("https://my.pod/resource");
     expect(mockedFetch.mock.calls[0][0]).toBe("https://my.pod/resource");
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     const decodedHeader = await jwtVerify(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      headers.get("DPoP")!,
+      headers.get("DPoP") as string,
       (
         await mockJwk()
       ).publicKey
@@ -143,10 +146,9 @@ describe("buildAuthenticatedFetch", () => {
       method: "POST",
     });
 
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     const { payload } = await jwtVerify(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      headers.get("DPoP")!,
+      headers.get("DPoP") as string,
       (
         await mockKeyPair()
       ).privateKey
@@ -167,9 +169,8 @@ describe("buildAuthenticatedFetch", () => {
     );
     await myFetch("https://my.pod/resource");
     expect(mockedFetch.mock.calls[0][0]).toBe("https://my.pod/resource");
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(headers.get("Authorization")!.startsWith("Bearer")).toBe(true);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
+    expect(headers.get("Authorization")?.startsWith("Bearer")).toBe(true);
   });
 
   it("returns a fetch that rebuilds the DPoP token if redirected", async () => {
@@ -190,10 +191,9 @@ describe("buildAuthenticatedFetch", () => {
     await myFetch("https://my.pod/container");
 
     expect(mockedFetch.mock.calls[1][0]).toBe("https://my.pod/container/");
-    const headers = new Headers(mockedFetch.mock.calls[1][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[1][1]?.headers);
     const { payload } = await jwtVerify(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      headers.get("DPoP")!,
+      headers.get("DPoP") as string,
       (
         await mockKeyPair()
       ).privateKey
@@ -226,7 +226,7 @@ describe("buildAuthenticatedFetch", () => {
     );
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
 
     expect(headers.get("Authorization")).toBe("Bearer myToken");
     expect(headers.get("someHeader")).toBe("SomeValue");
@@ -246,7 +246,7 @@ describe("buildAuthenticatedFetch", () => {
       headers: new Headers({ someHeader: "SomeValue" }),
     });
 
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
 
     expect(headers.get("Authorization")).toBe("Bearer myToken");
     expect(headers.get("someHeader")).toBe("SomeValue");
@@ -267,7 +267,7 @@ describe("buildAuthenticatedFetch", () => {
         DPoP: "some header",
       },
     });
-    const headers = new Headers(mockedFetch.mock.calls[0][1].headers);
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     expect(headers.get("Authorization")).toBe("DPoP myToken");
   });
 
@@ -318,7 +318,9 @@ describe("buildAuthenticatedFetch", () => {
   }
 
   it("refreshes the token before it expires", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -343,7 +345,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("sets a default timeout if the OIDC provider did not return one", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
     const spyTimeout = jest.spyOn(global, "setTimeout");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -362,7 +366,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("does not rebind the DPoP token on refresh", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const keylikePair = await mockJwk();
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.
@@ -406,7 +412,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("sets up the timeout on refresh so that the tokens keep being valid", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
       // We get a new expiration date every time we refresh the tokens
@@ -442,7 +450,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("sets a default timeout on refresh if the OIDC provider does not return one", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
       // No new expiration date is provided on refresh
@@ -469,7 +479,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("calls the provided callback when the access token is refreshed", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const tokenSet = mockDefaultTokenSet();
     const mockedFreshener = mockTokenRefresher({
       ...tokenSet,
@@ -491,7 +503,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("calls the provided callback when a new refresh token is issued", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
@@ -514,7 +528,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("rotates the refresh token if a new one is issued", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.
     const mockedTokenRefresher: ITokenRefresher = {
@@ -545,7 +561,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("emits the appropriate events when refreshing the token fails", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
       .fn()
@@ -583,7 +601,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("emits the appropriate events when an unexpected response is received", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
       .fn()
@@ -610,7 +630,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("emits the appropriate events when the access token expires and may not be refreshed", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedFreshener.refresh = jest
@@ -633,7 +655,9 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("does not schedule any callback to be called if no event can be fired", async () => {
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock(
+      "cross-fetch"
+    ) as jest.Mocked<typeof CrossFetch>;
     const spyTimeout = jest.spyOn(global, "setTimeout");
     await buildAuthenticatedFetch(mockedFetch, "myToken");
     await sleep(100);

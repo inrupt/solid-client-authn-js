@@ -29,6 +29,7 @@ import {
   USER_SESSION_PREFIX,
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
@@ -786,7 +787,7 @@ describe("AuthCodeRedirectHandler", () => {
     const mockedStorage = mockDefaultRedirectStorage();
     const coreModule = jest.requireActual(
       "@inrupt/solid-client-authn-core"
-    ) as any;
+    ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
       "buildAuthenticatedFetch"
