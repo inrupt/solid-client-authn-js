@@ -26,6 +26,7 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
       - run: npm ci
+      - run: npm run ci-all
       - run: npm run bootstrap
       - run: npm run build
       - run: npm run test

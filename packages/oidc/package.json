@@ -9,6 +9,7 @@
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "scripts": {
+    "ci": "npm ci",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rimraf ./coverage",
     "clean-module": "rimraf ./dist",

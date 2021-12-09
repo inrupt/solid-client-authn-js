@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "demo-app": "cd packages/browser; npm run demo-app",
+    "ci-all": "lerna run ci",
     "bootstrap": "lerna bootstrap -- --no-optional",
     "e2e-test": "jest --config jest.e2e.config.js",
     "build": "lerna run build",

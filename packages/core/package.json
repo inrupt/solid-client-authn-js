@@ -8,6 +8,7 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
+    "ci": "npm ci --no-optional",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module",
     "clean-module": "rimraf ./dist",

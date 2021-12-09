@@ -8,6 +8,7 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
+    "ci": "npm ci",
     "prepublishOnly": "npm run build",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "e2e-test": "jest --config jest.e2e.config.js",

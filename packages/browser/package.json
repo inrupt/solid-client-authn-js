@@ -10,6 +10,7 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
+    "ci": "npm ci",
     "demo-app": "concurrently \"npm run dev\" \"cd examples/demoClientApp; npm run start\"",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module && npm run clean-browser && rimraf ./coverage",
