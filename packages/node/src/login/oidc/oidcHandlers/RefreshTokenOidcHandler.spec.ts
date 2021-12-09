@@ -32,7 +32,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { jwtVerify, exportJWK } from "jose";
 import { EventEmitter } from "events";
-import { Headers as NodeHeaders } from "node-fetch";
+import { Headers as NodeHeaders } from "cross-fetch";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
@@ -44,7 +44,12 @@ import {
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
 
-jest.mock("cross-fetch");
+jest.mock("cross-fetch", () => {
+  const crossFetchModule = jest.requireActual("cross-fetch") as any;
+  crossFetchModule.default = jest.fn();
+  crossFetchModule.fetch = jest.fn();
+  return crossFetchModule;
+});
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -145,7 +150,9 @@ describe("RefreshTokenOidcHandler", () => {
       );
       expect(result?.webId).toBe("https://my.webid/");
 
-      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock;
+      };
       mockedFetch.mockResolvedValue({
         status: 401,
         url: "https://my.pod/resource",
@@ -176,7 +183,9 @@ describe("RefreshTokenOidcHandler", () => {
       expect(result).toBeDefined();
       expect(result?.webId).toBe("https://my.webid/");
 
-      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock;
+      };
       mockedFetch.mockResolvedValue({
         status: 200,
         url: "https://some.pod/resource",
@@ -213,7 +222,9 @@ describe("RefreshTokenOidcHandler", () => {
         })
       );
 
-      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock;
+      };
       mockedFetch.mockResolvedValue({
         status: 200,
         url: "https://some.pod/resource",
@@ -248,7 +259,9 @@ describe("RefreshTokenOidcHandler", () => {
       );
       expect(result).toBeDefined();
 
-      const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+      const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
+        fetch: jest.Mock;
+      };
       mockedFetch.mockResolvedValue({
         status: 200,
         url: "https://some.pod/resource",

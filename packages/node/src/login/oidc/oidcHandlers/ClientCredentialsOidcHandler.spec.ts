@@ -27,7 +27,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import { JWK } from "jose";
 // eslint-disable-next-line no-shadow
-import { Headers } from "node-fetch";
+import { Headers } from "cross-fetch";
 
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
@@ -36,7 +36,14 @@ import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
 import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
 
 jest.mock("openid-client");
-jest.mock("cross-fetch");
+
+jest.mock("cross-fetch", () => {
+  const crossFetchModule = jest.requireActual("cross-fetch") as any;
+  crossFetchModule.default = jest.fn();
+  crossFetchModule.fetch = jest.fn();
+  return crossFetchModule;
+});
+
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"
@@ -271,7 +278,9 @@ describe("handle", () => {
       },
     });
 
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
+      fetch: jest.Mock;
+    };
     mockedFetch.mockResolvedValue({
       status: 200,
       url: "https://some.pod/resource",
@@ -300,7 +309,9 @@ describe("handle", () => {
       },
     });
 
-    const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
+    const { fetch: mockedFetch } = jest.requireMock("cross-fetch") as {
+      fetch: jest.Mock;
+    };
     mockedFetch.mockResolvedValue({
       status: 200,
       url: "https://some.pod/resource",

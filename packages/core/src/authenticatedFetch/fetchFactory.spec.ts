@@ -25,7 +25,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
-import { Response } from "node-fetch";
+import { Response } from "cross-fetch";
 import {
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
@@ -173,7 +173,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("returns a fetch that rebuilds the DPoP token if redirected", async () => {
-    // const mockedFetch = jest.requireMock("cross-fetch") as jest.Mock;
     const mockedFetch = mockFetch(
       new Response(undefined, { status: 403 }),
       "https://my.pod/container/"
