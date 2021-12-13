@@ -10,7 +10,7 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "clean": "rimraf ./dist && rimraf ./coverage",
-    "e2e-test": "jest --config jest.e2e.config.js",
+    "e2e-test": "tap --reporter=specy --no-coverage --files=dist/e2e/*.test.js",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint \"src/**/*.ts\"",
     "lint-fix": "eslint --fix \"src/**\"",
@@ -21,13 +21,14 @@
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
+    "@types/tap": "^15.0.5",
     "eslint": "^7.16.0",
     "jest": "^27.4.3",
     "license-checker": "^25.0.1",
+    "tap": "^15.1.5",
     "ts-jest": "^27.0.7",
     "typedoc": "^0.22.4",
-    "typedoc-plugin-markdown": "^3.10.2",
-    "typescript": "^4.0.5"
+    "typedoc-plugin-markdown": "^3.10.2"
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^1.11.2",
