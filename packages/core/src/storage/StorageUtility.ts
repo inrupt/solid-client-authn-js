@@ -95,7 +95,6 @@ export async function loadOidcContextFromStorage(
  *
  * @param storageUtility
  * @param sessionId
- * @param idToken
  * @param webId
  * @param isLoggedIn
  * @param refreshToken
@@ -105,7 +104,6 @@ export async function loadOidcContextFromStorage(
 export async function saveSessionInfoToStorage(
   storageUtility: IStorageUtility,
   sessionId: string,
-  idToken?: string,
   webId?: string,
   isLoggedIn?: string,
   refreshToken?: string,
@@ -115,9 +113,6 @@ export async function saveSessionInfoToStorage(
   // TODO: Investigate why this does not work with a Promise.all
   if (refreshToken !== undefined) {
     await storageUtility.setForUser(sessionId, { refreshToken }, { secure });
-  }
-  if (idToken !== undefined) {
-    await storageUtility.setForUser(sessionId, { idToken }, { secure });
   }
   if (webId !== undefined) {
     await storageUtility.setForUser(sessionId, { webId }, { secure });

@@ -61,11 +61,6 @@ export interface ISessionInfo {
  */
 export interface ISessionInternalInfo {
   /**
-   * The ID token associated with the session (if any).
-   */
-  idToken?: string;
-
-  /**
    * The refresh token associated with the session (if any).
    */
   refreshToken?: string;

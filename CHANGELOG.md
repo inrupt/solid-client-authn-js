@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 being overlooked.
 - As per [the Solid-OIDC spec](https://solid.github.io/solid-oidc/#webid-scope), the `webid`
 scope is now added to token requests.
+- The ID token is no longer kept in storage.
 
 #### oidc
 

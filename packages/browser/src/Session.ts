@@ -104,10 +104,8 @@ export async function silentlyAuthenticate(
   },
   session: Session
 ): Promise<boolean> {
-  // Check if we have an ID Token in storage - if we do then we may be
-  // currently logged in, and the user has refreshed their browser page. The ID
-  // token is validated, and on success the current session information are returned,
-  // now that we know they have not been tampered with.
+  // Check if we have session information in storage - if we do then we may be
+  // currently logged in, and the user has refreshed their browser page.
   const storedSessionInfo = await clientAuthn.validateCurrentSession();
   if (storedSessionInfo !== null) {
     // It can be really useful to save the user's current browser location,

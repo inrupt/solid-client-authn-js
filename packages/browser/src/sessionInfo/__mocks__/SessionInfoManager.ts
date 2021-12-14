@@ -34,9 +34,6 @@ export const SessionCreatorCreateResponse: ISessionInfo & ISessionInternalInfo =
     sessionId: "global",
     isLoggedIn: true,
     webId: "https://pod.com/profile/card#me",
-
-    // Internal info fields...
-    idToken: "test ID token",
   };
 export const SessionCreatorGetSessionResponse: ISessionInfo &
   ISessionInternalInfo = SessionCreatorCreateResponse;

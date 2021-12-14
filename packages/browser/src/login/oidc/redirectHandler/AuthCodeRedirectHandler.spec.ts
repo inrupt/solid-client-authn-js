@@ -465,6 +465,13 @@ describe("AuthCodeRedirectHandler", () => {
           secure: false,
         })
       ).resolves.toBe("https://coolsite.com/redirect?state=oauth2StateValue");
+
+      // The ID token should not have been stored
+      await expect(
+        mockedStorage.getForUser("mySession", "idToken", {
+          secure: false,
+        })
+      ).resolves.toBeUndefined();
     });
 
     it("preserves any query strings from the redirect URI", async () => {

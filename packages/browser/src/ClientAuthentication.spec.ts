@@ -21,14 +21,12 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import {
-  IIssuerConfig,
   mockStorageUtility,
   StorageUtility,
   USER_SESSION_PREFIX,
   mockStorage,
 } from "@inrupt/solid-client-authn-core";
 import * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
-import { JWK, SignJWT, importJWK } from "jose";
 import { EventEmitter } from "events";
 import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
 import {
@@ -39,10 +37,7 @@ import { LogoutHandlerMock } from "./logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "./ClientAuthentication";
 import { KEY_CURRENT_SESSION } from "./constant";
-import {
-  mockDefaultIssuerConfigFetcher,
-  mockIssuerConfigFetcher,
-} from "./login/oidc/__mocks__/IssuerConfigFetcher";
+import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
@@ -55,44 +50,6 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 
-const mockJwk = (): JWK => {
-  return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
-};
-
-const mockAnotherJwk = (): JWK => {
-  return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXriUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIr1J0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR8m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
-};
-
-const mockIdTokenPayload = (
-  subject: string,
-  issuer: string,
-  audience: string
-): Record<string, string | number> => {
-  return {
-    sub: subject,
-    iss: issuer,
-    aud: audience,
-    exp: 1662266216,
-    iat: 1462266216,
-  };
-};
-
 type SessionStorageOptions = {
   clientId: string;
   issuer: string;
@@ -100,7 +57,6 @@ type SessionStorageOptions = {
 
 const mockSessionStorage = async (
   sessionId: string,
-  idTokenPayload: Record<string, string | number> = {},
   options: SessionStorageOptions = {
     clientId: "https://some.app/registration",
     issuer: "https://some.issuer",
@@ -115,12 +71,6 @@ const mockSessionStorage = async (
     }),
     mockStorage({
       [`${USER_SESSION_PREFIX}:${sessionId}`]: {
-        idToken: await new SignJWT(idTokenPayload)
-          .setProtectedHeader({
-            alg: "ES256",
-          })
-          .setIssuedAt()
-          .sign(await importJWK(mockJwk()), {}),
         clientId: options.clientId,
         issuer: options.issuer,
       },
@@ -413,7 +363,7 @@ describe("ClientAuthentication", () => {
     });
   });
 
-  describe("getCurrentIssuer", () => {
+  describe("validateCurrentSession", () => {
     // In the following describe block, (window as any) is used
     // multiple types to override the window type definition and
     // allow localStorage to be written.
@@ -433,33 +383,6 @@ describe("ClientAuthentication", () => {
         mockStorage({
           [`${USER_SESSION_PREFIX}:${sessionId}`]: {
             isLoggedIn: "true",
-          },
-        }),
-        mockStorage({
-          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
-            clientId: "https://some.app/registration",
-            idToken: "some.id.token",
-          },
-        })
-      );
-      const clientAuthn = getClientAuthentication({
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
-    });
-
-    it("returns null if the current session has no stored ID token", async () => {
-      const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
-
-      const mockedStorage = new StorageUtility(
-        mockStorage({
-          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
-            isLoggedIn: "true",
-            issuer: "https://some.issuer",
           },
         }),
         mockStorage({
@@ -488,9 +411,7 @@ describe("ClientAuthentication", () => {
           },
         }),
         mockStorage({
-          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
-            idToken: "some.id.token",
-          },
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {},
         })
       );
       const clientAuthn = getClientAuthentication({
@@ -500,182 +421,28 @@ describe("ClientAuthentication", () => {
       await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
 
-    it("returns null if the issuer does not have a JWKS", async () => {
+    it("returns the current session if all necessary information are available", async () => {
       const sessionId = "mySession";
       mockLocalStorage({
         [KEY_CURRENT_SESSION]: sessionId,
       });
-      const mockedIssuerConfig = mockIssuerConfigFetcher({} as IIssuerConfig);
-
-      const mockedStorage = await mockSessionStorage(sessionId);
-
-      const clientAuthn = getClientAuthentication({
-        issuerConfigFetcher: mockedIssuerConfig,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
-    });
-
-    it("returns null if the issuer's JWKS isn't available", async () => {
-      const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
-      const mockedIssuerConfig = mockIssuerConfigFetcher({
-        jwksUri: "https://some.issuer/jwks",
-      } as IIssuerConfig);
-      const mockedStorage = await mockSessionStorage(sessionId);
-      const { fetchJwks } = SolidClientAuthnCore as jest.Mocked<
-        typeof SolidClientAuthnCore
-      >;
-      fetchJwks.mockRejectedValueOnce("Not a valid JWK");
-
-      const clientAuthn = getClientAuthentication({
-        issuerConfigFetcher: mockedIssuerConfig,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
-    });
-
-    it("returns null if the current issuer doesn't match the ID token's", async () => {
-      const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
-      const mockedIssuerConfig = mockIssuerConfigFetcher({
-        jwksUri: "https://some.issuer/jwks",
+      const mockedStorage = await mockSessionStorage(sessionId, {
+        clientId: "https://some.app/registration",
         issuer: "https://some.issuer",
-      } as IIssuerConfig);
-      const mockedStorage = await mockSessionStorage(
-        sessionId,
-        mockIdTokenPayload(
-          "https://my.pod/profile#me",
-          // The ID token issuer
-          "https://some-other.issuer",
-          "https://some.app/registration"
-        ),
-        {
-          // The current issuer
+      });
+
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(clientAuthn.validateCurrentSession()).resolves.toStrictEqual(
+        expect.objectContaining({
           issuer: "https://some.issuer",
-          clientId: "https://some.app/registration",
-        }
+          clientAppId: "https://some.app/registration",
+          sessionId,
+          webId: "https://my.pod/profile#me",
+        })
       );
-
-      const { fetchJwks } = SolidClientAuthnCore as jest.Mocked<
-        typeof SolidClientAuthnCore
-      >;
-      fetchJwks.mockResolvedValueOnce(mockJwk());
-
-      const clientAuthn = getClientAuthentication({
-        issuerConfigFetcher: mockedIssuerConfig,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
     });
-
-    it("returns null if the current client ID doesn't match the ID token audience", async () => {
-      const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
-      const mockedIssuerConfig = mockIssuerConfigFetcher({
-        jwksUri: "https://some.issuer/jwks",
-      } as IIssuerConfig);
-      const mockedStorage = await mockSessionStorage(
-        sessionId,
-        mockIdTokenPayload(
-          "https://my.pod/profile#me",
-          "https://some.issuer",
-          // The ID token audience
-          "https://some-other.app/registration"
-        ),
-        {
-          issuer: "https://some.issuer",
-          // The current client ID
-          clientId: "https://some.app/registration",
-        }
-      );
-      const { fetchJwks } = SolidClientAuthnCore as jest.Mocked<
-        typeof SolidClientAuthnCore
-      >;
-      fetchJwks.mockResolvedValueOnce(mockJwk());
-
-      const clientAuthn = getClientAuthentication({
-        issuerConfigFetcher: mockedIssuerConfig,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
-    });
-
-    it("returns null if the ID token isn't signed with the keys of the issuer", async () => {
-      const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
-      const mockedIssuerConfig = mockIssuerConfigFetcher({
-        jwksUri: "https://some.issuer/jwks",
-      } as IIssuerConfig);
-      const mockedStorage = await mockSessionStorage(
-        sessionId,
-        mockIdTokenPayload(
-          "https://my.pod/profile#me",
-          "https://some.issuer",
-          "https://some.app/registration"
-        )
-      );
-
-      const { fetchJwks } = SolidClientAuthnCore as jest.Mocked<
-        typeof SolidClientAuthnCore
-      >;
-      fetchJwks.mockResolvedValueOnce(mockAnotherJwk());
-
-      const clientAuthn = getClientAuthentication({
-        issuerConfigFetcher: mockedIssuerConfig,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
-    });
-  });
-
-  it("returns the issuer if the ID token is verified", async () => {
-    const sessionId = "mySession";
-    mockLocalStorage({
-      [KEY_CURRENT_SESSION]: sessionId,
-    });
-    const mockedIssuerConfig = mockIssuerConfigFetcher({
-      jwksUri: "https://some.issuer/jwks",
-    } as IIssuerConfig);
-    const mockedStorage = await mockSessionStorage(
-      sessionId,
-      mockIdTokenPayload(
-        "https://my.pod/profile#me",
-        "https://some.issuer",
-        "https://some.app/registration"
-      )
-    );
-    const { fetchJwks } = SolidClientAuthnCore as jest.Mocked<
-      typeof SolidClientAuthnCore
-    >;
-    fetchJwks.mockResolvedValueOnce(mockJwk());
-
-    const clientAuthn = getClientAuthentication({
-      issuerConfigFetcher: mockedIssuerConfig,
-      sessionInfoManager: mockSessionInfoManager(mockedStorage),
-    });
-
-    await expect(clientAuthn.validateCurrentSession()).resolves.toStrictEqual(
-      expect.objectContaining({
-        issuer: "https://some.issuer",
-        clientAppId: "https://some.app/registration",
-        sessionId,
-        idToken: expect.anything(),
-        webId: "https://my.pod/profile#me",
-      })
-    );
   });
 });
