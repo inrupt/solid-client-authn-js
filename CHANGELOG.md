@@ -7,6 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+The following changes have been implemented but not released yet:
+
+- 
+
+## 1.11.3 - 2021-08-24
+
 ### Bugfixes
 
 #### node
@@ -27,8 +33,6 @@ scope is now added to token requests.
 OIDC package now depends on a fork, `@inrupt/oidc-client`, so that we can ensure
 the dependencies are kept up-to-date. This should be transparent for users of
 `@inrupt/solid-client-authn-browser`.
-
-The following sections document changes that have been released already:
 
 ## 1.11.2 - 2021-08-24
 
