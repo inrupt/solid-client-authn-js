@@ -12,6 +12,6 @@
     "entryDocument": "index.md"
   },
 
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "e2e/*"],
   "exclude": ["src/**/*.spec.ts", "**/__mocks__/*"]
 }

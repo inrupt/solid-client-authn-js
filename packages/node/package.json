@@ -10,7 +10,7 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "clean": "rimraf ./dist && rimraf ./coverage",
-    "e2e-test": "jest --config jest.e2e.config.js",
+    "e2e-test": "ava",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint \"src/**/*.ts\"",
     "lint-fix": "eslint --fix \"src/**\"",
@@ -20,7 +20,9 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
+    "@ava/typescript": "^2.0.0",
     "@types/jest": "^27.0.3",
+    "ava": "^3.15.0",
     "eslint": "^7.16.0",
     "jest": "^27.4.3",
     "license-checker": "^25.0.1",
@@ -40,5 +42,17 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "ava": {
+    "files": [
+      "e2e/*"
+    ],
+    "verbose": true,
+    "typescript": {
+      "rewritePaths": {
+        "e2e/": "dist/e2e/"
+      },
+      "compile": "tsc"
+    }
   }
 }
