@@ -10,7 +10,6 @@
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
-    "demo-app": "concurrently \"npm run dev\" \"cd examples/demoClientApp; npm run start\"",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module && npm run clean-browser && rimraf ./coverage",
     "clean-module": "rimraf ./dist",
@@ -27,7 +26,6 @@
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",
-    "concurrently": "^6.0.0",
     "cross-fetch": "^3.0.6",
     "eslint": "^7.16.0",
     "jest": "^27.4.3",
