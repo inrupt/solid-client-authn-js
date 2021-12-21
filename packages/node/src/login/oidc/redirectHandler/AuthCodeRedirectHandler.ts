@@ -136,9 +136,9 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       url.href,
       params,
       { code_verifier: oidcContext.codeVerifier, state: oauthState },
-      // openid-client does not support yet jose@3.x, and expects
-      // type definitions that are no longer present. However, the JWK
-      // type that we pass here is compatible with the API.
+      // The KeyLike type is dynamically bound to either KeyObject or CryptoKey
+      // at runtime depending on the environment. Here, we know we are in a NodeJS
+      // context.
       { DPoP: dpopKey?.privateKey as KeyObject }
     );
 
