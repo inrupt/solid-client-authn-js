@@ -1,24 +1,3 @@
-/*
- * Copyright 2021 Inrupt Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
- * Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
 import { it, describe } from "@jest/globals";
 import { config } from "dotenv-flow";
 import { custom } from "openid-client";
@@ -36,7 +15,12 @@ config({
   silent: process.env.CI === "true",
 });
 
-type AuthDetails = { pod: string, oidcIssuer: string, clientId: string, clientSecret: string };
+type AuthDetails = {
+  pod: string;
+  oidcIssuer: string;
+  clientId: string;
+  clientSecret: string;
+};
 // Instructions for obtaining these credentials can be found here:
 // https://github.com/inrupt/solid-client-authn-js/blob/1a97ef79057941d8ac4dc328fff18333eaaeb5d1/packages/node/example/bootstrappedApp/README.md
 const serversUnderTest: AuthDetails[] = [
@@ -56,7 +40,10 @@ const serversUnderTest: AuthDetails[] = [
     // Trim `https://` from the start of these URLs,
     // so that GitHub Actions doesn't replace them with *** in the logs.
     pod: process.env.E2E_TEST_DEV_NEXT_POD!.replace(/^https:\/\//, ""),
-    oidcIssuer: process.env.E2E_TEST_DEV_NEXT_IDP_URL!.replace(/^https:\/\//, ""),
+    oidcIssuer: process.env.E2E_TEST_DEV_NEXT_IDP_URL!.replace(
+      /^https:\/\//,
+      ""
+    ),
     clientId: process.env.E2E_TEST_DEV_NEXT_CLIENT_ID!,
     clientSecret: process.env.E2E_TEST_DEV_NEXT_CLIENT_SECRET!,
   },
@@ -67,8 +54,15 @@ const serversUnderTest: AuthDetails[] = [
 ];
 
 serversUnderTest.forEach((envValues) => {
-  const { clientId, clientSecret, oidcIssuer: oidcIssuerDisplay, pod: podDisplay } = envValues;
-  console.log(`Running tests for ${podDisplay}, authenticated to ${oidcIssuerDisplay}`);
+  const {
+    clientId,
+    clientSecret,
+    oidcIssuer: oidcIssuerDisplay,
+    pod: podDisplay,
+  } = envValues;
+  console.log(
+    `Running tests for ${podDisplay}, authenticated to ${oidcIssuerDisplay}`
+  );
   const oidcIssuer = `https://${oidcIssuerDisplay}`;
   const pod = `https://${podDisplay}`;
 
@@ -84,7 +78,7 @@ serversUnderTest.forEach((envValues) => {
     expect(session.info.webId).toBeDefined();
     await session.logout();
   })();
-})
+});
 
 // describe.each(serversUnderTest)(
 //   "End-to-end authentication tests against Pod [%s] authenticated to [%s]",
