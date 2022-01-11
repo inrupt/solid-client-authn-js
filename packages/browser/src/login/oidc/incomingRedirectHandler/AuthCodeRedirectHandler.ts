@@ -38,12 +38,12 @@ import {
   loadOidcContextFromStorage,
   RefreshOptions,
   HeadersAuthenticator,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import {
   getDpopToken,
   getBearerToken,
   CodeExchangeResult,
-} from "@inrupt/oidc-client-ext";
+} from "@rubensworks/oidc-client-ext";
 import { EventEmitter } from "events";
 
 /**

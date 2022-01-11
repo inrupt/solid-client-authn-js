@@ -29,7 +29,7 @@ import {
   fetch,
   getDefaultSession,
   WindowToWorkerHandler,
-} from "../../../../dist/index";
+} from "@rubensworks/solid-client-authn-browser";
 
 const REDIRECT_URL = "http://localhost:3113/";
 // This is the IRI where the Client identifier document (i.e. client-app-profile.jsonld)

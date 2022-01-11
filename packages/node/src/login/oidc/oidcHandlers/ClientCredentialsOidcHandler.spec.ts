@@ -22,8 +22,8 @@
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@rubensworks/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@rubensworks/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import type * as OpenidClient from "openid-client";
@@ -48,9 +48,9 @@ jest.mock("cross-fetch", () => {
   } as typeof CrossFetch;
 });
 
-jest.mock("@inrupt/solid-client-authn-core", () => {
+jest.mock("@rubensworks/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@rubensworks/solid-client-authn-core"
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
@@ -155,7 +155,7 @@ const setupOidcClientMock = (tokenSet: TokenSet) => {
 
 const setupGetWebidMock = (webid: string) => {
   const { getWebidFromTokenPayload } = jest.requireMock(
-    "@inrupt/solid-client-authn-core"
+    "@rubensworks/solid-client-authn-core"
   ) as jest.Mocked<typeof SolidClientAuthnCore>;
   getWebidFromTokenPayload.mockResolvedValueOnce(webid);
 };
@@ -291,7 +291,7 @@ describe("handle", () => {
     tokens.id_token = undefined;
     setupOidcClientMock(tokens);
     const { getWebidFromTokenPayload } = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
+      "@rubensworks/solid-client-authn-core"
     ) as jest.Mocked<typeof SolidClientAuthnCore>;
     // Pretend the token validation function throws
     getWebidFromTokenPayload.mockRejectedValueOnce(new Error("Bad audience"));
@@ -381,7 +381,7 @@ describe("handle", () => {
     tokens.refresh_token = "some refresh token";
     setupOidcClientMock(tokens);
     const coreModule = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
+      "@rubensworks/solid-client-authn-core"
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,

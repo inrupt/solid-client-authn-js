@@ -22,10 +22,10 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import {
   InMemoryStorage,
-  // FIXME: use @inrupt/solid-client-authn-core/mocks instead:
+  // FIXME: use @rubensworks/solid-client-authn-core/mocks instead:
   mockStorage,
   mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,

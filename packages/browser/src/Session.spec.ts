@@ -25,7 +25,7 @@ import {
   ISessionInfo,
   StorageUtility,
   USER_SESSION_PREFIX,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import { Session } from "./Session";
 import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";

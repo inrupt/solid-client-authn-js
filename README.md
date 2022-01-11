@@ -1,5 +1,9 @@
 # Solid JavaScript Authentication - solid-client-authn
 
+**This is a fork of [inrupt/solid-client-authn-js](https://github.com/inrupt/solid-client-authn-js) that includes support for [Web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers).**
+**If you don't need Web worker support, it is recommended to use Inrupt's original [inrupt/solid-client-authn-js](https://github.com/inrupt/solid-client-authn-js) packages.**
+_The motivation for this fork can be found here: https://github.com/rubensworks/solid-client-authn-js/pull/1802_
+
 `solid-client-authn` is a suite of libraries to manage the authentication required to access protected resources on Solid servers.
 The libraries share a common API and include different modules for different deployment environments:
 
@@ -27,23 +31,23 @@ The libraries share a common API and include different modules for different dep
 For the latest stable version of solid-client-authn-browser:
 
 ```bash
-npm install @inrupt/solid-client-authn-browser
+npm install @rubensworks/solid-client-authn-browser
 ```
 
 For the latest stable version of solid-client-authn-node:
 
 ```bash
-npm install @inrupt/solid-client-authn-node
+npm install @rubensworks/solid-client-authn-node
 ```
 
 For the latest stable version of all Inrupt Solid JavaScript libraries:
 
 ```bash
 # For browser-based projects
-npm install @inrupt/solid-client @inrupt/solid-client-authn-browser @inrupt/vocab-common-rdf
+npm install @inrupt/solid-client @rubensworks/solid-client-authn-browser @inrupt/vocab-common-rdf
 
 # For Node.js-based projects
-npm install @inrupt/solid-client @inrupt/solid-client-authn-node @inrupt/vocab-common-rdf
+npm install @inrupt/solid-client @rubensworks/solid-client-authn-node @inrupt/vocab-common-rdf
 ```
 
 # Issues & Help
@@ -73,7 +77,7 @@ The `solid-client-authn` libraries are compatible with [NSS](https://github.com/
 ### Browser
 
 ```shell
-git clone https://github.com/inrupt/solid-client-authn-js
+git clone https://github.com/rubensworks/solid-client-authn-js
 cd solid-client-authn-js
 npm ci
 cd packages/browser/examples/single/bundle/
@@ -87,7 +91,7 @@ Go to http://localhost:3001/.
 #### Running a server-side app
 
 ```shell
-git clone https://github.com/inrupt/solid-client-authn-js
+git clone https://github.com/rubensworks/solid-client-authn-js
 cd solid-client-authn-js
 npm ci
 cd packages/node/example/demoClientApp/
@@ -102,4 +106,4 @@ See [the dedicated documentation](/packages/node/example/bootstrappedApp/README.
 
 ## Using with jest
 
-Due to [a behavior from jsdom](https://github.com/jsdom/jsdom/issues/2524), `@inrupt/solid-client-authn-browser` needs some adjustments if you want to run it with `jest`. There are multiple options, listed in [a dedicated issue](https://github.com/inrupt/solid-client-authn-js/issues/1676). Thanks to [Angelo V.](https://github.com/angelo-v) for proposing a mitigation.
+Due to [a behavior from jsdom](https://github.com/jsdom/jsdom/issues/2524), `@rubensworks/solid-client-authn-browser` needs some adjustments if you want to run it with `jest`. There are multiple options, listed in [a dedicated issue](https://github.com/rubensworks/solid-client-authn-js/issues/1676). Thanks to [Angelo V.](https://github.com/angelo-v) for proposing a mitigation.

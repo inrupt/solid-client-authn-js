@@ -24,7 +24,30 @@ async function globalSetup() {
   // Fail fast with dotenv:
   getTestingEnvironment();
 
+<<<<<<< HEAD:e2e/browser/globalSetup.ts
   // Return the teardown function.
   return async () => {};
+=======
+/**
+ * Responsible for decided which Login Handler should be used given the Login Options
+ */
+import {
+  ILoginHandler,
+  ILoginOptions,
+  AggregateHandler,
+  LoginResult,
+} from "@rubensworks/solid-client-authn-core";
+
+/**
+ * @hidden
+ */
+export default class AggregateLoginHandler
+  extends AggregateHandler<[ILoginOptions], LoginResult>
+  implements ILoginHandler
+{
+  constructor(loginHandlers: ILoginHandler[]) {
+    super(loginHandlers);
+  }
+>>>>>>> 6df43277 (Prepare repo for fork publication):packages/browser/src/login/AggregateLoginHandler.ts
 }
 export default globalSetup;

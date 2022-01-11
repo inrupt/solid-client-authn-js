@@ -68,7 +68,7 @@ jobs:
           npm run publish -- from-package --no-verify-access --yes 
           echo "Packages published. To install, run:"
           echo ""
-          echo "    npm install @inrupt/solid-client-authn-XXXX"
+          echo "    npm install @rubensworks/solid-client-authn-XXXX"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.INRUPT_NPM_TOKEN }}
       - name: Mark GitHub Deployment as successful
@@ -78,8 +78,8 @@ jobs:
           repository: ${{ github.repository }}
           deployment: ${{ needs.prepare-deployment.outputs.deployment-id }}
           environment: review
-          environment_url: "https://www.npmjs.com/package/@inrupt/solid-client-authn-browser/v/${GITHUB_REF#refs/tags/v}"
-          description: "Published to npm. To install, run: npm install @inrupt/solid-client-authn-browser@${GITHUB_REF#refs/tags/v}"
+          environment_url: "https://www.npmjs.com/package/@rubensworks/solid-client-authn-browser/v/${GITHUB_REF#refs/tags/v}"
+          description: "Published to npm. To install, run: npm install @rubensworks/solid-client-authn-browser@${GITHUB_REF#refs/tags/v}"
           log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           mediaType: '{"previews": ["flash", "ant-man"]}'
           state: success
@@ -115,7 +115,7 @@ jobs:
       - name: Install the preview release of solid-client-authn-node in the packaging test project
         run: |
           cd .github/workflows/cd-packaging-tests/node
-          npm install @inrupt/solid-client-authn-node
+          npm install @rubensworks/solid-client-authn-node
       - name: Verify that the package can be imported in Node from a CommonJS module
         run: |
           cd .github/workflows/cd-packaging-tests/node
@@ -137,7 +137,7 @@ jobs:
       - name: Verify that the package can be imported in a Parcel project
         run: |
           cd .github/workflows/cd-packaging-tests/bundler-parcel
-          npm install @inrupt/solid-client-authn-browser
+          npm install @rubensworks/solid-client-authn-browser
           npx parcel@1.12.3 build index.ts
       - name: Archive Parcel build artifacts
         uses: actions/upload-artifact@v3
@@ -158,7 +158,7 @@ jobs:
       - name: Verify that the package can be imported in a Webpack project
         run: |
           cd .github/workflows/cd-packaging-tests/bundler-webpack
-          npm install @inrupt/solid-client-authn-browser
+          npm install @rubensworks/solid-client-authn-browser
           npm install webpack@5 webpack-cli buffer
           npx webpack --devtool source-map
       - name: Archive Webpack build artifacts

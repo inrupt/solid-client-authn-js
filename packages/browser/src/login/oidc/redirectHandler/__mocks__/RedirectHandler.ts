@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Inrupt Inc.
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -19,8 +19,29 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@rubensworks/solid-client-authn-core";
+import {
+  IRedirectHandler,
+  ISessionInfo,
+} from "@rubensworks/solid-client-authn-core";
+import { jest } from "@jest/globals";
 
-export const KEY_CURRENT_SESSION = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentSession`;
+import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
 
-export const KEY_CURRENT_URL = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}currentUrl`;
+/**
+ * @hidden
+ */
+export const RedirectHandlerResponse: ISessionInfo =
+  SessionCreatorCreateResponse;
+
+/**
+ * @hidden
+ */
+export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  canHandle: jest.fn((url: string) => Promise.resolve(true)),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handle: jest.fn((url: string) =>
+    Promise.resolve({ ...RedirectHandlerResponse, fetch: jest.fn() })
+  ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;

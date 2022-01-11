@@ -30,7 +30,7 @@ import {
   TokenEndpointResponse,
   OidcProviderError,
   InvalidResponseError,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 
 // Identifiers in camelcase are mandated by the OAuth spec.
 /* eslint-disable camelcase */

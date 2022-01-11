@@ -33,7 +33,7 @@ import {
   ConfigurationError,
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { Client, Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 

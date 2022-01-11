@@ -27,14 +27,14 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
-import {
+ import {
   IOidcHandler,
   IOidcOptions,
   IRedirector,
   IStorageUtility,
   LoginResult,
   DEFAULT_SCOPES,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 

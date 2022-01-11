@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IStorage } from "@inrupt/solid-client-authn-core";
+import { IStorage } from "@rubensworks/solid-client-authn-core";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";

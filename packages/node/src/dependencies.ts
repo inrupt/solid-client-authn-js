@@ -27,7 +27,7 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
-import {
+ import {
   IStorage,
   InMemoryStorage,
   ITokenRefresher,
@@ -37,7 +37,7 @@ import {
   ILoginHandler,
   ISessionInfoManager,
   IIncomingRedirectHandler,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";

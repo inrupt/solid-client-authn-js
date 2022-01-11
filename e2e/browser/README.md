@@ -1,7 +1,12 @@
 # End-2-End Browser Tests
 
+<<<<<<< HEAD
 Playwright end-to-end tests for [solid-client-authn.js](https://github.com/inrupt/solid-client-authn-js).
 These can be run manually locally, and they also run automatically in CI.
+=======
+TestCafe end-to-end tests for [solid-client-authn.js](https://github.com/rubensworks/solid-client-authn-js).
+These can be run manually locally, or automatically in CI.
+>>>>>>> 6df43277 (Prepare repo for fork publication)
 
 ## Running locally
 
@@ -48,7 +53,11 @@ npm run test:e2e:browser
 
 ## Configuring CI
 
+<<<<<<< HEAD
 To change the credentials used in CI, see https://github.com/inrupt/solid-client-authn-js/settings/environments.
+=======
+To change the credentials used in CI, see https://github.com/rubensworks/solid-client-authn-js/settings/secrets/.
+>>>>>>> 6df43277 (Prepare repo for fork publication)
 
 When adding new secrets, make sure to also expose them to the CI job using /.github/workflows/e2e-browser.yml.
 (Specifically, add them under `env` in the "Run tests" job.)

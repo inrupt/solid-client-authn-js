@@ -35,7 +35,7 @@ import {
   ITokenRefresher,
   TokenEndpointResponse,
   EVENTS,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { Issuer, IssuerMetadata, TokenSet } from "openid-client";
 import { KeyObject } from "crypto";
 import { EventEmitter } from "events";

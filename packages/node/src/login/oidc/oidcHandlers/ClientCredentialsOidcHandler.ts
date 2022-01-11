@@ -41,7 +41,7 @@ import {
   ITokenRefresher,
   DEFAULT_SCOPES,
   buildHeadersAuthenticator,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
 import { fetch as globalFetch } from "cross-fetch";

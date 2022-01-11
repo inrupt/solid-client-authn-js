@@ -25,11 +25,11 @@ import { EventEmitter } from "events";
 import {
   ILoginHandler,
   ILoginOptions,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import * as crossFetch from "cross-fetch";
 import { Session } from "./Session";
 // FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
+// this should import from @rubensworks/solid-client-authn-core/mocks
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,

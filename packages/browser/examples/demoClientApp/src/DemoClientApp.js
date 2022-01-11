@@ -4,7 +4,7 @@ import "regenerator-runtime/runtime";
 import {
   Session,
   getClientAuthenticationWithDependencies,
-} from "@inrupt/solid-client-authn-browser";
+} from "@rubensworks/solid-client-authn-browser";
 
 const clientApplicationName = "S-C-A Browser Demo Client App";
 let snackBarTimeout = undefined;

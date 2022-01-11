@@ -22,7 +22,7 @@
 import {
   IIssuerConfig,
   IIssuerConfigFetcher,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { jest } from "@jest/globals";
 import { IssuerMetadata } from "openid-client";
 import { configFromIssuerMetadata } from "../IssuerConfigFetcher";

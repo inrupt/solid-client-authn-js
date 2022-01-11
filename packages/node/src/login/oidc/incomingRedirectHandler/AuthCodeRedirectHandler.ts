@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import {
+ import {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
@@ -42,9 +42,9 @@ import {
   ITokenRefresher,
   buildAuthenticatedFetch,
   EVENTS,
+  HeadersAuthenticator,
   buildHeadersAuthenticator,
-  HeadersAuthenticator
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
 import { Issuer } from "openid-client";
@@ -58,7 +58,7 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
  * @hidden
  * Token endpoint request: https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint
  */
- export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
+export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   constructor(
     private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,

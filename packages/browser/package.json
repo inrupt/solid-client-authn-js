@@ -1,5 +1,5 @@
 {
-  "name": "@inrupt/solid-client-authn-browser",
+  "name": "@rubensworks/solid-client-authn-browser",
   "version": "1.12.1",
   "license": "MIT",
   "types": "dist/index",
@@ -33,10 +33,10 @@
     "webpack-merge": "^5.7.2"
   },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^1.12.1",
-    "@inrupt/solid-client-authn-core": "^1.12.1",
+    "@rubensworks/oidc-client-ext": "file:../oidc",
+    "@rubensworks/solid-client-authn-core": "file:../core",
     "@types/lodash.clonedeep": "^4.5.6",
-    "@types/node": "^18.0.3",
+    "@types/node": "^17.0.2",
     "@types/uuid": "^8.3.0",
     "events": "^3.3.0",
     "jose": "^4.3.7",

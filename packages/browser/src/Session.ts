@@ -28,7 +28,7 @@ import {
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
@@ -236,25 +236,6 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * An internal logout function, to control whether or not the logout signal
-   * should be sent, i.e. if the logout was user-initiated or is the result of
-   * an external event.
-   *
-   * @hidden
-   */
-  private internalLogout = async (emitSignal: boolean): Promise<void> => {
-    // Clearing this value means that silent refresh will no longer be attempted.
-    // In particular, in the case of a silent authentication error it prevents
-    // from getting stuck in an authentication retries loop.
-    window.localStorage.removeItem(KEY_CURRENT_SESSION);
-    await this.clientAuthentication.logout(this.info.sessionId);
-    this.info.isLoggedIn = false;
-    if (emitSignal) {
-      this.emit(EVENTS.LOGOUT);
-    }
-  };
-
-  /**
    * Provides the necessary headers to perform the given request using this
    * session's authentication.
    * @param resource The resource URL to request.
@@ -271,6 +252,25 @@ export class Session extends EventEmitter {
       method,
       headersUnauthenticated
     );
+  };
+
+  /**
+   * An internal logout function, to control whether or not the logout signal
+   * should be sent, i.e. if the logout was user-initiated or is the result of
+   * an external event.
+   *
+   * @hidden
+   */
+  private internalLogout = async (emitSignal: boolean): Promise<void> => {
+    // Clearing this value means that silent refresh will no longer be attempted.
+    // In particular, in the case of a silent authentication error it prevents
+    // from getting stuck in an authentication retries loop.
+    window.localStorage.removeItem(KEY_CURRENT_SESSION);
+    await this.clientAuthentication.logout(this.info.sessionId);
+    this.info.isLoggedIn = false;
+    if (emitSignal) {
+      this.emit(EVENTS.LOGOUT);
+    }
   };
 
   /**
@@ -337,7 +337,7 @@ export class Session extends EventEmitter {
         // until it happens precisely. That's why the current Promise simply does not
         // resolve.
         if (attemptedSilentAuthentication) {
-          return new Promise(() => {});
+          return new Promise(() => { });
         }
       }
     }

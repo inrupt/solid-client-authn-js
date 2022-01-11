@@ -27,15 +27,15 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
-import {
+ import {
   IOidcHandler,
   IOidcOptions,
   IRedirector,
   IStorageUtility,
   LoginResult,
   DEFAULT_SCOPES,
-} from "@inrupt/solid-client-authn-core";
-import { OidcClient } from "@inrupt/oidc-client-ext";
+} from "@rubensworks/solid-client-authn-core";
+import { OidcClient } from "@rubensworks/oidc-client-ext";
 
 /**
  * @hidden

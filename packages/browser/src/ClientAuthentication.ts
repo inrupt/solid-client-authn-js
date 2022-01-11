@@ -35,8 +35,8 @@
   ILoginOptions,
   EVENTS,
   HeadersAuthenticator,
-} from "@inrupt/solid-client-authn-core";
-import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
+} from "@rubensworks/solid-client-authn-core";
+import { removeOidcQueryParam } from "@rubensworks/oidc-client-ext";
 import { EventEmitter } from "events";
 
 // By only referring to `window` at runtime, apps that do server-side rendering

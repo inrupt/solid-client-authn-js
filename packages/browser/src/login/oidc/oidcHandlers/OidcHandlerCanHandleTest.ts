@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IOidcOptions } from "@inrupt/solid-client-authn-core";
+import { IOidcOptions } from "@rubensworks/solid-client-authn-core";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 
 const canHandleTests: {

@@ -26,9 +26,9 @@ import {
   mockStorageUtility,
   StorageUtilityMock,
   TokenEndpointResponse,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { JWK, importJWK } from "jose";
-import { refresh } from "@inrupt/oidc-client-ext";
+import { refresh } from "@rubensworks/oidc-client-ext";
 import { EventEmitter } from "events";
 import { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
@@ -38,7 +38,7 @@ import {
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 
-jest.mock("@inrupt/oidc-client-ext");
+jest.mock("@rubensworks/oidc-client-ext");
 
 const mockDefaultStorageContent = {
   "solidClientAuthenticationUser:mySession": {
@@ -112,7 +112,7 @@ const mockDpopTokens = (): TokenEndpointResponse => {
 };
 
 const mockOidcModule = async (response?: TokenEndpointResponse) => {
-  const oidcModule = jest.requireMock("@inrupt/oidc-client-ext") as {
+  const oidcModule = jest.requireMock("@rubensworks/oidc-client-ext") as {
     refresh: typeof refresh;
   };
   oidcModule.refresh = jest.fn().mockReturnValueOnce(

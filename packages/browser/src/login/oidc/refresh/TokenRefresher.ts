@@ -34,8 +34,8 @@ import {
   ITokenRefresher,
   TokenEndpointResponse,
   EVENTS,
-} from "@inrupt/solid-client-authn-core";
-import { refresh } from "@inrupt/oidc-client-ext";
+} from "@rubensworks/solid-client-authn-core";
+import { refresh } from "@rubensworks/oidc-client-ext";
 import { EventEmitter } from "events";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the

@@ -28,7 +28,7 @@ import {
   HeadersAuthenticator,
   IIncomingRedirectHandler,
   ISessionInfo,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
 

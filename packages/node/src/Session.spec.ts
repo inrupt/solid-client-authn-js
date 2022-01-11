@@ -20,16 +20,15 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-// eslint-disable-next-line no-shadow
-import { Headers } from "cross-fetch";
 import {
   InMemoryStorage,
   ISessionInfo,
   EVENTS,
-  // FIXME: use @inrupt/solid-client-authn-core/mocks instead:
+  // FIXME: use @rubensworks/solid-client-authn-core/mocks instead:
   mockStorage,
   mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
+import * as crossFetch from "cross-fetch";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
@@ -394,7 +393,11 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       mySession.info.isLoggedIn = true;
       await expect(
-        mySession.authenticateHeaders("https://some.url", "GET", new Headers())
+        mySession.authenticateHeaders(
+          "https://some.url",
+          "GET",
+          new crossFetch.Headers()
+        )
       ).rejects.toThrow("headersAuthenticator is not initialized yet");
       expect(clientAuthnHeadersAuthenticator).toHaveBeenCalled();
     });

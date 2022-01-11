@@ -25,7 +25,7 @@ import { Response } from "cross-fetch";
 import {
   IIssuerConfig,
   IClientRegistrarOptions,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { registerClient } from "./clientRegistrar";
 
 /* eslint-disable camelcase */

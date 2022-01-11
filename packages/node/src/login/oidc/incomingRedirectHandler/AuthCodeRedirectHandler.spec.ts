@@ -24,7 +24,7 @@ import {
   StorageUtilityMock,
   mockStorageUtility,
   EVENTS,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import { JWK } from "jose";
 import { Response as NodeResponse, Headers as NodeHeaders } from "cross-fetch";
@@ -51,9 +51,9 @@ jest.mock("cross-fetch", () => {
   } as typeof CrossFetch;
 });
 
-jest.mock("@inrupt/solid-client-authn-core", () => {
+jest.mock("@rubensworks/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@rubensworks/solid-client-authn-core"
   ) as any;
   return {
     ...actualCoreModule,

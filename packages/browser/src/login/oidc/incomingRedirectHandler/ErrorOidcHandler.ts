@@ -29,7 +29,7 @@ import {
   IIncomingRedirectHandler,
   ISessionInfo,
   HeadersAuthenticator,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import type { EventEmitter } from "events";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";

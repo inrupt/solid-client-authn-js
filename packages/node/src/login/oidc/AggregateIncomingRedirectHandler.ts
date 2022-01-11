@@ -32,7 +32,7 @@ import {
   ISessionInfo,
   AggregateHandler,
   HeadersAuthenticator,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { EventEmitter } from "events";
 
 /**

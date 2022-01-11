@@ -23,7 +23,7 @@ import {
   IOidcHandler,
   IOidcOptions,
   ISessionInfo,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { jest } from "@jest/globals";
 
 import { SessionCreatorGetSessionResponse } from "../../../sessionInfo/__mocks__/SessionInfoManager";

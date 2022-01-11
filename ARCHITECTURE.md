@@ -1,27 +1,27 @@
 # Solid-client-authn-* architecture
 
 This document summarizes the architecture of the `@inrupt/solid-client-authn-*`
-modules. It applies to both `@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`.
+modules. It applies to both `@rubensworks/solid-client-authn-node` and `@rubensworks/solid-client-authn-browser`.
 
 ## Module map
 
-https://github.com/inrupt/solid-client-authn-js is a Lerna-based monorepo, which
+https://github.com/rubensworks/solid-client-authn-js is a Lerna-based monorepo, which
 means this single Git repository actually hosts several npm modules that are
 related to each other. The following diagram shows an overview of the modules and their 
 relationships.
 
 ![Module dependencies](./documentation/diagrams/module_map.svg)
 
-`@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser` (grouped under the
+`@rubensworks/solid-client-authn-node` and `@rubensworks/solid-client-authn-browser` (grouped under the
 "Client libraries" label) are the modules we expect developers to import.
 As their names imply, each  of these modules is specific to a given environment 
 (NodeJS or the browser). However, they both have very similar APIs and architecture,
 and mostly differ by their main dependency, namely the third-party library implementing the
 [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html) protocol.
 
-- `@inrupt/solid-client-authn-node` depends on [`openid-client`](https://github.com/panva/node-openid-client/).
-- `@inrupt/solid-client-authn-browser` depends on `@inrupt/oidc-client-ext`. 
-`@inrupt/oidc-client-ext` in turn depends on
+- `@rubensworks/solid-client-authn-node` depends on [`openid-client`](https://github.com/panva/node-openid-client/).
+- `@rubensworks/solid-client-authn-browser` depends on `@rubensworks/oidc-client-ext`. 
+`@rubensworks/oidc-client-ext` in turn depends on
 [`@inrupt/oidc-client`](https://github.com/inrupt/oidc-client-js),
 extending it with support for
 [DPoP tokens](https://tools.ietf.org/html/draft-ietf-oauth-dpop-01) and 
@@ -130,7 +130,7 @@ use cases for each flow.
 ## Codemap of the client library modules
 
 This section will give a high-level description of the shared inner workings of 
-`@inrupt/solid-client-authn-node` and `@inrupt/solid-client-authn-browser`,
+`@rubensworks/solid-client-authn-node` and `@rubensworks/solid-client-authn-browser`,
 omitting anything too module-specific.
 
 ### The API

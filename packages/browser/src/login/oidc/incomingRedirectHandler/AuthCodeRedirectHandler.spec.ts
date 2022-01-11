@@ -28,10 +28,13 @@ import {
   IIssuerConfigFetcher,
   USER_SESSION_PREFIX,
   IIssuerConfig,
-} from "@inrupt/solid-client-authn-core";
-import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@rubensworks/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
+import {
+  CodeExchangeResult,
+  getBearerToken,
+} from "@rubensworks/oidc-client-ext";
 import { Response } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
@@ -139,7 +142,7 @@ const mockLocalStorage = (stored: Record<string, string>) => {
   });
 };
 
-jest.mock("@inrupt/oidc-client-ext");
+jest.mock("@rubensworks/oidc-client-ext");
 
 jest.useFakeTimers();
 
@@ -151,7 +154,7 @@ const defaultJwt = {
 function mockOidcClient(jwt: typeof defaultJwt = defaultJwt): any {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mockedOidcClient = jest.requireMock(
-    "@inrupt/oidc-client-ext"
+    "@rubensworks/oidc-client-ext"
   ) as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mockedOidcClient.generateJwkForDpop = (jest.fn() as any).mockResolvedValue(
@@ -576,7 +579,7 @@ describe("AuthCodeRedirectHandler", () => {
     mockOidcClient();
     const mockedStorage = mockDefaultStorageUtility();
     const coreModule = jest.requireActual(
-      "@inrupt/solid-client-authn-core"
+      "@rubensworks/solid-client-authn-core"
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,

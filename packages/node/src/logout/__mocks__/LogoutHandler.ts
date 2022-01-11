@@ -22,7 +22,7 @@
 import {
   ILogoutHandler,
   IStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { jest } from "@jest/globals";
 import { clear } from "../../sessionInfo/SessionInfoManager";
 

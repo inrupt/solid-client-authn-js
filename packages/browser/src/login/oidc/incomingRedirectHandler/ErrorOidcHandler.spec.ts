@@ -21,7 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { EventEmitter } from "events";
-import { EVENTS } from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "@rubensworks/solid-client-authn-core";
 import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
 describe("ErrorOidcHandler", () => {
