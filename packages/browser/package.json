@@ -27,7 +27,7 @@
   "devDependencies": {
     "@types/jest": "^27.0.3",
     "cross-fetch": "^3.0.6",
-    "eslint": "^7.16.0",
+    "eslint": "^8.6.0",
     "jest": "^27.4.3",
     "license-checker": "^25.0.1",
     "ts-jest": "^27.0.7",
