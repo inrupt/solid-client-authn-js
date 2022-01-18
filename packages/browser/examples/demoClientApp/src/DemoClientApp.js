@@ -147,17 +147,38 @@ class DemoClientApp extends Component {
     const config = await this.lookupIdentityProviderConfig(
       this.state.loginIssuer
     );
-    const endSessionEndpoint = config.end_session_endpoint;
 
-    console.log(
-      `Opening new window for Identity Provider Logout at: [${endSessionEndpoint}]`
+    // ESS requires the `post_logout_redirect_uri` to be set:
+    const redirectUri = new URL("/popup", document.location.href);
+
+    const endSessionUrl = new URL(config.end_session_endpoint);
+    endSessionUrl.searchParams.set(
+      "post_logout_redirect_uri",
+      redirectUri.toString()
     );
 
-    this.openNewWindow(endSessionEndpoint);
+    // FIXME: This parameter is required for ESS 1.2 if post_logout_redirect_uri
+    // is supplied, but it seems to accept an empty value?
+    endSessionUrl.searchParams.set("id_token_hint", "");
+
+    console.log(
+      `Opening new window for Identity Provider Logout at: [${endSessionUrl}]`
+    );
+
+    this.openNewWindow(endSessionUrl);
+
+    // Calling explicitly because the logout happens in the popup:
+    setTimeout(() => {
+      this.performLogout();
+    }, 1000);
   }
 
-  async handleLogout(e) {
+  handleLogout(e) {
     e.preventDefault();
+    this.performLogout();
+  }
+
+  async performLogout() {
     this.setState({ status: "loading" });
     await this.state.session.logout();
 
@@ -323,14 +344,14 @@ class DemoClientApp extends Component {
     return (
       <div style={style}>
         <div>
-          <div class="tooltip">
+          <div className="tooltip">
             <div>
               <span>Login with your Identity Provider:</span>
-              &nbsp;<i class="fa fa-info-circle"></i>
+              &nbsp;<i className="fa fa-info-circle"></i>
               &nbsp;
             </div>
 
-            <span class="tooltiptext">
+            <span className="tooltiptext">
               Your Identity Provider is who you trust to manage your identity.
               <p></p>
               Hover your mouse over the editbox and click the 'x' on the
@@ -352,14 +373,14 @@ class DemoClientApp extends Component {
           />
           <datalist id="preconfigued_idp_list">
             {preconfiguedIdpList.map((idp) => (
-              <option value={idp} />
+              <option value={idp} key={idp} />
             ))}
           </datalist>
           &nbsp;
           <button onClick={this.handleLogin}>Log In</button>
         </div>
 
-        <div class="tooltip">
+        <div className="tooltip">
           <div>
             <input
               type="checkbox"
@@ -376,10 +397,10 @@ class DemoClientApp extends Component {
               }}
             />
             <label>Re-authorize this client application on login</label>
-            &nbsp;<i class="fa fa-info-circle"></i>
+            &nbsp;<i className="fa fa-info-circle"></i>
           </div>
 
-          <span class="tooltiptext">
+          <span className="tooltiptext">
             Re-authorize this Client Application on login.
             <p></p>
             For example, to change the access permissions you may have already
@@ -421,7 +442,7 @@ class DemoClientApp extends Component {
       <div style={style}>
         <p></p>
         <div>
-          <div class="tooltip">
+          <div className="tooltip">
             <form>
               <button
                 onClick={this.handleLogout}
@@ -429,9 +450,9 @@ class DemoClientApp extends Component {
               >
                 Log Out
               </button>
-              &nbsp;<i class="fa fa-info-circle"></i>
+              &nbsp;<i className="fa fa-info-circle"></i>
             </form>
-            <span class="tooltiptext">
+            <span className="tooltiptext">
               Log out of this client application.
               <p></p>
               NOTE: This button is only enabled if you are currently logged in.
@@ -439,7 +460,7 @@ class DemoClientApp extends Component {
           </div>
         </div>
 
-        <div class="tooltip">
+        <div className="tooltip">
           <div>
             Popup Identity Provider:{" "}
             {/*<a target="_blank" href={this.state.loginIssuer}>*/}
@@ -451,17 +472,17 @@ class DemoClientApp extends Component {
             >
               Open Identity Provider
             </button>
-            &nbsp;<i class="fa fa-info-circle"></i>
+            &nbsp;<i className="fa fa-info-circle"></i>
             &nbsp;
           </div>
 
-          <span class="tooltiptext">
+          <span className="tooltiptext">
             Allows you to see authorizations you've granted, and to log out
             (maybe you'd like to log in again using a different account).
           </span>
         </div>
 
-        <div class="tooltip">
+        <div className="tooltip">
           <div>
             <button
               id="logout_idp_button"
@@ -469,10 +490,10 @@ class DemoClientApp extends Component {
             >
               Logout from Identity Provider
             </button>
-            &nbsp;<i class="fa fa-info-circle"></i>
+            &nbsp;<i className="fa fa-info-circle"></i>
           </div>
 
-          <span class="tooltiptext">
+          <span className="tooltiptext">
             Jump to 'Logout' endpoint for currently entered Identity Provider.
             <p></p>
             NOTE: This button is only enabled if the currently entered Identity
@@ -482,13 +503,13 @@ class DemoClientApp extends Component {
         </div>
 
         <div>
-          <div class="tooltip">
+          <div className="tooltip">
             <div>
-              UserInfo&nbsp;<i class="fa fa-info-circle"></i>:&nbsp;
+              UserInfo&nbsp;<i className="fa fa-info-circle"></i>:&nbsp;
               <span id="idp_userinfo_text"></span>
             </div>
 
-            <span class="tooltiptext">
+            <span className="tooltiptext">
               Information on the currently logged-in user (if logged in!) from
               the 'UserInfo' endpoint of the Identity Provider.
             </span>
@@ -501,7 +522,12 @@ class DemoClientApp extends Component {
   render() {
     switch (this.state.status) {
       case "popup":
-        return <h1>Popup Redirected</h1>;
+        return (
+          <>
+            <h1>Popup Redirected</h1>
+            <p>Will automatically close in 2 seconds</p>
+          </>
+        );
 
       case "loading":
         return <h1>Loading...</h1>;
