@@ -121,16 +121,31 @@ testSuite.podServerList.forEach((server: IPodServerConfig) => {
         }
 
         // NSS does not support the RS session cookie.
-        if (data.refresh && server.podResourceServer === "ess") {
-          await t.eval(() => location.reload());
-        }
+        // if (data.refresh && server.podResourceServer === "ess") {
+        //   await t.eval(() => location.reload());
+        // }
 
         // We explicitly lower-case th username here (since that's what ESS does
-        const podRoot = server.podResourceServer.replace(
-          "<TEST USER NAME>",
-          testUserName.toLowerCase()
-        );
+        // const podRoot = server.podResourceServer.replace(
+        //   "<TEST USER NAME>",
+        //   testUserName.toLowerCase()
+        // );
+
+        const appStatus = await FetchPage.appStatus.textContent;
+
+        console.log(appStatus);
+
+        // FIXME: Find a better way to know that we're ready:
+        // Needed for the loading state transition:
+        await t.wait(2000);
+
+        const podRoot = await FetchPage.webIdStorage.textContent;
+
+        console.log(podRoot);
+
         const resourceToGet = data.resourceToGet.replace("<POD ROOT>", podRoot);
+
+        console.log("Fetching...", resourceToGet);
 
         // If this select fails, it probably means our client application is not
         // running (since all we're trying to do here is select the resource IRI

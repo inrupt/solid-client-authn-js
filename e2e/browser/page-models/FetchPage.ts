@@ -1,12 +1,19 @@
 import { Selector } from "testcafe";
 
 class FetchPage {
+  appStatus: Selector;
+  webIdStorage: Selector;
   fetchUriTextbox: Selector;
   fetchButton: Selector;
   fetchResponseTextbox: Selector;
   logoutButton: Selector;
 
   constructor() {
+    this.appStatus = Selector("*").withAttribute("data-testid", "app-status");
+    this.webIdStorage = Selector("*").withAttribute(
+      "data-testid",
+      "webid_storage"
+    );
     this.fetchUriTextbox = Selector("*").withAttribute(
       "data-testid",
       "fetch_uri_textbox"

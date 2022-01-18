@@ -39,6 +39,7 @@ export class CognitoPage {
 
   async login(username: string, password: string) {
     await onCognitoPage();
+
     await t
       // See the constructor for details of why we need to maximize the window!
       .resizeWindow(1600, 800)
