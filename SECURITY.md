@@ -18,7 +18,7 @@ they may not be extracted once received from the remote server. These protected
 elements will not be made available directly (e.g. through a function call) or
 indirectly (e.g. allowing to sign a header with the DPoP key) to any third-party.
 - Longer-lived tokens (e.g. refresh tokens) are only stored in a secure storage,
-i.e., a storage which isn't shared beyond the librarie's control. This means not using
+i.e., a storage which isn't shared beyond the library's control. This means not using
 the `localStorage` and `sessionStorage` in browsers.
 - If these restrictions on the high-level layer are blocking some legitimate use
 cases, the options is added when possible for advanced users to drop down to a
