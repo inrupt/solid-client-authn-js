@@ -1,17 +1,19 @@
 # oidc-client-ext
 
-This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js) (forked in [`@inrupt/oidc-clienr`](https://github.com/inrupt/oidc-client-js)), and adds the following features to it: 
+This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js) (forked in [`@inrupt/oidc-clienr`](https://github.com/inrupt/oidc-client-js)), and adds the following features to it:
+
 - Dynamic client registration
-[Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html) is part of the [OpenID](https://openid.net) specification and it allows OAuth client applications to dynamically register with an OAuth server.
-To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/openid-connect/openid-connect-understanding-dcr/)
+  [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html) is part of the [OpenID](https://openid.net) specification and it allows OAuth client applications to dynamically register with an OAuth server.
+  To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/openid-connect/openid-connect-understanding-dcr/)
 
 - DPoP tokens for authentication
-[DPoP](https://oauth.net/2/dpop/), or Demonstration of Proof of Possession, is part of the [OAuth 2.0](https://oauth.net/2/) spec and is an extension that describes a technique to cryptographically bind access tokens to a particular client when they are issued. This is one of many attempts at improving the security of Bearer Tokens by requiring the application using the token to authenticate itself.
+  [DPoP](https://oauth.net/2/dpop/), or Demonstration of Proof of Possession, is part of the [OAuth 2.0](https://oauth.net/2/) spec and is an extension that describes a technique to cryptographically bind access tokens to a particular client when they are issued. This is one of many attempts at improving the security of Bearer Tokens by requiring the application using the token to authenticate itself.
 
 This [proposed standard](https://tools.ietf.org/html/draft-fett-oauth-dpop-04) is still in draft status.
 To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/oauth/dpop-overview/)
 
 # Other Inrupt Solid JavaScript Libraries
+
 [`@inrupt/oidc-client-ext`](https://www.npmjs.com/package/@inrupt/oidc-client-ext) is part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Solid JavaScript Authentication - solid-client-authn
