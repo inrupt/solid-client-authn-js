@@ -14,13 +14,14 @@ the `events` npm package as well.
 
 ## Underlying libraries
 
-`solid-client-authn-browser` is based on [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), forked in 
-[`@inrupt/oidc-client`](https://github.com/inrupt/oidc-client-js) after the original library stopped being supported. 
+`solid-client-authn-browser` is based on [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), forked in
+[`@inrupt/oidc-client`](https://github.com/inrupt/oidc-client-js) after the original library stopped being supported.
 However, the latter lacks some features that are necessary to provide the developer experience we specifically want for the Solid ecosystem, so we developed [`oidc-client-ext`](https://www.npmjs.com/package/@inrupt/oidc-client-ext) to add these features.
 
 # Other Inrupt Solid JavaScript Libraries
-[`@inrupt/solid-client-authn-browser`](https://www.npmjs.com/package/@inrupt/solid-client-authn-browser )is part of a family open source JavaScript libraries designed to support developers building Solid applications.
- 
+
+[`@inrupt/solid-client-authn-browser`](https://www.npmjs.com/package/@inrupt/solid-client-authn-browser)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+
 ## Inrupt Solid JavaScript Client Libraries
 
 ### Data access and permissions management - solid-client
