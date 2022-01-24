@@ -1,6 +1,13 @@
 name: CD-preview
 
-on: [push, workflow_dispatch]
+on: 
+  push:
+    branches:
+        - "**"
+    tags-ignore: 
+      # Only create preview releases for branches
+      # (the `release` workflow creates actual releases for version tags):
+      - v[0-9]+.[0-9]+.[0-9]+
 
 env:
   CI: true
