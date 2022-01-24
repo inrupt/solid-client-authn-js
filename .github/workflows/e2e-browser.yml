@@ -1,16 +1,21 @@
 name: End-to-end browser tests
 
-on: [push, workflow_dispatch]
+on: [push]
 
 env:
   CI: true
 jobs:
-  build:
+  test:
+    # Running end-to-end tests requires accessing secrets which aren't available to dependabot.
+    # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+    if: github.actor != 'dependabot[bot]'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # Available OS's: https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners
         os: [ubuntu-20.04]
+        # The Node version does not influence how well our tests run in the browser,
+        # so we only need to test in one.
         node-version: [16.x]
     steps:
       - uses: actions/checkout@v2.4.0
@@ -35,7 +40,7 @@ jobs:
           cd packages/browser/examples/demoClientApp
           npm install
           cd ../../../../
-      - name: Run browser-based end-to-end tests (Linux)
+      - name: Run browser-based end-to-end tests
         # Connections are flakier in CI, so retry failed network requests with --retry-test-pages.
         # That also requires adding `--hostname localhost` to run over HTTPS:
         # https://testcafe.io/documentation/402638/reference/configuration-file#retrytestpages
@@ -46,10 +51,6 @@ jobs:
           cd e2e/browser
           npm ci
           npm run e2e-test-ci || npm run e2e-test-ci || npm run e2e-test-ci
-        # Dependabot does not have access to our secrets,
-        # so end-to-end tests for Dependabot PRs can only be manually started.
-        # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
-        if: github.actor != 'dependabot[bot]'
         env:
           E2E_DEMO_CLIENT_APP_URL: http://localhost:3001
           E2E_ESS_USERNAME: ${{ secrets.E2E_TEST_ESS_PROD_COGNITO_USER }}
