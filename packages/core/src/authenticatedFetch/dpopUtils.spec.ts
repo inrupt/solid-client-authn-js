@@ -66,6 +66,19 @@ describe("createDpopHeader", () => {
     expect(payload.htu).toBe("https://some.resource/");
   });
 
+  it("creates a JWT with 'htu' that needs to be normalized", async () => {
+    const header = await createDpopHeader(
+      "https://user:pass@some.resource/?query#hash",
+      "GET",
+      await mockKeyPair()
+    );
+    const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
+    expect(payload.htm).toBe("GET");
+    expect(payload.jti).toBeDefined();
+    // The IRI is normalized, hence the trailing '/'
+    expect(payload.htu).toBe("https://some.resource/");
+  });
+
   it("creates a JWT with the appropriate protected header", async () => {
     const header = await createDpopHeader(
       "https://some.resource",
