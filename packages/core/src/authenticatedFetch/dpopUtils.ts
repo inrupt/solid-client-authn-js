@@ -30,12 +30,9 @@ import { PREFERRED_SIGNING_ALG } from "../constant";
  * @returns The normalized URL as a string.
  * @hidden
  */
-function removeHashUsernameAndPassword(audience: string): string {
-  const cleanedAudience = new URL(audience);
-  cleanedAudience.hash = "";
-  cleanedAudience.username = "";
-  cleanedAudience.password = "";
-  return cleanedAudience.toString();
+function normalizeHTU(audience: string): string {
+  const audienceUrl = new URL(audience);
+  return new URL(audienceUrl.pathname, audienceUrl.origin).toString();
 }
 
 export type KeyPair = {
@@ -58,7 +55,7 @@ export async function createDpopHeader(
   dpopKey: KeyPair
 ): Promise<string> {
   return new SignJWT({
-    htu: removeHashUsernameAndPassword(audience),
+    htu: normalizeHTU(audience),
     htm: method.toUpperCase(),
     jti: v4(),
   })

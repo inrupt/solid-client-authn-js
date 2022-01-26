@@ -9,7 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
-- 
+### Bugfixes
+
+- The HTU field of the DPoP header is now normalized to remove the query parameters.
+Thanks to @diegoaraujo for his first contribution to the project! 
 
 ## 1.11.3 - 2021-08-24
 
