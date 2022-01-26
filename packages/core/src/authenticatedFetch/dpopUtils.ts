@@ -31,12 +31,8 @@ import { PREFERRED_SIGNING_ALG } from "../constant";
  * @hidden
  */
 function normalizeHTU(audience: string): string {
-  const cleanedAudience = new URL(audience);
-  cleanedAudience.hash = "";
-  cleanedAudience.username = "";
-  cleanedAudience.password = "";
-  cleanedAudience.search = "";
-  return cleanedAudience.toString();
+  const audienceUrl = new URL(audience);
+  return new URL(audienceUrl.pathname, audienceUrl.origin).toString();
 }
 
 export type KeyPair = {
