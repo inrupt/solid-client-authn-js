@@ -27,6 +27,7 @@ module.exports = {
     "!**/src/index.ts",
     "!**/dist/**",
     "!**/*.spec.ts",
+    "!**/example/**",
   ],
   testEnvironment: "<rootDir>/tests/environment/customEnvironment.js",
   injectGlobals: false,
