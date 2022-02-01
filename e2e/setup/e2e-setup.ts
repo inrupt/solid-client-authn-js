@@ -20,11 +20,16 @@
  */
 import { config } from "dotenv-flow";
 
-config({
-  path: __dirname.concat("/../env/"),
-  // Disable warning messages in CI
-  silent: process.env.CI === "true",
-});
+// We need this check as otherwise dotenv-flow gets grumpy that multiple things
+// seemingly call config() rather than just considering it a non-op like it
+// actually should be
+if (!process.env.E2E_TEST_ENVIRONMENT) {
+  config({
+    path: __dirname.concat("/../env/"),
+    // Disable warning messages in CI
+    silent: process.env.CI === "true",
+  });
+}
 
 const availableEnvironment = [
   "ESS Dev-Next" as const,
@@ -43,10 +48,12 @@ export interface TestingEnvironment {
   clientId: string;
   clientSecret: string;
   environment: AvailableEnvironment;
-  // No environment-specific features at the moment
-  // feature: {}
   idp: string;
   pod: string;
+  username: string;
+  password: string;
+  // No environment-specific features at the moment
+  // feature: {}
 }
 
 export interface EnvVariables {
@@ -55,10 +62,19 @@ export interface EnvVariables {
   E2E_TEST_IDP: string;
   E2E_TEST_CLIENT_ID: string;
   E2E_TEST_CLIENT_SECRET: string;
+  E2E_TEST_USERNAME: string;
+  E2E_TEST_PASSWORD: string;
+}
+
+function checkEnvVariable(environment: unknown, key: keyof EnvVariables) {
+  if (typeof (environment as EnvVariables)[key] !== "string") {
+    throw new Error(`The environment variable ${key} is undefined.`);
+  }
 }
 
 function isTestingEnvironment(
-  environment: unknown
+  environment: unknown,
+  requiresCredentials: boolean = false
 ): asserts environment is EnvVariables {
   if (
     !availableEnvironment.includes(
@@ -71,35 +87,33 @@ function isTestingEnvironment(
       }]`
     );
   }
-  if (typeof (environment as EnvVariables).E2E_TEST_POD !== "string") {
-    throw new Error("The environment variable E2E_TEST_POD is undefined.");
-  }
-  if (typeof (environment as EnvVariables).E2E_TEST_IDP !== "string") {
-    throw new Error("The environment variable E2E_TEST_IDP is undefined.");
-  }
-  if (typeof (environment as EnvVariables).E2E_TEST_CLIENT_ID !== "string") {
-    throw new Error(
-      "The environment variable E2E_TEST_CLIENT_ID is undefined."
-    );
-  }
-  if (
-    typeof (environment as EnvVariables).E2E_TEST_CLIENT_SECRET !== "string"
-  ) {
-    throw new Error(
-      "The environment variable E2E_TEST_CLIENT_SECRET is undefined."
-    );
+
+  checkEnvVariable(environment, "E2E_TEST_POD");
+  checkEnvVariable(environment, "E2E_TEST_IDP");
+  checkEnvVariable(environment, "E2E_TEST_CLIENT_ID");
+  checkEnvVariable(environment, "E2E_TEST_CLIENT_SECRET");
+
+  // dev-note: we could use the 'features' here?
+  if (requiresCredentials === true) {
+    checkEnvVariable(environment, "E2E_TEST_USERNAME");
+    checkEnvVariable(environment, "E2E_TEST_PASSWORD");
   }
 }
 
-export function getTestingEnvironment(): TestingEnvironment {
-  isTestingEnvironment(process.env);
+export function getTestingEnvironment(
+  requiresCredentials: boolean = false
+): TestingEnvironment {
+  isTestingEnvironment(process.env, requiresCredentials);
 
   return {
+    environment: process.env.E2E_TEST_ENVIRONMENT,
     pod: process.env.E2E_TEST_POD,
     idp: process.env.E2E_TEST_IDP,
     clientId: process.env.E2E_TEST_CLIENT_ID,
     clientSecret: process.env.E2E_TEST_CLIENT_SECRET,
-    environment: process.env.E2E_TEST_ENVIRONMENT,
+    // These are required for browser based e2e tests:
+    username: process.env.E2E_TEST_USERNAME,
+    password: process.env.E2E_TEST_PASSWORD,
     // feature: {}
   };
 }

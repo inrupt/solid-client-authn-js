@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf ./dist",
-    "start": "webpack-dev-server --open --mode development",
+    "start": "webpack-dev-server --mode development",
     "dev": "npm run start",
     "build": "ASSET_PATH=\"/demo/\" webpack --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"

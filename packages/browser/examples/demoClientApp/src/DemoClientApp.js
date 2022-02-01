@@ -10,19 +10,11 @@ import {
   getClientAuthenticationWithDependencies,
 } from "../../../dist/index";
 
-const STORAGE_PREDICATE = "http://www.w3.org/ns/pim/space#storage";
-
 const clientApplicationName = "S-C-A Browser Demo Client App";
 let snackBarTimeout = undefined;
 let identityProviderLogoutEndpointTimeout = null;
 
-// const defaultLocalClientAppSessionId = "my local session id";
-
 const NSS_SERVER_URL = "https://inrupt.net/";
-
-// TODO: PMCB55: make demo's 'prettier' by avoiding 'localhost'...
-// const defaultClientEndpoint = "http://my-demo-app.com/";
-// const defaultClientEndpoint = "http://localhost:3001/";
 
 const preconfiguedIdpList = [
   "https://openid.dev-next.inrupt.com",
@@ -32,10 +24,7 @@ const preconfiguedIdpList = [
   "https://inrupt.net",
 ];
 
-// const defaultIssuer = "https://broker.pod.inrupt.com/";
-const defaultIssuer = preconfiguedIdpList[0];
-const defaultProtectedResource =
-  "https://ldp.pod.inrupt.com/sdktestuser/private/";
+const defaultIssuer = preconfiguedIdpList[1];
 
 const style = {
   display: "block",
@@ -130,6 +119,7 @@ class DemoClientApp extends Component {
     session.onLogout(() => {
       this.setState({
         status: "login",
+        fetchLoading: false,
         fetchBody: null,
         idpUserInfo: null,
         idpConfig: null,
@@ -148,12 +138,12 @@ class DemoClientApp extends Component {
       status: "loading",
       loginIssuer: defaultIssuer,
       clearClientRegistrationInfo: true,
-      fetchRoute: defaultProtectedResource,
+      fetchRoute: "",
+      fetchLoading: false,
       fetchBody: null,
       idpConfig: null,
       idpUserInfo: null,
       enableIdpButtons: false,
-      webIdStorage: null,
     };
 
     if (window.location.pathname === "/popup") {
@@ -180,8 +170,7 @@ class DemoClientApp extends Component {
 
       // restore the existing session or handle the redirect from login:
       await session.handleIncomingRedirect({
-        // Needs to be disabled for E2E tests:
-        // restorePreviousSession: true,
+        restorePreviousSession: true,
       });
 
       if (!session.info.isLoggedIn) {
@@ -206,10 +195,9 @@ class DemoClientApp extends Component {
       this.setState({
         status: "dashboard",
         loginIssuer: fullSessionInfo.issuer,
-        fetchRoute: defaultProtectedResource,
+        fetchRoute: "",
       });
 
-      this.fetchWebId();
       this.fetchIdentityProviderInfo(fullSessionInfo.issuer);
     }
   }
@@ -308,13 +296,19 @@ class DemoClientApp extends Component {
   async handleFetch(e) {
     e.preventDefault();
 
-    const session = getSession();
-    const response = await (
-      await session.fetch(this.state.fetchRoute, {})
-    ).text();
+    this.setState({ fetchLoading: true });
 
-    this.setState({ fetchBody: response });
-    this.fetchIdentityProviderInfo(this.state.loginIssuer);
+    try {
+      const session = getSession();
+      const response = await (
+        await session.fetch(this.state.fetchRoute, {})
+      ).text();
+
+      this.setState({ fetchBody: response, fetchLoading: false });
+      this.fetchIdentityProviderInfo(this.state.loginIssuer);
+    } catch (err) {
+      this.setState({ fetchLoading: false });
+    }
   }
 
   displaySnackBar(text) {
@@ -339,65 +333,6 @@ class DemoClientApp extends Component {
       this.fetchIdentityProviderInfo(url);
     }, 200);
   }
-
-  async fetchWebId() {
-    const session = getSession();
-
-    this.setState({ webIdStorage: null });
-
-    if (!session.info.isLoggedIn) {
-      return;
-    }
-    try {
-      await fetch(session.info.webId, {
-        headers: {
-          Accept: "application/ld+json",
-        },
-      })
-        .then((response) => response.json())
-        .then((profile) => {
-          // ESS 1.2
-          if (profile.storage) {
-            return profile.storage;
-          }
-
-          // ESS 1.1:
-          if (profile["@graph"]) {
-            profile = profile["@graph"];
-          }
-
-          // ESS 1.1 & NSS
-          if (Array.isArray(profile)) {
-            const found = profile.find((doc) => {
-              return !!doc[STORAGE_PREDICATE] || !!doc.storage;
-            });
-
-            if (found.storage) {
-              return found.storage;
-            }
-
-            if (
-              found[STORAGE_PREDICATE] &&
-              found[STORAGE_PREDICATE][0]["@id"]
-            ) {
-              return found[STORAGE_PREDICATE][0]["@id"];
-            }
-          }
-
-          return null;
-        })
-        .then((storage) => {
-          if (storage) {
-            this.setState({
-              webIdStorage: storage,
-            });
-          }
-        });
-    } catch (err) {
-      debugger;
-    }
-  }
-
   async fetchIdentityProviderInfo(url) {
     const session = getSession();
     const idpConfigEndpoint = identityProviderConfigUrl(url);
@@ -480,7 +415,7 @@ class DemoClientApp extends Component {
             </span>
           </div>
           <input
-            data-testid="identity_provider_textbox"
+            data-testid="idp_input"
             list="preconfigued_idp_list"
             type="search"
             size="80"
@@ -496,13 +431,16 @@ class DemoClientApp extends Component {
             ))}
           </datalist>
           &nbsp;
-          <button onClick={this.handleLogin}>Log In</button>
+          <button data-testid="idp_login_button" onClick={this.handleLogin}>
+            Log In
+          </button>
         </div>
 
         <div className="tooltip">
           <div>
             <input
               type="checkbox"
+              data-testid="login_reauthorize"
               checked={this.state.clearClientRegistrationInfo}
               onChange={(e) => {
                 this.setState({
@@ -542,12 +480,21 @@ class DemoClientApp extends Component {
             value={this.state.fetchRoute}
             onChange={(e) => this.setState({ fetchRoute: e.target.value })}
           />
-          <button onClick={this.handleFetch}>Fetch</button>
+          <button data-testid="fetch_button" onClick={this.handleFetch}>
+            Fetch
+          </button>
         </form>
 
-        <pre data-testid="fetch_response_textbox">
-          {this.state.fetchBody || "not fetched"}
-        </pre>
+        {this.state.fetchLoading ? (
+          <span>Loading...</span>
+        ) : (
+          <pre
+            data-testid="fetch_response_textbox"
+            style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
+          >
+            {this.state.fetchBody || "not fetched"}
+          </pre>
+        )}
       </div>
     );
   }
@@ -666,10 +613,6 @@ class DemoClientApp extends Component {
               </span>
               {webId.suffix}
             </code>
-          </p>
-          <p>
-            <strong>Storage:</strong>{" "}
-            <code data-testid="webid_storage">{this.state.webIdStorage}</code>
           </p>
           <div className="tooltip">
             <form>

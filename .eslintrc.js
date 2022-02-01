@@ -17,6 +17,9 @@ module.exports = {
       files: ["**/__mocks__/**"],
     },
     {
+      files: ["**/*.playwright.ts"],
+    },
+    {
       files: ["**/*.spec.ts"],
       rules: {
         // Using 'any' in the tests is usually justified.
