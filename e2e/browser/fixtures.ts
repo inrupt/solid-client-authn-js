@@ -93,9 +93,7 @@ export const test = base.extend<Fixtures>({
         tokenType: "Bearer",
       });
     } catch (err) {
-      throw new Error(
-        "There was an issue when logging in, most likely invalid_request"
-      );
+      throw new Error(`Failed to login: ${err.message}`);
     }
 
     if (!session.info.isLoggedIn) {
