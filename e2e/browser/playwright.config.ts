@@ -26,7 +26,10 @@ const env = () => (process.env.CI === "true" ? "in CI" : "locally");
 const config: PlaywrightTestConfig = {
   testMatch: "*.playwright.ts",
   retries: 1,
+  workers: process.env.CI ? 3 : 1,
   globalSetup: require.resolve("./globalSetup.ts"),
+  // On CI we want to use the automatic annotations, otherwise we use list:
+  reporter: process.env.CI ? "github" : "list",
   use: {
     headless: true,
     // Screenshots actually don't give us any value when trying to debug:
@@ -40,6 +43,8 @@ const config: PlaywrightTestConfig = {
       env: {},
     },
   },
+  // We need just a little more time on CI:
+  timeout: process.env.CI ? 60_000 : 30_000,
   webServer: {
     command: "npm run start",
     port: 3001,
