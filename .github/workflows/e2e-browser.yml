@@ -36,6 +36,9 @@ jobs:
           path: node_modules
             packages/*/node_modules
           key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+      # Installing playwright seems to be fast enough without caching:
+      - name: Setup Playwright
+        run: npx playwright install-deps chromium firefox webkit
       - run: npm ci
       - run: npm run bootstrap -- --ci
       - run: npm run build
