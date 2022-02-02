@@ -44,7 +44,7 @@ const config: PlaywrightTestConfig = {
     },
   },
   // We need just a little more time on CI:
-  timeout: process.env.CI ? 60_000 : 30_000,
+  timeout: process.env.CI ? 3 * 60_000 : 60_000,
   webServer: {
     command: "npm run start",
     port: 3001,

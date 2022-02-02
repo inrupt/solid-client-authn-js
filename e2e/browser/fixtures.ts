@@ -93,10 +93,10 @@ export const test = base.extend<Fixtures>({
         tokenType: "Bearer",
       });
     } catch (err) {
-      throw new Error(`Failed to login: ${err.message}`);
+      throw new Error(`Failed to login: ${(err as Error).message}`);
     }
 
-    if (!session.info.isLoggedIn) {
+    if (!session.info.isLoggedIn || !session.info.webId) {
       throw new Error("Failed to login when creating test container");
     }
 
