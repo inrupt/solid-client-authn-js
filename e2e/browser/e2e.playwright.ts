@@ -24,7 +24,7 @@ import { LoginFlow } from "./pages/LoginFlow";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
-test.describe("Not Logged In", () => {
+test.describe.parallel("Not Logged In", () => {
   test("Public resource in my Pod", async ({ testContainer, app }) => {
     await app.start();
 
@@ -63,7 +63,7 @@ test.describe("Not Logged In", () => {
   );
 });
 
-test.describe("Logged In", () => {
+test.describe.parallel("Logged In", () => {
   test.beforeEach(async ({ app, page, environment }) => {
     await app.start();
     await app.waitForReady();
