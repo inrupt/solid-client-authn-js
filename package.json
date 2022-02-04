@@ -29,7 +29,7 @@
     "lerna": "^4.0.0"
   },
   "devDependencies": {
-    "@inrupt/eslint-config-base": "0.1.2",
+    "@inrupt/eslint-config-base": "0.3.0",
     "@inrupt/eslint-config-lib": "0.3.0",
     "@types/dotenv-flow": "^3.1.0",
     "@types/jest": "^27.0.3",
