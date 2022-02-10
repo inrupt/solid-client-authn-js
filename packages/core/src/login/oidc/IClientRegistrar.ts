@@ -76,7 +76,6 @@ function determineClientType(
   if (options.clientId !== undefined && !isValidUrl(options.clientId)) {
     return "static";
   }
-  console.debug(issuerConfig.scopesSupported);
   if (
     issuerConfig.scopesSupported?.includes("webid") &&
     options.clientId !== undefined &&
@@ -98,7 +97,6 @@ export async function handleRegistration(
   clientRegistrar: IClientRegistrar
 ): Promise<IClient> {
   const clientType = determineClientType(options, issuerConfig);
-  console.debug("Client type: ", clientType);
   if (clientType === "dynamic") {
     return clientRegistrar.getClient(
       {
