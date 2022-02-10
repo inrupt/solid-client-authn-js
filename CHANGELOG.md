@@ -12,7 +12,9 @@ The following changes have been implemented but not released yet:
 ### Bugfixes
 
 - The HTU field of the DPoP header is now normalized to remove the query parameters.
-Thanks to @diegoaraujo for his first contribution to the project! 
+Thanks to @diegoaraujo for his first contribution to the project!
+- The Solid-OIDC discovery implemented a deprecated method, and is now updated to
+align with the latest [Solid-OIDC specification](https://solid.github.io/solid-oidc/#discovery).
 
 ## 1.11.3 - 2021-08-24
 
