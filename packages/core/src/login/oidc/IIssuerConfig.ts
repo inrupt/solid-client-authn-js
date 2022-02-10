@@ -38,7 +38,7 @@ export interface IIssuerConfig {
   userinfoEndpoint?: string;
   jwksUri: string;
   registrationEndpoint?: string;
-  scopesSupported?: string[];
+  scopesSupported: string[];
   responseTypesSupported?: string[];
   responseModesSupported?: string[];
   grantTypesSupported?: string[];

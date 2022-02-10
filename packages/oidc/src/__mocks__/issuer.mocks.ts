@@ -64,6 +64,7 @@ export const mockIssuer = (): IIssuerConfig => {
     subjectTypesSupported: ["public", "pairwise"],
     registrationEndpoint: "https://some.issuer/registration",
     grantTypesSupported: ["authorization_code"],
+    scopesSupported: ["openid"],
   };
 };
 

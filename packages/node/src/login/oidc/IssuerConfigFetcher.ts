@@ -102,7 +102,10 @@ export function configFromIssuerMetadata(
       | undefined,
     idTokenSigningAlgValuesSupported:
       metadata.id_token_signing_alg_values_supported as string[] | undefined,
-    scopesSupported: metadata.scopes_supported as string[] | undefined,
+    scopesSupported:
+      metadata.scopes_supported === undefined
+        ? ["openid"]
+        : (metadata.scopes_supported as string[]),
   };
 }
 

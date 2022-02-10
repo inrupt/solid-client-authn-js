@@ -30,5 +30,6 @@ export const mockIssuerConfig = (): IIssuerConfig => {
     subjectTypesSupported: [],
     claimsSupported: [],
     grantTypesSupported: ["refresh_token"],
+    scopesSupported: ["openid"],
   };
 };
