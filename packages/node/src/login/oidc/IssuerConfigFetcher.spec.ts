@@ -162,10 +162,10 @@ describe("IssuerConfigFetcher", () => {
     );
   });
 
-  it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
+  it("defaults scopes_supported to [openid] if omitted", async () => {
     const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
-      solid_oidc_supported: "https://solidproject.org/TR/solid-oidc",
+      scopes_supported: undefined,
     });
     Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
       metadata: mockedIssuerConfig,
@@ -175,8 +175,23 @@ describe("IssuerConfigFetcher", () => {
       storageUtility: mockStorageUtility({}),
     });
     const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
-    expect(fetchedConfig.solidOidcSupported).toBe(
-      "https://solidproject.org/TR/solid-oidc"
-    );
+    expect(fetchedConfig.scopesSupported).toContain("openid");
+    expect(fetchedConfig.scopesSupported).toHaveLength(1);
+  });
+
+  it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
+    const { Issuer } = jest.requireMock("openid-client") as any;
+    const mockedIssuerConfig = mockIssuerMetadata({
+      scopes_supported: ["webid"],
+    });
+    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
+      metadata: mockedIssuerConfig,
+    });
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(fetchedConfig.scopesSupported).toContain("webid");
   });
 });

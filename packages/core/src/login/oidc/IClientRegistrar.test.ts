@@ -39,7 +39,7 @@ describe("handleRegistration", () => {
     };
     await handleRegistration(
       options,
-      { solidOidcSupported: undefined } as IIssuerConfig,
+      { scopesSupported: ["openid"] } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
       clientRegistrar as IClientRegistrar
     );
@@ -56,7 +56,7 @@ describe("handleRegistration", () => {
     };
     await handleRegistration(
       options,
-      { solidOidcSupported: undefined } as IIssuerConfig,
+      { scopesSupported: ["openid"] } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
       clientRegistrar as IClientRegistrar
     );
@@ -78,7 +78,7 @@ describe("handleRegistration", () => {
     const client = await handleRegistration(
       options,
       {
-        solidOidcSupported: "https://solidproject.org/TR/solid-oidc",
+        scopesSupported: ["openid", "offline_access", "webid"],
       } as IIssuerConfig,
       storageUtility,
       clientRegistrar as IClientRegistrar
@@ -105,7 +105,7 @@ describe("handleRegistration", () => {
     const client = await handleRegistration(
       options,
       {
-        solidOidcSupported: undefined,
+        scopesSupported: ["openid"],
       } as IIssuerConfig,
       storageUtility,
       clientRegistrar as IClientRegistrar

@@ -123,9 +123,6 @@ const issuerConfigKeyMap: Record<
     toKey: "opTosUri",
     convertToUrl: true,
   },
-  solid_oidc_supported: {
-    toKey: "solidOidcSupported",
-  },
 };
 /* eslint-enable camelcase */
 

@@ -38,6 +38,7 @@ const getMockIssuer = (): IIssuerConfig => {
     subjectTypesSupported: ["public"],
     registrationEndpoint: "https://some.issuer/registration",
     idTokenSigningAlgValuesSupported: ["RS256"],
+    scopesSupported: ["openid"],
   };
 };
 

@@ -85,7 +85,7 @@ describe("IssuerConfigFetcher", () => {
         issuer: "https://example.com",
         // eslint-disable-next-line camelcase
         claim_types_supported: "oidc",
-        solid_oidc_supported: "https://solidproject.org/TR/solid-oidc",
+        scopes_supported: ["openid", "offline_access", "webid"],
       })
     ) as unknown as Response;
     const configFetcher = getIssuerConfigFetcher({
@@ -96,8 +96,8 @@ describe("IssuerConfigFetcher", () => {
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );
-    expect(fetchedConfig.solidOidcSupported).toBe(
-      "https://solidproject.org/TR/solid-oidc"
-    );
+    expect(fetchedConfig.scopesSupported).toContain("webid");
+    expect(fetchedConfig.scopesSupported).toContain("openid");
+    expect(fetchedConfig.scopesSupported).toContain("offline_access");
   });
 });

@@ -95,17 +95,17 @@ export function configFromIssuerMetadata(
     requestObjectSigningAlgValuesSupported:
       metadata.request_object_signing_alg_values_supported,
     // TODO: add revocation_endpoint, end_session_endpoint, introspection_endpoint_auth_methods_supported, introspection_endpoint_auth_signing_alg_values_supported, revocation_endpoint_auth_methods_supported, revocation_endpoint_auth_signing_alg_values_supported, mtls_endpoint_aliases to IIssuerConfig
-
     // The following properties may be captured as "unkown" entries in the metadata object.
     grantTypesSupported: metadata.grant_types_supported as string[] | undefined,
     responseTypesSupported: metadata.response_types_supported as
       | string[]
       | undefined,
-    solidOidcSupported: metadata.solid_oidc_supported as
-      | "https://solidproject.org/TR/solid-oidc"
-      | undefined,
     idTokenSigningAlgValuesSupported:
       metadata.id_token_signing_alg_values_supported as string[] | undefined,
+    scopesSupported:
+      metadata.scopes_supported === undefined
+        ? ["openid"]
+        : (metadata.scopes_supported as string[]),
   };
 }
 
@@ -134,6 +134,7 @@ export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
     response_types_supported: config.responseTypesSupported,
     id_token_signing_alg_values_supported:
       config.idTokenSigningAlgValuesSupported,
+    scopes_supported: config.scopesSupported,
   };
 }
 

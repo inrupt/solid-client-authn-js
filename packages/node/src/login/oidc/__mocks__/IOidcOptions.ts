@@ -36,6 +36,7 @@ export const standardOidcOptions: IOidcOptions = {
     jwksUri: "https://example.com/jwks",
     subjectTypesSupported: [],
     claimsSupported: [],
+    scopesSupported: ["openid"],
   },
   client: {
     clientId: "coolApp",

@@ -77,8 +77,7 @@ function determineClientType(
     return "static";
   }
   if (
-    issuerConfig.solidOidcSupported ===
-      "https://solidproject.org/TR/solid-oidc" &&
+    issuerConfig.scopesSupported.includes("webid") &&
     options.clientId !== undefined &&
     isValidUrl(options.clientId)
   ) {

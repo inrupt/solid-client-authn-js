@@ -38,7 +38,7 @@ export interface IIssuerConfig {
   userinfoEndpoint?: string;
   jwksUri: string;
   registrationEndpoint?: string;
-  scopesSupported?: string[];
+  scopesSupported: string[];
   responseTypesSupported?: string[];
   responseModesSupported?: string[];
   grantTypesSupported?: string[];
@@ -67,5 +67,4 @@ export interface IIssuerConfig {
   requireRequestUriRegistration?: boolean;
   opPolicyUri?: string;
   opTosUri?: string;
-  solidOidcSupported?: "https://solidproject.org/TR/solid-oidc";
 }
