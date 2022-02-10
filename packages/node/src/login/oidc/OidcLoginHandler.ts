@@ -78,6 +78,9 @@ export default class OidcLoginHandler implements ILoginHandler {
         )}`
       );
     }
+    console.debug(
+      await this.issuerConfigFetcher.fetchConfig(options.oidcIssuer)
+    );
     // TODO: the following code must be pushed to the handlers that actually need redirection
     // if (!hasRedirectUrl(options)) {
     //   throw new ConfigurationError(

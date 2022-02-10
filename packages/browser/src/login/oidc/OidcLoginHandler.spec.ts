@@ -149,9 +149,6 @@ describe("OidcLoginHandler", () => {
       clientRegistrar: new ClientRegistrar(mockedEmptyStorage),
       issuerConfigFetcher: mockIssuerConfigFetcher({
         ...IssuerConfigFetcherFetchConfigResponse,
-        // Solid-OIDC is not supported by the Identity Provider, so the provided
-        // client WebID cannot be used, and the client must go through DCR instead.
-        solidOidcSupported: undefined,
       }),
     });
 
@@ -200,7 +197,7 @@ describe("OidcLoginHandler", () => {
       clientRegistrar: new ClientRegistrar(mockedStorage),
       issuerConfigFetcher: mockIssuerConfigFetcher({
         ...IssuerConfigFetcherFetchConfigResponse,
-        solidOidcSupported: "https://solidproject.org/TR/solid-oidc",
+        scopesSupported: ["openid", "offline_access", "webid"],
       }),
     });
 

@@ -76,9 +76,9 @@ function determineClientType(
   if (options.clientId !== undefined && !isValidUrl(options.clientId)) {
     return "static";
   }
+  console.debug(issuerConfig.scopesSupported);
   if (
-    issuerConfig.solidOidcSupported ===
-      "https://solidproject.org/TR/solid-oidc" &&
+    issuerConfig.scopesSupported?.includes("webid") &&
     options.clientId !== undefined &&
     isValidUrl(options.clientId)
   ) {
@@ -98,6 +98,7 @@ export async function handleRegistration(
   clientRegistrar: IClientRegistrar
 ): Promise<IClient> {
   const clientType = determineClientType(options, issuerConfig);
+  console.debug("Client type: ", clientType);
   if (clientType === "dynamic") {
     return clientRegistrar.getClient(
       {

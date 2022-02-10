@@ -36,6 +36,7 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   claimsSupported: [],
   grantTypesSupported: ["refresh_token"],
   idTokenSigningAlgValuesSupported: ["ES256", "RS256"],
+  scopesSupported: ["openid", "offline_access"],
 };
 
 export const IssuerConfigFetcherMock = {
