@@ -13,7 +13,7 @@ The following changes have been implemented but not released yet:
 
 - 
 
-## 1.11.3 - 2021-08-24
+## 1.11.4 - 2022-02-11
 
 ### Bugfixes
 
