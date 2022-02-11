@@ -11,6 +11,14 @@ The following changes have been implemented but not released yet:
 
 ### Bugfixes
 
+- 
+
+## 1.11.3 - 2021-08-24
+
+### Bugfixes
+
+#### node and browser
+
 - The HTU field of the DPoP header is now normalized to remove the query parameters.
 Thanks to @diegoaraujo for his first contribution to the project!
 - The Solid-OIDC discovery implemented a deprecated method, and is now updated to
