@@ -13,6 +13,10 @@ The following changes have been implemented but not released yet:
 
 - 
 
+## 1.11.5 - 2022-02-14
+
+No changes; fixed issue with npm publish.
+
 ## 1.11.4 - 2022-02-11
 
 ### Bugfixes
