@@ -77,6 +77,7 @@ function determineClientType(
     return "static";
   }
   if (
+    issuerConfig.scopesSupported &&
     issuerConfig.scopesSupported.includes("webid") &&
     options.clientId !== undefined &&
     isValidUrl(options.clientId)
