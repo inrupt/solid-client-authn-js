@@ -11,7 +11,7 @@ The following changes have been implemented but not released yet:
 
 ### New features
 
-- 
+- @inrupt/oidc-client-ext: remove ts-jest from package dependencies.
 
 ## 1.11.6 - 2022-03-04
 
