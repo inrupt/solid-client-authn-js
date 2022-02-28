@@ -107,7 +107,6 @@ describe("IssuerConfigFetcher", () => {
         issuer: "https://example.com",
         // eslint-disable-next-line camelcase
         claim_types_supported: "oidc",
-        scopes_supported: undefined,
       })
     ) as unknown as Response;
     const configFetcher = getIssuerConfigFetcher({
