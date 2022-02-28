@@ -139,7 +139,7 @@ function processConfig(
       parsedConfig[issuerConfigKeyMap[key].toKey] = config[key];
     }
   });
-  if (parsedConfig.scopesSupported === undefined) {
+  if (!Array.isArray(parsedConfig.scopesSupported)) {
     parsedConfig.scopesSupported = ["openid"];
   }
   return parsedConfig as unknown as IIssuerConfig;
