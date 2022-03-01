@@ -227,6 +227,27 @@ export class Session extends EventEmitter {
         this
       )
     );
+
+    // When a session is logged in, we want to track its ID in local storage to
+    // enable silent refresh.
+    this.on("login", () => {
+      // Store the current session ID specifically in 'localStorage' (i.e., not using
+      // any other storage mechanism), as we don't deem this information to be
+      // sensitive, and we want to ensure it survives a browser tab refresh.
+      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId);
+    });
+
+    // On logout, silent refresh should no longer be considered a viable option.
+    this.on("logout", () => {
+      window.localStorage.removeItem(KEY_CURRENT_SESSION);
+    });
+
+    // If an error happens, silent refresh should no longer be considered a viable option
+    // to prevent endless redirection, and session information should be cleared.
+    this.on(EVENTS.ERROR, async () => {
+      window.localStorage.removeItem(KEY_CURRENT_SESSION);
+      await this.logout();
+    });
   }
 
   /**

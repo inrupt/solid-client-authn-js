@@ -17,7 +17,7 @@
     "prepublishOnly": "npm run build",
     "publish": "lerna publish",
     "publish-preview": "lerna publish from-package",
-    "test": "jest --coverage --verbose",
+    "test": "lerna run test",
     "test:e2e": "jest --config jest.e2e.config.js",
     "lerna-version": "lerna version",
     "install-sandbox": "npm ci && npm ci --prefix .codesandbox/sandbox",

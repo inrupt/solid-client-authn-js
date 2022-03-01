@@ -922,6 +922,44 @@ describe("Session", () => {
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
       expect(clientAuthentication.login).not.toHaveBeenCalled();
     });
+
+    it("does not retry silent authentication if an authentication error happens", async () => {
+      const sessionId = "mySession";
+      // Pretend that we have a previously active session.
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({})
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn(clientAuthentication.handleIncomingRedirect)
+        .mockImplementationOnce(async (_url, emitter) => {
+          emitter.emit(EVENTS.ERROR, "Some authentication error");
+          return {
+            isLoggedIn: false,
+            sessionId,
+          };
+        });
+      clientAuthentication.login = jest.fn();
+
+      const mySession = new Session({ clientAuthentication });
+      // eslint-disable-next-line no-void
+      void mySession.handleIncomingRedirect("https://some.redirect/url");
+      // The local storage should have been cleared by the auth error
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
+      // Silent authentication should not have been attempted
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
+    });
   });
 
   describe("onLogin", () => {
