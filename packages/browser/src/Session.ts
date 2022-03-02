@@ -230,7 +230,7 @@ export class Session extends EventEmitter {
 
     // When a session is logged in, we want to track its ID in local storage to
     // enable silent refresh.
-    this.on("login", () => {
+    this.on(EVENTS.LOGIN, () => {
       // Store the current session ID specifically in 'localStorage' (i.e., not using
       // any other storage mechanism), as we don't deem this information to be
       // sensitive, and we want to ensure it survives a browser tab refresh.
@@ -238,7 +238,11 @@ export class Session extends EventEmitter {
     });
 
     // On logout, silent refresh should no longer be considered a viable option.
-    this.on("logout", () => {
+    this.on(EVENTS.LOGOUT, () => {
+      window.localStorage.removeItem(KEY_CURRENT_SESSION);
+    });
+
+    this.on(EVENTS.SESSION_EXPIRED, () => {
       window.localStorage.removeItem(KEY_CURRENT_SESSION);
     });
 
@@ -299,7 +303,7 @@ export class Session extends EventEmitter {
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
     this.tmpFetchWithCookies = false;
-    this.emit("logout");
+    this.emit(EVENTS.LOGOUT);
   };
 
   /**
@@ -415,13 +419,13 @@ export class Session extends EventEmitter {
       if (currentUrl === null) {
         // The login event can only be triggered **after** the user has been
         // redirected from the IdP with access and ID tokens.
-        this.emit("login");
+        this.emit(EVENTS.LOGIN);
       } else {
         // If an URL is stored in local storage, we are being logged in after a
         // silent authentication, so remove our currently stored URL location
         // to clean up our state now that we are completing the re-login process.
         window.localStorage.removeItem(KEY_CURRENT_URL);
-        this.emit("sessionRestore", currentUrl);
+        this.emit(EVENTS.SESSION_RESTORED, currentUrl);
       }
     } else if (options.restorePreviousSession === true) {
       // Silent authentication happens after a refresh, which means there are no
@@ -463,7 +467,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes login.
    */
   onLogin(callback: () => unknown): void {
-    this.on("login", callback);
+    this.on(EVENTS.LOGIN, callback);
   }
 
   /**
@@ -472,7 +476,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes logout.
    */
   onLogout(callback: () => unknown): void {
-    this.on("logout", callback);
+    this.on(EVENTS.LOGOUT, callback);
   }
 
   /**
@@ -499,7 +503,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
    */
   onSessionRestore(callback: (currentUrl: string) => unknown): void {
-    this.on("sessionRestore", callback);
+    this.on(EVENTS.SESSION_RESTORED, callback);
   }
 
   /**
