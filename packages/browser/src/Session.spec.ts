@@ -973,10 +973,36 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
       void mySession.handleIncomingRedirect("https://some.redirect/url");
+      expect(mySession.info.isLoggedIn).toBe(false);
       // The local storage should have been cleared by the auth error
       expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
       // Silent authentication should not have been attempted
       expect(clientAuthentication.login).not.toHaveBeenCalled();
+    });
+
+    it("clears the session ID from local storage if the session expired", async () => {
+      const sessionId = "mySession";
+      // Pretend that we have a previously active session.
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({})
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const mySession = new Session({ clientAuthentication });
+      mySession.emit(EVENTS.SESSION_EXPIRED);
+      // The local storage should have been cleared by the auth error
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
     });
   });
 
