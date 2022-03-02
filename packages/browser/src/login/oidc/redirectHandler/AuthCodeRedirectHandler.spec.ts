@@ -578,6 +578,47 @@ describe("AuthCodeRedirectHandler", () => {
 
       expect(sessionInfo.expirationDate).toBeNull();
     });
+
+    it("clears the PKCE verifier from session information", async () => {
+      mockOidcClient();
+      mockLocalStorage({
+        // This mocks how oidc-client stores session information
+        "oidc.oauth2StateValue": "some arbitrary value",
+      });
+      const mockedFetch = jest.fn(global.fetch).mockReturnValue(
+        new Promise((resolve) => {
+          resolve(
+            new Response("", {
+              status: 200,
+            })
+          );
+        })
+      );
+      window.fetch = mockedFetch;
+
+      const storage = mockStorageUtility({
+        "solidClientAuthenticationUser:oauth2StateValue": {
+          sessionId: "mySession",
+        },
+        "solidClientAuthenticationUser:mySession": {
+          dpop: "true",
+          issuer: mockIssuer().issuer.toString(),
+          codeVerifier: "some code verifier",
+          redirectUrl: "https://some.redirect.uri",
+        },
+      });
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: storage,
+      });
+      await authCodeRedirectHandler.handle(
+        "https://coolsite.com/?code=someCode&state=oauth2StateValue"
+      );
+      await expect(
+        storage.getForUser("mySession", "codeVerifier")
+      ).resolves.toBeUndefined();
+      expect(window.localStorage.getItem("oidc.oauth2StateValue")).toBeNull();
+    });
   });
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {

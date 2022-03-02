@@ -186,9 +186,17 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         codeVerifier,
         redirectUrl: storedRedirectIri,
       });
+
+      // Delete oidc-client-specific session information from storage. This is
+      // done automatically when retrieving a bearer token, but since the DPoP
+      // binding uses our custom code, this needs to be done manually.
+      window.localStorage.removeItem(`oidc.${oauthState}`);
     } else {
       tokens = await getBearerToken(url.toString());
     }
+
+    // Clear storage from information which was only required to make the backchannel exchange.
+    await this.storageUtility.deleteForUser(storedSessionId, "codeVerifier");
 
     let refreshOptions: RefreshOptions | undefined;
     if (tokens.refreshToken !== undefined) {
