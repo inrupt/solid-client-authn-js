@@ -579,7 +579,7 @@ describe("AuthCodeRedirectHandler", () => {
       expect(sessionInfo.expirationDate).toBeNull();
     });
 
-    it("clears the PKCE verifier from session information", async () => {
+    it("clears the oidc-client specific session information", async () => {
       mockOidcClient();
       mockLocalStorage({
         // This mocks how oidc-client stores session information
@@ -614,9 +614,6 @@ describe("AuthCodeRedirectHandler", () => {
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/?code=someCode&state=oauth2StateValue"
       );
-      await expect(
-        storage.getForUser("mySession", "codeVerifier")
-      ).resolves.toBeUndefined();
       expect(window.localStorage.getItem("oidc.oauth2StateValue")).toBeNull();
     });
   });

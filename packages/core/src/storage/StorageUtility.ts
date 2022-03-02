@@ -72,6 +72,8 @@ export async function loadOidcContextFromStorage(
         storageUtility.getForUser(sessionId, "redirectUrl"),
         storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
       ]);
+    // Clear the code verifier, which is one-time use.
+    await storageUtility.deleteForUser(sessionId, "codeVerifier");
 
     // Unlike openid-client, this looks up the configuration from storage
     const issuerConfig = await configFetcher.fetchConfig(issuerIri as string);

@@ -34,6 +34,7 @@ import {
   ISessionInfoManager,
   IStorageUtility,
   ITokenRefresher,
+  loadOidcContextFromStorage,
   RefreshOptions,
 } from "@inrupt/solid-client-authn-core";
 import {
@@ -145,18 +146,30 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
         errorIfNull: true,
       }
     )) as string;
-    const isDpop =
-      (await this.storageUtility.getForUser(storedSessionId, "dpop")) ===
-      "true";
 
-    // Since we throw if not found, the type assertion is okay
-    const issuer = (await this.storageUtility.getForUser(
+    const {
+      issuerConfig,
+      codeVerifier,
+      redirectUrl: storedRedirectIri,
+      dpop: isDpop,
+    } = await loadOidcContextFromStorage(
       storedSessionId,
-      "issuer",
-      { errorIfNull: true }
-    )) as string;
+      this.storageUtility,
+      this.issuerConfigFetcher
+    );
 
-    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(issuer);
+    if (codeVerifier === undefined) {
+      throw new Error(
+        `The code verifier for session ${storedSessionId} is missing from storage.`
+      );
+    }
+
+    if (storedRedirectIri === undefined) {
+      throw new Error(
+        `The redirect URL for session ${storedSessionId} is missing from storage.`
+      );
+    }
+
     const client: IClient = await this.clientRegistrar.getClient(
       { sessionId: storedSessionId },
       issuerConfig
@@ -166,18 +179,6 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     const referenceTime = Date.now();
 
     if (isDpop) {
-      const codeVerifier = (await this.storageUtility.getForUser(
-        storedSessionId,
-        "codeVerifier",
-        { errorIfNull: true }
-      )) as string;
-
-      const storedRedirectIri = (await this.storageUtility.getForUser(
-        storedSessionId,
-        "redirectUrl",
-        { errorIfNull: true }
-      )) as string;
-
       tokens = await getDpopToken(issuerConfig, client, {
         grantType: "authorization_code",
         // We rely on our 'canHandle' function checking that the OAuth 'code'
@@ -194,9 +195,6 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     } else {
       tokens = await getBearerToken(url.toString());
     }
-
-    // Clear storage from information which was only required to make the backchannel exchange.
-    await this.storageUtility.deleteForUser(storedSessionId, "codeVerifier");
 
     let refreshOptions: RefreshOptions | undefined;
     if (tokens.refreshToken !== undefined) {
