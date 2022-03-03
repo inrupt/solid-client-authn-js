@@ -22,7 +22,7 @@ jobs:
     outputs:
       version-nr: ${{ steps.determine-npm-version.outputs.version-nr }}
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Prepare for publication to GitHub Packages
         uses: actions/setup-node@v2.5.1
         with:
@@ -75,7 +75,7 @@ jobs:
         node-version: [16.x, 14.x, 12.x]
     needs: [dev-release-npm]
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2.5.1
         with:
           node-version: ${{ matrix.node-version }}
@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [dev-release-npm]
     steps:
-    - uses: actions/checkout@v2.4.0
+    - uses: actions/checkout@v3
     - uses: actions/setup-node@v2.5.1
       with:
         node-version: '16.x'
@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [dev-release-npm]
     steps:
-    - uses: actions/checkout@v2.4.0
+    - uses: actions/checkout@v3
     - uses: actions/setup-node@v2.5.1
       with:
         node-version: '16.x'
