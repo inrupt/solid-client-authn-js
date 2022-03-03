@@ -235,20 +235,12 @@ export class Session extends EventEmitter {
       window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId);
     });
 
-    // On logout, silent refresh should no longer be considered a viable option.
-    this.on(EVENTS.LOGOUT, () => {
-      window.localStorage.removeItem(KEY_CURRENT_SESSION);
+    this.on(EVENTS.SESSION_EXPIRED, async () => {
+      await this.internalLogout(false);
     });
 
-    this.on(EVENTS.SESSION_EXPIRED, () => {
-      window.localStorage.removeItem(KEY_CURRENT_SESSION);
-    });
-
-    // If an error happens, silent refresh should no longer be considered a viable option
-    // to prevent endless redirection, and session information should be cleared.
     this.on(EVENTS.ERROR, async () => {
-      window.localStorage.removeItem(KEY_CURRENT_SESSION);
-      await this.logout();
+      await this.internalLogout(false);
     });
   }
 
@@ -295,14 +287,29 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
+   * An internal logout function, to control whether or not the logout signal
+   * should be sent, i.e. if the logout was user-initiated or is the result of
+   * an external event.
+   *
+   * @hidden
    */
-  logout = async (): Promise<void> => {
+  private internalLogout = async (emitSignal: boolean): Promise<void> => {
+    // Clearing this value means that silent refresh will no longer be attempted.
+    // In particular, in the case of a silent authentication error it prevents
+    // from getting stuck in an authentication retries loop.
+    window.localStorage.removeItem(KEY_CURRENT_SESSION);
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
     this.tmpFetchWithCookies = false;
-    this.emit(EVENTS.LOGOUT);
+    if (emitSignal) {
+      this.emit(EVENTS.LOGOUT);
+    }
   };
+
+  /**
+   * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
+   */
+  logout = async (): Promise<void> => this.internalLogout(true);
 
   /**
    * Completes the login process by processing the information provided by the
