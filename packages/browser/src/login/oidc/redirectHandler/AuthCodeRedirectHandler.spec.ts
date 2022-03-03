@@ -31,7 +31,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import { CodeExchangeResult } from "@inrupt/oidc-client-ext";
+import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
@@ -250,10 +250,10 @@ const mockDefaultStorageUtility = (
   }
 ) =>
   mockStorageUtility({
-    "solidClientAuthenticationUser:oauth2StateValue": {
+    [`${USER_SESSION_PREFIX}:${DEFAULT_OAUTH_STATE}`]: {
       sessionId: "mySession",
     },
-    "solidClientAuthenticationUser:mySession": {
+    [`${USER_SESSION_PREFIX}:mySession`]: {
       dpop: options.dpop ? "true" : "false",
       issuer: mockIssuer().issuer.toString(),
       codeVerifier: options.codeVerifier ?? DEFAULT_CODE_VERIFIER,
@@ -342,6 +342,42 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
+    it("throws if the code verifier is missing from storage", async () => {
+      mockOidcClient();
+      mockFetch(
+        new Response("", {
+          status: 200,
+        })
+      );
+      const storageUtility = mockDefaultStorageUtility();
+      await storageUtility.deleteForUser("mySession", "codeVerifier");
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(mockRedirectUrl())
+      ).rejects.toThrow();
+    });
+
+    it("throws if the redirect URL is missing from storage", async () => {
+      mockOidcClient();
+      mockFetch(
+        new Response("", {
+          status: 200,
+        })
+      );
+      const storageUtility = mockDefaultStorageUtility();
+      await storageUtility.deleteForUser("mySession", "redirectUrl");
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(mockRedirectUrl())
+      ).rejects.toThrow();
+    });
+
     it("Fails if a session was not retrieved", async () => {
       mockOidcClient();
       mockFetch(
@@ -366,18 +402,8 @@ describe("AuthCodeRedirectHandler", () => {
         })
       );
 
-      const testIssuer = "some test Issuer";
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockStorageUtility({
-          "solidClientAuthenticationUser:mySession": {
-            issuer: testIssuer,
-            dpop: "false",
-            codeVerifier: "some code verifier",
-          },
-          "solidClientAuthenticationUser:oauth2StateValue": {
-            sessionId: "mySession",
-          },
-        }),
+        storageUtility: mockDefaultStorageUtility({ dpop: false }),
       });
 
       const redirectInfo = await authCodeRedirectHandler.handle(
@@ -408,20 +434,8 @@ describe("AuthCodeRedirectHandler", () => {
       );
       window.fetch = mockedFetch;
 
-      const storage = mockStorageUtility({
-        "solidClientAuthenticationUser:oauth2StateValue": {
-          sessionId: "mySession",
-        },
-        "solidClientAuthenticationUser:mySession": {
-          dpop: "true",
-          issuer: mockIssuer().issuer.toString(),
-          codeVerifier: "some code verifier",
-          redirectUrl: "https://some.redirect.uri",
-        },
-      });
-
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: storage,
+        storageUtility: mockDefaultStorageUtility({ dpop: true }),
       });
       const redirectInfo = await authCodeRedirectHandler.handle(
         mockRedirectUrl()
@@ -444,17 +458,7 @@ describe("AuthCodeRedirectHandler", () => {
         })
       );
 
-      const mockedStorage = mockStorageUtility({
-        [`${USER_SESSION_PREFIX}:oauth2StateValue`]: {
-          sessionId: "mySession",
-        },
-        [`${USER_SESSION_PREFIX}:mySession`]: {
-          dpop: "true",
-          issuer: mockIssuer().issuer.toString(),
-          codeVerifier: "some code verifier",
-          redirectUrl: "https://some.redirect.uri",
-        },
-      });
+      const mockedStorage = mockDefaultStorageUtility();
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockedStorage,
@@ -490,17 +494,7 @@ describe("AuthCodeRedirectHandler", () => {
         [RequestInfo, RequestInit?]
       >;
 
-      const mockedStorage = mockStorageUtility({
-        [`${USER_SESSION_PREFIX}:oauth2StateValue`]: {
-          sessionId: "mySession",
-        },
-        [`${USER_SESSION_PREFIX}:mySession`]: {
-          dpop: "true",
-          issuer: mockIssuer().issuer.toString(),
-          codeVerifier: "some code verifier",
-          redirectUrl: "https://some.redirect.uri?someKey=someValue",
-        },
-      });
+      const mockedStorage = mockDefaultStorageUtility();
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockedStorage,
@@ -519,6 +513,10 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns the expiration time normalised to the current time", async () => {
       mockOidcClient();
+      window.fetch = jest.fn();
+      mockLocalStorage({
+        "tmp-resource-server-session-enabled": "false",
+      });
       const MOCK_TIMESTAMP = 10000;
       Date.now = jest
         .fn()
@@ -527,18 +525,8 @@ describe("AuthCodeRedirectHandler", () => {
         .mockReturnValueOnce(MOCK_TIMESTAMP)
         .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
-      const testIssuer = "some test Issuer";
-      const mockedStorage = mockStorageUtility({
-        "solidClientAuthenticationUser:mySession": {
-          issuer: testIssuer,
-        },
-        "solidClientAuthenticationUser:oauth2StateValue": {
-          sessionId: "mySession",
-        },
-      });
-
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
+        storageUtility: mockDefaultStorageUtility(),
       });
 
       const sessionInfo = await authCodeRedirectHandler.handle(
@@ -551,26 +539,21 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns null for the expiration time if none was provided", async () => {
-      mockOidcClient();
-      const mockedOidcClient = jest.requireMock(
-        "@inrupt/oidc-client-ext"
-      ) as any;
-      jest.spyOn(mockedOidcClient, "getBearerToken").mockReturnValueOnce({
-        accessToken: mockAccessTokenBearer(),
-        idToken: mockIdToken(),
-        webId: mockWebId(),
-        // no expiresIn
+      const mockedOidcClient = mockOidcClient();
+      window.fetch = jest.fn();
+      mockLocalStorage({
+        "tmp-resource-server-session-enabled": "false",
       });
+      mockedOidcClient.getBearerToken = jest
+        .fn(getBearerToken)
+        .mockResolvedValueOnce({
+          accessToken: mockAccessTokenBearer(),
+          idToken: mockIdToken(),
+          webId: mockWebId(),
+          // no expiresIn
+        });
 
-      const testIssuer = "some test Issuer";
-      const mockedStorage = mockStorageUtility({
-        "solidClientAuthenticationUser:mySession": {
-          issuer: testIssuer,
-        },
-        "solidClientAuthenticationUser:oauth2StateValue": {
-          sessionId: "mySession",
-        },
-      });
+      const mockedStorage = mockDefaultStorageUtility({ dpop: false });
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockedStorage,
@@ -600,20 +583,8 @@ describe("AuthCodeRedirectHandler", () => {
       );
       window.fetch = mockedFetch;
 
-      const storage = mockStorageUtility({
-        "solidClientAuthenticationUser:oauth2StateValue": {
-          sessionId: "mySession",
-        },
-        "solidClientAuthenticationUser:mySession": {
-          dpop: "true",
-          issuer: mockIssuer().issuer.toString(),
-          codeVerifier: "some code verifier",
-          redirectUrl: "https://some.redirect.uri",
-        },
-      });
-
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: storage,
+        storageUtility: mockDefaultStorageUtility(),
       });
       await authCodeRedirectHandler.handle(mockRedirectUrl());
       expect(window.localStorage.getItem("oidc.oauth2StateValue")).toBeNull();
@@ -640,15 +611,7 @@ describe("AuthCodeRedirectHandler", () => {
       .mockReturnValueOnce(MOCK_TIMESTAMP)
       .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
-    const testIssuer = "some test Issuer";
-    const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:mySession": {
-        issuer: testIssuer,
-      },
-      "solidClientAuthenticationUser:oauth2StateValue": {
-        sessionId: "mySession",
-      },
-    });
+    const mockedStorage = mockDefaultStorageUtility();
 
     const authCodeRedirectHandler = getAuthCodeRedirectHandler({
       storageUtility: mockedStorage,
@@ -657,7 +620,7 @@ describe("AuthCodeRedirectHandler", () => {
     await authCodeRedirectHandler.handle(mockRedirectUrl());
     expect(
       JSON.parse(
-        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
+        (await mockedStorage.get("tmp-resource-server-session-info")) as string
       )
     ).toEqual({
       webId: "https://my.webid",
@@ -693,14 +656,7 @@ describe("AuthCodeRedirectHandler", () => {
       .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
     const testIssuer = "some test Issuer";
-    const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:mySession": {
-        issuer: testIssuer,
-      },
-      "solidClientAuthenticationUser:oauth2StateValue": {
-        sessionId: "mySession",
-      },
-    });
+    const mockedStorage = mockDefaultStorageUtility();
 
     const authCodeRedirectHandler = getAuthCodeRedirectHandler({
       storageUtility: mockedStorage,
@@ -726,14 +682,7 @@ describe("AuthCodeRedirectHandler", () => {
       })
     );
 
-    const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:mySession": {
-        issuer: "some dummy test Issuer",
-      },
-      "solidClientAuthenticationUser:oauth2StateValue": {
-        sessionId: "mySession",
-      },
-    });
+    const mockedStorage = mockDefaultStorageUtility();
 
     const authCodeRedirectHandler = getAuthCodeRedirectHandler({
       storageUtility: mockedStorage,
@@ -758,14 +707,7 @@ describe("AuthCodeRedirectHandler", () => {
       )
       .mockRejectedValueOnce("Some error");
 
-    const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:mySession": {
-        issuer: "some dummy test Issuer",
-      },
-      "solidClientAuthenticationUser:oauth2StateValue": {
-        sessionId: "mySession",
-      },
-    });
+    const mockedStorage = mockDefaultStorageUtility();
 
     const authCodeRedirectHandler = getAuthCodeRedirectHandler({
       storageUtility: mockedStorage,
@@ -791,14 +733,7 @@ describe("AuthCodeRedirectHandler", () => {
       })
     );
 
-    const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:mySession": {
-        issuer: "some dummy test Issuer",
-      },
-      "solidClientAuthenticationUser:oauth2StateValue": {
-        sessionId: "mySession",
-      },
-    });
+    const mockedStorage = mockDefaultStorageUtility({ dpop: false });
 
     const authCodeRedirectHandler = getAuthCodeRedirectHandler({
       storageUtility: mockedStorage,
