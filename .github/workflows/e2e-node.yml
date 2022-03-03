@@ -21,7 +21,7 @@ jobs:
         # NSS does not support static client registration, which we rely on for testing.
         environment-name: ["ESS Production", "ESS Dev-Next"]
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2.5.1
         with:
