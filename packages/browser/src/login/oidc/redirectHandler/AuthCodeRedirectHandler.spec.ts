@@ -359,7 +359,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated bearer fetch if requested", async () => {
       mockOidcClient();
-      mockLocalStorage({});
 
       const mockedFetch = mockFetch(
         new Response("", {
@@ -398,7 +397,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
-      mockLocalStorage({});
       const mockedFetch = jest.fn(global.fetch).mockReturnValue(
         new Promise((resolve) => {
           resolve(
@@ -436,7 +434,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("saves session information in storage on successful login", async () => {
       mockOidcClient();
-      mockLocalStorage({});
       window.fetch = jest.fn(global.fetch).mockReturnValue(
         new Promise((resolve) => {
           resolve(
@@ -479,7 +476,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("preserves any query strings from the redirect URI", async () => {
       mockOidcClient();
-      mockLocalStorage({});
 
       window.fetch = (jest.fn() as any).mockReturnValue(
         new Promise((resolve) => {
@@ -626,7 +622,6 @@ describe("AuthCodeRedirectHandler", () => {
 
   it("stores information about the resource server cookie in local storage on successful authentication", async () => {
     mockOidcClient();
-    mockLocalStorage({});
 
     // This mocks the fetch to the Resource Server session endpoint
     // Note: Currently, the endpoint only returns the webid in plain/text, it could
@@ -818,7 +813,9 @@ describe("AuthCodeRedirectHandler", () => {
   });
 
   it("returns a fetch that supports the refresh flow", async () => {
-    window.localStorage.setItem("tmp-resource-server-session-enabled", "false");
+    mockLocalStorage({
+      "tmp-resource-server-session-enabled": "false",
+    });
     mockOidcClient();
     const mockedStorage = mockDefaultStorageUtility();
     const coreModule = jest.requireActual(
