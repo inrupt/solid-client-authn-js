@@ -100,4 +100,23 @@ describe("IssuerConfigFetcher", () => {
     expect(fetchedConfig.scopesSupported).toContain("openid");
     expect(fetchedConfig.scopesSupported).toContain("offline_access");
   });
+
+  it("should return a default value for the supported scopes if not advertized by the OpenID provider", async () => {
+    const fetchResponse = new NodeResponse(
+      JSON.stringify({
+        issuer: "https://example.com",
+        // eslint-disable-next-line camelcase
+        claim_types_supported: "oidc",
+      })
+    ) as unknown as Response;
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
+    window.fetch = mockFetch as typeof window.fetch;
+    const fetchedConfig = await configFetcher.fetchConfig(
+      "https://arbitrary.url"
+    );
+    expect(fetchedConfig.scopesSupported).toContain("openid");
+  });
 });
