@@ -36,7 +36,6 @@ import {
 import { LogoutHandlerMock } from "./logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "./ClientAuthentication";
-import { KEY_CURRENT_SESSION } from "./constant";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 
@@ -76,17 +75,6 @@ const mockSessionStorage = async (
       },
     })
   );
-};
-
-const mockLocalStorage = (stored: Record<string, string>) => {
-  // Kinda weird: `(window as any).localStorage = new LocalStorageMock(stored)` does
-  // not work as intended unless the following snippet is present in the test suite.
-  // On the other hand, only ever mocking localstorage with the following snippet
-  // works well.
-  Object.defineProperty(window, "localStorage", {
-    value: new LocalStorageMock(stored),
-    writable: true,
-  });
 };
 
 describe("ClientAuthentication", () => {
@@ -364,20 +352,8 @@ describe("ClientAuthentication", () => {
   });
 
   describe("validateCurrentSession", () => {
-    // In the following describe block, (window as any) is used
-    // multiple types to override the window type definition and
-    // allow localStorage to be written.
-    it("returns null no current session is in storage", async () => {
-      const clientAuthn = getClientAuthentication({});
-
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
-    });
-
     it("returns null if the current session has no stored issuer", async () => {
       const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
 
       const mockedStorage = new StorageUtility(
         mockStorage({
@@ -395,14 +371,13 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
+      await expect(
+        clientAuthn.validateCurrentSession(sessionId)
+      ).resolves.toBeNull();
     });
 
     it("returns null if the current session has no stored client ID", async () => {
       const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
       const mockedStorage = new StorageUtility(
         mockStorage({
           [`${USER_SESSION_PREFIX}:${sessionId}`]: {
@@ -418,14 +393,13 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.validateCurrentSession()).resolves.toBeNull();
+      await expect(
+        clientAuthn.validateCurrentSession(sessionId)
+      ).resolves.toBeNull();
     });
 
     it("returns the current session if all necessary information are available", async () => {
       const sessionId = "mySession";
-      mockLocalStorage({
-        [KEY_CURRENT_SESSION]: sessionId,
-      });
       const mockedStorage = await mockSessionStorage(sessionId, {
         clientId: "https://some.app/registration",
         issuer: "https://some.issuer",
@@ -435,7 +409,9 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      await expect(clientAuthn.validateCurrentSession()).resolves.toStrictEqual(
+      await expect(
+        clientAuthn.validateCurrentSession(sessionId)
+      ).resolves.toStrictEqual(
         expect.objectContaining({
           issuer: "https://some.issuer",
           clientAppId: "https://some.app/registration",

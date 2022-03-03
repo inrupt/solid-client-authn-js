@@ -104,9 +104,7 @@ export async function silentlyAuthenticate(
   },
   session: Session
 ): Promise<boolean> {
-  // Check if we have session information in storage - if we do then we may be
-  // currently logged in, and the user has refreshed their browser page.
-  const storedSessionInfo = await clientAuthn.validateCurrentSession();
+  const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
   if (storedSessionInfo !== null) {
     // It can be really useful to save the user's current browser location,
     // so that we can restore it after completing the silent authentication

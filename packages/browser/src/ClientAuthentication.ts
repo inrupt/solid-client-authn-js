@@ -36,7 +36,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
-import { KEY_CURRENT_SESSION } from "./constant";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a
@@ -112,13 +111,9 @@ export default class ClientAuthentication {
   // if the expected information cannot be found.
   // Note that the ID token is not stored, which means the session information
   // cannot be validated at this point.
-  validateCurrentSession = async (): Promise<
-    (ISessionInfo & ISessionInternalInfo) | null
-  > => {
-    const currentSessionId = window.localStorage.getItem(KEY_CURRENT_SESSION);
-    if (currentSessionId === null) {
-      return null;
-    }
+  validateCurrentSession = async (
+    currentSessionId: string
+  ): Promise<(ISessionInfo & ISessionInternalInfo) | null> => {
     const sessionInfo = await this.sessionInfoManager.get(currentSessionId);
     if (
       sessionInfo === undefined ||
