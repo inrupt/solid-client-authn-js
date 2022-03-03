@@ -655,7 +655,6 @@ describe("AuthCodeRedirectHandler", () => {
       .mockReturnValueOnce(MOCK_TIMESTAMP)
       .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
-    const testIssuer = "some test Issuer";
     const mockedStorage = mockDefaultStorageUtility();
 
     const authCodeRedirectHandler = getAuthCodeRedirectHandler({
