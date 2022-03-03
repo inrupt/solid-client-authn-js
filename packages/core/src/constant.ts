@@ -32,7 +32,8 @@ export const SOLID_CLIENT_AUTHN_KEY_PREFIX = "solidClientAuthn:";
 export const PREFERRED_SIGNING_ALG = ["ES256", "RS256"];
 
 export const EVENTS = {
-  ERROR: "error",
+  // `error` is not a valid event name, hence the `onError`.
+  ERROR: "onError",
   LOGIN: "login",
   LOGOUT: "logout",
   NEW_REFRESH_TOKEN: "newRefreshToken",
