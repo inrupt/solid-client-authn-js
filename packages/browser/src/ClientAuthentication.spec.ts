@@ -37,7 +37,6 @@ import { LogoutHandlerMock } from "./logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
-import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
