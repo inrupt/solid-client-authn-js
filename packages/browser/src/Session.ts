@@ -227,21 +227,16 @@ export class Session extends EventEmitter {
     );
 
     // When a session is logged in, we want to track its ID in local storage to
-    // enable silent refresh.
-    this.on(EVENTS.LOGIN, () => {
-      // Store the current session ID specifically in 'localStorage' (i.e., not using
-      // any other storage mechanism), as we don't deem this information to be
-      // sensitive, and we want to ensure it survives a browser tab refresh.
-      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId);
-    });
+    // enable silent refresh. The current session ID specifically stored in 'localStorage'
+    // (as opposed to using our storage abstraction layer) because it is only
+    // used in a browser-specific mechanism.
+    this.on(EVENTS.LOGIN, () =>
+      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId)
+    );
 
-    this.on(EVENTS.SESSION_EXPIRED, async () => {
-      await this.internalLogout(false);
-    });
+    this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
 
-    this.on(EVENTS.ERROR, async () => {
-      await this.internalLogout(false);
-    });
+    this.on(EVENTS.ERROR, () => this.internalLogout(false));
   }
 
   /**

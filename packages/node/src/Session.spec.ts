@@ -155,6 +155,42 @@ describe("Session", () => {
           .lastTimeoutHandle
       ).toBe(0);
     });
+
+    it("logs the session out on error", async () => {
+      const mySession = new Session({
+        clientAuthentication: mockClientAuthentication(),
+      });
+      // Spy on the private session logout
+      const spiedLogout = jest.spyOn(
+        mySession as unknown as { internalLogout: () => Promise<void> },
+        "internalLogout"
+      );
+      const logoutEventcallback = jest.fn();
+      mySession.onLogout(logoutEventcallback);
+      mySession.emit(EVENTS.ERROR);
+      // The internal logout should have been called...
+      expect(spiedLogout).toHaveBeenCalled();
+      // ... but the user-initiated logout signal should not have been sent
+      expect(logoutEventcallback).not.toHaveBeenCalled();
+    });
+
+    it("logs the session out on expiration", async () => {
+      const mySession = new Session({
+        clientAuthentication: mockClientAuthentication(),
+      });
+      // Spy on the private session logout
+      const spiedLogout = jest.spyOn(
+        mySession as unknown as { internalLogout: () => Promise<void> },
+        "internalLogout"
+      );
+      const logoutEventcallback = jest.fn();
+      mySession.onLogout(logoutEventcallback);
+      mySession.emit(EVENTS.SESSION_EXPIRED);
+      // The internal logout should have been called...
+      expect(spiedLogout).toHaveBeenCalled();
+      // ... but the user-initiated logout signal should not have been sent
+      expect(logoutEventcallback).not.toHaveBeenCalled();
+    });
   });
 
   describe("login", () => {
