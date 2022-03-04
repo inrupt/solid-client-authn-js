@@ -575,6 +575,8 @@ describe("buildAuthenticatedFetch", () => {
         )
       ) as any;
     const mockEmitter = new EventEmitter();
+    // 'error' events must be listened to.
+    mockEmitter.on(EVENTS.ERROR, jest.fn());
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
     await buildAuthenticatedFetch(mockedFetch, "myToken", {

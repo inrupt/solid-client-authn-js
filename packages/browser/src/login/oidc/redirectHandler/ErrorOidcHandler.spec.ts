@@ -71,6 +71,8 @@ describe("ErrorOidcHandler", () => {
     it("calls the onError callback if given with both parameters", async () => {
       window.fetch = jest.fn();
       const mockEmitter = new EventEmitter();
+      // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events
+      mockEmitter.on(EVENTS.ERROR, jest.fn());
       const mockEmit = jest.spyOn(mockEmitter, "emit");
 
       const redirectHandler = new ErrorOidcHandler();
@@ -91,6 +93,8 @@ describe("ErrorOidcHandler", () => {
       window.fetch = jest.fn();
       const mockEmitter = new EventEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
+      // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events
+      mockEmitter.on(EVENTS.ERROR, jest.fn());
 
       const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle(

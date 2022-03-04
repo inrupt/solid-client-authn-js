@@ -158,6 +158,9 @@ export class Session extends EventEmitter {
     this.on(EVENTS.TIMEOUT_SET, (timeoutHandle: number) => {
       this.lastTimeoutHandle = timeoutHandle;
     });
+
+    this.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
   }
 
   /**
@@ -202,12 +205,16 @@ export class Session extends EventEmitter {
   /**
    * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
    */
-  logout = async (): Promise<void> => {
+  logout = async (): Promise<void> => this.internalLogout(true);
+
+  private internalLogout = async (emitEvent: boolean): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId);
     // Clears the timeouts on logout so that Node does not hang.
     clearTimeout(this.lastTimeoutHandle);
     this.info.isLoggedIn = false;
-    this.emit("logout");
+    if (emitEvent) {
+      this.emit(EVENTS.LOGOUT);
+    }
   };
 
   /**
@@ -242,7 +249,7 @@ export class Session extends EventEmitter {
           if (sessionInfo.isLoggedIn) {
             // The login event can only be triggered **after** the user has been
             // redirected from the IdP with access and ID tokens.
-            this.emit("login");
+            this.emit(EVENTS.LOGIN);
           }
         }
       } finally {
@@ -260,7 +267,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes login.
    */
   onLogin(callback: () => unknown): void {
-    this.on("login", callback);
+    this.on(EVENTS.LOGIN, callback);
   }
 
   /**
@@ -269,7 +276,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes logout.
    */
   onLogout(callback: () => unknown): void {
-    this.on("logout", callback);
+    this.on(EVENTS.LOGOUT, callback);
   }
 
   onNewRefreshToken(callback: (newToken: string) => unknown): void {

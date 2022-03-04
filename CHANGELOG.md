@@ -11,7 +11,9 @@ The following changes have been implemented but not released yet:
 
 ### Bugfixes
 
-- 
+#### browser
+
+- Silent authentication is only attempted once, and no longer retries indefinitely on failure.  
 
 ## 1.11.5 - 2022-02-14
 

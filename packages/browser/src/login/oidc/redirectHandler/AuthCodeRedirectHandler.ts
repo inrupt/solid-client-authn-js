@@ -42,7 +42,6 @@ import {
   CodeExchangeResult,
 } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
-import { KEY_CURRENT_SESSION } from "../../../constant";
 
 // A lifespan of 30 minutes is ESS's default. This could be removed if we
 // configure the server to return the remaining lifespan of the cookie.
@@ -156,11 +155,6 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       "issuer",
       { errorIfNull: true }
     )) as string;
-
-    // Store the current session ID specifically in 'localStorage' (i.e., not using
-    // any other storage mechanism), as we don't deem this information to be
-    // sensitive, and we want to ensure it survives a browser tab refresh.
-    window.localStorage.setItem(KEY_CURRENT_SESSION, storedSessionId);
 
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(issuer);
     const client: IClient = await this.clientRegistrar.getClient(

@@ -41,7 +41,6 @@ import {
 } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
-import { KEY_CURRENT_SESSION } from "../../../constant";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
 import {
   mockDefaultTokenRefresher,
@@ -455,11 +454,6 @@ describe("AuthCodeRedirectHandler", () => {
       });
       await authCodeRedirectHandler.handle(
         "https://coolsite.com/redirect?code=someCode&state=oauth2StateValue"
-      );
-      // Check that the current session is stored correctly __specifically__ in
-      // 'localStorage'.
-      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBe(
-        "mySession"
       );
       await expect(
         mockedStorage.getForUser("mySession", "redirectUrl", {

@@ -104,9 +104,7 @@ export async function silentlyAuthenticate(
   },
   session: Session
 ): Promise<boolean> {
-  // Check if we have session information in storage - if we do then we may be
-  // currently logged in, and the user has refreshed their browser page.
-  const storedSessionInfo = await clientAuthn.validateCurrentSession();
+  const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
   if (storedSessionInfo !== null) {
     // It can be really useful to save the user's current browser location,
     // so that we can restore it after completing the silent authentication
@@ -227,6 +225,18 @@ export class Session extends EventEmitter {
         this
       )
     );
+
+    // When a session is logged in, we want to track its ID in local storage to
+    // enable silent refresh. The current session ID specifically stored in 'localStorage'
+    // (as opposed to using our storage abstraction layer) because it is only
+    // used in a browser-specific mechanism.
+    this.on(EVENTS.LOGIN, () =>
+      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId)
+    );
+
+    this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
+
+    this.on(EVENTS.ERROR, () => this.internalLogout(false));
   }
 
   /**
@@ -272,14 +282,29 @@ export class Session extends EventEmitter {
   };
 
   /**
-   * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
+   * An internal logout function, to control whether or not the logout signal
+   * should be sent, i.e. if the logout was user-initiated or is the result of
+   * an external event.
+   *
+   * @hidden
    */
-  logout = async (): Promise<void> => {
+  private internalLogout = async (emitSignal: boolean): Promise<void> => {
+    // Clearing this value means that silent refresh will no longer be attempted.
+    // In particular, in the case of a silent authentication error it prevents
+    // from getting stuck in an authentication retries loop.
+    window.localStorage.removeItem(KEY_CURRENT_SESSION);
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
     this.tmpFetchWithCookies = false;
-    this.emit("logout");
+    if (emitSignal) {
+      this.emit(EVENTS.LOGOUT);
+    }
   };
+
+  /**
+   * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
+   */
+  logout = async (): Promise<void> => this.internalLogout(true);
 
   /**
    * Completes the login process by processing the information provided by the
@@ -394,13 +419,13 @@ export class Session extends EventEmitter {
       if (currentUrl === null) {
         // The login event can only be triggered **after** the user has been
         // redirected from the IdP with access and ID tokens.
-        this.emit("login");
+        this.emit(EVENTS.LOGIN);
       } else {
         // If an URL is stored in local storage, we are being logged in after a
         // silent authentication, so remove our currently stored URL location
         // to clean up our state now that we are completing the re-login process.
         window.localStorage.removeItem(KEY_CURRENT_URL);
-        this.emit("sessionRestore", currentUrl);
+        this.emit(EVENTS.SESSION_RESTORED, currentUrl);
       }
     } else if (options.restorePreviousSession === true) {
       // Silent authentication happens after a refresh, which means there are no
@@ -442,7 +467,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes login.
    */
   onLogin(callback: () => unknown): void {
-    this.on("login", callback);
+    this.on(EVENTS.LOGIN, callback);
   }
 
   /**
@@ -451,7 +476,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes logout.
    */
   onLogout(callback: () => unknown): void {
-    this.on("logout", callback);
+    this.on(EVENTS.LOGOUT, callback);
   }
 
   /**
@@ -478,7 +503,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
    */
   onSessionRestore(callback: (currentUrl: string) => unknown): void {
-    this.on("sessionRestore", callback);
+    this.on(EVENTS.SESSION_RESTORED, callback);
   }
 
   /**
