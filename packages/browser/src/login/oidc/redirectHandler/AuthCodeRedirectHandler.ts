@@ -176,7 +176,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
     );
 
     let tokens: CodeExchangeResult;
-    const referenceTime = Date.now();
+    const tokenCreatedAt = Date.now();
 
     if (isDpop) {
       tokens = await getDpopToken(issuerConfig, client, {
@@ -255,7 +255,7 @@ export class AuthCodeRedirectHandler implements IRedirectHandler {
       fetch: authFetch,
       expirationDate:
         typeof tokens.expiresIn === "number"
-          ? referenceTime + tokens.expiresIn * 1000
+          ? tokenCreatedAt + tokens.expiresIn * 1000
           : null,
     });
   }
