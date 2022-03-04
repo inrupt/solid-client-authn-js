@@ -9,11 +9,19 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### New features
+
+- 
+
+## 1.11.6 - 2022-03-04
+
 ### Bugfixes
 
 #### browser
 
-- Silent authentication is only attempted once, and no longer retries indefinitely on failure.  
+- Silent authentication is only attempted once, and no longer retries indefinitely on failure.
+- Default values are provided for the OIDC Provider supported scopes if not present
+in the configuration. This fixes https://github.com/inrupt/solid-client-authn-js/issues/1991.
 
 ## 1.11.5 - 2022-02-14
 
