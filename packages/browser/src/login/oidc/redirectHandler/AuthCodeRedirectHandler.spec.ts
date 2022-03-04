@@ -572,16 +572,7 @@ describe("AuthCodeRedirectHandler", () => {
         // This mocks how oidc-client stores session information
         "oidc.oauth2StateValue": "some arbitrary value",
       });
-      const mockedFetch = jest.fn(global.fetch).mockReturnValue(
-        new Promise((resolve) => {
-          resolve(
-            new Response("", {
-              status: 200,
-            })
-          );
-        })
-      );
-      window.fetch = mockedFetch;
+      mockFetch(new Response());
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockDefaultStorageUtility(),
