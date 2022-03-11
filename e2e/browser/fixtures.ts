@@ -10,13 +10,14 @@ import {
   deleteContainer,
   saveFileInContainer,
   getSourceUrl,
+  access_v1,
   access_v2,
   deleteFile,
   createContainerInContainer,
 } from "@inrupt/solid-client";
 import { AppPage } from "./pages/AppPage";
 
-const { setPublicAccess, setAgentAccess } = access_v2;
+// const { setPublicAccess, setAgentAccess } = access_v2;
 
 export type Options = {};
 export type Fixtures = {
@@ -130,6 +131,9 @@ export const test = base.extend<Fixtures>({
       containerUrl: testContainerUrl,
       session,
     });
+
+    const { setPublicAccess, setAgentAccess } =
+      environment.environment === "ESS Production" ? access_v1 : access_v2;
 
     await setPublicAccess(
       publicFileUrl,
