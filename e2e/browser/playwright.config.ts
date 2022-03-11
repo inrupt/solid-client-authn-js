@@ -32,16 +32,17 @@ const config: PlaywrightTestConfig = {
   reporter: process.env.CI ? "github" : "list",
   use: {
     headless: true,
+    // Don't leak the env to the browser:
+    // Comment out if not running headless browser
+    launchOptions: {
+      env: {},
+    },
     // Screenshots actually don't give us any value when trying to debug:
     screenshot: "off",
     // On CI we want all the trace results, but in local development, you really
     // only want those for failures:
     trace: process.env.CI ? "on" : "retain-on-failure",
     video: process.env.CI ? "on" : "retain-on-failure",
-    // Don't leak the env to the browser:
-    launchOptions: {
-      env: {},
-    },
   },
   // We need just a little more time on CI:
   timeout: process.env.CI ? 3 * 60_000 : 60_000,
