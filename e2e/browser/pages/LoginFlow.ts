@@ -13,7 +13,7 @@ export class LoginFlow {
   async perform(username: string, password: string) {
     const currentUrl = new URL(this.page.url());
 
-    if (currentUrl.hostname.endsWith("inrupt.com")) {
+    if (currentUrl.hostname.includes("amazoncognito")) {
       return this.performCognitoLogin(username, password);
     } else if (currentUrl.hostname.endsWith("inrupt.net")) {
       return this.performNssLogin(username, password);
