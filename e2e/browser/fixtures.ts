@@ -7,12 +7,12 @@ import { getTestingEnvironment, TestingEnvironment } from "../setup/e2e-setup";
 import { Session } from "@inrupt/solid-client-authn-node";
 import {
   getPodUrlAll,
-  createContainerAt,
   deleteContainer,
   saveFileInContainer,
   getSourceUrl,
   access_v2,
   deleteFile,
+  createContainerInContainer,
 } from "@inrupt/solid-client";
 import { AppPage } from "./pages/AppPage";
 
@@ -104,15 +104,10 @@ export const test = base.extend<Fixtures>({
       fetch: session.fetch,
     });
 
-    // Usually there's only a single Pod URL on the test accounts, so this *should* be fine:
-    const rootContainer = pods[0];
-
-    // Generating a long random container identifier to prevent conflicts between tests:
-    const testContainerId = crypto.randomBytes(16).toString("hex");
-
     // Create the container:
-    const testContainer = await createContainerAt(
-      rootContainer + testContainerId + "/",
+    const testContainer = await createContainerInContainer(
+      // Usually there's only a single Pod URL on the test accounts, so this *should* be fine:
+      pods[0],
       {
         fetch: session.fetch,
       }
@@ -150,12 +145,13 @@ export const test = base.extend<Fixtures>({
     );
 
     const nonExistentResource =
-      rootContainer +
-      testContainerId +
+      getSourceUrl(testContainer) +
       "/" +
       crypto.randomBytes(16).toString("hex") +
       ".txt";
 
+    // The code before the call to use is the setup, and after is the teardown.
+    // This is the value the Fixture will be using.
     await use({
       url: getSourceUrl(testContainer),
       publicResource: publicFileUrl,
