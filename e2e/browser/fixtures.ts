@@ -11,12 +11,12 @@ import {
   deleteContainer,
   saveFileInContainer,
   getSourceUrl,
-  access,
+  access_v2,
   deleteFile,
 } from "@inrupt/solid-client";
 import { AppPage } from "./pages/AppPage";
 
-const { setPublicAccess, setAgentAccess } = access;
+const { setPublicAccess, setAgentAccess } = access_v2;
 
 export type Options = {};
 export type Fixtures = {
