@@ -9,9 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
-### New features
+### Bugfixes
 
 - @inrupt/oidc-client-ext: remove ts-jest from package dependencies.
+- The PKCE verifier is now cleared from storage as soon as it has been used in the
+token exchange, regardless of the token type (it used to not be cleared from part
+of the storage when getting a DPoP-bound token).
 
 ## 1.11.6 - 2022-03-04
 
