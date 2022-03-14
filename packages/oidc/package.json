@@ -29,9 +29,9 @@
     "cross-fetch": "^3.0.6",
     "eslint": "^7.19.0",
     "jest": "^27.4.3",
-    "ts-jest": "^27.0.7",
     "rollup": "^2.38.4",
-    "rollup-plugin-typescript2": "^0.31.1"
+    "rollup-plugin-typescript2": "^0.31.1",
+    "ts-jest": "^27.0.7"
   },
   "dependencies": {
     "@inrupt/oidc-client": "^1.11.6",
