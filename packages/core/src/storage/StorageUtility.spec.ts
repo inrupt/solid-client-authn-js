@@ -598,6 +598,26 @@ describe("loadOidcContextFromStorage", () => {
       dpop: true,
     });
   });
+
+  it("Clears the code verifier", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "https://my.idp/",
+        codeVerifier: "some code verifier",
+        redirectUrl: "https://my.app/redirect",
+        dpop: "true",
+      },
+    });
+
+    await loadOidcContextFromStorage(
+      "mySession",
+      mockedStorage,
+      mockIssuerConfigFetcher(mockIssuerConfig())
+    );
+    await expect(
+      mockedStorage.getForUser("mySession", "codeVerifier")
+    ).resolves.toBeUndefined();
+  });
 });
 
 describe("saveSessionInfoToStorage", () => {
