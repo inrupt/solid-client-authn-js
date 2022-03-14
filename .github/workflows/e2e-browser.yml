@@ -20,8 +20,7 @@ jobs:
         # so we only need to test in one.
         node-version: [16.x]
         # NSS does not support static client registration, which we rely on for testing.
-        # FIXME: "ESS Dev-Next" is disabled for now due to errors, should be able to be re-enabled before merge:
-        environment-name: ["ESS Production"]
+        environment-name: ["ESS Production", "ESS Dev-Next"]
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
