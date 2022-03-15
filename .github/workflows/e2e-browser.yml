@@ -40,15 +40,12 @@ jobs:
       - run: npm run build
       - name: Install e2e tests dependencies
         run: |
-          cd e2e/browser/
           npm ci
-          npx playwright install-deps chromium firefox webkit
-          npx playwright install
+          npx playwright install --with-deps
+        working-directory: e2e/browser/
       - name: Prepare browser-based end-to-end tests
-        run: |
-          cd packages/browser/examples/demoClientApp
-          npm install
-          cd ../../../../
+        run: npm install
+        working-directory: packages/browser/examples/demoClientApp
       - name: Run browser-based end-to-end tests
         run: npm run test:e2e:browser
         env:
