@@ -1,11 +1,13 @@
 {
+  "private": true,
   "name": "e2e-browser",
   "version": "1.0.0",
-  "description": "TestCafe end-2-end authentication test runner",
-  "main": "index.ts",
+  "description": "Playwright end-2-end test runner for solid-client-authn-browser",
   "scripts": {
-    "test": "testcafe",
-    "e2e-test-ci": "testcafe firefox:headless,chrome:headless:userAgent=\"Browser-based solid-client-authn end-to-end tests running in CI (only Chrome supports userAgent overide).\" --screenshots takeOnFails=true,path=./e2e-browser-failures --retry-test-pages --hostname localhost"
+    "start": "cd ../../packages/browser/examples/demoClientApp && npm run start",
+    "test": "playwright test",
+    "test:parallel": "playwright test --workers 4",
+    "clean:testdata": "ts-node scripts/cleanup.ts"
   },
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
@@ -13,8 +15,11 @@
   "author": "Inrupt, Inc.",
   "license": "MIT",
   "devDependencies": {
-    "@testing-library/testcafe": "^4.2.3",
+    "@inrupt/solid-client": "^1.20.1",
+    "@inrupt/solid-client-authn-node": "^1.11.6",
+    "@inrupt/vocab-common-rdf": "^1.0.3",
+    "@playwright/test": "^1.18.0",
     "dotenv-flow": "^3.2.0",
-    "testcafe": "^1.9.4"
+    "ts-node": "^10.4.0"
   }
 }

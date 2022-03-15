@@ -36,8 +36,8 @@ jobs:
       - run: npm ci
       - run: npm run bootstrap -- --ci
       - run: npm run build
-      - run: npm run test:e2e
-        env: 
+      - run: npm run test:e2e:node
+        env:
           E2E_TEST_POD: ${{ secrets.E2E_TEST_POD }}
           E2E_TEST_IDP: ${{ secrets.E2E_TEST_IDP }}
           E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
