@@ -30,8 +30,7 @@ specified browsers:
 ```script
 cd e2e/browser/
 npm ci
-npx playwright install-deps chromium firefox webkit
-npx playwright install
+npx playwright install --with-deps
 ```
 
 Finally, you can run the tests with the following command:
