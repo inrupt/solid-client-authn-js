@@ -9,6 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### New features
+
+- 
+
+## 1.11.7 - 2022-03-16
+
 ### Bugfixes
 
 - @inrupt/oidc-client-ext: remove ts-jest from package dependencies.
