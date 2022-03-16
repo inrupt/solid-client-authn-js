@@ -32,9 +32,7 @@ jobs:
       - run: npm run bootstrap -- --ci
       - run: npm run build
       - name: Install e2e tests dependencies
-        run: |
-          npm ci
-          npx playwright install --with-deps
+        run: npx playwright install --with-deps
         working-directory: e2e/browser/
       - name: Prepare browser-based end-to-end tests
         run: npm install
