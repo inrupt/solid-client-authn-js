@@ -134,16 +134,6 @@ export async function saveSessionInfoToStorage(
   }
 }
 
-export type ResourceServerSession = {
-  webId: string;
-  sessions: Record<
-    string,
-    {
-      expiration: number;
-    }
-  >;
-};
-
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
  * @hidden

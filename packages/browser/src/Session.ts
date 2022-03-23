@@ -28,7 +28,6 @@ import {
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
-  ResourceServerSession,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
