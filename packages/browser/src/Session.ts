@@ -83,6 +83,8 @@ export interface IHandleIncomingRedirectOptions {
    * `useEssSession` defaults to false and will be removed in the future; to
    * preserve sessions across page reloads, use of `restorePreviousSession` is
    * recommended.
+   *
+   * @deprecated
    */
   useEssSession?: boolean;
   /**
@@ -147,9 +149,6 @@ export class Session extends EventEmitter {
   private clientAuthentication: ClientAuthentication;
 
   private tokenRequestInProgress = false;
-
-  // Remove this when removing the `useEssSession` workaround:
-  private tmpFetchWithCookies = false;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -270,16 +269,8 @@ export class Session extends EventEmitter {
    * @param url The URL from which data should be fetched.
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
-  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    return this.clientAuthentication.fetch(url, {
-      ...init,
-      credentials: this.tmpFetchWithCookies
-        ? /* istanbul ignore next Simulating a cookie-enabled session in tests is too much work for a temporary, disabled-by-default workaround: */
-          "include"
-        : /* istanbul ignore next Simulating a cookie-enabled session in tests is too much work for a temporary, disabled-by-default workaround: */
-          init?.credentials,
-    });
-  };
+  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> =>
+    this.clientAuthentication.fetch(url, init);
 
   /**
    * An internal logout function, to control whether or not the logout signal
@@ -295,7 +286,6 @@ export class Session extends EventEmitter {
     window.localStorage.removeItem(KEY_CURRENT_SESSION);
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
-    this.tmpFetchWithCookies = false;
     if (emitSignal) {
       this.emit(EVENTS.LOGOUT);
     }
@@ -332,81 +322,6 @@ export class Session extends EventEmitter {
       postRedirectUrlToParent(url);
       return undefined;
     }
-
-    // Unfortunately, regular sessions are lost when the user refreshes the page or opens a new tab.
-    // While we're figuring out the API for a longer-term solution, as a temporary workaround some
-    // *resource* servers set a cookie that keeps the user logged in after authenticated requests,
-    // and expose the fact that they set it on a special endpoint.
-    // After login, we store that fact in LocalStorage. This means that we can now look for that
-    // data, and if present, indicate that the user is already logged in.
-    // Note that there are a lot of edge cases that won't work well with this approach, so it willl
-    // be removed in due time, and is disabled by default.
-    if (
-      options.useEssSession !== true ||
-      options.restorePreviousSession === true
-    ) {
-      window.localStorage.setItem(
-        "tmp-resource-server-session-enabled",
-        "false"
-      );
-    } else {
-      window.localStorage.setItem(
-        "tmp-resource-server-session-enabled",
-        "true"
-      );
-    }
-    const storedSessionCookieReference = window.localStorage.getItem(
-      "tmp-resource-server-session-info"
-    );
-    if (
-      typeof storedSessionCookieReference === "string" &&
-      options.restorePreviousSession !== true &&
-      options.useEssSession === true
-    ) {
-      // TOOD: Re-use the type used when writing this data:
-      // https://github.com/inrupt/solid-client-authn-js/pull/920/files#diff-659ac87dfd3711f4cfcea3c7bf6970980f4740fd59df45f04c7977bffaa23e98R118
-      // To keep temporary code together
-      // eslint-disable-next-line no-inner-declarations
-      function isValidSessionCookieReference(
-        reference: Record<string, unknown>
-      ): reference is ResourceServerSession {
-        const resourceServers = Object.keys(
-          (reference as ResourceServerSession).sessions ?? {}
-        );
-        return (
-          typeof (reference as ResourceServerSession).webId === "string" &&
-          resourceServers.length > 0 &&
-          typeof (reference as ResourceServerSession).sessions[
-            resourceServers[0]
-          ].expiration === "number"
-        );
-      }
-      const reference = JSON.parse(storedSessionCookieReference);
-      if (isValidSessionCookieReference(reference)) {
-        const resourceServers = Object.keys(reference.sessions);
-        const webIdOrigin = new URL(reference.webId).hostname;
-        const ownResourceServer = resourceServers.find((resourceServer) => {
-          return new URL(resourceServer).hostname === webIdOrigin;
-        });
-        // Usually the user's WebID is also a Resource server for them,
-        // so we pick the expiration time for that. If it doesn't exist,
-        // we just pick the first (and probably only) one:
-        const relevantServer = ownResourceServer ?? resourceServers[0];
-        // If the cookie is valid for fewer than five minutes,
-        // pretend it's not valid anymore already, to avoid small misalignments
-        // resulting in invalid states:
-        if (
-          reference.sessions[relevantServer].expiration - Date.now() >
-          5 * 60 * 1000
-        ) {
-          this.info.isLoggedIn = true;
-          this.info.webId = reference.webId;
-          this.tmpFetchWithCookies = true;
-          return this.info;
-        }
-      }
-    }
-    // end of temporary workaround.
 
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(

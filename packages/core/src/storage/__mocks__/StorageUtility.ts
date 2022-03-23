@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IStorage, StorageUtility } from "../..";
+import { IStorage, StorageUtility } from "../../";
 import IStorageUtility from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
@@ -55,19 +55,6 @@ export const StorageUtilityMock: IStorageUtility = {
   },
   deleteAllUserData: async (userId: string, options?: { secure?: boolean }) => {
     /* do nothing */
-  },
-  /* eslint-enable @typescript-eslint/no-unused-vars */
-  storeResourceServerSessionInfo: async (
-    _webId: string,
-    _resourceServerIri: string,
-    _sessionExpires: number
-  ): Promise<void> => {
-    // Do nothing
-  },
-  clearResourceServerSessionInfo: async (
-    _resourceServerIri: string
-  ): Promise<void> => {
-    // Do nothing
   },
 };
 

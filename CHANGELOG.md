@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Breaking change
+
+- the `useEssSession` option is deprecated, and the associated session endpoint
+is no longer used. Note that this option defaulted to false, and no public ESS
+instance was enabling this endpoint, so unless you were explicitly using this
+feature in an ESS instance you were running yourself, this change is transparent
+to you.
+
 ### New features
 
 - 

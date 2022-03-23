@@ -35,10 +35,7 @@ import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
-import {
-  AuthCodeRedirectHandler,
-  DEFAULT_LIFESPAN,
-} from "./AuthCodeRedirectHandler";
+import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { RedirectorMock } from "../__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
@@ -514,15 +511,11 @@ describe("AuthCodeRedirectHandler", () => {
     it("returns the expiration time normalised to the current time", async () => {
       mockOidcClient();
       window.fetch = jest.fn();
-      mockLocalStorage({
-        "tmp-resource-server-session-enabled": "false",
-      });
       const MOCK_TIMESTAMP = 10000;
       Date.now = jest
         .fn()
         // Date.now is called twice: once to be able to calculate the auth token expiry time,
         // and once to set the cookie expiry. We only care about the second in this test.
-        .mockReturnValueOnce(MOCK_TIMESTAMP)
         .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -541,9 +534,6 @@ describe("AuthCodeRedirectHandler", () => {
     it("returns null for the expiration time if none was provided", async () => {
       const mockedOidcClient = mockOidcClient();
       window.fetch = jest.fn();
-      mockLocalStorage({
-        "tmp-resource-server-session-enabled": "false",
-      });
       mockedOidcClient.getBearerToken = jest
         .fn(getBearerToken)
         .mockResolvedValueOnce({
@@ -582,165 +572,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
   });
 
-  it("stores information about the resource server cookie in local storage on successful authentication", async () => {
-    mockOidcClient();
-
-    // This mocks the fetch to the Resource Server session endpoint
-    // Note: Currently, the endpoint only returns the webid in plain/text, it could
-    // be extended later to also provide the cookie expiration.
-    mockFetch(
-      new Response("https://my.webid", {
-        status: 200,
-      })
-    );
-
-    const MOCK_TIMESTAMP = 10000;
-    Date.now = jest
-      .fn()
-      // Date.now is called twice: once to be able to calculate the auth token expiry time,
-      // and once to set the cookie expiry. We only care about the second in this test.
-      .mockReturnValueOnce(MOCK_TIMESTAMP)
-      .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
-
-    const mockedStorage = mockDefaultStorageUtility();
-
-    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-      storageUtility: mockedStorage,
-    });
-
-    await authCodeRedirectHandler.handle(mockRedirectUrl());
-    expect(
-      JSON.parse(
-        (await mockedStorage.get("tmp-resource-server-session-info")) as string
-      )
-    ).toEqual({
-      webId: "https://my.webid",
-      sessions: {
-        "https://my.webid": {
-          expiration: MOCK_TIMESTAMP + DEFAULT_LIFESPAN,
-        },
-      },
-    });
-  });
-
-  it("does not look the session endpoint up if the ESS cookie workaround has been disabled", async () => {
-    mockOidcClient();
-    mockLocalStorage({
-      "tmp-resource-server-session-enabled": "false",
-    });
-
-    // This mocks the fetch to the Resource Server session endpoint
-    // Note: Currently, the endpoint only returns the webid in plain/text, it could
-    // be extended later to also provide the cookie expiration.
-    mockFetch(
-      new Response("https://my.webid", {
-        status: 200,
-      })
-    );
-
-    const MOCK_TIMESTAMP = 10000;
-    Date.now = jest
-      .fn()
-      // Date.now is called twice: once to be able to calculate the auth token expiry time,
-      // and once to set the cookie expiry. We only care about the second in this test.
-      .mockReturnValueOnce(MOCK_TIMESTAMP)
-      .mockReturnValueOnce(MOCK_TIMESTAMP) as typeof Date.now;
-
-    const mockedStorage = mockDefaultStorageUtility();
-
-    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-      storageUtility: mockedStorage,
-    });
-
-    await authCodeRedirectHandler.handle(mockRedirectUrl());
-    expect(
-      JSON.parse(
-        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
-      )
-    ).toEqual({});
-  });
-
-  it("store nothing if the resource server has no session endpoint", async () => {
-    mockOidcClient();
-    mockLocalStorage({});
-    // This mocks the fetch to the Resource Server session endpoint
-    // Note: Currently, the endpoint only returns the WebID in plain/text, it could
-    // be extended later to also provide the cookie expiration.
-    mockFetch(
-      new Response("", {
-        status: 404,
-      })
-    );
-
-    const mockedStorage = mockDefaultStorageUtility();
-
-    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-      storageUtility: mockedStorage,
-    });
-
-    await authCodeRedirectHandler.handle(mockRedirectUrl());
-    expect(
-      JSON.parse(
-        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
-      )
-    ).toEqual({});
-  });
-
-  it("swallows the exception if the fetch to the session endpoint fails", async () => {
-    mockOidcClient();
-    mockLocalStorage({});
-    window.fetch = (jest.fn() as any)
-      .mockResolvedValueOnce(
-        new Response("https://my.webid", {
-          status: 200,
-        })
-      )
-      .mockRejectedValueOnce("Some error");
-
-    const mockedStorage = mockDefaultStorageUtility();
-
-    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-      storageUtility: mockedStorage,
-    });
-
-    await authCodeRedirectHandler.handle(mockRedirectUrl());
-    expect(
-      JSON.parse(
-        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
-      )
-    ).toEqual({});
-  });
-
-  it("store nothing if the resource server does not recognize the user", async () => {
-    mockOidcClient();
-    mockLocalStorage({});
-    // This mocks the fetch to the Resource Server session endpoint
-    // Note: Currently, the endpoint only returns the WebID in plain/text, it could
-    // be extended later to also provide the cookie expiration.
-    mockFetch(
-      new Response("", {
-        status: 401,
-      })
-    );
-
-    const mockedStorage = mockDefaultStorageUtility({ dpop: false });
-
-    const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-      storageUtility: mockedStorage,
-    });
-
-    await authCodeRedirectHandler.handle(mockRedirectUrl());
-    expect(
-      JSON.parse(
-        (await mockedStorage.get("tmp-resource-server-session-info")) ?? "{}"
-      )
-    ).toEqual({});
-  });
-
   it("returns a fetch that supports the refresh flow", async () => {
-    mockLocalStorage({
-      "tmp-resource-server-session-enabled": "false",
-    });
     mockOidcClient();
     const mockedStorage = mockDefaultStorageUtility();
     const coreModule = jest.requireActual(
