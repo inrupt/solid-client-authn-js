@@ -268,8 +268,9 @@ export class Session extends EventEmitter {
    * @param url The URL from which data should be fetched.
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
-  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> =>
-    this.clientAuthentication.fetch(url, init);
+  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
+    return this.clientAuthentication.fetch(url, init);
+  };
 
   /**
    * An internal logout function, to control whether or not the logout signal
