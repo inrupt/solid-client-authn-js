@@ -235,6 +235,11 @@ export class Session extends EventEmitter {
     this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
 
     this.on(EVENTS.ERROR, () => this.internalLogout(false));
+
+    // @deprecated: Remove this when removing all support for the useEssSession parameter.
+    // This intends at cleaning up local storage of applications from data related
+    // to the resource server session workaround.
+    window.localStorage.removeItem("tmp-resource-server-session-enabled");
   }
 
   /**
