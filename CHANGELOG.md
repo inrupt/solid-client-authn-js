@@ -14,8 +14,9 @@ The following changes have been implemented but not released yet:
 - the `useEssSession` option is deprecated, and the associated session endpoint
 is no longer used. Note that this option defaulted to false, and no public ESS
 instance was enabling this endpoint, so unless you were explicitly using this
-feature in an ESS instance you were running yourself, this change should not affect you.
-to you.
+feature in an ESS instance you were running yourself, this change should not 
+affect you. If you were using this in a demo app, you may want to clear its local
+storage.
 
 ### New features
 
