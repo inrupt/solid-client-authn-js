@@ -83,7 +83,7 @@ export interface IHandleIncomingRedirectOptions {
    * preserve sessions across page reloads, use of `restorePreviousSession` is
    * recommended.
    *
-   * @deprecated
+   * @deprecated unreleased
    */
   useEssSession?: boolean;
   /**
