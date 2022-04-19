@@ -31,8 +31,8 @@ import {
 } from "../../../../dist/index";
 
 const REDIRECT_URL = "http://localhost:3113/";
-const CLIENT_APP_WEBID =
-  "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.ttl#app";
+const CLIENT_IDENTIFIER =
+  "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.jsonld";
 
 export default function App() {
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
@@ -67,7 +67,7 @@ export default function App() {
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
       clientName: "Demo app",
-      clientId: CLIENT_APP_WEBID,
+      clientId: CLIENT_IDENTIFIER,
     });
   };
 

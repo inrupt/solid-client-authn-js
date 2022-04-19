@@ -1,0 +1,8 @@
+{
+  "@context": ["https://www.w3.org/ns/solid/oidc-context.jsonld"],
+  "client_id": "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.jsonld",
+  "client_name": "solid-client-authn-browser demo",
+  "redirect_uris": ["http://localhost:3113/"],
+  "scope" : "openid offline_access webid",
+  "grant_types" : ["refresh_token","authorization_code"]
+}
