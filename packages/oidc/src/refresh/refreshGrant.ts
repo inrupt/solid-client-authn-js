@@ -32,7 +32,10 @@ import {
 import formUrlEncoded from "form-urlencoded";
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 
-interface RefreshRequestBody {
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase */
+
+interface IRefreshRequestBody {
   grant_type: "refresh_token";
   refresh_token: string;
   scope: typeof DEFAULT_SCOPES;
@@ -48,7 +51,7 @@ export async function refresh(
   client: IClient,
   dpopKey?: KeyPair
 ): Promise<TokenEndpointResponse> {
-  const requestBody: RefreshRequestBody = {
+  const requestBody: IRefreshRequestBody = {
     grant_type: "refresh_token",
     refresh_token: refreshToken,
     scope: DEFAULT_SCOPES,
