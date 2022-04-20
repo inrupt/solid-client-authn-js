@@ -26,6 +26,7 @@ import {
   IIssuerConfig,
   KeyPair,
   TokenEndpointResponse,
+  DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
 // NB: once this is rebased on #1560, change dependency to core package.
 import formUrlEncoded from "form-urlencoded";
@@ -34,7 +35,7 @@ import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 interface RefreshRequestBody {
   grant_type: "refresh_token";
   refresh_token: string;
-  scope: "openid offline_access webid";
+  scope: typeof DEFAULT_SCOPES;
   client_id?: string;
 }
 
@@ -50,7 +51,7 @@ export async function refresh(
   const requestBody: RefreshRequestBody = {
     grant_type: "refresh_token",
     refresh_token: refreshToken,
-    scope: "openid offline_access webid",
+    scope: DEFAULT_SCOPES,
   };
 
   let dpopHeader = {};

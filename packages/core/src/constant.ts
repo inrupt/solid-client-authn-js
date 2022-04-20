@@ -46,3 +46,14 @@ export const EVENTS = {
  * We want to refresh a token 5 seconds before it expires.
  */
 export const REFRESH_BEFORE_EXPIRATION_SECONDS = 5;
+
+// The openid scope requests an OIDC ID token token to be returned.
+const SCOPE_OPENID = "openid";
+// The offline_access scope requests a refresh token to be returned.
+const SCOPE_OFFLINE = "offline_access";
+// The webid scope is required as per https://solid.github.io/solid-oidc/#webid-scope
+const SCOPE_WEBID = "webid";
+// The scopes are expected as a space-separated list.
+export const DEFAULT_SCOPES = [SCOPE_OPENID, SCOPE_OFFLINE, SCOPE_WEBID].join(
+  " "
+);

@@ -33,6 +33,7 @@ import {
   IRedirector,
   IStorageUtility,
   LoginResult,
+  DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
@@ -78,9 +79,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirect_uri: oidcLoginOptions.redirectUrl,
       code_challenge_method: "S256",
       prompt: "consent",
-      // The offline_access scope asks the provider to issue a refresh token.
-      // The webid scope is required as per https://solid.github.io/solid-oidc/#webid-scope
-      scope: "openid offline_access webid",
+      scope: DEFAULT_SCOPES,
     });
 
     // Stores information to be reused after reload
