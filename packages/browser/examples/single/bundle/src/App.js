@@ -31,7 +31,8 @@ import {
 } from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = "http://localhost:3113/";
-const CLIENT_IDENTIFIER = "https://zwifi.eu/client-id.json";
+const CLIENT_IDENTIFIER =
+  "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.jsonld";
 
 export default function App() {
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
