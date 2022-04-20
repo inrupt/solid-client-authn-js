@@ -31,6 +31,13 @@ import {
 import formUrlEncoded from "form-urlencoded";
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 
+interface RefreshRequestBody {
+  grant_type: "refresh_token";
+  refresh_token: string;
+  scope: "openid offline_access webid";
+  client_id?: string;
+}
+
 // Identifiers in snake_case are mandated by the OAuth spec.
 /* eslint-disable camelcase */
 
@@ -40,10 +47,10 @@ export async function refresh(
   client: IClient,
   dpopKey?: KeyPair
 ): Promise<TokenEndpointResponse> {
-  const requestBody = {
+  const requestBody: RefreshRequestBody = {
     grant_type: "refresh_token",
     refresh_token: refreshToken,
-    scope: "openid offline_access",
+    scope: "openid offline_access webid",
   };
 
   let dpopHeader = {};
@@ -62,6 +69,11 @@ export async function refresh(
         `${client.clientId}:${client.clientSecret}`
       )}`,
     };
+  } else {
+    // If the client ID is present, and there is no client secret, the client
+    // has a Solid-OIDC Client Identifier, and it should be present in the
+    // request body.
+    requestBody.client_id = client.clientId;
   }
 
   const rawResponse = await fetch(issuer.tokenEndpoint, {
