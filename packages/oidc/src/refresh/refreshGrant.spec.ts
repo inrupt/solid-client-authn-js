@@ -63,7 +63,7 @@ describe("refreshGrant", () => {
     );
   });
 
-  it("does not use basic auth if no client secret is available", async () => {
+  it("include the client id in the body if no client secret is available", async () => {
     const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const client = mockClient();
 
@@ -71,8 +71,12 @@ describe("refreshGrant", () => {
     expect(myFetch.mock.calls[0][0]).toBe(
       mockIssuer().tokenEndpoint.toString()
     );
+    // The basic auth scheme should not have been used
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers.Authorization).toBeUndefined();
+
+    const body = myFetch.mock.calls[0][1]?.body as BodyInit;
+    expect(body.toString()).toContain("client_id=some+client");
   });
 
   it("includes a DPoP proof if a DPoP key is provided", async () => {
