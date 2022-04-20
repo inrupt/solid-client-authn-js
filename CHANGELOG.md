@@ -18,9 +18,13 @@ feature in an ESS instance you were running yourself, this change should not
 affect you. If you were using this in a demo app, you may want to clear its local
 storage.
 
-### New features
+### Bugfix
 
-- 
+#### browser
+
+- The refresh flow was broken for browser-based applications using a client identifier, 
+leading to short session lifetime. Now that this is fixed, the background refresh
+will happen normally, and the session will remain active.
 
 ## 1.11.7 - 2022-03-16
 
