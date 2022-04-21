@@ -42,6 +42,18 @@ interface IRefreshRequestBody {
   client_id?: string;
 }
 
+const isValidUrl = (url: string): boolean => {
+  try {
+    // Here, the URL constructor is just called to parse the given string and
+    // verify if it is a well-formed IRI.
+    // eslint-disable-next-line no-new
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Identifiers in snake_case are mandated by the OAuth spec.
 /* eslint-disable camelcase */
 
@@ -73,8 +85,8 @@ export async function refresh(
         `${client.clientId}:${client.clientSecret}`
       )}`,
     };
-  } else {
-    // If the client ID is present, and there is no client secret, the client
+  } else if (client.clientId !== undefined && isValidUrl(client.clientId)) {
+    // If the client ID is an URL, and there is no client secret, the client
     // has a Solid-OIDC Client Identifier, and it should be present in the
     // request body.
     requestBody.client_id = client.clientId;
