@@ -91,7 +91,7 @@ export async function refresh(
         `${client.clientId}:${client.clientSecret}`
       )}`,
     };
-  } else if (client.clientId !== undefined && isValidUrl(client.clientId)) {
+  } else if (isValidUrl(client.clientId)) {
     // If the client ID is an URL, and there is no client secret, the client
     // has a Solid-OIDC Client Identifier, and it should be present in the
     // request body.
