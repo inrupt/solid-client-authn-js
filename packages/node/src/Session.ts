@@ -23,13 +23,12 @@
  * @hidden
  */
 import { EventEmitter } from "events";
-import {
+import type {
   ILoginInputOptions,
-  InMemoryStorage,
   ISessionInfo,
   IStorage,
-  EVENTS,
 } from "@inrupt/solid-client-authn-core";
+import { InMemoryStorage, EVENTS } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";

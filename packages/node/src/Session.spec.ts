@@ -20,12 +20,12 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
+import type { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
-  ISessionInfo,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { EVENTS } from "@inrupt/solid-client-authn-core/src";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,

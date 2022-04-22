@@ -19,8 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IStorage, StorageUtility } from "../..";
-import IStorageUtility from "../IStorageUtility";
+import { StorageUtility } from "../..";
+import type { IStorage } from "../..";
+import type IStorageUtility from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
 

@@ -19,14 +19,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
+import type {
   ILoginHandler,
   ILogoutHandler,
   IRedirectHandler,
   ISessionInfoManager,
   IStorageUtility,
-  mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import ClientAuthentication from "../ClientAuthentication";
 import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
