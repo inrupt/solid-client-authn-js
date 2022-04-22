@@ -116,7 +116,6 @@ describe("refreshGrant", () => {
   });
 
   it("throws if the client identifier is undefined", async () => {
-    const client = mockClient();
     await expect(
       refresh("some refresh token", mockIssuer(), {
         clientId: undefined,
