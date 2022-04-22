@@ -63,6 +63,12 @@ export async function refresh(
   client: IClient,
   dpopKey?: KeyPair
 ): Promise<TokenEndpointResponse> {
+  if (client.clientId === undefined) {
+    throw new Error(
+      "No client ID available when trying to refresh the access token."
+    );
+  }
+
   const requestBody: IRefreshRequestBody = {
     grant_type: "refresh_token",
     refresh_token: refreshToken,
@@ -74,12 +80,6 @@ export async function refresh(
     dpopHeader = {
       DPoP: await createDpopHeader(issuer.tokenEndpoint, "POST", dpopKey),
     };
-  }
-
-  if (client.clientId === undefined) {
-    throw new Error(
-      "No client ID available when trying to refresh the access token."
-    );
   }
 
   let authHeader = {};
