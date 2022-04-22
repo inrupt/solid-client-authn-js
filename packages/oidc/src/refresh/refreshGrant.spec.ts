@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { IClient } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { jwtVerify, importJWK } from "jose";
 import {
@@ -63,16 +64,37 @@ describe("refreshGrant", () => {
     );
   });
 
-  it("does not use basic auth if no client secret is available", async () => {
+  it("include the client id in the body if it is an IRI and no client secret is available", async () => {
     const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    const client = mockClient();
+    const client = mockClient("https://client.identifier");
 
     await refresh("some refresh token", mockIssuer(), client);
     expect(myFetch.mock.calls[0][0]).toBe(
       mockIssuer().tokenEndpoint.toString()
     );
+    // The basic auth scheme should not have been used
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers.Authorization).toBeUndefined();
+
+    const body = myFetch.mock.calls[0][1]?.body as BodyInit;
+    expect(body.toString()).toContain(
+      "client_id=https%3A%2F%2Fclient.identifier"
+    );
+  });
+
+  it("does not include a non-IRI client ID in the body", async () => {
+    const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
+    const client = mockClient("some non-IRI client id");
+
+    await refresh("some refresh token", mockIssuer(), client);
+    const mockedFetchCall = myFetch.mock.calls[0];
+    expect(mockedFetchCall[0]).toBe(mockIssuer().tokenEndpoint.toString());
+    // The basic auth scheme should not have been used
+    const headers = mockedFetchCall[1]?.headers as Record<string, string>;
+    expect(headers.Authorization).toBeUndefined();
+
+    const body = mockedFetchCall[1]?.body as BodyInit;
+    expect(body.toString()).not.toContain("client_id=some+non-IRI+client+id");
   });
 
   it("includes a DPoP proof if a DPoP key is provided", async () => {
@@ -91,6 +113,16 @@ describe("refreshGrant", () => {
       await importJWK(keyPair.publicKey)
     );
     expect(dpopProof.payload.htu).toBe(mockIssuer().tokenEndpoint.toString());
+  });
+
+  it("throws if the client identifier is undefined", async () => {
+    await expect(
+      refresh("some refresh token", mockIssuer(), {
+        clientId: undefined,
+      } as unknown as IClient)
+    ).rejects.toThrow(
+      "No client ID available when trying to refresh the access token"
+    );
   });
 
   it("throws if the token endpoint returns an unexpected data format (i.e. not JSON)", async () => {

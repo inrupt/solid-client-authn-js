@@ -151,9 +151,9 @@ export const mockDpopTokens = (): TokenEndpointRawResponse => {
   };
 };
 
-export const mockClient = (): IClient => {
+export const mockClient = (clientId = "some client"): IClient => {
   return {
-    clientId: "some client",
+    clientId,
     clientType: "dynamic",
   };
 };

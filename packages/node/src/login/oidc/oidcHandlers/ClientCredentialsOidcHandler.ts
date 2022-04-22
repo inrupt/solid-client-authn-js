@@ -39,6 +39,7 @@ import {
   getWebidFromTokenPayload,
   buildAuthenticatedFetch,
   ITokenRefresher,
+  DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
@@ -83,7 +84,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       {
         grant_type: "client_credentials",
         token_endpoint_auth_method: "client_secret_basic",
-        scope: "openid offline_access webid",
+        scope: DEFAULT_SCOPES,
       },
       {
         DPoP:

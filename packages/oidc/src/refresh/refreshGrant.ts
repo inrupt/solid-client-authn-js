@@ -26,10 +26,33 @@ import {
   IIssuerConfig,
   KeyPair,
   TokenEndpointResponse,
+  DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
 // NB: once this is rebased on #1560, change dependency to core package.
 import formUrlEncoded from "form-urlencoded";
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase */
+
+interface IRefreshRequestBody {
+  grant_type: "refresh_token";
+  refresh_token: string;
+  scope: typeof DEFAULT_SCOPES;
+  client_id?: string;
+}
+
+const isValidUrl = (url: string): boolean => {
+  try {
+    // Here, the URL constructor is just called to parse the given string and
+    // verify if it is a well-formed IRI.
+    // eslint-disable-next-line no-new
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 // Identifiers in snake_case are mandated by the OAuth spec.
 /* eslint-disable camelcase */
@@ -40,10 +63,16 @@ export async function refresh(
   client: IClient,
   dpopKey?: KeyPair
 ): Promise<TokenEndpointResponse> {
-  const requestBody = {
+  if (client.clientId === undefined) {
+    throw new Error(
+      "No client ID available when trying to refresh the access token."
+    );
+  }
+
+  const requestBody: IRefreshRequestBody = {
     grant_type: "refresh_token",
     refresh_token: refreshToken,
-    scope: "openid offline_access",
+    scope: DEFAULT_SCOPES,
   };
 
   let dpopHeader = {};
@@ -62,6 +91,11 @@ export async function refresh(
         `${client.clientId}:${client.clientSecret}`
       )}`,
     };
+  } else if (isValidUrl(client.clientId)) {
+    // If the client ID is an URL, and there is no client secret, the client
+    // has a Solid-OIDC Client Identifier, and it should be present in the
+    // request body.
+    requestBody.client_id = client.clientId;
   }
 
   const rawResponse = await fetch(issuer.tokenEndpoint, {

@@ -33,6 +33,7 @@ import {
   IRedirector,
   IStorageUtility,
   LoginResult,
+  DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
 import { OidcClient } from "@inrupt/oidc-client-ext";
 
@@ -67,9 +68,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       post_logout_redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       response_type: "code",
-      // The offline_access scope requests that a refresh token be returned.
-      // The webid scope is required as per https://solid.github.io/solid-oidc/#webid-scope
-      scope: "openid offline_access webid",
+      scope: DEFAULT_SCOPES,
       filterProtocolClaims: true,
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the

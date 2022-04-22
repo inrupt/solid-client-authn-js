@@ -28,9 +28,12 @@ import {
   handleIncomingRedirect,
   fetch,
   getDefaultSession,
-} from "../../../../dist/index";
+} from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = "http://localhost:3113/";
+// This is the IRI where the Client identifier document (i.e. client-app-profile.jsonld)
+// is available to the OIDC issuer. See https://solid.github.io/solid-oidc/#clientids-document
+// for more information.
 const CLIENT_IDENTIFIER =
   "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.jsonld";
 
