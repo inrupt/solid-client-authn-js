@@ -27,8 +27,8 @@ import {
   KeyPair,
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
+
 // NB: once this is rebased on #1560, change dependency to core package.
-import formUrlEncoded from "form-urlencoded";
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 
 // Identifiers in snake_case are mandated by the OAuth spec.
@@ -66,7 +66,7 @@ export async function refresh(
 
   const rawResponse = await fetch(issuer.tokenEndpoint, {
     method: "POST",
-    body: formUrlEncoded(requestBody),
+    body: new URLSearchParams(requestBody).toString(),
     headers: {
       ...dpopHeader,
       ...authHeader,
