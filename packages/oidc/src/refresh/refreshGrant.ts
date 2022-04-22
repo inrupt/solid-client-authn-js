@@ -76,6 +76,12 @@ export async function refresh(
     };
   }
 
+  if (client.clientId === undefined) {
+    throw new Error(
+      "No client ID available when trying to refresh the access token."
+    );
+  }
+
   let authHeader = {};
   if (client.clientSecret !== undefined) {
     authHeader = {

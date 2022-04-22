@@ -19,6 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { IClient } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { jwtVerify, importJWK } from "jose";
 import {
@@ -112,6 +113,17 @@ describe("refreshGrant", () => {
       await importJWK(keyPair.publicKey)
     );
     expect(dpopProof.payload.htu).toBe(mockIssuer().tokenEndpoint.toString());
+  });
+
+  it("throws if the client identifier is undefined", async () => {
+    const client = mockClient();
+    await expect(
+      refresh("some refresh token", mockIssuer(), {
+        clientId: undefined,
+      } as unknown as IClient)
+    ).rejects.toThrow(
+      "No client ID available when trying to refresh the access token"
+    );
   });
 
   it("throws if the token endpoint returns an unexpected data format (i.e. not JSON)", async () => {
