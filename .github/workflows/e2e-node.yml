@@ -34,8 +34,8 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
       - run: npm ci
-      - run: npm run bootstrap -- --ci
-      - run: npm run build
+      - run: npm ci --workspaces
+      - run: npm run build --workspaces
       - run: npm run test:e2e:node
         env:
           E2E_TEST_POD: ${{ secrets.E2E_TEST_POD }}

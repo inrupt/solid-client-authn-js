@@ -29,8 +29,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
-      - run: npm run bootstrap -- --ci
-      - run: npm run build
+      - run: npm ci --workspaces
+      - run: npm run build --workspaces
       - name: Install e2e tests dependencies
         run: npx playwright install --with-deps
         working-directory: e2e/browser/
