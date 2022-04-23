@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "1.11.8-alpha.2",
+  "version": "1.11.9-alpha.0",
   "license": "MIT",
   "browser": "dist/solid-client-authn.bundle.js",
   "main": "dist/index.js",
