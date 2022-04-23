@@ -1,5 +1,6 @@
 {
   "name": "root",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "demo-app": "cd packages/browser; npm run demo-app",
@@ -13,6 +14,7 @@
     "lint:fix": "lerna run lint:fix",
     "prepublishOnly": "npm run build",
     "publish": "lerna publish",
+    "postpublish": "lerna link convert",
     "publish-preview": "lerna publish from-package",
     "test": "lerna run test --ignore e2e-browser",
     "test:e2e:node": "jest --config jest.e2e.config.js",
