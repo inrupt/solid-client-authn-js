@@ -45,5 +45,10 @@ export default {
       },
     }),
   ],
-  external: ["@inrupt/solid-client", "@inrupt/solid-client-authn-core", "uuid"],
+  external: [
+    "@inrupt/solid-client",
+    "@inrupt/solid-client-authn-core",
+    "@inrupt/oidc-client-ext",
+    "uuid",
+  ],
 };
