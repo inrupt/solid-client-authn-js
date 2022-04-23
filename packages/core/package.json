@@ -3,7 +3,7 @@
   "version": "1.11.8-alpha.2",
   "license": "MIT",
   "main": "dist/index.js",
-  "types": "dist/index",
+  "types": "dist/index.d.ts",
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },
