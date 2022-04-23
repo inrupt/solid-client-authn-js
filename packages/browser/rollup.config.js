@@ -34,7 +34,9 @@ export default {
       name: "solidClientAuthentication",
       globals: {
         // FIXME: inline oidc-client:
+        uuid: "uuid",
         "@inrupt/oidc-client": "oidcClient",
+        "@inrupt/oidc-client-ext": "oidcClientExt",
         "@inrupt/solid-client-authn-core": "solidClientAuthnCore",
       },
       ...commonOutput,
@@ -62,6 +64,7 @@ export default {
     "@inrupt/solid-client",
     "@inrupt/solid-client-authn-core",
     "@inrupt/oidc-client-ext",
+    "@inrupt/oidc-client",
     "uuid",
   ],
 };
