@@ -4,6 +4,10 @@
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist/*",
+    "src/*"
+  ],
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },
@@ -32,5 +36,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "7691f0ec36e228ffde3f66acee895dabc60d4c4c"
 }

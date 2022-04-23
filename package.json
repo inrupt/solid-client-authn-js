@@ -33,7 +33,6 @@
     "@inrupt/solid-client-authn-browser": "file:packages/browser",
     "@inrupt/solid-client-authn-core": "file:packages/core",
     "@inrupt/solid-client-authn-node": "file:packages/node",
-    "@rollup/plugin-typescript": "^8.3.2",
     "e2e-browser": "file:e2e/browser"
   },
   "devDependencies": {
