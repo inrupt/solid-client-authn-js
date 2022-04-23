@@ -39,6 +39,7 @@
     "@inrupt/vocab-common-rdf": "^1.0.3",
     "@inrupt/vocab-inrupt-common": "^0.7.2",
     "@playwright/test": "^1.18.0",
+    "@rollup/plugin-commonjs": "^21.1.0",
     "@rollup/plugin-node-resolve": "^13.2.1",
     "@types/dotenv-flow": "^3.1.0",
     "@types/jest": "^27.0.3",

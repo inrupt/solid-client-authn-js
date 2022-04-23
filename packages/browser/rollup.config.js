@@ -3,6 +3,7 @@ import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import nodePolyfills from "rollup-plugin-polyfill-node";
 import sourcemaps from "rollup-plugin-sourcemaps";
+import commonjs from "@rollup/plugin-commonjs";
 
 export default {
   input: "./src/index.ts",
@@ -27,14 +28,15 @@ export default {
     },
   ],
   plugins: [
-    nodePolyfills({
-      include: ["events", "crypto"],
-    }),
-    sourcemaps(),
+    commonjs(),
     nodeResolve({
       browser: true,
       preferBuiltins: true,
     }),
+    nodePolyfills({
+      include: ["events", "crypto"],
+    }),
+    sourcemaps(),
     typescript({
       // Use our own version of TypeScript, rather than the one bundled with the plugin:
       typescript: require("typescript"),
