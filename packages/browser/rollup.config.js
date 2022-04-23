@@ -34,11 +34,6 @@ export default {
     nodeResolve({
       browser: true,
       preferBuiltins: true,
-      resolveOnly: [
-        "uuid",
-        "@inrupt/solid-client-authn-core",
-        "@inrupt/oidc-client-ext",
-      ],
     }),
     typescript({
       // Use our own version of TypeScript, rather than the one bundled with the plugin:
@@ -50,5 +45,5 @@ export default {
       },
     }),
   ],
-  external: ["@inrupt/solid-client", "@inrupt/solid-client-authn-core"],
+  external: ["@inrupt/solid-client", "@inrupt/solid-client-authn-core", "uuid"],
 };
