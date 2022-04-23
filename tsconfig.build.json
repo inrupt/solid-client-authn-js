@@ -1,7 +1,7 @@
 {
   "include": ["packages/*/src/**/*.ts", "e2e/*/**/*.ts", "tests/**/*.js"],
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ESNext",
     "strict": true,
     "declaration": true,
     "noImplicitAny": true,

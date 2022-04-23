@@ -3,7 +3,8 @@
 
   "compilerOptions": {
     "lib": ["es2018", "dom"],
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "declarationDir": "."
   },
 
   "typedocOptions": {

@@ -1,9 +1,19 @@
 import pkg from "./package.json";
-import typescript from "rollup-plugin-typescript2";
-import nodeResolve from "@rollup/plugin-node-resolve";
+import rootPkg from "../../package.json";
 import nodePolyfills from "rollup-plugin-polyfill-node";
-import sourcemaps from "rollup-plugin-sourcemaps";
-import commonjs from "@rollup/plugin-commonjs";
+import nodeResolve from "@rollup/plugin-node-resolve";
+import typescript from "rollup-plugin-typescript2";
+
+const isProduction = process.env.NODE_ENV === "production";
+
+const resolve = nodeResolve({
+  browser: true,
+  moduleDirectories: rootPkg.workspaces,
+});
+
+const commonOutput = {
+  sourcemap: !isProduction,
+};
 
 export default {
   input: "./src/index.ts",
@@ -11,10 +21,12 @@ export default {
     {
       file: pkg.main,
       format: "cjs",
+      ...commonOutput,
     },
     {
       file: pkg.module,
       format: "esm",
+      ...commonOutput,
     },
     {
       file: pkg.bundle,
@@ -25,25 +37,24 @@ export default {
         "@inrupt/oidc-client": "oidcClient",
         "@inrupt/solid-client-authn-core": "solidClientAuthnCore",
       },
+      ...commonOutput,
     },
   ],
   plugins: [
-    commonjs(),
-    nodeResolve({
-      browser: true,
-      preferBuiltins: true,
-    }),
     nodePolyfills({
       include: ["events", "crypto"],
     }),
-    sourcemaps(),
+    resolve,
     typescript({
       // Use our own version of TypeScript, rather than the one bundled with the plugin:
       typescript: require("typescript"),
-      tsconfigOverride: {
-        compilerOptions: {
-          module: "esnext",
-        },
+      sourceMap: !isProduction,
+      inlineSources: !isProduction,
+      compilerOptions: {
+        outDir: "./dist",
+        declaration: true,
+        declarationDir: ".",
+        noEmit: false,
       },
     }),
   ],

@@ -1,8 +1,5 @@
 {
-  "packages": [
-    "packages/*",
-    "e2e/browser"
-  ],
+  "useWorkspaces": true,
   "command": {
     "bootstrap": {
       "ignore": "example-*"

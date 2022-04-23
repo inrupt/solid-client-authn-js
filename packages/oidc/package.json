@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
-  "browser": "umd/index.js",
+  "bundle": "dist/index.bundle.js",
   "files": [
     "dist/*",
     "src/*"
