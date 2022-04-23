@@ -19,20 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  IRedirector,
-  IRedirectorOptions,
-} from "@inrupt/solid-client-authn-core";
+import { IRedirector } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
-
-export const RedirectorMock = {
-  redirect: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
-      /* void */
-    }
-  ),
-} as unknown as jest.Mocked<IRedirector>;
 
 export const mockRedirector = (): IRedirector => {
   return {

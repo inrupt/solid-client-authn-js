@@ -23,35 +23,20 @@
     "lint:prettier": "prettier \"src/*.{ts,tsx,js,jsx,css}\" \"**/*.{md,mdx,yml}\"",
     "licenses:check": "license-checker --production --out license.csv --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
     "test": "jest --coverage --verbose",
-    "build-api-docs": "npx typedoc --out docs/api/source/api --readme none",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest -i",
+    "build-api-docs": "typedoc --out docs/api/source/api --readme none",
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
-  "devDependencies": {
-    "@types/jest": "^27.0.3",
-    "cross-fetch": "^3.0.6",
-    "eslint": "^7.16.0",
-    "jest": "^27.5.1",
-    "license-checker": "^25.0.1",
-    "ts-jest": "^27.0.7",
-    "ts-loader": "^9.1.1",
-    "tsc-watch": "^5.0.2",
-    "typedoc": "^0.22.4",
-    "typedoc-plugin-markdown": "^3.10.2",
-    "typescript": "^4.0.5",
-    "webpack": "^5.11.0",
-    "webpack-cli": "^4.2.0",
-    "webpack-merge": "^5.7.2"
-  },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^1.11.7",
-    "@inrupt/solid-client-authn-core": "^1.11.7",
+    "@inrupt/oidc-client-ext": "file:../oidc",
+    "@inrupt/solid-client-authn-core": "file:../core",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/node": "^17.0.2",
     "@types/uuid": "^8.3.0",
     "events": "^3.3.0",
     "jose": "^4.3.7",
     "lodash.clonedeep": "^4.5.0",
-    "uuid": "^8.3.1"
+    "uuid": "^8.3.2"
   },
   "publishConfig": {
     "access": "public"

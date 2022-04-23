@@ -16,6 +16,11 @@ export default {
       dir: "umd",
       format: "umd",
       name: "OidcDpopClient",
+      globals: {
+        // FIXME: inline oidc-client:
+        "@inrupt/oidc-client": "oidcClient",
+        "@inrupt/solid-client-authn-core": "solidClientAuthnCore",
+      },
     },
   ],
   plugins: [
@@ -29,7 +34,5 @@ export default {
       },
     }),
   ],
-  // external: ['crypto'],
-  // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true,
+  external: ["@inrupt/solid-client-authn-core", "@inrupt/oidc-client"],
 };

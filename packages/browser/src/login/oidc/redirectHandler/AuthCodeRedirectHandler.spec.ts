@@ -36,7 +36,7 @@ import { Response } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
-import { RedirectorMock } from "../__mocks__/Redirector";
+import { mockRedirector } from "../__mocks__/Redirector";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
 import {
@@ -208,7 +208,7 @@ const mockFetch = (response: Response) => {
 
 const defaultMocks = {
   storageUtility: StorageUtilityMock,
-  redirector: RedirectorMock,
+  redirector: mockRedirector(),
   sessionInfoManager: SessionInfoManagerMock,
   clientRegistrar: mockClientRegistrar(mockClient()),
   issuerConfigFetcher: mockIssuerConfigFetcher(mockIssuer()),

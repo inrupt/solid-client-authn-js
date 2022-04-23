@@ -25,12 +25,12 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
 
-export const RedirectorMock: jest.Mocked<IRedirector> = {
-  redirect: jest.fn(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
-      /* void */
-    }
-  ),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
+export const mockedRedirect = jest.fn<
+  void,
+  [redirectUrl: string, redirectOptions: IRedirectorOptions]
+>();
+export const mockRedirector = (): IRedirector => {
+  return {
+    redirect: mockedRedirect,
+  };
+};

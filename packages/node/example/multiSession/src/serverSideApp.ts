@@ -4,9 +4,9 @@
 import {
   getSessionFromStorage,
   getSessionIdFromStorageAll,
-} from "../../../dist/multiSession";
+} from "@inrupt/solid-client-authn-node/dist/multiSession";
 
-import { Session } from "../../../dist/Session";
+import { Session } from "@inrupt/solid-client-authn-node/dist/Session";
 
 import cookieSession from "cookie-session";
 

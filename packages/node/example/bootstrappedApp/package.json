@@ -1,6 +1,7 @@
 {
-  "name": "@inrupt/demo-authn-node-script",
-  "version": "1.0.0",
+  "name": "example-authn-node-script",
+  "version": "0.0.0",
+  "private": true,
   "description": "Demo for script authentication in NodeJS",
   "main": "src/index.js",
   "scripts": {

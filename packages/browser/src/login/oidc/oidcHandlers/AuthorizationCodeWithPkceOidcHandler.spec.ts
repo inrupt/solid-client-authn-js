@@ -19,23 +19,32 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import {
+  jest,
+  it,
+  describe,
+  expect,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
+import mockConsole, { RestoreConsole } from "jest-mock-console";
+
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
 import {
   IOidcOptions,
-  IRedirector,
   IRedirectorOptions,
   mockStorage,
   StorageUtility,
   StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { jest, it, describe, expect } from "@jest/globals";
+
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
 import canHandleTests from "./OidcHandlerCanHandleTest";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
-import { RedirectorMock } from "../__mocks__/Redirector";
+import { mockedRedirect, mockRedirector } from "../__mocks__/Redirector";
 
 jest.mock("@inrupt/oidc-client-ext");
 
@@ -57,10 +66,14 @@ const mockOidcModule = (
 };
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   const defaultMocks = {
     sessionCreator: SessionInfoManagerMock,
     storageUtility: StorageUtilityMock,
-    redirector: RedirectorMock,
+    redirector: mockRedirector(),
   };
 
   function getAuthorizationCodeWithPkceOidcHandler(
@@ -91,20 +104,18 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   describe("handle", () => {
     it("swallows any redirector exceptions", async () => {
       mockOidcModule();
-      const redirectorThatThrowsMock: jest.Mocked<IRedirector> = {
-        redirect: jest.fn(
-          (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
-            throw new Error(
-              `Redirecting to [${redirectUrl}] with options [${redirectOptions}] throws...`
-            );
-          }
-        ),
-      } as any;
+      mockConsole("error");
+
+      mockedRedirect.mockImplementation(
+        (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
+          throw new Error(
+            `Redirecting to [${redirectUrl}] with options [${redirectOptions}] throws...`
+          );
+        }
+      );
 
       const authorizationCodeWithPkceOidcHandler =
-        getAuthorizationCodeWithPkceOidcHandler({
-          redirector: redirectorThatThrowsMock,
-        });
+        getAuthorizationCodeWithPkceOidcHandler();
 
       const oidcOptions: IOidcOptions = {
         ...standardOidcOptions,
@@ -115,8 +126,20 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           grantTypesSupported: ["authorization_code"],
         },
       };
-      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
-      expect(redirectorThatThrowsMock.redirect).toHaveBeenCalledTimes(1);
+
+      await expect(
+        authorizationCodeWithPkceOidcHandler.handle(oidcOptions)
+      ).resolves.toBeUndefined();
+
+      expect(mockedRedirect).toHaveBeenCalledTimes(1);
+
+      // Test the error was even printed to the console Note: this matcher is
+      // pretty nasty due to an Error instance being logged without being
+      // converted to a string:
+      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(
+        (console as jest.Mocked<Console>).error.mock.calls[0][0].toString()
+      ).toMatch(/Error: Redirecting to \[[^\]]+\] with options/);
     });
 
     it("handles login properly with PKCE", async () => {

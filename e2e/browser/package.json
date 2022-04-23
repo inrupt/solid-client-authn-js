@@ -15,11 +15,6 @@
   "author": "Inrupt, Inc.",
   "license": "MIT",
   "devDependencies": {
-    "@inrupt/solid-client": "^1.20.1",
-    "@inrupt/solid-client-authn-node": "^1.11.7",
-    "@inrupt/vocab-common-rdf": "^1.0.3",
-    "@playwright/test": "^1.18.0",
-    "dotenv-flow": "^3.2.0",
-    "ts-node": "^10.4.0"
+    "@inrupt/solid-client-authn-node": "file:../../packages/node"
   }
 }
