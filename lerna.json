@@ -1,4 +1,9 @@
 {
   "packages": ["packages/*", "e2e/browser"],
+  "command": {
+    "bootstrap": {
+      "ignore": "example-*"
+    }
+  },
   "version": "1.11.7"
 }
