@@ -28,7 +28,7 @@ export default {
   ],
   plugins: [
     nodePolyfills({
-      include: ["events"],
+      include: ["events", "crypto"],
     }),
     sourcemaps(),
     nodeResolve({
@@ -51,7 +51,4 @@ export default {
     }),
   ],
   external: ["@inrupt/solid-client", "@inrupt/solid-client-authn-core"],
-  // external: ['crypto'],
-  // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true,
 };
