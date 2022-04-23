@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/oidc-client-ext",
-  "version": "1.11.9-alpha.4",
+  "version": "1.11.9-alpha.5",
   "description": "A module extending oidc-client-js with new features, such as dynamic client registration and DPoP support.",
   "homepage": "https://github.com/inrupt/solid-client-authn-js/tree/main/packages/oidc/",
   "bugs": "https://github.com/inrupt/solid-client-authn-js/issues",
@@ -32,5 +32,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "7691f0ec36e228ffde3f66acee895dabc60d4c4c"
+  "gitHead": "90317c8630f47f3a7ea1998e3385337f5c0446cc"
 }
