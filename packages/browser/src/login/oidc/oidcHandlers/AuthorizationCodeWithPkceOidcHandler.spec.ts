@@ -19,15 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  jest,
-  it,
-  describe,
-  expect,
-  beforeEach,
-  afterEach,
-} from "@jest/globals";
-import mockConsole, { RestoreConsole } from "jest-mock-console";
+import { jest, it, describe, expect, afterEach } from "@jest/globals";
+import mockConsole from "jest-mock-console";
 
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler

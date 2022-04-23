@@ -99,12 +99,13 @@ describe("ClientAuthentication", () => {
     );
   }
 
-  // beforeEach(() => {
-  //   Object.defineProperty(window, "location", {
-  //     writable: true,
-  //     value: { assign: jest.fn() },
-  //   });
-  // });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: { assign: jest.fn() },
+    });
+  });
 
   describe("login", () => {
     const mockEmitter = new EventEmitter();
@@ -113,7 +114,7 @@ describe("ClientAuthentication", () => {
     it("calls login, and uses the window.location.href for the redirect if no redirectUrl is set", async () => {
       // Set a current window location which will be the expected URL to be
       // redirected back to, since we don't pass redirectUrl:
-      window.location.href = "https://coolApp.test/some/redirect";
+      window.location.href = "https://coolapp.test/some/redirect";
 
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(
@@ -128,11 +129,9 @@ describe("ClientAuthentication", () => {
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
         clientId: "coolApp",
-        redirectUrl: "https://coolApp.test/some/redirect",
+        redirectUrl: "https://coolapp.test/some/redirect",
         oidcIssuer: "https://idp.com",
         clientName: "coolApp",
-        clientSecret: undefined,
-        handleRedirect: undefined,
         eventEmitter: mockEmitter,
         tokenType: "DPoP",
       });

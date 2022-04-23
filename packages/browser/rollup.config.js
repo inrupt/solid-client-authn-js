@@ -19,6 +19,11 @@ export default {
       file: pkg.bundle,
       format: "umd",
       name: "solidClientAuthentication",
+      globals: {
+        // FIXME: inline oidc-client:
+        "@inrupt/oidc-client": "oidcClient",
+        "@inrupt/solid-client-authn-core": "solidClientAuthnCore",
+      },
     },
   ],
   plugins: [
