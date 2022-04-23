@@ -8,7 +8,7 @@ import "regenerator-runtime/runtime";
 import {
   Session,
   getClientAuthenticationWithDependencies,
-} from "../../../dist/index";
+} from "@inrupt/solid-client-authn-browser";
 
 const clientApplicationName = "S-C-A Browser Demo Client App";
 let snackBarTimeout = undefined;
@@ -297,6 +297,14 @@ class DemoClientApp extends Component {
     e.preventDefault();
 
     this.setState({ fetchLoading: true });
+
+    if (this.state.fetchRoute.startsWith("/")) {
+      this.setState({
+        fetchBody: "Error: please specify a full URL",
+        fetchLoading: false,
+      });
+      return;
+    }
 
     try {
       const session = getSession();

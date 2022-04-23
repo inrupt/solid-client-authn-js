@@ -45,3 +45,16 @@ export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
+
+/**
+ * @hidden
+ */
+export const RedirectFailureHandlerMock: jest.Mocked<IRedirectHandler> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  canHandle: jest.fn((url: string) => Promise.resolve(true)),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handle: jest.fn((url: string) =>
+    Promise.reject(new Error("Something went wrong"))
+  ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;

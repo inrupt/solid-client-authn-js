@@ -5,18 +5,15 @@
   "types": "dist/index",
   "browser": "dist/solid-client-authn.bundle.js",
   "main": "dist/index.js",
+  "module": "dist/index.es.js",
   "bundle": "dist/solid-client-authn.bundle.js",
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },
   "scripts": {
     "prepublishOnly": "npm run build",
-    "clean": "npm run clean-module && npm run clean-browser && rimraf ./coverage",
-    "clean-module": "rimraf ./dist",
-    "clean-browser": "rimraf ./browserDist",
-    "build": "npm run build-module && npm run build-browser",
-    "build-module": "npm run clean-module && tsc -p tsconfig.json",
-    "build-browser": "npm run clean-browser && webpack --config webpack.browser.js",
+    "clean": "rimraf ./dist",
+    "build": "rollup --config rollup.config.js",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write",
     "lint:check": "npm run lint:eslint && npm run lint:prettier -- --check",
     "lint:eslint": "eslint --config .eslintrc.js \"src/\"",
@@ -40,5 +37,10 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.2.1",
+    "rollup-plugin-polyfill-node": "^0.9.0",
+    "rollup-plugin-sourcemaps": "^0.6.3"
   }
 }
