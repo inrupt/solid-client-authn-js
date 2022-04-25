@@ -19,7 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import formurlencoded from "form-urlencoded";
 import { OidcClient } from "@inrupt/oidc-client";
 import {
   IClient,
@@ -222,20 +221,22 @@ export async function getTokens(
     )}`;
   }
 
+  const requestBody = {
+    /* eslint-disable camelcase */
+    grant_type: data.grantType,
+    redirect_uri: data.redirectUrl,
+    code: data.code,
+    code_verifier: data.codeVerifier,
+    client_id: client.clientId,
+    /* eslint-enable camelcase */
+  };
+
   const tokenRequestInit: RequestInit & {
     headers: Record<string, string>;
   } = {
     method: "POST",
     headers,
-    body: formurlencoded({
-      /* eslint-disable camelcase */
-      grant_type: data.grantType,
-      redirect_uri: data.redirectUrl,
-      code: data.code,
-      code_verifier: data.codeVerifier,
-      client_id: client.clientId,
-      /* eslint-enable camelcase */
-    }),
+    body: new URLSearchParams(requestBody).toString(),
   };
 
   const rawTokenResponse = await await fetch(

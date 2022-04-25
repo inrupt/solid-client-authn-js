@@ -28,19 +28,19 @@ import {
   TokenEndpointResponse,
   DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
+
 // NB: once this is rebased on #1560, change dependency to core package.
-import formUrlEncoded from "form-urlencoded";
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase */
 
-interface IRefreshRequestBody {
+type IRefreshRequestBody = {
   grant_type: "refresh_token";
   refresh_token: string;
   scope: typeof DEFAULT_SCOPES;
   client_id?: string;
-}
+};
 
 const isValidUrl = (url: string): boolean => {
   try {
@@ -100,7 +100,7 @@ export async function refresh(
 
   const rawResponse = await fetch(issuer.tokenEndpoint, {
     method: "POST",
-    body: formUrlEncoded(requestBody),
+    body: new URLSearchParams(requestBody).toString(),
     headers: {
       ...dpopHeader,
       ...authHeader,

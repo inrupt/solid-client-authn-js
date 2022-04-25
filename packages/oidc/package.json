@@ -38,7 +38,6 @@
     "@inrupt/solid-client-authn-core": "^1.11.7",
     "@types/jest": "^27.0.3",
     "@types/uuid": "^8.3.0",
-    "form-urlencoded": "~6.0.3",
     "jose": "^4.3.7",
     "uuid": "^8.3.1"
   },
