@@ -53,24 +53,26 @@ export type DpopHeaderPayload = {
   jti: string;
 };
 
-async function buildDpopFetchOptions(
-  targetUrl: string,
-  authToken: string,
-  dpopKey: KeyPair,
-  defaultOptions?: RequestInit
-): Promise<RequestInit> {
-  const headers = new Headers(defaultOptions?.headers);
-  // Any pre-existing Authorization header should be overriden.
-  headers.set("Authorization", `DPoP ${authToken}`);
-  headers.set(
-    "DPoP",
-    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey)
-  );
-  return {
-    ...defaultOptions,
-    headers,
-  };
-}
+const overrideHeaders = (
+  init: RequestInit | undefined,
+  header: Headers
+): RequestInit => {
+  const overridenInit: RequestInit = init ?? {};
+  console.log("overriding following headers");
+  new Headers(overridenInit.headers).forEach((value, key) => {
+    console.log(`${key}: ${value}`);
+  });
+  header.forEach((value, key) => {
+    const overriddenHeaders = new Headers(overridenInit.headers);
+    overriddenHeaders.set(key, value);
+    overridenInit.headers = overriddenHeaders;
+  });
+  console.log("overriden values: ");
+  new Headers(overridenInit.headers).forEach((value, key) => {
+    console.log(`${key}: ${value}`);
+  });
+  return overridenInit;
+};
 
 async function buildAuthenticatedHeaders(
   targetUrl: string,
@@ -78,16 +80,22 @@ async function buildAuthenticatedHeaders(
   dpopKey?: KeyPair,
   defaultOptions?: RequestInit
 ): Promise<RequestInit> {
+  const authenticationHeaders = new Headers();
   if (dpopKey !== undefined) {
-    return buildDpopFetchOptions(targetUrl, authToken, dpopKey, defaultOptions);
+    authenticationHeaders.set("Authorization", `DPoP ${authToken}`);
+    authenticationHeaders.set(
+      "DPoP",
+      await createDpopHeader(
+        targetUrl,
+        defaultOptions?.method ?? "get",
+        dpopKey
+      )
+    );
+  } else {
+    authenticationHeaders.set("Authorization", `Bearer ${authToken}`);
   }
-  const headers = new Headers(defaultOptions?.headers);
   // Any pre-existing Authorization header should be overriden.
-  headers.set("Authorization", `Bearer ${authToken}`);
-  return {
-    ...defaultOptions,
-    headers,
-  };
+  return overrideHeaders(defaultOptions, authenticationHeaders);
 }
 
 async function makeAuthenticatedRequest(
@@ -255,7 +263,14 @@ export async function buildAuthenticatedFetch(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     options.eventEmitter!.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
   }
-  return async (url, requestInit?): Promise<Response> => {
+  return async (url, requestInit): Promise<Response> => {
+    if (requestInit === undefined) {
+      console.debug("request init undefined");
+    }
+    console.log("Received following headers");
+    new Headers(requestInit?.headers).forEach((value, key) => {
+      console.log(`${key}: ${value}`);
+    });
     let response = await makeAuthenticatedRequest(
       unauthFetch,
       currentAccessToken,

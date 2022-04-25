@@ -70,7 +70,7 @@ export default function App() {
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
       clientName: "Demo app",
-      clientId: CLIENT_IDENTIFIER,
+      // clientId: CLIENT_IDENTIFIER,
     });
   };
 
@@ -85,7 +85,13 @@ export default function App() {
 
   const handleFetch = (e) => {
     e.preventDefault();
-    fetch(resource, { headers: new Headers({ Accept: "text/turtle" }) })
+    const headers = new Headers({ Accept: "text/turtle" });
+    console.log("sending the following headers");
+    new Headers(headers).forEach((value, key) => {
+      console.log(`${key}: ${value}`);
+    });
+    fetch(resource, { headers })
+      // fetch(resource, { headers: { Accept: "text/turtle" } })
       .then((response) => response.text())
       .then(setData);
   };
