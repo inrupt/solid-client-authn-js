@@ -22,36 +22,26 @@
 import {
   ILoginHandler,
   ILogoutHandler,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
   ISessionInfoManager,
   IStorageUtility,
-  mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+// FIXME: For some reason jest crashes on trying to handle a subpath import
+// this should import from @inrupt/solid-client-authn-core/mocks
+import {
+  mockStorageUtility,
+  mockIncomingRedirectHandler,
+} from "../../../core/src/mocks";
 import ClientAuthentication from "../ClientAuthentication";
-import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
-import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
-import {
-  LogoutHandlerMock,
-  mockLogoutHandler,
-} from "../logout/__mocks__/LogoutHandler";
-import {
-  mockSessionInfoManager,
-  SessionInfoManagerMock,
-} from "../sessionInfo/__mocks__/SessionInfoManager";
-
-export const mockClientAuthentication = (): ClientAuthentication =>
-  new ClientAuthentication(
-    LoginHandlerMock,
-    RedirectHandlerMock,
-    LogoutHandlerMock,
-    SessionInfoManagerMock
-  );
+import { mockLoginHandler } from "../login/__mocks__/LoginHandler";
+import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
+import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";
 
 type CustomMocks = {
   storage: IStorageUtility;
   sessionInfoManager: ISessionInfoManager;
   loginHandler: ILoginHandler;
-  redirectHandler: IRedirectHandler;
+  redirectHandler: IIncomingRedirectHandler;
   logoutHandler: ILogoutHandler;
 };
 
@@ -60,9 +50,13 @@ export const mockCustomClientAuthentication = (
 ): ClientAuthentication => {
   const storage = mocks.storage ?? mockStorageUtility({});
   return new ClientAuthentication(
-    mocks.loginHandler ?? LoginHandlerMock,
-    mocks.redirectHandler ?? RedirectHandlerMock,
+    mocks.loginHandler ?? mockLoginHandler(),
+    mocks.redirectHandler ?? mockIncomingRedirectHandler(),
     mocks.logoutHandler ?? mockLogoutHandler(storage),
     mocks.sessionInfoManager ?? mockSessionInfoManager(storage)
   );
+};
+
+export const mockClientAuthentication = (): ClientAuthentication => {
+  return mockCustomClientAuthentication({});
 };

@@ -19,25 +19,32 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { describe, it, expect } from "@jest/globals";
-import WebIdLoginHandler from "./WebIdLoginHandler";
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-describe("WebIdLoginHandler", () => {
-  it("should never handle", async () => {
-    await expect(
-      new WebIdLoginHandler().canHandle({
-        sessionId: "value doesn't matter",
-        tokenType: "DPoP",
-      })
-    ).resolves.toBeFalsy();
-  });
+/**
+ * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
+ */
+import {
+  IIncomingRedirectHandler,
+  ISessionInfo,
+  AggregateHandler,
+} from "@inrupt/solid-client-authn-core";
+import { EventEmitter } from "events";
 
-  it("should not be implement yet", async () => {
-    await expect(
-      new WebIdLoginHandler().handle({
-        sessionId: "value doesn't matter",
-        tokenType: "DPoP",
-      })
-    ).rejects.toThrow("Not implemented");
-  });
-});
+/**
+ * @hidden
+ */
+export default class AggregateIncomingRedirectHandler
+  extends AggregateHandler<
+    [string, EventEmitter],
+    ISessionInfo & { fetch: typeof fetch }
+  >
+  implements IIncomingRedirectHandler
+{
+  constructor(redirectHandlers: IIncomingRedirectHandler[]) {
+    super(redirectHandlers);
+  }
+}

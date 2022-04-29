@@ -19,29 +19,34 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { EventEmitter } from "events";
+import { jest } from "@jest/globals";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import {
-  IRedirectHandler,
-  AggregateHandler,
-  RedirectInput,
-  RedirectResult,
-} from "@inrupt/solid-client-authn-core";
+import IIncomingRedirectHandler, {
+  IncomingRedirectInput,
+  IncomingRedirectResult,
+} from "../IIncomingRedirectHandler";
 
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+const canHandle = jest.fn<Promise<boolean>, IncomingRedirectInput>(
+  (_url: string) => Promise.resolve(true)
+);
+
+const handle = jest.fn<Promise<IncomingRedirectResult>, IncomingRedirectInput>(
+  (_url: string, _emitter: EventEmitter | undefined) =>
+    Promise.resolve({
+      sessionId: "global",
+      isLoggedIn: true,
+      webId: "https://pod.com/profile/card#me",
+      fetch: jest.fn(),
+    })
+);
+
+export const mockCanHandleIncomingRedirect = canHandle;
+export const mockHandleIncomingRedirect = handle;
+
+export const mockIncomingRedirectHandler = (): IIncomingRedirectHandler => {
+  return {
+    canHandle,
+    handle,
+  };
+};

@@ -31,10 +31,9 @@ export const LoginHandlerResponse: ISessionInfo = {
   sessionId: "global",
 };
 
-export const LoginHandlerMock: jest.Mocked<ILoginHandler> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  canHandle: jest.fn((options: ILoginOptions) => Promise.resolve(true)),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handle: jest.fn((options: ILoginOptions) => Promise.resolve(undefined)),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
+export const mockLoginHandler = (): ILoginHandler => {
+  return {
+    canHandle: jest.fn((_options: ILoginOptions) => Promise.resolve(true)),
+    handle: jest.fn((_options: ILoginOptions) => Promise.resolve(undefined)),
+  };
+};

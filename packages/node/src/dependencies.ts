@@ -36,7 +36,7 @@ import {
   IStorageUtility,
   ILoginHandler,
   ISessionInfoManager,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
@@ -45,11 +45,11 @@ import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
-import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
-import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
-import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
+import { AuthCodeRedirectHandler } from "./login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler";
+import { FallbackRedirectHandler } from "./login/oidc/incomingRedirectHandler/FallbackRedirectHandler";
+import AggregateIncomingRedirectHandler from "./login/oidc/AggregateIncomingRedirectHandler";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
@@ -61,9 +61,6 @@ export const buildLoginHandler = (
   issuerConfigFetcher: IIssuerConfigFetcher,
   clientRegistrar: IClientRegistrar
 ): ILoginHandler => {
-  // We don't need an Aggregate login handler here at all, since we only use one handler, but
-  // for future reference, if we want to register multiple, just use an AggregateLoginHandler:
-  //   new AggregateLoginHandler([ loginHandler1, loginHandler2 ]);
   return new OidcLoginHandler(
     storageUtility,
     new AggregateOidcHandler([
@@ -85,8 +82,8 @@ export const buildRedirectHandler = (
   issuerConfigFetcher: IIssuerConfigFetcher,
   clientRegistrar: IClientRegistrar,
   tokenRefresher: ITokenRefresher
-): IRedirectHandler => {
-  return new AggregateRedirectHandler([
+): IIncomingRedirectHandler => {
+  return new AggregateIncomingRedirectHandler([
     new AuthCodeRedirectHandler(
       storageUtility,
       sessionInfoManager,

@@ -31,7 +31,6 @@ import { Response as NodeResponse, Headers as NodeHeaders } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
-import { RedirectorMock } from "../__mocks__/Redirector";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import {
   mockIssuerConfigFetcher,
@@ -141,7 +140,6 @@ const mockDpopTokens = (): TokenSet => {
 
 const defaultMocks = {
   storageUtility: StorageUtilityMock,
-  redirector: RedirectorMock,
   sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
   clientRegistrar: mockDefaultClientRegistrar(),
   issuerConfigFetcher: mockIssuerConfigFetcher(mockDefaultIssuerConfig()),

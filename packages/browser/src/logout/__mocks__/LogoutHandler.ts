@@ -26,22 +26,13 @@ import {
 import { jest } from "@jest/globals";
 import { clear } from "../../sessionInfo/SessionInfoManager";
 
-export const LogoutHandlerMock: jest.Mocked<ILogoutHandler> = {
-  canHandle: jest.fn(async (_localUserId: string) => true),
-  handle: jest.fn(async (_localUserId: string) => {
-    /* Do nothing */
-  }),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
-
 export const mockLogoutHandler = (
   storageUtility: IStorageUtility
-): jest.Mocked<ILogoutHandler> => {
+): ILogoutHandler => {
   return {
-    canHandle: jest.fn(async (_localUserId: string) => true),
+    canHandle: jest.fn(async (_localUserId: string) => Promise.resolve(true)),
     handle: jest.fn(async (localUserId: string) => {
       return clear(localUserId, storageUtility);
     }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
+  };
 };

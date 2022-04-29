@@ -28,7 +28,7 @@ import {
   ILoginInputOptions,
   ILoginHandler,
   ILogoutHandler,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
@@ -43,7 +43,7 @@ import { EventEmitter } from "events";
 export default class ClientAuthentication {
   constructor(
     private loginHandler: ILoginHandler,
-    private redirectHandler: IRedirectHandler,
+    private redirectHandler: IIncomingRedirectHandler,
     private logoutHandler: ILogoutHandler,
     private sessionInfoManager: ISessionInfoManager
   ) {}

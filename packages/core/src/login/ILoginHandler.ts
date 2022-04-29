@@ -29,9 +29,10 @@
  */
 import IHandleable from "../util/handlerPattern/IHandleable";
 import ILoginOptions from "./ILoginOptions";
-import { RedirectResult } from "./oidc/redirectHandler/IRedirectHandler";
+import { IncomingRedirectResult } from "./oidc/IIncomingRedirectHandler";
 
-export type LoginResult = RedirectResult | undefined;
+// FIXME: Remove this file as we only have one login handler:
+export type LoginResult = IncomingRedirectResult | undefined;
 
 /**
  * @hidden

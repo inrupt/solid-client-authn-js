@@ -20,21 +20,28 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
+import { EventEmitter } from "events";
+import * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
+
 import {
-  mockStorageUtility,
   StorageUtility,
   USER_SESSION_PREFIX,
-  mockStorage,
 } from "@inrupt/solid-client-authn-core";
-import * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
-import { EventEmitter } from "events";
-import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
+
+// FIXME: For some reason jest crashes on trying to handle a subpath import
+// this should import from @inrupt/solid-client-authn-core/mocks
 import {
-  RedirectHandlerMock,
-  RedirectHandlerResponse,
-} from "./login/oidc/redirectHandler/__mocks__/RedirectHandler";
-import { LogoutHandlerMock } from "./logout/__mocks__/LogoutHandler";
-import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
+  mockStorageUtility,
+  mockStorage,
+  mockIncomingRedirectHandler,
+} from "../../core/src/mocks";
+
+import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
+import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
+import {
+  mockSessionInfoManager,
+  SessionCreatorCreateResponse,
+} from "./sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 
@@ -77,11 +84,12 @@ const mockSessionStorage = async (
 };
 
 describe("ClientAuthentication", () => {
+  const defaultMockStorage = mockStorageUtility({});
   const defaultMocks = {
-    loginHandler: LoginHandlerMock,
-    redirectHandler: RedirectHandlerMock,
-    logoutHandler: LogoutHandlerMock,
-    sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
+    loginHandler: mockLoginHandler(),
+    redirectHandler: mockIncomingRedirectHandler(),
+    logoutHandler: mockLogoutHandler(defaultMockStorage),
+    sessionInfoManager: mockSessionInfoManager(defaultMockStorage),
     issuerConfigFetcher: mockDefaultIssuerConfigFetcher(),
   };
 
@@ -271,6 +279,7 @@ describe("ClientAuthentication", () => {
     it("calls handle redirect", async () => {
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
+      const expectedResult = SessionCreatorCreateResponse;
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
       const url =
@@ -285,15 +294,11 @@ describe("ClientAuthentication", () => {
       // only contain publicly visible fields. So we need to explicitly check
       // for individual fields (as opposed to just checking against
       // entire-response-object-equality).
-      expect(redirectInfo?.sessionId).toEqual(
-        RedirectHandlerResponse.sessionId
-      );
-      expect(redirectInfo?.webId).toEqual(RedirectHandlerResponse.webId);
-      expect(redirectInfo?.isLoggedIn).toEqual(
-        RedirectHandlerResponse.isLoggedIn
-      );
+      expect(redirectInfo?.sessionId).toEqual(expectedResult.sessionId);
+      expect(redirectInfo?.webId).toEqual(expectedResult.webId);
+      expect(redirectInfo?.isLoggedIn).toEqual(expectedResult.isLoggedIn);
       expect(redirectInfo?.expirationDate).toEqual(
-        RedirectHandlerResponse.expirationDate
+        expectedResult.expirationDate
       );
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,

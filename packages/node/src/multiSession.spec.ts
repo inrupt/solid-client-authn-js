@@ -19,16 +19,17 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { InMemoryStorage } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
+import {
+  InMemoryStorage,
+  // FIXME: use @inrupt/solid-client-authn-core/mocks instead:
+  mockStorage,
+  mockStorageUtility,
+} from "@inrupt/solid-client-authn-core";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
 } from "./__mocks__/ClientAuthentication";
-import {
-  mockStorage,
-  mockStorageUtility,
-} from "../../core/src/storage/__mocks__/StorageUtility";
 import { KEY_REGISTERED_SESSIONS } from "./constant";
 import {
   clearSessionFromStorageAll,

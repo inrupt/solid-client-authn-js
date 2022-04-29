@@ -19,32 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
+import { test, describe, expect } from "@jest/globals";
+import * as mocks from "./mocks";
 
-/**
- * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
- */
-import {
-  IRedirectHandler,
-  ISessionInfo,
-  AggregateHandler,
-} from "@inrupt/solid-client-authn-core";
-import { EventEmitter } from "events";
+describe("mocks", () => {
+  test("exposes the various mocks", () => {
+    // Storage:
+    expect(mocks.mockStorage).toBeDefined();
+    expect(mocks.mockStorageUtility).toBeDefined();
+    expect(mocks.StorageUtilityGetResponse).toBeDefined();
+    expect(mocks.StorageUtilityMock).toBeDefined();
 
-/**
- * @hidden
- */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<
-    [string, EventEmitter],
-    ISessionInfo & { fetch: typeof fetch }
-  >
-  implements IRedirectHandler
-{
-  constructor(redirectHandlers: IRedirectHandler[]) {
-    super(redirectHandlers);
-  }
-}
+    // Incoming Redirects:
+    expect(mocks.mockIncomingRedirectHandler).toBeDefined();
+    expect(mocks.mockCanHandleIncomingRedirect).toBeDefined();
+    expect(mocks.mockHandleIncomingRedirect).toBeDefined();
+  });
+});

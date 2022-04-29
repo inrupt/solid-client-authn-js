@@ -23,31 +23,41 @@ import {
   IIssuerConfigFetcher,
   ILoginHandler,
   ILogoutHandler,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
   ISessionInfoManager,
+  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+// FIXME: For some reason jest crashes on trying to handle a subpath import
+// this should import from @inrupt/solid-client-authn-core/mocks
+import {
+  mockStorageUtility,
+  mockIncomingRedirectHandler,
+} from "../../../core/src/mocks";
+
 import ClientAuthentication from "../ClientAuthentication";
-import { RedirectHandlerMock } from "../login/oidc/redirectHandler/__mocks__/RedirectHandler";
 import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";
-import { LoginHandlerMock } from "../login/__mocks__/LoginHandler";
-import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
-import { SessionInfoManagerMock } from "../sessionInfo/__mocks__/SessionInfoManager";
+import { mockLoginHandler } from "../login/__mocks__/LoginHandler";
+import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
+import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";
 
 type ClientAuthnDependencies = {
+  storage: IStorageUtility;
   loginhandler: ILoginHandler;
-  redirectHandler: IRedirectHandler;
+  redirectHandler: IIncomingRedirectHandler;
   logoutHandler: ILogoutHandler;
   sessionInfoManager: ISessionInfoManager;
   issuerConfigFetcher: IIssuerConfigFetcher;
 };
 
 export const mockClientAuthentication = (
-  dependencies?: Partial<ClientAuthnDependencies>
-): ClientAuthentication =>
-  new ClientAuthentication(
-    dependencies?.loginhandler ?? LoginHandlerMock,
-    dependencies?.redirectHandler ?? RedirectHandlerMock,
-    dependencies?.logoutHandler ?? LogoutHandlerMock,
-    dependencies?.sessionInfoManager ?? SessionInfoManagerMock,
-    dependencies?.issuerConfigFetcher ?? IssuerConfigFetcherMock
+  mocks?: Partial<ClientAuthnDependencies>
+): ClientAuthentication => {
+  const storage = mocks?.storage ?? mockStorageUtility({});
+  return new ClientAuthentication(
+    mocks?.loginhandler ?? mockLoginHandler(),
+    mocks?.redirectHandler ?? mockIncomingRedirectHandler(),
+    mocks?.logoutHandler ?? mockLogoutHandler(storage),
+    mocks?.sessionInfoManager ?? mockSessionInfoManager(storage),
+    mocks?.issuerConfigFetcher ?? IssuerConfigFetcherMock
   );
+};

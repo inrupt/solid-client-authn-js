@@ -25,11 +25,11 @@
  */
 
 import {
-  EVENTS,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
-import type { EventEmitter } from "events";
+// eslint-disable-next-line no-shadow
+import { URL } from "url";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 
@@ -39,11 +39,13 @@ import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManag
  * for the query params themselves, and can always try to use them as a redirect IRI.
  * @hidden
  */
-export class ErrorOidcHandler implements IRedirectHandler {
+export class FallbackRedirectHandler implements IIncomingRedirectHandler {
   async canHandle(redirectUrl: string): Promise<boolean> {
     try {
+      // The next URL object is built for validating it.
       // eslint-disable-next-line no-new
-      return new URL(redirectUrl).searchParams.has("error");
+      new URL(redirectUrl);
+      return true;
     } catch (e) {
       throw new Error(
         `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`
@@ -52,15 +54,9 @@ export class ErrorOidcHandler implements IRedirectHandler {
   }
 
   async handle(
-    redirectUrl: string,
-    eventEmitter?: EventEmitter
+    // The argument is ignored, but must be present to implement the interface
+    _redirectUrl: string
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
-    if (eventEmitter !== undefined) {
-      const url = new URL(redirectUrl);
-      const errorUrl = url.searchParams.get("error");
-      const errorDescriptionUrl = url.searchParams.get("error_description");
-      eventEmitter.emit(EVENTS.ERROR, errorUrl, errorDescriptionUrl);
-    }
     return getUnauthenticatedSession();
   }
 }

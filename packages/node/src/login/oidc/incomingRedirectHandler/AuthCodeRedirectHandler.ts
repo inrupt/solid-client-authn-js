@@ -28,7 +28,7 @@ import {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
@@ -56,7 +56,7 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
  * @hidden
  * Token endpoint request: https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint
  */
-export class AuthCodeRedirectHandler implements IRedirectHandler {
+export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   constructor(
     private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,

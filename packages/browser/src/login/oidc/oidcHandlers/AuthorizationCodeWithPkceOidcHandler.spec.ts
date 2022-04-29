@@ -33,7 +33,7 @@ import {
 import { jest, it, describe, expect } from "@jest/globals";
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
 import canHandleTests from "./OidcHandlerCanHandleTest";
-import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
+import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import { RedirectorMock } from "../__mocks__/Redirector";
 
@@ -58,7 +58,7 @@ const mockOidcModule = (
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
-    sessionCreator: SessionInfoManagerMock,
+    sessionCreator: mockSessionInfoManager(StorageUtilityMock),
     storageUtility: StorageUtilityMock,
     redirector: RedirectorMock,
   };

@@ -33,15 +33,15 @@ import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
-import { FallbackRedirectHandler } from "./login/oidc/redirectHandler/FallbackRedirectHandler";
+import { FallbackRedirectHandler } from "./login/oidc/incomingRedirectHandler/FallbackRedirectHandler";
 import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
-import { AuthCodeRedirectHandler } from "./login/oidc/redirectHandler/AuthCodeRedirectHandler";
-import AggregateRedirectHandler from "./login/oidc/redirectHandler/AggregateRedirectHandler";
+import { AuthCodeRedirectHandler } from "./login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler";
+import AggregateRedirectHandler from "./login/oidc/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
 import ClientRegistrar from "./login/oidc/ClientRegistrar";
-import { ErrorOidcHandler } from "./login/oidc/redirectHandler/ErrorOidcHandler";
+import { ErrorOidcHandler } from "./login/oidc/incomingRedirectHandler/ErrorOidcHandler";
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 
 /**

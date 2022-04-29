@@ -19,31 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
 import { JWK, JWTPayload, jwtVerify, importJWK } from "jose";
-import { EventEmitter } from "events";
-import IHandleable from "../../../util/handlerPattern/IHandleable";
-import { ISessionInfo } from "../../../sessionInfo/ISessionInfo";
-
-export type RedirectResult = ISessionInfo & { fetch: typeof fetch };
-export type RedirectInput = [string, EventEmitter | undefined];
-
-/**
- * @hidden
- */
-type IRedirectHandler = IHandleable<
-  // Tuple of the URL to redirect to, an optional event listener for when
-  // we receive a new refresh token, and, an optional onError function:
-  RedirectInput,
-  RedirectResult
->;
-export default IRedirectHandler;
 
 type WithMessage = { message: string };
 type WithStack = { stack: string };

@@ -182,7 +182,7 @@ describe("RefreshTokenOidcHandler", () => {
             clientType: "dynamic",
           },
         })
-      )) as SolidClientAuthnCore.RedirectResult;
+      )) as SolidClientAuthnCore.LoginResult;
       expect(result).toBeDefined();
       expect(result?.webId).toBe("https://my.webid/");
 
@@ -193,7 +193,8 @@ describe("RefreshTokenOidcHandler", () => {
         ...new NodeResponse(undefined, { status: 200 }),
         url: "https://my.pod/resource",
       });
-      await result.fetch("https://some.pod/resource");
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      await result!.fetch("https://some.pod/resource");
       const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(
         "DPoP some refreshed access token"

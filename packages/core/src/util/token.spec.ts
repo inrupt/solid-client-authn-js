@@ -23,7 +23,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import { JWTPayload, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
 import { Response as NodeResponse } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
-import { getWebidFromTokenPayload } from "./IRedirectHandler";
+import { getWebidFromTokenPayload } from "./token";
 
 jest.mock("cross-fetch", () => {
   return {
