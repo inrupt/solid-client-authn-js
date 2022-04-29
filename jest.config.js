@@ -5,7 +5,7 @@ module.exports = {
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
   },
-  modulePathIgnorePatterns: ["dist/", "<rootDir>/example/"],
+  modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
   testPathIgnorePatterns: [
     "/node_modules/",
     // By default we only run unit tests:
@@ -29,7 +29,7 @@ module.exports = {
     "!**/src/index.ts",
     "!**/dist/**",
     "!**/*.spec.ts",
-    "!**/example/**",
+    "!**/examples/**",
   ],
   testEnvironment: "<rootDir>/tests/environment/customEnvironment.js",
   injectGlobals: false,

@@ -1,0 +1,2 @@
+# TODO: figure out why the root .prettierignore file isn't detected:
+docs/**/*.md
