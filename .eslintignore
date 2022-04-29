@@ -1,2 +1,5 @@
 resources/
 node_modules/
+**/docs/**
+**/.eslintrc.js
+jest.*.js

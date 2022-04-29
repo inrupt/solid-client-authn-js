@@ -1,12 +1,7 @@
+const path = require("path");
+
 module.exports = {
-  parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint", "prettier", "license-header"],
-  extends: [
-    "plugin:@typescript-eslint/recommended",
-    "prettier/@typescript-eslint",
-    "plugin:prettier/recommended",
-    "@inrupt/eslint-config-lib",
-  ],
+  extends: ["@inrupt/eslint-config-lib"],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module",
@@ -44,7 +39,6 @@ module.exports = {
         },
       },
     ],
-    "license-header/header": ["error", "./resources/license-header.js"],
     "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     // The following rules are disabled until the overall testing strategy is improved
     "jest/no-mocks-import": "off",
@@ -53,5 +47,10 @@ module.exports = {
     "class-methods-use-this": "off",
     // This rule trips over modules with exports maps, like jose@3.x
     "import/no-unresolved": "off",
+
+    "header/header": [
+      "error",
+      path.resolve(__dirname, "./resources/license-header.js"),
+    ],
   },
 };

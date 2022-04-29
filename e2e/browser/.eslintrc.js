@@ -7,8 +7,6 @@ module.exports = {
     // removed, at which point this workaround can be removed...
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": "error",
-
-    "license-header/header": ["error", "../../resources/license-header.js"],
   },
   parserOptions: {
     project: "./tsconfig.eslint.json",
