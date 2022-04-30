@@ -68,6 +68,7 @@ export default class ClientAuthentication {
     // we used Dynamic Client Registration to register (since we don't
     // necessarily want the user to have to register this app each time they
     // login).
+    // FIXME: now preserves the client, but deletes the session info:
     await this.sessionInfoManager.clear(options.sessionId);
 
     // In the case of the user hitting the 'back' button in their browser, they
@@ -112,17 +113,16 @@ export default class ClientAuthentication {
   // if the expected information cannot be found.
   // Note that the ID token is not stored, which means the session information
   // cannot be validated at this point.
+  // FIXME: not actually part of the public interface:
   validateCurrentSession = async (
     currentSessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | null> => {
     const sessionInfo = await this.sessionInfoManager.get(currentSessionId);
-    if (
-      sessionInfo === undefined ||
-      sessionInfo.clientAppId === undefined ||
-      sessionInfo.issuer === undefined
-    ) {
+
+    if (sessionInfo === undefined) {
       return null;
     }
+
     return sessionInfo;
   };
 
@@ -162,6 +162,7 @@ export default class ClientAuthentication {
     }
   };
 
+  // FIXME: technically should be the same as removeOidcQueryParam method, though isn't:
   private cleanUrlAfterRedirect(url: string): void {
     const cleanedUpUrl = new URL(url);
     cleanedUpUrl.searchParams.delete("state");

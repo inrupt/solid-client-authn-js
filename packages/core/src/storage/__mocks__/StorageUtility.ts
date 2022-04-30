@@ -60,9 +60,26 @@ export const StorageUtilityMock: IStorageUtility = {
 };
 
 export const mockStorage = (
-  stored: Record<string, string | Record<string, string>>
+  stored: Record<string, string | Record<string, string | number>>
 ): IStorage => {
-  const store = stored;
+  const store = Object.keys(stored).reduce<Record<string, string>>(
+    // Have to use spread here due to eslint no-reassign-param
+    (mockStore, key) => {
+      const value = stored[key];
+      if (typeof value === "string") {
+        return {
+          ...mockStore,
+          [key]: value,
+        };
+      }
+      return {
+        ...mockStore,
+        [key]: JSON.stringify(value),
+      };
+    },
+    {}
+  );
+
   return {
     get: async (key: string): Promise<string | undefined> => {
       if (store[key] === undefined) {
@@ -71,7 +88,7 @@ export const mockStorage = (
       if (typeof store[key] === "string") {
         return store[key] as string;
       }
-      return JSON.stringify(store[key]);
+      return store[key];
     },
     set: async (key: string, value: string): Promise<void> => {
       store[key] = value;
@@ -83,7 +100,7 @@ export const mockStorage = (
 };
 
 export const mockStorageUtility = (
-  stored: Record<string, string | Record<string, string>>,
+  stored: Record<string, string | Record<string, string | number>>,
   isSecure = false
 ): IStorageUtility => {
   if (isSecure) {

@@ -36,6 +36,15 @@ export interface IClientRegistrarOptions {
   registrationAccessToken?: string;
 }
 
+/** @hidden */
+export interface IClientDetails
+  extends Record<string, string | number | undefined> {
+  clientId: string;
+  clientSecret?: string;
+  clientExpiresAt?: number;
+  clientName?: string;
+}
+
 /**
  * @hidden
  */
@@ -98,7 +107,9 @@ export async function handleRegistration(
 ): Promise<IClient> {
   const clientType = determineClientType(options, issuerConfig);
   if (clientType === "dynamic") {
-    return clientRegistrar.getClient(
+    // Added because I was missing stacktrace frames otherwise:
+    // eslint-disable-next-line @typescript-eslint/return-await
+    return await clientRegistrar.getClient(
       {
         sessionId: options.sessionId,
         clientName: options.clientName,
@@ -111,26 +122,26 @@ export async function handleRegistration(
   // or it is not compliant but the client_id isn't an IRI (we assume it has already
   // been registered with the IdP), then the client registration information needs
   // to be stored so that it can be retrieved later after redirect.
-  await storageUtility.setForUser(options.sessionId, {
+  const clientDetails: IClientDetails = {
     // If the client is either static or solid-oidc compliant, its client ID cannot be undefined.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     clientId: options.clientId!,
-  });
+    // This only has meaning on dynamic clients:
+    clientExpiresAt: 0,
+  };
+
   if (options.clientSecret) {
-    await storageUtility.setForUser(options.sessionId, {
-      clientSecret: options.clientSecret,
-    });
+    clientDetails.clientSecret = options.clientSecret;
   }
+
   if (options.clientName) {
-    await storageUtility.setForUser(options.sessionId, {
-      clientName: options.clientName,
-    });
+    clientDetails.clientName = options.clientName;
   }
+
+  await storageUtility.setForUser(options.sessionId, clientDetails);
+
   return {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    clientId: options.clientId!,
-    clientSecret: options.clientSecret,
-    clientName: options.clientName,
+    ...clientDetails,
     clientType,
   };
 }

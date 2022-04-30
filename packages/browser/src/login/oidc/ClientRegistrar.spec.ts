@@ -51,6 +51,7 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
+            client_secret_expires_at: 0,
             redirect_uris: ["https://example.com"],
             id_token_signed_response_alg: "RS256",
           })
@@ -166,17 +167,18 @@ describe("ClientRegistrar", () => {
           }
         )
       ).rejects.toThrow(
-        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]"
+        "Dynamic client registration failed: bad stuff that's an error - "
       );
     });
 
-    it("retrieves client id and secret from storage if they are present", async () => {
+    it("retrieves client id, secret and expiry from storage if they are present", async () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
             "solidClientAuthenticationUser:mySession": {
               clientId: "an id",
               clientSecret: "a secret",
+              clientExpiresAt: 0,
             },
           },
           false
@@ -193,6 +195,94 @@ describe("ClientRegistrar", () => {
       );
       expect(client.clientId).toBe("an id");
       expect(client.clientSecret).toBe("a secret");
+      expect(client.clientExpiresAt).toBe(0);
+    });
+
+    it("registers a new client if the one in storage has expired", async () => {
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: "an id",
+              clientSecret: "a secret",
+              // The stored expiry is in the past:
+              clientExpiresAt: 5,
+            },
+          },
+          false
+        ),
+      });
+
+      const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
+        /* eslint-disable camelcase */
+        new NodeResponse(
+          JSON.stringify({
+            client_id: "abcd",
+            client_secret: "1234",
+            client_secret_expires_at: 0,
+            redirect_uris: ["https://example.com"],
+          })
+        ) as unknown as Response
+        /* eslint-enable camelcase */
+      );
+      global.fetch = mockFetch;
+
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+          registrationEndpoint: "https://some.issuer/register",
+        }
+      );
+
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    it("registers a new client if the one in storage has no expiry stored", async () => {
+      // We do this because the client may actually have an expiry, but when we
+      // stored it, we didn't store the expiry.
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: "an id",
+              clientSecret: "a secret",
+              // Note: clientExpiresAt is not present
+            },
+          },
+          false
+        ),
+      });
+
+      const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
+        /* eslint-disable camelcase */
+        new NodeResponse(
+          JSON.stringify({
+            client_id: "abcd",
+            client_secret: "1234",
+            client_secret_expires_at: 0,
+            redirect_uris: ["https://example.com"],
+          })
+        ) as unknown as Response
+        /* eslint-enable camelcase */
+      );
+      global.fetch = mockFetch;
+
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+          registrationEndpoint: "https://some.issuer/register",
+        }
+      );
+
+      expect(mockFetch).toHaveBeenCalled();
     });
 
     it("passes the registration token if provided", async () => {
@@ -206,6 +296,7 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
+            client_secret_expires_at: 0,
             redirect_uris: ["https://example.com"],
           })
         ) as unknown as Response
@@ -250,6 +341,7 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "abcd",
             client_secret: "1234",
+            client_secret_expires_at: 0,
             redirect_uris: ["https://example.com"],
           })
         ) as unknown as Response
@@ -276,12 +368,18 @@ describe("ClientRegistrar", () => {
     });
 
     it("saves dynamic registration information", async () => {
+      const currentTime = 1651281010000;
+      jest.useFakeTimers();
+      jest.setSystemTime(currentTime);
+
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new NodeResponse(
           JSON.stringify({
             client_id: "some id",
             client_secret: "some secret",
+            // Expire this client in 5 seconds:
+            client_secret_expires_at: currentTime / 1000 + 5,
             redirect_uris: ["https://example.com"],
           })
         ) as unknown as Response
@@ -311,6 +409,9 @@ describe("ClientRegistrar", () => {
       await expect(
         myStorage.getForUser("mySession", "clientSecret", { secure: false })
       ).resolves.toBe("some secret");
+      await expect(
+        myStorage.getForUser("mySession", "clientExpiresAt", { secure: false })
+      ).resolves.toBe(1651281015000);
     });
   });
 });

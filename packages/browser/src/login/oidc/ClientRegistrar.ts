@@ -29,9 +29,26 @@ import {
   IClientRegistrar,
   IIssuerConfig,
   IClient,
+  IClientDetails,
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "@inrupt/oidc-client-ext";
+
+// FIXME: make this a generic helper somewhere, probably in
+// solid-client-authn-core Alternatively: do something with the stored details
+// to figure out the client type, potentially we can use `determineClientType`
+// here, which is currently internal to authn-core
+function isValidUrl(url: string): boolean {
+  try {
+    // Here, the URL constructor is just called to parse the given string and
+    // verify if it is a well-formed IRI.
+    // eslint-disable-next-line no-new
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * @hidden
@@ -44,67 +61,99 @@ export default class ClientRegistrar implements IClientRegistrar {
     issuerConfig: IIssuerConfig
   ): Promise<IClient> {
     // If client secret and/or client id are stored in storage, use those.
-    const [
-      storedClientId,
-      storedClientSecret,
-      // storedClientName,
-    ] = await Promise.all([
-      this.storageUtility.getForUser(options.sessionId, "clientId", {
-        secure: false,
-      }),
-      this.storageUtility.getForUser(options.sessionId, "clientSecret", {
-        secure: false,
-      }),
-      // this.storageUtility.getForUser(options.sessionId, "clientName", {
-      //   // FIXME: figure out how to persist secure storage at reload
-      //   secure: false,
-      // }),
-    ]);
-    if (storedClientId) {
+    const [storedClientId, storedClientSecret, storedClientExpiry] =
+      await Promise.all([
+        this.storageUtility.getForUser(options.sessionId, "clientId", {
+          secure: false,
+        }),
+        this.storageUtility.getForUser(options.sessionId, "clientSecret", {
+          secure: false,
+        }),
+        this.storageUtility.getForUser(options.sessionId, "clientExpiresAt", {
+          secure: false,
+        }),
+      ]);
+
+    // Handle public client identifiers:
+    if (typeof storedClientId === "string" && isValidUrl(storedClientId)) {
       return {
         clientId: storedClientId,
-        clientSecret: storedClientSecret,
-        clientType: "dynamic",
+        clientExpiresAt: 0,
+        clientType: "solid-oidc",
       };
     }
-    const extendedOptions = { ...options };
-    // If registration access token is stored, use that.
-    extendedOptions.registrationAccessToken =
-      extendedOptions.registrationAccessToken ??
-      (await this.storageUtility.getForUser(
-        options.sessionId,
-        "registrationAccessToken"
-      ));
 
-    try {
-      const registeredClient = await registerClient(
-        extendedOptions,
-        issuerConfig
-      );
-      // Save info
-      const infoToSave: Record<string, string> = {
-        clientId: registeredClient.clientId,
-      };
-      if (registeredClient.clientSecret) {
-        infoToSave.clientSecret = registeredClient.clientSecret;
+    // Handle dynamically registered clients & client credentials:
+    if (
+      typeof storedClientId === "string" &&
+      typeof storedClientSecret === "string" &&
+      typeof storedClientExpiry === "number"
+    ) {
+      if (storedClientExpiry === 0 || storedClientExpiry > Date.now()) {
+        return {
+          clientId: storedClientId,
+          clientSecret: storedClientSecret,
+          clientExpiresAt: storedClientExpiry,
+          clientType: "dynamic",
+        };
       }
-      if (registeredClient.idTokenSignedResponseAlg) {
-        infoToSave.idTokenSignedResponseAlg =
-          registeredClient.idTokenSignedResponseAlg;
-      }
-      await this.storageUtility.setForUser(
-        extendedOptions.sessionId,
-        infoToSave,
-        {
-          // FIXME: figure out how to persist secure storage at reload
-          // Otherwise, the client info cannot be retrieved from storage, and
-          // the lib tries to re-register the client on each fetch
-          secure: false,
-        }
-      );
-      return registeredClient;
-    } catch (error) {
-      throw new Error(`Client registration failed: [${error}]`);
     }
+
+    const extendedOptions = { ...options };
+
+    // If registration access token is stored, use that.
+    if (typeof extendedOptions.registrationAccessToken !== "string") {
+      const storedRegistrationAccessToken =
+        await this.storageUtility.getForUser(
+          options.sessionId,
+          "registrationAccessToken"
+        );
+
+      if (typeof storedRegistrationAccessToken === "string") {
+        extendedOptions.registrationAccessToken = storedRegistrationAccessToken;
+      }
+    }
+
+    const registeredClient = await registerClient(
+      extendedOptions,
+      issuerConfig
+    );
+
+    let clientExpiresAt = 0;
+    if (typeof registeredClient.clientExpiresAt === "number") {
+      // clientExpiresAt is the timestamp in seconds, convert it to milliseconds:
+      clientExpiresAt = registeredClient.clientExpiresAt * 1000;
+    }
+
+    // Save info
+    const infoToSave: IClientDetails = {
+      clientId: registeredClient.clientId,
+    };
+
+    if (registeredClient.clientSecret) {
+      infoToSave.clientSecret = registeredClient.clientSecret;
+      // For a dynamic client, this will be an epoch > 0, for static, it should be 0:
+      infoToSave.clientExpiresAt = clientExpiresAt;
+    }
+
+    // FIXME: correctly negotiate signing algorithm like node does:
+    if (registeredClient.idTokenSignedResponseAlg) {
+      infoToSave.idTokenSignedResponseAlg =
+        registeredClient.idTokenSignedResponseAlg;
+    }
+
+    await this.storageUtility.setForUser(
+      extendedOptions.sessionId,
+      infoToSave,
+      {
+        // FIXME: figure out how to persist secure storage at reload
+        // Otherwise, the client info cannot be retrieved from storage, and
+        // the lib tries to re-register the client on each fetch
+        secure: false,
+      }
+    );
+
+    // FIXME: return a simple object like node does:
+    return registeredClient;
   }
 }

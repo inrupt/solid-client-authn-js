@@ -20,7 +20,7 @@
  */
 
 import { describe, it, expect } from "@jest/globals";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { mockStorage } from "@inrupt/solid-client-authn-core";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import ClientAuthentication from "./ClientAuthentication";
 
@@ -32,7 +32,7 @@ describe("dependencies", () => {
 
   it("performs dependency injection with a given input", () => {
     const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: mockStorageUtility({}),
+      secureStorage: mockStorage({}),
     });
     expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
   });

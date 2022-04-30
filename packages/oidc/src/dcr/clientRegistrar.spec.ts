@@ -58,6 +58,8 @@ const getSuccessfulFetch = (): typeof fetch =>
         // eslint-disable-next-line camelcase
         client_secret: "some secret",
         // eslint-disable-next-line camelcase
+        client_secret_expires_at: 0,
+        // eslint-disable-next-line camelcase
         redirect_uris: ["https://some.url"],
         // eslint-disable-next-line camelcase
         id_token_signed_response_alg: "RS256",
@@ -168,6 +170,8 @@ describe("registerClient", () => {
             // eslint-disable-next-line camelcase
             client_secret: "some secret",
             // eslint-disable-next-line camelcase
+            client_secret_expires_at: 0,
+            // eslint-disable-next-line camelcase
             redirect_uris: ["https://some.other.url"],
           }),
           { status: 200 }
@@ -203,6 +207,103 @@ describe("registerClient", () => {
     ).rejects.toThrow(
       'Dynamic client registration failed: no client_id has been found on {"some_key":"some value"}'
     );
+  });
+
+  it("throws if the client_secret_expires_at is not returned during DCR", async () => {
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            // eslint-disable-next-line camelcase
+            client_id: "some id",
+            // eslint-disable-next-line camelcase
+            client_secret: "some secret",
+            // eslint-disable-next-line camelcase
+            redirect_uris: ["https://some.url"],
+          }),
+          { status: 200 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      'Dynamic client registration failed: a client_secret was returned, but no client_secret_expires_at was returned: {"client_id":"some id","client_secret":"some secret","redirect_uris":["https://some.url"]}'
+    );
+  });
+
+  it("throws if the client_secret_expires_at is in the past", async () => {
+    const clientTime = 1651281012000;
+    const serverTime = 1651281011; // server time is in seconds
+
+    jest.useFakeTimers();
+    jest.setSystemTime(clientTime);
+
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            // eslint-disable-next-line camelcase
+            client_id: "some id",
+            // eslint-disable-next-line camelcase
+            client_secret: "some secret",
+            // The value here just has to be greater than zero but less than Date.now():
+            // eslint-disable-next-line camelcase
+            client_secret_expires_at: serverTime,
+            // eslint-disable-next-line camelcase
+            redirect_uris: ["https://some.url"],
+          }),
+          { status: 200 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    await expect(() =>
+      registerClient(options, getMockIssuer())
+    ).rejects.toThrow(
+      'Dynamic client registration failed: the server indicated that the client has already expired: {"client_id":"some id","client_secret":"some secret","client_secret_expires_at":1651281011,"redirect_uris":["https://some.url"]}'
+    );
+  });
+
+  it("does not throw if the client_secret_expires_at is in the future", async () => {
+    const clientTime = 1651281010000;
+    const serverTime = 1651281011; // server time is in seconds
+
+    jest.useFakeTimers();
+    jest.setSystemTime(clientTime);
+
+    const myFetch = jest.fn(
+      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+        new Response(
+          JSON.stringify({
+            // eslint-disable-next-line camelcase
+            client_id: "some id",
+            // eslint-disable-next-line camelcase
+            client_secret: "some secret",
+            // The value here just has to be greater than zero but less than Date.now():
+            // eslint-disable-next-line camelcase
+            client_secret_expires_at: serverTime,
+            // eslint-disable-next-line camelcase
+            redirect_uris: ["https://some.url"],
+          }),
+          { status: 200 }
+        )
+    );
+    global.fetch = myFetch;
+    const options = getMockOptions();
+
+    const client = await registerClient(options, getMockIssuer());
+
+    expect(client).toEqual({
+      clientExpiresAt: 1651281011,
+      clientId: "some id",
+      clientSecret: "some secret",
+      clientType: "dynamic",
+      idTokenSignedResponseAlg: undefined,
+    });
   });
 
   it("throws if the redirect URI is invalid", async () => {

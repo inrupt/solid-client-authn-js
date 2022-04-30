@@ -31,7 +31,7 @@ export default interface IStorageUtility {
   ): Promise<string | undefined>;
   set(
     key: string,
-    value: string,
+    value: string | number,
     options?: { secure?: boolean }
   ): Promise<void>;
   delete(key: string, options?: { secure?: boolean }): Promise<void>;
@@ -39,10 +39,10 @@ export default interface IStorageUtility {
     userId: string,
     key: string,
     options?: { errorIfNull?: boolean; secure?: boolean }
-  ): Promise<string | undefined>;
+  ): Promise<string | number | undefined>;
   setForUser(
     userId: string,
-    values: Record<string, string>,
+    values: Record<string, string | number | undefined>,
     options?: { secure?: boolean }
   ): Promise<void>;
   deleteForUser(

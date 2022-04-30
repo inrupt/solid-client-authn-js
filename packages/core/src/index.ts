@@ -59,6 +59,7 @@ export { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
 export { IIssuerConfig } from "./login/oidc/IIssuerConfig";
 export {
   IClientRegistrar,
+  IClientDetails,
   IClientRegistrarOptions,
   handleRegistration,
   determineSigningAlg,

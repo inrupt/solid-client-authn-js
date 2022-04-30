@@ -118,8 +118,6 @@ export async function silentlyAuthenticate(
         prompt: "none",
         oidcIssuer: storedSessionInfo.issuer,
         redirectUrl: storedSessionInfo.redirectUrl,
-        clientId: storedSessionInfo.clientAppId,
-        clientSecret: storedSessionInfo.clientAppSecret,
         tokenType: storedSessionInfo.tokenType ?? "DPoP",
         inIframe: options.inIframe,
       },

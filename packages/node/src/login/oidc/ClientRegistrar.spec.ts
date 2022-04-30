@@ -83,6 +83,7 @@ describe("ClientRegistrar", () => {
             "solidClientAuthenticationUser:mySession": {
               clientId: "an id",
               clientSecret: "a secret",
+              clientExpiresAt: "0",
               clientName: "my client name",
               idTokenSignedResponseAlg: "ES256",
             },
@@ -102,7 +103,89 @@ describe("ClientRegistrar", () => {
       expect(client.clientId).toBe("an id");
       expect(client.clientSecret).toBe("a secret");
       expect(client.clientName).toBe("my client name");
+      expect(client.clientExpiresAt).toBe(0);
       expect(client.idTokenSignedResponseAlg).toBe("ES256");
+    });
+
+    it("registers a new client if the one in storage has expired", async () => {
+      const { Issuer } = jest.requireMock("openid-client") as any;
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerMetadata(),
+        Client: {
+          register: (jest.fn() as any).mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.mockReturnValue(mockedIssuer);
+
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: "an id",
+              clientSecret: "a secret",
+              // The expiry is in the past:
+              clientExpiresAt: "5",
+              clientName: "my client name",
+              idTokenSignedResponseAlg: "ES256",
+            },
+          },
+          false
+        ),
+      });
+
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+
+      expect(mockedIssuer.Client.register).toHaveBeenCalled();
+    });
+
+    it("registers a new client if the one in storage has no expiry stored", async () => {
+      const { Issuer } = jest.requireMock("openid-client") as any;
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerMetadata(),
+        Client: {
+          register: (jest.fn() as any).mockResolvedValueOnce({
+            metadata: mockDefaultClientConfig(),
+          }),
+        },
+      };
+      Issuer.mockReturnValue(mockedIssuer);
+
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: "an id",
+              clientSecret: "a secret",
+              // Note: no clientExpiresAt has been stored
+              clientName: "my client name",
+              idTokenSignedResponseAlg: "ES256",
+            },
+          },
+          false
+        ),
+      });
+
+      await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        }
+      );
+
+      expect(mockedIssuer.Client.register).toHaveBeenCalled();
     });
 
     it("negotiates signing alg if not found in storage", async () => {
@@ -112,6 +195,7 @@ describe("ClientRegistrar", () => {
             "solidClientAuthenticationUser:mySession": {
               clientId: "an id",
               clientSecret: "a secret",
+              clientExpiresAt: "0",
               clientName: "my client name",
             },
           },
@@ -181,7 +265,7 @@ describe("ClientRegistrar", () => {
       );
     });
 
-    it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {
+    it("throws if the issuer doesn't advertise for supported signing algorithms", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client") as any;
       const mockedIssuer = {

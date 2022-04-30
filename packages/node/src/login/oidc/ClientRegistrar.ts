@@ -29,6 +29,7 @@ import {
   IClientRegistrar,
   IIssuerConfig,
   IClient,
+  IClientDetails,
   IClientRegistrarOptions,
   ConfigurationError,
   determineSigningAlg,
@@ -80,35 +81,52 @@ export default class ClientRegistrar implements IClientRegistrar {
       storedClientId,
       storedClientSecret,
       storedClientName,
+      storedClientExpiresAt,
       storedIdTokenSignedResponseAlg,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId"),
       this.storageUtility.getForUser(options.sessionId, "clientSecret"),
       this.storageUtility.getForUser(options.sessionId, "clientName"),
+      this.storageUtility.getForUser(options.sessionId, "clientExpiresAt"),
       this.storageUtility.getForUser(
         options.sessionId,
         "idTokenSignedResponseAlg"
       ),
     ]);
-    if (storedClientId) {
-      return {
-        clientId: storedClientId,
-        clientSecret: storedClientSecret,
-        clientName: storedClientName as string | undefined,
-        idTokenSignedResponseAlg:
-          storedIdTokenSignedResponseAlg ??
-          negotiateClientSigningAlg(issuerConfig, PREFERRED_SIGNING_ALG),
-        clientType: "dynamic",
-      };
+
+    if (
+      typeof storedClientId === "string" &&
+      typeof storedClientSecret === "string" &&
+      typeof storedClientExpiresAt === "number" &&
+      typeof storedIdTokenSignedResponseAlg === "string"
+    ) {
+      if (storedClientExpiresAt === 0 || storedClientExpiresAt > Date.now()) {
+        return {
+          clientId: storedClientId,
+          clientSecret: storedClientSecret,
+          clientExpiresAt: storedClientExpiresAt,
+          clientName: storedClientName as string | undefined,
+          idTokenSignedResponseAlg:
+            storedIdTokenSignedResponseAlg ??
+            negotiateClientSigningAlg(issuerConfig, PREFERRED_SIGNING_ALG),
+          clientType: "dynamic",
+        };
+      }
     }
     const extendedOptions = { ...options };
+
     // If registration access token is stored, use that.
-    extendedOptions.registrationAccessToken =
-      extendedOptions.registrationAccessToken ??
-      (await this.storageUtility.getForUser(
-        options.sessionId,
-        "registrationAccessToken"
-      ));
+    if (typeof extendedOptions.registrationAccessToken !== "string") {
+      const storedRegistrationAccessToken =
+        await this.storageUtility.getForUser(
+          options.sessionId,
+          "registrationAccessToken"
+        );
+
+      if (typeof storedRegistrationAccessToken === "string") {
+        extendedOptions.registrationAccessToken = storedRegistrationAccessToken;
+      }
+    }
 
     // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
     const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
@@ -143,18 +161,32 @@ export default class ClientRegistrar implements IClientRegistrar {
       }
     );
 
-    const infoToSave: Record<string, string> = {
+    let clientExpiresAt = 0;
+    if (
+      typeof registeredClient.metadata.client_secret_expires_at === "number"
+    ) {
+      // client_secret_expires_at is the timestamp in seconds, convert it to milliseconds:
+      clientExpiresAt =
+        registeredClient.metadata.client_secret_expires_at * 1000;
+    }
+
+    const infoToSave: IClientDetails = {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
     };
+
     if (registeredClient.metadata.client_secret) {
       infoToSave.clientSecret = registeredClient.metadata.client_secret;
+      // For a dynamic client, this will be an epoch > 0, for static, it should be 0:
+      infoToSave.clientExpiresAt = clientExpiresAt;
     }
+
     await this.storageUtility.setForUser(extendedOptions.sessionId, infoToSave);
     return {
       clientId: registeredClient.metadata.client_id,
       clientSecret: registeredClient.metadata.client_secret,
+      clientExpiresAt,
       clientName: registeredClient.metadata.client_name as string | undefined,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,

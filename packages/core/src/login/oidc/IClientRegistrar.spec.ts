@@ -68,6 +68,7 @@ describe("handleRegistration", () => {
       sessionId: "some session",
       tokenType: "DPoP",
       clientId: "https://my.app/registration#app",
+      clientExpiresAt: 0,
     };
     const clientRegistrar = {
       getClient: jest.fn(),
@@ -113,6 +114,42 @@ describe("handleRegistration", () => {
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
     expect(client.clientType).toBe("static");
+  });
+
+  it("should store the client expiry if provided", async () => {
+    const options: ILoginOptions = {
+      sessionId: "some session",
+      tokenType: "DPoP",
+      clientId: "some statically registered client ID",
+      clientName: "some statically registered client name",
+      clientSecret: "some statically registered client secret",
+      clientExpiresAt: 50000,
+    };
+    const clientRegistrar = {
+      getClient: jest.fn(),
+    };
+    const storageUtility = {
+      setForUser: jest.fn(),
+    } as unknown as jest.Mocked<IStorageUtility>;
+
+    const client = await handleRegistration(
+      options,
+      {
+        scopesSupported: ["openid"],
+      } as IIssuerConfig,
+      storageUtility,
+      clientRegistrar as IClientRegistrar
+    );
+    expect(clientRegistrar.getClient).not.toHaveBeenCalled();
+    expect(storageUtility.setForUser).toHaveBeenCalledTimes(1);
+    expect(storageUtility.setForUser).toHaveBeenCalledWith("some session", {
+      clientId: "some statically registered client ID",
+      clientName: "some statically registered client name",
+      clientSecret: "some statically registered client secret",
+      clientExpiresAt: 50000,
+    });
+
+    expect(client.clientExpiresAt).toBe(50000);
   });
 });
 

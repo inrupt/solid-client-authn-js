@@ -35,7 +35,7 @@ import {
   LoginResult,
   DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
-import { OidcClient } from "@inrupt/oidc-client-ext";
+import { OidcClient, OidcClientSettings } from "@inrupt/oidc-client-ext";
 
 /**
  * @hidden
@@ -60,8 +60,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    /* eslint-disable camelcase */
-    const oidcOptions = {
+    const oidcOptions: OidcClientSettings = {
       authority: oidcLoginOptions.issuer.toString(),
       client_id: oidcLoginOptions.client.clientId,
       client_secret: oidcLoginOptions.client.clientSecret,
@@ -73,16 +72,12 @@ export default class AuthorizationCodeWithPkceOidcHandler
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the
       // profile referenced by the WebId.
+      // see: https://github.com/nodeSolidServer/node-solid-server/issues/1490
       loadUserInfo: false,
-      code_verifier: true,
       prompt: oidcLoginOptions.prompt ?? "consent",
     };
-    /* eslint-enable camelcase */
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
-
-    const { redirector } = this;
-    const storage = this.storageUtility;
 
     try {
       const signingRequest = await oidcClientLibrary.createSigninRequest();
@@ -97,7 +92,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
         // may not be appropriate (since the OAuth 'state' value should really
         // be an unguessable crypto-random value).
         // eslint-disable-next-line no-underscore-dangle
-        storage.setForUser(signingRequest.state._id, {
+        this.storageUtility.setForUser(signingRequest.state._id, {
           sessionId: oidcLoginOptions.sessionId,
         }),
 
@@ -105,7 +100,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
         // Strictly speaking, this indirection from our OAuth state value to
         // our session ID is unnecessary, but it provides a slightly cleaner
         // separation of concerns.
-        storage.setForUser(oidcLoginOptions.sessionId, {
+        this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
           // eslint-disable-next-line no-underscore-dangle
           codeVerifier: signingRequest.state._code_verifier,
           issuer: oidcLoginOptions.issuer.toString(),
@@ -115,7 +110,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
         }),
       ]);
 
-      redirector.redirect(signingRequest.url.toString(), {
+      this.redirector.redirect(signingRequest.url.toString(), {
         handleRedirect: oidcLoginOptions.handleRedirect,
         redirectInIframe: oidcLoginOptions.inIframe,
       });

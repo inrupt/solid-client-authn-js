@@ -91,6 +91,9 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       }
     )) as string;
 
+    // Clear the temporary sessionId for the login:
+    await this.storageUtility.deleteAllUserData(oauthState);
+
     const {
       issuerConfig,
       codeVerifier,

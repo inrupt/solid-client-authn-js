@@ -39,6 +39,7 @@ export interface ISessionInfo {
    * The WebID of the app, or a "Public app" WebID if the app does not provide its own.
    * undefined until the session is logged in and the app WebID has been verified.
    */
+  // FIXME: remove as we're detangling client information from user session infomation
   clientAppId?: string;
 
   /**
@@ -79,6 +80,7 @@ export interface ISessionInternalInfo {
    * For public clients, and Solid Identity Providers that do not support Client
    * WebIDs, the client secret is still required at the token endpoint.
    */
+  // FIXME: remove as we're detangling client information from user session infomation
   clientAppSecret?: string;
 
   /**

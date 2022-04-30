@@ -89,7 +89,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     const issuerConfig: IIssuerConfig =
       await this.issuerConfigFetcher.fetchConfig(options.oidcIssuer);
 
-    const clientRegistration = await handleRegistration(
+    const clientInfo = await handleRegistration(
       options,
       issuerConfig,
       this.storageUtility,
@@ -108,7 +108,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       dpop: options.tokenType.toLowerCase() === "dpop",
       ...options,
       issuerConfiguration: issuerConfig,
-      client: clientRegistration,
+      client: clientInfo,
     };
 
     // Call proper OIDC Handler

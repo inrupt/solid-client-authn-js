@@ -79,6 +79,7 @@ describe("OidcLoginHandler", () => {
           // The value of the client ID doesn't matter here, and it could be a WebID.
           // This checks it gets passed through from storage to the handler.
           clientId: "some client ID",
+          clientExpiresAt: 0,
         },
       })
     );
