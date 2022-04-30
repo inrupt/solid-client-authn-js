@@ -25,6 +25,10 @@ storage.
 - The refresh flow was broken for browser-based applications using a client identifier, 
 leading to short session lifetime. Now that this is fixed, the background refresh
 will happen normally, and the session will remain active.
+- The incoming redirect sometimes left OAuth parameters on the URL, despite
+already having consumed them, this only happened in certain error scenarios,
+but now the parameters will always be removed, such that the user doesn't get
+stuck at an error.
 
 #### node
 
