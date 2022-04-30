@@ -20,6 +20,7 @@
  */
 
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import mockConsole from "jest-mock-console";
 
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
@@ -96,6 +97,8 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   describe("handle", () => {
     it("swallows any redirector exceptions", async () => {
       mockOidcModule();
+      mockConsole("error");
+
       mockedRedirector.mockImplementationOnce(
         (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
           throw new Error(
@@ -122,6 +125,16 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       ).resolves.toBeUndefined();
 
       expect(mockedRedirector).toHaveBeenCalledTimes(1);
+
+      // Test the error was even printed to the console Note: this matcher is
+      // pretty nasty due to an Error instance being logged without being
+      // converted to a string:
+
+      // eslint-disable-next-line no-console
+      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(
+        (console as jest.Mocked<Console>).error.mock.calls[0][0].toString()
+      ).toMatch(/Error: Redirecting to \[[^\]]+\] with options/);
     });
 
     it("handles login properly with PKCE", async () => {
