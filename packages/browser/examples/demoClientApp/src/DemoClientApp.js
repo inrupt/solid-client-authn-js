@@ -13,11 +13,11 @@ let identityProviderLogoutEndpointTimeout = null;
 const NSS_SERVER_URL = "https://inrupt.net/";
 
 const preconfiguedIdpList = [
-  "https://openid.dev-next.inrupt.com",
-  "https://broker.pod.inrupt.com",
-  "https://broker.dev-ess.inrupt.com",
-  "https://broker.demo-ess.inrupt.com",
-  "https://inrupt.net",
+  "https://openid.dev-next.inrupt.com/",
+  "https://broker.pod.inrupt.com/",
+  "https://broker.dev-ess.inrupt.com/",
+  "https://broker.demo-ess.inrupt.com/",
+  "https://inrupt.net/",
 ];
 
 const defaultIssuer = preconfiguedIdpList[1];
