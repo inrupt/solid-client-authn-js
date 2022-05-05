@@ -27,7 +27,7 @@
 import {
   ILoginHandler,
   ILogoutHandler,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
   IIssuerConfigFetcher,
@@ -49,7 +49,7 @@ const globalFetch: typeof window.fetch = (request, init) =>
 export default class ClientAuthentication {
   constructor(
     private loginHandler: ILoginHandler,
-    private redirectHandler: IRedirectHandler,
+    private redirectHandler: IIncomingRedirectHandler,
     private logoutHandler: ILogoutHandler,
     private sessionInfoManager: ISessionInfoManager,
     private issuerConfigFetcher: IIssuerConfigFetcher

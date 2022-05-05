@@ -19,29 +19,20 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  IRedirectHandler,
-  ISessionInfo,
-} from "@inrupt/solid-client-authn-core";
-import { jest } from "@jest/globals";
+import { test, describe, expect } from "@jest/globals";
+import * as mocks from "./mocks";
 
-import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
+describe("mocks", () => {
+  test("exposes the various mocks", () => {
+    // Storage:
+    expect(mocks.mockStorage).toBeDefined();
+    expect(mocks.mockStorageUtility).toBeDefined();
+    expect(mocks.StorageUtilityGetResponse).toBeDefined();
+    expect(mocks.StorageUtilityMock).toBeDefined();
 
-/**
- * @hidden
- */
-export const RedirectHandlerResponse: ISessionInfo =
-  SessionCreatorCreateResponse;
-
-/**
- * @hidden
- */
-export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  canHandle: jest.fn((url: string) => Promise.resolve(true)),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handle: jest.fn((url: string) =>
-    Promise.resolve({ ...RedirectHandlerResponse, fetch: jest.fn() })
-  ),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
+    // Incoming Redirects:
+    expect(mocks.mockIncomingRedirectHandler).toBeDefined();
+    expect(mocks.mockCanHandleIncomingRedirect).toBeDefined();
+    expect(mocks.mockHandleIncomingRedirect).toBeDefined();
+  });
+});

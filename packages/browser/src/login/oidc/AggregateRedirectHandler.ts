@@ -25,23 +25,23 @@
  */
 
 /**
- * Responsible for decided which Login Handler should be used given the Login Options.
+ * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
 import {
-  ILoginHandler,
-  ILoginOptions,
+  IIncomingRedirectHandler,
   AggregateHandler,
-  LoginResult,
+  IncomingRedirectInput,
+  IncomingRedirectResult,
 } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden
  */
-export default class AggregateLoginHandler
-  extends AggregateHandler<[ILoginOptions], LoginResult>
-  implements ILoginHandler
+export default class AggregateRedirectHandler
+  extends AggregateHandler<IncomingRedirectInput, IncomingRedirectResult>
+  implements IIncomingRedirectHandler
 {
-  constructor(loginHandlers: ILoginHandler[]) {
-    super(loginHandlers);
+  constructor(redirectHandlers: IIncomingRedirectHandler[]) {
+    super(redirectHandlers);
   }
 }

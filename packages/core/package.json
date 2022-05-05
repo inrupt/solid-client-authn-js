@@ -3,7 +3,26 @@
   "version": "1.11.7",
   "license": "MIT",
   "main": "dist/index.js",
-  "types": "dist/index",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./mocks": {
+      "require": "./dist/mocks.js",
+      "import": "./dist/mocks.js",
+      "types": "./dist/mocks.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "mocks": [
+        "dist/mocks.d.ts"
+      ]
+    }
+  },
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
   },

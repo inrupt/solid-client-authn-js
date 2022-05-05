@@ -19,29 +19,27 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  IRedirectHandler,
-  ISessionInfo,
-} from "@inrupt/solid-client-authn-core";
-import { jest } from "@jest/globals";
+/**
+ * @hidden
+ * @packageDocumentation
+ */
 
-import { SessionCreatorCreateResponse } from "../../../../sessionInfo/__mocks__/SessionInfoManager";
+// eslint-disable-next-line no-shadow
+import { fetch } from "cross-fetch";
+import { EventEmitter } from "events";
+import IHandleable from "../../util/handlerPattern/IHandleable";
+import { ISessionInfo } from "../../sessionInfo/ISessionInfo";
+
+export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch };
+export type IncomingRedirectInput = [string, EventEmitter | undefined];
 
 /**
  * @hidden
  */
-export const RedirectHandlerResponse: ISessionInfo =
-  SessionCreatorCreateResponse;
-
-/**
- * @hidden
- */
-export const RedirectHandlerMock: jest.Mocked<IRedirectHandler> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  canHandle: jest.fn((url: string) => Promise.resolve(true)),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handle: jest.fn((url: string) =>
-    Promise.resolve({ ...RedirectHandlerResponse, fetch: jest.fn() })
-  ),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
+type IIncomingRedirectHandler = IHandleable<
+  // Tuple of the URL to redirect to, an optional event listener for when
+  // we receive a new refresh token, and, an optional onError function:
+  IncomingRedirectInput,
+  IncomingRedirectResult
+>;
+export default IIncomingRedirectHandler;

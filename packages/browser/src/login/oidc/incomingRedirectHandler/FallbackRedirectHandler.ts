@@ -24,32 +24,37 @@
  * @packageDocumentation
  */
 
-/**
- * Handles login if a user's WebID was provided.
- */
 import {
-  ILoginOptions,
-  ILoginHandler,
-  LoginResult,
+  IIncomingRedirectHandler,
+  ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
 
+import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
+
 /**
+ * This class handles redirect IRIs without any query params, and returns an unauthenticated
+ * session. It serves as a fallback so that consuming libraries don't have to test
+ * for the query params themselves, and can always try to use them as a redirect IRI.
  * @hidden
  */
-export default class WebIdLoginHandler implements ILoginHandler {
-  async canHandle(_loginOptions: ILoginOptions): Promise<boolean> {
-    return false;
+export class FallbackRedirectHandler implements IIncomingRedirectHandler {
+  async canHandle(redirectUrl: string): Promise<boolean> {
+    try {
+      // The next URL object is built for validating it.
+      // eslint-disable-next-line no-new
+      new URL(redirectUrl);
+      return true;
+    } catch (e) {
+      throw new Error(
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`
+      );
+    }
   }
 
-  /**
-   * Handles a given WebID by first de-referencing that WebID, then creating
-   * correct login options for a future login handler and triggering that login
-   * handler. For example, if a WebID contains an 'oidcIssuer' triple, it will
-   * create login credentials to match that.
-   * @param loginOptions
-   */
-  async handle(_loginOptions: ILoginOptions): Promise<LoginResult> {
-    // TODO: implement
-    throw new Error("Not implemented");
+  async handle(
+    // The argument is ignored, but must be present to implement the interface
+    _redirectUrl: string
+  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+    return getUnauthenticatedSession();
   }
 }

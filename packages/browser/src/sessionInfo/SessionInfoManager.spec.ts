@@ -27,7 +27,7 @@ import {
 import { jest, it, describe, expect } from "@jest/globals";
 
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
-import { LogoutHandlerMock } from "../logout/__mocks__/LogoutHandler";
+import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "./SessionInfoManager";
 
 const mockClearFunction = jest.fn();
@@ -39,10 +39,11 @@ jest.mock("@inrupt/oidc-client-ext", () => {
 });
 
 describe("SessionInfoManager", () => {
+  const defaultMockStorage = mockStorageUtility({});
   const defaultMocks = {
     uuidGenerator: UuidGeneratorMock,
-    logoutHandler: LogoutHandlerMock,
-    storageUtility: mockStorageUtility({}),
+    logoutHandler: mockLogoutHandler(defaultMockStorage),
+    storageUtility: defaultMockStorage,
   };
 
   function getSessionInfoManager(

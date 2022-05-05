@@ -23,15 +23,16 @@ import { jest, it, describe, expect } from "@jest/globals";
 import {
   InMemoryStorage,
   ISessionInfo,
+  EVENTS,
+  // FIXME: use @inrupt/solid-client-authn-core/mocks instead:
+  mockStorage,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { EVENTS } from "@inrupt/solid-client-authn-core/src";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
 } from "./__mocks__/ClientAuthentication";
 import { Session } from "./Session";
-import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_REGISTERED_SESSIONS } from "./constant";
 import {

@@ -17,7 +17,7 @@
     "prepublishOnly": "npm run build",
     "publish": "lerna publish",
     "publish-preview": "lerna publish from-package",
-    "test": "jest --coverage --verbose",
+    "test": "lerna run --no-bail --ignore e2e-browser test",
     "test:e2e:node": "jest --config jest.e2e.config.js",
     "test:e2e:browser": "cd e2e/browser && npm test",
     "lerna-version": "lerna version",

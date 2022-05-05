@@ -20,24 +20,11 @@
  */
 
 import { describe, it, expect } from "@jest/globals";
-import WebIdLoginHandler from "./WebIdLoginHandler";
 
-describe("WebIdLoginHandler", () => {
-  it("should never handle", async () => {
-    await expect(
-      new WebIdLoginHandler().canHandle({
-        sessionId: "value doesn't matter",
-        tokenType: "DPoP",
-      })
-    ).resolves.toBeFalsy();
-  });
+import { USER_SESSION_PREFIX } from "./ISessionInfoManager";
 
-  it("should not be implement yet", async () => {
-    await expect(
-      new WebIdLoginHandler().handle({
-        sessionId: "value doesn't matter",
-        tokenType: "DPoP",
-      })
-    ).rejects.toThrow("Not implemented");
+describe("ISessionInfoManager", () => {
+  it("should export a default user session prefix", () => {
+    expect(USER_SESSION_PREFIX).toBe("solidClientAuthenticationUser");
   });
 });

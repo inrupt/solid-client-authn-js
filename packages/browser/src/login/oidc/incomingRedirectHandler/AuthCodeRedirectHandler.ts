@@ -29,7 +29,7 @@ import {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
-  IRedirectHandler,
+  IIncomingRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
@@ -47,7 +47,7 @@ import { EventEmitter } from "events";
 /**
  * @hidden
  */
-export class AuthCodeRedirectHandler implements IRedirectHandler {
+export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   constructor(
     private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,

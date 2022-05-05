@@ -20,30 +20,35 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import {
-  ILoginHandler,
-  mockStorageUtility,
-  ILoginOptions,
-} from "@inrupt/solid-client-authn-core";
 import { Session } from "inspector";
 import { EventEmitter } from "events";
-import { LoginHandlerMock } from "./login/__mocks__/LoginHandler";
+
+import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
+// FIXME: For some reason jest crashes on trying to handle a subpath import
+// this should import from @inrupt/solid-client-authn-core/mocks
 import {
-  RedirectHandlerMock,
-  RedirectHandlerResponse,
-} from "./login/oidc/redirectHandler/__mocks__/RedirectHandler";
-import { LogoutHandlerMock } from "./logout/__mocks__/LogoutHandler";
-import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
+  mockStorageUtility,
+  mockIncomingRedirectHandler,
+} from "../../core/src/mocks";
+
+import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
+import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
+import {
+  mockSessionInfoManager,
+  SessionCreatorCreateResponse,
+} from "./sessionInfo/__mocks__/SessionInfoManager";
+
 import ClientAuthentication from "./ClientAuthentication";
 
 jest.mock("cross-fetch");
 
 describe("ClientAuthentication", () => {
+  const defaultMockStorage = mockStorageUtility({});
   const defaultMocks = {
-    loginHandler: LoginHandlerMock,
-    redirectHandler: RedirectHandlerMock,
-    logoutHandler: LogoutHandlerMock,
-    sessionInfoManager: mockSessionInfoManager(mockStorageUtility({})),
+    loginHandler: mockLoginHandler(),
+    redirectHandler: mockIncomingRedirectHandler(),
+    logoutHandler: mockLogoutHandler(defaultMockStorage),
+    sessionInfoManager: mockSessionInfoManager(defaultMockStorage),
   };
 
   function getClientAuthentication(
@@ -270,7 +275,7 @@ describe("ClientAuthentication", () => {
         session
       );
       expect(redirectInfo).toEqual({
-        ...RedirectHandlerResponse,
+        ...SessionCreatorCreateResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
@@ -292,7 +297,7 @@ describe("ClientAuthentication", () => {
         session
       );
       expect(redirectInfo).toEqual({
-        ...RedirectHandlerResponse,
+        ...SessionCreatorCreateResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,

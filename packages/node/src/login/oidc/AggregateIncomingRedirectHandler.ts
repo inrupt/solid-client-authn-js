@@ -28,20 +28,23 @@
  * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
 import {
-  IRedirectHandler,
+  IIncomingRedirectHandler,
+  ISessionInfo,
   AggregateHandler,
-  RedirectInput,
-  RedirectResult,
 } from "@inrupt/solid-client-authn-core";
+import { EventEmitter } from "events";
 
 /**
  * @hidden
  */
-export default class AggregateRedirectHandler
-  extends AggregateHandler<RedirectInput, RedirectResult>
-  implements IRedirectHandler
+export default class AggregateIncomingRedirectHandler
+  extends AggregateHandler<
+    [string, EventEmitter],
+    ISessionInfo & { fetch: typeof fetch }
+  >
+  implements IIncomingRedirectHandler
 {
-  constructor(redirectHandlers: IRedirectHandler[]) {
+  constructor(redirectHandlers: IIncomingRedirectHandler[]) {
     super(redirectHandlers);
   }
 }

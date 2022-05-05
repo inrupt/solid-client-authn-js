@@ -31,16 +31,17 @@ export { default as ILogoutHandler } from "./logout/ILogoutHandler";
 export { default as IHandleable } from "./util/handlerPattern/IHandleable";
 export { default as AggregateHandler } from "./util/handlerPattern/AggregateHandler";
 
+export { getWebidFromTokenPayload, fetchJwks } from "./util/token";
+
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
 
 export {
-  default as IRedirectHandler,
-  RedirectInput,
-  RedirectResult,
-  getWebidFromTokenPayload,
-  fetchJwks,
-} from "./login/oidc/redirectHandler/IRedirectHandler";
+  default as IIncomingRedirectHandler,
+  IncomingRedirectInput,
+  IncomingRedirectResult,
+} from "./login/oidc/IIncomingRedirectHandler";
+
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 
 export {
@@ -101,6 +102,9 @@ export {
 } from "./login/oidc/refresh/ITokenRefresher";
 
 // Mocks.
+/**
+ * @deprecated
+ */
 export {
   mockStorage,
   mockStorageUtility,
