@@ -78,7 +78,7 @@ const mockIdToken = (): string =>
   "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw";
 
 type AccessJwt = {
-  sub: string;
+  webid: string;
   iss: string;
   aud: string;
   nbf: number;
@@ -92,7 +92,7 @@ const mockWebId = (): string => "https://my.webid/";
 
 const mockKeyBoundToken = (): AccessJwt => {
   return {
-    sub: mockWebId(),
+    webid: mockWebId(),
     iss: mockDefaultIssuerConfig().issuer.toString(),
     aud: "https://resource.example.org",
     nbf: 1562262611,
@@ -246,7 +246,10 @@ describe("handle", () => {
     );
   });
 
-  it("throws if the issuer does not return an ID token", async () => {
+  // Note that this is a temporary fix, and it will eventually be removed from the
+  // codebase once the client credential use case is properly covered by the authentication
+  // panel.
+  it("gets the WebID from the access token if the issuer does not return an ID token", async () => {
     const tokens = mockDpopTokens();
     tokens.id_token = undefined;
     setupOidcClientMock(tokens);
@@ -254,18 +257,20 @@ describe("handle", () => {
       mockDefaultTokenRefresher(),
       mockStorageUtility({})
     );
-    await expect(
-      clientCredentialsOidcHandler.handle({
-        ...standardOidcOptions,
-        client: {
-          clientId: "some client ID",
-          clientSecret: "some client secret",
-          clientType: "static",
-        },
-      })
-    ).rejects.toThrow(
-      /Invalid response from Solid Identity Provider \[.+\]: \{.+\} is missing 'id_token'/
-    );
+
+    const sessionInfo = await clientCredentialsOidcHandler.handle({
+      ...standardOidcOptions,
+      client: {
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        clientType: "static",
+      },
+    });
+    // The session's WebID should have been picked up from the access token in
+    // the absence of an ID token.
+    expect(
+      (sessionInfo as SolidClientAuthnCore.ISessionInfo).webId
+    ).toStrictEqual(mockKeyBoundToken().webid);
   });
 
   it("builds a fetch authenticated with a DPoP token if appropriate", async () => {

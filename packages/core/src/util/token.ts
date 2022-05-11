@@ -82,7 +82,7 @@ export async function getWebidFromTokenPayload(
     );
     payload = verifiedPayload;
   } catch (e) {
-    throw new Error(`ID token verification failed: ${(e as WithStack).stack}`);
+    throw new Error(`Token verification failed: ${(e as WithStack).stack}`);
   }
 
   if (typeof payload.webid === "string") {
@@ -90,7 +90,7 @@ export async function getWebidFromTokenPayload(
   }
   if (typeof payload.sub !== "string") {
     throw new Error(
-      `The ID token ${JSON.stringify(
+      `The token ${JSON.stringify(
         payload
       )} is invalid: it has no 'webid' claim and no 'sub' claim.`
     );
@@ -104,7 +104,7 @@ export async function getWebidFromTokenPayload(
     return payload.sub;
   } catch (e) {
     throw new Error(
-      `The ID token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`
+      `The token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`
     );
   }
 }
