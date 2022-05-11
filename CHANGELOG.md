@@ -26,6 +26,11 @@ storage.
 leading to short session lifetime. Now that this is fixed, the background refresh
 will happen normally, and the session will remain active.
 
+#### node
+
+- The client credential flow as implemented by the CSS Identity Provider is now
+supported.
+
 ## 1.11.7 - 2022-03-16
 
 ### Bugfixes
