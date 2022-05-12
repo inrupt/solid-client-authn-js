@@ -278,9 +278,7 @@ describe("handle", () => {
     expect(sessionInfo).toBeDefined();
     // The session's WebID should have been picked up from the access token in
     // the absence of an ID token.
-    expect(sessionInfo.webId).toBe(
-      "https://my.webid/"
-    );
+    expect(sessionInfo.webId).toBe("https://my.webid/");
   });
 
   // Note that this is a temporary fix, and it will eventually be removed from the
