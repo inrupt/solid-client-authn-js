@@ -275,9 +275,10 @@ describe("handle", () => {
         clientType: "static",
       },
     });
+    expect(sessionInfo).toBeDefined();
     // The session's WebID should have been picked up from the access token in
     // the absence of an ID token.
-    expect((sessionInfo as SolidClientAuthnCore.ISessionInfo).webId).toBe(
+    expect(sessionInfo.webId).toBe(
       "https://my.webid/"
     );
   });
