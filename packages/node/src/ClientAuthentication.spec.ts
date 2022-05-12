@@ -20,10 +20,10 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { Session } from "./Session";
 import { EventEmitter } from "events";
 
 import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
+import { Session } from "./Session";
 // FIXME: For some reason jest crashes on trying to handle a subpath import
 // this should import from @inrupt/solid-client-authn-core/mocks
 import {

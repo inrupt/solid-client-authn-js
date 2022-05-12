@@ -154,12 +154,11 @@ const setupOidcClientMock = (tokenSet: TokenSet) => {
 };
 
 const setupGetWebidMock = (webid: string) => {
-  const { getWebidFromTokenPayload } = jest.requireMock("@inrupt/solid-client-authn-core") as jest.Mocked<
-  typeof SolidClientAuthnCore
->;
+  const { getWebidFromTokenPayload } = jest.requireMock(
+    "@inrupt/solid-client-authn-core"
+  ) as jest.Mocked<typeof SolidClientAuthnCore>;
   getWebidFromTokenPayload.mockResolvedValueOnce(webid);
-}
-
+};
 
 describe("ClientCredentialsOidcHandler", () => {
   describe("canHandle", () => {
@@ -278,9 +277,9 @@ describe("handle", () => {
     });
     // The session's WebID should have been picked up from the access token in
     // the absence of an ID token.
-    expect(
-      (sessionInfo as SolidClientAuthnCore.ISessionInfo).webId
-    ).toStrictEqual("https://my.webid/");
+    expect((sessionInfo as SolidClientAuthnCore.ISessionInfo).webId).toBe(
+      "https://my.webid/"
+    );
   });
 
   // Note that this is a temporary fix, and it will eventually be removed from the
@@ -291,9 +290,9 @@ describe("handle", () => {
     const tokens = mockDpopTokens();
     tokens.id_token = undefined;
     setupOidcClientMock(tokens);
-    const { getWebidFromTokenPayload } = jest.requireMock("@inrupt/solid-client-authn-core") as jest.Mocked<
-      typeof SolidClientAuthnCore
-    >;
+    const { getWebidFromTokenPayload } = jest.requireMock(
+      "@inrupt/solid-client-authn-core"
+    ) as jest.Mocked<typeof SolidClientAuthnCore>;
     // Pretend the token validation function throws
     getWebidFromTokenPayload.mockRejectedValueOnce(new Error("Bad audience"));
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
@@ -301,14 +300,16 @@ describe("handle", () => {
       mockStorageUtility({})
     );
 
-    await expect(clientCredentialsOidcHandler.handle({
-      ...standardOidcOptions,
-      client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
-        clientType: "static",
-      },
-    })).rejects.toThrow();
+    await expect(
+      clientCredentialsOidcHandler.handle({
+        ...standardOidcOptions,
+        client: {
+          clientId: "some client ID",
+          clientSecret: "some client secret",
+          clientType: "static",
+        },
+      })
+    ).rejects.toThrow();
   });
 
   it("builds a fetch authenticated with a DPoP token if appropriate", async () => {
