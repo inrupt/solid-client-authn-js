@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { Session } from "inspector";
+import { Session } from "./Session";
 import { EventEmitter } from "events";
 
 import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
