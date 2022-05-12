@@ -55,9 +55,10 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
-    getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/")
-    ),
+    // getWebidFromTokenPayload: jest.fn(() =>
+    //   Promise.resolve("https://my.webid/")
+    // ),
+    getWebidFromTokenPayload: jest.fn(),
   };
 });
 jest.useFakeTimers();
@@ -151,6 +152,14 @@ const setupOidcClientMock = (tokenSet: TokenSet) => {
   } as unknown as OpenidClient.Issuer<OpenidClient.Client>;
   Issuer.mockReturnValueOnce(mockedIssuer);
 };
+
+const setupGetWebidMock = (webid: string) => {
+  const { getWebidFromTokenPayload } = jest.requireMock("@inrupt/solid-client-authn-core") as jest.Mocked<
+  typeof SolidClientAuthnCore
+>;
+  getWebidFromTokenPayload.mockResolvedValueOnce(webid);
+}
+
 
 describe("ClientCredentialsOidcHandler", () => {
   describe("canHandle", () => {
@@ -253,6 +262,7 @@ describe("handle", () => {
     const tokens = mockDpopTokens();
     tokens.id_token = undefined;
     setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
       mockStorageUtility({})
@@ -270,7 +280,35 @@ describe("handle", () => {
     // the absence of an ID token.
     expect(
       (sessionInfo as SolidClientAuthnCore.ISessionInfo).webId
-    ).toStrictEqual(mockKeyBoundToken().webid);
+    ).toStrictEqual("https://my.webid/");
+  });
+
+  // Note that this is a temporary fix, and it will eventually be removed from the
+  // codebase once the client credential use case is properly covered by the authentication
+  // panel. This encodes assumptions about the Access Token which have emerged
+  // in the current implementations, but is out of scope of the Solid-OIDC specification.
+  it("throws if the Access Token doesn't have the expected shape and the issuer does not return an ID token", async () => {
+    const tokens = mockDpopTokens();
+    tokens.id_token = undefined;
+    setupOidcClientMock(tokens);
+    const { getWebidFromTokenPayload } = jest.requireMock("@inrupt/solid-client-authn-core") as jest.Mocked<
+      typeof SolidClientAuthnCore
+    >;
+    // Pretend the token validation function throws
+    getWebidFromTokenPayload.mockRejectedValueOnce(new Error("Bad audience"));
+    const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+      mockDefaultTokenRefresher(),
+      mockStorageUtility({})
+    );
+
+    await expect(clientCredentialsOidcHandler.handle({
+      ...standardOidcOptions,
+      client: {
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        clientType: "static",
+      },
+    })).rejects.toThrow();
   });
 
   it("builds a fetch authenticated with a DPoP token if appropriate", async () => {
@@ -379,6 +417,7 @@ describe("handle", () => {
   it("returns session info with the built fetch", async () => {
     const tokens = mockDpopTokens();
     setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
       mockStorageUtility({})
@@ -395,6 +434,6 @@ describe("handle", () => {
 
     expect(result?.isLoggedIn).toBe(true);
     expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
-    expect(result?.webId).toBe(mockIdTokenPayload().sub);
+    expect(result?.webId).toBe("https://my.webid/");
   });
 });
