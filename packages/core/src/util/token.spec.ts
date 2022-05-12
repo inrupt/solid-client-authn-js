@@ -142,7 +142,7 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.clientId"
       )
     ).rejects.toThrow(
-      "ID token verification failed: JWSSignatureVerificationFailed: signature verification failed"
+      "Token verification failed: JWSSignatureVerificationFailed: signature verification failed"
     );
   });
 
@@ -161,7 +161,7 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.clientId"
       )
     ).rejects.toThrow(
-      'ID token verification failed: JWTClaimValidationFailed: unexpected "iss" claim value'
+      'Token verification failed: JWTClaimValidationFailed: unexpected "iss" claim value'
     );
   });
 
@@ -180,7 +180,7 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.clientId"
       )
     ).rejects.toThrow(
-      'ID token verification failed: JWTClaimValidationFailed: unexpected "aud" claim value'
+      'Token verification failed: JWTClaimValidationFailed: unexpected "aud" claim value'
     );
   });
 
@@ -216,7 +216,7 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.clientId"
       )
     ).rejects.toThrow(
-      "The ID token has no 'webid' claim, and its 'sub' claim of [some user ID] is invalid as a URL - error [TypeError: Invalid URL: some user ID]."
+      "The token has no 'webid' claim, and its 'sub' claim of [some user ID] is invalid as a URL - error [TypeError: Invalid URL: some user ID]."
     );
   });
 
