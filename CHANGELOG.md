@@ -28,8 +28,8 @@ will happen normally, and the session will remain active.
 
 #### node
 
-- The client credential flow as implemented by the CSS Identity Provider is now
-supported.
+- The client credential flow as implemented by the Community Solid Server Identity
+Provider is now supported. See [the documentation](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/documentation/client-credentials.md) for more details.
 
 ## 1.11.7 - 2022-03-16
 
