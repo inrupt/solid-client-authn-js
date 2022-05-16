@@ -309,7 +309,7 @@ describe("handle", () => {
           clientType: "static",
         },
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow("Bad audience");
   });
 
   it("builds a fetch authenticated with a DPoP token if appropriate", async () => {
