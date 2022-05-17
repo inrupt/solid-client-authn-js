@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "e2e-browser",
-  "version": "1.11.7",
+  "version": "1.11.8",
   "description": "Playwright end-2-end test runner for solid-client-authn-browser",
   "scripts": {
     "start": "cd ../../packages/browser/examples/demoClientApp && npm run start",
@@ -16,7 +16,7 @@
   "license": "MIT",
   "devDependencies": {
     "@inrupt/solid-client": "^1.20.1",
-    "@inrupt/solid-client-authn-node": "^1.11.7",
+    "@inrupt/solid-client-authn-node": "^1.11.8",
     "@inrupt/vocab-common-rdf": "^1.0.3",
     "@playwright/test": "^1.18.0",
     "dotenv-flow": "^3.2.0",
