@@ -94,6 +94,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       }
     );
 
+    let webId: string;
     if (tokens.access_token === undefined) {
       throw new Error(
         `Invalid response from Solid Identity Provider [${
@@ -103,10 +104,24 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     }
 
     if (tokens.id_token === undefined) {
-      throw new Error(
-        `Invalid response from Solid Identity Provider [${
-          oidcLoginOptions.issuer
-        }]: ${JSON.stringify(tokens)} is missing 'id_token'`
+      // In the case where no ID token is provided, the access token is used to
+      // get the authenticated user's WebID. This is only a temporary solution,
+      // as eventually we want to move away from the Identity Provider issuing
+      // Access Tokens, but by then panel work for the bot use case support will
+      // have moved forward.
+      webId = await getWebidFromTokenPayload(
+        tokens.access_token,
+        oidcLoginOptions.issuerConfiguration.jwksUri,
+        oidcLoginOptions.issuer,
+        // When validating the Access Token, the audience should always be 'solid'
+        "solid"
+      );
+    } else {
+      webId = await getWebidFromTokenPayload(
+        tokens.id_token,
+        oidcLoginOptions.issuerConfiguration.jwksUri,
+        oidcLoginOptions.issuer,
+        oidcLoginOptions.client.clientId
       );
     }
 
@@ -129,12 +144,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
-      webId: await getWebidFromTokenPayload(
-        tokens.id_token,
-        oidcLoginOptions.issuerConfiguration.jwksUri,
-        oidcLoginOptions.issuer,
-        oidcLoginOptions.client.clientId
-      ),
+      webId,
     };
 
     return Object.assign(sessionInfo, {
