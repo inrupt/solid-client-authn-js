@@ -42,15 +42,20 @@ import {
   handleRegistration,
 } from "@inrupt/solid-client-authn-core";
 
+export interface OidcLoginHandlerOptions {
+  redirectUrl: string;
+  oidcIssuer: string;
+}
+
 function hasIssuer(
-  options: ILoginOptions
-): options is ILoginOptions & { oidcIssuer: string } {
+  options: OidcLoginHandlerOptions
+): options is OidcLoginHandlerOptions & { oidcIssuer: string } {
   return typeof options.oidcIssuer === "string";
 }
 
 function hasRedirectUrl(
-  options: ILoginOptions
-): options is ILoginOptions & { redirectUrl: string } {
+  options: OidcLoginHandlerOptions
+): options is OidcLoginHandlerOptions & { redirectUrl: string } {
   return typeof options.redirectUrl === "string";
 }
 
@@ -65,11 +70,11 @@ export default class OidcLoginHandler implements ILoginHandler {
     private clientRegistrar: IClientRegistrar
   ) {}
 
-  async canHandle(options: ILoginOptions): Promise<boolean> {
+  async canHandle(options: OidcLoginHandlerOptions): Promise<boolean> {
     return hasIssuer(options) && hasRedirectUrl(options);
   }
 
-  async handle(options: ILoginOptions): Promise<LoginResult> {
+  async handle(options: OidcLoginHandlerOptions): Promise<LoginResult> {
     if (!hasIssuer(options)) {
       throw new ConfigurationError(
         `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(

@@ -31,24 +31,9 @@ import {
   IClient,
   IClientDetails,
   IClientRegistrarOptions,
+  isValidUrl,
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "@inrupt/oidc-client-ext";
-
-// FIXME: make this a generic helper somewhere, probably in
-// solid-client-authn-core Alternatively: do something with the stored details
-// to figure out the client type, potentially we can use `determineClientType`
-// here, which is currently internal to authn-core
-function isValidUrl(url: string): boolean {
-  try {
-    // Here, the URL constructor is just called to parse the given string and
-    // verify if it is a well-formed IRI.
-    // eslint-disable-next-line no-new
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * @hidden
