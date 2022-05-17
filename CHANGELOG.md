@@ -9,6 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfixes
+
+-
+
+## 1.11.8 - 2022-05-17
+
 ### Breaking change
 
 - the `useEssSession` option is deprecated, and the associated session endpoint
