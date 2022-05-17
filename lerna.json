@@ -1,4 +1,7 @@
 {
-  "packages": ["packages/*", "e2e/browser"],
-  "version": "1.11.7"
+  "packages": [
+    "packages/*",
+    "e2e/browser"
+  ],
+  "version": "1.11.8"
 }
