@@ -22,7 +22,7 @@
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
-import { jest, it, describe, expect } from "@jest/globals";
+import { it, describe, expect } from "@jest/globals";
 import {
   mockStorageUtility,
   StorageUtilityMock,
@@ -36,7 +36,7 @@ import {
   mockDefaultOidcOptions,
   mockOidcOptions,
 } from "../__mocks__/IOidcOptions";
-import { mockRedirector } from "../__mocks__/Redirector";
+import { mockRedirector, mockedRedirector } from "../__mocks__/Redirector";
 
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
@@ -72,35 +72,27 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
   describe("handle", () => {
     it("redirects the user to the specified IdP", async () => {
-      const mockedRedirector = mockRedirector();
       const authorizationCodeWithPkceOidcHandler =
-        getAuthorizationCodeWithPkceOidcHandler({
-          redirector: mockedRedirector,
-        });
+        getAuthorizationCodeWithPkceOidcHandler();
 
       await authorizationCodeWithPkceOidcHandler.handle(
         mockDefaultOidcOptions()
       );
-      const mockRedirect = mockedRedirector.redirect as jest.Mock;
 
-      const builtUrl = new URL(mockRedirect.mock.calls[0][0]);
+      const builtUrl = new URL(mockedRedirector.mock.calls[0][0]);
       expect(builtUrl.hostname).toEqual(
         new URL(mockDefaultOidcOptions().issuer).hostname
       );
     });
 
     it("sets the specified options in the query params", async () => {
-      const mockedRedirector = mockRedirector();
       const authorizationCodeWithPkceOidcHandler =
-        getAuthorizationCodeWithPkceOidcHandler({
-          redirector: mockedRedirector,
-        });
+        getAuthorizationCodeWithPkceOidcHandler();
       const oidcOptions = mockDefaultOidcOptions();
 
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
-      const mockRedirect = mockedRedirector.redirect as jest.Mock;
 
-      const builtUrl = new URL(mockRedirect.mock.calls[0][0]);
+      const builtUrl = new URL(mockedRedirector.mock.calls[0][0]);
       expect(builtUrl.searchParams.get("client_id")).toEqual(
         oidcOptions.client.clientId
       );

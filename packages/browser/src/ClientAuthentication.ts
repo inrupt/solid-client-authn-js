@@ -33,6 +33,7 @@ import {
   IIssuerConfigFetcher,
   ISessionInternalInfo,
   ILoginOptions,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
@@ -129,13 +130,39 @@ export default class ClientAuthentication {
     url: string,
     eventEmitter: EventEmitter
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
-    // The `FallbackRedirectHandler` directly returns the global `fetch` for
-    // his value, so we should ensure it's bound to `window` rather than to
-    // ClientAuthentication, to avoid the following error:
-    // > 'fetch' called on an object that does not implement interface Window.
-    this.fetch = redirectInfo.fetch.bind(window);
+    try {
+      const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
+      // The `FallbackRedirectHandler` directly returns the global `fetch` for
+      // his value, so we should ensure it's bound to `window` rather than to
+      // ClientAuthentication, to avoid the following error:
+      // > 'fetch' called on an object that does not implement interface Window.
+      this.fetch = redirectInfo.fetch.bind(window);
 
+      // Strip the oauth params:
+      this.cleanUrlAfterRedirect(url);
+
+      return {
+        isLoggedIn: redirectInfo.isLoggedIn,
+        webId: redirectInfo.webId,
+        sessionId: redirectInfo.sessionId,
+        expirationDate: redirectInfo.expirationDate,
+      };
+    } catch (err) {
+      // Strip the oauth params:
+      this.cleanUrlAfterRedirect(url);
+
+      // FIXME: EVENTS.ERROR should be errorCode, errorDescription
+      //
+      // I'm not sure if "redirect" is a good error code, and in theory `err`
+      // maybe an Error object and not a string; Maybe we want to just hardcode
+      // a description instead?
+      eventEmitter.emit(EVENTS.ERROR, "redirect", err);
+
+      return undefined;
+    }
+  };
+
+  private cleanUrlAfterRedirect(url: string): void {
     const cleanedUpUrl = new URL(url);
     cleanedUpUrl.searchParams.delete("state");
     // For auth code flow
@@ -153,12 +180,5 @@ export default class ClientAuthentication {
     // authentication library will be called again with what are now invalid
     // query parameters!).
     window.history.replaceState(null, "", cleanedUpUrl.toString());
-
-    return {
-      isLoggedIn: redirectInfo.isLoggedIn,
-      webId: redirectInfo.webId,
-      sessionId: redirectInfo.sessionId,
-      expirationDate: redirectInfo.expirationDate,
-    };
-  };
+  }
 }

@@ -19,13 +19,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { jest, it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import { EventEmitter } from "events";
 import * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 
 import {
   StorageUtility,
   USER_SESSION_PREFIX,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 
 // FIXME: For some reason jest crashes on trying to handle a subpath import
@@ -34,6 +35,7 @@ import {
   mockStorageUtility,
   mockStorage,
   mockIncomingRedirectHandler,
+  mockHandleIncomingRedirect,
 } from "../../core/src/mocks";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
@@ -105,8 +107,44 @@ describe("ClientAuthentication", () => {
     );
   }
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: { assign: jest.fn() },
+    });
+  });
+
   describe("login", () => {
     const mockEmitter = new EventEmitter();
+    // TODO: add tests for events & errors
+
+    it("calls login, and uses the window.location.href for the redirect if no redirectUrl is set", async () => {
+      // Set a current window location which will be the expected URL to be
+      // redirected back to, since we don't pass redirectUrl:
+      window.location.href = "https://coolapp.test/some/redirect";
+
+      const clientAuthn = getClientAuthentication();
+      await clientAuthn.login(
+        {
+          sessionId: "mySession",
+          tokenType: "DPoP",
+          clientId: "coolApp",
+          oidcIssuer: "https://idp.com",
+        },
+        mockEmitter
+      );
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
+        sessionId: "mySession",
+        clientId: "coolApp",
+        redirectUrl: "https://coolapp.test/some/redirect",
+        oidcIssuer: "https://idp.com",
+        clientName: "coolApp",
+        eventEmitter: mockEmitter,
+        tokenType: "DPoP",
+      });
+    });
 
     it("calls login, and defaults to a DPoP token", async () => {
       const clientAuthn = getClientAuthentication();
@@ -208,6 +246,7 @@ describe("ClientAuthentication", () => {
 
   describe("logout", () => {
     const mockEmitter = new EventEmitter();
+    // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
       window.fetch = jest.fn();
@@ -275,6 +314,7 @@ describe("ClientAuthentication", () => {
 
   describe("handleIncomingRedirect", () => {
     const mockEmitter = new EventEmitter();
+    mockEmitter.emit = jest.fn();
 
     it("calls handle redirect", async () => {
       // eslint-disable-next-line no-restricted-globals
@@ -307,6 +347,7 @@ describe("ClientAuthentication", () => {
 
       // Calling the redirect handler should have updated the fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
+      expect(mockEmitter.emit).not.toHaveBeenCalled();
     });
 
     it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
@@ -321,6 +362,34 @@ describe("ClientAuthentication", () => {
         null,
         "",
         "https://coolapp.com/redirect"
+      );
+      expect(mockEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it("clears the current IRI from OAuth query parameters even if auth flow fails", async () => {
+      // eslint-disable-next-line no-restricted-globals
+      history.replaceState = jest.fn();
+
+      mockHandleIncomingRedirect.mockImplementationOnce(() =>
+        Promise.reject(new Error("Something went wrong"))
+      );
+
+      const clientAuthn = getClientAuthentication();
+
+      const url =
+        "https://coolapp.com/redirect?state=someState&code=someAuthCode";
+      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
+      // eslint-disable-next-line no-restricted-globals
+      expect(history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        "https://coolapp.com/redirect"
+      );
+
+      expect(mockEmitter.emit).toHaveBeenCalledWith(
+        EVENTS.ERROR,
+        "redirect",
+        new Error("Something went wrong")
       );
     });
 
@@ -337,6 +406,7 @@ describe("ClientAuthentication", () => {
         "",
         "https://coolapp.com/redirect"
       );
+      expect(mockEmitter.emit).not.toHaveBeenCalled();
     });
 
     it("preserves non-OAuth query strings", async () => {
@@ -352,6 +422,7 @@ describe("ClientAuthentication", () => {
         "",
         "https://coolapp.com/redirect?someQuery=someValue"
       );
+      expect(mockEmitter.emit).not.toHaveBeenCalled();
     });
   });
 

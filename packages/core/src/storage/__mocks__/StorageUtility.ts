@@ -20,8 +20,8 @@
  */
 
 import StorageUtility from "../StorageUtility";
-import IStorage from "../IStorage";
-import IStorageUtility from "../IStorageUtility";
+import type IStorage from "../IStorage";
+import type IStorageUtility from "../IStorageUtility";
 
 export const StorageUtilityGetResponse = "getResponse";
 
