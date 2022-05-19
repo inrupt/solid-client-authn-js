@@ -215,7 +215,10 @@ export async function getTokens(
   }
 
   // TODO: Find out where this is specified.
-  if (client.clientSecret) {
+  if (
+    (client.clientType === "static" || client.clientType === "dynamic") &&
+    client.clientSecret !== undefined
+  ) {
     headers.Authorization = `Basic ${btoa(
       `${client.clientId}:${client.clientSecret}`
     )}`;

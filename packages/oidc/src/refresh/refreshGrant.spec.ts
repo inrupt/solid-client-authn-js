@@ -19,7 +19,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { IClient } from "@inrupt/solid-client-authn-core";
+import {
+  IClient,
+  PublicIdentifierClient,
+} from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { jwtVerify, importJWK } from "jose";
 import {
@@ -66,7 +69,10 @@ describe("refreshGrant", () => {
 
   it("include the client id in the body if it is an IRI and no client secret is available", async () => {
     const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    const client = mockClient("https://client.identifier");
+    const client: PublicIdentifierClient = {
+      clientId: "https://client.identifier",
+      clientType: "solid-oidc",
+    };
 
     await refresh("some refresh token", mockIssuer(), client);
     expect(myFetch.mock.calls[0][0]).toBe(
@@ -84,7 +90,10 @@ describe("refreshGrant", () => {
 
   it("does not include a non-IRI client ID in the body", async () => {
     const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    const client = mockClient("some non-IRI client id");
+    const client: PublicIdentifierClient = {
+      clientId: "some non-IRI client id",
+      clientType: "solid-oidc",
+    };
 
     await refresh("some refresh token", mockIssuer(), client);
     const mockedFetchCall = myFetch.mock.calls[0];

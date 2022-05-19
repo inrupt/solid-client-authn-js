@@ -24,6 +24,7 @@ import { jest } from "@jest/globals";
 import { Response } from "cross-fetch";
 import { JWK, importJWK, SignJWT } from "jose";
 import {
+  DynamicClient,
   IClient,
   IIssuerConfig,
   KeyPair,
@@ -151,9 +152,14 @@ export const mockDpopTokens = (): TokenEndpointRawResponse => {
   };
 };
 
-export const mockClient = (clientId = "some client"): IClient => {
+export const mockClient = (
+  clientId = "some client",
+  clientSecret = "super secret"
+): DynamicClient => {
   return {
     clientId,
+    clientSecret,
+    clientExpiresAt: 0,
     clientType: "dynamic",
   };
 };

@@ -58,11 +58,7 @@ export async function clearOidcPersistentStorage(): Promise<void> {
   const itemsToRemove = [];
   for (let i = 0; i <= myStorage.length; i += 1) {
     const key = myStorage.key(i);
-    if (
-      key &&
-      key.match(/^oidc\..+$/) // ||
-      // key.match(/^solidClientAuthenticationUser:.+$/)
-    ) {
+    if (key && key.match(/^oidc\..+$/)) {
       itemsToRemove.push(key);
     }
   }

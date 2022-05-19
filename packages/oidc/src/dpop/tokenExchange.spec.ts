@@ -20,7 +20,10 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import {
+  IIssuerConfig,
+  PublicIdentifierClient,
+} from "@inrupt/solid-client-authn-core";
 
 import {
   getBearerToken,
@@ -190,7 +193,11 @@ describe("getTokens", () => {
 
   it("does not use basic auth if a client secret is not available", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
-    await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
+    const client: PublicIdentifierClient = {
+      clientType: "solid-oidc",
+      clientId: "https://some.client.test/",
+    };
+    await getTokens(mockIssuer(), client, mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
       mockIssuer().tokenEndpoint.toString()
     );

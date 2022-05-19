@@ -24,7 +24,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import { Response } from "cross-fetch";
 import {
   IIssuerConfig,
-  IClientRegistrarOptions,
+  IDynamicClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "./clientRegistrar";
 
@@ -42,9 +42,9 @@ const getMockIssuer = (): IIssuerConfig => {
   };
 };
 
-const getMockOptions = (): IClientRegistrarOptions => {
+const getMockOptions = (): IDynamicClientRegistrarOptions => {
   return {
-    sessionId: "mySession",
+    clientName: "test-client",
   };
 };
 
@@ -381,7 +381,7 @@ describe("registerClient", () => {
     await expect(() =>
       registerClient(options, getMockIssuer())
     ).rejects.toThrow(
-      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - some description'
+      'Dynamic client registration failed: the provided client metadata {"clientName":"test-client"} is invalid - some description'
     );
 
     global.fetch = jest.fn(
@@ -396,7 +396,7 @@ describe("registerClient", () => {
     await expect(() =>
       registerClient(options, getMockIssuer())
     ).rejects.toThrow(
-      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - '
+      'Dynamic client registration failed: the provided client metadata {"clientName":"test-client"} is invalid - '
     );
   });
 
