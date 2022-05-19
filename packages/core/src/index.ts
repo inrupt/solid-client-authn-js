@@ -66,6 +66,7 @@ export {
 
 export {
   handleRegistration,
+  negotiateClientSigningAlg,
   determineSigningAlg,
   determineClientType,
 } from "./login/oidc/ClientManager";

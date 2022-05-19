@@ -24,6 +24,7 @@ import { IIssuerConfig, ILoginOptions, IStorageUtility } from "../..";
 import {
   determineClientType,
   determineSigningAlg,
+  negotiateClientSigningAlg,
   handleRegistration,
 } from "./ClientManager";
 import type { IDynamicClientRegistrar } from "./IDynamicClientRegistrar";
@@ -150,6 +151,51 @@ describe("determineClientType", () => {
     expect(
       determineClientType({ clientName: "client example" }, issuerConfig)
     ).toBe("dynamic");
+  });
+});
+
+describe("negotiateSigningAlg", () => {
+  it("correctly negotiates signing algorithm with the client", () => {
+    const issuerConfig = mockIssuerConfig({
+      idTokenSigningAlgValuesSupported: ["ES256", "RS256"],
+    });
+
+    expect(negotiateClientSigningAlg(issuerConfig, ["RS256"])).toBe("RS256");
+  });
+
+  it("throws if the issuer doesn't advertise for supported signing algorithms", () => {
+    // By default does not have id_token_signing_alg_values_supported set:
+    const issuerConfig = mockIssuerConfig();
+
+    expect(issuerConfig.idTokenEncryptionAlgValuesSupported).toBeUndefined();
+
+    expect(() => negotiateClientSigningAlg(issuerConfig, ["RS256"])).toThrow(
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+    );
+  });
+
+  it("throws if no signing algorithm supported by the issuer matches the client preferences", () => {
+    const issuerConfig = mockIssuerConfig({
+      idTokenSigningAlgValuesSupported: ["Some_bogus_algorithm"],
+    });
+
+    expect(() =>
+      negotiateClientSigningAlg(issuerConfig, ["ES256", "RS256"])
+    ).toThrow(
+      'No signature algorithm match between ["Some_bogus_algorithm"] supported by the Identity Provider and ["ES256","RS256"] preferred by the client.'
+    );
+  });
+
+  it("throws if no signing algorithm supported by the client preferences matches that supported by the issuer", () => {
+    const issuerConfig = mockIssuerConfig({
+      idTokenSigningAlgValuesSupported: ["ES256", "RS256"],
+    });
+
+    expect(() =>
+      negotiateClientSigningAlg(issuerConfig, ["Some_bogus_algorithm"])
+    ).toThrow(
+      'No signature algorithm match between ["ES256","RS256"] supported by the Identity Provider and ["Some_bogus_algorithm"] preferred by the client.'
+    );
   });
 });
 

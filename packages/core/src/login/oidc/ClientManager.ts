@@ -43,6 +43,34 @@ export function determineSigningAlg(
   );
 }
 
+export function negotiateClientSigningAlg(
+  issuerConfig: IIssuerConfig,
+  clientPreference: string[]
+): string {
+  if (!Array.isArray(issuerConfig.idTokenSigningAlgValuesSupported)) {
+    throw new Error(
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+    );
+  }
+
+  const signingAlg = determineSigningAlg(
+    issuerConfig.idTokenSigningAlgValuesSupported,
+    clientPreference
+  );
+
+  if (signingAlg === null) {
+    throw new Error(
+      `No signature algorithm match between ${JSON.stringify(
+        issuerConfig.idTokenSigningAlgValuesSupported
+      )} supported by the Identity Provider and ${JSON.stringify(
+        clientPreference
+      )} preferred by the client.`
+    );
+  }
+
+  return signingAlg;
+}
+
 export function determineClientType(
   options: Partial<ILoginOptions>,
   issuerConfig: IIssuerConfig
