@@ -22,8 +22,14 @@
 import StorageUtility from "../StorageUtility";
 import type IStorage from "../IStorage";
 import type IStorageUtility from "../IStorageUtility";
+import { IClient } from "../../login/oidc/IClient";
 
 export const StorageUtilityGetResponse = "getResponse";
+
+export const StorageUtilityClientResponse: IClient = {
+  clientType: "solid-oidc",
+  clientId: "https://example.test/",
+};
 
 export const StorageUtilityMock: IStorageUtility = {
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -35,6 +41,19 @@ export const StorageUtilityMock: IStorageUtility = {
   delete: async (key: string) => {
     /* do nothing */
   },
+
+  getClientDetails: async (issuer: string): Promise<IClient> => {
+    return StorageUtilityClientResponse;
+  },
+
+  setClientDetails: async (issuer: string, details: IClient): Promise<void> => {
+    /* do nothing */
+  },
+
+  deleteClientDetails: async (issuer: string): Promise<void> => {
+    /* do nothing */
+  },
+
   getForUser: async (
     userId: string,
     key: string,

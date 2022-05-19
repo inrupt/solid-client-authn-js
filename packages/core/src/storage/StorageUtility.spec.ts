@@ -29,6 +29,7 @@ import StorageUtility, {
   saveSessionInfoToStorage,
 } from "./StorageUtility";
 import { mockStorage, mockStorageUtility } from "./__mocks__/StorageUtility";
+import { DynamicClient, IClient } from "../login/oidc/IClient";
 
 describe("StorageUtility", () => {
   const defaultMocks = {
@@ -130,6 +131,73 @@ describe("StorageUtility", () => {
         storageUtility.get(key, { secure: true })
       ).resolves.toBeUndefined();
     });
+  });
+
+  describe("clients", () => {
+    const issuer = "https://idp.test";
+
+    describe("getClientDetails", () => {
+      it("fetches an existing client from localstorage", async () => {
+        const clientDetails: DynamicClient = {
+          clientType: "dynamic",
+          clientId: "example-123",
+          clientSecret: "secret",
+          clientExpiresAt: 0,
+        };
+
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({
+            [`solidClient:${issuer}`]: JSON.stringify(clientDetails),
+          }),
+        });
+
+        await expect(storageUtility.getClientDetails(issuer)).resolves.toEqual(
+          clientDetails
+        );
+      });
+
+      it("returns null if the client is not stored", async () => {
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({}),
+        });
+
+        await expect(
+          storageUtility.getClientDetails(issuer)
+        ).resolves.toBeNull();
+      });
+
+      it("returns null if the client stored is invalid json", async () => {
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({
+            [`solidClient:${issuer}`]: "not json",
+          }),
+        });
+
+        await expect(
+          storageUtility.getClientDetails(issuer)
+        ).resolves.toBeNull();
+      });
+
+      it("returns null if the client stored is invalid", async () => {
+        const clientDetails = {
+          clientType: "dynamic",
+          clientId: "example-123",
+          // Missing clientSecret and clientExpiresAt
+        };
+
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({
+            [`solidClient:${issuer}`]: JSON.stringify(clientDetails),
+          }),
+        });
+
+        await expect(
+          storageUtility.getClientDetails(issuer)
+        ).resolves.toBeNull();
+      });
+    });
+    describe("setClientDetails", () => {});
+    describe("deleteClientDetails", () => {});
   });
 
   describe("getForUser", () => {

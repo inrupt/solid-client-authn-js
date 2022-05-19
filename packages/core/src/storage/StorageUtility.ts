@@ -31,9 +31,11 @@ import { exportJWK } from "jose";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
 import InruptError from "../errors/InruptError";
+import { ClientTypes, IClient, isValidClient } from "../login/oidc/IClient";
 import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 import { KeyPair } from "../authenticatedFetch/dpopUtils";
+import { isValidUrl } from "../util/isValidUrl";
 import { isObject } from "../util/isObject";
 
 export type OidcContext = {
@@ -167,6 +169,59 @@ export default class StorageUtility implements IStorageUtility {
 
   private getKey(userId: string): string {
     return `solidClientAuthenticationUser:${userId}`;
+  }
+
+  private getClientKey(issuer: string): string {
+    return `solidClient:${issuer}`;
+  }
+
+  public async getClientDetails(issuer: string): Promise<IClient | null> {
+    const key = this.getClientKey(issuer);
+
+    // FIXME: Use sessionStorage or similar:
+    const stored = await this.insecureStorage.get(key);
+
+    // This will only be the case if we don't find a client for the given session:
+    if (typeof stored !== "string") {
+      // throw new InruptError(`No client stored for [${issuer}]`);
+      return null;
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(stored);
+    } catch (err) {
+      // throw new InruptError(
+      //   `Data for client [${issuer}] in storage is corrupted - expected valid JSON, but got: ${stored}\n${err}`
+      // );
+      return null;
+    }
+
+    if (!isValidClient(parsed)) {
+      // throw new InruptError(
+      //   `Data for client [${issuer}] in storage is invalid`
+      // );
+      return null;
+    }
+
+    return parsed;
+  }
+
+  public async setClientDetails(
+    issuer: string,
+    details: IClient
+  ): Promise<void> {
+    const key = this.getClientKey(issuer);
+
+    // FIXME: Use sessionStorage or similar:
+    await this.insecureStorage.set(key, JSON.stringify(details));
+  }
+
+  public async deleteClientDetails(issuer: string): Promise<void> {
+    const key = this.getClientKey(issuer);
+
+    // FIXME: Use sessionStorage or similar:
+    await this.insecureStorage.delete(key);
   }
 
   private async getUserData(
