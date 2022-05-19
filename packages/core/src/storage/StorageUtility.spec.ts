@@ -164,20 +164,13 @@ describe("StorageUtility", () => {
       });
       const userData = {
         jackie: "The Cat",
-        sledge: 5000,
+        sledge: "hammer",
       };
       await storageUtility.setForUser(userId, userData);
 
       const retrievedValue = await storageUtility.getForUser(userId, "jackie");
 
       expect(retrievedValue).toBe("The Cat");
-
-      const retrievedNumberValue = await storageUtility.getForUser(
-        userId,
-        "sledge"
-      );
-
-      expect(retrievedNumberValue).toBe(5000);
     });
 
     it("gets an item from (secure) storage for a user", async () => {
@@ -186,7 +179,7 @@ describe("StorageUtility", () => {
       });
       const userData = {
         jackie: "The Cat",
-        sledge: 5000,
+        sledge: "hammer",
       };
       await storageUtility.setForUser(userId, userData, {
         secure: true,
@@ -197,34 +190,24 @@ describe("StorageUtility", () => {
       });
 
       expect(retrievedValue).toBe("The Cat");
-
-      const retrievedNumberValue = await storageUtility.getForUser(
-        userId,
-        "sledge",
-        {
-          secure: true,
-        }
-      );
-
-      expect(retrievedNumberValue).toBe(5000);
     });
 
-    it("returns 0 if the item is in storage but set to 0", async () => {
+    it("returns an empty string if the item is in storage but set to an empty string", async () => {
       const storageUtility = getStorageUtility({
         secureStorage: mockStorage({}),
       });
       const userData = {
-        zero: 0,
+        empty: "",
       };
       await storageUtility.setForUser(userId, userData, {
         secure: true,
       });
 
-      const retrievedValue = await storageUtility.getForUser(userId, "zero", {
+      const retrievedValue = await storageUtility.getForUser(userId, "empty", {
         secure: true,
       });
 
-      expect(retrievedValue).toBe(0);
+      expect(retrievedValue).toBe("");
     });
 
     it("returns undefined if no item is in storage", async () => {

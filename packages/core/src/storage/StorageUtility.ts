@@ -34,6 +34,7 @@ import InruptError from "../errors/InruptError";
 import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 import { KeyPair } from "../authenticatedFetch/dpopUtils";
+import { isObject } from "../util/isObject";
 
 export type OidcContext = {
   issuerConfig: IIssuerConfig;
@@ -41,6 +42,10 @@ export type OidcContext = {
   redirectUrl?: string;
   dpop: boolean;
 };
+
+export interface IUserData {
+  [key: string]: string;
+}
 
 export async function getSessionIdFromOauthState(
   storageUtility: IStorageUtility,
@@ -150,10 +155,6 @@ export async function saveSessionInfoToStorage(
   }
 }
 
-function isObject(value: unknown): value is object {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 // TOTEST: this does not handle all possible bad inputs for example what if it's not proper JSON
 /**
  * @hidden
@@ -171,7 +172,7 @@ export default class StorageUtility implements IStorageUtility {
   private async getUserData(
     userId: string,
     secure?: boolean
-  ): Promise<Record<string, string | number>> {
+  ): Promise<IUserData> {
     const stored = await (secure
       ? this.secureStorage
       : this.insecureStorage
@@ -195,7 +196,7 @@ export default class StorageUtility implements IStorageUtility {
 
   private async setUserData(
     userId: string,
-    data: Record<string, string | number>,
+    data: IUserData,
     secure?: boolean
   ): Promise<void> {
     await (secure ? this.secureStorage : this.insecureStorage).set(
@@ -239,33 +240,35 @@ export default class StorageUtility implements IStorageUtility {
     userId: string,
     key: string,
     options?: { errorIfNull?: boolean; secure?: boolean }
-  ): Promise<string | number | undefined> {
+  ): Promise<string | undefined> {
     const userData = await this.getUserData(userId, options?.secure);
+    const storedValue = userData[key];
 
-    let value: string | number | undefined = userData[key];
+    let result: string | undefined = undefined;
 
     if (
-      !isObject(userData) ||
-      Object.prototype.hasOwnProperty.call(userData, key) === false
+      isObject(userData) &&
+      Object.prototype.hasOwnProperty.call(userData, key) === true &&
+      typeof storedValue === "string"
     ) {
-      value = undefined;
+      result = storedValue;
     }
 
-    if (value === undefined && options?.errorIfNull) {
+    if (result === undefined && options?.errorIfNull) {
       throw new InruptError(
         `Field [${key}] for user [${userId}] is not stored`
       );
     }
 
-    return value;
+    return result;
   }
 
   async setForUser(
     userId: string,
-    values: Record<string, string | number>,
+    values: IUserData,
     options?: { secure?: boolean }
   ): Promise<void> {
-    let userData: Record<string, string | number>;
+    let userData: IUserData;
     try {
       userData = await this.getUserData(userId, options?.secure);
     } catch {

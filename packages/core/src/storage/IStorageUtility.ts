@@ -35,6 +35,8 @@ export default interface IStorageUtility {
     options?: { secure?: boolean }
   ): Promise<void>;
   delete(key: string, options?: { secure?: boolean }): Promise<void>;
+
+  // For managing information about the users' session:
   getForUser(
     userId: string,
     key: string,

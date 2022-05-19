@@ -39,7 +39,10 @@ export const StorageUtilityMock: IStorageUtility = {
     userId: string,
     key: string,
     options?: { errorIfNull?: boolean; secure?: boolean }
-  ) => StorageUtilityGetResponse,
+  ) => {
+    return StorageUtilityGetResponse;
+  },
+
   setForUser: async (
     userId: string,
     values: Record<string, string>,
@@ -47,6 +50,7 @@ export const StorageUtilityMock: IStorageUtility = {
   ) => {
     /* do nothing */
   },
+
   deleteForUser: async (
     userId: string,
     key: string,
@@ -54,6 +58,7 @@ export const StorageUtilityMock: IStorageUtility = {
   ) => {
     /* do nothing */
   },
+
   deleteAllUserData: async (userId: string, options?: { secure?: boolean }) => {
     /* do nothing */
   },
