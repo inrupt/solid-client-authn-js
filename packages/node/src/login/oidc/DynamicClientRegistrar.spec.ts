@@ -21,7 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import ClientRegistrar from "./ClientRegistrar";
+import DynamicClientRegistrar from "./DynamicClientRegistrar";
 import {
   IssuerConfigFetcherFetchConfigResponse,
   mockDefaultIssuerMetadata,

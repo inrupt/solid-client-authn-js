@@ -26,54 +26,25 @@
 
 import {
   IStorageUtility,
-  IClientRegistrar,
+  IDynamicClientRegistrar,
+  IDynamicClientRegistrarOptions,
   IIssuerConfig,
   IClient,
-  IClientDetails,
-  IClientRegistrarOptions,
   ConfigurationError,
-  determineSigningAlg,
   PREFERRED_SIGNING_ALG,
+  negotiateClientSigningAlg,
 } from "@inrupt/solid-client-authn-core";
 import { Client, Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 
-export function negotiateClientSigningAlg(
-  issuerConfig: IIssuerConfig,
-  clientPreference: string[]
-): string {
-  if (!Array.isArray(issuerConfig.idTokenSigningAlgValuesSupported)) {
-    throw new Error(
-      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
-    );
-  }
-
-  const signingAlg = determineSigningAlg(
-    issuerConfig.idTokenSigningAlgValuesSupported,
-    clientPreference
-  );
-
-  if (signingAlg === null) {
-    throw new Error(
-      `No signature algorithm match between ${JSON.stringify(
-        issuerConfig.idTokenSigningAlgValuesSupported
-      )} supported by the Identity Provider and ${JSON.stringify(
-        clientPreference
-      )} preferred by the client.`
-    );
-  }
-
-  return signingAlg;
-}
-
 /**
  * @hidden
  */
-export default class ClientRegistrar implements IClientRegistrar {
+export default class DynamicClientRegistrar implements IDynamicClientRegistrar {
   constructor(private storageUtility: IStorageUtility) {}
 
   async getClient(
-    options: IClientRegistrarOptions,
+    options: IDynamicClientRegistrarOptions,
     issuerConfig: IIssuerConfig
   ): Promise<IClient> {
     // If client secret and/or client id are stored in storage, use those.
