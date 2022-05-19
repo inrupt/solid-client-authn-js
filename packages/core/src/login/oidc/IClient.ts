@@ -19,6 +19,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { isObject } from "../../util/isObject";
+import { isValidUrl } from "../../util/isValidUrl";
+
 export interface IPublicIdentifierClientOptions {
   clientId: string;
 }
@@ -58,3 +61,83 @@ export interface PublicIdentifierClient extends BaseClient {
 }
 
 export type IClient = PublicIdentifierClient | DynamicClient | StaticClient;
+
+// These need to match the defined keys:
+const clientPropertyKeys = [
+  "clientType",
+  "clientId",
+  "clientName",
+  "idTokenSignedResponseAlg",
+  "clientSecret",
+  "clientExpiresAt",
+];
+
+export function isValidClient(value: any): value is IClient {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const keys = Object.keys(value);
+  if (keys.every((key) => clientPropertyKeys.includes(key)) !== true) {
+    return false;
+  }
+
+  // Validating clientType:
+  if (
+    typeof value.clientType !== "string" ||
+    // we need any here due to how `includes` is typed:
+    !ClientTypes.includes(value.clientType as any)
+  ) {
+    return false;
+  }
+
+  // Validating clientId:
+  if (typeof value.clientId !== "string") {
+    return false;
+  }
+
+  // Validating clientName, if it exists:
+  if (
+    typeof value.clientName !== "undefined" &&
+    typeof value.clientName !== "string"
+  ) {
+    return false;
+  }
+
+  // Validating the idTokenSignedResponseAlg value:
+  if (
+    typeof value.idTokenSignedResponseAlg !== "undefined" &&
+    typeof value.idTokenSignedResponseAlg !== "string"
+  ) {
+    return false;
+  }
+
+  // Validating public client identifiers:
+  if (value.clientType === "solid-oidc") {
+    if (!isValidUrl(value.clientId)) {
+      return false;
+    }
+
+    if (typeof value.clientSecret !== "undefined") {
+      return false;
+    }
+  }
+
+  // Validating static clients:
+  if (value.clientType === "static" && typeof value.clientSecret !== "string") {
+    return false;
+  }
+
+  // Validating dynamically registered clients:
+  if (value.clientType === "dynamic") {
+    if (
+      typeof value.clientSecret !== "string" ||
+      typeof value.clientExpiresAt !== "number" ||
+      value.clientExpiresAt < 0
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
