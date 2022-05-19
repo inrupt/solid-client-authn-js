@@ -65,12 +65,10 @@ export {
 } from "./login/oidc/IDynamicClientRegistrar";
 
 export {
-  IClientRegistrar,
-  IClientDetails,
-  IClientRegistrarOptions,
   handleRegistration,
   determineSigningAlg,
-} from "./login/oidc/IClientRegistrar";
+  determineClientType,
+} from "./login/oidc/ClientManager";
 
 export {
   ClientType,
