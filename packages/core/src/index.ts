@@ -57,6 +57,12 @@ export {
 
 export { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
 export { IIssuerConfig } from "./login/oidc/IIssuerConfig";
+
+export {
+  IDynamicClientRegistrarOptions,
+  IDynamicClientRegistrar,
+} from "./login/oidc/IDynamicClientRegistrar";
+
 export {
   IClientRegistrar,
   IClientDetails,
