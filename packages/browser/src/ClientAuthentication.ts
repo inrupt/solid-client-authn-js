@@ -35,9 +35,12 @@ import {
   IDynamicClientOptions,
   EVENTS,
   ClientManager,
+  isValidUrl,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
+
+import { KEY_CURRENT_URL } from "./constant";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a
@@ -54,6 +57,10 @@ export type ILoginOptions = IClientOptions & {
   redirectUrl: string;
   tokenType?: "DPoP" | "Bearer" = "DPoP";
 };
+
+export interface ISilentLoginOptions {
+  sessionId: string;
+}
 
 /**
  * @hidden
@@ -98,8 +105,50 @@ export default class ClientAuthentication {
   //   });
   // };
 
-  login = async (options: ILoginOptions): Promise<void> => {
-    const { sessionId, oidcIssuer, redirectUrl, ...clientOptions } = options;
+  login = async (
+    sessionId: string,
+    options: ILoginOptions,
+    eventEmitter: EventEmitter
+  ): Promise<void> => {
+    const { oidcIssuer, ...clientOptions } = options;
+
+    // TODO: Should we validate presence of oidcIssuer and redirectUrl here?
+
+    const redirectUrl =
+      options.redirectUrl && isValidUrl(options.redirectUrl)
+        ? options.redirectUrl
+        : window.location.href;
+
+    this.loginHandler.handle({
+      sessionId,
+      oidcIssuer,
+      redirectUrl,
+    });
+  };
+
+  silentlyLogin = async (options: ISilentLoginOptions): Promise<boolean> => {
+    // FIXME: Implement
+    const sessionInfo = await this.sessionInfoManager.get(options.sessionId);
+
+    if (sessionInfo === undefined || sessionInfo.issuer === undefined) {
+      return false;
+    }
+
+    const client = await this.clientManager.get(sessionInfo.issuer);
+
+    if (!client) {
+      return false;
+    }
+
+    // FIXME: use storage adapter:
+    window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
+
+    // await this.loginHandler.handle({
+    //   oidcIssuer: sessionInfo.issuer,
+    //   redirectUrl: sessionInfo.redirectUrl,
+    // });
+
+    return false;
   };
 
   // By default, our fetch() resolves to the environment fetch() function.
