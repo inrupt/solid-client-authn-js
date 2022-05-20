@@ -19,6 +19,8 @@ The following changes have been implemented but not released yet:
   implemented. For Solid apps we recommend the use
   of a [Public Client Identifier
   Document](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate-client/)
+- We've also removed support for the iframe-based session renewal, which was
+  never fully implemented.
 
 ## 1.11.9 - 2022-05-25
 

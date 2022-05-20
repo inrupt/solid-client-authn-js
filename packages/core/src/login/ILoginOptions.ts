@@ -53,12 +53,4 @@ export default interface ILoginOptions extends ILoginInputOptions {
    * Event emitter enabling calling user-specified callbacks.
    */
   eventEmitter?: EventEmitter;
-
-  /**
-   * This boolean specifies redirection to the Identity Provider should happen in
-   * the main window or in an iframe, thus making the redirect invisible to the
-   * user. Such redirection may only succeed in the case of silent authentication,
-   * if a cookie is set for the IdP and this cookie is included by the iframe.
-   */
-  inIframe?: boolean;
 }

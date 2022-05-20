@@ -64,7 +64,6 @@ export interface IOidcOptions {
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
   eventEmitter?: EventEmitter;
-  inIframe?: boolean;
 }
 
 export default IOidcOptions;
