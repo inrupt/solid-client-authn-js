@@ -11,6 +11,7 @@ module.exports = {
     // By default we only run unit tests:
     "e2e/*",
   ],
+  reporters: ["default"],
   collectCoverage: true,
   coverageReporters: ["text"],
   coverageThreshold: {
