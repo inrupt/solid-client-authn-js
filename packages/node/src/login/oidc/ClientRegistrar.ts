@@ -101,14 +101,6 @@ export default class ClientRegistrar implements IClientRegistrar {
         clientType: "dynamic",
       };
     }
-    const extendedOptions = { ...options };
-    // If registration access token is stored, use that.
-    extendedOptions.registrationAccessToken =
-      extendedOptions.registrationAccessToken ??
-      (await this.storageUtility.getForUser(
-        options.sessionId,
-        "registrationAccessToken"
-      ));
 
     // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
     const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
@@ -130,18 +122,13 @@ export default class ClientRegistrar implements IClientRegistrar {
     // type annotations.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const registeredClient: Client = await issuer.Client.register(
-      {
-        redirect_uris: [options.redirectUrl],
-        client_name: options.clientName,
-        // See https://openid.net/specs/openid-connect-registration-1_0.html
-        id_token_signed_response_alg: signingAlg,
-        grant_types: ["authorization_code", "refresh_token"],
-      },
-      {
-        initialAccessToken: extendedOptions.registrationAccessToken,
-      }
-    );
+    const registeredClient: Client = await issuer.Client.register({
+      redirect_uris: [options.redirectUrl],
+      client_name: options.clientName,
+      // See https://openid.net/specs/openid-connect-registration-1_0.html
+      id_token_signed_response_alg: signingAlg,
+      grant_types: ["authorization_code", "refresh_token"],
+    });
 
     const infoToSave: Record<string, string> = {
       clientId: registeredClient.metadata.client_id,
@@ -151,7 +138,7 @@ export default class ClientRegistrar implements IClientRegistrar {
     if (registeredClient.metadata.client_secret) {
       infoToSave.clientSecret = registeredClient.metadata.client_secret;
     }
-    await this.storageUtility.setForUser(extendedOptions.sessionId, infoToSave);
+    await this.storageUtility.setForUser(options.sessionId, infoToSave);
     return {
       clientId: registeredClient.metadata.client_id,
       clientSecret: registeredClient.metadata.client_secret,
