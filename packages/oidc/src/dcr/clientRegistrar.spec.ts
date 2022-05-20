@@ -91,19 +91,6 @@ describe("registerClient", () => {
     );
   });
 
-  it("uses an access token if provided", async () => {
-    const myFetch = getSuccessfulFetch();
-    global.fetch = myFetch;
-    const options = getMockOptions();
-    options.registrationAccessToken = "some token";
-    await registerClient(options, getMockIssuer());
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    expect(myFetch.mock.calls[0][1]?.headers.Authorization).toBe(
-      "Bearer some token"
-    );
-  });
-
   it("extracts the client info from the IdP response", async () => {
     const myFetch = getSuccessfulFetch();
     global.fetch = myFetch;

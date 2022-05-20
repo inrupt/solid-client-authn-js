@@ -67,20 +67,9 @@ export default class ClientRegistrar implements IClientRegistrar {
         clientType: "dynamic",
       };
     }
-    const extendedOptions = { ...options };
-    // If registration access token is stored, use that.
-    extendedOptions.registrationAccessToken =
-      extendedOptions.registrationAccessToken ??
-      (await this.storageUtility.getForUser(
-        options.sessionId,
-        "registrationAccessToken"
-      ));
 
     try {
-      const registeredClient = await registerClient(
-        extendedOptions,
-        issuerConfig
-      );
+      const registeredClient = await registerClient(options, issuerConfig);
       // Save info
       const infoToSave: Record<string, string> = {
         clientId: registeredClient.clientId,
@@ -92,16 +81,12 @@ export default class ClientRegistrar implements IClientRegistrar {
         infoToSave.idTokenSignedResponseAlg =
           registeredClient.idTokenSignedResponseAlg;
       }
-      await this.storageUtility.setForUser(
-        extendedOptions.sessionId,
-        infoToSave,
-        {
-          // FIXME: figure out how to persist secure storage at reload
-          // Otherwise, the client info cannot be retrieved from storage, and
-          // the lib tries to re-register the client on each fetch
-          secure: false,
-        }
-      );
+      await this.storageUtility.setForUser(options.sessionId, infoToSave, {
+        // FIXME: figure out how to persist secure storage at reload
+        // Otherwise, the client info cannot be retrieved from storage, and
+        // the lib tries to re-register the client on each fetch
+        secure: false,
+      });
       return registeredClient;
     } catch (error) {
       throw new Error(`Client registration failed: [${error}]`);

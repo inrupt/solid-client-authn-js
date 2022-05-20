@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Breaking Changes
+
+- We've removed support for the registrationAccessToken / initialAccessToken
+  when performing dynamic client registration. This feature wasn't fully
+  implemented, and does not really make sense for Dynamic Client Registration in
+  the context of Solid — you're probably better
+  off using a [Public Client Identifier
+  Document](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate-client/)
+
 ### Bugfixes
 
 -
