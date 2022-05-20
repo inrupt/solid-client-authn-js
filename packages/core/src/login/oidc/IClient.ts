@@ -19,21 +19,42 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-export type ClientType = "static" | "dynamic" | "solid-oidc";
-
-/**
- * @hidden
- */
-export interface IClient {
+export interface IPublicIdentifierClientOptions {
   clientId: string;
-  clientSecret?: string;
-  clientName?: string;
-  clientExpiresAt?: number;
-  idTokenSignedResponseAlg?: string;
-  clientType: ClientType;
 }
+
+export interface IStaticClientOptions {
+  clientId: string;
+  clientSecret: string;
+}
+
+export interface IDynamicClientOptions {
+  clientName?: string;
+}
+
+export const ClientTypes = ["static", "dynamic", "solid-oidc"] as const;
+export type ClientType = typeof ClientTypes[number];
+
+export interface BaseClient {
+  clientType: ClientType;
+  clientId: string;
+  clientName?: string;
+  idTokenSignedResponseAlg?: string;
+}
+
+export interface StaticClient extends BaseClient {
+  clientType: "static";
+  clientSecret: string;
+}
+
+export interface DynamicClient extends BaseClient {
+  clientType: "dynamic";
+  clientSecret: string;
+  clientExpiresAt: number;
+}
+
+export interface PublicIdentifierClient extends BaseClient {
+  clientType: "solid-oidc";
+}
+
+export type IClient = PublicIdentifierClient | DynamicClient | StaticClient;

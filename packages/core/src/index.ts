@@ -71,7 +71,19 @@ export {
   handleRegistration,
   determineSigningAlg,
 } from "./login/oidc/IClientRegistrar";
-export { IClient } from "./login/oidc/IClient";
+
+export {
+  ClientType,
+  ClientTypes,
+  IClient,
+  StaticClient,
+  IStaticClientOptions,
+  PublicIdentifierClient,
+  IPublicIdentifierClientOptions,
+  DynamicClient,
+  IDynamicClientOptions,
+  isValidClient,
+} from "./login/oidc/IClient";
 
 // Storage.
 export { default as IStorage } from "./storage/IStorage";
