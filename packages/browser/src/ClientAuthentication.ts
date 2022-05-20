@@ -30,11 +30,11 @@ import {
   IIncomingRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
-  IIssuerConfigFetcher,
   ISessionInternalInfo,
   IPublicIdentifierClientOptions,
   IDynamicClientOptions,
   EVENTS,
+  ClientManager,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
@@ -64,7 +64,7 @@ export default class ClientAuthentication {
     private redirectHandler: IIncomingRedirectHandler,
     private logoutHandler: ILogoutHandler,
     private sessionInfoManager: ISessionInfoManager,
-    private issuerConfigFetcher: IIssuerConfigFetcher
+    private clientManager: ClientManager
   ) {}
 
   // Define these functions as properties so that they don't get accidentally re-bound.

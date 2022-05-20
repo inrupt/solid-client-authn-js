@@ -27,7 +27,6 @@
 import {
   buildAuthenticatedFetch,
   IClient,
-  IClientRegistrar,
   IIssuerConfigFetcher,
   IIncomingRedirectHandler,
   ISessionInfo,
@@ -36,6 +35,7 @@ import {
   ITokenRefresher,
   loadOidcContextFromStorage,
   RefreshOptions,
+  ClientManager,
 } from "@inrupt/solid-client-authn-core";
 import {
   getDpopToken,
@@ -52,7 +52,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     private storageUtility: IStorageUtility,
     private sessionInfoManager: ISessionInfoManager,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar,
+    private clientManager: ClientManager,
     private tokerRefresher: ITokenRefresher
   ) {}
 
@@ -117,10 +117,13 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       );
     }
 
-    const client: IClient = await this.clientRegistrar.getClient(
-      { sessionId: storedSessionId },
-      issuerConfig
-    );
+    const client = await this.clientManager.get(issuerConfig.issuer);
+
+    if (client === null) {
+      throw new Error(
+        `The client for session ${storedSessionId} is missing or no longer valid`
+      );
+    }
 
     let tokens: CodeExchangeResult;
     const tokenCreatedAt = Date.now();

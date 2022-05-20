@@ -33,8 +33,7 @@ import {
   mockIssuerConfigFetcher,
 } from "./__mocks__/IssuerConfigFetcher";
 import OidcLoginHandler from "./OidcLoginHandler";
-import { mockDefaultClientRegistrar } from "./__mocks__/ClientRegistrar";
-import ClientRegistrar from "./ClientRegistrar";
+// import { mockDefaultClientRegistrar } from "./__mocks__/ClientRegistrar";
 
 jest.mock("@inrupt/oidc-client-ext");
 
@@ -43,7 +42,8 @@ describe("OidcLoginHandler", () => {
     storageUtility: StorageUtilityMock,
     oidcHandler: OidcHandlerMock,
     issuerConfigFetcher: mockDefaultIssuerConfigFetcher(),
-    clientRegistrar: mockDefaultClientRegistrar(),
+    // FIXME: add mock for clientManager:
+    clientManager: {},
   };
   function getInitialisedHandler(
     mocks: Partial<typeof defaultMocks> = defaultMocks
@@ -52,7 +52,7 @@ describe("OidcLoginHandler", () => {
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-      mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+      mocks.clientManager ?? defaultMocks.clientManager
     );
   }
 

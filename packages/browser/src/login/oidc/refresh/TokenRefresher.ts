@@ -26,7 +26,6 @@
 
 import {
   IClient,
-  IClientRegistrar,
   IIssuerConfigFetcher,
   IStorageUtility,
   loadOidcContextFromStorage,
@@ -34,6 +33,7 @@ import {
   ITokenRefresher,
   TokenEndpointResponse,
   EVENTS,
+  ClientManager,
 } from "@inrupt/solid-client-authn-core";
 import { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
@@ -49,7 +49,7 @@ export default class TokenRefresher implements ITokenRefresher {
   constructor(
     private storageUtility: IStorageUtility,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientManager: ClientManager
   ) {}
 
   async refresh(
@@ -63,11 +63,13 @@ export default class TokenRefresher implements ITokenRefresher {
       this.storageUtility,
       this.issuerConfigFetcher
     );
-    // This should also retrieve the client from storage
-    const clientInfo: IClient = await this.clientRegistrar.getClient(
-      { sessionId },
-      oidcContext.issuerConfig
-    );
+
+    const issuer = oidcContext.issuerConfig.issuer;
+    const clientInfo = await this.clientManager.get(issuer);
+
+    if (clientInfo === null) {
+      throw new Error(`The client for ${issuer} was not found in storage`);
+    }
 
     if (refreshToken === undefined) {
       // TODO: in a next PR, look up storage for a refresh token

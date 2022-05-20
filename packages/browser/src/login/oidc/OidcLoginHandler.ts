@@ -29,7 +29,6 @@
  */
 
 import {
-  IClientRegistrar,
   IIssuerConfig,
   IIssuerConfigFetcher,
   ILoginOptions,
@@ -40,11 +39,18 @@ import {
   ConfigurationError,
   LoginResult,
   handleRegistration,
+  ClientManager,
+  IClient,
+  StaticClient,
 } from "@inrupt/solid-client-authn-core";
 
-export interface OidcLoginHandlerOptions {
+// FIXME: Remove extends from ILoginOptions:
+export interface OidcLoginHandlerOptions extends ILoginOptions {
   redirectUrl: string;
   oidcIssuer: string;
+
+  // This is always set by ClientAuthentication
+  clientId: string;
 }
 
 function hasIssuer(
@@ -67,7 +73,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     private storageUtility: IStorageUtility,
     private oidcHandler: IOidcHandler,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientManager: ClientManager
   ) {}
 
   async canHandle(options: OidcLoginHandlerOptions): Promise<boolean> {
@@ -90,15 +96,32 @@ export default class OidcLoginHandler implements ILoginHandler {
       );
     }
 
+    // FIXME: I don't think the following code is correct / necessary:
+    // FIXME: We want to only register the client if we're doing an active login, for silent login, we want this to happen in the background
+
     // Fetch issuer config.
     const issuerConfig: IIssuerConfig =
       await this.issuerConfigFetcher.fetchConfig(options.oidcIssuer);
 
-    const clientInfo = await handleRegistration(
-      options,
-      issuerConfig,
-      this.storageUtility,
-      this.clientRegistrar
+    // const clientInfo = await handleRegistration(
+    //   options,
+    //   issuerConfig,
+    //   this.storageUtility,
+    //   this.clientManager
+    // );
+
+    const clientDetails: Omit<IClient, "clientType"> = {
+      clientId: options.clientId,
+      clientName: options.clientName,
+    };
+
+    if (options.clientSecret) {
+      (clientDetails as StaticClient).clientSecret = options.clientSecret;
+    }
+
+    const clientInfo = await this.clientManager.register(
+      options.oidcIssuer,
+      clientDetails
     );
 
     // Construct OIDC Options
