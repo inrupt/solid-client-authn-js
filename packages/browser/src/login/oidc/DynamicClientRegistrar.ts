@@ -23,19 +23,25 @@ import { registerClient } from "@inrupt/oidc-client-ext";
 import {
   IDynamicClientRegistrarOptions,
   IDynamicClientRegistrar,
-  IClient,
   IIssuerConfig,
+  DynamicClient,
 } from "@inrupt/solid-client-authn-core";
+
+/**
+ * This class is a little strange, as it's just a shim around oidc-client-ext's
+ * registerClient method that actually returns a DynamicClient already, we're
+ * just adding a layer to ease future work on that library
+ */
 
 export class DynamicClientRegistrar implements IDynamicClientRegistrar {
   async register(
     options: IDynamicClientRegistrarOptions,
     issuerConfig: IIssuerConfig
-  ): Promise<IClient> {
+  ): Promise<DynamicClient> {
     const registeredClient = await registerClient(options, issuerConfig);
 
     // Specifically convert to an IClient which is a DynamicClient, as to isolate from @inrupt/oidc-client-ext
-    const client: IClient = {
+    const client: DynamicClient = {
       clientType: "dynamic",
       clientId: registeredClient.clientId,
       clientSecret: registeredClient.clientSecret,

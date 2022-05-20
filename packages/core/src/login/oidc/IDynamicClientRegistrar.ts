@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import type { IClient } from "./IClient";
+import type { DynamicClient, IClient } from "./IClient";
 import type { IIssuerConfig } from "./IIssuerConfig";
 
 export interface IDynamicClientRegistrarOptions {
@@ -32,5 +32,5 @@ export interface IDynamicClientRegistrar {
   register(
     options: IDynamicClientRegistrarOptions,
     issuerConfig: IIssuerConfig
-  ): Promise<IClient>;
+  ): Promise<DynamicClient>;
 }

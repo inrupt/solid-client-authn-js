@@ -33,6 +33,7 @@ import {
   ConfigurationError,
   PREFERRED_SIGNING_ALG,
   negotiateClientSigningAlg,
+  DynamicClient,
 } from "@inrupt/solid-client-authn-core";
 import { Client, Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
@@ -43,10 +44,10 @@ import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 export default class DynamicClientRegistrar implements IDynamicClientRegistrar {
   constructor(private storageUtility: IStorageUtility) {}
 
-  async getClient(
+  async register(
     options: IDynamicClientRegistrarOptions,
     issuerConfig: IIssuerConfig
-  ): Promise<IClient> {
+  ): Promise<DynamicClient> {
     // If client secret and/or client id are stored in storage, use those.
     const [
       storedClientId,
