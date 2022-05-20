@@ -29,28 +29,28 @@ The following changes have been implemented but not released yet:
 ### Breaking change
 
 - the `useEssSession` option is deprecated, and the associated session endpoint
-is no longer used. Note that this option defaulted to false, and no public ESS
-instance was enabling this endpoint, so unless you were explicitly using this
-feature in an ESS instance you were running yourself, this change should not 
-affect you. If you were using this in a demo app, you may want to clear its local
-storage.
+  is no longer used. Note that this option defaulted to false, and no public ESS
+  instance was enabling this endpoint, so unless you were explicitly using this
+  feature in an ESS instance you were running yourself, this change should not
+  affect you. If you were using this in a demo app, you may want to clear its local
+  storage.
 
 ### Bugfix
 
 #### browser
 
-- The refresh flow was broken for browser-based applications using a client identifier, 
-leading to short session lifetime. Now that this is fixed, the background refresh
-will happen normally, and the session will remain active.
+- The refresh flow was broken for browser-based applications using a client identifier,
+  leading to short session lifetime. Now that this is fixed, the background refresh
+  will happen normally, and the session will remain active.
 - The incoming redirect sometimes left OAuth parameters on the URL, despite
-already having consumed them, this only happened in certain error scenarios,
-but now the parameters will always be removed, such that the user doesn't get
-stuck at an error.
+  already having consumed them, this only happened in certain error scenarios,
+  but now the parameters will always be removed, such that the user doesn't get
+  stuck at an error.
 
 #### node
 
 - The client credential flow as implemented by the Community Solid Server Identity
-Provider is now supported. See [the documentation](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/documentation/client-credentials.md) for more details.
+  Provider is now supported. See [the documentation](https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/documentation/client-credentials.md) for more details.
 
 ## 1.11.7 - 2022-03-16
 
@@ -58,8 +58,8 @@ Provider is now supported. See [the documentation](https://github.com/CommunityS
 
 - @inrupt/oidc-client-ext: remove ts-jest from package dependencies.
 - The PKCE verifier is now cleared from storage as soon as it has been used in the
-token exchange, regardless of the token type (it used to not be cleared from part
-of the storage when getting a DPoP-bound token).
+  token exchange, regardless of the token type (it used to not be cleared from part
+  of the storage when getting a DPoP-bound token).
 
 ## 1.11.6 - 2022-03-04
 
@@ -69,7 +69,7 @@ of the storage when getting a DPoP-bound token).
 
 - Silent authentication is only attempted once, and no longer retries indefinitely on failure.
 - Default values are provided for the OIDC Provider supported scopes if not present
-in the configuration. This fixes https://github.com/inrupt/solid-client-authn-js/issues/1991.
+  in the configuration. This fixes https://github.com/inrupt/solid-client-authn-js/issues/1991.
 
 ## 1.11.5 - 2022-02-14
 
@@ -82,9 +82,9 @@ No changes; fixed issue with npm publish.
 #### node and browser
 
 - The HTU field of the DPoP header is now normalized to remove the query parameters.
-Thanks to @diegoaraujo for his first contribution to the project!
+  Thanks to @diegoaraujo for his first contribution to the project!
 - The Solid-OIDC discovery implemented a deprecated method, and is now updated to
-align with the latest [Solid-OIDC specification](https://solid.github.io/solid-oidc/#discovery).
+  align with the latest [Solid-OIDC specification](https://solid.github.io/solid-oidc/#discovery).
 
 ## 1.11.3 - 2021-08-24
 
@@ -97,17 +97,17 @@ align with the latest [Solid-OIDC specification](https://solid.github.io/solid-o
 #### node and browser
 
 - Passing custom headers to a session's fetch as a Headers object would result in the headers
-being overlooked.
+  being overlooked.
 - As per [the Solid-OIDC spec](https://solid.github.io/solid-oidc/#webid-scope), the `webid`
-scope is now added to token requests.
+  scope is now added to token requests.
 - The ID token is no longer kept in storage.
 
 #### oidc
 
-- Since `oidc-client` has been deprecated, and won't be maintained anymore, the 
-OIDC package now depends on a fork, `@inrupt/oidc-client`, so that we can ensure
-the dependencies are kept up-to-date. This should be transparent for users of
-`@inrupt/solid-client-authn-browser`.
+- Since `oidc-client` has been deprecated, and won't be maintained anymore, the
+  OIDC package now depends on a fork, `@inrupt/oidc-client`, so that we can ensure
+  the dependencies are kept up-to-date. This should be transparent for users of
+  `@inrupt/solid-client-authn-browser`.
 
 ## 1.11.2 - 2021-08-24
 
@@ -116,34 +116,34 @@ the dependencies are kept up-to-date. This should be transparent for users of
 #### oidc
 
 - When dynamically registering a Client to a Solid Identity Provider, the subject
-type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
-sense in the context of Solid, where subjects (in this case, users) are uniquely
-identified by their WebID. This was disregarded by current Solid Identity Providers, 
-so it should not have affected dependants, but it's technically more correct.
+  type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
+  sense in the context of Solid, where subjects (in this case, users) are uniquely
+  identified by their WebID. This was disregarded by current Solid Identity Providers,
+  so it should not have affected dependants, but it's technically more correct.
 
 #### node
 
 - The `prompt=consent` parameter was missing when redirecting the user to the Solid
-Identity Provider authorization endpoint. This prevented working with the Community
-Solid Server Identity Provider.
+  Identity Provider authorization endpoint. This prevented working with the Community
+  Solid Server Identity Provider.
 - Proactive refreshing of the token prevented NodeJS from shutting down gracefully.
-Logging out now clear the timeout previously set, which resolves the issue.
+  Logging out now clear the timeout previously set, which resolves the issue.
 
 ## 1.11.1 - 2021-08-20
 
 #### oidc
 
 - When dynamically registering a Client to a Solid Identity Provider, the subject
-type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
-sense in the context of Solid, where subjects (in this case, users) are uniquely
-identified by their WebID. This was disregarded by current Solid Identity Providers, 
-so it should not have affected dependants, but it's technically more correct.
+  type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
+  sense in the context of Solid, where subjects (in this case, users) are uniquely
+  identified by their WebID. This was disregarded by current Solid Identity Providers,
+  so it should not have affected dependants, but it's technically more correct.
 
 #### node
 
 - The `prompt=consent` parameter was missing when redirecting the user to the Solid
-Identity Provider authorization endpoint. This prevented working with the Community
-Solid Server Identity Provider.
+  Identity Provider authorization endpoint. This prevented working with the Community
+  Solid Server Identity Provider.
 
 ## 1.11.0 - 2021-08-12
 
@@ -152,22 +152,22 @@ Solid Server Identity Provider.
 #### browser
 
 - Use refresh tokens to keep the sesion alive: The browser client now requests a
-refresh token, and uses it when its access token is about to expire to get a new
-access token. This enables keeping a session alive for longer than the lifetime 
-of a single access token.
+  refresh token, and uses it when its access token is about to expire to get a new
+  access token. This enables keeping a session alive for longer than the lifetime
+  of a single access token.
 - The `Session` class now exposes an `onError` method, which is a hook where
-error-handling callbacks may be registered.
+  error-handling callbacks may be registered.
 - The `Session` class now exposes an `onSessionExpiration` method, which is a hook
-where a callback may be registered to handle session expiration in the case when
-silent authentication fails.
+  where a callback may be registered to handle session expiration in the case when
+  silent authentication fails.
 
 ### Bugfixes
 
 #### node
 
 - Trying to log a session in providing dynamically registered client credentials
-along with a refresh token was mistaken for a static client login, leading to an
-"Invalid client credentials" error.
+  along with a refresh token was mistaken for a static client login, leading to an
+  "Invalid client credentials" error.
 
 ## 1.10.1 - 2021-08-02
 
@@ -176,8 +176,8 @@ along with a refresh token was mistaken for a static client login, leading to an
 #### node
 
 - A transitive dependency used submodule exports, which aren't supported yet by
-significant parts of the ecosystem, such as Jest. With an internal change, we enabled
-using @inrupt/solid-client-authn-node without encountering submodule exports.
+  significant parts of the ecosystem, such as Jest. With an internal change, we enabled
+  using @inrupt/solid-client-authn-node without encountering submodule exports.
 
 ## 1.10.0 - 2021-07-28
 
@@ -186,14 +186,14 @@ using @inrupt/solid-client-authn-node without encountering submodule exports.
 #### node
 
 - DPoP-bound refresh tokens are now supported, which allows for an increased protection
-against refresh token extraction.
+  against refresh token extraction.
 - Client credential grant: for Solid Identity Providers which support it, a client
-may statically register, and use the obtained credentials (client ID and secret)
-to log in to an Identity Provider. This is convenient in some cases, such as CI
-environment. However, it requires offline provider/client interaction, which does
-not scale well in the decentralized ecosystem of Solid. As such, it should only be
-used in specific cases, where the user is able to statically register their app 
-to their identity provider (which requires some technical background).
+  may statically register, and use the obtained credentials (client ID and secret)
+  to log in to an Identity Provider. This is convenient in some cases, such as CI
+  environment. However, it requires offline provider/client interaction, which does
+  not scale well in the decentralized ecosystem of Solid. As such, it should only be
+  used in specific cases, where the user is able to statically register their app
+  to their identity provider (which requires some technical background).
 
 ### Bugs fixed
 
@@ -210,7 +210,7 @@ to their identity provider (which requires some technical background).
 
 - Trying to call `Session.fetch` for a Session that had not yet authenticated
   would result in the following error:
-    'fetch' called on an object that does not implement interface Window.
+  'fetch' called on an object that does not implement interface Window.
 
 ## 1.9.0 - 2021-06-16
 
@@ -296,8 +296,8 @@ The following sections document changes that have been released already:
 #### node
 
 - It is now possible to specify a callback when constructing a function in order
-to invoke custom code when the refresh token is rotated. This is useful for users
-who wish to run authenticated scripts, without implementing a brand new storage.
+  to invoke custom code when the refresh token is rotated. This is useful for users
+  who wish to run authenticated scripts, without implementing a brand new storage.
 
 ## 1.7.4 - 2021-04-15
 
@@ -306,14 +306,14 @@ who wish to run authenticated scripts, without implementing a brand new storage.
 #### node and oidc
 
 - The OIDC issuer profile is used to negotiate the preferred signature algorithm
-for ID tokens.
+  for ID tokens.
 
 #### node
 
 - During client registration, the client explicitly specifies both the 'refresh_token'
-and the 'authorization_code' grants as part of its profile, instead of only relying
-on scopes to get refresh tokens. Depending on the Identity Provider, the former 
-behaviour could result in not getting refresh tokens.
+  and the 'authorization_code' grants as part of its profile, instead of only relying
+  on scopes to get refresh tokens. Depending on the Identity Provider, the former
+  behaviour could result in not getting refresh tokens.
 
 ## 1.7.3 - 2021-04-09
 
@@ -333,29 +333,29 @@ behaviour could result in not getting refresh tokens.
 #### browser and node
 
 - When loaded in the same environment (e.g. a full-stack NextJS app), it is no longer
-possible that the browser and node code get mixed together, resulting in code being
-executed in the wrong environment.
+  possible that the browser and node code get mixed together, resulting in code being
+  executed in the wrong environment.
 
 ## 1.7.2 - 2021-03-10
 
 #### browser and node
 
 - A client WebID can now be provided as part of the `login` options. The library will
-check for compliance of the chosen Solid Identity Provider, and go use the provided 
-client WebID or go through Dynamic Client Registration accordingly.
+  check for compliance of the chosen Solid Identity Provider, and go use the provided
+  client WebID or go through Dynamic Client Registration accordingly.
 
 ### Bugfixes
 
 #### browser
 
-- Attempting to log in with a hash fragment in the redirect URL no longer throws, 
-the hash fragment is simply discarded.
+- Attempting to log in with a hash fragment in the redirect URL no longer throws,
+  the hash fragment is simply discarded.
 - The ID token is now validated when asking for DPoP-bound tokens, and not only when asking for a Bearer token.
 
 #### node
 
-- The OIDC parameters added to the redirect IRI by the Solid Identity Provider 
-are no longer included in the redirect IRI provided at the token endpoint.
+- The OIDC parameters added to the redirect IRI by the Solid Identity Provider
+  are no longer included in the redirect IRI provided at the token endpoint.
 - The provided redirect IRI is now normalized.
 
 ## 1.7.1 - 2021-03-04
@@ -372,17 +372,17 @@ are no longer included in the redirect IRI provided at the token endpoint.
 
 #### browser
 
-- New option `useEssSession` for `session.handleIncomingRedirect`: Control to 
-enable and disble the behaviour introduced in 1.4.0. If set to false, the
-`/session` endpoint isn't looked up, and cookie-based auth is disabled. The 
-behaviour is similar when `restorePreviousSession` is true.
+- New option `useEssSession` for `session.handleIncomingRedirect`: Control to
+  enable and disble the behaviour introduced in 1.4.0. If set to false, the
+  `/session` endpoint isn't looked up, and cookie-based auth is disabled. The
+  behaviour is similar when `restorePreviousSession` is true.
 
 ### Bugfixes
 
 #### browser
 
 - Some components of the redirect URL are no longer lost after redirect, which
-prevents silent authentication from failing.
+  prevents silent authentication from failing.
 
 ## 1.6.1 - 2021-02-26
 
@@ -417,7 +417,7 @@ prevents silent authentication from failing.
 #### oidc
 
 - `validateIdToken`: A function to check that an ID token has been signed by the
-correct issuer, and that it contains some expected values.
+  correct issuer, and that it contains some expected values.
 
 #### browser
 
@@ -425,7 +425,7 @@ correct issuer, and that it contains some expected values.
   the developer to register an event callback that will be called whenever a
   session is restored (e.g., due to a browser page refresh). The callback is
   given a URL parameter, which represents the current URL of the browser
-  *before* the session restoration (to allow the developer to restore their
+  _before_ the session restoration (to allow the developer to restore their
   app's state if needed, e.g., if the app is a Single Page App (SPA) and the
   developer wishes to restore the users 'current page' to exactly where they
   were before the refresh).
@@ -435,14 +435,14 @@ correct issuer, and that it contains some expected values.
 #### browser
 
 - Refreshing the page no longer logs the session out, no matter what Resource Server
-the data is collected from. 
-- When a session expires, the session is now marked as logged out, and a 
+  the data is collected from.
+- When a session expires, the session is now marked as logged out, and a
   `logout` event is thrown.
 - The 'client_id' option, if specified as an option when logging in, is now
   stored in storage, ready to be retrieved again from storage when the login
   flow redirects back to the client application (previously it was only being
   stored if DCR was invoked).
-- The issuer URL associated with the session is now necessarily the __canonical__
+- The issuer URL associated with the session is now necessarily the **canonical**
   issuer's URL, instead of potentially including/missing a trailing slash.
 
 ## 1.5.1 - 2020-02-03
@@ -453,8 +453,8 @@ the data is collected from.
 
 - Deprecated SessionManager
 - The implicit flow is no longer supported. However, no known Solid Identity issuer
-only supports the implicit flow and not the auth code flow, and no user-facing
-controls enable choosing one's flow, so this has no user impact.
+  only supports the implicit flow and not the auth code flow, and no user-facing
+  controls enable choosing one's flow, so this has no user impact.
 
 ### New features
 
@@ -478,11 +478,11 @@ controls enable choosing one's flow, so this has no user impact.
 #### node
 
 - `getSessionFromStorage`: a function to retrieve a session from storage based on
-its session ID (for multi-session management).
+  its session ID (for multi-session management).
 - `getSessionIdFromStorageAll`: a function to retrieve the session IDs for all stored
-sessions.
+  sessions.
 - `clearSessionFromStorageAll`: a function to clear all information about all sessions in
-storage.
+  storage.
 
 ### Bugfix
 
@@ -490,8 +490,8 @@ storage.
 
 #### node
 
-- Building multiple sessions with the default storage re-initialized a new storage 
-each time.
+- Building multiple sessions with the default storage re-initialized a new storage
+  each time.
 
 ## 1.4.2 - 2020-01-19
 
@@ -508,7 +508,7 @@ each time.
 #### node
 
 - For `solid-client-authn-node`, the `secureStorage` and `insecureStorage` are
-deprecated, and replaced by `storage`.
+  deprecated, and replaced by `storage`.
 
 ### Bugfix
 
@@ -523,25 +523,25 @@ deprecated, and replaced by `storage`.
 ### New features
 
 - Updating the browser window will no longer log the user out if their WebID is
-hosted on an ESS instance (such as https://pod.inrupt.com). A better, global
-solution will be implemented later in order not to break compatibility in the 
-ecosystem. The current solution is based on a custom `/session` endpoint lookup, 
-and a Resource Server cookie.
+  hosted on an ESS instance (such as https://pod.inrupt.com). A better, global
+  solution will be implemented later in order not to break compatibility in the
+  ecosystem. The current solution is based on a custom `/session` endpoint lookup,
+  and a Resource Server cookie.
 
 ## 1.3.0 - 2020-01-06
 
 ### New feature
 
 - Although still possible, it is now no longer required to manually instantiate
-a new `Session` object when using `solid-client-authn-browser`. Instead, you can
-directly import `fetch`, `login`, `logout` and `handleIncomingRedirect`,
-which will instantiate a new Session implicitly behind the scenes. If you do
-need access to this Session, you can do so using the new function
-`getDefaultSession`.
+  a new `Session` object when using `solid-client-authn-browser`. Instead, you can
+  directly import `fetch`, `login`, `logout` and `handleIncomingRedirect`,
+  which will instantiate a new Session implicitly behind the scenes. If you do
+  need access to this Session, you can do so using the new function
+  `getDefaultSession`.
 
 ### Bugfix
 
-- The `session.info.isLoggedIn` property is now set to false on logout. 
+- The `session.info.isLoggedIn` property is now set to false on logout.
 
 ## 1.2.6 - 2020-12-23
 
@@ -558,22 +558,22 @@ need access to this Session, you can do so using the new function
 ## 1.2.4 - 2020-12-17
 
 - `ajv` was imported through a dependency instead of being explicitly declared as
-a direct dependency of `solid-client-authn-core`
+  a direct dependency of `solid-client-authn-core`
 
 ## 1.2.3 - 2020-12-17
 
 ### Bugfix
 
 - The `browser` entry in the `package.json` was incorrect, leading to issues when
-bundling the library.
+  bundling the library.
 
 ## 1.2.2 - 2020-12-16
 
 ### Bugfix
 
-- The WebID is now REALLY set on the session when logging in a script. The initial 
-fix introduced in 1.2.1 did compute the WebID from the identity provider response,
-but did not set it properly on the session.
+- The WebID is now REALLY set on the session when logging in a script. The initial
+  fix introduced in 1.2.1 did compute the WebID from the identity provider response,
+  but did not set it properly on the session.
 
 The following sections document changes that have been released already:
 
@@ -582,26 +582,25 @@ The following sections document changes that have been released already:
 ### Bugfix
 
 - Addressed part of issue https://github.com/inrupt/solid-client-authn-js/issues/684,
-by providing a `browser` entry in the `package.json` file. The ES modules export will
-be adressed in a different PR. 
+  by providing a `browser` entry in the `package.json` file. The ES modules export will
+  be adressed in a different PR.
 - The WebID is now set on the session when logging in a script.
 - When logging in with a refresh token (e.g. for a script), if the provided credentials are incorrect, an error is thrown.
-
 
 ## 1.2.0 - 2020-12-04
 
 ### New feature
 
 - Support for authenticated scripts: It's now possible to provide a script with login
-parameters for a refresh token, a client ID and a client secret, which enables it to access
-private resources on Pods. This means that it's now easier to write small backend
-scripts which can interact with Pods in an automated way (i.e. no human interaction
-required).
+  parameters for a refresh token, a client ID and a client secret, which enables it to access
+  private resources on Pods. This means that it's now easier to write small backend
+  scripts which can interact with Pods in an automated way (i.e. no human interaction
+  required).
 
 ### Bugfixes
 
 - In some use cases (e.g. authenticating a script), logging in happens without a redirection. The architecture so far prevented this
-from being possible, and now after a login that does not require a redirect, the current session may be authenticated.
+  from being possible, and now after a login that does not require a redirect, the current session may be authenticated.
 - Logging in a browser app will now clear OIDC-specific query params from the URL, which prevents a crash on refresh.
 
 ### New features
@@ -620,9 +619,9 @@ from being possible, and now after a login that does not require a redirect, the
 
 ### New features
 
-- NodeJS support: a new NPM package, `@inrupt/solid-client-authn-node`, is now available to use authentication in a server environment. 
-- In addition to the features supported by the browser version, `@inrupt/solid-client-authn-node` supports the refresh token grant, which 
-makes it possible to maintain long-lived sessions without re-involving the user.
+- NodeJS support: a new NPM package, `@inrupt/solid-client-authn-node`, is now available to use authentication in a server environment.
+- In addition to the features supported by the browser version, `@inrupt/solid-client-authn-node` supports the refresh token grant, which
+  makes it possible to maintain long-lived sessions without re-involving the user.
 
 ### Bugfixes
 
@@ -681,7 +680,7 @@ we will bump the major version when we change our publicly documented interface.
 ### Internal refactor:
 
 - Uses [oidc-client-js](https://github.com/IdentityModel/oidc-client-js) now to
-perform the Auth Code Flow (replacing lots of hand-rolled code).
+  perform the Auth Code Flow (replacing lots of hand-rolled code).
 
 ### Bugfixes
 
@@ -696,19 +695,21 @@ perform the Auth Code Flow (replacing lots of hand-rolled code).
 
 - Browser
   - Login now clears the local storage, so that you can log into a different server
-even if not logged out properly.
+    even if not logged out properly.
 
 ### Internal refactor:
+
 - Created multiple sub-packages, specifically the core and oidc-dpop-client-browser.
 - Moved interfaces down into Core.
 - Removed TSyringe annotations from the implementation of StorageUtility in the
- Core package and extended it in the browser module (where they we re-applied to
- allow injection again).
+  Core package and extended it in the browser module (where they we re-applied to
+  allow injection again).
 - Refactored the StorageUtility code to fix up mock usage.
 
 ## [0.1.2] - 2020-09-07
 
 ### Internal refactor:
+
 - Moved to Lerna (currently only the browser module is available).
 
 ## [0.1.1] - 2020-08-14
