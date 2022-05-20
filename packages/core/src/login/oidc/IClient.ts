@@ -137,6 +137,12 @@ export function isValidClient(value: any): value is IClient {
     ) {
       return false;
     }
+
+    // Check clientExpiresAt as being in the future or non-expiring:
+    // TODO: test coverage
+    if (value.clientExpiresAt !== 0 && value.clientExpiresAt < Date.now()) {
+      return false;
+    }
   }
 
   return true;
