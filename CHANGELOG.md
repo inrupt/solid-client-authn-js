@@ -11,6 +11,8 @@ The following changes have been implemented but not released yet:
 
 ### Breaking Changes
 
+- Support for Node.js v12.x has been dropped as that version has reached
+  end-of-life.
 - We've removed support for the registrationAccessToken / initialAccessToken
   when performing dynamic client registration. This feature wasn't fully
   implemented, and does not really make sense for Dynamic Client Registration in
