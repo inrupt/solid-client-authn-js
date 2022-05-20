@@ -26,7 +26,13 @@
 
 import type IStorageUtility from "../../storage/IStorageUtility";
 import type ILoginOptions from "../ILoginOptions";
-import type { ClientType, IClient } from "./IClient";
+import {
+  ClientType,
+  IClient,
+  isValidClient,
+  PublicIdentifierClient,
+  StaticClient,
+} from "./IClient";
 import type { IIssuerConfig } from "./IIssuerConfig";
 import type { IDynamicClientRegistrar } from "./IDynamicClientRegistrar";
 import type { IIssuerConfigFetcher } from "./IIssuerConfigFetcher";
@@ -92,78 +98,6 @@ export function determineClientType(
   return "dynamic";
 }
 
-export async function handleRegistration(...args: any[]) {}
-
-//   options: IDynamicClientRegistrarOptions,
-//   issuerConfig: IIssuerConfig,
-//   storageUtility: IStorageUtility,
-//   clientRegistrar: IDynamicClientRegistrar
-// ): Promise<IClient> {
-//   const clientType = determineClientType(options, issuerConfig);
-//   if (clientType === "dynamic") {
-//     return clientRegistrar.getClient(
-//       {
-//         sessionId: options.sessionId,
-//         clientName: options.clientName,
-//         redirectUrl: options.redirectUrl,
-//       },
-//       issuerConfig
-//     );
-//   }
-
-//   await storageUtility.setClientDetails(issuerConfig.issuer, {});
-//   // If a client_id was provided, and the Identity Provider is Solid-OIDC compliant,
-//   // or it is not compliant but the client_id isn't an IRI (we assume it has already
-//   // been registered with the IdP), then the client registration information needs
-//   // to be stored so that it can be retrieved later after redirect.
-//   await storageUtility.setForUser(options.sessionId, {
-//     // If the client is either static or solid-oidc compliant, its client ID cannot be undefined.
-//     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-//     clientId: options.clientId!,
-//   });
-//   if (options.clientSecret) {
-//     await storageUtility.setForUser(options.sessionId, {
-//       clientSecret: options.clientSecret,
-//     });
-//   }
-//   if (options.clientName) {
-//     await storageUtility.setForUser(options.sessionId, {
-//       clientName: options.clientName,
-//     });
-//   }
-//   return {
-//     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-//     clientId: options.clientId!,
-//     clientSecret: options.clientSecret,
-//     clientName: options.clientName,
-//     clientType,
-//   };
-// }
-
-export async function getClient(
-  issuerConfig: IIssuerConfig,
-  storageUtility: IStorageUtility
-): Promise<IClient | null> {
-  const storedClient = await storageUtility.getClientDetails(
-    issuerConfig.issuer
-  );
-
-  if (storedClient === null) {
-    return null;
-  }
-
-  // Should this be in `isValidClient`?
-  if (
-    storedClient.clientType === "dynamic" &&
-    storedClient.clientExpiresAt !== 0 &&
-    storedClient.clientExpiresAt < Date.now()
-  ) {
-    return null;
-  }
-
-  return storedClient;
-}
-
 export class ClientManager {
   constructor(
     private storageUtility: IStorageUtility,
@@ -172,41 +106,60 @@ export class ClientManager {
   ) {}
 
   async get(issuer: string): Promise<IClient | null> {
-    const storedClient = await this.storageUtility.getClientDetails(issuer);
-
-    if (storedClient === null) {
-      return null;
-    }
-
-    // Should this be in `isValidClient`?
-    if (
-      storedClient.clientType === "dynamic" &&
-      storedClient.clientExpiresAt !== 0 &&
-      storedClient.clientExpiresAt < Date.now()
-    ) {
-      return null;
-    }
-
-    return storedClient;
+    return await this.storageUtility.getClientDetails(issuer);
   }
 
   async register(
     issuer: string,
-    clientDetails: Omit<IClient, "clientType">
-    // FIXME: just return IClient
-  ): Promise<IClient | void> {
-    const issuerConfig: IIssuerConfig =
-      await this.issuerConfigFetcher.fetchConfig(issuer);
+    // FIXME: make this a decent type:
+    // static clients will never have a redirectUrl, others must have one.
+    clientDetails: Omit<IClient, "clientType"> & { redirectUrl?: string }
+  ): Promise<IClient> {
+    const issuerConfig = await this.issuerConfigFetcher.fetchConfig(issuer);
 
     const clientType = determineClientType(clientDetails, issuerConfig);
 
     if (clientType === "dynamic") {
-      this.dynamicClientRegistrar.register(
-        {
-          clientName: clientDetails.clientName,
-        },
-        issuerConfig
+      const existingClient = await this.storageUtility.getClientDetails(issuer);
+
+      // If we already have a client and its of the same type, then return it:
+      if (existingClient && existingClient.clientType === clientType) {
+        // TODO: do we care too much about clients changing name? Should we add a `isSameClient(clientA, clientB)`?
+        return existingClient;
+      } else {
+        // Otherwise register a new client for the issuer:
+        const dynamicClient = await this.dynamicClientRegistrar.register(
+          {
+            clientName: clientDetails.clientName,
+            redirectUrl: clientDetails.redirectUrl,
+          },
+          issuerConfig
+        );
+
+        this.storageUtility.setClientDetails(issuer, dynamicClient);
+
+        return dynamicClient;
+      }
+    }
+
+    // This is a little hacky, and it'd be better to explicitly validate fields:
+    const client = {
+      clientType,
+      ...clientDetails,
+    };
+
+    if (!isValidClient(client)) {
+      throw new Error(
+        `Missing or incorrect clientDetails supplied to ClientManager.register, received for ${clientType}: ${clientDetails}`
       );
+    }
+
+    this.storageUtility.setClientDetails(issuer, client);
+
+    if (clientType === "solid-oidc") {
+      return client as PublicIdentifierClient;
+    } else {
+      return client as StaticClient;
     }
   }
 }

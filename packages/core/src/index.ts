@@ -69,6 +69,7 @@ export {
   negotiateClientSigningAlg,
   determineSigningAlg,
   determineClientType,
+  ClientManager,
 } from "./login/oidc/ClientManager";
 
 export {

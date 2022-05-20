@@ -25,7 +25,7 @@ import {
   determineClientType,
   determineSigningAlg,
   negotiateClientSigningAlg,
-  handleRegistration,
+  ClientManager,
 } from "./ClientManager";
 import type { IDynamicClientRegistrar } from "./IDynamicClientRegistrar";
 import { mockIssuerConfig } from "./__mocks__/IssuerConfig";
