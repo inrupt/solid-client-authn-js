@@ -63,8 +63,8 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const oidcOptions: OidcClientSettings = {
       authority: oidcLoginOptions.issuer.toString(),
       client_id: oidcLoginOptions.client.clientId,
-      client_secret: oidcLoginOptions.client.clientSecret,
       redirect_uri: oidcLoginOptions.redirectUrl.toString(),
+      // TODO: Support post logout redirect url: SDK-1252
       post_logout_redirect_uri: oidcLoginOptions.redirectUrl.toString(),
       response_type: "code",
       scope: DEFAULT_SCOPES,
@@ -76,6 +76,14 @@ export default class AuthorizationCodeWithPkceOidcHandler
       loadUserInfo: false,
       prompt: oidcLoginOptions.prompt ?? "consent",
     };
+
+    // Only dynamic and static clients have a clientSecret:
+    if (
+      oidcLoginOptions.client.clientType === "dynamic" ||
+      oidcLoginOptions.client.clientType === "static"
+    ) {
+      oidcOptions.client_secret = oidcLoginOptions.client.clientSecret;
+    }
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
 
