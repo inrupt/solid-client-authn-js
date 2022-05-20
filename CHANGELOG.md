@@ -19,6 +19,7 @@ The following changes have been implemented but not released yet:
   the context of Solid — you're probably better
   off using a [Public Client Identifier
   Document](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate-client/)
+- We've also removed support for the iframe-based session renewal.
 
 ### Bugfixes
 

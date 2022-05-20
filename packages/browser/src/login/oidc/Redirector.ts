@@ -28,7 +28,6 @@ import {
   IRedirector,
   IRedirectorOptions,
 } from "@inrupt/solid-client-authn-core";
-import { redirectInIframe } from "../../iframe";
 
 /**
  * @hidden
@@ -39,8 +38,6 @@ export default class Redirector implements IRedirector {
       options.handleRedirect(redirectUrl);
     } else if (options && options.redirectByReplacingState) {
       window.history.replaceState({}, "", redirectUrl);
-    } else if (options?.redirectInIframe) {
-      redirectInIframe(redirectUrl);
     } else {
       window.location.href = redirectUrl;
     }

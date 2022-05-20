@@ -33,7 +33,6 @@ import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
-import { postRedirectUrlToParent, setupIframeListener } from "./iframe";
 
 export interface ISessionOptions {
   /**
@@ -98,11 +97,6 @@ export interface IHandleIncomingRedirectOptions {
 export async function silentlyAuthenticate(
   sessionId: string,
   clientAuthn: ClientAuthentication,
-  options: {
-    inIframe?: boolean;
-  } = {
-    inIframe: false,
-  },
   session: Session
 ): Promise<boolean> {
   const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
@@ -121,7 +115,6 @@ export async function silentlyAuthenticate(
         clientId: storedSessionInfo.clientAppId,
         clientSecret: storedSessionInfo.clientAppSecret,
         tokenType: storedSessionInfo.tokenType ?? "DPoP",
-        inIframe: options.inIframe,
       },
       session
     );
@@ -193,36 +186,6 @@ export class Session extends EventEmitter {
         isLoggedIn: false,
       };
     }
-
-    // Listen for messages from children iframes.
-    setupIframeListener(async (redirectUrl: string) => {
-      const sessionInfo =
-        await this.clientAuthentication.handleIncomingRedirect(
-          redirectUrl,
-          this
-        );
-
-      // If silent authentication was not successful, do nothing;
-      // the existing session might still be valid for a while,
-      // and will expire by itself.
-      if (!isLoggedIn(sessionInfo)) {
-        return;
-      }
-      // After having revalidated the session,
-      // make sure to apply the new expiration time:
-      this.setSessionInfo(sessionInfo);
-    });
-    // Listen for the 'tokenRenewal' signal to trigger the silent token renewal.
-    this.on("tokenRenewal", () =>
-      silentlyAuthenticate(
-        this.info.sessionId,
-        this.clientAuthentication,
-        {
-          inIframe: true,
-        },
-        this
-      )
-    );
 
     // When a session is logged in, we want to track its ID in local storage to
     // enable silent refresh. The current session ID specifically stored in 'localStorage'
@@ -321,13 +284,6 @@ export class Session extends EventEmitter {
       typeof inputOptions === "string" ? { url: inputOptions } : inputOptions;
     const url = options.url ?? window.location.href;
 
-    if (window.frameElement !== null) {
-      // This is being loaded from an iframe, so send the redirect
-      // URL to the parent window on the same origin.
-      postRedirectUrlToParent(url);
-      return undefined;
-    }
-
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
@@ -357,13 +313,9 @@ export class Session extends EventEmitter {
       // ...if not, then there is no ID token, and so silent authentication cannot happen, but
       // if we do have a stored session ID, attempt to re-authenticate now silently.
       if (storedSessionId !== null) {
-        // TODO: iframe-based authentication being still experimental, it is disabled
-        // by default here. When it settles down, the following could be set to true,
-        // in which case the unresolving promise afterwards would need to be changed.
         const attemptedSilentAuthentication = await silentlyAuthenticate(
           storedSessionId,
           this.clientAuthentication,
-          undefined,
           this
         );
         // At this point, we know that the main window will imminently be redirected.
