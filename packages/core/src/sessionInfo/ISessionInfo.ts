@@ -36,13 +36,6 @@ export interface ISessionInfo {
   webId?: string;
 
   /**
-   * The WebID of the app, or a "Public app" WebID if the app does not provide its own.
-   * undefined until the session is logged in and the app WebID has been verified.
-   */
-  // FIXME: remove as we're detangling client information from user session infomation
-  clientAppId?: string;
-
-  /**
    * A unique identifier for the session.
    */
   sessionId: string;
@@ -69,19 +62,7 @@ export interface ISessionInternalInfo {
   /**
    * The OIDC issuer that issued the tokens authenticating the session.
    */
-  issuer?: string;
-
-  /**
-   * The redirect URL registered when initially logging the session in.
-   */
-  redirectUrl?: string;
-
-  /**
-   * For public clients, and Solid Identity Providers that do not support Client
-   * WebIDs, the client secret is still required at the token endpoint.
-   */
-  // FIXME: remove as we're detangling client information from user session infomation
-  clientAppSecret?: string;
+  issuer: string;
 
   /**
    * The token type used by the session

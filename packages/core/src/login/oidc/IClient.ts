@@ -22,8 +22,11 @@
 import { isObject } from "../../util/isObject";
 import { isValidUrl } from "../../util/isValidUrl";
 
+// TODO: add base client options with redirectUrl (optional but defaulted)
+
 export interface IPublicIdentifierClientOptions {
   clientId: string;
+  redirectUrl?: string;
 }
 
 export interface IStaticClientOptions {
@@ -34,6 +37,17 @@ export interface IStaticClientOptions {
 export interface IDynamicClientOptions {
   clientName?: string;
 }
+
+type LoginOptions =
+  | (Required<{ redirectUrl?: string }> & IPublicIdentifierClientOptions)
+  | IDynamicClientOptions;
+
+// type ClientOptions = {
+//   clientName?: string
+// } | {
+//   clientId: string
+//   clientSecret?: string
+// }
 
 export const ClientTypes = ["static", "dynamic", "solid-oidc"] as const;
 export type ClientType = typeof ClientTypes[number];
@@ -54,10 +68,12 @@ export interface DynamicClient extends BaseClient {
   clientType: "dynamic";
   clientSecret: string;
   clientExpiresAt: number;
+  redirectUrl: string;
 }
 
 export interface PublicIdentifierClient extends BaseClient {
   clientType: "solid-oidc";
+  redirectUrl: string;
 }
 
 export type IClient = PublicIdentifierClient | DynamicClient | StaticClient;
