@@ -112,6 +112,19 @@ describe("Session", () => {
       expect(mySession.info.sessionId).toBe("mySession");
       expect(mySession.info.webId).toBe("https://some.webid");
     });
+
+    it("does not reference window immediately", () => {
+      // Let's make TypeScript and eslint angry! We'll set our window mock to
+      // undefined so that any references to its properties or methods explode.
+      // @ts-ignore-start
+      // eslint-disable-next-line no-global-assign
+      window = undefined;
+      // @ts-ignore-end
+      expect(() => {
+        // eslint-disable-next-line no-new
+        new Session({});
+      }).not.toThrow();
+    });
   });
 
   describe("login", () => {
