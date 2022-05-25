@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## 1.11.9 - 2022-05-25
+
 ### Bugfixes
 
 - Removed immediate use of `window` in Session constructor of the browser package
