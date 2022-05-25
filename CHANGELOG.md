@@ -11,7 +11,7 @@ The following changes have been implemented but not released yet:
 
 ### Bugfixes
 
--
+- Removed immediate use of `window` in Session constructor of the browser package
 
 ## 1.11.8 - 2022-05-17
 
