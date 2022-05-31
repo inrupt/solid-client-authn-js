@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "env": {
+    "shared-node-browser": true,
+    "es6": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:import/recommended"
+  ],
+  "plugins": ["prettier", "react", "import"]
+}
