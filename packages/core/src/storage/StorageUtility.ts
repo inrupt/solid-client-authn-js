@@ -31,9 +31,12 @@ import { exportJWK } from "jose";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
 import InruptError from "../errors/InruptError";
+import { ClientTypes, IClient, isValidClient } from "../login/oidc/IClient";
 import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 import { KeyPair } from "../authenticatedFetch/dpopUtils";
+import { isValidUrl } from "../util/isValidUrl";
+import { isObject } from "../util/isObject";
 
 export type OidcContext = {
   issuerConfig: IIssuerConfig;
@@ -42,11 +45,21 @@ export type OidcContext = {
   dpop: boolean;
 };
 
+export interface IUserData {
+  [key: string]: string;
+}
+
 export async function getSessionIdFromOauthState(
   storageUtility: IStorageUtility,
   oauthState: string
 ): Promise<string | undefined> {
-  return storageUtility.getForUser(oauthState, "sessionId");
+  const sessionId = await storageUtility.getForUser(oauthState, "sessionId");
+
+  if (typeof sessionId === "string") {
+    return sessionId;
+  }
+
+  return undefined;
 }
 
 /**
@@ -77,6 +90,16 @@ export async function loadOidcContextFromStorage(
 
     // Unlike openid-client, this looks up the configuration from storage
     const issuerConfig = await configFetcher.fetchConfig(issuerIri as string);
+
+    if (
+      typeof codeVerifier !== "string" ||
+      typeof storedRedirectIri !== "string"
+    ) {
+      throw new Error(
+        "non-string value stored for codeVerifier or redirectUrl"
+      );
+    }
+
     return {
       codeVerifier,
       redirectUrl: storedRedirectIri,
@@ -148,10 +171,63 @@ export default class StorageUtility implements IStorageUtility {
     return `solidClientAuthenticationUser:${userId}`;
   }
 
+  private getClientKey(issuer: string): string {
+    return `solidClient:${issuer}`;
+  }
+
+  public async getClientDetails(issuer: string): Promise<IClient | null> {
+    const key = this.getClientKey(issuer);
+
+    // FIXME: Use sessionStorage or similar:
+    const stored = await this.insecureStorage.get(key);
+
+    // This will only be the case if we don't find a client for the given session:
+    if (typeof stored !== "string") {
+      // throw new InruptError(`No client stored for [${issuer}]`);
+      return null;
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(stored);
+    } catch (err) {
+      // throw new InruptError(
+      //   `Data for client [${issuer}] in storage is corrupted - expected valid JSON, but got: ${stored}\n${err}`
+      // );
+      return null;
+    }
+
+    if (!isValidClient(parsed)) {
+      // throw new InruptError(
+      //   `Data for client [${issuer}] in storage is invalid`
+      // );
+      return null;
+    }
+
+    return parsed;
+  }
+
+  public async setClientDetails(
+    issuer: string,
+    details: IClient
+  ): Promise<void> {
+    const key = this.getClientKey(issuer);
+
+    // FIXME: Use sessionStorage or similar:
+    await this.insecureStorage.set(key, JSON.stringify(details));
+  }
+
+  public async deleteClientDetails(issuer: string): Promise<void> {
+    const key = this.getClientKey(issuer);
+
+    // FIXME: Use sessionStorage or similar:
+    await this.insecureStorage.delete(key);
+  }
+
   private async getUserData(
     userId: string,
     secure?: boolean
-  ): Promise<Record<string, string>> {
+  ): Promise<IUserData> {
     const stored = await (secure
       ? this.secureStorage
       : this.insecureStorage
@@ -162,6 +238,7 @@ export default class StorageUtility implements IStorageUtility {
     }
 
     try {
+      // FIXME: prevent bad retrieval due to JSON.parse resulting in `any` instead of `Record<string, string | number>`
       return JSON.parse(stored);
     } catch (err) {
       throw new InruptError(
@@ -174,7 +251,7 @@ export default class StorageUtility implements IStorageUtility {
 
   private async setUserData(
     userId: string,
-    data: Record<string, string>,
+    data: IUserData,
     secure?: boolean
   ): Promise<void> {
     await (secure ? this.secureStorage : this.insecureStorage).set(
@@ -220,25 +297,33 @@ export default class StorageUtility implements IStorageUtility {
     options?: { errorIfNull?: boolean; secure?: boolean }
   ): Promise<string | undefined> {
     const userData = await this.getUserData(userId, options?.secure);
-    let value;
-    if (!userData || !userData[key]) {
-      value = undefined;
+    const storedValue = userData[key];
+
+    let result: string | undefined = undefined;
+
+    if (
+      isObject(userData) &&
+      Object.prototype.hasOwnProperty.call(userData, key) === true &&
+      typeof storedValue === "string"
+    ) {
+      result = storedValue;
     }
-    value = userData[key];
-    if (value === undefined && options?.errorIfNull) {
+
+    if (result === undefined && options?.errorIfNull) {
       throw new InruptError(
         `Field [${key}] for user [${userId}] is not stored`
       );
     }
-    return value || undefined;
+
+    return result;
   }
 
   async setForUser(
     userId: string,
-    values: Record<string, string>,
+    values: IUserData,
     options?: { secure?: boolean }
   ): Promise<void> {
-    let userData: Record<string, string>;
+    let userData: IUserData;
     try {
       userData = await this.getUserData(userId, options?.secure);
     } catch {

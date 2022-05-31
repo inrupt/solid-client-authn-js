@@ -19,21 +19,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { describe, it, expect } from "@jest/globals";
-import { mockStorage } from "@inrupt/solid-client-authn-core";
-import { getClientAuthenticationWithDependencies } from "./dependencies";
-import ClientAuthentication from "./ClientAuthentication";
-
-describe("dependencies", () => {
-  it("performs dependency injection", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
-
-  it("performs dependency injection with a given input", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: mockStorage({}),
-    });
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
-});
+export function isValidUrl(url: string): boolean {
+  try {
+    // Here, the URL constructor is just called to parse the given string and
+    // verify if it is a well-formed IRI.
+    // eslint-disable-next-line no-new
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}

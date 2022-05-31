@@ -19,21 +19,18 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { describe, it, expect } from "@jest/globals";
-import { mockStorage } from "@inrupt/solid-client-authn-core";
-import { getClientAuthenticationWithDependencies } from "./dependencies";
-import ClientAuthentication from "./ClientAuthentication";
+import type { DynamicClient, IClient } from "./IClient";
+import type { IIssuerConfig } from "./IIssuerConfig";
 
-describe("dependencies", () => {
-  it("performs dependency injection", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
+export interface IDynamicClientRegistrarOptions {
+  clientName?: string;
+  redirectUrl?: string;
+  registrationAccessToken?: string;
+}
 
-  it("performs dependency injection with a given input", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: mockStorage({}),
-    });
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
-});
+export interface IDynamicClientRegistrar {
+  register(
+    options: IDynamicClientRegistrarOptions,
+    issuerConfig: IIssuerConfig
+  ): Promise<DynamicClient>;
+}

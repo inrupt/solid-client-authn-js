@@ -29,7 +29,6 @@
  */
 
 import {
-  IClientRegistrar,
   IIssuerConfig,
   IIssuerConfigFetcher,
   ILoginOptions,
@@ -40,17 +39,29 @@ import {
   ConfigurationError,
   LoginResult,
   handleRegistration,
+  ClientManager,
+  IClient,
+  StaticClient,
 } from "@inrupt/solid-client-authn-core";
 
+// FIXME: Remove extends from ILoginOptions:
+export interface OidcLoginHandlerOptions extends ILoginOptions {
+  redirectUrl: string;
+  oidcIssuer: string;
+
+  // This is always set by ClientAuthentication
+  clientId: string;
+}
+
 function hasIssuer(
-  options: ILoginOptions
-): options is ILoginOptions & { oidcIssuer: string } {
+  options: OidcLoginHandlerOptions
+): options is OidcLoginHandlerOptions & { oidcIssuer: string } {
   return typeof options.oidcIssuer === "string";
 }
 
 function hasRedirectUrl(
-  options: ILoginOptions
-): options is ILoginOptions & { redirectUrl: string } {
+  options: OidcLoginHandlerOptions
+): options is OidcLoginHandlerOptions & { redirectUrl: string } {
   return typeof options.redirectUrl === "string";
 }
 
@@ -62,14 +73,14 @@ export default class OidcLoginHandler implements ILoginHandler {
     private storageUtility: IStorageUtility,
     private oidcHandler: IOidcHandler,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientManager: ClientManager
   ) {}
 
-  async canHandle(options: ILoginOptions): Promise<boolean> {
+  async canHandle(options: OidcLoginHandlerOptions): Promise<boolean> {
     return hasIssuer(options) && hasRedirectUrl(options);
   }
 
-  async handle(options: ILoginOptions): Promise<LoginResult> {
+  async handle(options: OidcLoginHandlerOptions): Promise<LoginResult> {
     if (!hasIssuer(options)) {
       throw new ConfigurationError(
         `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(
@@ -85,15 +96,32 @@ export default class OidcLoginHandler implements ILoginHandler {
       );
     }
 
+    // FIXME: I don't think the following code is correct / necessary:
+    // FIXME: We want to only register the client if we're doing an active login, for silent login, we want this to happen in the background
+
     // Fetch issuer config.
     const issuerConfig: IIssuerConfig =
       await this.issuerConfigFetcher.fetchConfig(options.oidcIssuer);
 
-    const clientRegistration = await handleRegistration(
-      options,
-      issuerConfig,
-      this.storageUtility,
-      this.clientRegistrar
+    // const clientInfo = await handleRegistration(
+    //   options,
+    //   issuerConfig,
+    //   this.storageUtility,
+    //   this.clientManager
+    // );
+
+    const clientDetails: Omit<IClient, "clientType"> = {
+      clientId: options.clientId,
+      clientName: options.clientName,
+    };
+
+    if (options.clientSecret) {
+      (clientDetails as StaticClient).clientSecret = options.clientSecret;
+    }
+
+    const clientInfo = await this.clientManager.register(
+      options.oidcIssuer,
+      clientDetails
     );
 
     // Construct OIDC Options
@@ -108,7 +136,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       dpop: options.tokenType.toLowerCase() === "dpop",
       ...options,
       issuerConfiguration: issuerConfig,
-      client: clientRegistration,
+      client: clientInfo,
     };
 
     // Call proper OIDC Handler

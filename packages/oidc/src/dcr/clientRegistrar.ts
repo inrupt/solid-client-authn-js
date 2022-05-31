@@ -28,15 +28,15 @@ import {
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
   IIssuerConfig,
-  IClient,
-  IClientRegistrarOptions,
+  IDynamicClientRegistrarOptions,
+  DynamicClient,
 } from "@inrupt/solid-client-authn-core";
 
 function processErrorResponse(
   // The type is any here because the object is parsed from a JSON response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseBody: any,
-  options: IClientRegistrarOptions
+  options: IDynamicClientRegistrarOptions
 ): void {
   // The following errors are defined by the spec, and allow providing some context.
   // See https://tools.ietf.org/html/rfc7591#section-3.2.2 for more information
@@ -67,7 +67,7 @@ function validateRegistrationResponse(
   // The type is any here because the object is parsed from a JSON response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseBody: any,
-  options: IClientRegistrarOptions
+  options: IDynamicClientRegistrarOptions
 ): void {
   if (responseBody.client_id === undefined) {
     throw new Error(
@@ -76,6 +76,7 @@ function validateRegistrationResponse(
       )}`
     );
   }
+
   if (
     options.redirectUrl &&
     (responseBody.redirect_uris === undefined ||
@@ -89,12 +90,37 @@ function validateRegistrationResponse(
       ])}`
     );
   }
+
+  if (
+    responseBody.client_secret !== undefined &&
+    responseBody.client_secret_expires_at === undefined
+  ) {
+    throw new Error(
+      `Dynamic client registration failed: a client_secret was returned, but no client_secret_expires_at was returned: ${JSON.stringify(
+        responseBody
+      )}`
+    );
+  }
+
+  const nowInSeconds = Math.round(Date.now() / 1000);
+
+  if (
+    responseBody.client_secret !== undefined &&
+    responseBody.client_secret_expires_at !== 0 &&
+    responseBody.client_secret_expires_at < nowInSeconds
+  ) {
+    throw new Error(
+      `Dynamic client registration failed: the server indicated that the client has already expired: ${JSON.stringify(
+        responseBody
+      )}`
+    );
+  }
 }
 
 export async function registerClient(
-  options: IClientRegistrarOptions,
+  options: IDynamicClientRegistrarOptions,
   issuerConfig: IIssuerConfig
-): Promise<IClient> {
+): Promise<DynamicClient> {
   if (!issuerConfig.registrationEndpoint) {
     throw new Error(
       "Dynamic Registration could not be completed because the issuer has no registration endpoint."
@@ -143,6 +169,7 @@ export async function registerClient(
     return {
       clientId: responseBody.client_id,
       clientSecret: responseBody.client_secret,
+      clientExpiresAt: responseBody.client_secret_expires_at,
       idTokenSignedResponseAlg: responseBody.id_token_signed_response_alg,
       clientType: "dynamic",
     };

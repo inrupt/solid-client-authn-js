@@ -34,11 +34,14 @@ import ILoginInputOptions from "../ILoginInputOptions";
  * @hidden
  */
 export default interface ILoginOptions extends ILoginInputOptions {
-  // This session ID is mandatory for internal use, so we could consider making
-  // it an explicit parameter on our login handler interface (rather than
-  // 'bundling' into this options interface), but it wouldn't be a significant
-  // improvement really...
+  /**
+   * This session ID is mandatory for internal use, so we could consider making
+   * it an explicit parameter on our login handler interface (rather than
+   * 'bundling' into this options interface), but it wouldn't be a significant
+   * improvement really...
+   */
   sessionId: string;
+
   /**
    * Specify whether the Solid Identity Provider may, or may not, interact with the user (for example,
    * the normal login process **_requires_** human interaction for them to enter their credentials,

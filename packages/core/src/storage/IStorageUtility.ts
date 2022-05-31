@@ -19,6 +19,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import { IClient } from "../login/oidc/IClient";
+
 /**
  * @hidden
  * @packageDocumentation
@@ -31,18 +33,25 @@ export default interface IStorageUtility {
   ): Promise<string | undefined>;
   set(
     key: string,
-    value: string,
+    value: string | number,
     options?: { secure?: boolean }
   ): Promise<void>;
   delete(key: string, options?: { secure?: boolean }): Promise<void>;
+
+  // For managing information about the client:
+  getClientDetails(issuer: string): Promise<IClient | null>;
+  setClientDetails(issuer: string, details: IClient): Promise<void>;
+  deleteClientDetails(issuer: string): Promise<void>;
+
+  // For managing information about the users' session:
   getForUser(
     userId: string,
     key: string,
     options?: { errorIfNull?: boolean; secure?: boolean }
-  ): Promise<string | undefined>;
+  ): Promise<string | number | undefined>;
   setForUser(
     userId: string,
-    values: Record<string, string>,
+    values: Record<string, string | number | undefined>,
     options?: { secure?: boolean }
   ): Promise<void>;
   deleteForUser(

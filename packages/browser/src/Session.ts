@@ -118,8 +118,6 @@ export async function silentlyAuthenticate(
         prompt: "none",
         oidcIssuer: storedSessionInfo.issuer,
         redirectUrl: storedSessionInfo.redirectUrl,
-        clientId: storedSessionInfo.clientAppId,
-        clientSecret: storedSessionInfo.clientAppSecret,
         tokenType: storedSessionInfo.tokenType ?? "DPoP",
         inIframe: options.inIframe,
       },
@@ -246,15 +244,16 @@ export class Session extends EventEmitter {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
-    await this.clientAuthentication.login(
-      {
-        sessionId: this.info.sessionId,
-        ...options,
-        // Defaults the token type to DPoP
-        tokenType: options.tokenType ?? "DPoP",
-      },
-      this
-    );
+    // FIXME: implement
+    // await this.clientAuthentication.login(
+    //   {
+    //     sessionId: this.info.sessionId,
+    //     ...options,
+    //     // Defaults the token type to DPoP
+    //     tokenType: options.tokenType ?? "DPoP",
+    //   },
+    //   this
+    // );
     // `login` redirects the user away from the app,
     // so unless it throws an error, there is no code that should run afterwards
     // (since there is no "after" in the lifetime of the script).

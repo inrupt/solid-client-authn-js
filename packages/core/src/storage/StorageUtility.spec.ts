@@ -29,6 +29,7 @@ import StorageUtility, {
   saveSessionInfoToStorage,
 } from "./StorageUtility";
 import { mockStorage, mockStorageUtility } from "./__mocks__/StorageUtility";
+import { DynamicClient, IClient } from "../login/oidc/IClient";
 
 describe("StorageUtility", () => {
   const defaultMocks = {
@@ -132,6 +133,73 @@ describe("StorageUtility", () => {
     });
   });
 
+  describe("clients", () => {
+    const issuer = "https://idp.test";
+
+    describe("getClientDetails", () => {
+      it("fetches an existing client from localstorage", async () => {
+        const clientDetails: DynamicClient = {
+          clientType: "dynamic",
+          clientId: "example-123",
+          clientSecret: "secret",
+          clientExpiresAt: 0,
+        };
+
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({
+            [`solidClient:${issuer}`]: JSON.stringify(clientDetails),
+          }),
+        });
+
+        await expect(storageUtility.getClientDetails(issuer)).resolves.toEqual(
+          clientDetails
+        );
+      });
+
+      it("returns null if the client is not stored", async () => {
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({}),
+        });
+
+        await expect(
+          storageUtility.getClientDetails(issuer)
+        ).resolves.toBeNull();
+      });
+
+      it("returns null if the client stored is invalid json", async () => {
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({
+            [`solidClient:${issuer}`]: "not json",
+          }),
+        });
+
+        await expect(
+          storageUtility.getClientDetails(issuer)
+        ).resolves.toBeNull();
+      });
+
+      it("returns null if the client stored is invalid", async () => {
+        const clientDetails = {
+          clientType: "dynamic",
+          clientId: "example-123",
+          // Missing clientSecret and clientExpiresAt
+        };
+
+        const storageUtility = getStorageUtility({
+          insecureStorage: mockStorage({
+            [`solidClient:${issuer}`]: JSON.stringify(clientDetails),
+          }),
+        });
+
+        await expect(
+          storageUtility.getClientDetails(issuer)
+        ).resolves.toBeNull();
+      });
+    });
+    describe("setClientDetails", () => {});
+    describe("deleteClientDetails", () => {});
+  });
+
   describe("getForUser", () => {
     it("throws if data stored is invalid JSON", async () => {
       const mockedStorageUtility = mockStorage({});
@@ -164,7 +232,7 @@ describe("StorageUtility", () => {
       });
       const userData = {
         jackie: "The Cat",
-        sledge: "The Dog",
+        sledge: "hammer",
       };
       await storageUtility.setForUser(userId, userData);
 
@@ -179,7 +247,7 @@ describe("StorageUtility", () => {
       });
       const userData = {
         jackie: "The Cat",
-        sledge: "The Dog",
+        sledge: "hammer",
       };
       await storageUtility.setForUser(userId, userData, {
         secure: true,
@@ -190,6 +258,24 @@ describe("StorageUtility", () => {
       });
 
       expect(retrievedValue).toBe("The Cat");
+    });
+
+    it("returns an empty string if the item is in storage but set to an empty string", async () => {
+      const storageUtility = getStorageUtility({
+        secureStorage: mockStorage({}),
+      });
+      const userData = {
+        empty: "",
+      };
+      await storageUtility.setForUser(userId, userData, {
+        secure: true,
+      });
+
+      const retrievedValue = await storageUtility.getForUser(userId, "empty", {
+        secure: true,
+      });
+
+      expect(retrievedValue).toBe("");
     });
 
     it("returns undefined if no item is in storage", async () => {
@@ -394,6 +480,27 @@ describe("loadOidcContextFromStorage", () => {
     );
   });
 
+  it("throws if the stored codeVerifier or redirectUrl is not a string", async () => {
+    const mockedStorage = mockStorageUtility({
+      "solidClientAuthenticationUser:mySession": {
+        issuer: "https://my.idp/",
+        codeVerifier: 1234,
+        redirectUrl: 1243,
+        dpop: "true",
+      },
+    });
+
+    await expect(
+      loadOidcContextFromStorage(
+        "mySession",
+        mockedStorage,
+        mockIssuerConfigFetcher(mockIssuerConfig())
+      )
+    ).rejects.toThrow(
+      "Failed to retrieve OIDC context from storage associated with session [mySession]: Error: non-string value stored for codeVerifier or redirectUrl"
+    );
+  });
+
   it("throws if no token type is stored for the user", async () => {
     const mockedStorage = mockStorageUtility({
       "solidClientAuthenticationUser:mySession": {
@@ -550,21 +657,25 @@ describe("saveSessionInfoToStorage", () => {
       dpopKey
     );
 
-    expect(
-      JSON.parse(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (await mockedStorage.getForUser("some session", "publicKey", {
-          secure: true,
-        }))!
-      )
-    ).toEqual(dpopKey.publicKey);
-    const privateJwk = await mockedStorage.getForUser(
+    const storedPublicKey = await mockedStorage.getForUser(
+      "some session",
+      "publicKey",
+      {
+        secure: true,
+      }
+    );
+
+    expect(typeof storedPublicKey).toBe("string");
+    expect(JSON.parse(storedPublicKey as string)).toEqual(dpopKey.publicKey);
+
+    const storedPrivateJwk = await mockedStorage.getForUser(
       "some session",
       "privateKey",
       { secure: true }
     );
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(JSON.parse(privateJwk!)).toEqual(
+
+    expect(typeof storedPrivateJwk).toBe("string");
+    expect(JSON.parse(storedPrivateJwk as string)).toEqual(
       await exportJWK(dpopKey.privateKey)
     );
   });

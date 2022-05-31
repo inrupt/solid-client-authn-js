@@ -40,9 +40,10 @@ import { AuthCodeRedirectHandler } from "./login/oidc/incomingRedirectHandler/Au
 import AggregateRedirectHandler from "./login/oidc/AggregateRedirectHandler";
 import BrowserStorage from "./storage/BrowserStorage";
 import Redirector from "./login/oidc/Redirector";
-import ClientRegistrar from "./login/oidc/ClientRegistrar";
+import { DynamicClientRegistrar } from "./login/oidc/DynamicClientRegistrar";
 import { ErrorOidcHandler } from "./login/oidc/incomingRedirectHandler/ErrorOidcHandler";
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
+import { ClientManager } from "@inrupt/solid-client-authn-core";
 
 /**
  *
@@ -63,14 +64,20 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   );
 
   const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
-  const clientRegistrar = new ClientRegistrar(storageUtility);
+  const dynamicClientRegistrar = new DynamicClientRegistrar();
+
+  const clientManager = new ClientManager(
+    storageUtility,
+    issuerConfigFetcher,
+    dynamicClientRegistrar
+  );
 
   const sessionInfoManager = new SessionInfoManager(storageUtility);
 
   const tokenRefresher = new TokenRefresher(
     storageUtility,
     issuerConfigFetcher,
-    clientRegistrar
+    clientManager
   );
 
   // make new handler for redirect and login
@@ -78,7 +85,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     storageUtility,
     new AuthorizationCodeWithPkceOidcHandler(storageUtility, new Redirector()),
     issuerConfigFetcher,
-    clientRegistrar
+    clientManager
   );
 
   const redirectHandler = new AggregateRedirectHandler([
@@ -87,7 +94,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
       storageUtility,
       sessionInfoManager,
       issuerConfigFetcher,
-      clientRegistrar,
+      clientManager,
       tokenRefresher
     ),
     // This catch-all class will always be able to handle the
@@ -100,6 +107,6 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     redirectHandler,
     new GeneralLogoutHandler(sessionInfoManager),
     sessionInfoManager,
-    issuerConfigFetcher
+    clientManager
   );
 }

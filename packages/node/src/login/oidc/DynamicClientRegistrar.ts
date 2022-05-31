@@ -26,89 +26,79 @@
 
 import {
   IStorageUtility,
-  IClientRegistrar,
+  IDynamicClientRegistrar,
+  IDynamicClientRegistrarOptions,
   IIssuerConfig,
   IClient,
-  IClientRegistrarOptions,
   ConfigurationError,
-  determineSigningAlg,
   PREFERRED_SIGNING_ALG,
+  negotiateClientSigningAlg,
+  DynamicClient,
 } from "@inrupt/solid-client-authn-core";
 import { Client, Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 
-export function negotiateClientSigningAlg(
-  issuerConfig: IIssuerConfig,
-  clientPreference: string[]
-): string {
-  if (!Array.isArray(issuerConfig.idTokenSigningAlgValuesSupported)) {
-    throw new Error(
-      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
-    );
-  }
-
-  const signingAlg = determineSigningAlg(
-    issuerConfig.idTokenSigningAlgValuesSupported,
-    clientPreference
-  );
-
-  if (signingAlg === null) {
-    throw new Error(
-      `No signature algorithm match between ${JSON.stringify(
-        issuerConfig.idTokenSigningAlgValuesSupported
-      )} supported by the Identity Provider and ${JSON.stringify(
-        clientPreference
-      )} preferred by the client.`
-    );
-  }
-
-  return signingAlg;
-}
-
 /**
  * @hidden
  */
-export default class ClientRegistrar implements IClientRegistrar {
+export default class DynamicClientRegistrar implements IDynamicClientRegistrar {
   constructor(private storageUtility: IStorageUtility) {}
 
-  async getClient(
-    options: IClientRegistrarOptions,
+  async register(
+    options: IDynamicClientRegistrarOptions,
     issuerConfig: IIssuerConfig
-  ): Promise<IClient> {
+  ): Promise<DynamicClient> {
     // If client secret and/or client id are stored in storage, use those.
     const [
       storedClientId,
       storedClientSecret,
       storedClientName,
+      storedClientExpiresAt,
       storedIdTokenSignedResponseAlg,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId"),
       this.storageUtility.getForUser(options.sessionId, "clientSecret"),
       this.storageUtility.getForUser(options.sessionId, "clientName"),
+      this.storageUtility.getForUser(options.sessionId, "clientExpiresAt"),
       this.storageUtility.getForUser(
         options.sessionId,
         "idTokenSignedResponseAlg"
       ),
     ]);
-    if (storedClientId) {
-      return {
-        clientId: storedClientId,
-        clientSecret: storedClientSecret,
-        clientName: storedClientName as string | undefined,
-        idTokenSignedResponseAlg:
-          storedIdTokenSignedResponseAlg ??
-          negotiateClientSigningAlg(issuerConfig, PREFERRED_SIGNING_ALG),
-        clientType: "dynamic",
-      };
+
+    if (
+      typeof storedClientId === "string" &&
+      typeof storedClientSecret === "string" &&
+      typeof storedClientExpiresAt === "number" &&
+      typeof storedIdTokenSignedResponseAlg === "string"
+    ) {
+      if (storedClientExpiresAt === 0 || storedClientExpiresAt > Date.now()) {
+        return {
+          clientId: storedClientId,
+          clientSecret: storedClientSecret,
+          clientExpiresAt: storedClientExpiresAt,
+          clientName: storedClientName as string | undefined,
+          idTokenSignedResponseAlg:
+            storedIdTokenSignedResponseAlg ??
+            negotiateClientSigningAlg(issuerConfig, PREFERRED_SIGNING_ALG),
+          clientType: "dynamic",
+        };
+      }
     }
     const extendedOptions = { ...options };
+
     // If registration access token is stored, use that.
-    extendedOptions.registrationAccessToken =
-      extendedOptions.registrationAccessToken ??
-      (await this.storageUtility.getForUser(
-        options.sessionId,
-        "registrationAccessToken"
-      ));
+    if (typeof extendedOptions.registrationAccessToken !== "string") {
+      const storedRegistrationAccessToken =
+        await this.storageUtility.getForUser(
+          options.sessionId,
+          "registrationAccessToken"
+        );
+
+      if (typeof storedRegistrationAccessToken === "string") {
+        extendedOptions.registrationAccessToken = storedRegistrationAccessToken;
+      }
+    }
 
     // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
     const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
@@ -143,18 +133,32 @@ export default class ClientRegistrar implements IClientRegistrar {
       }
     );
 
-    const infoToSave: Record<string, string> = {
+    let clientExpiresAt = 0;
+    if (
+      typeof registeredClient.metadata.client_secret_expires_at === "number"
+    ) {
+      // client_secret_expires_at is the timestamp in seconds, convert it to milliseconds:
+      clientExpiresAt =
+        registeredClient.metadata.client_secret_expires_at * 1000;
+    }
+
+    const infoToSave: IClientDetails = {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
     };
+
     if (registeredClient.metadata.client_secret) {
       infoToSave.clientSecret = registeredClient.metadata.client_secret;
+      // For a dynamic client, this will be an epoch > 0, for static, it should be 0:
+      infoToSave.clientExpiresAt = clientExpiresAt;
     }
+
     await this.storageUtility.setForUser(extendedOptions.sessionId, infoToSave);
     return {
       clientId: registeredClient.metadata.client_id,
       clientSecret: registeredClient.metadata.client_secret,
+      clientExpiresAt,
       clientName: registeredClient.metadata.client_name as string | undefined,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,

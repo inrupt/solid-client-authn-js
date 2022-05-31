@@ -30,19 +30,37 @@ import {
   IIncomingRedirectHandler,
   ISessionInfo,
   ISessionInfoManager,
-  IIssuerConfigFetcher,
   ISessionInternalInfo,
-  ILoginOptions,
+  IPublicIdentifierClientOptions,
+  IDynamicClientOptions,
   EVENTS,
+  ClientManager,
+  isValidUrl,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
+
+import { KEY_CURRENT_URL } from "./constant";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a
 // ClientAuthentication:
 const globalFetch: typeof window.fetch = (request, init) =>
   window.fetch(request, init);
+
+export type IClientOptions =
+  | IPublicIdentifierClientOptions
+  | IDynamicClientOptions;
+export type ILoginOptions = IClientOptions & {
+  sessionId: string;
+  oidcIssuer: string;
+  redirectUrl: string;
+  tokenType?: "DPoP" | "Bearer" = "DPoP";
+};
+
+export interface ISilentLoginOptions {
+  sessionId: string;
+}
 
 /**
  * @hidden
@@ -53,37 +71,84 @@ export default class ClientAuthentication {
     private redirectHandler: IIncomingRedirectHandler,
     private logoutHandler: ILogoutHandler,
     private sessionInfoManager: ISessionInfoManager,
-    private issuerConfigFetcher: IIssuerConfigFetcher
+    private clientManager: ClientManager
   ) {}
 
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
+  // login = async (
+  //   options: ILoginOptions,
+  //   eventEmitter: EventEmitter
+  // ): Promise<void> => {
+  //   // In order to get a clean start, make sure that the session is logged out
+  //   // on login.
+  //   // But we may want to preserve our client application info, particularly if
+  //   // we used Dynamic Client Registration to register (since we don't
+  //   // necessarily want the user to have to register this app each time they
+  //   // login).
+  //   // FIXME: now preserves the client, but deletes the session info:
+  //   await this.sessionInfoManager.clear(options.sessionId);
+
+  //   // In the case of the user hitting the 'back' button in their browser, they
+  //   // could return to a previous redirect URL that contains OIDC params that
+  //   // are now longer valid - so just to be safe, strip relevant params now.
+  //   const redirectUrl = removeOidcQueryParam(
+  //     options.redirectUrl ?? window.location.href
+  //   );
+
+  //   await this.loginHandler.handle({
+  //     ...options,
+  //     redirectUrl,
+  //     // If no clientName is provided, the clientId may be used instead.
+  //     clientName: options.clientName ?? options.clientId,
+  //     eventEmitter,
+  //   });
+  // };
+
   login = async (
+    sessionId: string,
     options: ILoginOptions,
     eventEmitter: EventEmitter
   ): Promise<void> => {
-    // In order to get a clean start, make sure that the session is logged out
-    // on login.
-    // But we may want to preserve our client application info, particularly if
-    // we used Dynamic Client Registration to register (since we don't
-    // necessarily want the user to have to register this app each time they
-    // login).
-    await this.sessionInfoManager.clear(options.sessionId);
+    const { oidcIssuer, ...clientOptions } = options;
 
-    // In the case of the user hitting the 'back' button in their browser, they
-    // could return to a previous redirect URL that contains OIDC params that
-    // are now longer valid - so just to be safe, strip relevant params now.
-    const redirectUrl = removeOidcQueryParam(
-      options.redirectUrl ?? window.location.href
-    );
+    // TODO: Should we validate presence of oidcIssuer and redirectUrl here?
 
-    await this.loginHandler.handle({
-      ...options,
+    const redirectUrl =
+      options.redirectUrl && isValidUrl(options.redirectUrl)
+        ? options.redirectUrl
+        : window.location.href;
+
+    this.loginHandler.handle({
+      sessionId,
+      oidcIssuer,
       redirectUrl,
-      // If no clientName is provided, the clientId may be used instead.
-      clientName: options.clientName ?? options.clientId,
-      eventEmitter,
     });
+  };
+
+  silentlyLogin = async (options: ISilentLoginOptions): Promise<boolean> => {
+    // FIXME: Implement
+    const sessionInfo = await this.sessionInfoManager.get(options.sessionId);
+
+    if (sessionInfo === undefined || sessionInfo.issuer === undefined) {
+      return false;
+    }
+
+    const client = await this.clientManager.get(sessionInfo.issuer);
+
+    if (!client) {
+      return false;
+    }
+
+    // FIXME: use storage adapter:
+    window.localStorage.setItem(KEY_CURRENT_URL, window.location.href);
+
+    // await this.loginHandler.handle({
+    //   oidcIssuer: sessionInfo.issuer,
+    //   redirectUrl: sessionInfo.redirectUrl,
+    // });
+
+    return false;
   };
 
   // By default, our fetch() resolves to the environment fetch() function.
@@ -112,17 +177,16 @@ export default class ClientAuthentication {
   // if the expected information cannot be found.
   // Note that the ID token is not stored, which means the session information
   // cannot be validated at this point.
+  // FIXME: not actually part of the public interface:
   validateCurrentSession = async (
     currentSessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | null> => {
     const sessionInfo = await this.sessionInfoManager.get(currentSessionId);
-    if (
-      sessionInfo === undefined ||
-      sessionInfo.clientAppId === undefined ||
-      sessionInfo.issuer === undefined
-    ) {
+
+    if (sessionInfo === undefined) {
       return null;
     }
+
     return sessionInfo;
   };
 
@@ -162,6 +226,7 @@ export default class ClientAuthentication {
     }
   };
 
+  // FIXME: technically should be the same as removeOidcQueryParam method, though isn't:
   private cleanUrlAfterRedirect(url: string): void {
     const cleanedUpUrl = new URL(url);
     cleanedUpUrl.searchParams.delete("state");

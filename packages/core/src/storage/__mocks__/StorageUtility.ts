@@ -22,8 +22,14 @@
 import StorageUtility from "../StorageUtility";
 import type IStorage from "../IStorage";
 import type IStorageUtility from "../IStorageUtility";
+import { IClient } from "../../login/oidc/IClient";
 
 export const StorageUtilityGetResponse = "getResponse";
+
+export const StorageUtilityClientResponse: IClient = {
+  clientType: "solid-oidc",
+  clientId: "https://example.test/",
+};
 
 export const StorageUtilityMock: IStorageUtility = {
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -35,11 +41,27 @@ export const StorageUtilityMock: IStorageUtility = {
   delete: async (key: string) => {
     /* do nothing */
   },
+
+  getClientDetails: async (issuer: string): Promise<IClient> => {
+    return StorageUtilityClientResponse;
+  },
+
+  setClientDetails: async (issuer: string, details: IClient): Promise<void> => {
+    /* do nothing */
+  },
+
+  deleteClientDetails: async (issuer: string): Promise<void> => {
+    /* do nothing */
+  },
+
   getForUser: async (
     userId: string,
     key: string,
     options?: { errorIfNull?: boolean; secure?: boolean }
-  ) => StorageUtilityGetResponse,
+  ) => {
+    return StorageUtilityGetResponse;
+  },
+
   setForUser: async (
     userId: string,
     values: Record<string, string>,
@@ -47,6 +69,7 @@ export const StorageUtilityMock: IStorageUtility = {
   ) => {
     /* do nothing */
   },
+
   deleteForUser: async (
     userId: string,
     key: string,
@@ -54,15 +77,33 @@ export const StorageUtilityMock: IStorageUtility = {
   ) => {
     /* do nothing */
   },
+
   deleteAllUserData: async (userId: string, options?: { secure?: boolean }) => {
     /* do nothing */
   },
 };
 
 export const mockStorage = (
-  stored: Record<string, string | Record<string, string>>
+  stored: Record<string, string | Record<string, string | number>>
 ): IStorage => {
-  const store = stored;
+  const store = Object.keys(stored).reduce<Record<string, string>>(
+    // Have to use spread here due to eslint no-reassign-param
+    (mockStore, key) => {
+      const value = stored[key];
+      if (typeof value === "string") {
+        return {
+          ...mockStore,
+          [key]: value,
+        };
+      }
+      return {
+        ...mockStore,
+        [key]: JSON.stringify(value),
+      };
+    },
+    {}
+  );
+
   return {
     get: async (key: string): Promise<string | undefined> => {
       if (store[key] === undefined) {
@@ -71,7 +112,7 @@ export const mockStorage = (
       if (typeof store[key] === "string") {
         return store[key] as string;
       }
-      return JSON.stringify(store[key]);
+      return store[key];
     },
     set: async (key: string, value: string): Promise<void> => {
       store[key] = value;
@@ -83,7 +124,7 @@ export const mockStorage = (
 };
 
 export const mockStorageUtility = (
-  stored: Record<string, string | Record<string, string>>,
+  stored: Record<string, string | Record<string, string | number>>,
   isSecure = false
 ): IStorageUtility => {
   if (isSecure) {

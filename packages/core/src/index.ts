@@ -32,6 +32,7 @@ export { default as IHandleable } from "./util/handlerPattern/IHandleable";
 export { default as AggregateHandler } from "./util/handlerPattern/AggregateHandler";
 
 export { getWebidFromTokenPayload, fetchJwks } from "./util/token";
+export { isValidUrl } from "./util/isValidUrl";
 
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
@@ -57,13 +58,32 @@ export {
 
 export { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
 export { IIssuerConfig } from "./login/oidc/IIssuerConfig";
+
 export {
-  IClientRegistrar,
-  IClientRegistrarOptions,
+  IDynamicClientRegistrarOptions,
+  IDynamicClientRegistrar,
+} from "./login/oidc/IDynamicClientRegistrar";
+
+export {
   handleRegistration,
+  negotiateClientSigningAlg,
   determineSigningAlg,
-} from "./login/oidc/IClientRegistrar";
-export { IClient } from "./login/oidc/IClient";
+  determineClientType,
+  ClientManager,
+} from "./login/oidc/ClientManager";
+
+export {
+  ClientType,
+  ClientTypes,
+  IClient,
+  StaticClient,
+  IStaticClientOptions,
+  PublicIdentifierClient,
+  IPublicIdentifierClientOptions,
+  DynamicClient,
+  IDynamicClientOptions,
+  isValidClient,
+} from "./login/oidc/IClient";
 
 // Storage.
 export { default as IStorage } from "./storage/IStorage";

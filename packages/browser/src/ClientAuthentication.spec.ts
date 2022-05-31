@@ -59,6 +59,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
 
 type SessionStorageOptions = {
   clientId: string;
+  clientExpiresAt: number;
   issuer: string;
 };
 
@@ -66,6 +67,7 @@ const mockSessionStorage = async (
   sessionId: string,
   options: SessionStorageOptions = {
     clientId: "https://some.app/registration",
+    clientExpiresAt: 0,
     issuer: "https://some.issuer",
   }
 ): Promise<StorageUtility> => {
@@ -79,6 +81,7 @@ const mockSessionStorage = async (
     mockStorage({
       [`${USER_SESSION_PREFIX}:${sessionId}`]: {
         clientId: options.clientId,
+        clientExpiresAt: options.clientExpiresAt,
         issuer: options.issuer,
       },
     })
@@ -291,6 +294,7 @@ describe("ClientAuthentication", () => {
         isLoggedIn: "true",
         sessionId: "mySession",
         webId: "https://pod.com/profile/card#me",
+        issuer: "https://some.issuer",
       };
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(
@@ -451,7 +455,8 @@ describe("ClientAuthentication", () => {
       ).resolves.toBeNull();
     });
 
-    it("returns null if the current session has no stored client ID", async () => {
+    // This is no longer handled in validateCurrentSession, and instead the client is dynamically registered:
+    it.skip("returns null if the current session has no stored client ID", async () => {
       const sessionId = "mySession";
       const mockedStorage = new StorageUtility(
         mockStorage({
@@ -477,6 +482,7 @@ describe("ClientAuthentication", () => {
       const sessionId = "mySession";
       const mockedStorage = await mockSessionStorage(sessionId, {
         clientId: "https://some.app/registration",
+        clientExpiresAt: 0,
         issuer: "https://some.issuer",
       });
 
@@ -489,7 +495,7 @@ describe("ClientAuthentication", () => {
       ).resolves.toStrictEqual(
         expect.objectContaining({
           issuer: "https://some.issuer",
-          clientAppId: "https://some.app/registration",
+          // clientAppId: "https://some.app/registration",
           sessionId,
           webId: "https://my.pod/profile#me",
         })

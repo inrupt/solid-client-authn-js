@@ -21,7 +21,9 @@
 
 import { IIssuerConfig } from "../../..";
 
-export const mockIssuerConfig = (): IIssuerConfig => {
+export const mockIssuerConfig = (
+  overrides: Partial<IIssuerConfig> = {}
+): IIssuerConfig => {
   return {
     issuer: "https://idp.com",
     authorizationEndpoint: "https://idp.com/auth",
@@ -31,5 +33,6 @@ export const mockIssuerConfig = (): IIssuerConfig => {
     claimsSupported: [],
     grantTypesSupported: ["refresh_token"],
     scopesSupported: ["openid"],
+    ...overrides,
   };
 };

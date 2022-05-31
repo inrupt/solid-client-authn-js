@@ -19,21 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { describe, it, expect } from "@jest/globals";
-import { mockStorage } from "@inrupt/solid-client-authn-core";
-import { getClientAuthenticationWithDependencies } from "./dependencies";
-import ClientAuthentication from "./ClientAuthentication";
-
-describe("dependencies", () => {
-  it("performs dependency injection", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
-
-  it("performs dependency injection with a given input", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: mockStorage({}),
-    });
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
-  });
-});
+export function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}

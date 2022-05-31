@@ -84,7 +84,7 @@ describe("clearOidcPersistentStorage", () => {
     );
     window.localStorage.setItem("anArbitraryKey", "a value");
     await clearOidcPersistentStorage();
-    expect(window.localStorage).toHaveLength(1);
+    expect(window.localStorage).toHaveLength(2);
   });
 
   it("doesn't fail if localstorage is empty", async () => {

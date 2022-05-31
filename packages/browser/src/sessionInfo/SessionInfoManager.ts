@@ -55,8 +55,14 @@ export async function clear(
   storage: IStorageUtility
 ): Promise<void> {
   await Promise.all([
-    storage.deleteAllUserData(sessionId, { secure: false }),
-    storage.deleteAllUserData(sessionId, { secure: true }),
+    // This isn't necessarily the best, what we really need in IStorageUtility
+    // is storage.setForClient(sessionId, client details), but for now I just
+    // try to wipe out the values that definitely impact login flow:
+    storage.deleteForUser(sessionId, "isLoggedIn", { secure: false }),
+    storage.deleteForUser(sessionId, "webId", { secure: false }),
+    storage.deleteForUser(sessionId, "redirectUrl", { secure: false }),
+    storage.deleteForUser(sessionId, "refreshToken", { secure: true }),
+    storage.deleteForUser(sessionId, "tokenType", { secure: false }),
     // FIXME: This is needed until the DPoP key is stored safely
     storage.delete("clientKey", { secure: false }),
   ]);
@@ -123,22 +129,6 @@ export class SessionInfoManager implements ISessionInfoManager {
       secure: true,
     });
 
-    const clientId = await this.storageUtility.getForUser(
-      sessionId,
-      "clientId",
-      {
-        secure: false,
-      }
-    );
-
-    const clientSecret = await this.storageUtility.getForUser(
-      sessionId,
-      "clientSecret",
-      {
-        secure: false,
-      }
-    );
-
     const redirectUrl = await this.storageUtility.getForUser(
       sessionId,
       "redirectUrl",
@@ -159,35 +149,38 @@ export class SessionInfoManager implements ISessionInfoManager {
       secure: false,
     });
 
-    const tokenType =
-      (await this.storageUtility.getForUser(sessionId, "tokenType", {
+    let tokenType = await this.storageUtility.getForUser(
+      sessionId,
+      "tokenType",
+      {
         secure: false,
-      })) ?? "DPoP";
+      }
+    );
+
+    if (typeof tokenType !== "string") {
+      tokenType = "DPoP";
+    }
 
     if (!isSupportedTokenType(tokenType)) {
       throw new Error(`Tokens of type [${tokenType}] are not supported.`);
     }
 
-    if (
-      clientId === undefined &&
-      isLoggedIn === undefined &&
-      webId === undefined &&
-      refreshToken === undefined
-    ) {
+    if (issuer === undefined) {
       return undefined;
     }
 
-    return {
+    const sessionInfo: ISessionInfo & ISessionInternalInfo = {
       sessionId,
-      webId,
       isLoggedIn: isLoggedIn === "true",
-      redirectUrl,
-      refreshToken,
-      issuer,
-      clientAppId: clientId,
-      clientAppSecret: clientSecret,
-      tokenType,
+      webId: typeof webId === "string" ? webId : undefined,
+      refreshToken: typeof refreshToken === "string" ? refreshToken : undefined,
+      tokenType:
+        tokenType === "DPoP" || tokenType === "Bearer" ? tokenType : undefined,
+      redirectUrl: typeof redirectUrl === "string" ? redirectUrl : undefined,
+      issuer: typeof issuer === "string" ? issuer : undefined,
     };
+
+    return sessionInfo;
   }
 
   // eslint-disable-next-line class-methods-use-this

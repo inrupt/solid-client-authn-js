@@ -19,21 +19,15 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { describe, it, expect } from "@jest/globals";
-import { mockStorage } from "@inrupt/solid-client-authn-core";
-import { getClientAuthenticationWithDependencies } from "./dependencies";
-import ClientAuthentication from "./ClientAuthentication";
+import { describe, test, expect } from "@jest/globals";
+import { isValidUrl } from "./isValidUrl";
 
-describe("dependencies", () => {
-  it("performs dependency injection", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({});
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+describe("isValidUrl", () => {
+  test("it returns true for a valid URL", () => {
+    expect(isValidUrl("https://test.example:3000/foo/bar?baz")).toBe(true);
   });
 
-  it("performs dependency injection with a given input", () => {
-    const clientAuthn = getClientAuthenticationWithDependencies({
-      secureStorage: mockStorage({}),
-    });
-    expect(clientAuthn).toBeInstanceOf(ClientAuthentication);
+  test("it returns false for a valid URL", () => {
+    expect(isValidUrl("not a url")).toBe(false);
   });
 });

@@ -83,7 +83,10 @@ export async function refresh(
   }
 
   let authHeader = {};
-  if (client.clientSecret !== undefined) {
+  if (
+    (client.clientType === "static" || client.clientType === "dynamic") &&
+    client.clientSecret !== undefined
+  ) {
     authHeader = {
       // We assume that client_secret_basic is the client authentication method.
       // TODO: Get the authentication method from the IClient configuration object.
