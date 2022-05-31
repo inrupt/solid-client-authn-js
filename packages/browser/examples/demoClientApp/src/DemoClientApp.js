@@ -1,14 +1,10 @@
 import React, { Component } from "react";
 import "regenerator-runtime/runtime";
 
-// import {
-//   Session,
-//   getClientAuthenticationWithDependencies,
-// } from "@inrupt/solid-client-authn-browser";
 import {
   Session,
   getClientAuthenticationWithDependencies,
-} from "../../../dist/index";
+} from "@inrupt/solid-client-authn-browser";
 
 const clientApplicationName = "S-C-A Browser Demo Client App";
 let snackBarTimeout = undefined;
