@@ -29,8 +29,6 @@ import {
 } from "@jest/globals";
 import Redirector from "./Redirector";
 
-jest.mock("../../../src/iframe");
-
 /**
  * Test for Redirector
  */
@@ -80,18 +78,6 @@ describe("Redirector", () => {
         "https://someUrl.com/redirect"
       );
       expect(window.location.href).toBe("https://coolSite.com");
-    });
-
-    it("redirects in an iframe if specified", () => {
-      const iframe = jest.requireMock("../../../src/iframe");
-      const redirectInIframe = jest.spyOn(iframe as any, "redirectInIframe");
-      const redirector = new Redirector();
-      redirector.redirect("https://someUrl.com/redirect", {
-        redirectInIframe: true,
-      });
-      expect(redirectInIframe).toHaveBeenCalledWith(
-        "https://someUrl.com/redirect"
-      );
     });
 
     it("calls redirect handler", () => {

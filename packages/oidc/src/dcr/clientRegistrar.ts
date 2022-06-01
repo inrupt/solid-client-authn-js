@@ -126,9 +126,7 @@ export async function registerClient(
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (options.registrationAccessToken) {
-    headers.Authorization = `Bearer ${options.registrationAccessToken}`;
-  }
+
   const registerResponse = await fetch(
     issuerConfig.registrationEndpoint.toString(),
     {
@@ -137,6 +135,7 @@ export async function registerClient(
       body: JSON.stringify(config),
     }
   );
+
   if (registerResponse.ok) {
     const responseBody = await registerResponse.json();
     validateRegistrationResponse(responseBody, options);

@@ -30,11 +30,6 @@
 export interface IRedirectorOptions {
   handleRedirect?: (url: string) => unknown;
   redirectByReplacingState?: boolean;
-  /**
-   * If this is set to true, the redirect will happen in an iframe, as opposed
-   * to the main window.
-   */
-  redirectInIframe?: boolean;
 }
 
 /**

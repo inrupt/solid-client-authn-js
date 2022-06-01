@@ -33,7 +33,6 @@ export interface IClientRegistrarOptions {
   sessionId: string;
   clientName?: string;
   redirectUrl?: string;
-  registrationAccessToken?: string;
 }
 
 /**
