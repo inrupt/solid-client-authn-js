@@ -18,7 +18,7 @@ jobs:
         os: [ubuntu-20.04]
         # The Node version does not influence how well our tests run in the browser,
         # so we only need to test in one.
-        node-version: [16.x]
+        node-version: ["16"]
         # NSS does not support static client registration, which we rely on for testing.
         environment-name: ["ESS Production", "ESS Dev-Next"]
     steps:
