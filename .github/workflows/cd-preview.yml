@@ -51,7 +51,8 @@ jobs:
           VERSION_NR=$(cat packages/browser/package.json | npx json version)
           echo "::set-output name=version-nr::$VERSION_NR"
       - run: npm run build
-      - run: npm run publish-preview -- --dist-tag "$TAG_SLUG" --yes
+        # Disable lerna's access verification as our npm token is an automation token:
+      - run: npm run publish-preview -- --no-verify-access --dist-tag "$TAG_SLUG" --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.INRUPT_NPM_TOKEN }}
       - run: |
@@ -79,7 +80,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - name: Install the preview release of solid-client-authn-node in the packaging test project
         run: |
           cd .github/workflows/cd-packaging-tests/node

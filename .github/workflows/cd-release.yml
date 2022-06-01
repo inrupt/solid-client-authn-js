@@ -63,8 +63,9 @@ jobs:
         #        "access": "public"
         #      }
         #    }
+        # Disable lerna's access verification as our npm token is an automation token:
         run: |
-          npm run publish -- from-package --yes 
+          npm run publish -- from-package --no-verify-access --yes 
           echo "Packages published. To install, run:"
           echo ""
           echo "    npm install @inrupt/solid-client-authn-XXXX"
@@ -110,7 +111,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - name: Install the preview release of solid-client-authn-node in the packaging test project
         run: |
           cd .github/workflows/cd-packaging-tests/node
