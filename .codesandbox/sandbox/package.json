@@ -13,17 +13,22 @@
     "test": "react-scripts test --env=jsdom"
   },
   "dependencies": {
-    "@inrupt/solid-client": "0.3.0",
-    "@inrupt/solid-client-authn-browser": "^0.1.1",
-    "ajv": "6.12.4",
+    "@inrupt/solid-client": "^1.23.0",
+    "@inrupt/solid-client-authn-browser": "^1.11.9",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-scripts": "3.4.3",
+    "react-scripts": "^5.0.1",
     "readable-stream": "3.6.0",
     "stream-browserify": "3.0.0"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.6.1"
+    "eslint": "8.13.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "prettier": "^2.6.2"
   },
   "keywords": [
     "typescript",

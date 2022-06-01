@@ -2,5 +2,6 @@
   "installCommand": "install-sandbox",
   "buildCommand": "build-sandbox",
   "sandboxes": ["/.codesandbox/sandbox"],
-  "packages": ["packages/browser"]
+  "packages": ["packages/*"],
+  "node": "14"
 }

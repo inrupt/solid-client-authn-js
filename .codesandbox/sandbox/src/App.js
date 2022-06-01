@@ -1,30 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Session as AuthSession } from "@inrupt/solid-client-authn-browser";
+import * as defaultSession from "@inrupt/solid-client-authn-browser";
+
+const {
+  login,
+  handleIncomingRedirect,
+  fetch: authenticatedFetch,
+  getDefaultSession,
+} = defaultSession;
 
 const REDIRECT_URL = window.location;
 
 export default function Home() {
-  // eslint-disable-next-line
-  const [session, _setSession] = useState(new AuthSession({}));
-  const [issuer, setIssuer] = useState("https://broker.demo-ess.inrupt.com/");
-  const [resource, setResource] = useState(session.info.webId);
+  const [issuer, setIssuer] = useState("https://broker.pod.inrupt.com/");
+  const [resource, setResource] = useState("");
   const [data, setData] = useState(null);
 
   useEffect(() => {
     const authCode = new URL(window.location.href).searchParams.get("code");
     if (authCode) {
       console.log("Being redirected from the IdP");
-      session.handleIncomingRedirect(window.location.href).then((info) => {
+      handleIncomingRedirect(window.location.href).then((info) => {
         setResource(info.webId);
       });
     }
-  }, [session]);
+  });
 
   const handleLogin = (e) => {
     // The default behaviour of the button is to resubmit.
     // This prevents the page from reloading.
     e.preventDefault();
-    session.login({
+    login({
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
     });
@@ -34,18 +39,19 @@ export default function Home() {
     // The default behaviour of the button is to resubmit.
     // This prevents the page from reloading.
     e.preventDefault();
-    session
-      .fetch(resource)
+    authenticatedFetch(resource)
       .then((response) => response.text())
       .then(setData);
   };
+
+  const session = getDefaultSession();
 
   return (
     <div>
       <main>
         <h1>Sandbox app</h1>
         <p>
-          {session.info.webId
+          {session?.info?.webId
             ? `Logged in as ${session.info.webId}`
             : "Not logged in yet"}{" "}
         </p>
