@@ -28,9 +28,7 @@ jobs:
         #     if: secrets.INRUPT_NPM_TOKEN != ''
         # so simply skip the command if the env var is not set:
         if [ -n $NODE_AUTH_TOKEN ] && [ $EXISTING_TAGS -eq 1 ]; then
-        npm dist-tag rm @inrupt/solid-client-authn-browser $TAG_SLUG;
-        npm dist-tag rm @inrupt/solid-client-authn-core $TAG_SLUG;
-        npm dist-tag rm @inrupt/oidc-client-ext $TAG_SLUG;
+        lerna exec -- npm dist-tag rm \$LERNA_PACKAGE_NAME $TAG_SLUG
         fi
       env:
         NODE_AUTH_TOKEN: ${{ secrets.INRUPT_NPM_TOKEN }}
