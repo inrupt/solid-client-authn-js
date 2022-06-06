@@ -22,12 +22,11 @@ This PR fixes bug #.
 
 This PR bumps the version to <version number>.
 
-# Checklist
+# Release Steps
 
-- [ ] I used `npm run lerna-version -- <major|minor|patch> --no-push` to update the version number, first inspecting the CHANGELOG to determine if the release was major, minor or patch.
-- [ ] The CHANGELOG has been updated to show version and release date - https://keepachangelog.com/en/1.0.0/.
-- [ ] The **only** commits in this PR are:
-  - the CHANGELOG update.
-  - the version update.
-- [ ] I will make sure **not** to squash these commits, but **rebase** instead.
-- [ ] Once this PR is merged, I will push the tag created by `lerna version ...` (e.g. `git push origin vX.X.X`).
+1. Look at the [CHANGELOG.md](../CHANGELOG.md) to determine whether the release should be a major, minor, or patch release. Coordinate with the team to ensure the next version is agreed upon.
+2. Run `npm run lerna-version -- <major|minor|patch>` with the decided on version.
+3. Update the `CHANGELOG.md` to release the latest the version, and set the release date.
+4. Commit the changes on a `release/vX.Y.Z` branch
+5. Push to GitHub, create a PR, and merge once CI passes.
+6. Create a release on GitHub for the new version, using a combination of the release notes from the `CHANGELOG.md` and the automatically generated changes.
