@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## 1.12.0 - 2022-06-06
+
 ### Breaking Changes
 
 - Support for Node.js v12.x has been dropped as that version has reached
