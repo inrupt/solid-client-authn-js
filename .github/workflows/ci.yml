@@ -18,3 +18,42 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test
+
+      - run: git fetch --unshallow
+        if: ${{ matrix.node-version == '16' }}
+
+      - name: SonarCloud Scan - Browser
+        if: ${{ matrix.node-version == '16' }}
+        uses: SonarSource/sonarcloud-github-action@v1.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: packages/browser
+
+      - name: SonarCloud Scan - Core
+        if: ${{ matrix.node-version == '16' }}
+        uses: SonarSource/sonarcloud-github-action@v1.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: packages/core
+
+      - name: SonarCloud Scan - Node
+        if: ${{ matrix.node-version == '16' }}
+        uses: SonarSource/sonarcloud-github-action@v1.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: packages/node
+
+      - name: SonarCloud Scan - OIDC
+        if: ${{ matrix.node-version == '16' }}
+        uses: SonarSource/sonarcloud-github-action@v1.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: packages/oidc
