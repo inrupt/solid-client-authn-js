@@ -13,7 +13,7 @@ module.exports = {
   ],
   reporters: ["default"],
   collectCoverage: true,
-  coverageReporters: ["text"],
+  coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
   coverageThreshold: {
     global: {
       branches: 100,
