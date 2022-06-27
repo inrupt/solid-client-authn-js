@@ -165,7 +165,7 @@ export const mockClient = (clientId = "some client"): IClient => {
 export const mockFetch = (payload: string, statusCode: number) => {
   const mockedFetch = jest.fn(
     async (
-      _url: RequestInfo,
+      _url: RequestInfo | URL,
       _init?: RequestInit
     ): ReturnType<typeof window.fetch> =>
       new Response(payload, { status: statusCode })

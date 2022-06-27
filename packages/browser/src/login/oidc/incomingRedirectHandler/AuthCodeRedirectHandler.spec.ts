@@ -486,7 +486,7 @@ describe("AuthCodeRedirectHandler", () => {
         })
       ) as jest.Mock<
         ReturnType<typeof window.fetch>,
-        [RequestInfo, RequestInit?]
+        [RequestInfo | URL, RequestInit?]
       >;
 
       const mockedStorage = mockDefaultStorageUtility();
