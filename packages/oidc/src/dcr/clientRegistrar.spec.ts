@@ -289,7 +289,7 @@ describe("registerClient", () => {
     );
 
     global.fetch = jest.fn(
-      async (_input: URL, _init?: RequestInit): Promise<Response> =>
+      async (_input: URL | RequestInfo, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "invalid_client_metadata",
@@ -306,7 +306,7 @@ describe("registerClient", () => {
 
   it("throws if the IdP returns a custom error", async () => {
     global.fetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
+      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "custom_error",
