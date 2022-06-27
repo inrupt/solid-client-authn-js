@@ -147,7 +147,10 @@ describe("registerClient", () => {
 
   it("throws if the IdP returns a mismatching redirect URL", async () => {
     const myFetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response(
           JSON.stringify({
             // eslint-disable-next-line camelcase
@@ -173,7 +176,10 @@ describe("registerClient", () => {
 
   it("throws if no client_id is returned", async () => {
     const myFetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response(
           JSON.stringify({
             // eslint-disable-next-line camelcase
@@ -194,7 +200,10 @@ describe("registerClient", () => {
 
   it("throws if the redirect URI is invalid", async () => {
     const myFetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "invalid_redirect_uri",
@@ -217,7 +226,10 @@ describe("registerClient", () => {
 
   it("throws if the redirect URI is undefined", async () => {
     global.fetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "invalid_redirect_uri",
@@ -235,7 +247,10 @@ describe("registerClient", () => {
       "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - some description"
     );
     global.fetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "invalid_redirect_uri",
@@ -252,7 +267,10 @@ describe("registerClient", () => {
 
   it("throws if the client metadata are invalid", async () => {
     global.fetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "invalid_client_metadata",
@@ -271,7 +289,7 @@ describe("registerClient", () => {
     );
 
     global.fetch = jest.fn(
-      async (_input:  | URL, _init?: RequestInit): Promise<Response> =>
+      async (_input: URL, _init?: RequestInit): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "invalid_client_metadata",
@@ -307,7 +325,10 @@ describe("registerClient", () => {
     );
 
     global.fetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response(
           JSON.stringify({
             error: "custom_error",
@@ -322,7 +343,10 @@ describe("registerClient", () => {
 
   it("throws without parsing the response body as JSON on non-400 error", async () => {
     const myFetch = jest.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> =>
+      async (
+        _input: RequestInfo | URL,
+        _init?: RequestInit
+      ): Promise<Response> =>
         new Response("Resource not found", {
           status: 404,
           statusText: "Not found",
