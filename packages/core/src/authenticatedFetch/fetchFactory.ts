@@ -93,7 +93,7 @@ async function buildAuthenticatedHeaders(
 async function makeAuthenticatedRequest(
   unauthFetch: typeof fetch,
   accessToken: string,
-  url: RequestInfo,
+  url: RequestInfo | URL,
   defaultRequestInit?: RequestInit,
   dpopKey?: KeyPair
 ) {

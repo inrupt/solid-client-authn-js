@@ -28,6 +28,8 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "./clientRegistrar";
 
+/* eslint-disable camelcase */
+
 const getMockIssuer = (): IIssuerConfig => {
   return {
     issuer: "https://some.issuer",
@@ -49,22 +51,17 @@ const getMockOptions = (): IClientRegistrarOptions => {
 };
 
 const getSuccessfulFetch = (): typeof fetch =>
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  (jest.fn().mockResolvedValue as any)(
+  jest.fn(global.fetch).mockResolvedValue(
     new Response(
       JSON.stringify({
-        // eslint-disable-next-line camelcase
         client_id: "some id",
-        // eslint-disable-next-line camelcase
         client_secret: "some secret",
-        // eslint-disable-next-line camelcase
         redirect_uris: ["https://some.url"],
-        // eslint-disable-next-line camelcase
         id_token_signed_response_alg: "RS256",
       }),
       { status: 200 }
     )
-  ) as typeof fetch;
+  );
 
 describe("registerClient", () => {
   global.fetch = getSuccessfulFetch();
@@ -146,19 +143,15 @@ describe("registerClient", () => {
   });
 
   it("throws if the IdP returns a mismatching redirect URL", async () => {
-    const myFetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            // eslint-disable-next-line camelcase
-            client_id: "some id",
-            // eslint-disable-next-line camelcase
-            client_secret: "some secret",
-            // eslint-disable-next-line camelcase
-            redirect_uris: ["https://some.other.url"],
-          }),
-          { status: 200 }
-        )
+    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          client_id: "some id",
+          client_secret: "some secret",
+          redirect_uris: ["https://some.other.url"],
+        }),
+        { status: 200 }
+      )
     );
     global.fetch = myFetch;
     const options = getMockOptions();
@@ -172,15 +165,13 @@ describe("registerClient", () => {
   });
 
   it("throws if no client_id is returned", async () => {
-    const myFetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            // eslint-disable-next-line camelcase
-            some_key: "some value",
-          }),
-          { status: 200 }
-        )
+    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          some_key: "some value",
+        }),
+        { status: 200 }
+      )
     );
     global.fetch = myFetch;
     const options = getMockOptions();
@@ -193,16 +184,14 @@ describe("registerClient", () => {
   });
 
   it("throws if the redirect URI is invalid", async () => {
-    const myFetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            error: "invalid_redirect_uri",
-            // eslint-disable-next-line camelcase
-            error_description: "some description",
-          }),
-          { status: 400 }
-        )
+    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "invalid_redirect_uri",
+          error_description: "some description",
+        }),
+        { status: 400 }
+      )
     );
     global.fetch = myFetch;
     const options = getMockOptions();
@@ -216,16 +205,14 @@ describe("registerClient", () => {
   });
 
   it("throws if the redirect URI is undefined", async () => {
-    global.fetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            error: "invalid_redirect_uri",
-            // eslint-disable-next-line camelcase
-            error_description: "some description",
-          }),
-          { status: 400 }
-        )
+    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "invalid_redirect_uri",
+          error_description: "some description",
+        }),
+        { status: 400 }
+      )
     );
     const options = getMockOptions();
 
@@ -234,14 +221,13 @@ describe("registerClient", () => {
     ).rejects.toThrow(
       "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - some description"
     );
-    global.fetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            error: "invalid_redirect_uri",
-          }),
-          { status: 400 }
-        )
+    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "invalid_redirect_uri",
+        }),
+        { status: 400 }
+      )
     );
     await expect(() =>
       registerClient(options, getMockIssuer())
@@ -251,16 +237,14 @@ describe("registerClient", () => {
   });
 
   it("throws if the client metadata are invalid", async () => {
-    global.fetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            error: "invalid_client_metadata",
-            // eslint-disable-next-line camelcase
-            error_description: "some description",
-          }),
-          { status: 400 }
-        )
+    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "invalid_client_metadata",
+          error_description: "some description",
+        }),
+        { status: 400 }
+      )
     );
     const options = getMockOptions();
 
@@ -270,14 +254,13 @@ describe("registerClient", () => {
       'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - some description'
     );
 
-    global.fetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            error: "invalid_client_metadata",
-          }),
-          { status: 400 }
-        )
+    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "invalid_client_metadata",
+        }),
+        { status: 400 }
+      )
     );
     await expect(() =>
       registerClient(options, getMockIssuer())
@@ -287,16 +270,14 @@ describe("registerClient", () => {
   });
 
   it("throws if the IdP returns a custom error", async () => {
-    global.fetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            error: "custom_error",
-            // eslint-disable-next-line camelcase
-            error_description: "some description",
-          }),
-          { status: 400 }
-        )
+    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "custom_error",
+          error_description: "some description",
+        }),
+        { status: 400 }
+      )
     );
     const options = getMockOptions();
 
@@ -306,14 +287,13 @@ describe("registerClient", () => {
       "Dynamic client registration failed: custom_error - some description"
     );
 
-    global.fetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response(
-          JSON.stringify({
-            error: "custom_error",
-          }),
-          { status: 400 }
-        )
+    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "custom_error",
+        }),
+        { status: 400 }
+      )
     );
     await expect(() =>
       registerClient(options, getMockIssuer())
@@ -321,12 +301,11 @@ describe("registerClient", () => {
   });
 
   it("throws without parsing the response body as JSON on non-400 error", async () => {
-    const myFetch = jest.fn(
-      async (_input: RequestInfo, _init?: RequestInit): Promise<Response> =>
-        new Response("Resource not found", {
-          status: 404,
-          statusText: "Not found",
-        })
+    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
+      new Response("Resource not found", {
+        status: 404,
+        statusText: "Not found",
+      })
     );
     global.fetch = myFetch;
     const options = getMockOptions();

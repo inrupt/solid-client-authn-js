@@ -192,7 +192,7 @@ export class Session extends EventEmitter {
    * @param url The URL from which data should be fetched.
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
-  fetch = async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
+  fetch: typeof fetch = async (url, init) => {
     if (!this.info.isLoggedIn) {
       // TODO: why does this.clientAuthentication.fetch return throws
       // ""'fetch' called on an object that does not implement interface Window"
