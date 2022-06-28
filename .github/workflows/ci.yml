@@ -27,7 +27,7 @@ jobs:
       # Since this is a monorepo, the Sonar scan must be run on each of the packages but this will pull in the test
       # coverage information produced by the tests already run.
       - name: SonarCloud Scan - Browser
-        if: ${{ matrix.node-version == '16' }}
+        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
         uses: SonarSource/sonarcloud-github-action@v1.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,7 +36,7 @@ jobs:
           projectBaseDir: packages/browser
 
       - name: SonarCloud Scan - Core
-        if: ${{ matrix.node-version == '16' }}
+        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
         uses: SonarSource/sonarcloud-github-action@v1.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
           projectBaseDir: packages/core
 
       - name: SonarCloud Scan - Node
-        if: ${{ matrix.node-version == '16' }}
+        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
         uses: SonarSource/sonarcloud-github-action@v1.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,7 +54,7 @@ jobs:
           projectBaseDir: packages/node
 
       - name: SonarCloud Scan - OIDC
-        if: ${{ matrix.node-version == '16' }}
+        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
         uses: SonarSource/sonarcloud-github-action@v1.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
