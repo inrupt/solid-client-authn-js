@@ -85,7 +85,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const storage = this.storageUtility;
 
     try {
-      const signingRequest = await oidcClientLibrary.createSigninRequest();
+      const signingRequest = await oidcClientLibrary.createSigninRequest({});
       await Promise.all([
         // We use the OAuth 'state' value (which should be crypto-random) as
         // the key in our storage to store our actual SessionID. We do this
@@ -96,8 +96,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
         // that session ID can be any developer-specified value, and therefore
         // may not be appropriate (since the OAuth 'state' value should really
         // be an unguessable crypto-random value).
-        // eslint-disable-next-line no-underscore-dangle
-        storage.setForUser(signingRequest.state._id, {
+        storage.setForUser(signingRequest.state.id, {
           sessionId: oidcLoginOptions.sessionId,
         }),
 
@@ -106,8 +105,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
         // our session ID is unnecessary, but it provides a slightly cleaner
         // separation of concerns.
         storage.setForUser(oidcLoginOptions.sessionId, {
-          // eslint-disable-next-line no-underscore-dangle
-          codeVerifier: signingRequest.state._code_verifier,
+          codeVerifier: signingRequest.state.code_verifier ?? "",
           issuer: oidcLoginOptions.issuer.toString(),
           // The redirect URL is read after redirect, so it must be stored now.
           redirectUrl: oidcLoginOptions.redirectUrl,

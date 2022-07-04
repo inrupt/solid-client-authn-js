@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { OidcClient } from "@inrupt/oidc-client";
+import { OidcClient } from "oidc-client-ts";
 import {
   IClient,
   IIssuerConfig,
@@ -304,6 +304,9 @@ export async function getBearerToken(
       // against NSS, and not in general.
       // Issue tracker: https://github.com/solid/node-solid-server/issues/1490
       loadUserInfo: false,
+      authority: "",
+      client_id: "",
+      redirect_uri: redirectUrl,
     });
     signinResponse = await client.processSigninResponse(redirectUrl);
     if (client.settings.metadata === undefined) {
@@ -324,6 +327,11 @@ export async function getBearerToken(
     if (client.settings.client_id === undefined) {
       throw new Error(
         "Missing some client information in storage: 'client_id' is undefined"
+      );
+    }
+    if (signinResponse.id_token === undefined) {
+      throw new Error(
+        "Missing some information in sign-in response: 'id_token' is undefined"
       );
     }
     const webId = await getWebidFromTokenPayload(

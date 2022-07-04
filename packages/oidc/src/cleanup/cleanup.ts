@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { OidcClient, WebStorageStateStore } from "@inrupt/oidc-client";
+import { OidcClient } from "oidc-client-ts";
 
 /**
  * Removes OIDC-specific query parameters from a given URL (state, code...), and
@@ -52,8 +52,11 @@ export async function clearOidcPersistentStorage(): Promise<void> {
     // for a hash '#' fragment!).
     // eslint-disable-next-line camelcase
     response_mode: "query",
+    redirect_uri: "",
+    authority: "",
+    client_id: "",
   });
-  await client.clearStaleState(new WebStorageStateStore({}));
+  await client.clearStaleState();
   const myStorage = window.localStorage;
   const itemsToRemove = [];
   for (let i = 0; i <= myStorage.length; i += 1) {

@@ -29,17 +29,14 @@ export {
   UserManager,
   AccessTokenEvents,
   MetadataService,
-  CordovaPopupNavigator,
-  CordovaIFrameNavigator,
   CheckSessionIFrame,
-  SigninRequest,
   SigninResponse,
   // TODO: Investigate why this fails
   // TokenRevocationClient,
   SessionMonitor,
   // Global,
   User,
-} from "@inrupt/oidc-client";
+} from "oidc-client-ts";
 
 export { registerClient } from "./dcr/clientRegistrar";
 export {
