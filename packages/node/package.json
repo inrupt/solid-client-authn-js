@@ -22,7 +22,7 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/node": "^17.0.2",
+    "@types/node": "^18.0.1",
     "@types/uuid": "^8.3.0"
   },
   "dependencies": {
