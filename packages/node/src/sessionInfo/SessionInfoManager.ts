@@ -123,6 +123,8 @@ export class SessionInfoManager implements ISessionInfoManager {
       "refreshToken"
     );
     const issuer = await this.storageUtility.getForUser(sessionId, "issuer");
+    const clientId = await this.storageUtility.getForUser(sessionId, "clientId");
+    const clientSecret = await this.storageUtility.getForUser(sessionId, "clientSecret");
 
     if (issuer !== undefined) {
       return {
@@ -131,6 +133,8 @@ export class SessionInfoManager implements ISessionInfoManager {
         isLoggedIn: isLoggedIn === "true",
         refreshToken,
         issuer,
+        clientAppId: clientId,
+        clientAppSecret: clientSecret
       };
     }
 
