@@ -7,19 +7,19 @@ _The motivation for this fork can be found here: https://github.com/rubensworks/
 `solid-client-authn-browser` is a library designed to authenticate web apps (in the browser) with Solid identity servers.
 The main documentation is at the [root of the repository](https://github.com/inrupt/solid-client-authn-js).
 
-
 ## Usage within Web workers
 
 This package enables support for [Web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
 by setting up a communication channel that exposes a fetch-like method to the worker, and follows the following flow:
 
-* Worker wants to do an authenticated request.
-* Worker sends request information to the main Window.
-* Window constructs authenticated headers for the request information.
-* Window sends back authenticated headers to the Worker.
-* Worker performs request using the authenticated headers.
+- Worker wants to do an authenticated request.
+- Worker sends request information to the main Window.
+- Window constructs authenticated headers for the request information.
+- Window sends back authenticated headers to the Worker.
+- Worker performs request using the authenticated headers.
 
 Example usage (Window):
+
 ```javascript
    const session = getDefaultSession();
    const worker = new Worker(...);
@@ -34,6 +34,7 @@ Example usage (Window):
 ```
 
 Example usage (Worker):
+
 ```javascript
    const workerToWindowHandler = new WorkerToWindowHandler(self);
    self.onmessage = (message => {
@@ -46,6 +47,7 @@ Example usage (Worker):
   const authFetch = workerToWindowHandler.buildAuthenticatedFetch();
   await authFetch('https://example.org/');
 ```
+
 A full working example can be found in:
 https://github.com/rubensworks/solid-client-authn-js/tree/feature/web-workers/packages/browser/examples/single/bundle
 
