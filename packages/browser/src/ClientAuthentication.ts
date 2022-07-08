@@ -34,6 +34,7 @@ import {
   ISessionInternalInfo,
   ILoginOptions,
   EVENTS,
+  HeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
@@ -43,6 +44,9 @@ import { EventEmitter } from "events";
 // ClientAuthentication:
 const globalFetch: typeof window.fetch = (request, init) =>
   window.fetch(request, init);
+
+const headersAuthenticatorDefault: HeadersAuthenticator = () =>
+  Promise.reject(new Error("headersAuthenticator is not initialized yet"));
 
 /**
  * @hidden
@@ -89,12 +93,16 @@ export default class ClientAuthentication {
   // By default, our fetch() resolves to the environment fetch() function.
   fetch = globalFetch;
 
+  // Headers for auxiliary fetching
+  headersAuthenticator: HeadersAuthenticator = headersAuthenticatorDefault;
+
   logout = async (sessionId: string): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
     this.fetch = globalFetch;
+    this.headersAuthenticator = headersAuthenticatorDefault;
   };
 
   getSessionInfo = async (
@@ -137,6 +145,7 @@ export default class ClientAuthentication {
       // ClientAuthentication, to avoid the following error:
       // > 'fetch' called on an object that does not implement interface Window.
       this.fetch = redirectInfo.fetch.bind(window);
+      this.headersAuthenticator = redirectInfo.headersAuthenticator;
 
       // Strip the oauth params:
       this.cleanUrlAfterRedirect(url);

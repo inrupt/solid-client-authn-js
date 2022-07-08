@@ -40,6 +40,7 @@ import {
   buildAuthenticatedFetch,
   ITokenRefresher,
   DEFAULT_SCOPES,
+  buildHeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
@@ -141,6 +142,13 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       }
     );
 
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      tokens.access_token,
+      {
+        dpopKey,
+      }
+    );
+
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
@@ -149,6 +157,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      headersAuthenticator,
     });
   }
 }

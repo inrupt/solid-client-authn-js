@@ -25,6 +25,7 @@
  */
 
 import {
+  HeadersAuthenticator,
   IIncomingRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
@@ -56,7 +57,12 @@ export class FallbackRedirectHandler implements IIncomingRedirectHandler {
   async handle(
     // The argument is ignored, but must be present to implement the interface
     _redirectUrl: string
-  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+  ): Promise<
+    ISessionInfo & {
+      fetch: typeof fetch;
+      headersAuthenticator: HeadersAuthenticator;
+    }
+  > {
     return getUnauthenticatedSession();
   }
 }

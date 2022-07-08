@@ -28,9 +28,15 @@
 import { fetch } from "cross-fetch";
 import { EventEmitter } from "events";
 import IHandleable from "../../util/handlerPattern/IHandleable";
-import { ISessionInfo } from "../../sessionInfo/ISessionInfo";
+import {
+  HeadersAuthenticator,
+  ISessionInfo,
+} from "../../sessionInfo/ISessionInfo";
 
-export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch };
+export type IncomingRedirectResult = ISessionInfo & {
+  fetch: typeof fetch;
+  headersAuthenticator: HeadersAuthenticator;
+};
 export type IncomingRedirectInput = [string, EventEmitter | undefined];
 
 /**

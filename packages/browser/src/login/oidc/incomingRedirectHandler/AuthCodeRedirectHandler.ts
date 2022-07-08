@@ -36,6 +36,8 @@ import {
   ITokenRefresher,
   loadOidcContextFromStorage,
   RefreshOptions,
+  buildHeadersAuthenticator,
+  HeadersAuthenticator
 } from "@inrupt/solid-client-authn-core";
 import {
   getDpopToken,
@@ -73,7 +75,12 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   async handle(
     redirectUrl: string,
     eventEmitter?: EventEmitter
-  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+  ): Promise<
+    ISessionInfo & {
+      fetch: typeof fetch;
+      headersAuthenticator: HeadersAuthenticator;
+    }
+  > {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
@@ -156,6 +163,13 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       expiresIn: tokens.expiresIn,
     });
 
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      tokens.accessToken,
+      {
+        dpopKey: tokens.dpopKey,
+      }
+    );
+
     await this.storageUtility.setForUser(
       storedSessionId,
       {
@@ -185,6 +199,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      headersAuthenticator,
       expirationDate:
         typeof tokens.expiresIn === "number"
           ? tokenCreatedAt + tokens.expiresIn * 1000

@@ -41,6 +41,8 @@ import {
   RefreshOptions,
   ITokenRefresher,
   TokenEndpointResponse,
+  HeadersAuthenticator,
+  buildHeadersAuthenticator,
   buildAuthenticatedFetch,
 } from "@inrupt/solid-client-authn-core";
 import { JWK, importJWK } from "jose";
@@ -71,7 +73,12 @@ async function refreshAccess(
   dpop: boolean,
   refreshBindingKey?: KeyPair,
   eventEmitter?: EventEmitter
-): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
+): Promise<
+  TokenEndpointResponse & {
+    fetch: typeof globalFetch;
+    headersAuthenticator: HeadersAuthenticator;
+  }
+> {
   try {
     let dpopKey: KeyPair | undefined;
     if (dpop) {
@@ -98,8 +105,15 @@ async function refreshAccess(
         eventEmitter,
       }
     );
+    const headersAuthenticator = await buildHeadersAuthenticator(
+      tokens.accessToken,
+      {
+        dpopKey,
+      }
+    );
     return Object.assign(tokens, {
       fetch: authFetch,
+      headersAuthenticator,
     });
   } catch (e) {
     throw new Error(`Invalid refresh credentials: ${e}`);
@@ -217,6 +231,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
 
     return Object.assign(sessionInfo, {
       fetch: accessInfo.fetch,
+      headersAuthenticator: accessInfo.headersAuthenticator,
     });
   }
 }

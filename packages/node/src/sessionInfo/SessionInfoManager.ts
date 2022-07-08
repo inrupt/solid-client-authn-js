@@ -30,6 +30,7 @@ import {
   ISessionInfoManager,
   ISessionInfoManagerOptions,
   IStorageUtility,
+  HeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
@@ -38,11 +39,17 @@ import { KEY_REGISTERED_SESSIONS } from "../constant";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;
+  headersAuthenticator: HeadersAuthenticator;
 } {
   return {
     isLoggedIn: false,
     sessionId: v4(),
     fetch,
+    headersAuthenticator: async (
+      resource: string,
+      method: string,
+      headers: Headers
+    ) => headers,
   };
 }
 

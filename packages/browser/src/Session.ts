@@ -236,6 +236,25 @@ export class Session extends EventEmitter {
   };
 
   /**
+   * Provides the necessary headers to perform the given request using this
+   * session's authentication.
+   * @param resource The resource URL to request.
+   * @param method The request method.
+   * @param headersUnauthenticated The headers for the request.
+   */
+  authenticateHeaders = (
+    resource: string,
+    method: string,
+    headersUnauthenticated: Headers
+  ): Promise<Headers> => {
+    return this.clientAuthentication.headersAuthenticator(
+      resource,
+      method,
+      headersUnauthenticated
+    );
+  };
+
+  /**
    * An internal logout function, to control whether or not the logout signal
    * should be sent, i.e. if the logout was user-initiated or is the result of
    * an external event.
