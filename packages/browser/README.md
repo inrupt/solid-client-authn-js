@@ -1,7 +1,53 @@
 # Solid JavaScript authentication for the browser - solid-client-authn-browser
 
+**This is a fork of [inrupt/solid-client-authn-js](https://github.com/inrupt/solid-client-authn-js) that includes support for [Web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers).**
+**If you don't need Web worker support, it is recommended to use Inrupt's original [inrupt/solid-client-authn-js](https://github.com/inrupt/solid-client-authn-js) packages.**
+_The motivation for this fork can be found here: https://github.com/rubensworks/solid-client-authn-js/pull/1802_
+
 `solid-client-authn-browser` is a library designed to authenticate web apps (in the browser) with Solid identity servers.
 The main documentation is at the [root of the repository](https://github.com/inrupt/solid-client-authn-js).
+
+
+## Usage within Web workers
+
+This package enables support for [Web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
+by setting up a communication channel that exposes a fetch-like method to the worker, and follows the following flow:
+
+* Worker wants to do an authenticated request.
+* Worker sends request information to the main Window.
+* Window constructs authenticated headers for the request information.
+* Window sends back authenticated headers to the Worker.
+* Worker performs request using the authenticated headers.
+
+Example usage (Window):
+```javascript
+   const session = getDefaultSession();
+   const worker = new Worker(...);
+   const windowToWorkerHandler = new WindowToWorkerHandler(this, worker, session);
+   worker.onmessage = async (message) => {
+      if (windowToWorkerHandler.onmessage(message)) {
+        // This means that the message was taken care of by the handler
+      } else {
+        // Optionally, take care of any other custom messages that your worker may send.
+      }
+    };
+```
+
+Example usage (Worker):
+```javascript
+   const workerToWindowHandler = new WorkerToWindowHandler(self);
+   self.onmessage = (message => {
+    if (workerToWindowHandler.onmessage(message)) {
+      // This means that the message was taken care of by the handler
+    } else {
+      // Optionally, take care of any other custom messages that your worker may receive.
+    }
+   // Use the authenticated fetch function
+  const authFetch = workerToWindowHandler.buildAuthenticatedFetch();
+  await authFetch('https://example.org/');
+```
+A full working example can be found in:
+https://github.com/rubensworks/solid-client-authn-js/tree/feature/web-workers/packages/browser/examples/single/bundle
 
 ## Required polyfills
 

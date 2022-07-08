@@ -1,5 +1,9 @@
 # Solid JavaScript authentication for Node.js - solid-client-authn-node
 
+**This is a fork of [inrupt/solid-client-authn-js](https://github.com/inrupt/solid-client-authn-js) that includes support for [Web workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers).**
+**If you don't need Web worker support, it is recommended to use Inrupt's original [inrupt/solid-client-authn-js](https://github.com/inrupt/solid-client-authn-js) packages.**
+_The motivation for this fork can be found here: https://github.com/rubensworks/solid-client-authn-js/pull/1802_
+
 `solid-client-authn-node` is a library designed to authenticate Node.js apps (both scripts and full-blown Web servers) with Solid identity servers.
 The main documentation is at the [root of the repository](https://github.com/inrupt/solid-client-authn-js).
 

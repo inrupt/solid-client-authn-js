@@ -9,6 +9,25 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### New features
+
+Merge @inrupt/solid-client-authn-* 1.12.1 and @rubensworks/solid-client-authn-*
+
+## [@rubensworks/solid-client-authn-*] 1.12.0 - 2022-01-11
+
+### New features
+
+#### node and browser
+
+- Expose `Session#authenticateHeaders` method that constructs the necessary headers to perform a given request using
+  this session's authentication.
+
+#### browser
+
+- The `WindowToWorkerHandler` and `WorkerToWindowHandler` helpers can be used to setup a communication channel between
+  the main window and a Web worker, so that the worker can perform authenticated requests, without any secrets having to
+  be shared with this worker. The actual fetch requests still happen within the Web worker for optimal performance.
+
 ## 1.12.1 - 2022-06-27
 
 - Fix incompatible type definitions for `fetch` following changes to the typescript definitions.
