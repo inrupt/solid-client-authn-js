@@ -24,6 +24,8 @@ export { Session, ISessionOptions } from "./Session";
 export { getClientAuthenticationWithDependencies } from "./dependencies";
 
 export * from "./defaultSession";
+export * from "./util/worker/WindowToWorkerHandler";
+export * from "./util/worker/WorkerToWindowHandler";
 
 // Re-export of types defined in the core module and produced/consumed by our API
 

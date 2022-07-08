@@ -1,5 +1,5 @@
-/*
- * Copyright 2022 Inrupt Inc.
+/**
+ * Copyright 2021 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal in
@@ -19,35 +19,23 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { EventEmitter } from "events";
-import { jest } from "@jest/globals";
+ import { WorkerToWindowHandler } from "../../../../dist/index";
 
-import IIncomingRedirectHandler, {
-  IncomingRedirectInput,
-  IncomingRedirectResult,
-} from "../IIncomingRedirectHandler";
-import { buildHeadersAuthenticator } from "../../../authenticatedFetch/fetchFactory";
-
-const canHandle = jest.fn<Promise<boolean>, IncomingRedirectInput>(
-  (_url: string) => Promise.resolve(true)
-);
-
-const handle = jest.fn<Promise<IncomingRedirectResult>, IncomingRedirectInput>(
-  async (_url: string, _emitter: EventEmitter | undefined) => ({
-    sessionId: "global",
-    isLoggedIn: true,
-    webId: "https://pod.com/profile/card#me",
-    fetch: jest.fn(),
-    headersAuthenticator: await buildHeadersAuthenticator(""),
-  })
-);
-
-export const mockCanHandleIncomingRedirect = canHandle;
-export const mockHandleIncomingRedirect = handle;
-
-export const mockIncomingRedirectHandler = (): IIncomingRedirectHandler => {
-  return {
-    canHandle,
-    handle,
-  };
-};
+ // Setup window communication
+ const workerToWindowHandler = new WorkerToWindowHandler(self);
+ self.onmessage = (message) => {
+   if (workerToWindowHandler.onmessage(message)) {
+     // This means that the message was taken care of by the handler
+   } else if (message.data.resource) {
+     const resource = message.data.resource;
+     const headers = new Headers();
+     headers.set("Accept", "text/turtle");
+ 
+     const fetch = workerToWindowHandler.buildAuthenticatedFetch();
+     fetch(resource, { headers })
+       .then((response) => response.text())
+       .catch((error) => self.postMessage({ text: error.message }))
+       .then((text) => self.postMessage({ text }));
+   }
+ };
+ 

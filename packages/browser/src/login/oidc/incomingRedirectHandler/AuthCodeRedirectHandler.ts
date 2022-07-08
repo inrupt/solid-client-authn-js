@@ -37,7 +37,7 @@ import {
   loadOidcContextFromStorage,
   RefreshOptions,
   buildHeadersAuthenticator,
-  HeadersAuthenticator
+  HeadersAuthenticator,
 } from "@inrupt/solid-client-authn-core";
 import {
   getDpopToken,

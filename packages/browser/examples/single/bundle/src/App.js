@@ -28,6 +28,7 @@ import {
   handleIncomingRedirect,
   fetch,
   getDefaultSession,
+  WindowToWorkerHandler,
 } from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = "http://localhost:3113/";
@@ -42,6 +43,7 @@ export default function App() {
   const [issuer, setIssuer] = useState("https://broker.pod.inrupt.com/");
   const [resource, setResource] = useState(webId);
   const [data, setData] = useState(null);
+  const worker = new Worker(new URL("./worker.js", import.meta.url));
 
   // The useEffect hook is executed on page load, and in particular when the user
   // is redirected to the page after logging in the identity provider.
@@ -90,6 +92,27 @@ export default function App() {
       .then(setData);
   };
 
+  const handleFetchWorker = (e) => {
+    e.preventDefault();
+
+    const session = getDefaultSession();
+
+    // Setup worker communication
+    const windowToWorkerHandler = new WindowToWorkerHandler(
+      this,
+      worker,
+      session
+    );
+    worker.postMessage({ resource });
+    worker.onmessage = async (message) => {
+      if (windowToWorkerHandler.onmessage(message)) {
+        // This means that the message was taken care of by the handler
+      } else if (message.data.text) {
+        setData(message.data.text);
+      }
+    };
+  };
+
   return (
     <div>
       <main>
@@ -118,6 +141,9 @@ export default function App() {
             }}
           />
           <button onClick={(e) => handleFetch(e)}>Fetch</button>
+          <button onClick={(e) => handleFetchWorker(e)}>
+            Fetch with Web Worker
+          </button>
         </div>
         <pre>{data}</pre>
       </main>

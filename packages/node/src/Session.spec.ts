@@ -28,6 +28,7 @@ import {
   mockStorage,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import * as crossFetch from "cross-fetch";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
@@ -379,6 +380,26 @@ describe("Session", () => {
       // One of the two token requests should not have reached the token endpoint
       // because the other was pending.
       expect(tokenRequests).toContain(undefined);
+    });
+  });
+
+  describe("authenticateHeaders", () => {
+    it("wraps up ClientAuthentication fetch if logged in", async () => {
+      const clientAuthentication = mockClientAuthentication();
+      const clientAuthnHeadersAuthenticator = jest.spyOn(
+        clientAuthentication,
+        "headersAuthenticator"
+      );
+      const mySession = new Session({ clientAuthentication });
+      mySession.info.isLoggedIn = true;
+      await expect(
+        mySession.authenticateHeaders(
+          "https://some.url",
+          "GET",
+          new crossFetch.Headers()
+        )
+      ).rejects.toThrow("headersAuthenticator is not initialized yet");
+      expect(clientAuthnHeadersAuthenticator).toHaveBeenCalled();
     });
   });
 

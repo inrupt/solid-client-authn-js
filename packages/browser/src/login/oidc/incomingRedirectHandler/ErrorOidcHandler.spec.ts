@@ -67,6 +67,9 @@ describe("ErrorOidcHandler", () => {
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
+      expect(
+        await mySession.headersAuthenticator("A", "GET", new Headers())
+      ).toEqual(new Headers());
     });
     it("calls the onError callback if given with both parameters", async () => {
       window.fetch = jest.fn();
