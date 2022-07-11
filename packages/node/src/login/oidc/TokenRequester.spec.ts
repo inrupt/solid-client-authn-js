@@ -25,7 +25,7 @@ import { Response as NodeResponse, fetch } from "cross-fetch";
 import {
   IIssuerConfig,
   mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import {
   IssuerConfigFetcherMock,
   IssuerConfigFetcherFetchConfigResponse,

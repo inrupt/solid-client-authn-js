@@ -32,7 +32,7 @@ import {
   IIssuerConfigFetcher,
   IStorageUtility,
   ConfigurationError,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { Issuer, IssuerMetadata } from "openid-client";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";

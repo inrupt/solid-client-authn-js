@@ -32,9 +32,9 @@ import {
   IStorageUtility,
   isSupportedTokenType,
   HeadersAuthenticator,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { v4 } from "uuid";
-import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
+import { clearOidcPersistentStorage } from "@rubensworks/oidc-client-ext";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;

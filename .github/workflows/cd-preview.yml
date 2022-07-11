@@ -58,11 +58,11 @@ jobs:
       - run: |
           echo "Package published. To install, run:"
           echo ""
-          echo "    npm install @inrupt/solid-client-authn-browser@$TAG_SLUG"
+          echo "    npm install @rubensworks/solid-client-authn-browser@$TAG_SLUG"
           echo ""
           echo "or"
           echo ""
-          echo "    npm install @inrupt/solid-client-authn-node@$TAG_SLUG"
+          echo "    npm install @rubensworks/solid-client-authn-node@$TAG_SLUG"
       - name: Waiting for npm CDNs to update...
         run: |
           echo "Giving npm some time to make the newly-published package available…"
@@ -84,7 +84,7 @@ jobs:
       - name: Install the preview release of solid-client-authn-node in the packaging test project
         run: |
           cd .github/workflows/cd-packaging-tests/node
-          npm install @inrupt/solid-client-authn-node@$VERSION_NR
+          npm install @rubensworks/solid-client-authn-node@$VERSION_NR
         env:
           VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
       - name: Verify that the package can be imported in Node from a CommonJS module
@@ -108,7 +108,7 @@ jobs:
       - name: Verify that the package can be imported in a Parcel project
         run: |
           cd .github/workflows/cd-packaging-tests/bundler-parcel
-          npm install @inrupt/solid-client-authn-browser@$VERSION_NR
+          npm install @rubensworks/solid-client-authn-browser@$VERSION_NR
           npx parcel@1.12.3 build index.ts
         env:
           VERSION_NR: ${{ needs.dev-release-npm.outputs.version-nr }}
@@ -131,7 +131,7 @@ jobs:
       - name: Verify that the package can be imported in a Webpack project
         run: |
           cd .github/workflows/cd-packaging-tests/bundler-webpack
-          npm install @inrupt/solid-client-authn-browser@$VERSION_NR
+          npm install @rubensworks/solid-client-authn-browser@$VERSION_NR
           npm install webpack@5 webpack-cli buffer crypto-browserify stream-browserify util
           npx webpack --devtool source-map
         env:

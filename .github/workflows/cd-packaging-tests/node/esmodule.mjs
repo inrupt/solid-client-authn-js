@@ -1,5 +1,5 @@
 // Verify that imports from the main export work:
-import { Session } from "@inrupt/solid-client-authn-node";
+import { Session } from "@rubensworks/solid-client-authn-node";
 
 const session = new Session();
 console.log(session.info.sessionId);

@@ -34,8 +34,8 @@ import {
   IStorageUtility,
   LoginResult,
   DEFAULT_SCOPES,
-} from "@inrupt/solid-client-authn-core";
-import { OidcClient } from "@inrupt/oidc-client-ext";
+} from "@rubensworks/solid-client-authn-core";
+import { OidcClient } from "@rubensworks/oidc-client-ext";
 
 /**
  * @hidden

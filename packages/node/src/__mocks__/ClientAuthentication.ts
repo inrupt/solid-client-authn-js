@@ -25,9 +25,9 @@ import {
   IIncomingRedirectHandler,
   ISessionInfoManager,
   IStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 // FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
+// this should import from @rubensworks/solid-client-authn-core/mocks
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,

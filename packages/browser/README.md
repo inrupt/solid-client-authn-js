@@ -55,7 +55,7 @@ https://github.com/rubensworks/solid-client-authn-js/tree/feature/web-workers/pa
 
 Our JavaScript Client Libraries use relatively modern JavaScript features that
 will work in all commonly used browsers, except Internet Explorer. Additionally,
-`@inrupt/solid-client-authn-browser` currently expects the Node.js `events`
+`@rubensworks/solid-client-authn-browser` currently expects the Node.js `events`
 module. Webpack versions before version 5 used to add a polyfill for that by
 default; if you do not use Webpack, or use version 5 or later, please install
 the `events` npm package as well.
@@ -64,11 +64,11 @@ the `events` npm package as well.
 
 `solid-client-authn-browser` is based on [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), forked in
 [`@inrupt/oidc-client`](https://github.com/inrupt/oidc-client-js) after the original library stopped being supported.
-However, the latter lacks some features that are necessary to provide the developer experience we specifically want for the Solid ecosystem, so we developed [`oidc-client-ext`](https://www.npmjs.com/package/@inrupt/oidc-client-ext) to add these features.
+However, the latter lacks some features that are necessary to provide the developer experience we specifically want for the Solid ecosystem, so we developed [`oidc-client-ext`](https://www.npmjs.com/package/@rubensworks/oidc-client-ext) to add these features.
 
 # Other Inrupt Solid JavaScript Libraries
 
-[`@inrupt/solid-client-authn-browser`](https://www.npmjs.com/package/@inrupt/solid-client-authn-browser)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+[`@rubensworks/solid-client-authn-browser`](https://www.npmjs.com/package/@rubensworks/solid-client-authn-browser)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Inrupt Solid JavaScript Client Libraries
 
@@ -78,7 +78,7 @@ However, the latter lacks some features that are necessary to provide the develo
 
 ### Authentication - solid-client-authn
 
-[@inrupt/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
+[@rubensworks/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
 ### Vocabularies and interoperability - solid-common-vocab-rdf
 

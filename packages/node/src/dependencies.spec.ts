@@ -20,8 +20,8 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { mockStorage } from "@inrupt/solid-client-authn-core";
-import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
+import { mockStorage } from "@rubensworks/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@rubensworks/solid-client-authn-core";
 import { EventEmitter } from "events";
 import {
   buildLoginHandler,
@@ -43,9 +43,9 @@ import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCreden
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 
 jest.mock("openid-client");
-jest.mock("@inrupt/solid-client-authn-core", () => {
+jest.mock("@rubensworks/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@rubensworks/solid-client-authn-core"
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,

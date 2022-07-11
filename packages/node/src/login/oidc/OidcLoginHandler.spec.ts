@@ -25,7 +25,7 @@ import {
   mockStorage,
   mockStorageUtility,
   StorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
 import {
   IssuerConfigFetcherFetchConfigResponse,

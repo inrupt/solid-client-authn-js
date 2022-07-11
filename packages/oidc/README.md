@@ -14,7 +14,7 @@ To learn more about how this works, you can have a look at [this page](https://c
 
 # Other Inrupt Solid JavaScript Libraries
 
-[`@inrupt/oidc-client-ext`](https://www.npmjs.com/package/@inrupt/oidc-client-ext) is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+[`@rubensworks/oidc-client-ext`](https://www.npmjs.com/package/@rubensworks/oidc-client-ext) is part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Solid JavaScript Authentication - solid-client-authn
 
@@ -24,7 +24,7 @@ The libraries share a common API and include different modules for different dep
 - `solid-client-authn-browser` can be used to help build web apps in the browser.
 - `solid-client-authn-node` is **planned** to help build server-side and console-based apps.
 
-@inrupt/solid-client-authn libraries are part of a family open source JavaScript libraries designed to support developers building Solid applications.
+@rubensworks/solid-client-authn libraries are part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Inrupt Solid JavaScript Client Libraries
 
@@ -34,7 +34,7 @@ The libraries share a common API and include different modules for different dep
 
 ### Authentication - solid-client-authn
 
-[`@inrupt/solid-client-authn`](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
+[`@rubensworks/solid-client-authn`](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
 ### Vocabularies and interoperability - solid-common-vocab-rdf
 

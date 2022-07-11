@@ -24,10 +24,10 @@ import {
   InMemoryStorage,
   ISessionInfo,
   EVENTS,
-  // FIXME: use @inrupt/solid-client-authn-core/mocks instead:
+  // FIXME: use @rubensworks/solid-client-authn-core/mocks instead:
   mockStorage,
   mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import * as crossFetch from "cross-fetch";
 import {
   mockClientAuthentication,

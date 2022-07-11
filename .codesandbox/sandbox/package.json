@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@inrupt/solid-client": "^1.23.0",
-    "@inrupt/solid-client-authn-browser": "^1.11.9",
+    "@rubensworks/solid-client-authn-browser": "^1.11.9",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-scripts": "^5.0.1",

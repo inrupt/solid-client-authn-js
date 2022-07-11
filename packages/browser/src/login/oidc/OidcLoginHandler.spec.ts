@@ -24,8 +24,8 @@ import {
   IIssuerConfigFetcher,
   StorageUtility,
   StorageUtilityMock,
-} from "@inrupt/solid-client-authn-core";
-import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
+} from "@rubensworks/solid-client-authn-core";
+import { mockStorage } from "@rubensworks/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
 import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
 import {
   IssuerConfigFetcherFetchConfigResponse,
@@ -36,7 +36,7 @@ import OidcLoginHandler from "./OidcLoginHandler";
 import { mockDefaultClientRegistrar } from "./__mocks__/ClientRegistrar";
 import ClientRegistrar from "./ClientRegistrar";
 
-jest.mock("@inrupt/oidc-client-ext");
+jest.mock("@rubensworks/oidc-client-ext");
 
 describe("OidcLoginHandler", () => {
   const defaultMocks = {
@@ -102,7 +102,9 @@ describe("OidcLoginHandler", () => {
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
-    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
+    const mockedOidcModule = jest.requireMock(
+      "@rubensworks/oidc-client-ext"
+    ) as any;
     mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
       clientId: "some dynamically registered ID",
       clientSecret: "some dynamically registered secret",
@@ -131,7 +133,9 @@ describe("OidcLoginHandler", () => {
   });
 
   it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
-    const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
+    const mockedOidcModule = jest.requireMock(
+      "@rubensworks/oidc-client-ext"
+    ) as any;
     mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
       clientId: "some dynamically registered ID",
       clientSecret: "some dynamically registered secret",

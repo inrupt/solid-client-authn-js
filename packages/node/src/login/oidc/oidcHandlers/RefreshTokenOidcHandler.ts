@@ -44,7 +44,7 @@ import {
   HeadersAuthenticator,
   buildHeadersAuthenticator,
   buildAuthenticatedFetch,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { JWK, importJWK } from "jose";
 import { fetch as globalFetch } from "cross-fetch";
 import { EventEmitter } from "events";

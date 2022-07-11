@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@rubensworks/solid-client-authn-core";
 import * as crossFetch from "cross-fetch";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";

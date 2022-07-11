@@ -34,7 +34,7 @@ import {
   IStorageUtility,
   LoginResult,
   DEFAULT_SCOPES,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 

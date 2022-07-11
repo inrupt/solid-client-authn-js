@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import { IIssuerConfig } from "@rubensworks/solid-client-authn-core";
 
 import {
   getBearerToken,
@@ -43,9 +43,9 @@ import {
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
 
-jest.mock("@inrupt/solid-client-authn-core", () => {
+jest.mock("@rubensworks/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@rubensworks/solid-client-authn-core"
   ) as any;
   return {
     ...actualCoreModule,
@@ -178,7 +178,9 @@ describe("getTokens", () => {
   it("can request a key-bound token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    const core = jest.requireMock(
+      "@rubensworks/solid-client-authn-core"
+    ) as any;
     core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
@@ -274,7 +276,9 @@ describe("getTokens", () => {
   it("returns the generated key along with the tokens", async () => {
     mockFetch(JSON.stringify(mockDpopTokens()), 200);
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    const core = jest.requireMock(
+      "@rubensworks/solid-client-authn-core"
+    ) as any;
     core.generateDpopKeyPair = jest.fn(() =>
       Promise.resolve("some DPoP key pair")
     );
@@ -383,7 +387,9 @@ describe("getTokens", () => {
   it("derives a WebId from the ID token", async () => {
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    const core = jest.requireMock(
+      "@rubensworks/solid-client-authn-core"
+    ) as any;
     core.getWebidFromTokenPayload = jest.fn(() =>
       Promise.resolve("https://some.webid#me")
     );
@@ -402,7 +408,9 @@ describe("getDpopToken", () => {
   it("requests a key-bound token, and returns the appropriate key with the token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    const core = jest.requireMock(
+      "@rubensworks/solid-client-authn-core"
+    ) as any;
     core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
     core.generateDpopKeyPair = jest.fn(() => Promise.resolve("some DPoP keys"));
     const tokens = await getDpopToken(

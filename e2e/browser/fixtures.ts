@@ -4,7 +4,7 @@ export { expect } from "@playwright/test";
 import crypto from "crypto";
 
 import { getTestingEnvironment, TestingEnvironment } from "../setup/e2e-setup";
-import { Session } from "@inrupt/solid-client-authn-node";
+import { Session } from "@rubensworks/solid-client-authn-node";
 import {
   getPodUrlAll,
   deleteContainer,

@@ -27,7 +27,10 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
-import { IStorage, InMemoryStorage } from "@inrupt/solid-client-authn-core";
+import {
+  IStorage,
+  InMemoryStorage,
+} from "@rubensworks/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";

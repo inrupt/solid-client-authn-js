@@ -40,7 +40,7 @@ import {
   ConfigurationError,
   LoginResult,
   handleRegistration,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 
 function hasIssuer(
   options: ILoginOptions

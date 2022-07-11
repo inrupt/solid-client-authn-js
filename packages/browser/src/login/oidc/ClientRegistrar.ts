@@ -30,8 +30,8 @@ import {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
-} from "@inrupt/solid-client-authn-core";
-import { registerClient } from "@inrupt/oidc-client-ext";
+} from "@rubensworks/solid-client-authn-core";
+import { registerClient } from "@rubensworks/oidc-client-ext";
 
 /**
  * @hidden

@@ -36,4 +36,4 @@ export {
   NotImplementedError,
   ConfigurationError,
   InMemoryStorage,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";

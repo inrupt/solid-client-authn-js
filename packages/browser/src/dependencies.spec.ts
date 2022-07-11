@@ -20,7 +20,7 @@
  */
 
 import { describe, it, expect } from "@jest/globals";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@rubensworks/solid-client-authn-core";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import ClientAuthentication from "./ClientAuthentication";
 

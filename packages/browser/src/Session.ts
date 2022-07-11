@@ -28,7 +28,7 @@ import {
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";

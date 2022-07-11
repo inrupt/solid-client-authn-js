@@ -21,16 +21,16 @@
 
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import { EventEmitter } from "events";
-import * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
+import * as SolidClientAuthnCore from "@rubensworks/solid-client-authn-core";
 
 import {
   StorageUtility,
   USER_SESSION_PREFIX,
   EVENTS,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 
 // FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
+// this should import from @rubensworks/solid-client-authn-core/mocks
 import {
   mockStorageUtility,
   mockStorage,
@@ -47,9 +47,9 @@ import {
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 
-jest.mock("@inrupt/solid-client-authn-core", () => {
+jest.mock("@rubensworks/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@rubensworks/solid-client-authn-core"
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import * as defaultSession from "@inrupt/solid-client-authn-browser";
+import * as defaultSession from "@rubensworks/solid-client-authn-browser";
 
 const {
   login,

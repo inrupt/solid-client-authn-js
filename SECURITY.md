@@ -3,7 +3,7 @@
 This document gathers security-related policies and guidelines for the codebase
 available in this repository.
 
-Authentication is a sensitive domain, and as such we designed the `@inrupt/solid-client-authn-*`
+Authentication is a sensitive domain, and as such we designed the `@rubensworks/solid-client-authn-*`
 libraries with a particular attention to security. In particular, 
 we decided to apply the following rules:
 

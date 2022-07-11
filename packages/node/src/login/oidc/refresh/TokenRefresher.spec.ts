@@ -25,7 +25,7 @@ import {
   StorageUtilityMock,
   EVENTS,
   KeyPair,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { JWK, importJWK } from "jose";
 import { IdTokenClaims, TokenSet } from "openid-client";
 import { EventEmitter } from "events";

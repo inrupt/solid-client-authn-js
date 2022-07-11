@@ -1,4 +1,4 @@
-const { Session } = require("@inrupt/solid-client-authn-node");
+const { Session } = require("@rubensworks/solid-client-authn-node");
 
 const session = new Session();
 console.log(session.info.sessionId);

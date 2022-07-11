@@ -23,7 +23,7 @@ import {
   mockStorageUtility,
   StorageUtility,
   mockStorage,
-} from "@inrupt/solid-client-authn-core";
+} from "@rubensworks/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
@@ -32,7 +32,7 @@ import { SessionInfoManager } from "./SessionInfoManager";
 
 const mockClearFunction = jest.fn();
 
-jest.mock("@inrupt/oidc-client-ext", () => {
+jest.mock("@rubensworks/oidc-client-ext", () => {
   return {
     clearOidcPersistentStorage: async () => mockClearFunction(),
   };

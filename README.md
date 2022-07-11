@@ -11,7 +11,7 @@ The libraries share a common API and include different modules for different dep
 - `solid-client-authn-browser` can be used to build web apps in the browser.
 - `solid-client-authn-node` can be used to build server-side and console-based apps.
 
-@inrupt/solid-client-authn libraries are part of a suite open source JavaScript libraries designed to support developers building Solid applications.
+@rubensworks/solid-client-authn libraries are part of a suite open source JavaScript libraries designed to support developers building Solid applications.
 
 # Inrupt Solid JavaScript Client Libraries
 
@@ -21,7 +21,7 @@ The libraries share a common API and include different modules for different dep
 
 ## Authentication - solid-client-authn
 
-[@inrupt/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
+[@rubensworks/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
 ## Vocabularies and interoperability - solid-common-vocab-rdf
 
@@ -32,23 +32,23 @@ The libraries share a common API and include different modules for different dep
 For the latest stable version of solid-client-authn-browser:
 
 ```bash
-npm install @inrupt/solid-client-authn-browser
+npm install @rubensworks/solid-client-authn-browser
 ```
 
 For the latest stable version of solid-client-authn-node:
 
 ```bash
-npm install @inrupt/solid-client-authn-node
+npm install @rubensworks/solid-client-authn-node
 ```
 
 For the latest stable version of all Inrupt Solid JavaScript libraries:
 
 ```bash
 # For browser-based projects
-npm install @inrupt/solid-client @inrupt/solid-client-authn-browser @inrupt/vocab-common-rdf
+npm install @inrupt/solid-client @rubensworks/solid-client-authn-browser @inrupt/vocab-common-rdf
 
 # For Node.js-based projects
-npm install @inrupt/solid-client @inrupt/solid-client-authn-node @inrupt/vocab-common-rdf
+npm install @inrupt/solid-client @rubensworks/solid-client-authn-node @inrupt/vocab-common-rdf
 ```
 
 # Issues & Help
@@ -107,4 +107,4 @@ See [the dedicated documentation](/packages/node/example/bootstrappedApp/README.
 
 ## Using with jest
 
-Due to [a behavior from jsdom](https://github.com/jsdom/jsdom/issues/2524), `@inrupt/solid-client-authn-browser` needs some adjustments if you want to run it with `jest`. There are multiple options, listed in [a dedicated issue](https://github.com/inrupt/solid-client-authn-js/issues/1676). Thanks to [Angelo V.](https://github.com/angelo-v) for proposing a mitigation.
+Due to [a behavior from jsdom](https://github.com/jsdom/jsdom/issues/2524), `@rubensworks/solid-client-authn-browser` needs some adjustments if you want to run it with `jest`. There are multiple options, listed in [a dedicated issue](https://github.com/inrupt/solid-client-authn-js/issues/1676). Thanks to [Angelo V.](https://github.com/angelo-v) for proposing a mitigation.

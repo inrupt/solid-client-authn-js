@@ -13,7 +13,7 @@ The main documentation is at the [root of the repository](https://github.com/inr
 
 # Other Inrupt Solid JavaScript Libraries
 
-[`@inrupt/solid-client-authn-node`](https://www.npmjs.com/package/@inrupt/solid-client-authn-node)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+[`@rubensworks/solid-client-authn-node`](https://www.npmjs.com/package/@rubensworks/solid-client-authn-node)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Inrupt Solid JavaScript Client Libraries
 
@@ -23,7 +23,7 @@ The main documentation is at the [root of the repository](https://github.com/inr
 
 ### Authentication - solid-client-authn
 
-[@inrupt/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
+[@rubensworks/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
 ### Vocabularies and interoperability - solid-common-vocab-rdf
 

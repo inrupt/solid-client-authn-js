@@ -19,6 +19,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@inrupt/solid-client-authn-core";
+import { SOLID_CLIENT_AUTHN_KEY_PREFIX } from "@rubensworks/solid-client-authn-core";
 
 export const KEY_REGISTERED_SESSIONS = `${SOLID_CLIENT_AUTHN_KEY_PREFIX}registeredSessions`;
