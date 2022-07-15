@@ -54,7 +54,7 @@ export class WorkerToWindowHandler {
     }
   > = {};
 
-  public constructor(private workerSelf: Window) { }
+  public constructor(private workerSelf: Window) {}
 
   /**
    * Handle messages from the window to the worker.

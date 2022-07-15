@@ -27,7 +27,7 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
- import {
+import {
   IStorage,
   InMemoryStorage,
   ITokenRefresher,

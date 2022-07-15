@@ -50,7 +50,7 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 /**
  * @hidden
  */
- export default class ClientCredentialsOidcHandler implements IOidcHandler {
+export default class ClientCredentialsOidcHandler implements IOidcHandler {
   constructor(
     private tokenRefresher: ITokenRefresher,
     private _storageUtility: IStorageUtility

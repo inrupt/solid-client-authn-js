@@ -27,7 +27,7 @@
 /**
  * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
- import {
+import {
   IIncomingRedirectHandler,
   AggregateHandler,
   IncomingRedirectInput,

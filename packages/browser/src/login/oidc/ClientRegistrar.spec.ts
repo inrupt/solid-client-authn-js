@@ -31,7 +31,7 @@ import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfig
 /**
  * Test for ClientRegistrar
  */
- describe("ClientRegistrar", () => {
+describe("ClientRegistrar", () => {
   const defaultMocks = {
     storage: StorageUtilityMock,
   };

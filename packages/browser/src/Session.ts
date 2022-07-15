@@ -337,7 +337,7 @@ export class Session extends EventEmitter {
         // until it happens precisely. That's why the current Promise simply does not
         // resolve.
         if (attemptedSilentAuthentication) {
-          return new Promise(() => { });
+          return new Promise(() => {});
         }
       }
     }

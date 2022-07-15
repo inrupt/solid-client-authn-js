@@ -27,7 +27,7 @@
 /**
  * Handler for the Refresh Token Flow
  */
- import {
+import {
   IOidcHandler,
   IOidcOptions,
   IStorageUtility,

@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
- import {
+import {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,

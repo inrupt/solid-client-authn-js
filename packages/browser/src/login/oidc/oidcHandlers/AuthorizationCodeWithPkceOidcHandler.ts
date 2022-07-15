@@ -27,7 +27,7 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
- import {
+import {
   IOidcHandler,
   IOidcOptions,
   IRedirector,

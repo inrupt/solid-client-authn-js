@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
- import {
+import {
   ILoginHandler,
   ILogoutHandler,
   IIncomingRedirectHandler,

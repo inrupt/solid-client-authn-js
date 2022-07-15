@@ -4,7 +4,8 @@
 **If you don't need Web worker support, it is recommended to use Inrupt's original [inrupt/solid-client-authn-js](https://github.com/inrupt/solid-client-authn-js) packages.**
 _The motivation for this fork can be found here: https://github.com/rubensworks/solid-client-authn-js/pull/1802_
 
-This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js) (forked in [`@inrupt/oidc-clienr`](https://github.com/inrupt/oidc-client-js)), and adds the following features to it: 
+This library is built on top of [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js) (forked in [`@inrupt/oidc-clienr`](https://github.com/inrupt/oidc-client-js)), and adds the following features to it:
+
 - Dynamic client registration
   [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html) is part of the [OpenID](https://openid.net) specification and it allows OAuth client applications to dynamically register with an OAuth server.
   To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/openid-connect/openid-connect-understanding-dcr/)
@@ -16,6 +17,7 @@ This [proposed standard](https://tools.ietf.org/html/draft-fett-oauth-dpop-04) i
 To learn more about how this works, you can have a look at [this page](https://curity.io/resources/architect/oauth/dpop-overview/)
 
 # Other Inrupt Solid JavaScript Libraries
+
 [`@rubensworks/oidc-client-ext`](https://www.npmjs.com/package/@rubensworks/oidc-client-ext) is part of a family open source JavaScript libraries designed to support developers building Solid applications.
 
 ## Solid JavaScript Authentication - solid-client-authn

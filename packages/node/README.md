@@ -12,12 +12,14 @@ The main documentation is at the [root of the repository](https://github.com/rub
 `solid-client-authn-node` is based on [`jose`](https://github.com/panva/jose).
 
 # Other Inrupt Solid JavaScript Libraries
+
 <<<<<<< HEAD
 
-[`@inrupt/solid-client-authn-node`](https://www.npmjs.com/package/@inrupt/solid-client-authn-node)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
-=======
-[`@rubensworks/solid-client-authn-node`](https://www.npmjs.com/package/@rubensworks/solid-client-authn-node )is part of a family open source JavaScript libraries designed to support developers building Solid applications.
->>>>>>> 6df43277 (Prepare repo for fork publication)
+# [`@inrupt/solid-client-authn-node`](https://www.npmjs.com/package/@inrupt/solid-client-authn-node)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+
+[`@rubensworks/solid-client-authn-node`](https://www.npmjs.com/package/@rubensworks/solid-client-authn-node)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
+
+> > > > > > > 6df43277 (Prepare repo for fork publication)
 
 ## Inrupt Solid JavaScript Client Libraries
 

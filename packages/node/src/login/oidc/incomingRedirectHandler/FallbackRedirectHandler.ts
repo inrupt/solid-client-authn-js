@@ -40,7 +40,7 @@ import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManag
  * for the query params themselves, and can always try to use them as a redirect IRI.
  * @hidden
  */
- export class FallbackRedirectHandler implements IIncomingRedirectHandler {
+export class FallbackRedirectHandler implements IIncomingRedirectHandler {
   async canHandle(redirectUrl: string): Promise<boolean> {
     try {
       // The next URL object is built for validating it.

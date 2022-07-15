@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
- import {
+import {
   IRedirector,
   IRedirectorOptions,
 } from "@rubensworks/solid-client-authn-core";
