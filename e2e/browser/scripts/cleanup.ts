@@ -1,5 +1,5 @@
 import { getTestingEnvironment } from "../../setup/e2e-setup";
-import { Session } from "@inrupt/solid-client-authn-node";
+import { Session } from "@rubensworks/solid-client-authn-node";
 
 import { config } from "dotenv-flow";
 import {

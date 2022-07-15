@@ -37,7 +37,6 @@ import {
    const session = getDefaultSession();
    const worker = new Worker(...);
    const windowToWorkerHandler = new WindowToWorkerHandler(this, worker, session);
-
    worker.onmessage = async (message) => {
       if (windowToWorkerHandler.onmessage(message)) {
         // This means that the message was taken care of by the handler

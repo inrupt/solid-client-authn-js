@@ -36,10 +36,10 @@ export default class Redirector implements IRedirector {
   redirect(redirectUrl: string, options?: IRedirectorOptions): void {
     if (options && options.handleRedirect) {
       options.handleRedirect(redirectUrl);
-    } else if (options && options.redirectByReplacingState) {
-      window.history.replaceState({}, "", redirectUrl);
     } else {
-      window.location.href = redirectUrl;
+      throw new Error(
+        "A redirection handler must be provided in the Node environment."
+      );
     }
   }
 }

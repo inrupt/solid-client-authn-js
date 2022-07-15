@@ -88,7 +88,7 @@ describe("WindowToWorkerHandler", () => {
       ).toBe(true);
 
       // Wait a tick for the job to resolve
-      await new Promise(setImmediate);
+      await (async () => {})();
 
       expect(session.authenticateHeaders).toHaveBeenCalledWith(
         "URL",
@@ -126,7 +126,8 @@ describe("WindowToWorkerHandler", () => {
       ).toBe(true);
 
       // Wait a tick for the job to resolve
-      await new Promise(setImmediate);
+      await (async () => {})();
+      await (async () => {})();
 
       expect(session.authenticateHeaders).toHaveBeenCalledWith(
         "URL",

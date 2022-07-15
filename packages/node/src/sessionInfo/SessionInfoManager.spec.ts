@@ -21,9 +21,13 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@rubensworks/solid-client-authn-core";
+import * as crossFetch from "cross-fetch";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
-import { SessionInfoManager } from "./SessionInfoManager";
+import {
+  SessionInfoManager,
+  getUnauthenticatedSession,
+} from "./SessionInfoManager";
 import { KEY_REGISTERED_SESSIONS } from "../constant";
 
 describe("SessionInfoManager", () => {
@@ -313,5 +317,13 @@ describe("SessionInfoManager", () => {
         storage.getForUser("a session", "some user info")
       ).resolves.toBeUndefined();
     });
+  });
+});
+
+describe("getUnauthenticatedSession", () => {
+  it("should return input headers for headersAuthenticator", async () => {
+    const { headersAuthenticator } = getUnauthenticatedSession();
+    const h = new crossFetch.Headers({ a: "a" });
+    expect(await headersAuthenticator("a", "b", h)).toEqual(h);
   });
 });

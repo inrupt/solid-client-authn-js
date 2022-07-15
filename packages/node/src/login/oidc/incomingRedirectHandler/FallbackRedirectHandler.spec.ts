@@ -20,8 +20,6 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-// eslint-disable-next-line no-shadow
-import { Headers } from "cross-fetch";
 import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
 
 jest.mock("cross-fetch");
@@ -59,9 +57,6 @@ describe("FallbackRedirectHandler", () => {
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
-      expect(
-        await mySession.headersAuthenticator("A", "GET", new Headers())
-      ).toEqual(new Headers());
     });
   });
 });

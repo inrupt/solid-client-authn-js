@@ -209,6 +209,24 @@ describe("WorkerToWindowHandler", () => {
         expect(global.fetch).not.toHaveBeenCalled();
       });
 
+      it("Should handle URL objects in fetch", async () => {
+        authFetch(new URL("http://example.org"), {
+          headers: new Headers({
+            A: "B",
+          }),
+        });
+
+        // Expect message from worker to window
+        expect(workerSelf.postMessage).toHaveBeenCalledWith({
+          [WorkerToWindowHandler.MESSAGE_KEY_POST]: {
+            messageId: 0,
+            resource: "http://example.org/",
+            method: "get",
+            headersUnauthenticatedRaw: [["a", "B"]],
+          },
+        });
+      });
+
       it("should increment message id for every request", async () => {
         authFetch("URL1");
         authFetch("URL2");

@@ -24,7 +24,6 @@ Example usage (Window):
    const session = getDefaultSession();
    const worker = new Worker(...);
    const windowToWorkerHandler = new WindowToWorkerHandler(this, worker, session);
-
    worker.onmessage = async (message) => {
       if (windowToWorkerHandler.onmessage(message)) {
         // This means that the message was taken care of by the handler
@@ -44,8 +43,6 @@ Example usage (Worker):
     } else {
       // Optionally, take care of any other custom messages that your worker may receive.
     }
-
-
    // Use the authenticated fetch function
   const authFetch = workerToWindowHandler.buildAuthenticatedFetch();
   await authFetch('https://example.org/');
@@ -65,16 +62,6 @@ the `events` npm package as well.
 
 ## Underlying libraries
 
-<<<<<<< HEAD
-`solid-client-authn-browser` is based on [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), forked in
-[`@inrupt/oidc-client`](https://github.com/inrupt/oidc-client-js) after the original library stopped being supported.
-However, the latter lacks some features that are necessary to provide the developer experience we specifically want for the Solid ecosystem, so we developed [`oidc-client-ext`](https://www.npmjs.com/package/@inrupt/oidc-client-ext) to add these features.
-
-# Other Inrupt Solid JavaScript Libraries
-
-[`@inrupt/solid-client-authn-browser`](https://www.npmjs.com/package/@inrupt/solid-client-authn-browser)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
-
-=======
 `solid-client-authn-browser` is based on [`oidc-client-js`](https://github.com/IdentityModel/oidc-client-js), forked in
 [`@inrupt/oidc-client`](https://github.com/inrupt/oidc-client-js) after the original library stopped being supported.
 However, the latter lacks some features that are necessary to provide the developer experience we specifically want for the Solid ecosystem, so we developed [`oidc-client-ext`](https://www.npmjs.com/package/@rubensworks/oidc-client-ext) to add these features.
@@ -82,8 +69,6 @@ However, the latter lacks some features that are necessary to provide the develo
 # Other Inrupt Solid JavaScript Libraries
 
 [`@rubensworks/solid-client-authn-browser`](https://www.npmjs.com/package/@rubensworks/solid-client-authn-browser)is part of a family open source JavaScript libraries designed to support developers building Solid applications.
-
-> > > > > > > 6df43277 (Prepare repo for fork publication)
 
 ## Inrupt Solid JavaScript Client Libraries
 
