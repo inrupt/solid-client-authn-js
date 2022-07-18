@@ -20,7 +20,7 @@ jobs:
         # so we only need to test in one.
         node-version: ["16"]
         # NSS does not support static client registration, which we rely on for testing.
-        environment-name: ["ESS Production", "ESS Dev-Next"]
+        environment-name: ["ESS Dev-Next"]
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
