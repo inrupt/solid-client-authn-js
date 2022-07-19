@@ -20,6 +20,8 @@ jobs:
         # so we only need to test in one.
         node-version: ["16"]
         # NSS does not support static client registration, which we rely on for testing.
+        # Note: "ESS Production" has been disabled due to the migration
+        # "ESS Dev-Next" is a 2.0-like environment.
         environment-name: ["ESS Dev-Next"]
     steps:
       - uses: actions/checkout@v3
