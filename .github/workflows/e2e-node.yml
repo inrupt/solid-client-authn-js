@@ -19,7 +19,9 @@ jobs:
         os: [ubuntu-latest]
         node-version: ["16"]
         # NSS does not support static client registration, which we rely on for testing.
-        environment-name: ["ESS Production", "ESS Dev-Next"]
+        # Note: "ESS Production" has been disabled due to the migration
+        # "ESS Dev-Next" is a 2.0-like environment.
+        environment-name: ["ESS Dev-Next"]
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
