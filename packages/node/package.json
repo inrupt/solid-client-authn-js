@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-node",
-  "version": "1.12.1",
+  "version": "1.12.2",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -26,7 +26,7 @@
     "@types/uuid": "^8.3.0"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-core": "^1.12.1",
+    "@inrupt/solid-client-authn-core": "^1.12.2",
     "cross-fetch": "^3.1.5",
     "jose": "^4.3.7",
     "openid-client": "^5.1.0",
