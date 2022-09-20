@@ -67,7 +67,8 @@
   "overrides": {
     "@inrupt/eslint-config-base@0.4.0": {
       "eslint-plugin-jest": "^26.1.5"
-    }
+    },
+    "parse-url": "^8.1.0"
   },
   "engines": {
     "node": "^14.0.0 || ^16.0.0"
