@@ -28,7 +28,7 @@ jobs:
       # coverage information produced by the tests already run.
       - name: SonarCloud Scan - Browser
         if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
-        uses: SonarSource/sonarcloud-github-action@v1.6
+        uses: SonarSource/sonarcloud-github-action@v1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -37,7 +37,7 @@ jobs:
 
       - name: SonarCloud Scan - Core
         if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
-        uses: SonarSource/sonarcloud-github-action@v1.6
+        uses: SonarSource/sonarcloud-github-action@v1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -46,7 +46,7 @@ jobs:
 
       - name: SonarCloud Scan - Node
         if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
-        uses: SonarSource/sonarcloud-github-action@v1.6
+        uses: SonarSource/sonarcloud-github-action@v1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -55,7 +55,7 @@ jobs:
 
       - name: SonarCloud Scan - OIDC
         if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
-        uses: SonarSource/sonarcloud-github-action@v1.6
+        uses: SonarSource/sonarcloud-github-action@v1.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
