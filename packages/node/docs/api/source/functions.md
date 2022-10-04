@@ -1,4 +1,3 @@
 # Functions
 
-## Table of contents
 

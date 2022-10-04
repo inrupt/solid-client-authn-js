@@ -1,3 +1,2 @@
 # Functions
 
-## Table of contents
