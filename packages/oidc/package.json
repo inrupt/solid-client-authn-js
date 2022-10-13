@@ -13,7 +13,7 @@
     "clean": "npm run clean-module && npm run clean-browser && npm run clean-examples && rimraf ./coverage",
     "clean-module": "rimraf ./dist",
     "clean-browser": "rimraf ./browserDist",
-    "build": "rollup --config rollup.config.js",
+    "build": "rollup --config rollup.config.mjs",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write",
     "lint:check": "npm run lint:eslint && npm run lint:prettier -- --check",
     "lint:eslint": "eslint --config .eslintrc.js \"src/\"",
