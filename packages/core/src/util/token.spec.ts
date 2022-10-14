@@ -216,7 +216,7 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.clientId"
       )
     ).rejects.toThrow(
-      "The token has no 'webid' claim, and its 'sub' claim of [some user ID] is invalid as a URL - error [TypeError: Invalid URL: some user ID]."
+      "The token has no 'webid' claim, and its 'sub' claim of [some user ID] is invalid as a URL - error"
     );
   });
 

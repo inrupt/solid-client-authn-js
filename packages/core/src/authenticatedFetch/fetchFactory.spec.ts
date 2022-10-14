@@ -25,7 +25,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
-import { Response } from "cross-fetch";
+import { Response, Headers } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
 import {
   buildAuthenticatedFetch,
@@ -115,7 +115,9 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: {
-          refresh: jest.fn(),
+          refresh: jest.fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
+          ReturnType<ITokenRefresher["refresh"]>
+        >(),
         },
       },
     });
@@ -374,10 +376,9 @@ describe("buildAuthenticatedFetch", () => {
     // This would not be necessary with mock timers.
     const mockedTokenRefresher: ITokenRefresher = {
       refresh: jest
-        .fn<
-          ReturnType<ITokenRefresher["refresh"]>,
-          Parameters<ITokenRefresher["refresh"]>
-        >()
+        .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
+        ReturnType<ITokenRefresher["refresh"]>
+      >()
         .mockResolvedValueOnce({
           ...mockDefaultTokenSet(),
           refreshToken: "some rotated refresh token",
@@ -535,9 +536,8 @@ describe("buildAuthenticatedFetch", () => {
     // This would not be necessary with mock timers.
     const mockedTokenRefresher: ITokenRefresher = {
       refresh: jest
-        .fn<
-          ReturnType<ITokenRefresher["refresh"]>,
-          Parameters<ITokenRefresher["refresh"]>
+        .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
+          ReturnType<ITokenRefresher["refresh"]>
         >()
         .mockResolvedValueOnce({
           ...mockDefaultTokenSet(),
@@ -566,7 +566,9 @@ describe("buildAuthenticatedFetch", () => {
     ) as jest.Mocked<typeof CrossFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
-      .fn()
+      .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
+      ReturnType<ITokenRefresher["refresh"]>
+    >()
       .mockRejectedValueOnce(
         new OidcProviderError(
           "Some error message",
@@ -608,7 +610,9 @@ describe("buildAuthenticatedFetch", () => {
     ) as jest.Mocked<typeof CrossFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
-      .fn()
+      .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
+      ReturnType<ITokenRefresher["refresh"]>
+    >()
       .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
@@ -638,7 +642,9 @@ describe("buildAuthenticatedFetch", () => {
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedFreshener.refresh = jest
-      .fn()
+      .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
+      ReturnType<ITokenRefresher["refresh"]>
+    >()
       .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");

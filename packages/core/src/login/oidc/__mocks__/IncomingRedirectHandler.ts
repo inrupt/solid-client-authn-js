@@ -27,17 +27,17 @@ import IIncomingRedirectHandler, {
   IncomingRedirectResult,
 } from "../IIncomingRedirectHandler";
 
-const canHandle = jest.fn<Promise<boolean>, IncomingRedirectInput>(
+const canHandle = jest.fn(
   (_url: string) => Promise.resolve(true)
 );
 
-const handle = jest.fn<Promise<IncomingRedirectResult>, IncomingRedirectInput>(
+const handle = jest.fn(
   (_url: string, _emitter: EventEmitter | undefined) =>
     Promise.resolve({
       sessionId: "global",
       isLoggedIn: true,
       webId: "https://pod.com/profile/card#me",
-      fetch: jest.fn(),
+      fetch: jest.fn(globalThis.fetch),
     })
 );
 

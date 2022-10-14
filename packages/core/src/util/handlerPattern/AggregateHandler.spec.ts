@@ -54,7 +54,7 @@ describe("AggregateHandler", () => {
           });
         }
       );
-      const mock: () => MockHandler = jest.fn<MockHandler, unknown[]>(() => ({
+      const mock: () => MockHandler = jest.fn(() => ({
         canHandle: canHandleFunction,
         handle: handleFunction,
       }));
