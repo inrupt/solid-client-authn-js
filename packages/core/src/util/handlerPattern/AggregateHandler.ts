@@ -28,7 +28,6 @@
  * An abstract class that will select the first handler that can handle certain parameters
  */
 import IHandleable from "./IHandleable";
-import InruptError from "../../errors/InruptError";
 
 /**
  * @hidden
@@ -87,7 +86,7 @@ export default class AggregateHandler<P extends Array<unknown>, R>
       return handler.handle(...params);
     }
 
-    throw new InruptError(
+    throw new Error(
       `[${this.constructor.name}] cannot find a suitable handler for: ${params
         .map((param) => {
           try {

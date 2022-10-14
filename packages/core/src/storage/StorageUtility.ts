@@ -30,7 +30,6 @@
 import { exportJWK } from "jose";
 import IStorage from "./IStorage";
 import IStorageUtility from "./IStorageUtility";
-import InruptError from "../errors/InruptError";
 import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 import { KeyPair } from "../authenticatedFetch/dpopUtils";
@@ -164,7 +163,7 @@ export default class StorageUtility implements IStorageUtility {
     try {
       return JSON.parse(stored);
     } catch (err) {
-      throw new InruptError(
+      throw new Error(
         `Data for user [${userId}] in [${
           secure ? "secure" : "unsecure"
         }] storage is corrupted - expected valid JSON, but got: ${stored}`
@@ -192,7 +191,7 @@ export default class StorageUtility implements IStorageUtility {
       : this.insecureStorage
     ).get(key);
     if (value === undefined && options?.errorIfNull) {
-      throw new InruptError(`[${key}] is not stored`);
+      throw new Error(`[${key}] is not stored`);
     }
     return value;
   }
@@ -226,7 +225,7 @@ export default class StorageUtility implements IStorageUtility {
     }
     value = userData[key];
     if (value === undefined && options?.errorIfNull) {
-      throw new InruptError(
+      throw new Error(
         `Field [${key}] for user [${userId}] is not stored`
       );
     }
