@@ -2,9 +2,8 @@ module.exports = {
   roots: ["<rootDir>"],
   clearMocks: true,
   testMatch: ["**/(__tests__|src)/**/?(*.)+(spec|test).+(ts|tsx|js)"],
-  transform: {
-    "^.+\\.(ts|tsx)?$": "ts-jest",
-  },
+  preset: "ts-jest/presets/default-esm",
+  extensionsToTreatAsEsm: ['.ts'],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
   testPathIgnorePatterns: [
     "/node_modules/",

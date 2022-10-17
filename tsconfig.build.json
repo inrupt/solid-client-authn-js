@@ -1,5 +1,5 @@
 {
-  "include": ["packages/*/src/**/*.ts", "e2e/*/**/*.ts"],
+  "include": ["packages/*/src/**/*.ts", "e2e/*/**/*.ts", "./jest.setup.ts"],
   "compilerOptions": {
     "module": "commonjs",
     "strict": true,
