@@ -1,5 +1,5 @@
 module.exports = {
   ...require("../../jest.config"),
   // Allows running tests from packages/core/
-  setupFilesAfterEnv: ['<rootDir>/../../jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/../../jest.setup.js'],
 };

@@ -32,6 +32,6 @@ module.exports = {
     "!**/*.spec.ts",
     "!**/examples/**",
   ],
-  testEnvironment: "<rootDir>/tests/environment/customEnvironment.js",
   injectGlobals: false,
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };

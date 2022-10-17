@@ -1,5 +1,6 @@
 module.exports = {
   ...require("../../jest.config"),
+  testEnvironment: "jsdom",
   // Allows running tests from packages/oidc/
-  testEnvironment: "<rootDir>/../../tests/environment/customEnvironment.js",
+  setupFilesAfterEnv: ['<rootDir>/../../jest.setup.js'],
 };
