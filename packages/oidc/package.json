@@ -33,7 +33,7 @@
     "@inrupt/solid-client-authn-core": "^1.12.2",
     "@types/jest": "^27.0.3",
     "@types/uuid": "^8.3.0",
-    "jose": "^4.3.7",
+    "jose": "^4.10.0",
     "uuid": "^9.0.0"
   },
   "publishConfig": {
