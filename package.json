@@ -42,7 +42,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-header": "^3.1.1",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jest": "^26.0.0",
+    "eslint-plugin-jest": "^27.1.2",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.5.1",
     "jest-mock-console": "^1.2.3",
