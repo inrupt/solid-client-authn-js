@@ -3,16 +3,17 @@
   "version": "1.12.2",
   "license": "MIT",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "require": "./dist/index.js",
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
     },
     "./mocks": {
       "require": "./dist/mocks.js",
-      "import": "./dist/mocks.js",
+      "import": "./dist/mocks.mjs",
       "types": "./dist/mocks.d.ts"
     }
   },
@@ -30,7 +31,7 @@
     "prepublishOnly": "npm run build",
     "clean": "npm run clean-module",
     "clean-module": "rimraf ./dist",
-    "build": "tsc -p tsconfig.json",
+    "build": "rollup --config rollup.config.mjs",
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write",
     "lint:check": "npm run lint:eslint && npm run lint:prettier -- --check",
     "lint:eslint": "eslint --config .eslintrc.js \"src/\"",
