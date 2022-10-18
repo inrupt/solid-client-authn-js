@@ -1,4 +1,6 @@
-module.exports = {
+import { JestConfigWithTsJest } from "ts-jest";
+
+export default {
   roots: ["<rootDir>"],
   clearMocks: true,
   testMatch: ["**/(__tests__|src)/**/?(*.)+(spec|test).+(ts|tsx|js)"],
@@ -32,5 +34,5 @@ module.exports = {
     "!**/examples/**",
   ],
   injectGlobals: false,
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-};
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+} as JestConfigWithTsJest ;

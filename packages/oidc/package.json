@@ -26,7 +26,8 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "cross-fetch": "^3.1.5"
+    "cross-fetch": "^3.1.5",
+    "ts-node": "^10.9.1"
   },
   "dependencies": {
     "@inrupt/oidc-client": "^1.11.6",
