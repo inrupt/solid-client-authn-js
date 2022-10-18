@@ -47,7 +47,7 @@
     "@types/uuid": "^8.3.0",
     "cross-fetch": "^3.1.5",
     "events": "^3.3.0",
-    "jose": "^4.3.7",
+    "jose": "^4.10.0",
     "lodash.clonedeep": "^4.5.0",
     "uuid": "^9.0.0"
   },
