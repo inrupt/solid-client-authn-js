@@ -42,8 +42,8 @@ import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import { mockedRedirector, mockRedirector } from "../__mocks__/Redirector";
 
 jest.mock("@inrupt/oidc-client-ext", () => {
-  return { 
-    OidcClient: jest.fn()
+  return {
+    OidcClient: jest.fn(),
   };
 });
 
@@ -56,11 +56,13 @@ const mockOidcModule = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const oidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
   oidcModule.OidcClient.mockReturnValue({
-    createSigninRequest: jest.fn<() => Promise<{url: string, state: string}>>().mockResolvedValue({
-      url,
-      state,
-    }),
-  })
+    createSigninRequest: jest
+      .fn<() => Promise<{ url: string; state: string }>>()
+      .mockResolvedValue({
+        url,
+        state,
+      }),
+  });
   return oidcModule;
 };
 

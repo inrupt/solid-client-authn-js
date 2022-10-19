@@ -19,10 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {
-  IRedirector,
-  IRedirectorOptions,
-} from "@inrupt/solid-client-authn-core";
+import { IRedirector } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
 
 export const mockedRedirector = jest.fn<IRedirector["redirect"]>();

@@ -97,9 +97,7 @@ describe("TokenRequester", () => {
     const mockedFetch = (
       jest.requireMock("cross-fetch") as jest.Mocked<typeof fetch>
     ).mockResolvedValueOnce(
-      new NodeResponse(
-        values.responseBody ?? defaultReturnValues.responseBody
-      )
+      new NodeResponse(values.responseBody ?? defaultReturnValues.responseBody)
     );
     return mockedFetch;
   }

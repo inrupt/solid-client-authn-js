@@ -246,8 +246,7 @@ describe("Session", () => {
     it("wraps up ClientAuthentication fetch if logged in", async () => {
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.login = jest
-        .fn<typeof clientAuthentication.login
-        >()
+        .fn<typeof clientAuthentication.login>()
         .mockResolvedValueOnce({
           isLoggedIn: true,
           sessionId: "mySession",
@@ -334,7 +333,9 @@ describe("Session", () => {
     });
 
     function sleep(ms: number): Promise<void> {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+      });
     }
 
     it("prevents from hitting the token endpoint twice with the same auth code", async () => {

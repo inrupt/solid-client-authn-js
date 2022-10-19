@@ -20,7 +20,6 @@
  */
 
 import {
-
   IClient,
   IClientRegistrar,
   IClientRegistrarOptions,

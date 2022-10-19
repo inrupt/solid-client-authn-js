@@ -36,7 +36,7 @@ import {
   mockStorage,
   mockIncomingRedirectHandler,
   mockHandleIncomingRedirect,
-} from "../../core/src/mocks";
+} from "@inrupt/solid-client-authn-core/src/mocks";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";

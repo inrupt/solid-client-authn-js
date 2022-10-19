@@ -48,7 +48,6 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 
-
 // jest.unstable_mockModule("@inrupt/solid-client-authn-core", async () => {
 //   const actualCoreModule = await import("@inrupt/solid-client-authn-core");
 //   return {

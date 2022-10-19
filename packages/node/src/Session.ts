@@ -116,7 +116,7 @@ export class Session extends EventEmitter {
    */
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
-    sessionId?: string
+    sessionId: string | undefined = undefined
   ) {
     super();
     if (sessionOptions.clientAuthentication) {

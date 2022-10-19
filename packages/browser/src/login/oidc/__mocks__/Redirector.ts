@@ -25,9 +25,8 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
 
-export const mockedRedirector = jest.fn<
-  (redirectUrl: string, redirectOptions: IRedirectorOptions) => void
->();
+export const mockedRedirector =
+  jest.fn<(redirectUrl: string, redirectOptions: IRedirectorOptions) => void>();
 export const mockRedirector = (): IRedirector => {
   return {
     redirect: mockedRedirector,

@@ -21,4 +21,4 @@
 
 import * as solidClientAuthentication from "./index";
 
-module.exports = solidClientAuthentication;
+export default solidClientAuthentication;

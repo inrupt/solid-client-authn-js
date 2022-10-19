@@ -71,7 +71,10 @@ describe("clearOidcPersistentStorage", () => {
   it("clears oidc-client storage", async () => {
     // This is a bad test, but we can only test for internal behaviour of oidc-client,
     // or test that the 'clearStaleState' function is called, which is done here.
-    const clearSpy = jest.spyOn(new OidcClient.OidcClient({}), "clearStaleState");
+    const clearSpy = jest.spyOn(
+      new OidcClient.OidcClient({}),
+      "clearStaleState"
+    );
     await clearOidcPersistentStorage();
     expect(clearSpy).toHaveBeenCalled();
   });

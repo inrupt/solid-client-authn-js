@@ -23,13 +23,13 @@ import { jest, it, describe, expect } from "@jest/globals";
 import { EventEmitter } from "events";
 
 import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
-import { Session } from "./Session";
-// FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
-} from "../../core/src/mocks";
+} from "@inrupt/solid-client-authn-core/src/mocks";
+import { Session } from "./Session";
+// FIXME: For some reason jest crashes on trying to handle a subpath import
+// this should import from @inrupt/solid-client-authn-core/mocks
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";

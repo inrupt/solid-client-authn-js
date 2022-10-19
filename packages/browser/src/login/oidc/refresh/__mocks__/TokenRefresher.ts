@@ -32,9 +32,7 @@ export const mockTokenRefresher = (
   tokenSet: TokenEndpointResponse
 ): ITokenRefresher => {
   return {
-    refresh: jest
-      .fn<ITokenRefresher["refresh"]>()
-      .mockResolvedValue(tokenSet),
+    refresh: jest.fn<ITokenRefresher["refresh"]>().mockResolvedValue(tokenSet),
   };
 };
 

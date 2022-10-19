@@ -145,12 +145,12 @@ const setupOidcClientMock = (tokenSet: TokenSet) => {
     // @ts-ignore
     this.grant = jest.fn().mockResolvedValueOnce(tokenSet);
   }
-  
+
   const mockedIssuer = jest.mocked({
     metadata: mockDefaultIssuerConfig(),
     Client: clientConstructor,
     // Cast to unknown because only partially mocked
-  } as unknown as OpenidClient.Issuer<OpenidClient.Client>) ;
+  } as unknown as OpenidClient.Issuer<OpenidClient.Client>);
   Issuer.mockReturnValueOnce(mockedIssuer);
 };
 

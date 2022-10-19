@@ -102,9 +102,7 @@ describe("registerClient", () => {
 
   it("does not send a challenge method when performing DCR", async () => {
     const options = getMockOptions();
-    const myFetch = getSuccessfulFetch() as jest.Mock<
-      typeof fetch
-    >;
+    const myFetch = getSuccessfulFetch() as jest.Mock<typeof fetch>;
     global.fetch = myFetch;
 
     await registerClient(options, getMockIssuer());

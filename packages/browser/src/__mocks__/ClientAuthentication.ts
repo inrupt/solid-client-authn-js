@@ -32,7 +32,7 @@ import {
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
-} from "../../../core/src/mocks";
+} from "@inrupt/solid-client-authn-core/src/mocks";
 
 import ClientAuthentication from "../ClientAuthentication";
 import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";

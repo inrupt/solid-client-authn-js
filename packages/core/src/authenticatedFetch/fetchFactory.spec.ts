@@ -115,9 +115,12 @@ describe("buildAuthenticatedFetch", () => {
         refreshToken: "some refresh token",
         sessionId: "mySession",
         tokenRefresher: {
-          refresh: jest.fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
-          ReturnType<ITokenRefresher["refresh"]>
-        >(),
+          refresh:
+            jest.fn<
+              (
+                ...params: Parameters<ITokenRefresher["refresh"]>
+              ) => ReturnType<ITokenRefresher["refresh"]>
+            >(),
         },
       },
     });
@@ -316,7 +319,9 @@ describe("buildAuthenticatedFetch", () => {
 
   // jest.useFakeTimers();
   function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 
   it("refreshes the token before it expires", async () => {
@@ -376,9 +381,11 @@ describe("buildAuthenticatedFetch", () => {
     // This would not be necessary with mock timers.
     const mockedTokenRefresher: ITokenRefresher = {
       refresh: jest
-        .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
-        ReturnType<ITokenRefresher["refresh"]>
-      >()
+        .fn<
+          (
+            ...params: Parameters<ITokenRefresher["refresh"]>
+          ) => ReturnType<ITokenRefresher["refresh"]>
+        >()
         .mockResolvedValueOnce({
           ...mockDefaultTokenSet(),
           refreshToken: "some rotated refresh token",
@@ -536,8 +543,10 @@ describe("buildAuthenticatedFetch", () => {
     // This would not be necessary with mock timers.
     const mockedTokenRefresher: ITokenRefresher = {
       refresh: jest
-        .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
-          ReturnType<ITokenRefresher["refresh"]>
+        .fn<
+          (
+            ...params: Parameters<ITokenRefresher["refresh"]>
+          ) => ReturnType<ITokenRefresher["refresh"]>
         >()
         .mockResolvedValueOnce({
           ...mockDefaultTokenSet(),
@@ -566,9 +575,11 @@ describe("buildAuthenticatedFetch", () => {
     ) as jest.Mocked<typeof CrossFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
-      .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
-      ReturnType<ITokenRefresher["refresh"]>
-    >()
+      .fn<
+        (
+          ...params: Parameters<ITokenRefresher["refresh"]>
+        ) => ReturnType<ITokenRefresher["refresh"]>
+      >()
       .mockRejectedValueOnce(
         new OidcProviderError(
           "Some error message",
@@ -610,9 +621,11 @@ describe("buildAuthenticatedFetch", () => {
     ) as jest.Mocked<typeof CrossFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
-      .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
-      ReturnType<ITokenRefresher["refresh"]>
-    >()
+      .fn<
+        (
+          ...params: Parameters<ITokenRefresher["refresh"]>
+        ) => ReturnType<ITokenRefresher["refresh"]>
+      >()
       .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
@@ -642,9 +655,11 @@ describe("buildAuthenticatedFetch", () => {
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedFreshener.refresh = jest
-      .fn<(...params: Parameters<ITokenRefresher["refresh"]>) => 
-      ReturnType<ITokenRefresher["refresh"]>
-    >()
+      .fn<
+        (
+          ...params: Parameters<ITokenRefresher["refresh"]>
+        ) => ReturnType<ITokenRefresher["refresh"]>
+      >()
       .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
