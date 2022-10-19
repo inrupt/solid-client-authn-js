@@ -243,7 +243,7 @@ describe("TokenRefresher", () => {
     const mockedModule = jest.requireMock("../ClientRegistrar") as {
       negotiateClientSigningAlg: typeof negotiateClientSigningAlg;
     };
-    mockedModule.negotiateClientSigningAlg = jest.fn();
+    mockedModule.negotiateClientSigningAlg = jest.fn<typeof mockedModule.negotiateClientSigningAlg>();
     const refresher = getTokenRefresher({
       storageUtility: mockRefresherDefaultStorageUtility(),
       clientRegistrar: mockClientRegistrar({

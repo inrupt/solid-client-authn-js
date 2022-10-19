@@ -44,10 +44,7 @@ describe("getSessionFromStorage", () => {
   it("returns a logged in Session if a refresh token is available in storage", async () => {
     const clientAuthentication = mockClientAuthentication();
     clientAuthentication.getSessionInfo = jest
-      .fn<
-        ReturnType<typeof clientAuthentication.getSessionInfo>,
-        Parameters<typeof clientAuthentication.getSessionInfo>
-      >()
+      .fn<typeof clientAuthentication.getSessionInfo>()
       .mockResolvedValue({
         webId: "https://my.webid",
         isLoggedIn: true,
@@ -56,10 +53,7 @@ describe("getSessionFromStorage", () => {
         sessionId: "mySession",
       });
     clientAuthentication.login = jest
-      .fn<
-        ReturnType<typeof clientAuthentication.login>,
-        Parameters<typeof clientAuthentication.login>
-      >()
+      .fn<typeof clientAuthentication.login>()
       .mockResolvedValue({
         webId: "https://my.webid",
         isLoggedIn: true,
@@ -82,10 +76,7 @@ describe("getSessionFromStorage", () => {
   it("returns a logged out Session if no refresh token is available", async () => {
     const clientAuthentication = mockClientAuthentication();
     clientAuthentication.getSessionInfo = jest
-      .fn<
-        ReturnType<typeof clientAuthentication.getSessionInfo>,
-        Parameters<typeof clientAuthentication.getSessionInfo>
-      >()
+      .fn<typeof clientAuthentication.getSessionInfo>()
       .mockResolvedValueOnce({
         webId: "https://my.webid",
         isLoggedIn: true,
@@ -93,10 +84,7 @@ describe("getSessionFromStorage", () => {
         sessionId: "mySession",
       });
     clientAuthentication.logout = jest
-      .fn<
-        ReturnType<typeof clientAuthentication.logout>,
-        Parameters<typeof clientAuthentication.logout>
-      >()
+      .fn<typeof clientAuthentication.logout>()
       .mockResolvedValueOnce();
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
@@ -115,10 +103,7 @@ describe("getSessionFromStorage", () => {
   it("returns undefined if no session id matches in storage", async () => {
     const clientAuthentication = mockClientAuthentication();
     clientAuthentication.getSessionInfo = jest
-      .fn<
-        ReturnType<typeof clientAuthentication.getSessionInfo>,
-        Parameters<typeof clientAuthentication.getSessionInfo>
-      >()
+      .fn<typeof clientAuthentication.getSessionInfo>()
       .mockResolvedValueOnce(undefined);
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
@@ -133,10 +118,7 @@ describe("getSessionFromStorage", () => {
   it("falls back to the environment storage if none is specified", async () => {
     const clientAuthentication = mockClientAuthentication();
     clientAuthentication.getSessionInfo = jest
-      .fn<
-        ReturnType<typeof clientAuthentication.getSessionInfo>,
-        Parameters<typeof clientAuthentication.getSessionInfo>
-      >()
+      .fn<typeof clientAuthentication.getSessionInfo>()
       .mockResolvedValueOnce(undefined);
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:

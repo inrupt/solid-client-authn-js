@@ -436,8 +436,8 @@ describe("RefreshTokenOidcHandler", () => {
       accessToken: "some access token",
     });
     tokenRefresher.refresh = jest
-      .fn()
-      .mockRejectedValue("Invalid credentials") as any;
+      .fn<typeof tokenRefresher.refresh>()
+      .mockRejectedValue("Invalid credentials");
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       tokenRefresher,
       mockStorageUtility({})
