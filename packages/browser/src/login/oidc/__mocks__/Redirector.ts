@@ -26,8 +26,7 @@ import {
 import { jest } from "@jest/globals";
 
 export const mockedRedirector = jest.fn<
-  void,
-  [redirectUrl: string, redirectOptions: IRedirectorOptions]
+  (redirectUrl: string, redirectOptions: IRedirectorOptions) => void
 >();
 export const mockRedirector = (): IRedirector => {
   return {

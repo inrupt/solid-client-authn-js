@@ -32,6 +32,7 @@ import { mockStorage } from "../../core/src/storage/__mocks__/StorageUtility";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
+import ClientAuthentication from "./ClientAuthentication";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
@@ -201,7 +202,7 @@ describe("Session", () => {
 
   describe("fetch", () => {
     it("wraps up ClientAuthentication fetch if logged in", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
@@ -211,7 +212,7 @@ describe("Session", () => {
     });
 
     it("preserves a binding to its Session instance", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
@@ -224,7 +225,7 @@ describe("Session", () => {
     });
 
     it("does not rebind window.fetch if logged out", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const clientAuthentication = mockClientAuthentication();
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url/");
@@ -563,7 +564,7 @@ describe("Session", () => {
         .mockReturnValueOnce(
           incomingRedirectPromise
         ) as typeof clientAuthentication.handleIncomingRedirect;
-      clientAuthentication.login = jest.fn();
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
@@ -620,7 +621,7 @@ describe("Session", () => {
         .mockReturnValueOnce(
           incomingRedirectPromise
         ) as typeof clientAuthentication.handleIncomingRedirect;
-      clientAuthentication.login = jest.fn();
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
       const handleIncomingRedirectPromise = mySession.handleIncomingRedirect({
@@ -662,7 +663,7 @@ describe("Session", () => {
       ).mockResolvedValue(
         undefined
       ) as typeof clientAuthentication.handleIncomingRedirect;
-      clientAuthentication.login = jest.fn();
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
@@ -699,7 +700,7 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = (
         jest.fn() as any
       ).mockResolvedValue(undefined);
-      clientAuthentication.login = jest.fn();
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
@@ -738,7 +739,7 @@ describe("Session", () => {
             sessionId,
           };
         });
-      clientAuthentication.login = jest.fn();
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void

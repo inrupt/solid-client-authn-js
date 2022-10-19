@@ -51,7 +51,7 @@ describe("FallbackRedirectHandler", () => {
 
   describe("handle", () => {
     it("returns an unauthenticated session", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const redirectHandler = new FallbackRedirectHandler();
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toBe(false);

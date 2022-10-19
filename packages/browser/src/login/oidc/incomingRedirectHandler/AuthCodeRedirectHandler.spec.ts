@@ -20,8 +20,7 @@
  */
 
 import {
-  StorageUtilityMock,
-  mockStorageUtility,
+
   IClient,
   IClientRegistrar,
   IClientRegistrarOptions,
@@ -29,6 +28,10 @@ import {
   USER_SESSION_PREFIX,
   IIssuerConfig,
 } from "@inrupt/solid-client-authn-core";
+import {
+  StorageUtilityMock,
+  mockStorageUtility,
+} from "@inrupt/solid-client-authn-core/mocks";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
@@ -484,10 +487,7 @@ describe("AuthCodeRedirectHandler", () => {
             })
           );
         })
-      ) as jest.Mock<
-        ReturnType<typeof window.fetch>,
-        [RequestInfo | URL, RequestInit?]
-      >;
+      ) as jest.Mock<typeof fetch>;
 
       const mockedStorage = mockDefaultStorageUtility();
 
@@ -508,7 +508,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns the expiration time normalised to the current time", async () => {
       mockOidcClient();
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const MOCK_TIMESTAMP = 10000;
       Date.now = jest
         .fn()
@@ -531,7 +531,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns null for the expiration time if none was provided", async () => {
       const mockedOidcClient = mockOidcClient();
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       mockedOidcClient.getBearerToken = jest
         .fn(getBearerToken)
         .mockResolvedValueOnce({

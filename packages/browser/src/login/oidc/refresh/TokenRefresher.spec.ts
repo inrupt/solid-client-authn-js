@@ -23,10 +23,12 @@ import { jest, it, describe, expect } from "@jest/globals";
 import {
   EVENTS,
   KeyPair,
-  mockStorageUtility,
-  StorageUtilityMock,
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
+import {
+  StorageUtilityMock,
+  mockStorageUtility,
+} from "@inrupt/solid-client-authn-core/mocks";
 import { JWK, importJWK } from "jose";
 import { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
