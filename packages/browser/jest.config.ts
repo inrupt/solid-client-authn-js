@@ -1,4 +1,5 @@
 import baseConfig from "../../jest.config";
+import { JestConfigWithTsJest } from "ts-jest";
 
 export default {
   ...baseConfig,
@@ -10,4 +11,4 @@ export default {
   // Enable injectGlobals here to support jest-mock-console
   // https://github.com/bpedersen/jest-mock-console/issues/32
   injectGlobals: true,
-};
+} as JestConfigWithTsJest;
