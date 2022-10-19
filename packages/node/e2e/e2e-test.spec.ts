@@ -21,7 +21,7 @@
 
 import { it, describe, beforeEach, afterEach } from "@jest/globals";
 import { custom } from "openid-client";
-import { getTestingEnvironment } from "root/e2e/setup/e2e-setup";
+import { getTestingEnvironment } from "../../../e2e/setup/e2e-setup";
 import { Session } from "../src/Session";
 
 custom.setHttpOptionsDefaults({
