@@ -26,7 +26,7 @@ import {
   StorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-import { mockStorage } from "@inrupt/solid-client-authn-core/src/storage/__mocks__/StorageUtility";
+import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import { Session } from "./Session";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";

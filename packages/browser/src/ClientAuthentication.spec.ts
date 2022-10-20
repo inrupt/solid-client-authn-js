@@ -29,14 +29,12 @@ import {
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 
-// FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
 import {
   mockStorageUtility,
   mockStorage,
   mockIncomingRedirectHandler,
   mockHandleIncomingRedirect,
-} from "@inrupt/solid-client-authn-core/src/mocks";
+} from "@inrupt/solid-client-authn-core/mocks";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
