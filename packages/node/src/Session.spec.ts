@@ -24,10 +24,11 @@ import {
   InMemoryStorage,
   ISessionInfo,
   EVENTS,
-  // FIXME: use @inrupt/solid-client-authn-core/mocks instead:
+} from "@inrupt/solid-client-authn-core";
+import {
   mockStorage,
   mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@inrupt/solid-client-authn-core/mocks";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,

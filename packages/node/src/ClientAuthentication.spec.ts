@@ -26,10 +26,8 @@ import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
-} from "@inrupt/solid-client-authn-core/src/mocks";
+} from "@inrupt/solid-client-authn-core/mocks";
 import { Session } from "./Session";
-// FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
