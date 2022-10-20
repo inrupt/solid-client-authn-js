@@ -4,6 +4,9 @@ export default {
   roots: ["<rootDir>"],
   clearMocks: true,
   testMatch: ["**/(__tests__|src)/**/?(*.)+(spec|test).+(ts|tsx|js)"],
+  // This combination of preset/transformIgnorePatterns enforces that both TS and
+  // JS files are transformed to CJS, and that the transform also applies to the
+  // dependencies in the node_modules, so that ESM-only dependencies are supported.
   preset: "ts-jest/presets/js-with-ts",
   transformIgnorePatterns: [],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
