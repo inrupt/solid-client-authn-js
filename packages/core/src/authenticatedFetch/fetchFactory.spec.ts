@@ -22,7 +22,7 @@
 // This is necessary to mock fetch
 /* eslint-disable no-shadow */
 
-import { jest, it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect, afterEach } from "@jest/globals";
 import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import { Response, Headers } from "cross-fetch";
@@ -98,7 +98,19 @@ const mockFetch = (response: Response, url: string) => {
 };
 
 describe("buildAuthenticatedFetch", () => {
+  const spyTimeout = jest.spyOn(global, "setTimeout");
+
+  afterEach(() => {
+    // Clear the latest timeout to avoid dangling open handles.
+    // FIXME: Should just use fake timers, but that chokes on recursive calls.
+    const handle = spyTimeout.mock.results[spyTimeout.mock.results.length - 1];
+    if(handle !== undefined) {
+      (handle.value as ReturnType<typeof setTimeout>).unref();
+    }
+  })
+
   it("builds a DPoP fetch if a DPoP key is provided", async () => {
+
     const mockedFetch = mockFetch(
       new Response(undefined, {
         status: 401,
@@ -356,7 +368,6 @@ describe("buildAuthenticatedFetch", () => {
       "cross-fetch"
     ) as jest.Mocked<typeof CrossFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
-    const spyTimeout = jest.spyOn(global, "setTimeout");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
