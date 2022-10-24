@@ -1,5 +1,9 @@
 # Solid JavaScript Authentication - solid-client-authn
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE-OF-CONDUCT.md)
+
+This project adheres to the Contributor Covenant [code of conduct](CODE-OF-CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [engineering@inrupt.com](mailto:engineering@inrupt.com).
+
 `solid-client-authn` is a suite of libraries to manage the authentication required to access protected resources on Solid servers.
 The libraries share a common API and include different modules for different deployment environments:
 
