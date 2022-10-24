@@ -34,6 +34,7 @@ import {
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
+import type * as OidcClientExt from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
@@ -145,34 +146,15 @@ jest.mock("@inrupt/oidc-client-ext");
 
 jest.useFakeTimers();
 
-const defaultJwt = {
-  sub: "https://some.webid",
-};
-
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-function mockOidcClient(jwt: typeof defaultJwt = defaultJwt): any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mockedOidcClient = jest.requireMock("@inrupt/oidc-client-ext") as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedOidcClient.generateJwkForDpop = (jest.fn() as any).mockResolvedValue(
-    mockJwk()
-  );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedOidcClient.createDpopHeader = (jest.fn() as any).mockResolvedValue(
-    "someToken"
-  );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedOidcClient.decodeJwt = (jest.fn() as any).mockResolvedValue(jwt);
+function mockOidcClient(): typeof OidcClientExt {
+  const mockedOidcClient = jest.requireMock<typeof OidcClientExt>("@inrupt/oidc-client-ext");
   mockedOidcClient.getDpopToken = jest
-    .fn()
+    .fn<typeof mockedOidcClient.getDpopToken>()
     .mockImplementationOnce(mockTokenEndpointDpopResponse);
   mockedOidcClient.getBearerToken = jest
-    .fn()
-    .mockImplementationOnce(mockTokenEndpointBearerResponse);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedOidcClient.validateIdToken = (jest.fn() as any).mockResolvedValue(true);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedOidcClient.refresh = (jest.fn() as any).mockResolvedValueOnce({
+    .fn<typeof mockedOidcClient.getBearerToken>()
+    .mockResolvedValue(mockTokenEndpointBearerResponse());
+  mockedOidcClient.refresh = jest.fn<typeof mockedOidcClient.refresh>().mockResolvedValueOnce({
     ...mockTokenEndpointBearerResponse(),
     refreshToken: "some rotated refresh token",
   });
@@ -572,9 +554,9 @@ describe("AuthCodeRedirectHandler", () => {
   it("returns a fetch that supports the refresh flow", async () => {
     mockOidcClient();
     const mockedStorage = mockDefaultStorageUtility();
-    const coreModule = jest.requireActual(
+    const coreModule = jest.requireActual<typeof SolidClientAuthnCore>(
       "@inrupt/solid-client-authn-core"
-    ) as typeof SolidClientAuthnCore;
+    );
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
       "buildAuthenticatedFetch"
