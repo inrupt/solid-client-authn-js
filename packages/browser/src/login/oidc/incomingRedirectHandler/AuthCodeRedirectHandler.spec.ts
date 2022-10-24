@@ -147,17 +147,21 @@ jest.mock("@inrupt/oidc-client-ext");
 jest.useFakeTimers();
 
 function mockOidcClient(): typeof OidcClientExt {
-  const mockedOidcClient = jest.requireMock<typeof OidcClientExt>("@inrupt/oidc-client-ext");
+  const mockedOidcClient = jest.requireMock<typeof OidcClientExt>(
+    "@inrupt/oidc-client-ext"
+  );
   mockedOidcClient.getDpopToken = jest
     .fn<typeof mockedOidcClient.getDpopToken>()
     .mockImplementationOnce(mockTokenEndpointDpopResponse);
   mockedOidcClient.getBearerToken = jest
     .fn<typeof mockedOidcClient.getBearerToken>()
     .mockResolvedValue(mockTokenEndpointBearerResponse());
-  mockedOidcClient.refresh = jest.fn<typeof mockedOidcClient.refresh>().mockResolvedValueOnce({
-    ...mockTokenEndpointBearerResponse(),
-    refreshToken: "some rotated refresh token",
-  });
+  mockedOidcClient.refresh = jest
+    .fn<typeof mockedOidcClient.refresh>()
+    .mockResolvedValueOnce({
+      ...mockTokenEndpointBearerResponse(),
+      refreshToken: "some rotated refresh token",
+    });
   return mockedOidcClient;
 }
 
