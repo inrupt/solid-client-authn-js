@@ -1,6 +1,6 @@
 import { JestConfigWithTsJest } from "ts-jest";
 
-export default {
+const baseConfig: JestConfigWithTsJest = {
   roots: ["<rootDir>"],
   clearMocks: true,
   testMatch: ["**/(__tests__|src)/**/?(*.)+(spec|test).+(ts|tsx|js)"],
@@ -11,6 +11,7 @@ export default {
   transformIgnorePatterns: [],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
   testPathIgnorePatterns: [
+    "/dist/",
     "/node_modules/",
     // By default we only run unit tests:
     "e2e/*",
@@ -27,15 +28,48 @@ export default {
     },
   },
   collectCoverageFrom: [
-    "**/src/**/*.ts",
-    "!**/node_modules/**",
-    "!**/__tests__/**",
-    "!**/src/external-types/**",
-    "!**/src/index.ts",
-    "!**/dist/**",
-    "!**/*.spec.ts",
-    "!**/examples/**",
+    "<rootDir>/src/**/*.ts",
+  ],
+  coveragePathIgnorePatterns: [
+    "node_modules/",
+    "dist/",
+    ".*.spec.ts"
   ],
   injectGlobals: false,
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+}
+
+
+export default {
+  projects: [{
+    ...baseConfig,
+    displayName: "core",
+    roots: ["<rootDir>/packages/core"],
+  }, {
+    ...baseConfig,
+    displayName: "oidc",
+    roots: ["<rootDir>/packages/oidc"],
+    // This test environment is an extension of jsdom. This module targets the
+    // browser environment only, so tests only need to run in jsdom.
+    // Currently, this is still required despite the polyfills in jest setup.
+    // See comments in file.
+    testEnvironment: "<rootDir>/tests/environment/customEnvironment.ts",
+  }, {
+    ...baseConfig,
+    displayName: "browser",
+    roots: ["<rootDir>/packages/browser"],
+    // This test environment is an extension of jsdom. This module targets the
+    // browser environment only, so tests only need to run in jsdom.
+    // Currently, this is still required despite the polyfills in jest setup.
+    // See comments in file.
+    testEnvironment: "<rootDir>/tests/environment/customEnvironment.ts",
+    // Enable injectGlobals here to support jest-mock-console
+    // https://github.com/bpedersen/jest-mock-console/issues/32
+    injectGlobals: true,
+  }, {
+    ...baseConfig,
+    displayName: "node",
+    roots: ["<rootDir>/packages/node"],
+    testEnvironment: "node",
+  }],
 } as JestConfigWithTsJest ;
