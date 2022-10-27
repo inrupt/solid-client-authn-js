@@ -72,4 +72,4 @@ export default {
     roots: ["<rootDir>/packages/node"],
     testEnvironment: "node",
   }],
-} as JestConfigWithTsJest ;
+} as JestConfigWithTsJest;
