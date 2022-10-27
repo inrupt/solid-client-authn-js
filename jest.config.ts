@@ -39,6 +39,9 @@ const baseConfig: JestConfigWithTsJest = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 }
 
+// Required by @peculiar/webcrypto, which comes from the polyfills
+// loaded in the setup file.
+process.env.OPENSSL_CONF = "/dev/null";
 
 export default {
   projects: [{
