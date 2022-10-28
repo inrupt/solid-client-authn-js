@@ -17,7 +17,7 @@ const baseConfig: JestConfigWithTsJest = {
     // By default we only run unit tests:
     "e2e/*",
   ],
-  reporters: ["default"],
+  reporters: ["default", "github-actions"],
   collectCoverage: true,
   coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
   coverageThreshold: {
