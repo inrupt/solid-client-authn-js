@@ -48,15 +48,6 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 
-// jest.unstable_mockModule("@inrupt/solid-client-authn-core", async () => {
-//   const actualCoreModule = await import("@inrupt/solid-client-authn-core");
-//   return {
-//     ...actualCoreModule,
-//     // This works around the network lookup to the JWKS in order to validate the ID token.
-//     getWebidFromTokenPayload: jest.fn<() => Promise<string>>().mockResolvedValue("https://my.webid/")
-//   };
-// });
-
 describe("refreshGrant", () => {
   it("uses basic auth if a client secret is available", async () => {
     const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
