@@ -150,16 +150,12 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       };
     }
 
-    const authFetch = await buildAuthenticatedFetch(
-      fetch,
-      tokens.accessToken,
-      {
-        dpopKey: tokens.dpopKey,
-        refreshOptions,
-        eventEmitter,
-        expiresIn: tokens.expiresIn,
-      }
-    );
+    const authFetch = await buildAuthenticatedFetch(fetch, tokens.accessToken, {
+      dpopKey: tokens.dpopKey,
+      refreshOptions,
+      eventEmitter,
+      expiresIn: tokens.expiresIn,
+    });
 
     await this.storageUtility.setForUser(
       storedSessionId,

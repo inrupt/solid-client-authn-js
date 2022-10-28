@@ -38,6 +38,7 @@ import type * as OidcClientExt from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
+import type * as CrossFetch from "cross-fetch";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
@@ -45,7 +46,6 @@ import {
   mockDefaultTokenRefresher,
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
-import type * as CrossFetch from "cross-fetch";
 
 const mockJwk = (): JWK => {
   return {
@@ -145,9 +145,9 @@ const mockLocalStorage = (stored: Record<string, string>) => {
 
 jest.mock("@inrupt/oidc-client-ext");
 jest.mock("cross-fetch", () => ({
-    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
-    default: jest.fn<typeof fetch>(),
-    fetch: jest.fn<typeof fetch>(),
+  ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
+  default: jest.fn<typeof fetch>(),
+  fetch: jest.fn<typeof fetch>(),
 }));
 
 jest.useFakeTimers();
@@ -387,9 +387,11 @@ describe("AuthCodeRedirectHandler", () => {
       const { fetch: mockedFetch } = jest.requireMock(
         "cross-fetch"
       ) as jest.Mocked<typeof CrossFetch>;
-      mockedFetch.mockResolvedValueOnce(new Response("", {
-        status: 200,
-      }))
+      mockedFetch.mockResolvedValueOnce(
+        new Response("", {
+          status: 200,
+        })
+      );
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockDefaultStorageUtility({ dpop: false }),
@@ -415,9 +417,11 @@ describe("AuthCodeRedirectHandler", () => {
       const { fetch: mockedFetch } = jest.requireMock(
         "cross-fetch"
       ) as jest.Mocked<typeof CrossFetch>;
-      mockedFetch.mockResolvedValueOnce(new Response("", {
-        status: 200,
-      }))
+      mockedFetch.mockResolvedValueOnce(
+        new Response("", {
+          status: 200,
+        })
+      );
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockDefaultStorageUtility({ dpop: true }),
