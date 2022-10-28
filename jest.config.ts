@@ -3,7 +3,7 @@ import { JestConfigWithTsJest } from "ts-jest";
 const baseConfig: JestConfigWithTsJest = {
   roots: ["<rootDir>"],
   clearMocks: true,
-  testMatch: ["**/(__tests__|src)/**/?(*.)+(spec|test).+(ts|tsx|js)"],
+  testMatch: ["src/**/(.+).spec.ts"],
   // This combination of preset/transformIgnorePatterns enforces that both TS and
   // JS files are transformed to CJS, and that the transform also applies to the
   // dependencies in the node_modules, so that ESM-only dependencies are supported.
