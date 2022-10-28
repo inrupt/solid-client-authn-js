@@ -26,7 +26,8 @@ const baseConfig: JestConfigWithTsJest = {
     "<rootDir>/src/**/*.ts",
   ],
   coveragePathIgnorePatterns: [
-    ".*.spec.ts"
+    ".*.spec.ts",
+    "dist/"
   ],
   injectGlobals: false,
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
