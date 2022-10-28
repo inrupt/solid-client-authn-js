@@ -2,7 +2,6 @@ import { JestConfigWithTsJest } from "ts-jest";
 
 const baseConfig: JestConfigWithTsJest = {
   roots: ["<rootDir>"],
-  clearMocks: true,
   testMatch: ["**/src/**/?*.spec.ts"],
   // This combination of preset/transformIgnorePatterns enforces that both TS and
   // JS files are transformed to CJS, and that the transform also applies to the
@@ -29,6 +28,7 @@ const baseConfig: JestConfigWithTsJest = {
     ".*.spec.ts",
     "dist/"
   ],
+  clearMocks: true,
   injectGlobals: false,
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 }
@@ -44,7 +44,7 @@ export default {
     roots: ["<rootDir>/packages/core"],
   }, {
     ...baseConfig,
-    displayName: "oidc",
+    displayName: "oidc-browser",
     roots: ["<rootDir>/packages/oidc-browser"],
     // This test environment is an extension of jsdom. This module targets the
     // browser environment only, so tests only need to run in jsdom.
