@@ -43,8 +43,6 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "dependencies": {
-    "@types/lodash.clonedeep": "^4.5.6",
-    "@types/uuid": "^8.3.0",
     "cross-fetch": "^3.1.5",
     "events": "^3.3.0",
     "jose": "^4.10.0",
@@ -56,5 +54,9 @@
   },
   "engines": {
     "node": "^14.0.0 || ^16.0.0"
+  },
+  "devDependencies": {
+    "@types/lodash.clonedeep": "^4.5.7",
+    "@types/uuid": "^8.3.4"
   }
 }
