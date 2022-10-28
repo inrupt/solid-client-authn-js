@@ -3,7 +3,7 @@ import { JestConfigWithTsJest } from "ts-jest";
 const baseConfig: JestConfigWithTsJest = {
   roots: ["<rootDir>"],
   clearMocks: true,
-  testMatch: ["src/**/(.+).spec.ts"],
+  testMatch: ["**/src/**/?*.spec.ts"],
   // This combination of preset/transformIgnorePatterns enforces that both TS and
   // JS files are transformed to CJS, and that the transform also applies to the
   // dependencies in the node_modules, so that ESM-only dependencies are supported.
@@ -11,12 +11,6 @@ const baseConfig: JestConfigWithTsJest = {
   // deliberately set to an empty array to allow including node_modules when transforming code:
   transformIgnorePatterns: [],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
-  testPathIgnorePatterns: [
-    "/dist/",
-    "/node_modules/",
-    // By default we only run unit tests:
-    "e2e/*",
-  ],
   reporters: ["default", "github-actions"],
   collectCoverage: true,
   coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
@@ -32,8 +26,6 @@ const baseConfig: JestConfigWithTsJest = {
     "<rootDir>/src/**/*.ts",
   ],
   coveragePathIgnorePatterns: [
-    "node_modules/",
-    "dist/",
     ".*.spec.ts"
   ],
   injectGlobals: false,
