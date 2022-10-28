@@ -9,6 +9,22 @@ const pkg = require('./package.json');
 
 import typescript from "rollup-plugin-typescript2";
 
+const sharedConfig = {
+  plugins: [
+    typescript({
+      // Use our own version of TypeScript, rather than the one bundled with the plugin:
+      typescript: require("typescript"),
+      tsconfigOverride: {
+        compilerOptions: {
+          module: "esnext",
+        },
+      },
+    })
+  ],
+  // The following option is useful because symlinks are used in monorepos
+  preserveSymlinks: true,
+}
+
 export default [{
   input: "./src/index.ts",
   output: [
@@ -21,19 +37,7 @@ export default [{
       format: "esm",
     },
   ],
-  plugins: [
-    typescript({
-      // Use our own version of TypeScript, rather than the one bundled with the plugin:
-      typescript: require("typescript"),
-      tsconfigOverride: {
-        compilerOptions: {
-          module: "esnext",
-        },
-      },
-    })
-  ],
-  // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true,
+  ...sharedConfig
 }, {
   input: "./src/mocks.ts",
   output: [
@@ -46,17 +50,5 @@ export default [{
       format: "esm",
     },
   ],
-  plugins: [
-    typescript({
-      // Use our own version of TypeScript, rather than the one bundled with the plugin:
-      typescript: require("typescript"),
-      tsconfigOverride: {
-        compilerOptions: {
-          module: "esnext",
-        },
-      },
-    })
-  ],
-  // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true,
+  ...sharedConfig
 }];
