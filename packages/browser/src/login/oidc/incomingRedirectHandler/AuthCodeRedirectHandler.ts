@@ -24,6 +24,7 @@
  * @packageDocumentation
  */
 
+import { fetch } from "cross-fetch";
 import {
   buildAuthenticatedFetch,
   IClient,
@@ -150,7 +151,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     }
 
     const authFetch = await buildAuthenticatedFetch(
-      window.fetch,
+      fetch,
       tokens.accessToken,
       {
         dpopKey: tokens.dpopKey,
