@@ -51,7 +51,7 @@ export default {
   }, {
     ...baseConfig,
     displayName: "oidc",
-    roots: ["<rootDir>/packages/oidc"],
+    roots: ["<rootDir>/packages/oidc-browser"],
     // This test environment is an extension of jsdom. This module targets the
     // browser environment only, so tests only need to run in jsdom.
     // Currently, this is still required despite the polyfills in jest setup.
