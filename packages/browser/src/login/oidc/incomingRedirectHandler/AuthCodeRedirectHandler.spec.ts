@@ -38,7 +38,6 @@ import type * as OidcClientExt from "@inrupt/oidc-client-ext";
 import { Response } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
-import type * as CrossFetch from "cross-fetch";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
