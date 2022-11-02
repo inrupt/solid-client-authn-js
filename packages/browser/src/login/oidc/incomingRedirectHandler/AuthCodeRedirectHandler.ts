@@ -24,7 +24,6 @@
  * @packageDocumentation
  */
 
-import { fetch } from "cross-fetch";
 import {
   buildAuthenticatedFetch,
   IClient,

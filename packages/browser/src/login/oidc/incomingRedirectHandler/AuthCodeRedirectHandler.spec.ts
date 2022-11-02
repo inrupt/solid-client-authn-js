@@ -144,11 +144,11 @@ const mockLocalStorage = (stored: Record<string, string>) => {
 };
 
 jest.mock("@inrupt/oidc-client-ext");
-jest.mock("cross-fetch", () => ({
-  ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
-  default: jest.fn<typeof fetch>(),
-  fetch: jest.fn<typeof fetch>(),
-}));
+// jest.mock("cross-fetch", () => ({
+//   ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
+//   default: jest.fn<typeof fetch>(),
+//   fetch: jest.fn<typeof fetch>(),
+// }));
 
 jest.useFakeTimers();
 
@@ -384,9 +384,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated bearer fetch if requested", async () => {
       mockOidcClient();
-      const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+      const mockedFetch = jest.mocked<typeof fetch>(window.fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
@@ -414,9 +412,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
-      const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+      const mockedFetch = jest.mocked<typeof fetch>(window.fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
