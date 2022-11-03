@@ -23,6 +23,9 @@
  * @hidden
  * @packageDocumentation
  */
+// FIXME: The following doesn't work in the browser, it results in all the fetches
+// being unauthenticated. This should be looked into when migrating to universal-fetch.
+// import { fetch } from "cross-fetch";
 
 import {
   buildAuthenticatedFetch,
