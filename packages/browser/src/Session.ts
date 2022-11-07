@@ -159,7 +159,7 @@ export class Session extends EventEmitter {
    */
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
-    sessionId?: string
+    sessionId: string | undefined = undefined
   ) {
     super();
 
@@ -222,7 +222,7 @@ export class Session extends EventEmitter {
     // so unless it throws an error, there is no code that should run afterwards
     // (since there is no "after" in the lifetime of the script).
     // Hence, this Promise never resolves:
-    return new Promise(() => undefined);
+    return new Promise(() => {});
   };
 
   /**

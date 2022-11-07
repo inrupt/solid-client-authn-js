@@ -62,14 +62,14 @@ describe("ErrorOidcHandler", () => {
 
   describe("handle", () => {
     it("returns an unauthenticated session", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
     });
     it("calls the onError callback if given with both parameters", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const mockEmitter = new EventEmitter();
       // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events
       mockEmitter.on(EVENTS.ERROR, jest.fn());
@@ -90,7 +90,7 @@ describe("ErrorOidcHandler", () => {
     });
 
     it("calls the onError callback if given with just error parameters if no description is provided", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const mockEmitter = new EventEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
       // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events

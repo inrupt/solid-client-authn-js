@@ -31,8 +31,9 @@ export const mockTokenRefresher = (
   return {
     refresh: jest
       .fn<
-        ReturnType<ITokenRefresher["refresh"]>,
-        Parameters<ITokenRefresher["refresh"]>
+        (
+          ...params: Parameters<ITokenRefresher["refresh"]>
+        ) => ReturnType<ITokenRefresher["refresh"]>
       >()
       .mockResolvedValue(tokenSet),
   };

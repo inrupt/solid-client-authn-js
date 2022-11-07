@@ -29,14 +29,12 @@ import {
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 
-// FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
 import {
   mockStorageUtility,
   mockStorage,
   mockIncomingRedirectHandler,
   mockHandleIncomingRedirect,
-} from "../../core/src/mocks";
+} from "@inrupt/solid-client-authn-core/mocks";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
@@ -234,7 +232,7 @@ describe("ClientAuthentication", () => {
 
   describe("fetch", () => {
     it("calls fetch", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
       expect(window.fetch).toHaveBeenCalledWith(
@@ -249,7 +247,7 @@ describe("ClientAuthentication", () => {
     // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
-      window.fetch = jest.fn();
+      window.fetch = jest.fn<typeof fetch>();
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
       const clientAuthn = getClientAuthentication();
@@ -314,7 +312,7 @@ describe("ClientAuthentication", () => {
 
   describe("handleIncomingRedirect", () => {
     const mockEmitter = new EventEmitter();
-    mockEmitter.emit = jest.fn();
+    mockEmitter.emit = jest.fn<typeof mockEmitter.emit>();
 
     it("calls handle redirect", async () => {
       // eslint-disable-next-line no-restricted-globals

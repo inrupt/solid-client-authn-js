@@ -19,28 +19,4 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { EventEmitter } from "events";
-import { jest } from "@jest/globals";
-
-import IIncomingRedirectHandler from "../IIncomingRedirectHandler";
-
-const canHandle = jest.fn((_url: string) => Promise.resolve(true));
-
-const handle = jest.fn((_url: string, _emitter: EventEmitter | undefined) =>
-  Promise.resolve({
-    sessionId: "global",
-    isLoggedIn: true,
-    webId: "https://pod.com/profile/card#me",
-    fetch: jest.fn(globalThis.fetch),
-  })
-);
-
-export const mockCanHandleIncomingRedirect = canHandle;
-export const mockHandleIncomingRedirect = handle;
-
-export const mockIncomingRedirectHandler = (): IIncomingRedirectHandler => {
-  return {
-    canHandle,
-    handle,
-  };
-};
+import "@inrupt/jest-jsdom-polyfills";

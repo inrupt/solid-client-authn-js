@@ -22,7 +22,7 @@
 import {
   StorageUtilityMock,
   mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+} from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
 import { Response as NodeResponse } from "cross-fetch";
 import ClientRegistrar from "./ClientRegistrar";

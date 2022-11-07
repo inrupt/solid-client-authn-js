@@ -23,9 +23,12 @@ import { jest, it, describe, expect } from "@jest/globals";
 import {
   IIssuerConfigFetcher,
   StorageUtility,
-  StorageUtilityMock,
 } from "@inrupt/solid-client-authn-core";
-import { mockStorage } from "@inrupt/solid-client-authn-core/dist/storage/__mocks__/StorageUtility";
+import {
+  StorageUtilityMock,
+  mockStorage,
+} from "@inrupt/solid-client-authn-core/mocks";
+
 import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
 import {
   IssuerConfigFetcherFetchConfigResponse,

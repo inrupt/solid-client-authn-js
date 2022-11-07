@@ -27,12 +27,10 @@ import {
   ISessionInfoManager,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-// FIXME: For some reason jest crashes on trying to handle a subpath import
-// this should import from @inrupt/solid-client-authn-core/mocks
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
-} from "../../../core/src/mocks";
+} from "@inrupt/solid-client-authn-core/mocks";
 
 import ClientAuthentication from "../ClientAuthentication";
 import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";
