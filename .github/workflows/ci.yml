@@ -30,7 +30,7 @@ jobs:
           path: coverage/
 
   sonar-scan:
-    needs: [unit-tests]
+    needs: [test]
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' }}
     strategy:
