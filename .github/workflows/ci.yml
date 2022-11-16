@@ -5,7 +5,11 @@ on: [push]
 env:
   CI: true
 jobs:
-  build:
+
+  lint:
+    uses: inrupt/typescript-sdk-tools/.github/workflows/reusable-lint.yml@v1.4.2
+
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -18,46 +22,36 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test
-
-      # Sonar analysis needs the full history for features like automatic assignment of bugs. If the following step
-      # is not included the project will show a warning about incomplete information.
-      - run: git fetch --unshallow
+      # Upload coverage for sonarcube (only matching OS and one node version required)
+      - uses: actions/upload-artifact@v3
         if: ${{ matrix.node-version == '16' }}
+        with:
+          name: code-coverage-ubuntu-latest-${{matrix.node-version}}
+          path: coverage/
 
-      # Since this is a monorepo, the Sonar scan must be run on each of the packages but this will pull in the test
-      # coverage information produced by the tests already run.
-      - name: SonarCloud Scan - Browser
-        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
+  sonar-scan:
+    needs: [test]
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    strategy:
+      matrix:
+        # Since this is a monorepo, the Sonar scan must be run on each of the packages but this will pull in the test
+        # coverage information produced by the tests already run.
+        project-root: ["packages/browser", "packages/oidc-browser", "packages/node", "packages/core"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Sonar analysis needs the full history for features like automatic assignment of bugs. If the following step
+          # is not included the project will show a warning about incomplete information.
+          fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-ubuntu-latest-16
+          path: coverage/
+      - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v1.7
+        with:
+          projectBaseDir: ${{ matrix.project-root }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: packages/browser
-
-      - name: SonarCloud Scan - Core
-        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
-        uses: SonarSource/sonarcloud-github-action@v1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: packages/core
-
-      - name: SonarCloud Scan - Node
-        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
-        uses: SonarSource/sonarcloud-github-action@v1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: packages/node
-
-      - name: SonarCloud Scan - OIDC
-        if: ${{ matrix.node-version == '16' && github.actor != 'dependabot[bot]'}}
-        uses: SonarSource/sonarcloud-github-action@v1.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: packages/oidc-browser

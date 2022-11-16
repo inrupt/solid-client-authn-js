@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -74,7 +74,7 @@ function checkEnvVariable(environment: unknown, key: keyof EnvVariables) {
 
 function isTestingEnvironment(
   environment: unknown,
-  requiresCredentials: boolean = false
+  requiresCredentials = false
 ): asserts environment is EnvVariables {
   if (
     !availableEnvironment.includes(
@@ -101,7 +101,7 @@ function isTestingEnvironment(
 }
 
 export function getTestingEnvironment(
-  requiresCredentials: boolean = false
+  requiresCredentials = false
 ): TestingEnvironment {
   isTestingEnvironment(process.env, requiresCredentials);
 
