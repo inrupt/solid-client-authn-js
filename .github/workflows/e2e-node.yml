@@ -21,7 +21,7 @@ jobs:
         # NSS does not support static client registration, which we rely on for testing.
         # Note: "ESS Production" has been disabled due to the migration
         # "ESS Dev-Next" is a 2.0-like environment.
-        environment-name: ["ESS Dev-Next"]
+        environment-name: ["ESS Dev-Next", "ESS PodSpaces"]
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -40,8 +40,7 @@ jobs:
       - run: npm run build
       - run: npm run test:e2e:node
         env:
-          E2E_TEST_POD: ${{ secrets.E2E_TEST_POD }}
           E2E_TEST_IDP: ${{ secrets.E2E_TEST_IDP }}
-          E2E_TEST_CLIENT_ID: ${{ secrets.E2E_TEST_CLIENT_ID }}
-          E2E_TEST_CLIENT_SECRET: ${{ secrets.E2E_TEST_CLIENT_SECRET }}
+          E2E_TEST_OWNER_CLIENT_ID: ${{ secrets.E2E_TEST_OWNER_CLIENT_ID }}
+          E2E_TEST_OWNER_CLIENT_SECRET: ${{ secrets.E2E_TEST_OWNER_CLIENT_SECRET }}
           E2E_TEST_ENVIRONMENT: ${{ matrix.environment-name }}
