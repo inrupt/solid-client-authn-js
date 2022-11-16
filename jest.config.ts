@@ -1,6 +1,8 @@
-import { JestConfigWithTsJest } from "ts-jest";
+import type { Config } from "jest";
 
-const baseConfig: JestConfigWithTsJest = {
+type ArrayElement<MyArray> = MyArray extends Array<infer T> ? T : never;
+
+const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   roots: ["<rootDir>"],
   testMatch: ["**/src/**/?*.spec.ts"],
   // This combination of preset/transformIgnorePatterns enforces that both TS and
@@ -10,20 +12,6 @@ const baseConfig: JestConfigWithTsJest = {
   // deliberately set to an empty array to allow including node_modules when transforming code:
   transformIgnorePatterns: [],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
-  reporters: ["default", "github-actions"],
-  collectCoverage: true,
-  coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
-  coverageThreshold: {
-    global: {
-      branches: 100,
-      functions: 100,
-      lines: 100,
-      statements: 100,
-    },
-  },
-  collectCoverageFrom: [
-    "<rootDir>/src/**/*.ts",
-  ],
   coveragePathIgnorePatterns: [
     ".*.spec.ts",
     "dist/"
@@ -38,6 +26,20 @@ const baseConfig: JestConfigWithTsJest = {
 process.env.OPENSSL_CONF = "/dev/null";
 
 export default {
+  reporters: ["default", "github-actions"],
+  collectCoverage: true,
+  coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
+  coverageThreshold: {
+    global: {
+      branches: 100,
+      functions: 100,
+      lines: 100,
+      statements: 100,
+    },
+  },
+  collectCoverageFrom: [
+    "<rootDir>/src/**/*.ts",
+  ],
   projects: [{
     ...baseConfig,
     displayName: "core",
@@ -69,4 +71,4 @@ export default {
     roots: ["<rootDir>/packages/node"],
     testEnvironment: "node",
   }],
-} as JestConfigWithTsJest;
+} as Config;
