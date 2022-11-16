@@ -1,9 +1,38 @@
+/*
+ * Copyright 2022 Inrupt Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+ * Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+// This file includes experimental API objects, which are camel cased.
+/* eslint-disable camelcase */
+
 import { test as base } from "@playwright/test";
-export { expect } from "@playwright/test";
 
 import crypto from "crypto";
-
-import { getTestingEnvironment, TestingEnvironment } from "../setup/e2e-setup";
+import type {
+  TestingEnvironmentBrowser,
+  TestingEnvironmentNode,
+} from "@inrupt/internal-test-env";
+import {
+  getNodeTestingEnvironment,
+  getBrowserTestingEnvironment,
+} from "@inrupt/internal-test-env";
 import { Session } from "@inrupt/solid-client-authn-node";
 import {
   getPodUrlAll,
@@ -17,13 +46,13 @@ import {
 } from "@inrupt/solid-client";
 import { AppPage } from "./pages/AppPage";
 
-// const { setPublicAccess, setAgentAccess } = access_v2;
+export { expect } from "@playwright/test";
 
-export type Options = {};
 export type Fixtures = {
   app: AppPage;
   testContainer: TestContainer;
-  environment: TestingEnvironment;
+  environment: TestingEnvironmentBrowser;
+  setupEnvironment: TestingEnvironmentNode;
 };
 
 export type TestContainer = {
@@ -65,20 +94,38 @@ const clientApplicationUrl =
 
 // Extend basic test by providing a "defaultItem" option and a "todoPage" fixture.
 export const test = base.extend<Fixtures>({
-  app: ({ page }, use) => {
+  app: async ({ page }, use) => {
     const app = new AppPage(page, {
       clientApplicationUrl,
       fetchTimeout: 2000,
     });
 
-    use(app);
+    await use(app);
   },
 
-  environment: ({}, use) => {
-    use(getTestingEnvironment(true));
+  // playwright expects the first argument to be a destructuring pattern.
+  // eslint-disable-next-line no-empty-pattern
+  environment: async ({}, use) => {
+    await use(
+      getBrowserTestingEnvironment({
+        clientCredentials: {
+          owner: {
+            // Check that username and password are well-defined
+            login: "",
+            password: "",
+          },
+        },
+      })
+    );
   },
 
-  testContainer: async ({ environment, page }, use, testInfo) => {
+  // playwright expects the first argument to be a destructuring pattern.
+  // eslint-disable-next-line no-empty-pattern
+  setupEnvironment: async ({}, use) => {
+    await use(getNodeTestingEnvironment());
+  },
+
+  testContainer: async ({ setupEnvironment, page }, use, testInfo) => {
     // Attempt to reduce the number of times we see invalid_request errors from session.login
     await page.waitForTimeout(100);
     // setup: build the container
@@ -86,9 +133,9 @@ export const test = base.extend<Fixtures>({
 
     try {
       await session.login({
-        oidcIssuer: environment.idp,
-        clientId: environment.clientId,
-        clientSecret: environment.clientSecret,
+        oidcIssuer: setupEnvironment.idp,
+        clientId: setupEnvironment.clientCredentials.owner.id,
+        clientSecret: setupEnvironment.clientCredentials.owner.secret,
         // DPoP is the default, but prints a warning on node.js that pollutes
         // the test output; we can do what we need with Bearer tokens.
         tokenType: "Bearer",
@@ -133,7 +180,7 @@ export const test = base.extend<Fixtures>({
     });
 
     const { setPublicAccess, setAgentAccess } =
-      environment.environment === "ESS Production" ? access_v1 : access_v2;
+      setupEnvironment.environment === "ESS PodSpaces" ? access_v1 : access_v2;
 
     await setPublicAccess(
       publicFileUrl,
@@ -148,11 +195,9 @@ export const test = base.extend<Fixtures>({
       { fetch: session.fetch }
     );
 
-    const nonExistentResource =
-      getSourceUrl(testContainer) +
-      "/" +
-      crypto.randomBytes(16).toString("hex") +
-      ".txt";
+    const nonExistentResource = `${getSourceUrl(testContainer)}/${crypto
+      .randomBytes(16)
+      .toString("hex")}.txt`;
 
     // The code before the call to use is the setup, and after is the teardown.
     // This is the value the Fixture will be using.

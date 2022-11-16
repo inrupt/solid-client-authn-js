@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2022 Inrupt Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,11 +18,12 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import { getTestingEnvironment } from "../setup/e2e-setup";
+
+import { setupEnv } from "@inrupt/internal-test-env";
 
 async function globalSetup() {
   // Fail fast with dotenv:
-  getTestingEnvironment();
+  setupEnv();
 
   // Return the teardown function.
   return async () => {};
