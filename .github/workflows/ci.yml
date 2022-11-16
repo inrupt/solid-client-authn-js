@@ -5,7 +5,11 @@ on: [push]
 env:
   CI: true
 jobs:
-  build:
+
+  lint:
+    uses: inrupt/typescript-sdk-tools/.github/workflows/reusable-lint.yml@1.4.2
+
+  unit-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -18,12 +22,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test
+      # Upload coverage for sonarcube (only matching OS and one node version required)
+      - uses: actions/upload-artifact@v3
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == '16.x' }}
+        with:
+          name: code-coverage-${{matrix.os}}-${{matrix.node-version}}
+          path: coverage/
 
-      # Sonar analysis needs the full history for features like automatic assignment of bugs. If the following step
-      # is not included the project will show a warning about incomplete information.
-      - run: git fetch --unshallow
-        if: ${{ matrix.node-version == '16' }}
-
+  sonar-scan:
+    needs: [unit-tests]
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' && matrix.node-version == '16' }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Sonar analysis needs the full history for features like automatic assignment of bugs. If the following step
+          # is not included the project will show a warning about incomplete information.
+          fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-ubuntu-latest-16.x
+          path: coverage/
       # Since this is a monorepo, the Sonar scan must be run on each of the packages but this will pull in the test
       # coverage information produced by the tests already run.
       - name: SonarCloud Scan - Browser
