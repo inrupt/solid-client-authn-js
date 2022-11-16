@@ -69,7 +69,7 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       });
       expect(response.status).toBe(200);
       await expect(response.text()).resolves.toContain(
-        ":PersonalProfileDocument"
+        authenticatedSession.info.webId
       );
     });
 
@@ -129,7 +129,7 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       });
       expect(response.status).toBe(200);
       await expect(response.text()).resolves.toContain(
-        ":PersonalProfileDocument"
+        authenticatedSession.info.webId
       );
     });
 
@@ -158,7 +158,7 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       });
       expect(response.status).toBe(200);
       await expect(response.text()).resolves.toContain(
-        ":PersonalProfileDocument"
+        authenticatedSession.info.webId
       );
     });
 
