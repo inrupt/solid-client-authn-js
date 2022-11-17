@@ -70,5 +70,11 @@ export default {
     displayName: "node",
     roots: ["<rootDir>/packages/node"],
     testEnvironment: "node",
+  }, {
+    ...baseConfig, 
+    displayName: "e2e-node",
+    roots: ["<rootDir>/e2e/node"],
+    setupFiles: ["<rootDir>/jest.e2e.setup.ts"],
+    testTimeout: 30000,
   }],
 } as Config;
