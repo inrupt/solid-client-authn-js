@@ -19,25 +19,29 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { it, describe, beforeEach, afterEach } from "@jest/globals";
+import { it, describe, beforeEach, afterEach, expect } from "@jest/globals";
 import { custom } from "openid-client";
+import {
+  getNodeTestingEnvironment,
+  getPodRoot,
+} from "@inrupt/internal-test-env";
+// Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
-import { getTestingEnvironment } from "../../../e2e/setup/e2e-setup";
-import { Session } from "../src/Session";
+import { Session } from "../../packages/node/src/Session";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
 });
 
-const ENV = getTestingEnvironment();
+const ENV = getNodeTestingEnvironment();
 
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
   const authenticatedSession = new Session();
 
   beforeEach(async () => {
     await authenticatedSession.login({
-      clientId: ENV.clientId,
-      clientSecret: ENV.clientSecret,
+      clientId: ENV.clientCredentials.owner.id,
+      clientSecret: ENV.clientCredentials.owner.secret,
       oidcIssuer: ENV.idp,
     });
   });
@@ -65,12 +69,17 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       });
       expect(response.status).toBe(200);
       await expect(response.text()).resolves.toContain(
-        ":PersonalProfileDocument"
+        authenticatedSession.info.webId
       );
     });
 
     it("can fetch a private resource when logged in", async () => {
-      const privateResourceUrl = ENV.pod;
+      // The following line doesn't compile because of the recursive dependency
+      // between the current package, the shared environment setup, and the
+      // published version of the current package.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const privateResourceUrl = await getPodRoot(authenticatedSession);
       const response = await authenticatedSession.fetch(privateResourceUrl, {
         headers: {
           Accept: "text/turtle",
@@ -84,13 +93,18 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
 
     it("can fetch a private resource when logged in after the same fetch failed", async () => {
       const unauthSession = new Session();
-      const privateResourceUrl = ENV.pod;
+      // The following line doesn't compile because of the recursive dependency
+      // between the current package, the shared environment setup, and the
+      // published version of the current package.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const privateResourceUrl = await getPodRoot(authenticatedSession);
       let response = await unauthSession.fetch(privateResourceUrl);
       expect(response.status).toBe(401);
 
       await unauthSession.login({
-        clientId: ENV.clientId,
-        clientSecret: ENV.clientSecret,
+        clientId: ENV.clientCredentials.owner.id,
+        clientSecret: ENV.clientCredentials.owner.secret,
         oidcIssuer: ENV.idp,
       });
 
@@ -115,13 +129,18 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       });
       expect(response.status).toBe(200);
       await expect(response.text()).resolves.toContain(
-        ":PersonalProfileDocument"
+        authenticatedSession.info.webId
       );
     });
 
     it("cannot fetch a private resource when not logged in", async () => {
       const unauthenticatedSession = new Session();
-      const privateResourceUrl = ENV.pod;
+      // The following line doesn't compile because of the recursive dependency
+      // between the current package, the shared environment setup, and the
+      // published version of the current package.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const privateResourceUrl = await getPodRoot(authenticatedSession);
       const response = await unauthenticatedSession.fetch(privateResourceUrl);
       expect(response.status).toBe(401);
     });
@@ -139,13 +158,18 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       });
       expect(response.status).toBe(200);
       await expect(response.text()).resolves.toContain(
-        ":PersonalProfileDocument"
+        authenticatedSession.info.webId
       );
     });
 
     it("cannot fetch a private resource after logging out", async () => {
       await authenticatedSession.logout();
-      const privateResourceUrl = ENV.pod;
+      // The following line doesn't compile because of the recursive dependency
+      // between the current package, the shared environment setup, and the
+      // published version of the current package.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const privateResourceUrl = await getPodRoot(authenticatedSession);
       const response = await authenticatedSession.fetch(privateResourceUrl);
       expect(response.status).toBe(401);
     });

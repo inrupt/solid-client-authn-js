@@ -1,11 +1,32 @@
+/*
+ * Copyright 2022 Inrupt Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+ * Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 import { expect, Page } from "@playwright/test";
-import { TestingEnvironment } from "../../setup/e2e-setup";
+import { TestingEnvironmentBrowser } from "@inrupt/internal-test-env";
 
 export class LoginFlow {
   readonly page: Page;
-  private readonly env: TestingEnvironment;
 
-  constructor(page: Page, environment: TestingEnvironment) {
+  private readonly env: TestingEnvironmentBrowser;
+
+  constructor(page: Page, environment: TestingEnvironmentBrowser) {
     this.page = page;
     this.env = environment;
   }
@@ -18,11 +39,11 @@ export class LoginFlow {
       currentUrl.hostname.includes("inrupt.com")
     ) {
       return this.performCognitoLogin(username, password);
-    } else if (currentUrl.hostname.endsWith("inrupt.net")) {
-      return this.performNssLogin(username, password);
-    } else {
-      throw new Error("Unknown login type");
     }
+    if (currentUrl.hostname.endsWith("inrupt.net")) {
+      return this.performNssLogin(username, password);
+    }
+    throw new Error("Unknown login type");
   }
 
   // FIXME: NSS can't be tested because the whole e2e setup can't execute on NSS:
@@ -43,8 +64,6 @@ export class LoginFlow {
   }
 
   private async performCognitoLogin(username: string, password: string) {
-    // console.log("Performing cognito login");
-
     // Check to ensure that the large login form is visible, apparently there are multiple:
     expect(this.page.isVisible(".visible-lg [type=text]")).toBeTruthy();
 
