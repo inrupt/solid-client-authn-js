@@ -4,7 +4,7 @@ type ArrayElement<MyArray> = MyArray extends Array<infer T> ? T : never;
 
 const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   roots: ["<rootDir>"],
-  testMatch: ["**/src/**/?*.spec.ts"],
+  testMatch: ["**/*.spec.ts"],
   // This combination of preset/transformIgnorePatterns enforces that both TS and
   // JS files are transformed to CJS, and that the transform also applies to the
   // dependencies in the node_modules, so that ESM-only dependencies are supported.
@@ -75,6 +75,6 @@ export default {
     displayName: "e2e-node",
     roots: ["<rootDir>/e2e/node"],
     setupFiles: ["<rootDir>/jest.e2e.setup.ts"],
-    testTimeout: 30000,
+    slowTestThreshold: 30,
   }],
 } as Config;
