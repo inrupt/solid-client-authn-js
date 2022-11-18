@@ -4,7 +4,9 @@ on:
   push:
   schedule:
     - cron: "40 10 * * *"
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   audit:
     uses: inrupt/typescript-sdk-tools/.github/workflows/reusable-audit.yml@v1.4.2

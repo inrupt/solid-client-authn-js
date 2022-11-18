@@ -2,7 +2,9 @@ name: End-to-end node tests
 
 on:
   push:
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   CI: true
 jobs:
@@ -14,30 +16,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     environment:
       name: ${{ matrix.environment-name }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: ["16"]
+        node-version: [16.x, 14.x]
         # NSS does not support static client registration, which we rely on for testing.
-        # Note: "ESS Production" has been disabled due to the migration
-        # "ESS Dev-Next" is a 2.0-like environment.
-        environment-name: ["ESS Dev-Next", "ESS PodSpaces"]
+        environment-name: ["ESS PodSpaces"]
+        experimental: [false]
+        include:
+          - environment-name: "ESS Dev-Next"
+            experimental: true
+            # The experimental config only needs to run in one node version
+            node-version: 16.x
+            # Ditto for the OS
+            os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          cache: npm
       - run: npm ci
-      - run: npm run bootstrap -- --ci
-      - run: npm run build
       - run: npm run test:e2e:node
         env:
           E2E_TEST_IDP: ${{ secrets.E2E_TEST_IDP }}

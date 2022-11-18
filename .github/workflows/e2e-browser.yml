@@ -1,7 +1,9 @@
 name: End-to-end browser tests
 
 on: [push]
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   CI: true
 jobs:
@@ -9,26 +11,25 @@ jobs:
     # Running end-to-end tests requires accessing secrets which aren't available to dependabot.
     # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
     if: github.actor != 'dependabot[bot]'
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     environment:
       name: ${{ matrix.environment-name }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        # Available OS's: https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners
-        os: [ubuntu-20.04]
-        # The Node version does not influence how well our tests run in the browser,
-        # so we only need to test in one.
-        node-version: ["16"]
         # NSS does not support static client registration, which we rely on for testing.
-        # Note: "ESS Production" has been disabled due to the migration
-        # "ESS Dev-Next" is a 2.0-like environment.
-        environment-name: ["ESS Dev-Next", "ESS PodSpaces"]
+        environment-name: ["ESS PodSpaces"]
+        experimental: [false]
+        include:
+          - environment-name: "ESS Dev-Next"
+            experimental: true
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      # The Node version does not influence how well our tests run in
+      # the browser so we only need to test in one.
+      - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
           cache: npm
       - run: npm ci
       - run: npm run bootstrap -- --ci
