@@ -26,7 +26,7 @@ jobs:
       - run: npm run test
       # Upload coverage for sonarcube (only matching OS and one node version required)
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.node-version == '16' }}
+        if: ${{ matrix.node-version == '16.x' }}
         with:
           name: code-coverage-ubuntu-latest-${{matrix.node-version}}
           path: coverage/
@@ -48,7 +48,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v3
         with:
-          name: code-coverage-ubuntu-latest-16
+          name: code-coverage-ubuntu-latest-16.x
           path: coverage/
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v1.7
