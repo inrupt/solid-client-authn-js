@@ -1,7 +1,9 @@
 name: End-to-end browser tests
 
 on: [push]
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   CI: true
 jobs:

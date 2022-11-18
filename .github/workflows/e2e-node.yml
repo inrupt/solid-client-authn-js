@@ -2,7 +2,9 @@ name: End-to-end node tests
 
 on:
   push:
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   CI: true
 jobs:
