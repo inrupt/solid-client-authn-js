@@ -19,6 +19,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
+        node-version: [16.x, 14.x]
         # NSS does not support static client registration, which we rely on for testing.
         environment-name: ["ESS PodSpaces"]
         experimental: [false]
@@ -27,10 +28,10 @@ jobs:
             experimental: true
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
       - run: npm run test:e2e:node
