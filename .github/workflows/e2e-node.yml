@@ -11,33 +11,26 @@ jobs:
     # Since all the other jobs of this workflow depend on this one, skipping it should
     # skip the entire workflow.
     if: ${{ github.actor != 'dependabot[bot]' }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     environment:
       name: ${{ matrix.environment-name }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        node-version: ["16"]
         # NSS does not support static client registration, which we rely on for testing.
-        # Note: "ESS Production" has been disabled due to the migration
-        # "ESS Dev-Next" is a 2.0-like environment.
-        environment-name: ["ESS Dev-Next", "ESS PodSpaces"]
+        environment-name: ["ESS PodSpaces"]
+        experimental: [false]
+        include:
+          - environment-name: "ESS Dev-Next"
+            experimental: true
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 16
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node${{ runner.node-version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          node-version: 16.x
+          cache: npm
       - run: npm ci
-      - run: npm run bootstrap -- --ci
-      - run: npm run build
       - run: npm run test:e2e:node
         env:
           E2E_TEST_IDP: ${{ secrets.E2E_TEST_IDP }}
