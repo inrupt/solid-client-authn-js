@@ -12,14 +12,11 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   // deliberately set to an empty array to allow including node_modules when transforming code:
   transformIgnorePatterns: [],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
-  coveragePathIgnorePatterns: [
-    ".*.spec.ts",
-    "dist/"
-  ],
+  coveragePathIgnorePatterns: [".*.spec.ts", "dist/"],
   clearMocks: true,
   injectGlobals: false,
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-}
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+};
 
 // Required by @peculiar/webcrypto, which comes from the polyfills
 // loaded in the setup file.
@@ -37,44 +34,48 @@ export default {
       statements: 100,
     },
   },
-  collectCoverageFrom: [
-    "<rootDir>/src/**/*.ts",
+  collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
+  projects: [
+    {
+      ...baseConfig,
+      displayName: "core",
+      roots: ["<rootDir>/packages/core"],
+    },
+    {
+      ...baseConfig,
+      displayName: "oidc-browser",
+      roots: ["<rootDir>/packages/oidc-browser"],
+      // This test environment is an extension of jsdom. This module targets the
+      // browser environment only, so tests only need to run in jsdom.
+      // Currently, this is still required despite the polyfills in jest setup.
+      // See comments in file.
+      testEnvironment: "<rootDir>/tests/environment/customEnvironment.ts",
+    },
+    {
+      ...baseConfig,
+      displayName: "browser",
+      roots: ["<rootDir>/packages/browser"],
+      // This test environment is an extension of jsdom. This module targets the
+      // browser environment only, so tests only need to run in jsdom.
+      // Currently, this is still required despite the polyfills in jest setup.
+      // See comments in file.
+      testEnvironment: "<rootDir>/tests/environment/customEnvironment.ts",
+      // Enable injectGlobals here to support jest-mock-console
+      // https://github.com/bpedersen/jest-mock-console/issues/32
+      injectGlobals: true,
+    },
+    {
+      ...baseConfig,
+      displayName: "node",
+      roots: ["<rootDir>/packages/node"],
+      testEnvironment: "node",
+    },
+    {
+      ...baseConfig,
+      displayName: "e2e-node",
+      roots: ["<rootDir>/e2e/node"],
+      setupFiles: ["<rootDir>/e2e/node/jest.e2e.setup.ts"],
+      slowTestThreshold: 30,
+    },
   ],
-  projects: [{
-    ...baseConfig,
-    displayName: "core",
-    roots: ["<rootDir>/packages/core"],
-  }, {
-    ...baseConfig,
-    displayName: "oidc-browser",
-    roots: ["<rootDir>/packages/oidc-browser"],
-    // This test environment is an extension of jsdom. This module targets the
-    // browser environment only, so tests only need to run in jsdom.
-    // Currently, this is still required despite the polyfills in jest setup.
-    // See comments in file.
-    testEnvironment: "<rootDir>/tests/environment/customEnvironment.ts",
-  }, {
-    ...baseConfig,
-    displayName: "browser",
-    roots: ["<rootDir>/packages/browser"],
-    // This test environment is an extension of jsdom. This module targets the
-    // browser environment only, so tests only need to run in jsdom.
-    // Currently, this is still required despite the polyfills in jest setup.
-    // See comments in file.
-    testEnvironment: "<rootDir>/tests/environment/customEnvironment.ts",
-    // Enable injectGlobals here to support jest-mock-console
-    // https://github.com/bpedersen/jest-mock-console/issues/32
-    injectGlobals: true,
-  }, {
-    ...baseConfig,
-    displayName: "node",
-    roots: ["<rootDir>/packages/node"],
-    testEnvironment: "node",
-  }, {
-    ...baseConfig, 
-    displayName: "e2e-node",
-    roots: ["<rootDir>/e2e/node"],
-    setupFiles: ["<rootDir>/jest.e2e.setup.ts"],
-    slowTestThreshold: 30,
-  }],
 } as Config;
