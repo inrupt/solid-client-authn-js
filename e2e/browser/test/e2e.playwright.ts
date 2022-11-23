@@ -20,7 +20,7 @@
  */
 
 import { test, expect } from "./fixtures";
-import { LoginFlow } from "./pageModels/LoginFlow";
+import { loginAndAllow } from "@inrupt/internal-playwright-helpers";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
@@ -70,13 +70,11 @@ test.describe("Logged In", () => {
     await app.start();
     await app.waitForReady();
     await app.startLogin(environment.idp);
-
-    const login = new LoginFlow(page, environment);
-    await login.perform(
+    await loginAndAllow(
+      page,
       environment.clientCredentials.owner.login,
       environment.clientCredentials.owner.password
     );
-    await login.approveAuthorization();
   });
 
   test("Public resource in my Pod", async ({ app, testContainer }) => {

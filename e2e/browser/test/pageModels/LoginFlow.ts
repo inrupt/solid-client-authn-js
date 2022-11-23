@@ -20,6 +20,7 @@
  */
 import { expect, Page } from "@playwright/test";
 import { TestingEnvironmentBrowser } from "@inrupt/internal-test-env";
+import { CognitoPage } from "@inrupt/internal-playwright-helpers";
 
 export class LoginFlow {
   readonly page: Page;
@@ -38,46 +39,9 @@ export class LoginFlow {
       currentUrl.hostname.includes("amazoncognito") ||
       currentUrl.hostname.includes("inrupt.com")
     ) {
-      return this.performCognitoLogin(username, password);
-    }
-    if (currentUrl.hostname.endsWith("inrupt.net")) {
-      return this.performNssLogin(username, password);
+      return CognitoPage.login(username, password);
     }
     throw new Error("Unknown login type");
-  }
-
-  // FIXME: NSS can't be tested because the whole e2e setup can't execute on NSS:
-  private async performNssLogin(username: string, password: string) {
-    // console.log("Performing nss login");
-
-    await this.page.fill("#username", username);
-    await this.page.fill("#password", password);
-
-    await Promise.all([
-      // Cognito does a synchronous navigation:
-      this.page.waitForNavigation({
-        waitUntil: "networkidle",
-      }),
-      // Click the login button:
-      this.page.click("#login"),
-    ]);
-  }
-
-  private async performCognitoLogin(username: string, password: string) {
-    // Check to ensure that the large login form is visible, apparently there are multiple:
-    expect(this.page.isVisible(".visible-lg [type=text]")).toBeTruthy();
-
-    await this.page.fill(".visible-lg [type=text]", username);
-    await this.page.fill(".visible-lg [type=password]", password);
-
-    await Promise.all([
-      // Cognito does a synchronous navigation:
-      this.page.waitForNavigation({
-        waitUntil: "networkidle",
-      }),
-      // Click the login button:
-      this.page.click(".visible-lg [aria-label=submit]"),
-    ]);
   }
 
   async approveAuthorization() {
