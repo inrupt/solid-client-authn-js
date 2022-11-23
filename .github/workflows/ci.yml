@@ -51,7 +51,7 @@ jobs:
           name: code-coverage-ubuntu-latest-16.x
           path: coverage/
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1.7
+        uses: SonarSource/sonarcloud-github-action@v1.8
         with:
           projectBaseDir: ${{ matrix.project-root }}
         env:
