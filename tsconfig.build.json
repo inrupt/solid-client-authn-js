@@ -1,5 +1,11 @@
 {
-  "include": ["packages/*/src/**/*.ts", "e2e/*/**/*.ts", "./jest.setup.ts"],
+  "include": [
+    "packages/*/src/**/*.ts",
+    "e2e/*/**/*.ts",
+    "e2e/node/jest.setup.ts",
+    "./jest.setup.ts",
+    "./jest.config.ts"
+  ],
   "compilerOptions": {
     "module": "commonjs",
     "strict": true,
@@ -15,7 +21,7 @@
     "lib": ["es2018", "dom"],
     "moduleResolution": "node",
     "outDir": "./dist",
-    // This is required to transform native ESM from our dependencies using ts-jest.  
+    // This is required to transform native ESM from our dependencies using ts-jest.
     "allowJs": true
   },
   "exclude": ["node_modules", "dist"],
