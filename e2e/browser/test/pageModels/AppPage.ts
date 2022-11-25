@@ -18,7 +18,7 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import { expect, Locator, Page } from "@playwright/test";
+import { Locator, Page } from "@playwright/test";
 
 type AppPageOptions = {
   clientApplicationUrl: string;
@@ -40,7 +40,7 @@ export class AppPage {
     this.fetchTimeout = options.fetchTimeout;
 
     this.fetchResponseText = this.page.locator(
-      '[data-testid="fetch_response_textbox"]'
+      '[data-testid="fetchResponseTextbox"]'
     );
   }
 
@@ -57,23 +57,29 @@ export class AppPage {
   // }
 
   async startLogin(url: string) {
-    await this.page.fill('[data-testid="idp_input"]', url);
+    await this.page.fill('[data-testid="identityProviderInput"]', url);
 
     // Click the login button:
-    await this.page.click('[data-testid="idp_login_button"]');
+    await this.page.click('[data-testid="loginButton"]');
     await this.page.waitForNavigation({
       waitUntil: "networkidle",
     });
   }
 
   async fetchResource(url: string) {
-    await this.page.fill('[data-testid="fetch_uri_textbox"]', url);
-    await this.page.click('[data-testid="fetch_button"]');
+    await this.page.fill('[data-testid="fetchUriTextbox"]', url);
+    await Promise.all([
+      this.page.click('[data-testid="fetchButton"]'),
+      // Negotiate the protocol endpoint at the gateway
+      this.page.waitForResponse((response) =>
+        response.url().includes(new URL(url).href)
+      ),
+    ]);
 
     // We use waitFor here, as now when we click the "fetch button", the
     // response textbox element will be removed from the DOM whilst the response
     // is loaded:
-    await this.fetchResponseText.waitFor({ timeout: this.fetchTimeout });
+    // await this.fetchResponseText.waitFor({ timeout: this.fetchTimeout });
 
     // Return the response to make testing less verbose:
     return this.getFetchResponse();

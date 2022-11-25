@@ -24,7 +24,7 @@
 
 import { test as base } from "@playwright/test";
 
-import crypto from "crypto";
+import nodeCrypto from "crypto";
 import type {
   TestingEnvironmentBrowser,
   TestingEnvironmentNode,
@@ -44,7 +44,7 @@ import {
   deleteFile,
   createContainerInContainer,
 } from "@inrupt/solid-client";
-import { AppPage } from "./pages/AppPage";
+import { AppPage } from "./pageModels/AppPage";
 
 export { expect } from "@playwright/test";
 
@@ -132,6 +132,7 @@ export const test = base.extend<Fixtures>({
     const session = new Session();
 
     try {
+      console.log(setupEnvironment.idp);
       await session.login({
         oidcIssuer: setupEnvironment.idp,
         clientId: setupEnvironment.clientCredentials.owner.id,
@@ -195,7 +196,7 @@ export const test = base.extend<Fixtures>({
       { fetch: session.fetch }
     );
 
-    const nonExistentResource = `${getSourceUrl(testContainer)}/${crypto
+    const nonExistentResource = `${getSourceUrl(testContainer)}/${nodeCrypto
       .randomBytes(16)
       .toString("hex")}.txt`;
 

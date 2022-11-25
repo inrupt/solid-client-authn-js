@@ -24,13 +24,20 @@ import { getPodUrlAll } from "@inrupt/solid-client";
 import {
   fetch as authenticatedFetch,
   getDefaultSession,
+  ISessionInfo,
+  onLogin,
+  onLogout,
 } from "@inrupt/solid-client-authn-browser";
 
 const session = getDefaultSession();
 
-export default function AuthenticatedFetch() {
+export default function AuthenticatedFetch({
+  sessionInfo,
+}: {
+  sessionInfo?: ISessionInfo;
+}) {
   const [resource, setResource] = useState<string>();
-  const [data, setData] = useState<string>();
+  const [data, setData] = useState<string>("not fetched");
 
   const handleFetch = (e: any) => {
     e.preventDefault();
@@ -63,21 +70,24 @@ export default function AuthenticatedFetch() {
           console.error("Something went wrong");
         });
     }
-  }, []);
+  }, [sessionInfo]);
 
   return (
     <>
       <div>
         <input
+          data-testId="fetchUriTextbox"
           type="text"
           value={resource}
           onChange={(e) => {
             setResource(e.target.value);
           }}
         />
-        <button onClick={(e) => handleFetch(e)}>Fetch</button>
+        <button onClick={(e) => handleFetch(e)} data-testId="fetchButton">
+          Fetch
+        </button>
       </div>
-      <pre>{data}</pre>
+      <pre data-testid="fetchResponseTextbox">{data}</pre>
     </>
   );
 }

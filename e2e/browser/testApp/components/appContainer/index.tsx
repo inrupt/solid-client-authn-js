@@ -32,19 +32,16 @@ const REDIRECT_URL = window.location.href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
 
-const FetchContainer = ({ sessionInfo }: { sessionInfo?: ISessionInfo }) => {
-  if (sessionInfo?.isLoggedIn) {
-    return <AuthenticatedFetch />;
-  }
-  return <></>;
-};
-
 export default function AppContainer() {
   const [sessionInfo, setSessionInfo] = useState<ISessionInfo>();
   const [issuer, setIssuer] = useState<string>(DEFAULT_ISSUER);
 
   useEffect(() => {
-    handleIncomingRedirect().then(setSessionInfo);
+    handleIncomingRedirect({ restorePreviousSession: true })
+      .then(setSessionInfo)
+      .catch((e) => {
+        console.error("Incoming redirect issue ", e);
+      });
   }, []);
 
   const handleLogin = async () => {
@@ -70,9 +67,13 @@ export default function AppContainer() {
     <div>
       <h1>{APP_NAME}</h1>
       <p>
-        {sessionInfo?.isLoggedIn
-          ? `Logged in as ${sessionInfo.webId}`
-          : "Not logged in yet"}
+        {sessionInfo?.isLoggedIn ? (
+          <span data-testid="loggedInStatus">
+            Logged in as {sessionInfo.webId}
+          </span>
+        ) : (
+          <span data-testid="loggedOutStatus">Not logged in yet</span>
+        )}
       </p>
       <form>
         <input
@@ -103,7 +104,7 @@ export default function AppContainer() {
         </button>
       </form>
       <br />
-      <FetchContainer sessionInfo={sessionInfo} />
+      <AuthenticatedFetch sessionInfo={sessionInfo} />
     </div>
   );
 }
