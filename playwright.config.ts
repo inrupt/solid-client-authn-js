@@ -50,7 +50,7 @@ const config: PlaywrightTestConfig = {
     command: "cd ./e2e/browser/testApp/ && npm run dev -- -p 3001",
     port: 3001,
     timeout: 120 * 1000,
-    reuseExistingServer: false//!process.env.CI,
+    reuseExistingServer: !process.env.CI,
   },
   projects: [
     {

@@ -13,16 +13,21 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
   - package-ecosystem: npm
+    directory: "/e2e/browser/testApp"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
     directory: "/packages/browser/examples/single/native"
     schedule:
-      interval: daily
+      interval: weekly
     open-pull-requests-limit: 10
   - package-ecosystem: npm
     directory: "/packages/browser/examples/single/script"
     schedule:
-      interval: daily
+      interval: weekly
     open-pull-requests-limit: 10
   - package-ecosystem: "pip"
     directory: "/packages/browser/docs/api"
     schedule:
-      interval: "daily"
+      interval: "weekly"

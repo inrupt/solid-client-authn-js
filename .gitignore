@@ -95,3 +95,6 @@ umd/
 
 # license-checker
 license.csv
+
+# playright tests output
+test-results/
