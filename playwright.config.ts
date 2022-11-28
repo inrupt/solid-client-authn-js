@@ -31,7 +31,7 @@ const config: PlaywrightTestConfig = {
   // On CI we want to use the automatic annotations, otherwise we use list:
   reporter: process.env.CI ? "github" : "list",
   use: {
-    headless: false,
+    headless: true,
     // Don't leak the env to the browser:
     // Comment out if not running headless browser
     launchOptions: {
