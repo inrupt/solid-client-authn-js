@@ -34,9 +34,9 @@ const config: PlaywrightTestConfig = {
     headless: false,
     // Don't leak the env to the browser:
     // Comment out if not running headless browser
-    // launchOptions: {
-    //   env: {},
-    // },
+    launchOptions: {
+      env: {},
+    },
     // Screenshots actually don't give us any value when trying to debug:
     screenshot: "off",
     // On CI we want all the trace results, but in local development, you really
