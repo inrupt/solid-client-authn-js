@@ -19,20 +19,13 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { useEffect, useState } from "react";
-import { getPodUrlAll } from "@inrupt/solid-client";
+import { useState } from "react";
 import {
   fetch as authenticatedFetch,
-  getDefaultSession,
   ISessionInfo,
-  onLogin,
-  onLogout,
 } from "@inrupt/solid-client-authn-browser";
 
-const session = getDefaultSession();
-
 export default function AuthenticatedFetch({
-  sessionInfo,
   onError,
 }: {
   sessionInfo?: ISessionInfo;
@@ -54,23 +47,6 @@ export default function AuthenticatedFetch({
         });
     }
   };
-
-  useEffect(() => {
-    if (session.info.webId !== undefined) {
-      getPodUrlAll(session.info.webId, {
-        fetch: session.fetch,
-      })
-        .then((pods) => {
-          if (pods.length === 0) {
-            throw new Error("No pod root in webid profile");
-          }
-          setResource(pods[0]);
-        })
-        .catch((err) => {
-          onError(`Something went wrong looking for Pod root: ${err}`);
-        });
-    }
-  }, [sessionInfo, onError]);
 
   return (
     <>

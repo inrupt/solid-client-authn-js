@@ -45,7 +45,7 @@ export default function AppContainer() {
     handleIncomingRedirect({ restorePreviousSession: true })
       .then(setSessionInfo)
       .catch((e) => {
-        console.error("Incoming redirect issue ", e);
+        onError(`Incoming redirect issue ${e.toString()}`);
       });
   }, []);
 
@@ -59,7 +59,7 @@ export default function AppContainer() {
         clientName: APP_NAME,
       });
     } catch (err) {
-      console.error(err);
+      onError((err as Error).toString());
     }
   };
 
@@ -112,7 +112,7 @@ export default function AppContainer() {
         <strong>{errorMessage}</strong>
       </p>
       <br />
-      <AuthenticatedFetch sessionInfo={sessionInfo} />
+      <AuthenticatedFetch onError={onError} />
     </div>
   );
 }
