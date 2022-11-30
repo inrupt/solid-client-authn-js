@@ -20,7 +20,12 @@
  */
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import DemoClientApp from "./DemoClientApp";
 
-ReactDOM.render(<DemoClientApp />, document.getElementById("container"));
+const container = document.getElementById("container");
+if (container) {
+  createRoot(container).render(<DemoClientApp />);
+} else {
+  throw new Error("Missing #container in DOM");
+}
