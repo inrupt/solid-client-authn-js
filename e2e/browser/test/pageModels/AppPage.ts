@@ -70,7 +70,7 @@ export class AppPage {
     await this.page.fill('[data-testid="fetchUriTextbox"]', url);
     await Promise.all([
       this.page.click('[data-testid="fetchButton"]'),
-      // Negotiate the protocol endpoint at the gateway
+      // A response should be sent to the issued fetch.
       this.page.waitForResponse((response) =>
         response.url().includes(new URL(url).href)
       ),
@@ -79,7 +79,7 @@ export class AppPage {
     // We use waitFor here, as now when we click the "fetch button", the
     // response textbox element will be removed from the DOM whilst the response
     // is loaded:
-    // await this.fetchResponseText.waitFor({ timeout: this.fetchTimeout });
+    await this.fetchResponseText.waitFor({ timeout: this.fetchTimeout });
 
     // Return the response to make testing less verbose:
     return this.getFetchResponse();
