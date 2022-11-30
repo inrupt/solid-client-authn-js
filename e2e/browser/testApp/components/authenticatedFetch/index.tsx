@@ -33,8 +33,10 @@ const session = getDefaultSession();
 
 export default function AuthenticatedFetch({
   sessionInfo,
+  onError,
 }: {
   sessionInfo?: ISessionInfo;
+  onError: (err: string) => void;
 }) {
   const [resource, setResource] = useState<string>();
   const [data, setData] = useState<string>("not fetched");
@@ -47,9 +49,8 @@ export default function AuthenticatedFetch({
       })
         .then((response) => response.text())
         .then(setData)
-        .catch((_e) => {
-          // FIXME add error status to the UI
-          console.error("Something went wrong");
+        .catch((error) => {
+          onError(`Something went wrong during fetch: ${error.toString()}`);
         });
     }
   };
@@ -65,12 +66,11 @@ export default function AuthenticatedFetch({
           }
           setResource(pods[0]);
         })
-        .catch((e) => {
-          // FIXME add error status to the UI
-          console.error("Something went wrong");
+        .catch((err) => {
+          onError(`Something went wrong looking for Pod root: ${err}`);
         });
     }
-  }, [sessionInfo]);
+  }, [sessionInfo, onError]);
 
   return (
     <>

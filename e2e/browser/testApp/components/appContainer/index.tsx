@@ -35,6 +35,11 @@ const DEFAULT_ISSUER = "https://login.inrupt.com/";
 export default function AppContainer() {
   const [sessionInfo, setSessionInfo] = useState<ISessionInfo>();
   const [issuer, setIssuer] = useState<string>(DEFAULT_ISSUER);
+  const [errorMessage, setErrorMessage] = useState<string>();
+
+  const onError = (error: string) => {
+    setErrorMessage(error);
+  };
 
   useEffect(() => {
     handleIncomingRedirect({ restorePreviousSession: true })
@@ -103,6 +108,9 @@ export default function AppContainer() {
           Log Out
         </button>
       </form>
+      <p data-testid="errorMessage">
+        <strong>{errorMessage}</strong>
+      </p>
       <br />
       <AuthenticatedFetch sessionInfo={sessionInfo} />
     </div>
