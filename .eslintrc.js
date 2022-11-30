@@ -47,10 +47,5 @@ module.exports = {
     "class-methods-use-this": "off",
     // This rule trips over modules with exports maps, like jose@3.x
     "import/no-unresolved": "off",
-
-    "header/header": [
-      "error",
-      path.resolve(__dirname, "./resources/license-header.js"),
-    ],
   },
 };
