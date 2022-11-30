@@ -17,7 +17,6 @@
     "postinstall": "lerna bootstrap --ci && npm run build",
     "prepublishOnly": "npm run build",
     "publish": "lerna publish",
-    "publish-preview": "lerna publish from-package",
     "test": "npm run test:unit:all",
     "test:unit:all": "jest --coverage --verbose --ignoreProjects e2e-node",
     "test:unit:node": "jest --coverage --verbose --selectProjects node",
