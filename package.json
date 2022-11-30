@@ -67,12 +67,6 @@
   "optionalDependencies": {
     "fsevents": "^2.3.2"
   },
-  "overrides": {
-    "@inrupt/eslint-config-base@0.4.0": {
-      "eslint-plugin-jest": "^26.1.5"
-    },
-    "axios": "^0.21.2"
-  },
   "engines": {
     "node": "^14.0.0 || ^16.0.0"
   }
