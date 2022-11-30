@@ -24,7 +24,7 @@
 
 import { test as base } from "@playwright/test";
 
-import nodeCrypto from "crypto";
+import { randomUUID } from "crypto";
 import type {
   TestingEnvironmentBrowser,
   TestingEnvironmentNode,
@@ -196,9 +196,10 @@ export const test = base.extend<Fixtures>({
       { fetch: session.fetch }
     );
 
-    const nonExistentResource = `${getSourceUrl(testContainer)}/${nodeCrypto
-      .randomBytes(16)
-      .toString("hex")}.txt`;
+    const nonExistentResource = new URL(
+      `${randomUUID()}.txt`,
+      getSourceUrl(testContainer)
+    );
 
     // The code before the call to use is the setup, and after is the teardown.
     // This is the value the Fixture will be using.
