@@ -132,7 +132,6 @@ export const test = base.extend<Fixtures>({
     const session = new Session();
 
     try {
-      console.log(setupEnvironment.idp);
       await session.login({
         oidcIssuer: setupEnvironment.idp,
         clientId: setupEnvironment.clientCredentials.owner.id,
