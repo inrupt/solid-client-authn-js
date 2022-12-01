@@ -17,6 +17,7 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           registry-url: "https://registry.npmjs.org"
+          cache: npm
       - run: npm ci
       - run: npm run publish -- from-package --no-verify-access --yes
         env:
