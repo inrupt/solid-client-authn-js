@@ -48,6 +48,7 @@ export function getDefaultSession(): Session {
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch}
  * @since 1.3.0
  */
+/* eslint-disable-next-line no-shadow */
 export const fetch: Session["fetch"] = (...args) => {
   const session = getDefaultSession();
   return session.fetch(...args);
