@@ -21,7 +21,7 @@
 
 // eslint-disable-next-line no-shadow
 import { fetch, Headers } from "cross-fetch";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 import { createDpopHeader, KeyPair } from "./dpopUtils";
@@ -111,7 +111,7 @@ async function makeAuthenticatedRequest(
 async function refreshAccessToken(
   refreshOptions: RefreshOptions,
   dpopKey?: KeyPair,
-  eventEmitter?: EventEmitter
+  eventEmitter?: TinyEmitter
 ): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }> {
   const tokenSet = await refreshOptions.tokenRefresher.refresh(
     refreshOptions.sessionId,
@@ -163,7 +163,7 @@ export async function buildAuthenticatedFetch(
     dpopKey?: KeyPair;
     refreshOptions?: RefreshOptions;
     expiresIn?: number;
-    eventEmitter?: EventEmitter;
+    eventEmitter?: TinyEmitter;
   }
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;

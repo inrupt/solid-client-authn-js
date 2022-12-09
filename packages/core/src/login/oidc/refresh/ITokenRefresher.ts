@@ -19,7 +19,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { KeyPair } from "../../../authenticatedFetch/dpopUtils";
 
 /**
@@ -69,6 +69,6 @@ export interface ITokenRefresher {
     localUserId: string,
     refreshToken?: string,
     dpopKey?: KeyPair,
-    eventEmitter?: EventEmitter
+    eventEmitter?: TinyEmitter
   ): Promise<TokenEndpointResponse>;
 }

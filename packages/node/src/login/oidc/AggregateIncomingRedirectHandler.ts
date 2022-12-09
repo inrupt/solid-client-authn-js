@@ -32,14 +32,14 @@ import {
   ISessionInfo,
   AggregateHandler,
 } from "@inrupt/solid-client-authn-core";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 
 /**
  * @hidden
  */
 export default class AggregateIncomingRedirectHandler
   extends AggregateHandler<
-    [string, EventEmitter],
+    [string, TinyEmitter],
     ISessionInfo & { fetch: typeof fetch }
   >
   implements IIncomingRedirectHandler

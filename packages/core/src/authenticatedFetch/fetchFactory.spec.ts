@@ -24,7 +24,7 @@
 
 import { jest, it, describe, expect, afterEach } from "@jest/globals";
 import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { Response, Headers } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
 import {
@@ -439,7 +439,7 @@ describe("buildAuthenticatedFetch", () => {
       expiresIn: 7,
     });
     const spyTimeout = jest.spyOn(global, "setTimeout");
-    const mockedEmitter = new EventEmitter();
+    const mockedEmitter = new TinyEmitter();
     const spiedEmit = jest.spyOn(mockedEmitter, "emit");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -505,7 +505,7 @@ describe("buildAuthenticatedFetch", () => {
       ...tokenSet,
       expiresIn: 1800,
     });
-    const eventEmitter = new EventEmitter();
+    const eventEmitter = new TinyEmitter();
     const spiedEmit = jest.spyOn(eventEmitter, "emit");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -527,7 +527,7 @@ describe("buildAuthenticatedFetch", () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
-    const eventEmitter = new EventEmitter();
+    const eventEmitter = new TinyEmitter();
     const spiedEmit = jest.spyOn(eventEmitter, "emit");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -597,7 +597,7 @@ describe("buildAuthenticatedFetch", () => {
           "Some error description"
         )
       ) as any;
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     // 'error' events must be listened to.
     mockEmitter.on(EVENTS.ERROR, jest.fn());
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
@@ -637,7 +637,7 @@ describe("buildAuthenticatedFetch", () => {
         ) => ReturnType<ITokenRefresher["refresh"]>
       >()
       .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -671,7 +671,7 @@ describe("buildAuthenticatedFetch", () => {
         ) => ReturnType<ITokenRefresher["refresh"]>
       >()
       .mockRejectedValueOnce(new InvalidResponseError(["access_token"])) as any;
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
     await buildAuthenticatedFetch(mockedFetch, "myToken", {

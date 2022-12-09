@@ -28,7 +28,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { JWK, importJWK } from "jose";
 import { IdTokenClaims, TokenSet } from "openid-client";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
 import {
@@ -356,7 +356,7 @@ describe("TokenRefresher", () => {
     mockedTokens.refresh_token = "some new refresh token";
     setupOidcClientMock(mockedTokens);
     const mockedStorage = mockRefresherDefaultStorageUtility();
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     const mockEmit = jest.spyOn(mockEmitter, "emit");
 
     const refresher = getTokenRefresher({

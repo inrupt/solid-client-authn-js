@@ -29,7 +29,7 @@ import { IdTokenClaims, TokenSet } from "openid-client";
 import { JWK } from "jose";
 import { Response as NodeResponse, Headers as NodeHeaders } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import {
@@ -421,7 +421,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockedTokens.refresh_token = "some refresh token";
       setupOidcClientMock(mockedTokens);
       const mockedStorage = mockDefaultRedirectStorage();
-      const mockEmitter = new EventEmitter();
+      const mockEmitter = new TinyEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
 
       // Run the test

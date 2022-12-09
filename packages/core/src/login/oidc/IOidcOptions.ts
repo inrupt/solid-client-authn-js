@@ -27,7 +27,7 @@
 /**
  * Defines how OIDC login should proceed
  */
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { IIssuerConfig } from "./IIssuerConfig";
 import { IClient } from "./IClient";
 
@@ -63,7 +63,7 @@ export interface IOidcOptions {
    */
   redirectUrl: string;
   handleRedirect?: (url: string) => unknown;
-  eventEmitter?: EventEmitter;
+  eventEmitter?: TinyEmitter;
 }
 
 export default IOidcOptions;

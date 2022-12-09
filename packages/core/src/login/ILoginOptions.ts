@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import ILoginInputOptions from "../ILoginInputOptions";
 
 /**
@@ -52,5 +52,5 @@ export default interface ILoginOptions extends ILoginInputOptions {
   /**
    * Event emitter enabling calling user-specified callbacks.
    */
-  eventEmitter?: EventEmitter;
+  eventEmitter?: TinyEmitter;
 }

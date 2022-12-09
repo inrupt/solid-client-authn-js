@@ -19,14 +19,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { jest } from "@jest/globals";
 
 import IIncomingRedirectHandler from "../IIncomingRedirectHandler";
 
 const canHandle = jest.fn((_url: string) => Promise.resolve(true));
 
-const handle = jest.fn((_url: string, _emitter: EventEmitter | undefined) =>
+const handle = jest.fn((_url: string, _emitter: TinyEmitter | undefined) =>
   Promise.resolve({
     sessionId: "global",
     isLoggedIn: true,

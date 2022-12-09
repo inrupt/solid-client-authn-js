@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 
 import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
 import {
@@ -61,7 +61,7 @@ describe("ClientAuthentication", () => {
   }
 
   describe("login", () => {
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     it("calls login, and defaults to a DPoP token", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(

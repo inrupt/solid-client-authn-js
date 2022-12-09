@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
@@ -70,7 +70,7 @@ describe("ErrorOidcHandler", () => {
     });
     it("calls the onError callback if given with both parameters", async () => {
       window.fetch = jest.fn<typeof fetch>();
-      const mockEmitter = new EventEmitter();
+      const mockEmitter = new TinyEmitter();
       // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events
       mockEmitter.on(EVENTS.ERROR, jest.fn());
       const mockEmit = jest.spyOn(mockEmitter, "emit");
@@ -91,7 +91,7 @@ describe("ErrorOidcHandler", () => {
 
     it("calls the onError callback if given with just error parameters if no description is provided", async () => {
       window.fetch = jest.fn<typeof fetch>();
-      const mockEmitter = new EventEmitter();
+      const mockEmitter = new TinyEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
       // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events
       mockEmitter.on(EVENTS.ERROR, jest.fn());

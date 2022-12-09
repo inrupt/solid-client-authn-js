@@ -36,7 +36,7 @@ import {
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { refresh } from "@inrupt/oidc-client-ext";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.
@@ -56,7 +56,7 @@ export default class TokenRefresher implements ITokenRefresher {
     sessionId: string,
     refreshToken?: string,
     dpopKey?: KeyPair,
-    eventEmitter?: EventEmitter
+    eventEmitter?: TinyEmitter
   ): Promise<TokenEndpointResponse> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,

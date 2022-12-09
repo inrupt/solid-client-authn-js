@@ -38,7 +38,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, IssuerMetadata, TokenSet } from "openid-client";
 import { KeyObject } from "crypto";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
@@ -85,7 +85,7 @@ export default class TokenRefresher implements ITokenRefresher {
     sessionId: string,
     refreshToken?: string,
     dpopKey?: KeyPair,
-    eventEmitter?: EventEmitter
+    eventEmitter?: TinyEmitter
   ): Promise<TokenEndpointResponse> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,

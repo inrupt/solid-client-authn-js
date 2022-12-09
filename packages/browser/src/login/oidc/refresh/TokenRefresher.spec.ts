@@ -31,7 +31,7 @@ import {
 } from "@inrupt/solid-client-authn-core/mocks";
 import { JWK, importJWK } from "jose";
 import { refresh } from "@inrupt/oidc-client-ext";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
 import {
@@ -228,7 +228,7 @@ describe("TokenRefresher", () => {
 
     it("calls the refresh token rotation callback if a new refresh token is issued", async () => {
       const mockedStorage = mockRefresherDefaultStorageUtility();
-      const mockEmitter = new EventEmitter();
+      const mockEmitter = new TinyEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
 
       await mockOidcModule({

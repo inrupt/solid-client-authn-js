@@ -22,7 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorage } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import {
   buildLoginHandler,
   buildRedirectHandler,
@@ -147,7 +147,7 @@ describe("resolution order", () => {
         refreshToken: "some refresh token",
         oidcIssuer: "https://some.issuer",
       },
-      new EventEmitter()
+      new TinyEmitter()
     );
     await expect(
       handlerSelectSpy.mock.results[0].value
@@ -171,7 +171,7 @@ describe("resolution order", () => {
         clientSecret: "some client secret",
         oidcIssuer: "https://some.issuer",
       },
-      new EventEmitter()
+      new TinyEmitter()
     );
     await expect(
       handlerSelectSpy.mock.results[0].value
@@ -194,7 +194,7 @@ describe("resolution order", () => {
         oidcIssuer: "https://some.issuer",
         handleRedirect: jest.fn(),
       },
-      new EventEmitter()
+      new TinyEmitter()
     );
     await expect(
       handlerSelectSpy.mock.results[0].value

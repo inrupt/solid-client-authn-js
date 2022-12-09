@@ -36,7 +36,7 @@ import {
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a
@@ -60,7 +60,7 @@ export default class ClientAuthentication {
   // Isn't Javascript fun?
   login = async (
     options: ILoginOptions,
-    eventEmitter: EventEmitter
+    eventEmitter: TinyEmitter
   ): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
@@ -128,7 +128,7 @@ export default class ClientAuthentication {
 
   handleIncomingRedirect = async (
     url: string,
-    eventEmitter: EventEmitter
+    eventEmitter: TinyEmitter
   ): Promise<ISessionInfo | undefined> => {
     try {
       const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);

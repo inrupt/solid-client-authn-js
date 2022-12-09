@@ -20,7 +20,7 @@
  */
 
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 
 import {
@@ -115,7 +115,7 @@ describe("ClientAuthentication", () => {
   });
 
   describe("login", () => {
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     // TODO: add tests for events & errors
 
     it("calls login, and uses the window.location.href for the redirect if no redirectUrl is set", async () => {
@@ -243,7 +243,7 @@ describe("ClientAuthentication", () => {
   });
 
   describe("logout", () => {
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
@@ -311,7 +311,7 @@ describe("ClientAuthentication", () => {
   });
 
   describe("handleIncomingRedirect", () => {
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
     mockEmitter.emit = jest.fn<typeof mockEmitter.emit>();
 
     it("calls handle redirect", async () => {

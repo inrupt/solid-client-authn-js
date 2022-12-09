@@ -29,7 +29,7 @@ import {
   IIncomingRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
-import type { EventEmitter } from "events";
+import type { TinyEmitter } from "tiny-emitter";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 
@@ -53,7 +53,7 @@ export class ErrorOidcHandler implements IIncomingRedirectHandler {
 
   async handle(
     redirectUrl: string,
-    eventEmitter?: EventEmitter
+    eventEmitter?: TinyEmitter
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (eventEmitter !== undefined) {
       const url = new URL(redirectUrl);

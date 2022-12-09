@@ -49,7 +49,7 @@ import { Issuer } from "openid-client";
 import { KeyObject } from "crypto";
 import { fetch as globalFetch } from "cross-fetch";
 
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
@@ -81,7 +81,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
   async handle(
     inputRedirectUrl: string,
-    eventEmitter?: EventEmitter
+    eventEmitter?: TinyEmitter
   ): Promise<ISessionInfo & { fetch: typeof globalFetch }> {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(

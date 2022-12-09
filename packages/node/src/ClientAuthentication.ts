@@ -35,7 +35,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 
 /**
  * @hidden
@@ -53,7 +53,7 @@ export default class ClientAuthentication {
   login = async (
     sessionId: string,
     options: ILoginInputOptions,
-    eventEmitter: EventEmitter
+    eventEmitter: TinyEmitter
   ): Promise<ISessionInfo | undefined> => {
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
@@ -123,7 +123,7 @@ export default class ClientAuthentication {
 
   handleIncomingRedirect = async (
     url: string,
-    eventEmitter: EventEmitter
+    eventEmitter: TinyEmitter
   ): Promise<ISessionInfo | undefined> => {
     const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
 

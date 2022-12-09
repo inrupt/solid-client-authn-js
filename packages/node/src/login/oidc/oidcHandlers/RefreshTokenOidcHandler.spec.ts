@@ -32,7 +32,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jwtVerify, exportJWK } from "jose";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { Headers as NodeHeaders, Response as NodeResponse } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
 import {
@@ -405,7 +405,7 @@ describe("RefreshTokenOidcHandler", () => {
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
-    const mockEmitter = new EventEmitter();
+    const mockEmitter = new TinyEmitter();
 
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(

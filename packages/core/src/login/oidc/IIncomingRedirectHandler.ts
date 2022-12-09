@@ -26,12 +26,12 @@
 
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import IHandleable from "../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../sessionInfo/ISessionInfo";
 
 export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch };
-export type IncomingRedirectInput = [string, EventEmitter | undefined];
+export type IncomingRedirectInput = [string, TinyEmitter | undefined];
 
 /**
  * @hidden

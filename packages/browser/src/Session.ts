@@ -22,7 +22,7 @@
 /**
  * @hidden
  */
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import {
   EVENTS,
   ILoginInputOptions,
@@ -132,7 +132,7 @@ function isLoggedIn(
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter {
+export class Session extends TinyEmitter {
   /**
    * Information regarding the current session.
    */

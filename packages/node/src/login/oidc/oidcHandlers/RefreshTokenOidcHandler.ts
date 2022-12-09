@@ -45,7 +45,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { JWK, importJWK } from "jose";
 import { fetch as globalFetch } from "cross-fetch";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 import { KeyObject } from "crypto";
 
 function validateOptions(
@@ -70,7 +70,7 @@ async function refreshAccess(
   refreshOptions: RefreshOptions,
   dpop: boolean,
   refreshBindingKey?: KeyPair,
-  eventEmitter?: EventEmitter
+  eventEmitter?: TinyEmitter
 ): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
   try {
     let dpopKey: KeyPair | undefined;

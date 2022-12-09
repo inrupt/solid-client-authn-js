@@ -45,7 +45,7 @@ import {
   getBearerToken,
   CodeExchangeResult,
 } from "@inrupt/oidc-client-ext";
-import { EventEmitter } from "events";
+import { TinyEmitter } from "tiny-emitter";
 
 /**
  * @hidden
@@ -75,7 +75,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
   async handle(
     redirectUrl: string,
-    eventEmitter?: EventEmitter
+    eventEmitter?: TinyEmitter
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
