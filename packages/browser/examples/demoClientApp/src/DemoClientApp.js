@@ -2,21 +2,21 @@ import React, { Component } from "react";
 import "regenerator-runtime/runtime";
 
 import {
-  Session,
-  getClientAuthenticationWithDependencies,
+  login,
+  getDefaultSession,
+  handleIncomingRedirect,
+  logout,
+  fetch,
 } from "@inrupt/solid-client-authn-browser";
 
 const clientApplicationName = "S-C-A Browser Demo Client App";
 let snackBarTimeout = undefined;
-let identityProviderLogoutEndpointTimeout = null;
 
 const NSS_SERVER_URL = "https://inrupt.net/";
 
 const preconfiguedIdpList = [
   "https://openid.dev-next.inrupt.com",
-  "https://broker.pod.inrupt.com",
-  "https://broker.dev-ess.inrupt.com",
-  "https://broker.demo-ess.inrupt.com",
+  "https://login.inrupt.com",
   "https://inrupt.net",
 ];
 
@@ -29,20 +29,6 @@ const style = {
   margin: "0 0 1em 0",
 };
 
-// FIXME: temporary hack to get access to the clientAuthentication instance to retrieve the IdP URL
-// replace with getDefaultSession once the issuer is exposed in ISessionInfo
-let session, clientAuthentication;
-function getSession() {
-  if (!session) {
-    clientAuthentication = getClientAuthenticationWithDependencies({});
-    session = new Session({
-      clientAuthentication: clientAuthentication,
-    });
-  }
-
-  return session;
-}
-
 function identityProviderConfigUrl(url) {
   return `${url}${
     url.endsWith("/") ? "" : "/"
@@ -54,63 +40,11 @@ async function fetchIdentityProviderConfig(idpConfigEndpoint) {
   return fetch(idpConfigEndpoint).then((response) => response.json());
 }
 
-/**
- * Very hacky attempt at splitting a WebID into 'components', such that:
- *  prefix: is up to, but not including, the username part of the WebID.
- *  identifier: is just the username part of the WebID.
- *  suffix: is everything after the username part of the WebID.
- *
- * Example: https://ldp.demo-ess.inrupt.com/110592712913443799002/profile/card#me
- *  prefix is "https://ldp.demo-ess.inrupt.com/".
- *  identifier is "110592712913443799002".
- *  suffix is "/profile/card#me".
- */
-function extractWebIdComponents(webId) {
-  const webIdUrl = new URL(webId);
-  const result = { prefix: null, identifier: null, suffix: null };
-
-  result.prefix = new URL("/", webIdUrl).toString();
-
-  if (webId.endsWith("/profile/card#me")) {
-    // ESS 1.1:
-    const suffixIndex = webIdUrl.pathname.indexOf("/profile/");
-
-    result.identifier = webIdUrl.pathname.slice(1, suffixIndex);
-    result.suffix = webIdUrl.pathname.slice(suffixIndex) + webIdUrl.hash;
-  } else {
-    // ESS 1.2:
-    // There is no suffix for ESS 1.2 WebIds
-    result.identifier = webIdUrl.pathname.substring(1);
-  }
-
-  // NSS on Inrupt.net uses subdomains, so we need to trim the trailing slash on the prefix:
-  if (
-    !result.identifier &&
-    result.prefix &&
-    result.suffix &&
-    result.prefix.endsWith("/")
-  ) {
-    result.prefix = result.prefix.substring(0, result.prefix.length - 1);
-  }
-
-  return result;
-}
-
-function openNewWindow(url) {
-  const top = (window.outerHeight - 500) / 2;
-  const left = (window.outerWidth - 1200) / 2;
-  window.open(
-    url,
-    "_blank",
-    `height=500,width=1200,top=${top},left=${left},modal=yes,alwaysRaised=yes,toolbar=0,menubar=0`
-  );
-}
-
 class DemoClientApp extends Component {
   constructor(props) {
     super(props);
 
-    const session = getSession();
+    const session = getDefaultSession();
 
     session.onLogout(() => {
       this.setState({
@@ -132,6 +66,7 @@ class DemoClientApp extends Component {
 
     this.state = {
       status: "loading",
+      // FIXME: This is currently wrong on session restore, as we don't expose the Issuer from ISessionInfo
       loginIssuer: defaultIssuer,
       clearClientRegistrationInfo: true,
       fetchRoute: "",
@@ -142,75 +77,47 @@ class DemoClientApp extends Component {
       enableIdpButtons: false,
     };
 
-    if (window.location.pathname === "/popup") {
-      this.state.status = "popup";
-    }
-
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.handleFetchIdentityProviderConfig =
       this.handleFetchIdentityProviderConfig.bind(this);
-    this.handleOpenIdentityProvider =
-      this.handleOpenIdentityProvider.bind(this);
-    this.handleLogoutIdentityProvider =
-      this.handleLogoutIdentityProvider.bind(this);
     this.handleFetch = this.handleFetch.bind(this);
   }
 
   async componentDidMount() {
-    if (window.location.pathname === "/popup") {
-      this.state.status = "popup";
-      setTimeout(() => window.close(), 2000);
+    // restore the existing session or handle the redirect from login:
+    const sessionInfo = await handleIncomingRedirect({
+      restorePreviousSession: true,
+    });
+
+    if (sessionInfo && sessionInfo.isLoggedIn) {
+      this.onLoginOrRestore();
     } else {
-      const session = getSession();
-
-      // restore the existing session or handle the redirect from login:
-      await session.handleIncomingRedirect({
-        restorePreviousSession: true,
-      });
-
-      if (!session.info.isLoggedIn) {
-        this.setState({ status: "login" });
-      } else {
-        this.onLoginOrRestore();
-      }
+      this.setState({ status: "login" });
     }
   }
 
   async onLoginOrRestore() {
-    const session = getSession();
+    const session = getDefaultSession();
 
     if (!session.info.isLoggedIn) {
       this.setState({ status: "login" });
     } else {
-      // FIXME: remove once issuer is provided in ISessionInfo:
-      const fullSessionInfo = await clientAuthentication.getSessionInfo(
-        session.info.sessionId
-      );
-
       this.setState({
         status: "dashboard",
-        loginIssuer: fullSessionInfo.issuer,
+        loginIssuer: this.state.loginIssuer,
         fetchRoute: "",
       });
 
-      this.fetchIdentityProviderInfo(fullSessionInfo.issuer);
+      this.fetchIdentityProviderInfo(this.state.loginIssuer);
     }
   }
 
-  async handleLogin(e, isPopup = false) {
+  async handleLogin(e) {
     e.preventDefault();
     this.setState({ status: "loading" });
 
-    if (this.state.clearClientRegistrationInfo) {
-      window.localStorage.clear(
-        "solidClientAuthenticationUser:clientApplicationRegistrationInfo"
-      );
-    }
-
-    const session = getSession();
-
-    await session.login({
+    await login({
       redirectUrl: document.location.href,
       oidcIssuer: this.state.loginIssuer,
       clientName: clientApplicationName,
@@ -229,58 +136,13 @@ class DemoClientApp extends Component {
     }
   }
 
-  handleOpenIdentityProvider(e) {
+  // FIXME: Support logout at IDP
+  async handleLogout(e) {
     e.preventDefault();
 
-    console.log(
-      `Opening new window for Identity Provider at: [${this.state.loginIssuer}]`
-    );
-
-    openNewWindow(this.state.loginIssuer);
-  }
-
-  async handleLogoutIdentityProvider(e) {
-    e.preventDefault();
-
-    const config = await fetchIdentityProviderConfig(
-      identityProviderConfigUrl(this.state.loginIssuer)
-    );
-
-    // ESS 1.1 requires the `post_logout_redirect_uri` to be set:
-    const redirectUri = new URL("/popup", document.location.href);
-    const endSessionUrl = new URL(config.end_session_endpoint);
-    endSessionUrl.searchParams.set(
-      "post_logout_redirect_uri",
-      redirectUri.toString()
-    );
-
-    console.log(
-      `Opening new window for Identity Provider Logout at: [${endSessionUrl}]`
-    );
-
-    openNewWindow(endSessionUrl);
-
-    // Calling explicitly because the logout happens in the popup:
-    setTimeout(async () => {
-      const session = getSession();
-      await session.logout();
-
-      this.setState({ enableIdpButtons: false });
-    }, 1000);
-  }
-
-  handleLogout(e) {
-    e.preventDefault();
-    this.performLogout();
-  }
-
-  async performLogout() {
     this.setState({ status: "loading" });
 
-    const session = getSession();
-    await session.logout();
-
-    this.hasIdentityProviderLogout(this.state.loginIssuer);
+    await logout();
 
     this.setState({
       status: "login",
@@ -295,13 +157,9 @@ class DemoClientApp extends Component {
     this.setState({ fetchLoading: true });
 
     try {
-      const session = getSession();
-      const response = await (
-        await session.fetch(this.state.fetchRoute, {})
-      ).text();
+      const response = await (await fetch(this.state.fetchRoute, {})).text();
 
       this.setState({ fetchBody: response, fetchLoading: false });
-      this.fetchIdentityProviderInfo(this.state.loginIssuer);
     } catch (err) {
       this.setState({ fetchLoading: false });
     }
@@ -309,6 +167,7 @@ class DemoClientApp extends Component {
 
   displaySnackBar(text) {
     const snackBar = document.getElementById("snackbar");
+    if (!snackBar) throw new Error("Snackbar not found in DOM");
     snackBar.className = "show";
     snackBar.innerHTML = text;
     if (snackBarTimeout) {
@@ -319,18 +178,13 @@ class DemoClientApp extends Component {
     }, 3000);
   }
 
-  hasIdentityProviderLogout(url) {
-    if (identityProviderLogoutEndpointTimeout != null) {
-      clearTimeout(identityProviderLogoutEndpointTimeout);
+  async fetchIdentityProviderInfo(url) {
+    // Handles the case on session restore where we don't have access to the issuer:
+    if (!url) {
+      return;
     }
 
-    identityProviderLogoutEndpointTimeout = setTimeout(() => {
-      identityProviderLogoutEndpointTimeout = null;
-      this.fetchIdentityProviderInfo(url);
-    }, 200);
-  }
-  async fetchIdentityProviderInfo(url) {
-    const session = getSession();
+    const session = getDefaultSession();
     const idpConfigEndpoint = identityProviderConfigUrl(url);
 
     return fetchIdentityProviderConfig(idpConfigEndpoint)
@@ -414,11 +268,10 @@ class DemoClientApp extends Component {
             data-testid="idp_input"
             list="preconfigued_idp_list"
             type="search"
-            size="80"
+            size={80}
             value={this.state.loginIssuer}
             onChange={(e) => {
               this.setState({ loginIssuer: e.target.value, idpConfig: null });
-              this.hasIdentityProviderLogout(e.target.value);
             }}
           />
           <datalist id="preconfigued_idp_list">
@@ -471,7 +324,7 @@ class DemoClientApp extends Component {
           <strong>Resource: </strong>
           <input
             data-testid="fetch_uri_textbox"
-            size="80"
+            size={80}
             type="text"
             value={this.state.fetchRoute}
             onChange={(e) => this.setState({ fetchRoute: e.target.value })}
@@ -496,7 +349,7 @@ class DemoClientApp extends Component {
   }
 
   renderUserInfo() {
-    const session = getSession();
+    const session = getDefaultSession();
     console.log(`Current logged in state: [${session.info.isLoggedIn}]`);
 
     return (
@@ -523,44 +376,10 @@ class DemoClientApp extends Component {
 
           <div className="tooltip">
             <div>
-              {/*<a target="_blank" href={this.state.loginIssuer}>*/}
-              {/*  {this.state.loginIssuer}*/}
-              {/*</a>*/}
-              <button
-                onClick={this.handleOpenIdentityProvider}
-                disabled={!this.state.enableIdpButtons}
-              >
-                Open Identity Provider Popup
-              </button>
+              <button disabled={true}>Logout from Identity Provider</button>
               &nbsp;<i className="fa fa-info-circle"></i>
               &nbsp;
             </div>
-
-            <span className="tooltiptext">
-              Allows you to see authorizations you've granted, and to log out
-              (maybe you'd like to log in again using a different account).
-            </span>
-          </div>
-
-          <div className="tooltip">
-            <div>
-              <button
-                onClick={this.handleLogoutIdentityProvider}
-                disabled={!this.state.enableIdpButtons}
-              >
-                Logout from Identity Provider
-              </button>
-              &nbsp;<i className="fa fa-info-circle"></i>
-              &nbsp;
-            </div>
-
-            <span className="tooltiptext">
-              Jump to 'Logout' endpoint for currently entered Identity Provider.
-              <p></p>
-              NOTE: This button is only enabled if the currently entered
-              Identity Provider exposes an 'end_session_endpoint' value at: [
-              {identityProviderConfigUrl(this.state.loginIssuer)}]
-            </span>
           </div>
 
           <div className="tooltip">
@@ -582,16 +401,7 @@ class DemoClientApp extends Component {
     );
   }
 
-  renderPopupMessage() {
-    return (
-      <>
-        <h1>Popup Redirected</h1>
-        <p>Will automatically close in 2 seconds</p>
-      </>
-    );
-  }
   renderDashboard(session) {
-    const webId = extractWebIdComponents(session.info.webId);
     return (
       <div>
         <div style={style}>
@@ -599,16 +409,12 @@ class DemoClientApp extends Component {
           <p>
             <strong>Session Provider:</strong>{" "}
             <code>{this.state.loginIssuer}</code>
+            <br />
+            Note: this value is currently incorrect on session restore, as we
+            don't currently expose the issuer from the session info.
           </p>
           <p>
-            <strong>WebID:</strong>{" "}
-            <code>
-              {webId.prefix}
-              <span style={{ color: "darkblue" }}>
-                <strong>{webId.identifier}</strong>
-              </span>
-              {webId.suffix}
-            </code>
+            <strong>WebID:</strong> <code>{session.info.webId}</code>
           </p>
           <div className="tooltip">
             <form>
@@ -638,8 +444,6 @@ class DemoClientApp extends Component {
 
   renderUI() {
     switch (this.state.status) {
-      case "popup":
-        return this.renderPopupMessage();
       case "loading":
         return <h1>Loading...</h1>;
       case "login":
@@ -650,7 +454,7 @@ class DemoClientApp extends Component {
           </>
         );
       case "dashboard":
-        return this.renderDashboard(getSession());
+        return this.renderDashboard(getDefaultSession());
       default:
         return (
           <p>Something seems to have gone wrong, please reload the page</p>
