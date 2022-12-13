@@ -20,7 +20,6 @@
  */
 
 import { test, expect } from "./fixtures";
-import { LoginFlow } from "./pageModels/LoginFlow";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
@@ -28,8 +27,6 @@ test.describe("Not Logged In", () => {
   // Skipping this for now, as it is currently failing. Will investigate separately.
   // eslint-disable-next-line playwright/no-skipped-test
   test.skip("Public resource in my Pod", async ({ testContainer, app }) => {
-    await app.start();
-
     expect(await app.getFetchResponse()).toBe("not fetched");
 
     const response = await app.fetchResource(testContainer.publicResource);
@@ -38,8 +35,6 @@ test.describe("Not Logged In", () => {
   });
 
   test("Private resource in my Pod", async ({ testContainer, app }) => {
-    await app.start();
-
     expect(await app.getFetchResponse()).toBe("not fetched");
 
     const response = await app.fetchResource(testContainer.privateResource);
@@ -52,8 +47,6 @@ test.describe("Not Logged In", () => {
   test.fixme(
     "Non-existent resource in my Pod",
     async ({ testContainer, app }) => {
-      await app.start();
-
       expect(await app.getFetchResponse()).toBe("not fetched");
 
       const response = await app.fetchResource(
@@ -66,23 +59,11 @@ test.describe("Not Logged In", () => {
 });
 
 test.describe("Logged In", () => {
-  test.beforeEach(async ({ app, page, environment }) => {
-    await app.start();
-    await app.waitForReady();
-    await app.startLogin(environment.idp);
-
-    const login = new LoginFlow(page, environment);
-    await login.perform(
-      environment.clientCredentials.owner.login,
-      environment.clientCredentials.owner.password
-    );
-    await login.approveAuthorization();
+  test.beforeEach(async ({ auth }) => {
+    await auth.login({ allow: true });
   });
 
   test("Public resource in my Pod", async ({ app, testContainer }) => {
-    // The app is started in the beforeEach:
-    await app.waitForReady();
-
     expect(await app.getFetchResponse()).toBe("not fetched");
 
     const response = await app.fetchResource(testContainer.publicResource);
@@ -91,9 +72,6 @@ test.describe("Logged In", () => {
   });
 
   test("Private resource in my Pod", async ({ app, testContainer }) => {
-    // The app is started in the beforeEach:
-    await app.waitForReady();
-
     expect(await app.getFetchResponse()).toBe("not fetched");
 
     const response = await app.fetchResource(testContainer.privateResource);
@@ -105,8 +83,6 @@ test.describe("Logged In", () => {
     app,
     testContainer,
   }) => {
-    // The app is started in the beforeEach:
-    await app.waitForReady();
     await app.page.reload();
 
     await app.page.waitForSelector("span[data-testid=loggedInStatus]");
