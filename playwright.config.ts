@@ -47,7 +47,7 @@ const config: PlaywrightTestConfig = {
   // We need just a little more time on CI:
   timeout: process.env.CI ? 3 * 60_000 : 60_000,
   webServer: {
-    command: "cd ./e2e/browser/testApp/ && npm run dev -- -p 3001",
+    command: "cd ./e2e/browser/test-app/ && npm run dev -- -p 3001",
     port: 3001,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,

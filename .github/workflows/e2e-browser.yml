@@ -38,7 +38,7 @@ jobs:
         run: npx playwright install --with-deps
       - name: Prepare browser-based end-to-end tests
         run: npm ci
-        working-directory: e2e/browser/testApp
+        working-directory: e2e/browser/test-pp
       - name: Run browser-based end-to-end tests
         run: npm run test:e2e:browser
         env:

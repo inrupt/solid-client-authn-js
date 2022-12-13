@@ -20,7 +20,6 @@
  */
 
 import { test, expect } from "./fixtures";
-import { loginAndAllow } from "@inrupt/internal-playwright-helpers";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
