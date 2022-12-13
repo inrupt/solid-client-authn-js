@@ -1,6 +1,28 @@
-import { getTestingEnvironment } from "../../setup/e2e-setup";
-import { Session } from "@inrupt/solid-client-authn-node";
+//
+// Copyright 2022 Inrupt Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+// Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
+// The following is a CLI script, so some regular linting rules don't apply.
+/* eslint-disable no-console, no-await-in-loop */
+
+import { Session } from "@inrupt/solid-client-authn-node";
 import { config } from "dotenv-flow";
 import {
   deleteContainer,
@@ -8,12 +30,8 @@ import {
   getContainedResourceUrlAll,
   getPodUrlAll,
   getSolidDataset,
-  getSourceUrl,
-  getThingAll,
-  getUrlAll,
-  solidDatasetAsMarkdown,
 } from "@inrupt/solid-client";
-import { ldp, solid } from "@inrupt/solid-client/dist/constants";
+import { getNodeTestingEnvironment } from "@inrupt/internal-test-env";
 
 config({
   path: __dirname.concat("/../../env/"),
@@ -22,23 +40,30 @@ config({
 });
 
 async function run() {
-  const environment = getTestingEnvironment();
+  const environment = getNodeTestingEnvironment({
+    clientCredentials: {
+      owner: {
+        id: "",
+        secret: "",
+      },
+    },
+  });
   const session = new Session();
 
   await session.login({
     oidcIssuer: environment.idp,
-    clientId: environment.clientId,
-    clientSecret: environment.clientSecret,
+    clientId: environment.clientCredentials.owner.id,
+    clientSecret: environment.clientCredentials.owner.secret,
   });
 
   // Empty line to make output separate from the DPoP DraftWarning
   console.log("");
 
-  if (!session.info.isLoggedIn) {
+  if (!session.info.isLoggedIn || typeof session.info.webId !== "string") {
     throw new Error("Failed to login when creating test container");
   }
 
-  const pods = await getPodUrlAll(session.info.webId!, {
+  const pods = await getPodUrlAll(session.info.webId, {
     fetch: session.fetch,
   });
 
@@ -80,6 +105,7 @@ async function run() {
   }
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-floating-promises */
 run()
   .catch(console.error.bind(console))
   .then(() => process.exit());

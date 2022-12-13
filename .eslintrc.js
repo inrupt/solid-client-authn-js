@@ -1,6 +1,7 @@
 const path = require("path");
 
 module.exports = {
+  root: true,
   extends: ["@inrupt/eslint-config-lib"],
   parserOptions: {
     ecmaVersion: 2018,
