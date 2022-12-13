@@ -27,7 +27,7 @@ const config: PlaywrightTestConfig = {
   testMatch: "*.playwright.ts",
   retries: 1,
   workers: process.env.CI ? 3 : 1,
-  globalSetup: require.resolve("./globalSetup.ts"),
+  globalSetup: require.resolve("./e2e/browser/test/globalSetup.ts"),
   // On CI we want to use the automatic annotations, otherwise we use list:
   reporter: process.env.CI ? "github" : "list",
   use: {
@@ -47,7 +47,7 @@ const config: PlaywrightTestConfig = {
   // We need just a little more time on CI:
   timeout: process.env.CI ? 3 * 60_000 : 60_000,
   webServer: {
-    command: "npm run start",
+    command: "cd ./e2e/browser/testApp/ && npm run dev -- -p 3001",
     port: 3001,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,

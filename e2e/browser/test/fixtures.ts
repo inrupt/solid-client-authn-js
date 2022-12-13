@@ -24,7 +24,7 @@
 
 import { test as base } from "@playwright/test";
 
-import crypto from "crypto";
+import { randomUUID } from "crypto";
 import type {
   TestingEnvironmentBrowser,
   TestingEnvironmentNode,
@@ -44,7 +44,7 @@ import {
   deleteFile,
   createContainerInContainer,
 } from "@inrupt/solid-client";
-import { AppPage } from "./pages/AppPage";
+import { AppPage } from "./pageModels/AppPage";
 
 export { expect } from "@playwright/test";
 
@@ -195,9 +195,10 @@ export const test = base.extend<Fixtures>({
       { fetch: session.fetch }
     );
 
-    const nonExistentResource = `${getSourceUrl(testContainer)}/${crypto
-      .randomBytes(16)
-      .toString("hex")}.txt`;
+    const nonExistentResource = new URL(
+      `${randomUUID()}.txt`,
+      getSourceUrl(testContainer)
+    );
 
     // The code before the call to use is the setup, and after is the teardown.
     // This is the value the Fixture will be using.

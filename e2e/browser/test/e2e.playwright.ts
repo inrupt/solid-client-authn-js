@@ -20,7 +20,7 @@
  */
 
 import { test, expect } from "./fixtures";
-import { LoginFlow } from "./pages/LoginFlow";
+import { LoginFlow } from "./pageModels/LoginFlow";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
@@ -109,7 +109,7 @@ test.describe("Logged In", () => {
     await app.waitForReady();
     await app.page.reload();
 
-    await app.waitForReady();
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
 
     expect(await app.getFetchResponse()).toBe("not fetched");
 
