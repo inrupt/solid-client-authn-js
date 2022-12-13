@@ -22,7 +22,7 @@
 // This file includes experimental API objects, which are camel cased.
 /* eslint-disable camelcase */
 
-import { test as base } from "@playwright/test";
+import { test as base } from "@inrupt/internal-playwright-helpers";
 
 import { randomUUID } from "crypto";
 import type {
@@ -46,7 +46,7 @@ import {
 } from "@inrupt/solid-client";
 import { AppPage } from "./pageModels/AppPage";
 
-export { expect } from "@playwright/test";
+export { expect } from "@inrupt/internal-playwright-helpers";
 
 export type Fixtures = {
   app: AppPage;
@@ -198,7 +198,7 @@ export const test = base.extend<Fixtures>({
     const nonExistentResource = new URL(
       `${randomUUID()}.txt`,
       getSourceUrl(testContainer)
-    );
+    ).href;
 
     // The code before the call to use is the setup, and after is the teardown.
     // This is the value the Fixture will be using.

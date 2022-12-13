@@ -44,28 +44,6 @@ export class AppPage {
     );
   }
 
-  async start() {
-    await this.page.goto(this.url);
-  }
-
-  async waitForReady() {
-    return this.page.waitForURL(this.url);
-  }
-
-  // async disableReauthorize() {
-  //   return this.page.uncheck('[data-testid="login_reauthorize"]');
-  // }
-
-  async startLogin(url: string) {
-    await this.page.fill('[data-testid="identityProviderInput"]', url);
-
-    // Click the login button:
-    await this.page.click('[data-testid="loginButton"]');
-    await this.page.waitForNavigation({
-      waitUntil: "networkidle",
-    });
-  }
-
   async fetchResource(url: string) {
     await this.page.fill('[data-testid="fetchUriTextbox"]', url);
     await Promise.all([
