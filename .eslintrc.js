@@ -19,6 +19,13 @@ module.exports = {
         "@typescript-eslint/no-explicit-any": "off",
       },
     },
+    {
+      files: ["e2e/**/*.tsx"],
+      rules: {
+        "no-shadow": "off",
+        "@typescript-eslint/no-shadow": "error",
+      },
+    },
   ],
   env: {
     // eslint will complain about imports from @jest/globals shadowing global
