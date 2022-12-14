@@ -8,6 +8,7 @@ module.exports = {
     sourceType: "module",
     tsconfigRootDir: ".",
   },
+  ignorePatterns: ["next-env.d.ts", "next.config.js"],
   overrides: [
     {
       files: ["**/__mocks__/**"],
