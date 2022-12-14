@@ -1,8 +1,7 @@
-const path = require("path");
-
 module.exports = {
   root: true,
-  extends: ["@inrupt/eslint-config-lib"], //, "next/core-web-vitals"
+  // FIXME: Figure out why "next/core-web-vitals" fails to load.
+  extends: ["@inrupt/eslint-config-lib"],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module",
