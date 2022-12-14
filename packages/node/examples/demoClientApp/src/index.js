@@ -1,3 +1,23 @@
+//
+// Copyright 2022 Inrupt Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+// Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 const fs = require("fs");
 const log = require("loglevel");
 
@@ -9,6 +29,7 @@ const { Session } = require("@inrupt/solid-client-authn-node");
 const clientApplicationName = "S-C-A Node Demo Client App";
 
 const express = require("express");
+
 const app = express();
 const PORT = 3001;
 
@@ -28,7 +49,7 @@ const enterResourceUriMessage =
   "...but enter any resource URI to attempt to read it...";
 
 // We expect these values to be overwritten as the users interacts!
-let loggedOutStatus = "";
+const loggedOutStatus = "";
 let resourceToRead = enterResourceUriMessage;
 let resourceValueRetrieved = "...not read yet...";
 let loginStatus = "Not logged in yet.";
@@ -45,41 +66,39 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/login", async (req, res, next) => {
-  const oidcIssuer = req.query.oidcIssuer;
+  const { oidcIssuer } = req.query;
 
   if (session.info.isLoggedIn) {
     loginStatus = `Already logged in with WebID [${session.info.webId}].`;
     log.info(loginStatus);
     sendHtmlResponse(res);
-  } else {
-    if (oidcIssuer) {
-      try {
-        await session.login({
-          redirectUrl: "http://localhost:3001/redirect",
-          oidcIssuer,
-          clientName: clientApplicationName,
-          handleRedirect: (data) => {
-            res.writeHead(302, {
-              location: data,
-            });
-            res.end();
-          },
-        });
+  } else if (oidcIssuer) {
+    try {
+      await session.login({
+        redirectUrl: "http://localhost:3001/redirect",
+        oidcIssuer,
+        clientName: clientApplicationName,
+        handleRedirect: (data) => {
+          res.writeHead(302, {
+            location: data,
+          });
+          res.end();
+        },
+      });
 
-        loginStatus = `Login called, expecting redirect function to redirect the user's browser now...`;
-        log.info(loginStatus);
-      } catch (error) {
-        loginStatus = `Login attempt failed: [${error}]`;
-        log.error(loginStatus);
-        sendHtmlResponse(res);
-      }
-    } else {
-      next(
-        new Error(
-          "No OIDC issuer provided to login API (expected 'oidcIssuer' query parameter)!"
-        )
-      );
+      loginStatus = `Login called, expecting redirect function to redirect the user's browser now...`;
+      log.info(loginStatus);
+    } catch (error) {
+      loginStatus = `Login attempt failed: [${error}]`;
+      log.error(loginStatus);
+      sendHtmlResponse(res);
     }
+  } else {
+    next(
+      new Error(
+        "No OIDC issuer provided to login API (expected 'oidcIssuer' query parameter)!"
+      )
+    );
   }
 });
 
@@ -183,11 +202,11 @@ function sendHtmlResponse(response) {
 }
 
 function getRequestFullUrl(request) {
-  return request.protocol + "://" + request.get("host") + request.originalUrl;
+  return `${request.protocol}://${request.get("host")}${request.originalUrl}`;
 }
 
 function getRequestQueryParam(request, param) {
-  return request.protocol + "://" + request.get("host") + request.originalUrl;
+  return `${request.protocol}://${request.get("host")}${request.originalUrl}`;
 }
 
 function statusIndexHtml() {
