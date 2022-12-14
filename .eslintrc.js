@@ -17,20 +17,10 @@ module.exports = {
   overrides: [
     // Add any package-specific rules as overrides here.
     {
-      files: ["**/__mocks__/**"],
-    },
-    {
       files: ["**/*.spec.ts"],
       rules: {
         // Using 'any' in the tests is usually justified.
         "@typescript-eslint/no-explicit-any": "off",
-      },
-    },
-    {
-      files: ["e2e/**/*.tsx"],
-      rules: {
-        "no-shadow": "off",
-        "@typescript-eslint/no-shadow": "error",
       },
     },
   ],
