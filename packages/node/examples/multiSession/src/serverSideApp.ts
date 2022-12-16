@@ -1,12 +1,8 @@
-// We only need the following imports from the Node AuthN library. Note that to
-// reuse this code "standalone", you'll have to change "../../../dist/Session"
-// into "@inrupt/solid-client-authn-node", and to npm install this module.
 import {
+  Session,
   getSessionFromStorage,
   getSessionIdFromStorageAll,
-} from "../../../dist/multiSession";
-
-import { Session } from "../../../dist/Session";
+} from "@inrupt/solid-client-authn-node";
 
 import cookieSession from "cookie-session";
 
@@ -16,7 +12,7 @@ import express from "express";
 const app = express();
 const PORT = 3001;
 
-const DEFAULT_OIDC_ISSUER = "https://broker.pod.inrupt.com/";
+const DEFAULT_OIDC_ISSUER = "https://login.inrupt.com/";
 // This is the endpoint our NodeJS demo app listens on to receive incoming login
 const REDIRECT_URL = "http://localhost:3001/redirect";
 
