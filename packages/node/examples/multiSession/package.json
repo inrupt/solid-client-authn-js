@@ -18,7 +18,8 @@
   "homepage": "https://github.com/inrupt/solid-client-authn-js#readme",
   "dependencies": {
     "cookie-session": "^1.4.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "@inrupt/solid-client-authn-node": "file:../../"
   },
   "devDependencies": {
     "@types/cookie-session": "^2.0.42",
