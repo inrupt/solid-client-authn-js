@@ -1,22 +1,40 @@
-// We only need the following imports from the Node AuthN library. Note that to
-// reuse this code "standalone", you'll have to change "../../../dist/Session"
-// into "@inrupt/solid-client-authn-node", and to npm install this module.
+//
+// Copyright 2022 Inrupt Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+// Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
 import {
+  Session,
   getSessionFromStorage,
   getSessionIdFromStorageAll,
-} from "../../../dist/multiSession";
-
-import { Session } from "../../../dist/Session";
+} from "@inrupt/solid-client-authn-node";
 
 import cookieSession from "cookie-session";
 
+import express from "express";
+
 const clientApplicationName = "solid-client-authn-node multi session demo";
 
-import express from "express";
 const app = express();
 const PORT = 3001;
 
-const DEFAULT_OIDC_ISSUER = "https://broker.pod.inrupt.com/";
+const DEFAULT_OIDC_ISSUER = "https://login.inrupt.com/";
 // This is the endpoint our NodeJS demo app listens on to receive incoming login
 const REDIRECT_URL = "http://localhost:3001/redirect";
 
@@ -36,16 +54,15 @@ app.get("/", async (req, res, next) => {
   const sessionIds = await getSessionIdFromStorageAll();
   const sessions = await Promise.all(
     sessionIds.map(async (sessionId) => {
-      return await getSessionFromStorage(sessionId);
+      return getSessionFromStorage(sessionId);
     })
   );
-  const htmlSessions =
-    sessions.reduce((sessionList, session) => {
-      if (session?.info.isLoggedIn) {
-        return sessionList + `<li><strong>${session?.info.webId}</strong></li>`;
-      }
-      return sessionList + "<li>Logging in process</li>";
-    }, "<ul>") + "</ul>";
+  const htmlSessions = `${sessions.reduce((sessionList, session) => {
+    if (session?.info.isLoggedIn) {
+      return `${sessionList}<li><strong>${session?.info.webId}</strong></li>`;
+    }
+    return `${sessionList}<li>Logging in process</li>`;
+  }, "<ul>")}</ul>`;
   res.send(
     `<p>There are currently [${sessionIds.length}] visitors: ${htmlSessions}</p>`
   );
@@ -88,21 +105,18 @@ app.get("/redirect", async (req, res) => {
 
 app.get("/fetch", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
-  if (!req.query["resource"]) {
+  if (!req.query.resource) {
     res
       .status(400)
       .send(
         "<p>Expected a 'resource' query param, for example <strong>http://localhost:3001/fetch?resource=https://pod.inrupt.com/MY_USERNAME/</strong> to fetch the resource at the root of your Pod (which, by default, only <strong>you</strong> will have access to).</p>"
       );
   } else {
-    const fetch = (session ?? new Session()).fetch;
+    const { fetch } = session ?? new Session();
     res.send(
-      "<pre>" +
-        (await (await fetch(req.query["resource"] as string)).text()).replace(
-          /</g,
-          "&lt;"
-        ) +
-        "</pre>"
+      `<pre>${(
+        await (await fetch(req.query.resource as string)).text()
+      ).replace(/</g, "&lt;")}</pre>`
     );
   }
 });
@@ -110,7 +124,7 @@ app.get("/fetch", async (req, res, next) => {
 app.get("/logout", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session!.sessionId);
   if (session) {
-    const webId = session.info.webId;
+    const { webId } = session.info;
     session.logout();
     res.send(`<p>Logged out of session with WebID [${webId}]</p>`);
   } else {
@@ -123,5 +137,5 @@ app.listen(PORT, async () => {
 });
 
 function getRequestFullUrl(request: express.Request) {
-  return request.protocol + "://" + request.get("host") + request.originalUrl;
+  return `${request.protocol}://${request.get("host")}${request.originalUrl}`;
 }

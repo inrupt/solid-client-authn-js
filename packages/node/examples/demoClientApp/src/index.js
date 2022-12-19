@@ -4,7 +4,7 @@ const log = require("loglevel");
 log.setLevel("TRACE");
 
 // The only import we need from the Node AuthN library is the Session class.
-const { Session } = require("../../../dist/Session");
+const { Session } = require("@inrupt/solid-client-authn-node");
 
 const clientApplicationName = "S-C-A Node Demo Client App";
 
@@ -22,7 +22,7 @@ const markerLogoutStatus = "{{labelLogoutStatus}}";
 const markerResourceToRead = "{{resourceToRead}}";
 const markerResourceValueRetrieved = "{{resourceValueRetrieved}}";
 
-const oidcIssuer = "https://broker.demo-ess.inrupt.com/";
+const oidcIssuer = "https://login.inrupt.com/";
 
 const enterResourceUriMessage =
   "...but enter any resource URI to attempt to read it...";
