@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "1.12.3",
+  "version": "1.12.4",
   "license": "MIT",
   "types": "dist/index",
   "browser": "dist/index.js",
@@ -25,8 +25,8 @@
     "cross-fetch": "^3.1.5"
   },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^1.12.3",
-    "@inrupt/solid-client-authn-core": "^1.12.3",
+    "@inrupt/oidc-client-ext": "^1.12.4",
+    "@inrupt/solid-client-authn-core": "^1.12.4",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/node": "^18.0.3",
     "@types/uuid": "^8.3.0",

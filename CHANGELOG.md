@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## 1.12.4 - 2023-01-09
+
+- Upgrades dependencies
+
 ## 1.12.3 - 2022-11-23
 
 - Upgrades dependencies
