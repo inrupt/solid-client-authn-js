@@ -1,3 +1,0 @@
-{
-  "extends": ["@inrupt/eslint-config-lib", "next/core-web-vitals"]
-}
