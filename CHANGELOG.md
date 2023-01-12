@@ -9,6 +9,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## 1.13.0 - 2023-01-12
+
+### node and browser
+
+- Added support for [RFC 9207](https://www.rfc-editor.org/rfc/rfc9207.html)
+
+### Bugfixes
+
+- Clean up `iss` parameter from redirect URL after redirect
+
 ## 1.12.4 - 2023-01-09
 
 - Upgrades dependencies
