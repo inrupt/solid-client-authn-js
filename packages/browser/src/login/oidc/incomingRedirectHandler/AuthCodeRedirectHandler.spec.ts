@@ -381,6 +381,28 @@ describe("AuthCodeRedirectHandler", () => {
       ).rejects.toThrow("Could not retrieve session");
     });
 
+    it("throws if the iss parameter does not match stored issuer", async () => {
+      const redirectUrl = new URL(DEFAULT_REDIRECT_URL);
+      redirectUrl.searchParams.append("state", DEFAULT_OAUTH_STATE);
+      redirectUrl.searchParams.append("code", DEFAULT_AUTHORIZATION_CODE);
+      redirectUrl.searchParams.append("iss", "someIssuer");
+
+      mockOidcClient();
+      mockFetch(
+        new Response("", {
+          status: 200,
+        })
+      );
+      const storageUtility = mockDefaultStorageUtility();
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility,
+      });
+
+      await expect(
+        authCodeRedirectHandler.handle(redirectUrl.href)
+      ).rejects.toThrow();
+    });
+
     it("returns an authenticated bearer fetch if requested", async () => {
       mockOidcClient();
       const mockedFetch = jest.mocked<typeof fetch>(window.fetch);

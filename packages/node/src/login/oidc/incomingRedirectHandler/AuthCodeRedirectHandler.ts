@@ -142,6 +142,14 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       { DPoP: dpopKey?.privateKey as KeyObject }
     );
 
+    const iss = url.searchParams.get("iss");
+
+    if (typeof iss === "string" && iss !== oidcContext.issuerConfig.issuer) {
+      throw new Error(
+        `The value of the iss parameter (${iss}) does not match the issuer identifier of the authorization server (${oidcContext.issuerConfig.issuer}). See [rfc9207](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.3-3.1.1)`
+      );
+    }
+
     if (
       tokenSet.access_token === undefined ||
       tokenSet.id_token === undefined

@@ -9,6 +9,20 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## 1.13.0 - 2023-01-12
+
+### node and browser
+
+#### New feature
+
+- Added support for [RFC 9207](https://www.rfc-editor.org/rfc/rfc9207.html)
+
+### Browser
+
+#### Bugfixes
+
+- Clean up `iss` parameter from redirect URL after redirect
+
 ## 1.12.4 - 2023-01-09
 
 - Upgrades dependencies
@@ -94,7 +108,7 @@ The following changes have been implemented but not released yet:
 
 - Silent authentication is only attempted once, and no longer retries indefinitely on failure.
 - Default values are provided for the OIDC Provider supported scopes if not present
-  in the configuration. This fixes https://github.com/inrupt/solid-client-authn-js/issues/1991.
+  in the configuration. This fixes <https://github.com/inrupt/solid-client-authn-js/issues/1991>.
 
 ## 1.11.5 - 2022-02-14
 
@@ -548,7 +562,7 @@ The following sections document changes that have been released already:
 ### New features
 
 - Updating the browser window will no longer log the user out if their WebID is
-  hosted on an ESS instance (such as https://pod.inrupt.com). A better, global
+  hosted on an ESS instance (such as <https://pod.inrupt.com>). A better, global
   solution will be implemented later in order not to break compatibility in the
   ecosystem. The current solution is based on a custom `/session` endpoint lookup,
   and a Resource Server cookie.
@@ -606,7 +620,7 @@ The following sections document changes that have been released already:
 
 ### Bugfix
 
-- Addressed part of issue https://github.com/inrupt/solid-client-authn-js/issues/684,
+- Addressed part of issue <https://github.com/inrupt/solid-client-authn-js/issues/684>,
   by providing a `browser` entry in the `package.json` file. The ES modules export will
   be adressed in a different PR.
 - The WebID is now set on the session when logging in a script.
@@ -702,7 +716,7 @@ we will bump the major version when we change our publicly documented interface.
 
 - Fixed typo in `detachSession` function name for the browser `SessionManager`.
 
-### Internal refactor:
+### Internal refactor
 
 - Uses [oidc-client-js](https://github.com/IdentityModel/oidc-client-js) now to
   perform the Auth Code Flow (replacing lots of hand-rolled code).
@@ -714,7 +728,7 @@ we will bump the major version when we change our publicly documented interface.
 
 ## [0.1.4] - 2020-09-11
 
-### NOTE: We skipped v0.1.3 due to testing the release process!
+### NOTE: We skipped v0.1.3 due to testing the release process
 
 ### Bugfixes
 
@@ -722,7 +736,7 @@ we will bump the major version when we change our publicly documented interface.
   - Login now clears the local storage, so that you can log into a different server
     even if not logged out properly.
 
-### Internal refactor:
+### Internal refactor
 
 - Created multiple sub-packages, specifically the core and oidc-dpop-client-browser.
 - Moved interfaces down into Core.
@@ -733,7 +747,7 @@ we will bump the major version when we change our publicly documented interface.
 
 ## [0.1.2] - 2020-09-07
 
-### Internal refactor:
+### Internal refactor
 
 - Moved to Lerna (currently only the browser module is available).
 
