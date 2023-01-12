@@ -353,7 +353,7 @@ describe("ClientAuthentication", () => {
       history.replaceState = jest.fn();
       const clientAuthn = getClientAuthentication();
       const url =
-        "https://coolapp.com/redirect?state=someState&code=someAuthCode";
+        "https://coolapp.com/redirect?state=someState&code=someAuthCode&iss=someIssuer";
       await clientAuthn.handleIncomingRedirect(url, mockEmitter);
       // eslint-disable-next-line no-restricted-globals
       expect(history.replaceState).toHaveBeenCalledWith(

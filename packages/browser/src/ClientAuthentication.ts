@@ -173,6 +173,7 @@ export default class ClientAuthentication {
     // For login error
     cleanedUpUrl.searchParams.delete("error");
     cleanedUpUrl.searchParams.delete("error_description");
+    cleanedUpUrl.searchParams.delete("iss");
 
     // Remove OAuth-specific query params (since the login flow finishes with
     // the browser being redirected back with OAuth2 query params (e.g. for
