@@ -105,9 +105,9 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       this.issuerConfigFetcher
     );
 
-    const iss = url.searchParams.get("iss") as string;
+    const iss = url.searchParams.get("iss");
 
-    if (iss && iss !== issuerConfig.issuer) {
+    if (typeof iss === "string" && iss !== issuerConfig.issuer) {
       throw new Error(
         `The value of the iss parameter (${iss}) does not match the issuer identifier of the authorization server (${issuerConfig.issuer}). See [rfc9207](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.3-3.1.1)`
       );
