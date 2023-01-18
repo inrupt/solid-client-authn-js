@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
-## 1.13.0 - 2023-01-12
+## 1.13.0 - 2023-01-18
 
 ### node and browser
 
