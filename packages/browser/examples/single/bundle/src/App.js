@@ -39,7 +39,7 @@ const CLIENT_IDENTIFIER =
 
 export default function App() {
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
-  const [issuer, setIssuer] = useState("https://broker.pod.inrupt.com/");
+  const [issuer, setIssuer] = useState("https://login.inrupt.com/");
   const [resource, setResource] = useState(webId);
   const [data, setData] = useState(null);
 
@@ -49,16 +49,15 @@ export default function App() {
     // After redirect, the current URL contains login information.
     handleIncomingRedirect({
       restorePreviousSession: true,
-      onError: errorHandle,
-    }).then((info) => {
-      setWebId(info.webId);
-      setResource(webId);
-    });
+    })
+      .then((info) => {
+        setWebId(info?.webId);
+        setResource(webId);
+      })
+      .catch((error) => {
+        console.log(`${error} has occured`);
+      });
   }, [webId]);
-
-  const errorHandle = (error, errorDescription) => {
-    console.log(`${error} has occured: `, errorDescription);
-  };
 
   const handleLogin = (e) => {
     // The default behaviour of the button is to resubmit.
