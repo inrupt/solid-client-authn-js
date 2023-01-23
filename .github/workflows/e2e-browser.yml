@@ -29,12 +29,16 @@ jobs:
           node-version: 16.x
           cache: npm
       - run: npm ci
+        if: github.actor != 'dependabot[bot]'
       - run: npm run bootstrap -- --ci
       - run: npm run build
+        if: github.actor != 'dependabot[bot]'
       - name: Install e2e tests dependencies
         run: npx playwright install --with-deps
+        if: github.actor != 'dependabot[bot]'
       - name: Prepare browser-based end-to-end tests
         run: npm ci
+        if: github.actor != 'dependabot[bot]'
         working-directory: e2e/browser/test-app
       - name: Run browser-based end-to-end tests
         # Running end-to-end tests requires accessing secrets which aren't available to dependabot.
