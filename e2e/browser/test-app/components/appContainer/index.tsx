@@ -74,10 +74,13 @@ export default function AppContainer() {
       <p>
         {sessionInfo?.isLoggedIn ? (
           <span data-testid="loggedInStatus">
-            Logged in as {sessionInfo.webId}
+            Logged in with WebID [{sessionInfo.webId}]
           </span>
         ) : (
-          <span data-testid="loggedOutStatus">Not logged in yet</span>
+          <span data-testid="loggedOutStatus">
+            Not logged in yet (provide the Identity Provider (IdP) URL for your
+            user, and click the 'Log In' button)
+          </span>
         )}
       </p>
       <form>

@@ -94,7 +94,11 @@ export default function App() {
     <div>
       <main>
         <h1>Sandbox app</h1>
-        <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
+        <p>
+          {webId
+            ? `Logged in with WebID [${webId}]`
+            : "Not logged in yet (provide the Identity Provider (IdP) URL for your user, and click the 'Log In' button)"}
+        </p>
         <div>
           <form>
             <input

@@ -52,14 +52,15 @@ const enterResourceUriMessage =
 const loggedOutStatus = "";
 let resourceToRead = enterResourceUriMessage;
 let resourceValueRetrieved = "...not read yet...";
-let loginStatus = "Not logged in yet.";
+let loginStatus =
+  "Not logged in yet (provide the Identity Provider (IdP) URL for your user, and click the 'Log In' button).";
 
 // Initialised when the server comes up and is running...
 let session;
 
 app.get("/", (_req, res) => {
   loginStatus = session.info.isLoggedIn
-    ? `Logged in as [${session.info.webId}]`
+    ? `Logged in with WebID [${session.info.webId}]`
     : `Not logged in`;
 
   sendHtmlResponse(res);

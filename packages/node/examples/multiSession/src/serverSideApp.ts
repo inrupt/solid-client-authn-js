@@ -94,7 +94,7 @@ app.get("/redirect", async (req, res) => {
     await session.handleIncomingRedirect(getRequestFullUrl(req));
     if (session.info.isLoggedIn) {
       res.send(
-        `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`
+        `<p>Logged in with WebID [<strong>${session.info.webId}</strong>] after redirect</p>`
       );
     } else {
       res.status(400).send(`<p>Not logged in after redirect</p>`);

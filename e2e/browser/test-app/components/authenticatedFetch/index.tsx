@@ -34,7 +34,9 @@ export default function AuthenticatedFetch({
   const [resource, setResource] = useState<string>();
   const [data, setData] = useState<string>("not fetched");
 
-  const handleFetch = (e: any) => {
+  const handleFetch = (e: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - ignore type warning due to using 'unknown' above (which is slightly better than using 'any').
     e.preventDefault();
     if (resource !== undefined) {
       authenticatedFetch(resource, {
