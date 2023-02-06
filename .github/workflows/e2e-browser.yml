@@ -8,9 +8,6 @@ env:
   CI: true
 jobs:
   test:
-    # Running end-to-end tests requires accessing secrets which aren't available to dependabot.
-    # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
-    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     environment:
       name: ${{ matrix.environment-name }}
@@ -32,14 +29,24 @@ jobs:
           node-version: 16.x
           cache: npm
       - run: npm ci
+        if: github.actor != 'dependabot[bot]'
       - run: npm run bootstrap -- --ci
       - run: npm run build
+        if: github.actor != 'dependabot[bot]'
       - name: Install e2e tests dependencies
         run: npx playwright install --with-deps
+        if: github.actor != 'dependabot[bot]'
       - name: Prepare browser-based end-to-end tests
         run: npm ci
+        if: github.actor != 'dependabot[bot]'
         working-directory: e2e/browser/test-app
       - name: Run browser-based end-to-end tests
+        # Running end-to-end tests requires accessing secrets which aren't available to dependabot.
+        # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+        # We want jobs in this workflow to be gating PRs, so the whole matrix must
+        # run even for dependabot so that the matrixed jobs are skipped, instead
+        # of the whole pipeline.
+        if: github.actor != 'dependabot[bot]'
         run: npm run test:e2e:browser
         env:
           E2E_DEMO_CLIENT_APP_URL: http://localhost:3001

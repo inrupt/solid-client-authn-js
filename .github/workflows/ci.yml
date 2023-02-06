@@ -34,7 +34,6 @@ jobs:
   sonar-scan:
     needs: [test]
     runs-on: ubuntu-latest
-    if: ${{ github.actor != 'dependabot[bot]' }}
     strategy:
       matrix:
         # Since this is a monorepo, the Sonar scan must be run on each of the packages but this will pull in the test
@@ -58,6 +57,7 @@ jobs:
           path: coverage/
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v1.8
+        if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           projectBaseDir: ${{ matrix.project-root }}
         env:
