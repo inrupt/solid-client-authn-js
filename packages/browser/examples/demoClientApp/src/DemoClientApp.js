@@ -60,6 +60,8 @@ async function fetchIdentityProviderConfig(idpConfigEndpoint) {
   return fetch(idpConfigEndpoint).then((response) => response.json());
 }
 
+const REDIRECT_URL = "http://localhost:3001"
+
 class DemoClientApp extends Component {
   constructor(props) {
     super(props);
@@ -138,7 +140,7 @@ class DemoClientApp extends Component {
     this.setState({ status: "loading" });
 
     await login({
-      redirectUrl: document.location.href,
+      redirectUrl: REDIRECT_URL,
       oidcIssuer: this.state.loginIssuer,
       clientName: clientApplicationName,
     });
