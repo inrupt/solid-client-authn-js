@@ -60,7 +60,7 @@ async function fetchIdentityProviderConfig(idpConfigEndpoint) {
   return fetch(idpConfigEndpoint).then((response) => response.json());
 }
 
-const REDIRECT_URL = "http://localhost:3001"
+const REDIRECT_URL = "http://localhost:3001";
 
 class DemoClientApp extends Component {
   constructor(props) {
