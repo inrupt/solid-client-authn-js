@@ -228,6 +228,58 @@ describe("ClientAuthentication", () => {
         nonEmptyStorage.get("clientKey", { secure: false })
       ).resolves.toBeUndefined();
     });
+
+    it("throws if the redirect IRI is a malformed URL", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() =>
+        clientAuthn.login(
+          {
+            sessionId: "someUser",
+            tokenType: "DPoP",
+            clientId: "coolApp",
+            redirectUrl: "not a valid URL",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter
+        )
+      ).rejects.toThrow();
+    });
+
+    it("throws if the redirect IRI contains a hash fragment, with a helpful message", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() =>
+        clientAuthn.login(
+          {
+            sessionId: "someUser",
+            tokenType: "DPoP",
+            clientId: "coolApp",
+            redirectUrl: "https://example.org/redirect#some-fragment",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter
+        )
+      ).rejects.toThrow("hash fragment");
+    });
+
+    it("does not normalize the redirect URL if provided by the user", async () => {
+      const clientAuthn = getClientAuthentication();
+      await clientAuthn.login(
+        {
+          sessionId: "mySession",
+          clientId: "coolApp",
+          // Note that the redirect IRI does not include a trailing slash.
+          redirectUrl: "https://example.org",
+          oidcIssuer: "https://idp.com",
+          tokenType: "Bearer",
+        },
+        mockEmitter
+      );
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          redirectUrl: "https://example.org",
+        })
+      );
+    });
   });
 
   describe("fetch", () => {

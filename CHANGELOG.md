@@ -13,7 +13,15 @@ The following changes have been implemented but not released yet:
 
 #### Dependency updates
 
-- Updated trasitive dependencies to fix GHSA-rc47-6667-2j5j
+- Updated transitive dependencies to fix GHSA-rc47-6667-2j5j
+
+#### Bugfix
+
+- The redirect URL provided to the `login` function was being normalized, which
+  could result in misalignments with the redirect URLs declared in a Client Identifier
+  document, since the latter wasn't being normalized. The normalization step has
+  now been removed, and the redirect provided by the user is sent to the OpenID
+  Provider unchanged.
 
 ## 1.13.0 - 2023-01-18
 
