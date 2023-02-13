@@ -9,6 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### node and browser
+
+#### Dependency updates
+
+- Updated trasitive dependencies to fix GHSA-rc47-6667-2j5j
+
 ## 1.13.0 - 2023-01-18
 
 ### node and browser
