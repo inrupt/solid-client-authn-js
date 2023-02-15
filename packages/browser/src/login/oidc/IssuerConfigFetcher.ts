@@ -33,7 +33,6 @@ import {
   IStorageUtility,
   ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
-import { appendToUrlPathname } from "../../util/urlPath";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
@@ -160,10 +159,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
-    const openIdConfigUrl = appendToUrlPathname(
-      issuer,
-      WELL_KNOWN_OPENID_CONFIG
-    );
+    const openIdConfigUrl = new URL(WELL_KNOWN_OPENID_CONFIG, issuer).href;
     const issuerConfigRequestBody = await window.fetch(openIdConfigUrl);
     // Check the validity of the fetched config
     try {
