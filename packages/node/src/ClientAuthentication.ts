@@ -32,6 +32,7 @@ import {
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
+  isValidRedirectUrl,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
@@ -57,12 +58,18 @@ export default class ClientAuthentication {
   ): Promise<ISessionInfo | undefined> => {
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
+    if (
+      typeof options.redirectUrl === "string" &&
+      !isValidRedirectUrl(options.redirectUrl)
+    ) {
+      throw new Error(
+        `${options.redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`
+      );
+    }
     const loginReturn = await this.loginHandler.handle({
       sessionId,
       oidcIssuer: options.oidcIssuer,
-      redirectUrl: options.redirectUrl
-        ? new URL(options.redirectUrl).href
-        : undefined,
+      redirectUrl: options.redirectUrl,
       clientId: options.clientId,
       clientSecret: options.clientSecret,
       clientName: options.clientName ?? options.clientId,

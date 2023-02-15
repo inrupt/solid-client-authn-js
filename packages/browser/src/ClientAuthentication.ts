@@ -34,6 +34,7 @@ import {
   ISessionInternalInfo,
   ILoginOptions,
   EVENTS,
+  isValidRedirectUrl,
 } from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
@@ -72,11 +73,17 @@ export default class ClientAuthentication {
 
     // In the case of the user hitting the 'back' button in their browser, they
     // could return to a previous redirect URL that contains OIDC params that
-    // are now longer valid - so just to be safe, strip relevant params now.
-    const redirectUrl = removeOidcQueryParam(
-      options.redirectUrl ?? window.location.href
-    );
-
+    // are now longer valid. To be safe, strip relevant params now.
+    // If the user is providing a redirect IRI, it should not be modified, so
+    // normalization only applies if we default to the current location (which is
+    // a bad practice and should be discouraged).
+    const redirectUrl =
+      options.redirectUrl ?? removeOidcQueryParam(window.location.href);
+    if (!isValidRedirectUrl(redirectUrl)) {
+      throw new Error(
+        `${redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`
+      );
+    }
     await this.loginHandler.handle({
       ...options,
       redirectUrl,
