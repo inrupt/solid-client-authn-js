@@ -121,6 +121,7 @@ const mockDpopTokens = (): TokenSet => {
     token_type: "DPoP",
     expired: () => false,
     claims: mockIdTokenPayload,
+    expires_in: 1662266216,
   };
 };
 
@@ -412,6 +413,7 @@ describe("handle", () => {
           sessionId: "mySession",
           tokenRefresher: mockedRefresher,
         },
+        expiresIn: expect.anything(),
       })
     );
   });
