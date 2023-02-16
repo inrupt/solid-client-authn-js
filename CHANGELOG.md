@@ -9,6 +9,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### node
+
+#### Bugfixes
+
+- The Client Credential flow had a bug where the expiration time set by the OpenID
+  Provider for the token was ignored, and an arbitrary default was applied instead.
+  This resulted in the session being unable to make authenticated requests, but
+  still acting as if it were logged in. The session now uses the expiration time
+  set by the OpenID Provider.
+
 ## 1.13.1 - 2023-02-15
 
 ### node and browser

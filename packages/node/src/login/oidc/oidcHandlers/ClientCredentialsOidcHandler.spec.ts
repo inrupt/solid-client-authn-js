@@ -121,6 +121,7 @@ const mockDpopTokens = (): TokenSet => {
     token_type: "DPoP",
     expired: () => false,
     claims: mockIdTokenPayload,
+    expires_in: 1662266216,
   };
 };
 
@@ -412,6 +413,40 @@ describe("handle", () => {
           sessionId: "mySession",
           tokenRefresher: mockedRefresher,
         },
+      })
+    );
+  });
+
+  it("builds a fetch authenticated including the expiration value if present", async () => {
+    const tokens = mockDpopTokens();
+    setupOidcClientMock(tokens);
+    const coreModule = jest.requireMock(
+      "@inrupt/solid-client-authn-core"
+    ) as typeof SolidClientAuthnCore;
+    const mockAuthenticatedFetchBuild = jest.spyOn(
+      coreModule,
+      "buildAuthenticatedFetch"
+    );
+    const mockedRefresher = mockDefaultTokenRefresher();
+    const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+      mockedRefresher,
+      mockStorageUtility({})
+    );
+    await clientCredentialsOidcHandler.handle({
+      ...standardOidcOptions,
+      dpop: true,
+      client: {
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        clientType: "static",
+      },
+    });
+
+    expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        expiresIn: 1662266216,
       })
     );
   });
