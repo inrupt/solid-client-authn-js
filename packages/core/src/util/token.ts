@@ -20,7 +20,7 @@
 //
 
 // eslint-disable-next-line no-shadow
-import { fetch } from "cross-fetch";
+import { fetch } from "@inrupt/universal-fetch";
 import { JWK, JWTPayload, jwtVerify, importJWK } from "jose";
 
 type WithMessage = { message: string };
