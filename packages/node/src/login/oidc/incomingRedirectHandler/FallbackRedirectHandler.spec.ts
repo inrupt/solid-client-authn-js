@@ -22,7 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
 
-jest.mock("cross-fetch");
+jest.mock("@inrupt/universal-fetch");
 
 describe("FallbackRedirectHandler", () => {
   describe("canHandle", () => {

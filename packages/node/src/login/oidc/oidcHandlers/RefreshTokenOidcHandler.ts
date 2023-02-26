@@ -44,7 +44,7 @@ import {
   buildAuthenticatedFetch,
 } from "@inrupt/solid-client-authn-core";
 import { JWK, importJWK } from "jose";
-import { fetch as globalFetch } from "cross-fetch";
+import { fetch as globalFetch } from "@inrupt/universal-fetch";
 import { EventEmitter } from "events";
 import { KeyObject } from "crypto";
 

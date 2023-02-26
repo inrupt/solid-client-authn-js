@@ -21,7 +21,7 @@
 
 import { describe, it, expect } from "@jest/globals";
 
-import { Headers as NodeHeaders } from "cross-fetch";
+import { Headers as NodeHeaders } from "@inrupt/universal-fetch";
 import { flattenHeaders } from "./HeadersUtils";
 
 describe("Headers interoperability function", () => {
