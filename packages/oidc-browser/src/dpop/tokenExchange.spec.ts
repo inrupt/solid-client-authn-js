@@ -21,7 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { IIssuerConfig } from "@inrupt/solid-client-authn-core";
-
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import {
   getBearerToken,
   getDpopToken,
@@ -42,7 +42,12 @@ import {
 
 // Some spec-compliant claims are camel-cased.
 /* eslint-disable camelcase */
-
+jest.mock("@inrupt/universal-fetch", () => {
+  return {
+    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core"

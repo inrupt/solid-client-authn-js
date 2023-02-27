@@ -52,5 +52,22 @@ module.exports = {
     "class-methods-use-this": "off",
     // This rule trips over modules with exports maps, like jose@3.x
     "import/no-unresolved": "off",
+    // FIXME Add "fetch" to the shared eslint config for the following rule.
+    "no-shadow": [
+      "error",
+      {
+        allow: [
+          "describe",
+          "it",
+          "jest",
+          "expect",
+          "beforeEach",
+          "beforeAll",
+          "afterEach",
+          "afterAll",
+          "fetch"
+        ],
+      },
+    ],
   },
 };

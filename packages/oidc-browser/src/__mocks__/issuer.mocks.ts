@@ -171,9 +171,9 @@ export const mockClient = (clientId = "some client"): IClient => {
 // the object actually returned or with the .mock calls in the tests.
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const mockFetch = (payload: string, statusCode: number) => {
-  const { fetch: mockedFetch } = jest.requireMock(
-    "@inrupt/universal-fetch"
-  ) as jest.Mocked<typeof UniversalFetch>;
-  mockedFetch.mockResolvedValue(new Response(payload, { status: statusCode }));
-  return mockedFetch;
+  const { fetch } = jest.requireMock("@inrupt/universal-fetch") as jest.Mocked<
+    typeof UniversalFetch
+  >;
+  fetch.mockResolvedValue(new Response(payload, { status: statusCode }));
+  return fetch;
 };
