@@ -29,6 +29,7 @@ import {
   ISessionInfo,
   IStorage,
 } from "@inrupt/solid-client-authn-core";
+import { fetch } from "@inrupt/universal-fetch";
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";

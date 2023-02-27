@@ -35,7 +35,8 @@ import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
-import { Response } from "cross-fetch";
+import { fetch, Response } from "@inrupt/universal-fetch";
+import * as UniversalFetch from "@inrupt/universal-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
@@ -45,6 +46,16 @@ import {
   mockDefaultTokenRefresher,
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
+
+jest.mock("@inrupt/universal-fetch", () => {
+  const fetchModule = jest.requireActual(
+    "@inrupt/universal-fetch"
+  ) as typeof UniversalFetch;
+  return {
+    ...fetchModule,
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 
 const mockJwk = (): JWK => {
   return {
@@ -193,8 +204,10 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
 }
 
 const mockFetch = (response: Response) => {
-  const mockedFetch = jest.fn(global.fetch).mockResolvedValue(response);
-  window.fetch = mockedFetch;
+  const { fetch: mockedFetch } = jest.requireMock(
+    "@inrupt/universal-fetch"
+  ) as jest.Mocked<typeof UniversalFetch>;
+  mockedFetch.mockResolvedValueOnce(response);
   return mockedFetch;
 };
 
@@ -405,7 +418,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated bearer fetch if requested", async () => {
       mockOidcClient();
-      const mockedFetch = jest.mocked<typeof fetch>(window.fetch);
+      const mockedFetch = jest.mocked<typeof fetch>(fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
@@ -433,7 +446,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
-      const mockedFetch = jest.mocked<typeof fetch>(window.fetch);
+      const mockedFetch = jest.mocked<typeof fetch>(fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
@@ -454,16 +467,11 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("saves session information in storage on successful login", async () => {
       mockOidcClient();
-      window.fetch = jest.fn(global.fetch).mockReturnValue(
-        new Promise((resolve) => {
-          resolve(
-            new Response("", {
-              status: 200,
-            })
-          );
+      mockFetch(
+        new Response("", {
+          status: 200,
         })
       );
-
       const mockedStorage = mockDefaultStorageUtility();
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -486,16 +494,11 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("preserves any query strings from the redirect URI", async () => {
       mockOidcClient();
-
-      window.fetch = (jest.fn() as any).mockReturnValue(
-        new Promise((resolve) => {
-          resolve(
-            new Response("", {
-              status: 200,
-            })
-          );
+      mockFetch(
+        new Response("", {
+          status: 200,
         })
-      ) as jest.Mock<typeof fetch>;
+      );
 
       const mockedStorage = mockDefaultStorageUtility();
 
@@ -516,7 +519,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns the expiration time normalised to the current time", async () => {
       mockOidcClient();
-      window.fetch = jest.fn<typeof fetch>();
+      mockFetch(new Response());
       const MOCK_TIMESTAMP = 10000;
       Date.now = jest
         .fn()
@@ -539,7 +542,7 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns null for the expiration time if none was provided", async () => {
       const mockedOidcClient = mockOidcClient();
-      window.fetch = jest.fn<typeof fetch>();
+      mockFetch(new Response());
       mockedOidcClient.getBearerToken = jest
         .fn(getBearerToken)
         .mockResolvedValueOnce({

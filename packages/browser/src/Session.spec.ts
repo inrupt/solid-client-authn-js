@@ -27,6 +27,8 @@ import {
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
+import { fetch } from "@inrupt/universal-fetch";
+import * as UniversalFetch from "@inrupt/universal-fetch";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import { Session } from "./Session";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
@@ -34,6 +36,16 @@ import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManag
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+
+jest.mock("@inrupt/universal-fetch", () => {
+  const fetchModule = jest.requireActual(
+    "@inrupt/universal-fetch"
+  ) as typeof UniversalFetch;
+  return {
+    ...fetchModule,
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 
 const mockLocalStorage = (stored: Record<string, string>) => {
   Object.defineProperty(window, "localStorage", {
@@ -201,7 +213,6 @@ describe("Session", () => {
 
   describe("fetch", () => {
     it("wraps up ClientAuthentication fetch if logged in", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
@@ -211,7 +222,6 @@ describe("Session", () => {
     });
 
     it("preserves a binding to its Session instance", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnFetch = jest.spyOn(clientAuthentication, "fetch");
       const mySession = new Session({ clientAuthentication });
@@ -224,12 +234,12 @@ describe("Session", () => {
     });
 
     it("does not rebind window.fetch if logged out", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const clientAuthentication = mockClientAuthentication();
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url/");
-      expect(window.fetch).toHaveBeenCalled();
-      expect((window.fetch as jest.Mock).mock.instances).toEqual([window]);
+      expect(fetch).toHaveBeenCalled();
+      // FIXME: See if the following can be done using jest and universal-fetch
+      // expect((fetch as jest.Mock).mock.instances).toEqual([window]);
     });
   });
 

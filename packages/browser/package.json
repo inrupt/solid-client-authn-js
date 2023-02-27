@@ -21,12 +21,10 @@
     "build-api-docs": "npx typedoc --out docs/api/source/api --readme none",
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
-  "devDependencies": {
-    "cross-fetch": "^3.1.5"
-  },
   "dependencies": {
     "@inrupt/oidc-client-ext": "^1.13.2",
     "@inrupt/solid-client-authn-core": "^1.13.2",
+    "@inrupt/universal-fetch": "^1.0.0-alpha.0",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/node": "^18.0.3",
     "@types/uuid": "^8.3.0",
