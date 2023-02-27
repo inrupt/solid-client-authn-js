@@ -22,12 +22,12 @@
   "devDependencies": {
     "@types/jest": "^29.2.0",
     "@types/uuid": "^8.3.4",
-    "cross-fetch": "^3.1.5",
     "ts-node": "^10.9.1"
   },
   "dependencies": {
     "@inrupt/oidc-client": "^1.11.6",
     "@inrupt/solid-client-authn-core": "^1.13.2",
+    "@inrupt/universal-fetch": "^1.0.0-alpha.0",
     "jose": "^4.10.0",
     "uuid": "^9.0.0"
   },

@@ -24,7 +24,7 @@
     "test:unit:node": "jest --coverage --verbose --selectProjects node",
     "test:unit:browser": "jest --coverage --verbose --selectProjects browser",
     "test:unit:core": "jest --coverage --verbose --selectProjects core",
-    "test:unit:oidc-node": "jest --coverage --verbose --selectProjects oidc-node",
+    "test:unit:oidc-browser": "jest --coverage --verbose --selectProjects oidc-browser",
     "test:e2e:node": "jest --selectProjects e2e-node --collectCoverage false",
     "test:e2e:browser": "playwright test",
     "lerna-version": "lerna version --no-push --no-git-tag-version",
