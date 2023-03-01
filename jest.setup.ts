@@ -25,12 +25,10 @@ import { Request, Response, Headers, fetch as undiFetch } from "undici";
 if (
   typeof globalThis.Response === "undefined" ||
   typeof globalThis.Request === "undefined" ||
-  typeof globalThis.Headers === "undefined" ||
-  typeof globalThis.fetch === "undefined"
+  typeof globalThis.Headers === "undefined"
 ) {
   // eslint-disable @typescript-eslint/no-explicit-any
   globalThis.Response = Response as any;
   globalThis.Request = Request as any;
   globalThis.Headers = Headers as any;
-  globalThis.fetch = undiFetch as any;
 }
