@@ -43,7 +43,10 @@ import {
   access_v2,
   deleteFile,
   createContainerInContainer,
+  overwriteFile,
+  universalAccess,
 } from "@inrupt/solid-client";
+import { PLAYWRIGHT_PORT } from "../../../playwright.config";
 import { AppPage } from "./pageModels/AppPage";
 
 export { expect } from "@inrupt/internal-playwright-helpers";
@@ -53,6 +56,7 @@ export type Fixtures = {
   testContainer: TestContainer;
   environment: TestingEnvironmentBrowser;
   setupEnvironment: TestingEnvironmentNode;
+  clientId: string;
 };
 
 export type TestContainer = {
@@ -81,6 +85,47 @@ const saveTextFile = async (options: {
   const url = getSourceUrl(file);
 
   return url;
+};
+
+const createClientIdDoc = async (
+  clientInfo: {
+    clientName: string;
+    redirectUrl: string;
+  },
+  session: Session
+): Promise<string> => {
+  if (typeof session.info.webId !== "string") {
+    throw new Error("The provided session isn't logged in.");
+  }
+  const parentContainers = await getPodUrlAll(session.info.webId);
+  if (parentContainers.length === 0) {
+    throw new Error(`Couldn't find storage for ${session.info.webId}`);
+  }
+  const emptyClientIdDoc = await saveFileInContainer(
+    parentContainers[0],
+    new Blob([]),
+    {
+      contentType: "application/json",
+      fetch: session.fetch,
+    }
+  );
+  const clientId = getSourceUrl(emptyClientIdDoc);
+  const clientIdDoc = {
+    "@context": ["https://www.w3.org/ns/solid/oidc-context.jsonld"],
+    client_name: clientInfo.clientName,
+    client_id: clientId,
+    redirect_uris: [clientInfo.redirectUrl],
+    // Note: No refresh token will be issued. If the tests last too long, this
+    // should be updated so that it has the offline_access scope and supports the
+    // refresh_token grant type.
+    scope: "openid webid",
+    grant_types: ["authorization_code"],
+    response_types: ["code"],
+  };
+  await overwriteFile(clientId, new Blob([JSON.stringify(clientIdDoc)]), {
+    fetch: session.fetch,
+  });
+  return clientId;
 };
 
 // This is the deployed client application that we'll be using to exercise
@@ -230,6 +275,48 @@ export const test = base.extend<Fixtures>({
     });
 
     await deleteContainer(testContainerUrl, {
+      fetch: session.fetch,
+    });
+
+    await session.logout();
+  },
+
+  clientId: async ({ setupEnvironment }, use) => {
+    // Make the Client ID document publicly available.
+    const session = new Session();
+
+    try {
+      await session.login({
+        oidcIssuer: setupEnvironment.idp,
+        clientId: setupEnvironment.clientCredentials.owner.id,
+        clientSecret: setupEnvironment.clientCredentials.owner.secret,
+      });
+    } catch (err) {
+      throw new Error(`Failed to login: ${(err as Error).message}`);
+    }
+
+    const clientId = await createClientIdDoc(
+      {
+        clientName: "Browser test app",
+        redirectUrl: new URL(`http://localhost:${PLAYWRIGHT_PORT}`).href,
+      },
+      session
+    );
+
+    const { setPublicAccess } = universalAccess;
+
+    await setPublicAccess(
+      clientId,
+      { read: true, write: false },
+      { fetch: session.fetch } // fetch function from authenticated session
+    );
+
+    // The code before the call to use is the setup, and after is the teardown.
+    // This is the value the Fixture will be using.
+    await use(clientId);
+
+    // Teardown: Delete the client ID document:
+    await deleteFile(clientId, {
       fetch: session.fetch,
     });
 
