@@ -21,6 +21,10 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  TESTID_OPENID_PROVIDER_INPUT,
+  TESTID_LOGIN_BUTTON,
+} from "@inrupt/internal-playwright-testids";
+import {
   login,
   logout,
   handleIncomingRedirect,
@@ -32,9 +36,23 @@ const REDIRECT_URL = "http://localhost:3001";
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
 
+const isValidUrl = (candidate?: string): boolean => {
+  if (typeof candidate !== "string") {
+    return false;
+  }
+  try {
+    // eslint-disable-next-line no-new
+    new URL(candidate);
+    return true;
+  } catch (_e) {
+    return false;
+  }
+};
+
 export default function AppContainer() {
   const [sessionInfo, setSessionInfo] = useState<ISessionInfo>();
   const [issuer, setIssuer] = useState<string>(DEFAULT_ISSUER);
+  const [clientId, setClientId] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const onError = (error: string) => {
@@ -57,6 +75,8 @@ export default function AppContainer() {
         redirectUrl: REDIRECT_URL,
         oidcIssuer: issuer,
         clientName: APP_NAME,
+        // Only Solid-OIDC Client Identifiers are accepted here.
+        clientId: isValidUrl(clientId) ? clientId : undefined,
       });
     } catch (err) {
       onError((err as Error).toString());
@@ -82,15 +102,24 @@ export default function AppContainer() {
       </p>
       <form>
         <input
-          data-testid="identityProviderInput"
+          data-testid={{ TESTID_OPENID_PROVIDER_INPUT }}
+          placeholder="OpenID Provider URL"
           type="text"
           value={issuer}
           onChange={(e) => {
             setIssuer(e.target.value);
           }}
         />
+        <input
+          data-testid="clientIdentifierInput"
+          placeholder="Client Identifier"
+          type="text"
+          onChange={(e) => {
+            setClientId(e.target.value);
+          }}
+        />
         <button
-          data-testid="loginButton"
+          data-testid={{ TESTID_LOGIN_BUTTON }}
           onClick={async (e) => {
             e.preventDefault();
             await handleLogin();
