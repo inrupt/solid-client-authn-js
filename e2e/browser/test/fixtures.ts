@@ -35,6 +35,7 @@ import {
 } from "@inrupt/internal-test-env";
 import { Session } from "@inrupt/solid-client-authn-node";
 import {
+  createThing,
   getPodUrlAll,
   deleteContainer,
   saveFileInContainer,
@@ -53,7 +54,6 @@ import {
   setThing,
 } from "@inrupt/solid-client";
 import LinkHeaders from "http-link-header";
-
 import { PLAYWRIGHT_PORT } from "../../../playwright.config";
 import { AppPage } from "./pageModels/AppPage";
 
@@ -67,6 +67,7 @@ export type Fixtures = {
   clientAccessControl: {
     clientId: string;
     clientResourceUrl: string;
+    clientResourceContent: string;
   };
 };
 
@@ -106,10 +107,14 @@ const createClientIdDoc = async (
   container: string,
   session: Session
 ): Promise<string> => {
-  const emptyClientIdDoc = await saveFileInContainer(container, new Blob([]), {
-    contentType: "application/json",
-    fetch: session.fetch,
-  });
+  const emptyClientIdDoc = await saveFileInContainer(
+    container,
+    Buffer.from([]),
+    {
+      contentType: "application/json",
+      fetch: session.fetch,
+    }
+  );
   const clientId = getSourceUrl(emptyClientIdDoc);
   const clientIdDoc = {
     "@context": ["https://www.w3.org/ns/solid/oidc-context.jsonld"],
@@ -123,7 +128,7 @@ const createClientIdDoc = async (
     grant_types: ["authorization_code"],
     response_types: ["code"],
   };
-  await overwriteFile(clientId, new Blob([JSON.stringify(clientIdDoc)]), {
+  await overwriteFile(clientId, Buffer.from(JSON.stringify(clientIdDoc)), {
     fetch: session.fetch,
   });
 
@@ -139,12 +144,13 @@ const createClientIdDoc = async (
 
 const createClientResource = async (
   container: string,
+  content: string,
   clientId: string,
   session: Session
 ): Promise<string> => {
   const clientResource = await saveFileInContainer(
     container,
-    new Blob(["This is a test resource."]),
+    Buffer.from(content),
     {
       contentType: "application/json",
       fetch: session.fetch,
@@ -192,9 +198,8 @@ const createClientResource = async (
     .build();
 
   const accessControlThing = buildThing(
-    // The null assertion is fine because we checked for the presence of the Access Control.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    getThing(acrDataset, applicableAccessControls[0])!
+    getThing(acrDataset, applicableAccessControls[0]) ??
+      createThing({ url: applicableAccessControls[0] })
   )
     .addUrl("http://www.w3.org/ns/solid/acp#apply", clientPolicyUri)
     .build();
@@ -218,6 +223,9 @@ const clientApplicationUrl =
 // Extend basic test by providing a "defaultItem" option and a "todoPage" fixture.
 export const test = base.extend<Fixtures>({
   app: async ({ page }, use) => {
+    // FIXME incompatible playwright versions
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const app = new AppPage(page, {
       clientApplicationUrl,
       fetchTimeout: 2000,
@@ -234,8 +242,8 @@ export const test = base.extend<Fixtures>({
         clientCredentials: {
           owner: {
             // Check that username and password are well-defined
-            login: "",
-            password: "",
+            login: true,
+            password: true,
           },
         },
       })
@@ -390,16 +398,18 @@ export const test = base.extend<Fixtures>({
       podRoot,
       session
     );
-
+    const clientResourceContent =
+      "Access to this file is restricted to a specific client.";
     const clientResourceUrl = await createClientResource(
       podRoot,
+      clientResourceContent,
       clientId,
       session
     );
 
     // The code before the call to use is the setup, and after is the teardown.
     // This is the value the Fixture will be using.
-    await use({ clientId, clientResourceUrl });
+    await use({ clientId, clientResourceUrl, clientResourceContent });
 
     // Teardown
     await deleteFile(clientId, {
