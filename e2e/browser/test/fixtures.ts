@@ -39,13 +39,21 @@ import {
   deleteContainer,
   saveFileInContainer,
   getSourceUrl,
+  getSolidDataset,
+  saveSolidDatasetAt,
+  getThing,
+  getUrlAll,
   access_v1,
   access_v2,
   deleteFile,
   createContainerInContainer,
   overwriteFile,
   universalAccess,
+  buildThing,
+  setThing,
 } from "@inrupt/solid-client";
+import LinkHeaders from "http-link-header";
+
 import { PLAYWRIGHT_PORT } from "../../../playwright.config";
 import { AppPage } from "./pageModels/AppPage";
 
@@ -56,7 +64,10 @@ export type Fixtures = {
   testContainer: TestContainer;
   environment: TestingEnvironmentBrowser;
   setupEnvironment: TestingEnvironmentNode;
-  clientId: string;
+  clientAccessControl: {
+    clientId: string;
+    clientResourceUrl: string;
+  };
 };
 
 export type TestContainer = {
@@ -92,23 +103,13 @@ const createClientIdDoc = async (
     clientName: string;
     redirectUrl: string;
   },
+  container: string,
   session: Session
 ): Promise<string> => {
-  if (typeof session.info.webId !== "string") {
-    throw new Error("The provided session isn't logged in.");
-  }
-  const parentContainers = await getPodUrlAll(session.info.webId);
-  if (parentContainers.length === 0) {
-    throw new Error(`Couldn't find storage for ${session.info.webId}`);
-  }
-  const emptyClientIdDoc = await saveFileInContainer(
-    parentContainers[0],
-    new Blob([]),
-    {
-      contentType: "application/json",
-      fetch: session.fetch,
-    }
-  );
+  const emptyClientIdDoc = await saveFileInContainer(container, new Blob([]), {
+    contentType: "application/json",
+    fetch: session.fetch,
+  });
   const clientId = getSourceUrl(emptyClientIdDoc);
   const clientIdDoc = {
     "@context": ["https://www.w3.org/ns/solid/oidc-context.jsonld"],
@@ -125,7 +126,84 @@ const createClientIdDoc = async (
   await overwriteFile(clientId, new Blob([JSON.stringify(clientIdDoc)]), {
     fetch: session.fetch,
   });
+
+  // The Client Identifier Document should be public.
+  const { setPublicAccess } = universalAccess;
+  await setPublicAccess(
+    clientId,
+    { read: true, write: false },
+    { fetch: session.fetch } // fetch function from authenticated session
+  );
   return clientId;
+};
+
+const createClientResource = async (
+  container: string,
+  clientId: string,
+  session: Session
+): Promise<string> => {
+  const clientResource = await saveFileInContainer(
+    container,
+    new Blob(["This is a test resource."]),
+    {
+      contentType: "application/json",
+      fetch: session.fetch,
+    }
+  );
+  const resourceUrl = getSourceUrl(clientResource);
+
+  // Adding client access control restrictions on a Resource isn't part of the
+  // high-level API yet.
+  const headResponse = await session.fetch(resourceUrl, {
+    method: "HEAD",
+  });
+  const responseLinks = headResponse.headers.get("Link");
+  if (responseLinks === null) {
+    throw new Error("Could not find links to the resource's ACR.");
+  }
+  const links = LinkHeaders.parse(responseLinks.toString());
+  const acrUrl = links.get("rel", "acl")[0].uri;
+  // Fetch the ACR, and add a matcher to match the given client ID.
+  const acrDataset = await getSolidDataset(acrUrl, { fetch: session.fetch });
+  const acrThing = getThing(acrDataset, acrUrl);
+  if (acrThing === null) {
+    throw new Error(
+      `The ACR ${acrUrl} doens't have a subject matching its own URL.`
+    );
+  }
+  const applicableAccessControls = getUrlAll(
+    acrThing,
+    "http://www.w3.org/ns/solid/acp#accessControl"
+  );
+  if (applicableAccessControls.length === 0) {
+    throw new Error(`ACR ${acrUrl} has no applicable Access Control.`);
+  }
+  const clientMatcherUri = new URL(randomUUID(), acrUrl).href;
+  const clientMatcher = buildThing({ url: clientMatcherUri })
+    .addUrl("http://www.w3.org/ns/solid/acp#client", clientId)
+    .build();
+  const clientPolicyUri = new URL(randomUUID(), acrUrl).href;
+  const clientPolicy = buildThing({ url: clientPolicyUri })
+    .addUrl(
+      "http://www.w3.org/ns/solid/acp#allow",
+      "http://www.w3.org/ns/auth/acl#Read"
+    )
+    .addUrl("http://www.w3.org/ns/solid/acp#allOf", clientMatcherUri)
+    .build();
+
+  const accessControlThing = buildThing(
+    // The null assertion is fine because we checked for the presence of the Access Control.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    getThing(acrDataset, applicableAccessControls[0])!
+  )
+    .addUrl("http://www.w3.org/ns/solid/acp#apply", clientPolicyUri)
+    .build();
+  const updatedAcr = [accessControlThing, clientPolicy, clientMatcher].reduce(
+    setThing,
+    acrDataset
+  );
+  await saveSolidDatasetAt(acrUrl, updatedAcr, { fetch: session.fetch });
+  return resourceUrl;
 };
 
 // This is the deployed client application that we'll be using to exercise
@@ -281,7 +359,7 @@ export const test = base.extend<Fixtures>({
     await session.logout();
   },
 
-  clientId: async ({ setupEnvironment }, use) => {
+  clientAccessControl: async ({ setupEnvironment }, use) => {
     // Make the Client ID document publicly available.
     const session = new Session();
 
@@ -295,28 +373,40 @@ export const test = base.extend<Fixtures>({
       throw new Error(`Failed to login: ${(err as Error).message}`);
     }
 
+    if (typeof session.info.webId !== "string") {
+      throw new Error("The provided session isn't logged in.");
+    }
+    const parentContainers = await getPodUrlAll(session.info.webId);
+    if (parentContainers.length === 0) {
+      throw new Error(`Couldn't find storage for ${session.info.webId}`);
+    }
+    const [podRoot] = parentContainers;
+
     const clientId = await createClientIdDoc(
       {
         clientName: "Browser test app",
         redirectUrl: new URL(`http://localhost:${PLAYWRIGHT_PORT}`).href,
       },
+      podRoot,
       session
     );
 
-    const { setPublicAccess } = universalAccess;
-
-    await setPublicAccess(
+    const clientResourceUrl = await createClientResource(
+      podRoot,
       clientId,
-      { read: true, write: false },
-      { fetch: session.fetch } // fetch function from authenticated session
+      session
     );
 
     // The code before the call to use is the setup, and after is the teardown.
     // This is the value the Fixture will be using.
-    await use(clientId);
+    await use({ clientId, clientResourceUrl });
 
-    // Teardown: Delete the client ID document:
+    // Teardown
     await deleteFile(clientId, {
+      fetch: session.fetch,
+    });
+
+    await deleteFile(clientResourceUrl, {
       fetch: session.fetch,
     });
 
