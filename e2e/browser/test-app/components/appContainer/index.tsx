@@ -94,7 +94,8 @@ export default function AppContainer() {
       <p>
         {sessionInfo?.isLoggedIn ? (
           <span data-testid="loggedInStatus">
-            Logged in as {sessionInfo.webId}
+            Logged in as {sessionInfo.webId} using client{" "}
+            {sessionInfo.clientAppId}.
           </span>
         ) : (
           <span data-testid="loggedOutStatus">Not logged in yet</span>
