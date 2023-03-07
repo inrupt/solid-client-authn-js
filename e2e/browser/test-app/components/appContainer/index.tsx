@@ -24,8 +24,7 @@ import {
   TESTID_OPENID_PROVIDER_INPUT,
   TESTID_LOGIN_BUTTON,
   TESTID_LOGOUT_BUTTON,
-  TESTID_SESSION_STATUS,
-  TESTID_ERROR_MESSAGE
+  TESTID_ERROR_MESSAGE,
 } from "@inrupt/internal-playwright-testids";
 import {
   login,

@@ -19,8 +19,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { test, expect } from "./fixtures";
 import { TESTID_SELECTORS } from "@inrupt/internal-playwright-testids";
+import { test, expect } from "./fixtures";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
