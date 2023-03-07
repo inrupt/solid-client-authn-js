@@ -119,4 +119,42 @@ describe("IssuerConfigFetcher", () => {
     );
     expect(fetchedConfig.scopesSupported).toContain("openid");
   });
+
+  it("should append the .well-known/openid-configuration path at the end of the issuer URL", async () => {
+    // The response value is irrelevant to this test.
+    const mockFetch = jest.fn<typeof fetch>().mockImplementation(
+      async () =>
+        new NodeResponse(
+          JSON.stringify({
+            issuer: "https://example.com",
+            // eslint-disable-next-line camelcase
+            claim_types_supported: "oidc",
+          })
+        )
+    );
+    window.fetch = mockFetch as typeof window.fetch;
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    // No trailing slash
+    await configFetcher.fetchConfig("https://arbitrary.url");
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      "https://arbitrary.url/.well-known/openid-configuration"
+    );
+    // A trailing slash
+    await configFetcher.fetchConfig("https://arbitrary.url/");
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      "https://arbitrary.url/.well-known/openid-configuration"
+    );
+    // A path without a trailing slash
+    await configFetcher.fetchConfig("https://arbitrary.url/path");
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      "https://arbitrary.url/path/.well-known/openid-configuration"
+    );
+    // A path with a trailing slash
+    await configFetcher.fetchConfig("https://arbitrary.url/path/");
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      "https://arbitrary.url/path/.well-known/openid-configuration"
+    );
+  });
 });
