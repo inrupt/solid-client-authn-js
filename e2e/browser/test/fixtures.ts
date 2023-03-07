@@ -188,13 +188,22 @@ const createClientResource = async (
   const clientMatcher = buildThing({ url: clientMatcherUri })
     .addUrl("http://www.w3.org/ns/solid/acp#client", clientId)
     .build();
+  const publicClientMatcherUri = new URL(randomUUID(), acrUrl).href;
+  const publicClientMatcher = buildThing({ url: publicClientMatcherUri })
+    .addUrl(
+      "http://www.w3.org/ns/solid/acp#client",
+      "http://www.w3.org/ns/solid/acp#PublicClient"
+    )
+    .build();
   const clientPolicyUri = new URL(randomUUID(), acrUrl).href;
+  // Deny access to all but the Client Identifier
   const clientPolicy = buildThing({ url: clientPolicyUri })
     .addUrl(
-      "http://www.w3.org/ns/solid/acp#allow",
+      "http://www.w3.org/ns/solid/acp#deny",
       "http://www.w3.org/ns/auth/acl#Read"
     )
-    .addUrl("http://www.w3.org/ns/solid/acp#allOf", clientMatcherUri)
+    .addUrl("http://www.w3.org/ns/solid/acp#anyOf", publicClientMatcher)
+    .addUrl("http://www.w3.org/ns/solid/acp#noneOf", clientMatcherUri)
     .build();
 
   const accessControlThing = buildThing(
@@ -203,11 +212,15 @@ const createClientResource = async (
   )
     .addUrl("http://www.w3.org/ns/solid/acp#apply", clientPolicyUri)
     .build();
-  const updatedAcr = [accessControlThing, clientPolicy, clientMatcher].reduce(
-    setThing,
-    acrDataset
-  );
-  await saveSolidDatasetAt(acrUrl, updatedAcr, { fetch: session.fetch });
+  const updatedAcr = [
+    accessControlThing,
+    clientPolicy,
+    clientMatcher,
+    publicClientMatcher,
+  ].reduce(setThing, acrDataset);
+  await saveSolidDatasetAt(acrUrl, updatedAcr, {
+    fetch: session.fetch,
+  });
   return resourceUrl;
 };
 
@@ -223,9 +236,6 @@ const clientApplicationUrl =
 // Extend basic test by providing a "defaultItem" option and a "todoPage" fixture.
 export const test = base.extend<Fixtures>({
   app: async ({ page }, use) => {
-    // FIXME incompatible playwright versions
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const app = new AppPage(page, {
       clientApplicationUrl,
       fetchTimeout: 2000,
