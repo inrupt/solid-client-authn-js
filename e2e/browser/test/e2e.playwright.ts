@@ -96,3 +96,25 @@ test.describe("Logged In", () => {
 
   test.fixme("Non-existent resource in my Pod", async () => {});
 });
+
+test.describe("Using a Client ID", () => {
+  test.only("can log in using a Client ID document", async ({
+    auth,
+    clientAccessControl,
+    app,
+  }) => {
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.type(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+    await auth.login({ allow: true });
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+    const response = await app.fetchResource(
+      clientAccessControl.clientResourceUrl
+    );
+
+    expect(response).toBe(clientAccessControl.clientResourceContent);
+  });
+});

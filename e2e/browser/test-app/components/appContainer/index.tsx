@@ -23,6 +23,9 @@ import React, { useState, useEffect } from "react";
 import {
   TESTID_OPENID_PROVIDER_INPUT,
   TESTID_LOGIN_BUTTON,
+  TESTID_LOGOUT_BUTTON,
+  TESTID_SESSION_STATUS,
+  TESTID_ERROR_MESSAGE
 } from "@inrupt/internal-playwright-testids";
 import {
   login,
@@ -103,7 +106,7 @@ export default function AppContainer() {
       </p>
       <form>
         <input
-          data-testid={{ TESTID_OPENID_PROVIDER_INPUT }}
+          data-testid={TESTID_OPENID_PROVIDER_INPUT}
           placeholder="OpenID Provider URL"
           type="text"
           value={issuer}
@@ -120,7 +123,7 @@ export default function AppContainer() {
           }}
         />
         <button
-          data-testid={{ TESTID_LOGIN_BUTTON }}
+          data-testid={TESTID_LOGIN_BUTTON}
           onClick={async (e) => {
             e.preventDefault();
             await handleLogin();
@@ -129,7 +132,7 @@ export default function AppContainer() {
           Log In
         </button>
         <button
-          data-testid="logoutButton"
+          data-testid={TESTID_LOGOUT_BUTTON}
           onClick={async (e) => {
             e.preventDefault();
             await handleLogout();
@@ -138,7 +141,7 @@ export default function AppContainer() {
           Log Out
         </button>
       </form>
-      <p data-testid="errorMessage">
+      <p data-testid={TESTID_ERROR_MESSAGE}>
         <strong>{errorMessage}</strong>
       </p>
       <br />
