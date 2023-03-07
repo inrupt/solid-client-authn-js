@@ -115,8 +115,9 @@ test.describe("Using a Client ID", () => {
     const successResponse = await app.fetchResource(
       clientAccessControl.clientResourceUrl
     );
-
+    // The resource content should be available, because it is fetched by an authorized client.
     expect(successResponse).toBe(clientAccessControl.clientResourceContent);
+
     // Try to log back in without using the Client Identifier, and verifies that it fails.
     await app.page.click(TESTID_SELECTORS.LOGOUT_BUTTON);
     // Enforce that we go through a full login again.
@@ -127,7 +128,7 @@ test.describe("Using a Client ID", () => {
     const failureResponse = await app.fetchResource(
       clientAccessControl.clientResourceUrl
     );
-
+    // The resource content shouldn't be available to a dynamically registered client.
     expect(failureResponse).not.toBe(clientAccessControl.clientResourceContent);
   });
 });
