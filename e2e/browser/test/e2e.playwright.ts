@@ -20,6 +20,7 @@
 //
 
 import { test, expect } from "./fixtures";
+import { TESTID_SELECTORS } from "@inrupt/internal-playwright-testids";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
@@ -98,23 +99,35 @@ test.describe("Logged In", () => {
 });
 
 test.describe("Using a Client ID", () => {
-  test.only("can log in using a Client ID document", async ({
+  test("can log in using a Client ID document", async ({
     auth,
     clientAccessControl,
     app,
   }) => {
     await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
     // Type the Client ID before logging in, so that it is used during logging.
-    await app.page.type(
+    await app.page.fill(
       "[data-testid=clientIdentifierInput]",
       clientAccessControl.clientId
     );
     await auth.login({ allow: true });
     await app.page.waitForSelector("span[data-testid=loggedInStatus]");
-    const response = await app.fetchResource(
+    const successResponse = await app.fetchResource(
       clientAccessControl.clientResourceUrl
     );
 
-    expect(response).toBe(clientAccessControl.clientResourceContent);
+    expect(successResponse).toBe(clientAccessControl.clientResourceContent);
+    // Try to log back in without using the Client Identifier, and verifies that it fails.
+    await app.page.click(TESTID_SELECTORS.LOGOUT_BUTTON);
+    // Enforce that we go through a full login again.
+    await app.page.context().clearCookies();
+    await app.page.fill("[data-testid=clientIdentifierInput]", "");
+    await auth.login({ allow: true });
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+    const failureResponse = await app.fetchResource(
+      clientAccessControl.clientResourceUrl
+    );
+
+    expect(failureResponse).not.toBe(clientAccessControl.clientResourceContent);
   });
 });
