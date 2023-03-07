@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## 1.13.3 - 2023-03-07
+
 ### browser
 
 #### Bugfixes
