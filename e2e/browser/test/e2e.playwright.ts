@@ -130,5 +130,6 @@ test.describe("Using a Client ID", () => {
     );
     // The resource content shouldn't be available to a dynamically registered client.
     expect(failureResponse).not.toBe(clientAccessControl.clientResourceContent);
+    expect(failureResponse).toContain("403");
   });
 });
