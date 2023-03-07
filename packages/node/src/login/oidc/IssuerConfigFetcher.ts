@@ -35,8 +35,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, IssuerMetadata } from "openid-client";
 
-export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
-
 /**
  * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]
  * @param metadata the object to transform.

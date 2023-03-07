@@ -159,7 +159,12 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     let issuerConfig: IIssuerConfig;
 
-    const openIdConfigUrl = new URL(WELL_KNOWN_OPENID_CONFIG, issuer).href;
+    const openIdConfigUrl = new URL(
+      WELL_KNOWN_OPENID_CONFIG,
+      // Make sure to append a slash at issuer URL, so that the .well-known URL
+      // includes the full issuer path. See https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig.
+      issuer.endsWith("/") ? issuer : `${issuer}/`
+    ).href;
     const issuerConfigRequestBody = await window.fetch(openIdConfigUrl);
     // Check the validity of the fetched config
     try {

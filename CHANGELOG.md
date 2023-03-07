@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### browser
+
+#### Bugfixes
+
+- No longer remove the last issuer URL path component if it doesn't have a trailing
+  slash: a bug was introduced in baac030d33163ba08dadebabdaf676450be7fa88, resulting
+  in the issuer configuration discovery failing if the issuer URL had a path that
+  did not end with a trailing slash. This is now fixed.
+
 ## 1.13.2 - 2023-02-16
 
 ### node
