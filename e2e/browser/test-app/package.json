@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@inrupt/internal-playwright-testids": "^1.5.5",
     "@inrupt/solid-client-authn-browser": "file:../../../",
     "next": "^13.2.1",
     "react": "^18.2.0",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^1.5.5",
+    "@playwright/test": "^1.31.2",
     "@types/node": "^18.14.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",

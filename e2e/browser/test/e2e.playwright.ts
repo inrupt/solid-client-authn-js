@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { TESTID_SELECTORS } from "@inrupt/internal-playwright-testids";
 import { test, expect } from "./fixtures";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
@@ -95,4 +96,40 @@ test.describe("Logged In", () => {
   });
 
   test.fixme("Non-existent resource in my Pod", async () => {});
+});
+
+test.describe("Using a Client ID", () => {
+  test("can log in using a Client ID document", async ({
+    auth,
+    clientAccessControl,
+    app,
+  }) => {
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.fill(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+    await auth.login({ allow: true });
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+    const successResponse = await app.fetchResource(
+      clientAccessControl.clientResourceUrl
+    );
+    // The resource content should be available, because it is fetched by an authorized client.
+    expect(successResponse).toBe(clientAccessControl.clientResourceContent);
+
+    // Try to log back in without using the Client Identifier, and verifies that it fails.
+    await app.page.click(TESTID_SELECTORS.LOGOUT_BUTTON);
+    // Enforce that we go through a full login again.
+    await app.page.context().clearCookies();
+    await app.page.fill("[data-testid=clientIdentifierInput]", "");
+    await auth.login({ allow: true });
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+    const failureResponse = await app.fetchResource(
+      clientAccessControl.clientResourceUrl
+    );
+    // The resource content shouldn't be available to a dynamically registered client.
+    expect(failureResponse).not.toBe(clientAccessControl.clientResourceContent);
+    expect(failureResponse).toContain("403");
+  });
 });

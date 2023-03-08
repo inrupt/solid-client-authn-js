@@ -34,8 +34,7 @@ export default function AuthenticatedFetch({
   const [resource, setResource] = useState<string>();
   const [data, setData] = useState<string>("not fetched");
 
-  const handleFetch = (e: any) => {
-    e.preventDefault();
+  const handleFetch = () => {
     if (resource !== undefined) {
       authenticatedFetch(resource, {
         headers: new Headers({ Accept: "text/turtle" }),
@@ -59,7 +58,13 @@ export default function AuthenticatedFetch({
             setResource(e.target.value);
           }}
         />
-        <button onClick={(e) => handleFetch(e)} data-testId="fetchButton">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            handleFetch();
+          }}
+          data-testId="fetchButton"
+        >
           Fetch
         </button>
       </div>
