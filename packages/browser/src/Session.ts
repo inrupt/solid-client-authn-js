@@ -138,6 +138,8 @@ export class Session extends EventEmitter {
    */
   public readonly info: ISessionInfo;
 
+  public readonly events: EventEmitter;
+
   private clientAuthentication: ClientAuthentication;
 
   private tokenRequestInProgress = false;
@@ -162,7 +164,7 @@ export class Session extends EventEmitter {
     sessionId: string | undefined = undefined
   ) {
     super();
-
+    this.events = new EventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -337,6 +339,14 @@ export class Session extends EventEmitter {
     this.on(EVENTS.LOGIN, callback);
   }
 
+  offLogin(callback: () => unknown): void {
+    this.off(EVENTS.LOGIN, callback);
+  }
+
+  onceLogin(callback: () => unknown): void {
+    this.once(EVENTS.LOGIN, callback);
+  }
+
   /**
    * Register a callback function to be called when a user logs out:
    *
@@ -344,6 +354,14 @@ export class Session extends EventEmitter {
    */
   onLogout(callback: () => unknown): void {
     this.on(EVENTS.LOGOUT, callback);
+  }
+
+  offLogout(callback: () => unknown): void {
+    this.off(EVENTS.LOGOUT, callback);
+  }
+
+  onceLogout(callback: () => unknown): void {
+    this.once(EVENTS.LOGOUT, callback);
   }
 
   /**
@@ -359,6 +377,24 @@ export class Session extends EventEmitter {
     ) => unknown
   ): void {
     this.on(EVENTS.ERROR, callback);
+  }
+
+  offError(
+    callback: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
+  ): void {
+    this.off(EVENTS.ERROR, callback);
+  }
+
+  onceError(
+    callback: (
+      error: string | null,
+      errorDescription?: string | null
+    ) => unknown
+  ): void {
+    this.once(EVENTS.ERROR, callback);
   }
 
   /**
