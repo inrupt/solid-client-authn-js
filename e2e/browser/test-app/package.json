@@ -11,7 +11,7 @@
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^1.5.5",
     "@inrupt/solid-client-authn-browser": "file:../../../",
-    "next": "^13.2.1",
+    "next": "^13.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
