@@ -35,7 +35,7 @@ import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
-import { Response } from "cross-fetch";
+import { Response, Headers } from "cross-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
