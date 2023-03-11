@@ -33,6 +33,9 @@ import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
+import { SessionEventEmitter } from "./SessionEventEmitter";
+
+export { EVENTS };
 
 export interface ISessionOptions {
   /**
@@ -116,7 +119,7 @@ export async function silentlyAuthenticate(
         clientSecret: storedSessionInfo.clientAppSecret,
         tokenType: storedSessionInfo.tokenType ?? "DPoP",
       },
-      session
+      session.events
     );
     return true;
   }
@@ -132,13 +135,13 @@ function isLoggedIn(
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter {
+export class Session {
   /**
    * Information regarding the current session.
    */
   public readonly info: ISessionInfo;
 
-  public readonly events: EventEmitter;
+  public readonly events: SessionEventEmitter;
 
   private clientAuthentication: ClientAuthentication;
 
@@ -163,8 +166,7 @@ export class Session extends EventEmitter {
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId: string | undefined = undefined
   ) {
-    super();
-    this.events = new EventEmitter();
+    this.events = new SessionEventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -193,13 +195,13 @@ export class Session extends EventEmitter {
     // enable silent refresh. The current session ID specifically stored in 'localStorage'
     // (as opposed to using our storage abstraction layer) because it is only
     // used in a browser-specific mechanism.
-    this.on(EVENTS.LOGIN, () =>
+    this.events.on(EVENTS.LOGIN, () =>
       window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId)
     );
 
-    this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
+    this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
 
-    this.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
   }
 
   /**
@@ -218,7 +220,7 @@ export class Session extends EventEmitter {
         // Defaults the token type to DPoP
         tokenType: options.tokenType ?? "DPoP",
       },
-      this
+      this.events
     );
     // `login` redirects the user away from the app,
     // so unless it throws an error, there is no code that should run afterwards
@@ -252,7 +254,7 @@ export class Session extends EventEmitter {
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
     if (emitSignal) {
-      this.emit(EVENTS.LOGOUT);
+      this.events.emit(EVENTS.LOGOUT);
     }
   };
 
@@ -284,7 +286,7 @@ export class Session extends EventEmitter {
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
-      this
+      this.events
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);
@@ -292,13 +294,13 @@ export class Session extends EventEmitter {
       if (currentUrl === null) {
         // The login event can only be triggered **after** the user has been
         // redirected from the IdP with access and ID tokens.
-        this.emit(EVENTS.LOGIN);
+        this.events.emit(EVENTS.LOGIN);
       } else {
         // If an URL is stored in local storage, we are being logged in after a
         // silent authentication, so remove our currently stored URL location
         // to clean up our state now that we are completing the re-login process.
         window.localStorage.removeItem(KEY_CURRENT_URL);
-        this.emit(EVENTS.SESSION_RESTORED, currentUrl);
+        this.events.emit(EVENTS.SESSION_RESTORED, currentUrl);
       }
     } else if (options.restorePreviousSession === true) {
       // Silent authentication happens after a refresh, which means there are no
@@ -336,15 +338,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes login.
    */
   onLogin(callback: () => unknown): void {
-    this.on(EVENTS.LOGIN, callback);
-  }
-
-  offLogin(callback: () => unknown): void {
-    this.off(EVENTS.LOGIN, callback);
-  }
-
-  onceLogin(callback: () => unknown): void {
-    this.once(EVENTS.LOGIN, callback);
+    this.events.on(EVENTS.LOGIN, callback);
   }
 
   /**
@@ -353,15 +347,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes logout.
    */
   onLogout(callback: () => unknown): void {
-    this.on(EVENTS.LOGOUT, callback);
-  }
-
-  offLogout(callback: () => unknown): void {
-    this.off(EVENTS.LOGOUT, callback);
-  }
-
-  onceLogout(callback: () => unknown): void {
-    this.once(EVENTS.LOGOUT, callback);
+    this.events.on(EVENTS.LOGOUT, callback);
   }
 
   /**
@@ -376,25 +362,7 @@ export class Session extends EventEmitter {
       errorDescription?: string | null
     ) => unknown
   ): void {
-    this.on(EVENTS.ERROR, callback);
-  }
-
-  offError(
-    callback: (
-      error: string | null,
-      errorDescription?: string | null
-    ) => unknown
-  ): void {
-    this.off(EVENTS.ERROR, callback);
-  }
-
-  onceError(
-    callback: (
-      error: string | null,
-      errorDescription?: string | null
-    ) => unknown
-  ): void {
-    this.once(EVENTS.ERROR, callback);
+    this.events.on(EVENTS.ERROR, callback);
   }
 
   /**
@@ -406,7 +374,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
    */
   onSessionRestore(callback: (currentUrl: string) => unknown): void {
-    this.on(EVENTS.SESSION_RESTORED, callback);
+    this.events.on(EVENTS.SESSION_RESTORED, callback);
   }
 
   /**
@@ -416,7 +384,7 @@ export class Session extends EventEmitter {
    * @since 1.11.0
    */
   onSessionExpiration(callback: () => unknown): void {
-    this.on(EVENTS.SESSION_EXPIRED, callback);
+    this.events.on(EVENTS.SESSION_EXPIRED, callback);
   }
 
   private setSessionInfo(
@@ -426,7 +394,7 @@ export class Session extends EventEmitter {
     this.info.webId = sessionInfo.webId;
     this.info.sessionId = sessionInfo.sessionId;
     this.info.expirationDate = sessionInfo.expirationDate;
-    this.on(EVENTS.SESSION_EXTENDED, (expiresIn: number) => {
+    this.events.on(EVENTS.SESSION_EXTENDED, (expiresIn: number) => {
       this.info.expirationDate = Date.now() + expiresIn * 1000;
     });
   }
