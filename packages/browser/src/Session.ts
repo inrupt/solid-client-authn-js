@@ -31,7 +31,6 @@ import {
   ISessionEventEmitter,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
-import { EventEmitter } from "events";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";

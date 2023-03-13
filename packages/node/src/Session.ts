@@ -34,7 +34,6 @@ import {
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
-import { EventEmitter } from "events";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 
