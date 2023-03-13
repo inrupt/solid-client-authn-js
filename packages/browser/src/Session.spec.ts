@@ -903,4 +903,23 @@ describe("Session", () => {
       expect(myCallback).toHaveBeenCalled();
     });
   });
+
+  describe("proxies events to the session", () => {
+    // This describe block is only required as long as Session extends the EventEmitter
+    // class.
+    it("proxies the EventEmitter calls from events to the session object", () => {
+      const mySession = new Session();
+      const spiedOn = jest.spyOn(mySession, "on");
+      mySession.events.on("login", jest.fn());
+      expect(spiedOn).toHaveBeenCalled();
+    });
+
+    it("throws on calls from events which aren't part of the EventEmitter interface", () => {
+      const mySession = new Session();
+      // @ts-expect-error onLogin is a function on Session, and not SessionEventEmitter
+      expect(() => mySession.events.onLogin(jest.fn())).toThrow(
+        "[onLogin] is not supported"
+      );
+    });
+  });
 });
