@@ -33,25 +33,20 @@ export class SessionEventEmitter extends EventEmitter {
   /* eslint-disable lines-between-class-members */
   /**
    * Register a listener called on successful login.
-<<<<<<< HEAD
    * @param eventName The login event name
    * @param listener The callback called on successful login
-=======
-   * @param eventName The login event name.
-   * @param listener The callback to register.
->>>>>>> d1896b41 (Add deprecation notice on legacy events API)
    */
   on(eventName: typeof EVENTS.LOGIN, listener: () => void): this;
   /**
    * Register a listener called on successful logout.
    * @param eventName The logout event name.
-   * @param listener The callback to register.
+   * @param listener The callback called on successful logout.
    */
   on(eventName: typeof EVENTS.LOGOUT, listener: () => void): this;
   /**
    * Register a listener called on session expiration.
    * @param eventName The session expiration event name.
-   * @param listener The callback to register.
+   * @param listener The callback called on session expiration.
    */
   on(eventName: typeof EVENTS.SESSION_EXPIRED, listener: () => void): this;
   /**
