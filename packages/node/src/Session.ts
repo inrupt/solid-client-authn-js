@@ -308,6 +308,7 @@ export class Session
    * The callback is called when {@link handleIncomingRedirect} completes successfully.
    *
    * @param callback The function called when a user completes login.
+   * @deprecated Prefer session.events.on(EVENTS.LOGIN, callback)
    */
   onLogin(callback: () => unknown): void {
     this.events.on(EVENTS.LOGIN, callback);
@@ -317,11 +318,19 @@ export class Session
    * Register a callback function to be called when a user logs out:
    *
    * @param callback The function called when a user completes logout.
+   * @deprecated Prefer session.events.on(EVENTS.LOGOUT, callback)
    */
   onLogout(callback: () => unknown): void {
     this.events.on(EVENTS.LOGOUT, callback);
   }
 
+  /**
+   * Register a callback function to be called when a new Refresh Token is issued
+   * for the session. This helps keeping track of refresh token rotation.
+   *
+   * @param callback The function called when a new refresh token is issued.
+   * @deprecated Prefer session.events.on(EVENTS.NEW_REFRESH_TOKEN, callback)
+   */
   onNewRefreshToken(callback: (newToken: string) => unknown): void {
     this.events.on(EVENTS.NEW_REFRESH_TOKEN, callback);
   }

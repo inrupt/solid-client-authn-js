@@ -36,8 +36,6 @@ import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
 
-export { EVENTS };
-
 export interface ISessionOptions {
   /**
    * A private storage, unreachable to other scripts on the page. Typically in-memory.
@@ -375,6 +373,7 @@ export class Session
    * The callback is called when {@link handleIncomingRedirect} completes successfully.
    *
    * @param callback The function called when a user completes login.
+   * @deprecated Prefer session.events.on(EVENTS.LOGIN, callback)
    */
   onLogin(callback: () => unknown): void {
     this.events.on(EVENTS.LOGIN, callback);
@@ -384,6 +383,7 @@ export class Session
    * Register a callback function to be called when a user logs out:
    *
    * @param callback The function called when a user completes logout.
+   * @deprecated Prefer session.events.on(EVENTS.LOGOUT, callback)
    */
   onLogout(callback: () => unknown): void {
     this.events.on(EVENTS.LOGOUT, callback);
@@ -394,6 +394,7 @@ export class Session
    *
    * @param callback The function called when an error occurs.
    * @since 1.11.0
+   * @deprecated Prefer session.events.on(EVENTS.ERROR, callback)
    */
   onError(
     callback: (
@@ -411,6 +412,7 @@ export class Session
    * at the time the session was restored.
    *
    * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
+   * @deprecated Prefer session.events.on(EVENTS.SESSION_RESTORED, callback)
    */
   onSessionRestore(callback: (currentUrl: string) => unknown): void {
     this.events.on(EVENTS.SESSION_RESTORED, callback);
@@ -421,6 +423,7 @@ export class Session
    * make authenticated requests, but following a user logout.
    * @param callback The function that runs on session expiration.
    * @since 1.11.0
+   * @deprecated Prefer session.events.on(EVENTS.SESSION_EXPIRED, callback)
    */
   onSessionExpiration(callback: () => unknown): void {
     this.events.on(EVENTS.SESSION_EXPIRED, callback);

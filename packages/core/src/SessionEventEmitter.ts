@@ -32,11 +32,11 @@ export class SessionEventEmitter extends EventEmitter {
   // The overloads should not be line-separated.
   /* eslint-disable lines-between-class-members */
   /**
-   * Register a listener called on successful login with the logged in WebID.
-   * @param eventName
-   * @param listener
+   * Register a listener called on successful login.
+   * @param eventName The login event name
+   * @param listener The callback called on successful login
    */
-  on(eventName: typeof EVENTS.LOGIN, listener: (webid: string) => void): this;
+  on(eventName: typeof EVENTS.LOGIN, listener: () => void): this;
   /**
    * Register a listener called on successful logout.
    * @param eventName
