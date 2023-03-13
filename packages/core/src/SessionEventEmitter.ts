@@ -19,7 +19,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 import { EventEmitter } from "events";
-import { EVENTS } from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "./constant";
+
+export interface ISessionEventEmitter {
+  events: SessionEventEmitter;
+}
 
 export class SessionEventEmitter extends EventEmitter {
   constructor() {
@@ -74,6 +78,25 @@ export class SessionEventEmitter extends EventEmitter {
   on(
     eventName: typeof EVENTS.SESSION_EXTENDED,
     listener: (expiresIn: number) => void
+  ): this;
+  /**
+   * Register a listener called when a timeout is set for a session event with
+   * the timeout handle.
+   * @param eventName
+   * @param listener
+   */
+  on(
+    eventName: typeof EVENTS.TIMEOUT_SET,
+    listener: (timeoutHandle: number) => void
+  ): this;
+  /**
+   * Register a listener called when a new refresh token is issued for the session.
+   * @param eventName
+   * @param listener
+   */
+  on(
+    eventName: typeof EVENTS.NEW_REFRESH_TOKEN,
+    listener: (newToken: string) => void
   ): this;
   on(
     eventName: Parameters<InstanceType<typeof EventEmitter>["on"]>[0],

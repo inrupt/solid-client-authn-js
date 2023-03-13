@@ -22,18 +22,18 @@
 /**
  * @hidden
  */
-import { EventEmitter } from "events";
 import {
   EVENTS,
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
+  SessionEventEmitter,
+  ISessionEventEmitter,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
-import { SessionEventEmitter } from "./SessionEventEmitter";
 
 export { EVENTS };
 
@@ -135,7 +135,7 @@ function isLoggedIn(
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session {
+export class Session implements ISessionEventEmitter {
   /**
    * Information regarding the current session.
    */

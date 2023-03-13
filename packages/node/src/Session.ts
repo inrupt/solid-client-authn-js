@@ -22,13 +22,14 @@
 /**
  * @hidden
  */
-import { EventEmitter } from "events";
 import {
   ILoginInputOptions,
   InMemoryStorage,
   ISessionInfo,
   IStorage,
   EVENTS,
+  SessionEventEmitter,
+  ISessionEventEmitter,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
@@ -85,11 +86,13 @@ export const defaultStorage = new InMemoryStorage();
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter {
+export class Session implements ISessionEventEmitter {
   /**
    * Information regarding the current session.
    */
   public readonly info: ISessionInfo;
+
+  public readonly events: SessionEventEmitter;
 
   private clientAuthentication: ClientAuthentication;
 
@@ -118,7 +121,7 @@ export class Session extends EventEmitter {
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId: string | undefined = undefined
   ) {
-    super();
+    this.events = new SessionEventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {
@@ -155,12 +158,12 @@ export class Session extends EventEmitter {
     }
     // Keeps track of the latest timeout handle in order to clean up on logout
     // and not leave open timeouts.
-    this.on(EVENTS.TIMEOUT_SET, (timeoutHandle: number) => {
+    this.events.on(EVENTS.TIMEOUT_SET, (timeoutHandle: number) => {
       this.lastTimeoutHandle = timeoutHandle;
     });
 
-    this.on(EVENTS.ERROR, () => this.internalLogout(false));
-    this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
+    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
   }
 
   /**
@@ -177,7 +180,7 @@ export class Session extends EventEmitter {
       {
         ...options,
       },
-      this
+      this.events
     );
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
@@ -214,7 +217,7 @@ export class Session extends EventEmitter {
     clearTimeout(this.lastTimeoutHandle);
     this.info.isLoggedIn = false;
     if (emitEvent) {
-      this.emit(EVENTS.LOGOUT);
+      this.events.emit(EVENTS.LOGOUT);
     }
   };
 
@@ -240,7 +243,7 @@ export class Session extends EventEmitter {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
           url,
-          this
+          this.events
         );
 
         if (sessionInfo) {
@@ -250,7 +253,7 @@ export class Session extends EventEmitter {
           if (sessionInfo.isLoggedIn) {
             // The login event can only be triggered **after** the user has been
             // redirected from the IdP with access and ID tokens.
-            this.emit(EVENTS.LOGIN);
+            this.events.emit(EVENTS.LOGIN);
           }
         }
       } finally {
@@ -268,7 +271,7 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes login.
    */
   onLogin(callback: () => unknown): void {
-    this.on(EVENTS.LOGIN, callback);
+    this.events.on(EVENTS.LOGIN, callback);
   }
 
   /**
@@ -277,10 +280,10 @@ export class Session extends EventEmitter {
    * @param callback The function called when a user completes logout.
    */
   onLogout(callback: () => unknown): void {
-    this.on(EVENTS.LOGOUT, callback);
+    this.events.on(EVENTS.LOGOUT, callback);
   }
 
   onNewRefreshToken(callback: (newToken: string) => unknown): void {
-    this.on(EVENTS.NEW_REFRESH_TOKEN, callback);
+    this.events.on(EVENTS.NEW_REFRESH_TOKEN, callback);
   }
 }

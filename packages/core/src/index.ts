@@ -21,6 +21,11 @@
 
 export * from "./constant";
 
+export {
+  SessionEventEmitter,
+  ISessionEventEmitter,
+} from "./SessionEventEmitter";
+
 export { default as ILoginInputOptions } from "./ILoginInputOptions";
 
 export { default as ILoginHandler, LoginResult } from "./login/ILoginHandler";
