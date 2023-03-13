@@ -32,7 +32,7 @@ import { Session } from "./Session";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
-import type ClientAuthentication from "./ClientAuthentication";
+import ClientAuthentication from "./ClientAuthentication";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
@@ -912,14 +912,6 @@ describe("Session", () => {
       const spiedOn = jest.spyOn(mySession, "on");
       mySession.events.on("login", jest.fn());
       expect(spiedOn).toHaveBeenCalled();
-    });
-
-    it("throws on calls from events which aren't part of the EventEmitter interface", () => {
-      const mySession = new Session();
-      // @ts-expect-error onLogin is a function on Session, and not SessionEventEmitter
-      expect(() => mySession.events.onLogin(jest.fn())).toThrow(
-        "[onLogin] is not supported"
-      );
     });
   });
 });

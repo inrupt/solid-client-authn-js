@@ -116,16 +116,7 @@ export class Session
     // SessionEventEmitter, and the proxying is no longer necessary.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(target: any, prop: any, receiver: any) {
-      if (
-        Object.getOwnPropertyNames(EventEmitter).includes(prop) ||
-        // Some internal properties begin with _, like _events, and need to be supported.
-        prop.startsWith("_")
-      ) {
-        return Reflect.get(target, prop, receiver);
-      }
-      throw new Error(
-        `events only implements SessionEventEmitter, [${prop}] is not supported`
-      );
+      return Reflect.get(target, prop, receiver);
     },
   };
 
