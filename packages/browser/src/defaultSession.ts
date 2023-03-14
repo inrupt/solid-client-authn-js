@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { EVENTS, SessionEventEmitter } from "@inrupt/solid-client-authn-core";
 import { Session } from "./Session";
 
 let defaultSession: Session;
@@ -97,6 +98,8 @@ export const handleIncomingRedirect: Session["handleIncomingRedirect"] = (
  * @since 1.3.0
  *
  * @param callback The function called when a user completes login.
+ * @deprecated Prefer events.on(EVENTS.LOGIN, callback)
+
  */
 export const onLogin: Session["onLogin"] = (...args) => {
   const session = getDefaultSession();
@@ -108,6 +111,8 @@ export const onLogin: Session["onLogin"] = (...args) => {
  *
  * @param callback The function called when a user completes logout.
  * @since 1.3.0
+ * @deprecated Prefer events.on(EVENTS.LOGOUT, callback)
+
  */
 export const onLogout: Session["onLogout"] = (...args) => {
   const session = getDefaultSession();
@@ -119,8 +124,16 @@ export const onLogout: Session["onLogout"] = (...args) => {
  *
  * @param callback The function called when a session is restored.
  * @since 1.3.0
+ * @deprecated Prefer events.on(EVENTS.SESSION_RESTORED, callback)
  */
 export const onSessionRestore: Session["onSessionRestore"] = (...args) => {
   const session = getDefaultSession();
   return session.onSessionRestore(...args);
 };
+
+/**
+ * {@link SessionEventEmitter} instance to subscribe to events by the default session.
+ *
+ * @since Unreleased
+ */
+export const { events } = getDefaultSession();

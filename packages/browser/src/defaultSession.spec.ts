@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { jest, it, expect } from "@jest/globals";
 import {
   fetch,
@@ -29,6 +30,7 @@ import {
   onLogin,
   onSessionRestore,
   onLogout,
+  events,
 } from "./defaultSession";
 import type * as SessionModuleType from "./Session";
 
@@ -73,6 +75,7 @@ it("all functions pass on their arguments to the default session", () => {
   const onLoginSpy = jest.spyOn(defaultSession, "onLogin");
   const onLogoutSpy = jest.spyOn(defaultSession, "onLogout");
   const onSessionRestoreSpy = jest.spyOn(defaultSession, "onSessionRestore");
+  const eventsOnSpy = jest.spyOn(defaultSession.events, "on");
 
   expect(fetchSpy).not.toHaveBeenCalled();
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -105,4 +108,8 @@ it("all functions pass on their arguments to the default session", () => {
   expect(onLogoutSpy).not.toHaveBeenCalled();
   onLogout(jest.fn());
   expect(onLogoutSpy).toHaveBeenCalledTimes(1);
+
+  expect(eventsOnSpy).not.toHaveBeenCalled();
+  events.on(EVENTS.LOGIN, jest.fn());
+  expect(eventsOnSpy).toHaveBeenCalledTimes(1);
 });
