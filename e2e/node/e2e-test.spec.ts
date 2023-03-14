@@ -240,7 +240,7 @@ describe("Session events", () => {
     expect(logoutSignalReceived).toBe(true);
   });
 
-  it("sends an event on session exiration", async () => {
+  it("sends an event on session expiration", async () => {
     const session = new Session();
     let expirationSignalReceived = false;
     session.events.on(EVENTS.SESSION_EXPIRED, () => {
