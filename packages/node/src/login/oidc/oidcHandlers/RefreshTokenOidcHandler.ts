@@ -214,6 +214,12 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         clientName: oidcLoginOptions.client.clientName,
       });
     }
+    let expirationDate: number | undefined;
+    expirationDate = accessInfo.expiresAt;
+    if (expirationDate === undefined && accessInfo.expiresIn !== undefined) {
+      expirationDate = accessInfo.expiresIn + Date.now();
+    }
+    sessionInfo.expirationDate = expirationDate;
 
     return Object.assign(sessionInfo, {
       fetch: accessInfo.fetch,
