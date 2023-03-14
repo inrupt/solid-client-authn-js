@@ -57,6 +57,9 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       expect(authenticatedSession.info.isLoggedIn).toBe(true);
       expect(authenticatedSession.info.sessionId).toBeDefined();
       expect(authenticatedSession.info.webId).toBeDefined();
+      expect(authenticatedSession.info.expirationDate).toBeGreaterThan(
+        Date.now()
+      );
     });
 
     it("can fetch a public resource when logged in", async () => {

@@ -25,7 +25,7 @@ import {
   mockStorageUtility,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { IdTokenClaims, TokenSet } from "openid-client";
+import { IdTokenClaims, TokenSet, BaseClient } from "openid-client";
 import { JWK } from "jose";
 import { Response as NodeResponse, Headers as NodeHeaders } from "cross-fetch";
 import type * as CrossFetch from "cross-fetch";
@@ -37,7 +37,10 @@ import {
   mockDefaultIssuerConfig,
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
-import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
+import {
+  mockDefaultTokenRefresher,
+  mockDefaultTokenSet,
+} from "../refresh/__mocks__/TokenRefresher";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
@@ -125,6 +128,7 @@ const mockBearerTokens = (): TokenSet => {
     token_type: "Bearer",
     expired: () => false,
     claims: mockIdTokenPayload,
+    expires_in: 3600,
   };
 };
 
@@ -135,6 +139,7 @@ const mockDpopTokens = (): TokenSet => {
     token_type: "DPoP",
     expired: () => false,
     claims: mockIdTokenPayload,
+    expires_in: 3600,
   };
 };
 
@@ -229,7 +234,11 @@ describe("AuthCodeRedirectHandler", () => {
           code: "someCode",
           state: "someState",
         }),
-        callback: callback ?? jest.fn().mockResolvedValue(tokenSet as never),
+        callback:
+          callback ??
+          jest
+            .fn<BaseClient["callback"]>()
+            .mockResolvedValue(tokenSet ?? mockDpopTokens()),
         metadata: {
           client_id: "https://some.client#id",
         },
@@ -252,7 +261,7 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
-    it("properly performs DPoP token exchange", async () => {
+    it("sets the correct session information", async () => {
       setupDefaultOidcClientMock();
       const mockedStorage = mockDefaultRedirectStorage();
 
@@ -269,6 +278,21 @@ describe("AuthCodeRedirectHandler", () => {
       expect(result.sessionId).toBe("mySession");
       expect(result.isLoggedIn).toBe(true);
       expect(result.webId).toEqual(mockWebId());
+      expect(result.expirationDate).toBeGreaterThan(Date.now());
+    });
+
+    it("properly performs DPoP token exchange", async () => {
+      setupDefaultOidcClientMock();
+      const mockedStorage = mockDefaultRedirectStorage();
+
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState"
+      );
 
       // Check that the session information is stored in the provided storage
       await expect(

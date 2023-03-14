@@ -472,5 +472,6 @@ describe("handle", () => {
     expect(result?.isLoggedIn).toBe(true);
     expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
     expect(result?.webId).toBe("https://my.webid/");
+    expect(result?.expirationDate).toBeGreaterThan(Date.now());
   });
 });
