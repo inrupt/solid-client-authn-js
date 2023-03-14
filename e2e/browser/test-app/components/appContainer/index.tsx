@@ -32,6 +32,7 @@ import {
   handleIncomingRedirect,
   ISessionInfo,
   getDefaultSession,
+  EVENTS
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
 
@@ -66,11 +67,11 @@ export default function AppContainer() {
     setErrorMessage(error);
   };
 
-  getDefaultSession().onLogin(() => {
+  getDefaultSession().events.on(EVENTS.LOGIN, () => {
     setLoginSignalReceived(true);
   });
 
-  getDefaultSession().onLogout(() => {
+  getDefaultSession().events.on(EVENTS.LOGOUT, () => {
     setLogoutSignalReceived(true);
   });
 
