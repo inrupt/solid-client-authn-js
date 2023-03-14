@@ -217,6 +217,10 @@ export class Session
       this.info.webId = loginInfo.webId;
       this.info.expirationDate = loginInfo.expirationDate;
     }
+    if (loginInfo?.isLoggedIn) {
+      // Send a signal on successful client credentials login.
+      this.events.emit(EVENTS.LOGIN);
+    }
   };
 
   /**

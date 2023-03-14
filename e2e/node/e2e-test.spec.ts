@@ -19,7 +19,14 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { it, describe, beforeEach, afterEach, expect } from "@jest/globals";
+import {
+  jest,
+  it,
+  describe,
+  beforeEach,
+  afterEach,
+  expect,
+} from "@jest/globals";
 import { custom } from "openid-client";
 import {
   getNodeTestingEnvironment,
@@ -27,7 +34,7 @@ import {
 } from "@inrupt/internal-test-env";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
-import { Session } from "../../packages/node/src/Session";
+import { Session, EVENTS } from "../../packages/node/src/index";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -176,5 +183,84 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       const response = await authenticatedSession.fetch(privateResourceUrl);
       expect(response.status).toBe(401);
     });
+  });
+
+  describe("Session events", () => {
+    it("can fetch a public resource after logging out", async () => {
+      // FIXME: the WebID isn't necessarily a Solid resource.
+      const publicResourceUrl = authenticatedSession.info.webId as string;
+      await authenticatedSession.logout();
+      const response = await authenticatedSession.fetch(publicResourceUrl, {
+        headers: {
+          Accept: "text/turtle",
+        },
+      });
+      expect(response.status).toBe(200);
+      await expect(response.text()).resolves.toContain(
+        authenticatedSession.info.webId
+      );
+    });
+
+    it("cannot fetch a private resource after logging out", async () => {
+      await authenticatedSession.logout();
+      // The following line doesn't compile because of the recursive dependency
+      // between the current package, the shared environment setup, and the
+      // published version of the current package.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const privateResourceUrl = await getPodRoot(authenticatedSession);
+      const response = await authenticatedSession.fetch(privateResourceUrl);
+      expect(response.status).toBe(401);
+    });
+  });
+});
+
+describe("Session events", () => {
+  // These tests will check for session expiration, so they'll need a longer timeout.
+  jest.setTimeout(15 * 60 * 1000);
+
+  it("sends an event on successful login and logout", async () => {
+    const session = new Session();
+    let loginSignalReceived = false;
+    let logoutSignalReceived = false;
+    session.events.on(EVENTS.LOGIN, () => {
+      loginSignalReceived = true;
+    });
+    session.events.on(EVENTS.LOGOUT, () => {
+      logoutSignalReceived = true;
+    });
+    await session.login({
+      clientId: ENV.clientCredentials.owner.id,
+      clientSecret: ENV.clientCredentials.owner.secret,
+      oidcIssuer: ENV.idp,
+    });
+    expect(session.info.isLoggedIn).toBe(true);
+    await session.logout();
+    expect(loginSignalReceived).toBe(true);
+    expect(logoutSignalReceived).toBe(true);
+  });
+
+  it("sends an event on session exiration", async () => {
+    const session = new Session();
+    let expirationSignalReceived = false;
+    session.events.on(EVENTS.SESSION_EXPIRED, () => {
+      expirationSignalReceived = true;
+    });
+    await session.login({
+      clientId: ENV.clientCredentials.owner.id,
+      clientSecret: ENV.clientCredentials.owner.secret,
+      oidcIssuer: ENV.idp,
+    });
+    if (typeof session.info.expirationDate !== "number") {
+      throw new Error("Cannot determine session expiration date");
+    }
+    const expiresIn = session.info.expirationDate - Date.now();
+    console.log(`waiting ${expiresIn / 1000}s`);
+    await new Promise((resolve) => {
+      setTimeout(resolve, expiresIn);
+    });
+
+    expect(expirationSignalReceived).toBe(true);
+    await session.logout();
   });
 });
