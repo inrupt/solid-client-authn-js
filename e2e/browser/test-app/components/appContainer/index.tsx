@@ -32,7 +32,7 @@ import {
   handleIncomingRedirect,
   ISessionInfo,
   getDefaultSession,
-  EVENTS
+  EVENTS,
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
 
