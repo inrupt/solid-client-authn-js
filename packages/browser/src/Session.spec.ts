@@ -32,6 +32,7 @@ import { Session } from "./Session";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
+import type ClientAuthentication from "./ClientAuthentication";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
@@ -264,21 +265,21 @@ describe("Session", () => {
 
     it("updates the session's info if relevant", async () => {
       const clientAuthentication = mockClientAuthentication();
-      clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => {
-          return {
-            isLoggedIn: true,
-            sessionId: "a session ID",
-            webId: "https://some.webid#them",
-          };
-        }
-      );
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn<ClientAuthentication["handleIncomingRedirect"]>()
+        .mockResolvedValueOnce({
+          isLoggedIn: true,
+          sessionId: "a session ID",
+          webId: "https://some.webid#them",
+          expirationDate: Date.now() + 3600,
+        });
       const mySession = new Session({ clientAuthentication });
       expect(mySession.info.isLoggedIn).toBe(false);
       await mySession.handleIncomingRedirect("https://some.url");
       expect(mySession.info.isLoggedIn).toBe(true);
       expect(mySession.info.sessionId).toBe("a session ID");
       expect(mySession.info.webId).toBe("https://some.webid#them");
+      expect(mySession.info.expirationDate).toBeGreaterThan(Date.now());
     });
 
     it("updates the localStorage if the login is completed", async () => {

@@ -64,6 +64,16 @@ test.describe("Logged In", () => {
     await auth.login({ allow: true });
   });
 
+  test("The session information are set appropriately", async ({
+    app,
+    page,
+  }) => {
+    expect(await app.isLoginSignalReceived()).toBe(true);
+    expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
+    await page.click(TESTID_SELECTORS.LOGOUT_BUTTON);
+    expect(await app.isLogoutSignalReceived()).toBe(true);
+  });
+
   test("Public resource in my Pod", async ({ app, testContainer }) => {
     expect(await app.getFetchResponse()).toBe("not fetched");
 
