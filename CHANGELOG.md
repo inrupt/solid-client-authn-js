@@ -18,6 +18,13 @@ The following changes have been implemented but not released yet:
   went unnoticed because of a misconfiguration of the browser-based test app that
   should have covered this scenario. Both issues are now resolved.
 
+### node
+
+#### Bugfix
+
+- The `Session` expiration date was not set in all contexts: `session.info.expirationDate`
+  wasn't set properly using Client Credentials.
+
 ## 1.13.3 - 2023-03-07
 
 ### browser
