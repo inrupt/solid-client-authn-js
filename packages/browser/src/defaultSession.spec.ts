@@ -19,7 +19,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { jest, it, expect } from "@jest/globals";
 import {
   fetch,

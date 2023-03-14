@@ -19,7 +19,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { EVENTS, SessionEventEmitter } from "@inrupt/solid-client-authn-core";
 import { Session } from "./Session";
 
 let defaultSession: Session;
