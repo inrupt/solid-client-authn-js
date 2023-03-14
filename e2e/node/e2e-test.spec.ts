@@ -255,9 +255,8 @@ describe("Session events", () => {
       throw new Error("Cannot determine session expiration date");
     }
     const expiresIn = session.info.expirationDate - Date.now();
-    console.log(`waiting ${expiresIn / 1000}s`);
     await new Promise((resolve) => {
-      setTimeout(resolve, expiresIn);
+      setTimeout(resolve, expiresIn * 1000);
     });
 
     expect(expirationSignalReceived).toBe(true);

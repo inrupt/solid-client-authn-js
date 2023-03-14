@@ -169,7 +169,7 @@ describe("Session", () => {
         "internalLogout"
       );
       const logoutEventcallback = jest.fn();
-      mySession.events.onL(EVENTS.LOGOUT, logoutEventcallback);
+      mySession.events.on(EVENTS.LOGOUT, logoutEventcallback);
       mySession.events.emit(EVENTS.ERROR);
       // The internal logout should have been called...
       expect(spiedLogout).toHaveBeenCalled();
