@@ -37,10 +37,7 @@ import {
   mockDefaultIssuerConfig,
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
-import {
-  mockDefaultTokenRefresher,
-  mockDefaultTokenSet,
-} from "../refresh/__mocks__/TokenRefresher";
+import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
