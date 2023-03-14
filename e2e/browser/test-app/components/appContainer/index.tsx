@@ -165,12 +165,18 @@ export default function AppContainer() {
         </tr>
         <tr>
           <td>Received?</td>
-          <td data-testId="loginSignalReceived">
-            {loginSignalReceived ? "Yes" : "No"}
-          </td>
-          <td data-testId="logoutSignalReceived">
-            {logoutSignalReceived ? "Yes" : "No"}
-          </td>
+          {/* Only set the testId when the value is set so that the test driver waits for React rendering. */}
+          {loginSignalReceived ? (
+            <td data-testId="loginSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {logoutSignalReceived ? (
+            <td data-testId="logoutSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
         </tr>
       </table>
       <AuthenticatedFetch onError={onError} sessionInfo={sessionInfo} />
