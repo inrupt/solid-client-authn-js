@@ -35,7 +35,6 @@ let defaultSession: Session | undefined;
  */
 export function getDefaultSession(): Session {
   if (typeof defaultSession === "undefined") {
-    console.log("Initializing the session");
     defaultSession = new Session();
   }
   return defaultSession;
