@@ -64,6 +64,12 @@ describe("removeOidcQueryParam", () => {
     );
   });
 
+  it("preserves the path", () => {
+    expect(
+      removeOidcQueryParam("https://coolapp.test/some/redirect?state=ohio")
+    ).toBe("https://coolapp.test/some/redirect");
+  });
+
   it("preserves other query strings", () => {
     expect(
       removeOidcQueryParam(

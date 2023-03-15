@@ -36,7 +36,6 @@ export function removeOidcQueryParam(redirectUrl: string): string {
   cleanedUrl.hash = "";
   // Do not normalize the trailing slash, and respect the original redirect URL.
   if (
-    cleanedUrl.pathname === "/" &&
     // The trailing slash is present in the original redirect URL
     redirectUrl.includes(`${cleanedUrl.origin}/`)
   ) {
