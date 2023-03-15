@@ -34,7 +34,7 @@ import {
 } from "./defaultSession";
 import * as SessionModule from "./Session";
 
-it("the default session is instantiated lazily", () => {
+it("instantiates the default session lazily", () => {
   const singletonSession = new SessionModule.Session();
   const spiedConstructor = jest
     .spyOn(SessionModule, "Session")
@@ -50,14 +50,13 @@ it("re-uses the same Session when calling multiple methods", () => {
     .spyOn(SessionModule, "Session")
     .mockImplementation(() => singletonSession);
 
-  expect(spiedConstructor).not.toHaveBeenCalled();
-
   events().on(EVENTS.LOGIN, jest.fn());
 
   expect(spiedConstructor).toHaveBeenCalledTimes(1);
 
   events().on(EVENTS.LOGOUT, jest.fn());
 
+  // No new session has been instantiated.
   expect(spiedConstructor).toHaveBeenCalledTimes(1);
 });
 
