@@ -470,11 +470,6 @@ describe("AuthCodeRedirectHandler", () => {
         storageUtility: mockedStorage,
       });
       await authCodeRedirectHandler.handle(mockRedirectUrl());
-      await expect(
-        mockedStorage.getForUser("mySession", "redirectUrl", {
-          secure: false,
-        })
-      ).resolves.toBe("https://some.redirect.uri/?state=oauth2StateValue");
 
       // The ID token should not have been stored
       await expect(
@@ -484,7 +479,7 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toBeUndefined();
     });
 
-    it("preserves any query strings from the redirect URI", async () => {
+    it("does not override the previously stored redirect URL", async () => {
       mockOidcClient();
 
       window.fetch = (jest.fn() as any).mockReturnValue(
@@ -509,9 +504,8 @@ describe("AuthCodeRedirectHandler", () => {
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
         })
-      ).resolves.toBe(
-        "https://some.redirect.uri/?state=oauth2StateValue&someKey=someValue"
-      );
+        // The redirect URL already in storage shouldn't be overriden on redirect.
+      ).resolves.toBe(DEFAULT_REDIRECT_URL);
     });
 
     it("returns the expiration time normalised to the current time", async () => {

@@ -34,7 +34,7 @@ import {
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
 
-const REDIRECT_URL = "http://localhost:3001";
+const REDIRECT_URL = new URL("http://localhost:3001/").href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
 

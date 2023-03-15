@@ -175,19 +175,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       },
       { secure: true }
     );
-    // Clear the code query param from the redirect URL before storing it, but
-    // preserve any state that my have been provided by the client and returned
-    // by the IdP.
-    url.searchParams.delete("code");
-    await this.storageUtility.setForUser(
-      storedSessionId,
-      {
-        redirectUrl: url.toString(),
-      },
-      {
-        secure: false,
-      }
-    );
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
