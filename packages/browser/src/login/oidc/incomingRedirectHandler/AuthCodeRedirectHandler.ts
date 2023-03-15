@@ -44,6 +44,7 @@ import {
   getDpopToken,
   getBearerToken,
   CodeExchangeResult,
+  removeOidcQueryParam,
 } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
 
@@ -175,14 +176,11 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       },
       { secure: true }
     );
-    // Clear the code query param from the redirect URL before storing it, but
-    // preserve any state that my have been provided by the client and returned
-    // by the IdP.
-    url.searchParams.delete("code");
+
     await this.storageUtility.setForUser(
       storedSessionId,
       {
-        redirectUrl: url.toString(),
+        redirectUrl: removeOidcQueryParam(url.href),
       },
       {
         secure: false,

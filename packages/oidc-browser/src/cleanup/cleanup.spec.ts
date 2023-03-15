@@ -58,6 +58,12 @@ describe("removeOidcQueryParam", () => {
     expect(removeOidcQueryParam("https://some.url/")).toBe("https://some.url/");
   });
 
+  it("does not normalize the trailing slash", () => {
+    expect(removeOidcQueryParam("https://some.url?state=ohio")).toBe(
+      "https://some.url"
+    );
+  });
+
   it("preserves other query strings", () => {
     expect(
       removeOidcQueryParam(
