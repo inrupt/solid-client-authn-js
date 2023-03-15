@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### browser
+
+#### Bugfix
+
+- v1.13.3 introduced a bug in the silent reload flow, resulting in a "Mismatching
+  redirect URL" error when refreshing a page with an app logged in. This regression
+  went unnoticed because of a misconfiguration of the browser-based test app that
+  should have covered this scenario. Both issues are now resolved.
+
 ## 1.13.3 - 2023-03-07
 
 ### browser
