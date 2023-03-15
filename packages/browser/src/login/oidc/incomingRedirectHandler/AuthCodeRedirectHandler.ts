@@ -177,16 +177,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       { secure: true }
     );
 
-    await this.storageUtility.setForUser(
-      storedSessionId,
-      {
-        redirectUrl: removeOidcQueryParam(url.href),
-      },
-      {
-        secure: false,
-      }
-    );
-
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
     if (!sessionInfo) {
       throw new Error(`Could not retrieve session: [${storedSessionId}].`);
