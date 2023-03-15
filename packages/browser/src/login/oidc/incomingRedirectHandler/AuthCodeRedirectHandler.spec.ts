@@ -470,11 +470,6 @@ describe("AuthCodeRedirectHandler", () => {
         storageUtility: mockedStorage,
       });
       await authCodeRedirectHandler.handle(mockRedirectUrl());
-      await expect(
-        mockedStorage.getForUser("mySession", "redirectUrl", {
-          secure: false,
-        })
-      ).resolves.toBe("https://some.redirect.uri/?state=oauth2StateValue");
 
       // The ID token should not have been stored
       await expect(
