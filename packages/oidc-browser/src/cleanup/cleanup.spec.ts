@@ -43,8 +43,8 @@ describe("removeOidcQueryParam", () => {
   });
 
   it("removes the 'state' query string if present", () => {
-    expect(removeOidcQueryParam("https://some.url/?state=arkansas")).toBe(
-      "https://some.url/"
+    expect(removeOidcQueryParam("https://some.url?state=arkansas")).toBe(
+      "https://some.url"
     );
   });
 
@@ -70,6 +70,14 @@ describe("removeOidcQueryParam", () => {
         "https://some.url/?code=someCode&state=someState&otherQuery=aValue"
       )
     ).toBe("https://some.url/?otherQuery=aValue");
+  });
+
+  it("preserves other query strings when no trailing slash is present", () => {
+    expect(
+      removeOidcQueryParam(
+        "https://some.url?code=someCode&state=someState&otherQuery=aValue"
+      )
+    ).toBe("https://some.url?otherQuery=aValue");
   });
 });
 
