@@ -44,7 +44,6 @@ import {
   getDpopToken,
   getBearerToken,
   CodeExchangeResult,
-  removeOidcQueryParam,
 } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
 
