@@ -21,7 +21,7 @@
 
 import { Session } from "./Session";
 
-let defaultSession: Session;
+let defaultSession: Session | undefined;
 
 /**
  * Obtain the {@link Session} used when not explicitly instantiating one yourself.
@@ -35,6 +35,7 @@ let defaultSession: Session;
  */
 export function getDefaultSession(): Session {
   if (typeof defaultSession === "undefined") {
+    console.log("Initializing the session");
     defaultSession = new Session();
   }
   return defaultSession;
@@ -135,4 +136,6 @@ export const onSessionRestore: Session["onSessionRestore"] = (...args) => {
  *
  * @since Unreleased
  */
-export const { events } = getDefaultSession();
+export const events = (): Session["events"] => {
+  return getDefaultSession().events;
+};
