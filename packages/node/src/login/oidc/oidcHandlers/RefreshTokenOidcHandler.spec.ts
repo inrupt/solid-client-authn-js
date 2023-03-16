@@ -185,6 +185,7 @@ describe("RefreshTokenOidcHandler", () => {
       )) as SolidClientAuthnCore.LoginResult;
       expect(result).toBeDefined();
       expect(result?.webId).toBe("https://my.webid/");
+      expect(result?.expirationDate).toBeGreaterThan(Date.now());
 
       const { fetch: mockedFetch } = jest.requireMock(
         "cross-fetch"

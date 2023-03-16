@@ -82,11 +82,7 @@ export default class ClientAuthentication {
 
     if (loginReturn !== undefined) {
       this.fetch = loginReturn.fetch;
-      return {
-        isLoggedIn: true,
-        sessionId,
-        webId: loginReturn.webId,
-      };
+      return loginReturn;
     }
 
     // undefined is returned in the case when the login must be completed

@@ -27,6 +27,7 @@ import {
 
 export default function AuthenticatedFetch({
   onError,
+  sessionInfo,
 }: {
   sessionInfo?: ISessionInfo;
   onError: (err: string) => void;
@@ -50,6 +51,12 @@ export default function AuthenticatedFetch({
   return (
     <>
       <div>
+        <p>
+          Session expires at{" "}
+          <span data-testId="sessionExpiration">
+            {sessionInfo?.expirationDate}
+          </span>
+        </p>
         <input
           data-testId="fetchUriTextbox"
           type="text"

@@ -121,7 +121,7 @@ const mockDpopTokens = (): TokenSet => {
     token_type: "DPoP",
     expired: () => false,
     claims: mockIdTokenPayload,
-    expires_in: 1662266216,
+    expires_in: 3600,
   };
 };
 
@@ -446,7 +446,7 @@ describe("handle", () => {
       expect.anything(),
       expect.anything(),
       expect.objectContaining({
-        expiresIn: 1662266216,
+        expiresIn: mockDpopTokens().expires_in,
       })
     );
   });
@@ -472,5 +472,6 @@ describe("handle", () => {
     expect(result?.isLoggedIn).toBe(true);
     expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
     expect(result?.webId).toBe("https://my.webid/");
+    expect(result?.expirationDate).toBeGreaterThan(Date.now());
   });
 });

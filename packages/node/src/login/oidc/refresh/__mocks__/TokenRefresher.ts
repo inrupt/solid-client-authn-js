@@ -50,6 +50,7 @@ export const mockDefaultTokenSet = (): TokenEndpointResponse => {
   return {
     accessToken: "some refreshed access token",
     idToken: JSON.stringify(mockIdTokenPayload()),
+    expiresAt: Date.now() + 3600,
   };
 };
 

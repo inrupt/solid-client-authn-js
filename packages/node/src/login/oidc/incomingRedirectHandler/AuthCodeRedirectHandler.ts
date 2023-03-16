@@ -175,7 +175,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         dpopKey,
         refreshOptions,
         eventEmitter,
-        expiresIn: tokenSet.expires_in,
+        expiresIn:
+          tokenSet.expires_in ?? typeof tokenSet.expires_at === "number"
+            ? (tokenSet.expires_at as number) - Date.now()
+            : undefined,
       }
     );
 
@@ -209,6 +212,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      expirationDate:
+        tokenSet.expires_at ?? typeof tokenSet.expires_in === "number"
+          ? (tokenSet.expires_in as number) + Date.now()
+          : undefined,
     });
   }
 }

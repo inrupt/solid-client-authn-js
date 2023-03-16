@@ -183,6 +183,7 @@ export class Session extends EventEmitter {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
       this.info.sessionId = loginInfo.sessionId;
       this.info.webId = loginInfo.webId;
+      this.info.expirationDate = loginInfo.expirationDate;
     }
   };
 

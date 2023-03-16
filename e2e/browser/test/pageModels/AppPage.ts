@@ -34,6 +34,12 @@ export class AppPage {
 
   private readonly fetchResponseText: Locator;
 
+  private readonly loginSignalReceived: Locator;
+
+  private readonly logoutSignalReceived: Locator;
+
+  private readonly expirationDate: Locator;
+
   constructor(page: Page, options: AppPageOptions) {
     this.page = page;
     this.url = options.clientApplicationUrl;
@@ -41,6 +47,15 @@ export class AppPage {
 
     this.fetchResponseText = this.page.locator(
       '[data-testid="fetchResponseTextbox"]'
+    );
+    this.loginSignalReceived = this.page.locator(
+      '[data-testid="loginSignalReceived"]'
+    );
+    this.logoutSignalReceived = this.page.locator(
+      '[data-testid="loginSignalReceived"]'
+    );
+    this.expirationDate = this.page.locator(
+      '[data-testid="sessionExpiration"]'
     );
   }
 
@@ -65,5 +80,23 @@ export class AppPage {
 
   async getFetchResponse() {
     return this.fetchResponseText.textContent();
+  }
+
+  async isLoginSignalReceived(): Promise<boolean> {
+    const loginSignalText = await this.loginSignalReceived.textContent();
+    return loginSignalText === "Yes";
+  }
+
+  async isLogoutSignalReceived(): Promise<boolean> {
+    const logoutSignalText = await this.logoutSignalReceived.textContent();
+    return logoutSignalText === "Yes";
+  }
+
+  async getExpirationDate(): Promise<number> {
+    const expirationDateText = await this.expirationDate.textContent();
+    if (expirationDateText === null) {
+      throw new Error("No expiration date found.");
+    }
+    return Number.parseInt(expirationDateText, 10);
   }
 }

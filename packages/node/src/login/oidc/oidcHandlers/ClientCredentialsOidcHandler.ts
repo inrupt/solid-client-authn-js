@@ -124,6 +124,12 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
         oidcLoginOptions.client.clientId
       );
     }
+    let expiresIn: number | undefined;
+    if (typeof tokens.expires_in === "number") {
+      expiresIn = tokens.expires_in;
+    } else if (typeof tokens.expires_at === "number") {
+      expiresIn = tokens.expires_at - Date.now();
+    }
 
     const authFetch = await buildAuthenticatedFetch(
       globalFetch,
@@ -138,7 +144,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
             }
           : undefined,
         eventEmitter: oidcLoginOptions.eventEmitter,
-        expiresIn: tokens.expires_in,
+        expiresIn,
       }
     );
 
@@ -146,8 +152,9 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
       webId,
+      expirationDate:
+        expiresIn !== undefined ? Date.now() + expiresIn : undefined,
     };
-
     return Object.assign(sessionInfo, {
       fetch: authFetch,
     });
