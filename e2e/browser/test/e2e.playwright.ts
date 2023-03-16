@@ -109,7 +109,7 @@ test.describe("Logged In", () => {
 
   test("gets notified when session is extended", async ({ app }) => {
     // The session should expire after 6 minutes. The additional second is for margin.
-    test.setTimeout(3600000 + 1000);
+    test.setTimeout(360_000 + 1000);
     await app.page.waitForSelector("span[data-testid=loggedInStatus]");
 
     // Wait for the session to expire
@@ -127,9 +127,7 @@ test.describe("Logged In", () => {
       setTimeout(resolve, expirationDate - Date.now() + 500);
     });
     await expect(
-      app.page
-        .locator("span[data-testid=extensionSignalReceived]")
-        .textContent()
+      app.page.locator("[data-testid=extensionSignalReceived]").textContent()
     ).resolves.toContain("Yes");
   });
 });
@@ -177,7 +175,7 @@ test.describe("Using a Client ID", () => {
     app,
   }) => {
     // The session should expire after 6 minutes. The additional second is for margin.
-    test.setTimeout(3600000 + 1000);
+    test.setTimeout(360_000 + 1000);
     await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
     // Type the Client ID before logging in, so that it is used during logging.
     await app.page.fill(
@@ -202,9 +200,7 @@ test.describe("Using a Client ID", () => {
       setTimeout(resolve, expirationDate - Date.now() + 500);
     });
     await expect(
-      app.page
-        .locator("span[data-testid=expirationSignalReceived]")
-        .textContent()
+      app.page.locator("[data-testid=expirationSignalReceived]").textContent()
     ).resolves.toContain("Yes");
   });
 });
