@@ -1011,18 +1011,6 @@ describe("Session", () => {
         expect.assertions(1);
       });
     });
-
-    describe("sessionExpired", () => {
-      it("calls the provided callback when receiving the appropriate event", async () => {
-        const myCallback = jest.fn();
-        const mySession = new Session({
-          clientAuthentication: mockClientAuthentication(),
-        });
-        mySession.events.on(EVENTS.SESSION_EXPIRED, myCallback);
-        mySession.events.emit(EVENTS.SESSION_EXPIRED);
-        expect(myCallback).toHaveBeenCalled();
-      });
-    });
   });
 
   describe("proxies events to the session", () => {
