@@ -11,8 +11,6 @@ The following changes have been implemented but not released yet:
 
 ## [1.13.4](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.13.4) - 2023-03-16
 
-## 1.13.3 - 2023-03-07
-
 ### browser
 
 #### Bugfix
