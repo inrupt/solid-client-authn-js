@@ -19,7 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fetch as authenticatedFetch,
   ISessionInfo,

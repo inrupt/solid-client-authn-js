@@ -69,6 +69,9 @@ export type Fixtures = {
     clientResourceUrl: string;
     clientResourceContent: string;
   };
+  noSessionExtension: {
+    clientId: string;
+  };
 };
 
 export type TestContainer = {
@@ -103,6 +106,7 @@ const createClientIdDoc = async (
   clientInfo: {
     clientName: string;
     redirectUrl: string;
+    scope?: string;
   },
   container: string,
   session: Session
@@ -121,10 +125,10 @@ const createClientIdDoc = async (
     client_name: clientInfo.clientName,
     client_id: clientId,
     redirect_uris: [clientInfo.redirectUrl],
-    // Note: No refresh token will be issued. If the tests last too long, this
+    // Note: No refresh token will be issued by default. If the tests last too long, this
     // should be updated so that it has the offline_access scope and supports the
     // refresh_token grant type.
-    scope: "openid webid",
+    scope: clientInfo.scope ?? "openid webid",
     grant_types: ["authorization_code"],
     response_types: ["code"],
   };
