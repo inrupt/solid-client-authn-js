@@ -28,12 +28,13 @@ import {
   ISessionInfo,
   IStorage,
   EVENTS,
-  SessionEventEmitter,
   ISessionEventEmitter,
+  IHasSessionEventEmitter,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
+import EventEmitter from "events";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 
@@ -86,10 +87,7 @@ export const defaultStorage = new InMemoryStorage();
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session
-  extends SessionEventEmitter
-  implements ISessionEventEmitter
-{
+export class Session extends EventEmitter implements IHasSessionEventEmitter {
   /**
    * Information regarding the current session.
    */
@@ -99,7 +97,7 @@ export class Session
    * Session attribute exposing the EventEmitter interface, to listen on session
    * events such as login, logout, etc.
    */
-  public readonly events: SessionEventEmitter;
+  public readonly events: ISessionEventEmitter;
 
   /**
    * Proxy handler to ease transition to the Session no longer being an EvenEmitter,
@@ -150,6 +148,7 @@ export class Session
     // Until Session no longer implements EventEmitter, this.events is just a proxy
     // to this (with some interface filtering). When we make the breaking change,
     // this.events will be a regular SessionEventsEmitter.
+    // this.events = new EventEmitter();
     this.events = new Proxy(this, this.handler);
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;

@@ -21,14 +21,11 @@
 import { EventEmitter } from "events";
 import { EVENTS } from "./constant";
 
-export interface ISessionEventEmitter {
-  events: SessionEventEmitter;
+export interface IHasSessionEventEmitter {
+  events: ISessionEventEmitter;
 }
 
-export class SessionEventEmitter extends EventEmitter {
-  constructor() {
-    super();
-  }
+export interface ISessionEventEmitter extends EventEmitter {
   // The overloads should not be line-separated.
   /* eslint-disable lines-between-class-members */
   /**
@@ -101,9 +98,7 @@ export class SessionEventEmitter extends EventEmitter {
   on(
     eventName: Parameters<InstanceType<typeof EventEmitter>["on"]>[0],
     listener: Parameters<InstanceType<typeof EventEmitter>["on"]>[1]
-  ): this {
-    return super.on(eventName, listener);
-  }
+  ): this;
 
   /**
    * Register a listener called on the next successful login with the logged in WebID.
@@ -176,9 +171,7 @@ export class SessionEventEmitter extends EventEmitter {
   once(
     eventName: Parameters<InstanceType<typeof EventEmitter>["on"]>[0],
     listener: Parameters<InstanceType<typeof EventEmitter>["on"]>[1]
-  ): this {
-    return super.once(eventName, listener);
-  }
+  ): this;
 
   /**
    * Unegister a listener called on successful login with the logged in WebID.
@@ -249,8 +242,5 @@ export class SessionEventEmitter extends EventEmitter {
   off(
     eventName: Parameters<InstanceType<typeof EventEmitter>["on"]>[0],
     listener: Parameters<InstanceType<typeof EventEmitter>["on"]>[1]
-  ): this {
-    return super.off(eventName, listener);
-  }
-  /* eslint-enable lines-between-class-members */
+  ): this;
 }

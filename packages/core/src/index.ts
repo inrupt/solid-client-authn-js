@@ -22,7 +22,7 @@
 export * from "./constant";
 
 export {
-  SessionEventEmitter,
+  IHasSessionEventEmitter,
   ISessionEventEmitter,
 } from "./SessionEventEmitter";
 
