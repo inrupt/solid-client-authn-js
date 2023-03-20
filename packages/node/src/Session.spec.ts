@@ -565,6 +565,14 @@ describe("Session", () => {
       mySession.events.on("login", jest.fn());
       expect(spiedOn).toHaveBeenCalled();
     });
+
+    it("throws on calls from events which aren't part of the EventEmitter interface", () => {
+      const mySession = new Session();
+      // @ts-expect-error onLogin is a function on Session, and not SessionEventEmitter
+      expect(() => mySession.events.onLogin(jest.fn())).toThrow(
+        "[onLogin] is not supported"
+      );
+    });
   });
 });
 

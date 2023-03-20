@@ -113,6 +113,15 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
     // SessionEventEmitter, and the proxying is no longer necessary.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(target: any, prop: any, receiver: any) {
+      // Reject any calls to the proxy that isn't specific to the EventEmitter API
+      if (
+        !Object.getOwnPropertyNames(EventEmitter).includes(prop) &&
+        Object.getOwnPropertyNames(Session.prototype).includes(prop)
+      ) {
+        throw new Error(
+          `events only implements SessionEventEmitter, [${prop}] is not supported`
+        );
+      }
       return Reflect.get(target, prop, receiver);
     },
   };
