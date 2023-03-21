@@ -46,7 +46,7 @@ type SESSION_EXTENDED_ARGS = {
 };
 type TIMEOUT_SET_ARGS = {
   eventName: typeof EVENTS.TIMEOUT_SET;
-  listener: (timeoutHandle: number) => void;
+  listener: (timeoutId: number) => void;
 };
 type NEW_REFRESH_TOKEN_ARGS = {
   eventName: typeof EVENTS.NEW_REFRESH_TOKEN;
