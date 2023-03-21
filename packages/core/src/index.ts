@@ -24,6 +24,7 @@ export * from "./constant";
 export {
   IHasSessionEventEmitter,
   ISessionEventEmitter,
+  buildProxyHandler,
 } from "./SessionEventEmitter";
 
 export { default as ILoginInputOptions } from "./ILoginInputOptions";

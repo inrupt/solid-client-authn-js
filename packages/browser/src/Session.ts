@@ -29,6 +29,7 @@ import {
   IStorage,
   IHasSessionEventEmitter,
   ISessionEventEmitter,
+  buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import EventEmitter from "events";
@@ -159,23 +160,11 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
    * When Session no longer implements SessionEventEmitter, this can be removed.
    * @hidden
    */
-  private handler = {
-    // This proxy is only a temporary measure until Session no longer extends
-    // SessionEventEmitter, and the proxying is no longer necessary.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    get(target: any, prop: any, receiver: any) {
-      // Reject any calls to the proxy that isn't specific to the EventEmitter API
-      if (
-        !Object.getOwnPropertyNames(EventEmitter).includes(prop) &&
-        Object.getOwnPropertyNames(Session.prototype).includes(prop)
-      ) {
-        throw new Error(
-          `events only implements SessionEventEmitter, [${prop}] is not supported`
-        );
-      }
-      return Reflect.get(target, prop, receiver);
-    },
-  };
+  private handler = buildProxyHandler(
+    EventEmitter,
+    Session.prototype,
+    "events only implements SessionEventEmitter"
+  );
 
   /**
    * Session object constructor. Typically called as follows:
