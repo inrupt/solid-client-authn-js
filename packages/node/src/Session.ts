@@ -180,7 +180,10 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
       };
     }
     if (sessionOptions.onNewRefreshToken !== undefined) {
-      this.onNewRefreshToken(sessionOptions.onNewRefreshToken);
+      this.events.on(
+        EVENTS.NEW_REFRESH_TOKEN,
+        sessionOptions.onNewRefreshToken
+      );
     }
     // Keeps track of the latest timeout handle in order to clean up on logout
     // and not leave open timeouts.
