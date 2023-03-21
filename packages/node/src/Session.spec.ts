@@ -29,6 +29,7 @@ import {
   mockStorage,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
+import EventEmitter from "events";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
@@ -144,7 +145,10 @@ describe("Session", () => {
       const mySession = new Session({
         onNewRefreshToken: legacyTokenRotationCallback,
       });
-      mySession.events.emit(EVENTS.NEW_REFRESH_TOKEN, "some refresh token");
+      (mySession.events as EventEmitter).emit(
+        EVENTS.NEW_REFRESH_TOKEN,
+        "some refresh token"
+      );
       expect(legacyTokenRotationCallback).toHaveBeenCalledWith(
         "some refresh token"
       );
@@ -152,7 +156,7 @@ describe("Session", () => {
 
     it("listens on the timeout event", () => {
       const mySession = new Session();
-      mySession.events.emit(EVENTS.TIMEOUT_SET, 0);
+      (mySession.events as EventEmitter).emit(EVENTS.TIMEOUT_SET, 0);
       expect(
         (mySession as unknown as { lastTimeoutHandle: number })
           .lastTimeoutHandle
@@ -170,7 +174,7 @@ describe("Session", () => {
       );
       const logoutEventcallback = jest.fn();
       mySession.events.on(EVENTS.LOGOUT, logoutEventcallback);
-      mySession.events.emit(EVENTS.ERROR);
+      (mySession.events as EventEmitter).emit(EVENTS.ERROR);
       // The internal logout should have been called...
       expect(spiedLogout).toHaveBeenCalled();
       // ... but the user-initiated logout signal should not have been sent
@@ -188,7 +192,7 @@ describe("Session", () => {
       );
       const logoutEventcallback = jest.fn();
       mySession.events.on(EVENTS.LOGOUT, logoutEventcallback);
-      mySession.events.emit(EVENTS.SESSION_EXPIRED);
+      (mySession.events as EventEmitter).emit(EVENTS.SESSION_EXPIRED);
       // The internal logout should have been called...
       expect(spiedLogout).toHaveBeenCalled();
       // ... but the user-initiated logout signal should not have been sent
@@ -460,7 +464,10 @@ describe("Session", () => {
         const myCallback = jest.fn();
         const mySession = new Session();
         mySession.events.on(EVENTS.NEW_REFRESH_TOKEN, myCallback);
-        mySession.events.emit("newRefreshToken", "some new refresh token");
+        (mySession.events as EventEmitter).emit(
+          "newRefreshToken",
+          "some new refresh token"
+        );
         expect(myCallback).toHaveBeenCalledWith("some new refresh token");
       });
     });
@@ -540,7 +547,7 @@ describe("Session", () => {
           clientAuthentication: mockClientAuthentication(),
         });
         mySession.events.on(EVENTS.SESSION_EXPIRED, myCallback);
-        mySession.events.emit(EVENTS.SESSION_EXPIRED);
+        (mySession.events as EventEmitter).emit(EVENTS.SESSION_EXPIRED);
         expect(myCallback).toHaveBeenCalled();
       });
     });
@@ -550,7 +557,10 @@ describe("Session", () => {
         const myCallback = jest.fn();
         const mySession = new Session();
         mySession.events.on(EVENTS.NEW_REFRESH_TOKEN, myCallback);
-        mySession.events.emit("newRefreshToken", "some new refresh token");
+        (mySession.events as EventEmitter).emit(
+          "newRefreshToken",
+          "some new refresh token"
+        );
         expect(myCallback).toHaveBeenCalledWith("some new refresh token");
       });
     });
