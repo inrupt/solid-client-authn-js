@@ -22,8 +22,8 @@
 export * from "./constant";
 
 export {
-  IHasSessionEventEmitter,
-  ISessionEventEmitter,
+  IHasSessionEventListener,
+  ISessionEventListener,
   buildProxyHandler,
 } from "./SessionEventEmitter";
 

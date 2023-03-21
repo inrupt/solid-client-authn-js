@@ -28,8 +28,8 @@ import {
   ISessionInfo,
   IStorage,
   EVENTS,
-  ISessionEventEmitter,
-  IHasSessionEventEmitter,
+  ISessionEventListener,
+  IHasSessionEventListener,
   buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
@@ -88,7 +88,7 @@ export const defaultStorage = new InMemoryStorage();
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter implements IHasSessionEventEmitter {
+export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Information regarding the current session.
    */
@@ -98,7 +98,7 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
    * Session attribute exposing the EventEmitter interface, to listen on session
    * events such as login, logout, etc.
    */
-  public readonly events: ISessionEventEmitter;
+  public readonly events: ISessionEventListener;
 
   /**
    * Proxy handler to ease transition to the Session no longer being an EvenEmitter,
@@ -216,7 +216,7 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
     }
     if (loginInfo?.isLoggedIn) {
       // Send a signal on successful client credentials login.
-      this.events.emit(EVENTS.LOGIN);
+      (this.events as EventEmitter).emit(EVENTS.LOGIN);
     }
   };
 
@@ -247,7 +247,7 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
     clearTimeout(this.lastTimeoutHandle);
     this.info.isLoggedIn = false;
     if (emitEvent) {
-      this.events.emit(EVENTS.LOGOUT);
+      (this.events as EventEmitter).emit(EVENTS.LOGOUT);
     }
   };
 
@@ -283,7 +283,7 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
           if (sessionInfo.isLoggedIn) {
             // The login event can only be triggered **after** the user has been
             // redirected from the IdP with access and ID tokens.
-            this.events.emit(EVENTS.LOGIN);
+            (this.events as EventEmitter).emit(EVENTS.LOGIN);
           }
         }
       } finally {

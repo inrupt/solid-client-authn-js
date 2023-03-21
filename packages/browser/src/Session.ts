@@ -27,8 +27,8 @@ import {
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
-  IHasSessionEventEmitter,
-  ISessionEventEmitter,
+  IHasSessionEventListener,
+  ISessionEventListener,
   buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
@@ -135,7 +135,7 @@ function isLoggedIn(
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter implements IHasSessionEventEmitter {
+export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Information regarding the current session.
    */
@@ -145,7 +145,7 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
    * Session attribute exposing the EventEmitter interface, to listen on session
    * events such as login, logout, etc.
    */
-  public readonly events: ISessionEventEmitter;
+  public readonly events: ISessionEventListener;
 
   private clientAuthentication: ClientAuthentication;
 
@@ -278,7 +278,7 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
     if (emitSignal) {
-      this.events.emit(EVENTS.LOGOUT);
+      (this.events as EventEmitter).emit(EVENTS.LOGOUT);
     }
   };
 
@@ -318,13 +318,13 @@ export class Session extends EventEmitter implements IHasSessionEventEmitter {
       if (currentUrl === null) {
         // The login event can only be triggered **after** the user has been
         // redirected from the IdP with access and ID tokens.
-        this.events.emit(EVENTS.LOGIN);
+        (this.events as EventEmitter).emit(EVENTS.LOGIN);
       } else {
         // If an URL is stored in local storage, we are being logged in after a
         // silent authentication, so remove our currently stored URL location
         // to clean up our state now that we are completing the re-login process.
         window.localStorage.removeItem(KEY_CURRENT_URL);
-        this.events.emit(EVENTS.SESSION_RESTORED, currentUrl);
+        (this.events as EventEmitter).emit(EVENTS.SESSION_RESTORED, currentUrl);
       }
     } else if (options.restorePreviousSession === true) {
       // Silent authentication happens after a refresh, which means there are no
