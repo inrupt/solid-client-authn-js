@@ -23,6 +23,12 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+### node
+
+#### Bugfixes
+
+- The session expiration date was incorrectly computed in the authorization code flow.
+
 ## [1.13.4](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.13.4) - 2023-03-16
 
 ### browser
