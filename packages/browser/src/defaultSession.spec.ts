@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { jest, it, expect } from "@jest/globals";
 import {
   fetch,
@@ -29,33 +30,34 @@ import {
   onLogin,
   onSessionRestore,
   onLogout,
+  events,
 } from "./defaultSession";
-import type * as SessionModuleType from "./Session";
+import * as SessionModule from "./Session";
 
-jest.mock("../src/Session.ts");
-
-it("does not instantiate a Session without calling one of its methods", () => {
-  const mockedSession = jest.requireMock(
-    "../src/Session.ts"
-  ) as typeof SessionModuleType;
-
-  expect(mockedSession.Session).not.toHaveBeenCalled();
+it("instantiates the default session lazily", () => {
+  const singletonSession = new SessionModule.Session();
+  const spiedConstructor = jest
+    .spyOn(SessionModule, "Session")
+    .mockImplementation(() => singletonSession);
+  expect(spiedConstructor).not.toHaveBeenCalled();
+  events().on(EVENTS.LOGIN, jest.fn());
+  expect(spiedConstructor).toHaveBeenCalled();
 });
 
 it("re-uses the same Session when calling multiple methods", () => {
-  const mockedSession = jest.requireMock(
-    "../src/Session.ts"
-  ) as typeof SessionModuleType;
+  const singletonSession = new SessionModule.Session();
+  const spiedConstructor = jest
+    .spyOn(SessionModule, "Session")
+    .mockImplementation(() => singletonSession);
 
-  expect(mockedSession.Session).not.toHaveBeenCalled();
+  events().on(EVENTS.LOGIN, jest.fn());
 
-  onLogin(jest.fn());
+  expect(spiedConstructor).toHaveBeenCalledTimes(1);
 
-  expect(mockedSession.Session).toHaveBeenCalledTimes(1);
+  events().on(EVENTS.LOGOUT, jest.fn());
 
-  onLogout(jest.fn());
-
-  expect(mockedSession.Session).toHaveBeenCalledTimes(1);
+  // No new session has been instantiated.
+  expect(spiedConstructor).toHaveBeenCalledTimes(1);
 });
 
 it("all functions pass on their arguments to the default session", () => {
@@ -73,6 +75,7 @@ it("all functions pass on their arguments to the default session", () => {
   const onLoginSpy = jest.spyOn(defaultSession, "onLogin");
   const onLogoutSpy = jest.spyOn(defaultSession, "onLogout");
   const onSessionRestoreSpy = jest.spyOn(defaultSession, "onSessionRestore");
+  const eventsOnSpy = jest.spyOn(defaultSession.events, "on");
 
   expect(fetchSpy).not.toHaveBeenCalled();
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -93,6 +96,12 @@ it("all functions pass on their arguments to the default session", () => {
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   handleIncomingRedirect("https://example.com");
   expect(handleIncomingRedirectSpy).toHaveBeenCalledTimes(1);
+
+  // onLogin will internall call events.on(...), so the following test
+  // must come first.
+  expect(eventsOnSpy).not.toHaveBeenCalled();
+  events().on(EVENTS.LOGIN, jest.fn());
+  expect(eventsOnSpy).toHaveBeenCalledTimes(1);
 
   expect(onLoginSpy).not.toHaveBeenCalled();
   onLogin(jest.fn());

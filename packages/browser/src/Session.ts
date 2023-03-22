@@ -22,14 +22,17 @@
 /**
  * @hidden
  */
-import { EventEmitter } from "events";
 import {
   EVENTS,
   ILoginInputOptions,
   ISessionInfo,
   IStorage,
+  IHasSessionEventListener,
+  ISessionEventListener,
+  buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
+import EventEmitter from "events";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
@@ -116,7 +119,7 @@ export async function silentlyAuthenticate(
         clientSecret: storedSessionInfo.clientAppSecret,
         tokenType: storedSessionInfo.tokenType ?? "DPoP",
       },
-      session
+      session.events
     );
     return true;
   }
@@ -132,11 +135,17 @@ function isLoggedIn(
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter {
+export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Information regarding the current session.
    */
   public readonly info: ISessionInfo;
+
+  /**
+   * Session attribute exposing the EventEmitter interface, to listen on session
+   * events such as login, logout, etc.
+   */
+  public readonly events: ISessionEventListener;
 
   private clientAuthentication: ClientAuthentication;
 
@@ -162,7 +171,17 @@ export class Session extends EventEmitter {
     sessionId: string | undefined = undefined
   ) {
     super();
-
+    // Until Session no longer implements EventEmitter, this.events is just a proxy
+    // to this (with some interface filtering). When we make the breaking change,
+    // this.events will be a regular EventEmitter (implementing ISessionEventEmitter):
+    // this.events = new EventEmitter();
+    this.events = new Proxy(
+      this,
+      buildProxyHandler(
+        Session.prototype,
+        "events only implements ISessionEventListener"
+      )
+    );
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -191,13 +210,13 @@ export class Session extends EventEmitter {
     // enable silent refresh. The current session ID specifically stored in 'localStorage'
     // (as opposed to using our storage abstraction layer) because it is only
     // used in a browser-specific mechanism.
-    this.on(EVENTS.LOGIN, () =>
+    this.events.on(EVENTS.LOGIN, () =>
       window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId)
     );
 
-    this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
+    this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
 
-    this.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
   }
 
   /**
@@ -216,7 +235,7 @@ export class Session extends EventEmitter {
         // Defaults the token type to DPoP
         tokenType: options.tokenType ?? "DPoP",
       },
-      this
+      this.events
     );
     // `login` redirects the user away from the app,
     // so unless it throws an error, there is no code that should run afterwards
@@ -250,7 +269,7 @@ export class Session extends EventEmitter {
     await this.clientAuthentication.logout(this.info.sessionId);
     this.info.isLoggedIn = false;
     if (emitSignal) {
-      this.emit(EVENTS.LOGOUT);
+      (this.events as EventEmitter).emit(EVENTS.LOGOUT);
     }
   };
 
@@ -282,7 +301,7 @@ export class Session extends EventEmitter {
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
-      this
+      this.events
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);
@@ -290,13 +309,13 @@ export class Session extends EventEmitter {
       if (currentUrl === null) {
         // The login event can only be triggered **after** the user has been
         // redirected from the IdP with access and ID tokens.
-        this.emit(EVENTS.LOGIN);
+        (this.events as EventEmitter).emit(EVENTS.LOGIN);
       } else {
         // If an URL is stored in local storage, we are being logged in after a
         // silent authentication, so remove our currently stored URL location
         // to clean up our state now that we are completing the re-login process.
         window.localStorage.removeItem(KEY_CURRENT_URL);
-        this.emit(EVENTS.SESSION_RESTORED, currentUrl);
+        (this.events as EventEmitter).emit(EVENTS.SESSION_RESTORED, currentUrl);
       }
     } else if (options.restorePreviousSession === true) {
       // Silent authentication happens after a refresh, which means there are no
@@ -332,18 +351,20 @@ export class Session extends EventEmitter {
    * The callback is called when {@link handleIncomingRedirect} completes successfully.
    *
    * @param callback The function called when a user completes login.
+   * @deprecated Prefer session.events.on(EVENTS.LOGIN, callback)
    */
   onLogin(callback: () => unknown): void {
-    this.on(EVENTS.LOGIN, callback);
+    this.events.on(EVENTS.LOGIN, callback);
   }
 
   /**
    * Register a callback function to be called when a user logs out:
    *
    * @param callback The function called when a user completes logout.
+   * @deprecated Prefer session.events.on(EVENTS.LOGOUT, callback)
    */
   onLogout(callback: () => unknown): void {
-    this.on(EVENTS.LOGOUT, callback);
+    this.events.on(EVENTS.LOGOUT, callback);
   }
 
   /**
@@ -351,6 +372,7 @@ export class Session extends EventEmitter {
    *
    * @param callback The function called when an error occurs.
    * @since 1.11.0
+   * @deprecated Prefer session.events.on(EVENTS.ERROR, callback)
    */
   onError(
     callback: (
@@ -358,7 +380,7 @@ export class Session extends EventEmitter {
       errorDescription?: string | null
     ) => unknown
   ): void {
-    this.on(EVENTS.ERROR, callback);
+    this.events.on(EVENTS.ERROR, callback);
   }
 
   /**
@@ -368,9 +390,10 @@ export class Session extends EventEmitter {
    * at the time the session was restored.
    *
    * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
+   * @deprecated Prefer session.events.on(EVENTS.SESSION_RESTORED, callback)
    */
   onSessionRestore(callback: (currentUrl: string) => unknown): void {
-    this.on(EVENTS.SESSION_RESTORED, callback);
+    this.events.on(EVENTS.SESSION_RESTORED, callback);
   }
 
   /**
@@ -378,9 +401,10 @@ export class Session extends EventEmitter {
    * make authenticated requests, but following a user logout.
    * @param callback The function that runs on session expiration.
    * @since 1.11.0
+   * @deprecated Prefer session.events.on(EVENTS.SESSION_EXPIRED, callback)
    */
   onSessionExpiration(callback: () => unknown): void {
-    this.on(EVENTS.SESSION_EXPIRED, callback);
+    this.events.on(EVENTS.SESSION_EXPIRED, callback);
   }
 
   private setSessionInfo(
@@ -390,7 +414,7 @@ export class Session extends EventEmitter {
     this.info.webId = sessionInfo.webId;
     this.info.sessionId = sessionInfo.sessionId;
     this.info.expirationDate = sessionInfo.expirationDate;
-    this.on(EVENTS.SESSION_EXTENDED, (expiresIn: number) => {
+    this.events.on(EVENTS.SESSION_EXTENDED, (expiresIn: number) => {
       this.info.expirationDate = Date.now() + expiresIn * 1000;
     });
   }

@@ -29,10 +29,12 @@ import {
   mockStorage,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
+import EventEmitter from "events";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
 } from "./__mocks__/ClientAuthentication";
+import type ClientAuthentication from "./ClientAuthentication";
 import { Session } from "./Session";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_REGISTERED_SESSIONS } from "./constant";
@@ -143,7 +145,10 @@ describe("Session", () => {
       const mySession = new Session({
         onNewRefreshToken: legacyTokenRotationCallback,
       });
-      mySession.emit(EVENTS.NEW_REFRESH_TOKEN, "some refresh token");
+      (mySession.events as EventEmitter).emit(
+        EVENTS.NEW_REFRESH_TOKEN,
+        "some refresh token"
+      );
       expect(legacyTokenRotationCallback).toHaveBeenCalledWith(
         "some refresh token"
       );
@@ -151,7 +156,7 @@ describe("Session", () => {
 
     it("listens on the timeout event", () => {
       const mySession = new Session();
-      mySession.emit(EVENTS.TIMEOUT_SET, 0);
+      (mySession.events as EventEmitter).emit(EVENTS.TIMEOUT_SET, 0);
       expect(
         (mySession as unknown as { lastTimeoutHandle: number })
           .lastTimeoutHandle
@@ -168,8 +173,8 @@ describe("Session", () => {
         "internalLogout"
       );
       const logoutEventcallback = jest.fn();
-      mySession.onLogout(logoutEventcallback);
-      mySession.emit(EVENTS.ERROR);
+      mySession.events.on(EVENTS.LOGOUT, logoutEventcallback);
+      (mySession.events as EventEmitter).emit(EVENTS.ERROR);
       // The internal logout should have been called...
       expect(spiedLogout).toHaveBeenCalled();
       // ... but the user-initiated logout signal should not have been sent
@@ -186,8 +191,8 @@ describe("Session", () => {
         "internalLogout"
       );
       const logoutEventcallback = jest.fn();
-      mySession.onLogout(logoutEventcallback);
-      mySession.emit(EVENTS.SESSION_EXPIRED);
+      mySession.events.on(EVENTS.LOGOUT, logoutEventcallback);
+      (mySession.events as EventEmitter).emit(EVENTS.SESSION_EXPIRED);
       // The internal logout should have been called...
       expect(spiedLogout).toHaveBeenCalled();
       // ... but the user-initiated logout signal should not have been sent
@@ -376,90 +381,207 @@ describe("Session", () => {
     });
   });
 
-  describe("onLogin", () => {
-    it("calls the registered callback on login", async () => {
-      const myCallback = jest.fn();
-      const clientAuthentication = mockClientAuthentication();
-      clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => {
-          return {
-            isLoggedIn: true,
-            sessionId: "a session ID",
-            webId: "https://some.webid#them",
-          };
-        }
-      );
-      const mySession = new Session({ clientAuthentication });
-      mySession.onLogin(myCallback);
-      await mySession.handleIncomingRedirect("https://some.url");
-      expect(myCallback).toHaveBeenCalled();
-    });
-
-    it("does not call the registered callback if login isn't successful", async () => {
-      const failCallback = (): void => {
-        throw new Error(
-          "Should *NOT* call callback - this means test has failed!"
+  describe("legacy events handlers", () => {
+    describe("onLogin", () => {
+      it("calls the registered callback on login", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn(
+          async (_url: string) => {
+            return {
+              isLoggedIn: true,
+              sessionId: "a session ID",
+              webId: "https://some.webid#them",
+            };
+          }
         );
-      };
-      const clientAuthentication = mockClientAuthentication();
-      clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => {
-          return {
-            isLoggedIn: false,
-            sessionId: "a session ID",
-            webId: "https://some.webid#them",
-          };
-        }
-      );
-      const mySession = new Session({ clientAuthentication });
-      mySession.onLogin(failCallback);
-      await expect(
-        mySession.handleIncomingRedirect("https://some.url")
-      ).resolves.not.toThrow();
+        const mySession = new Session({ clientAuthentication });
+        mySession.onLogin(myCallback);
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalled();
+      });
+
+      it("does not call the registered callback if login isn't successful", async () => {
+        const failCallback = (): void => {
+          throw new Error(
+            "Should *NOT* call callback - this means test has failed!"
+          );
+        };
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn(
+          async (_url: string) => {
+            return {
+              isLoggedIn: false,
+              sessionId: "a session ID",
+              webId: "https://some.webid#them",
+            };
+          }
+        );
+        const mySession = new Session({ clientAuthentication });
+        mySession.onLogin(failCallback);
+        await expect(
+          mySession.handleIncomingRedirect("https://some.url")
+        ).resolves.not.toThrow();
+      });
+
+      it("sets the appropriate information before calling the callback", async () => {
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest.fn(
+          async (_url: string) => {
+            return {
+              isLoggedIn: true,
+              sessionId: "a session ID",
+              webId: "https://some.webid#them",
+            };
+          }
+        );
+        const mySession = new Session({ clientAuthentication });
+        const myCallback = jest.fn((): void => {
+          expect(mySession.info.webId).toBe("https://some.webid#them");
+        });
+        mySession.onLogin(myCallback);
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalled();
+        // Verify that the conditional assertion has been called
+        expect.assertions(2);
+      });
     });
 
-    it("sets the appropriate information before calling the callback", async () => {
-      const clientAuthentication = mockClientAuthentication();
-      clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => {
-          return {
+    describe("onLogout", () => {
+      it("calls the registered callback on logout", async () => {
+        const myCallback = jest.fn();
+        const mySession = new Session({
+          clientAuthentication: mockClientAuthentication(),
+        });
+        mySession.onLogout(myCallback);
+        await mySession.logout();
+        expect(myCallback).toHaveBeenCalled();
+      });
+    });
+
+    describe("onNewRefreshToken", () => {
+      it("calls the registered callback on the newREfreshToken event", async () => {
+        const myCallback = jest.fn();
+        const mySession = new Session();
+        mySession.events.on(EVENTS.NEW_REFRESH_TOKEN, myCallback);
+        (mySession.events as EventEmitter).emit(
+          "newRefreshToken",
+          "some new refresh token"
+        );
+        expect(myCallback).toHaveBeenCalledWith("some new refresh token");
+      });
+    });
+  });
+
+  describe("events.on", () => {
+    describe("login", () => {
+      it("calls the registered callback on login", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
             isLoggedIn: true,
             sessionId: "a session ID",
             webId: "https://some.webid#them",
-          };
-        }
-      );
-      const mySession = new Session({ clientAuthentication });
-      const myCallback = jest.fn((): void => {
-        expect(mySession.info.webId).toBe("https://some.webid#them");
+          });
+        const mySession = new Session({ clientAuthentication });
+        mySession.events.on(EVENTS.LOGIN, myCallback);
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalled();
       });
-      mySession.onLogin(myCallback);
-      await mySession.handleIncomingRedirect("https://some.url");
-      expect(myCallback).toHaveBeenCalled();
-      // Verify that the conditional assertion has been called
-      expect.assertions(2);
+
+      it("does not call the registered callback if login isn't successful", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        const mySession = new Session({ clientAuthentication });
+        mySession.events.on(EVENTS.LOGIN, myCallback);
+        expect(myCallback).not.toHaveBeenCalled();
+      });
+
+      it("sets the appropriate information before calling the callback", async () => {
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        const mySession = new Session({ clientAuthentication });
+        const myCallback = jest.fn((): void => {
+          expect(mySession.info.webId).toBe("https://some.webid#them");
+        });
+        mySession.events.on(EVENTS.LOGIN, myCallback);
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalled();
+        // Verify that the conditional assertion has been called
+        expect.assertions(2);
+      });
+    });
+
+    describe("logout", () => {
+      it("calls the registered callback on logout", async () => {
+        const myCallback = jest.fn();
+        const mySession = new Session({
+          clientAuthentication: mockClientAuthentication(),
+        });
+
+        mySession.events.on(EVENTS.LOGOUT, myCallback);
+        await mySession.logout();
+        expect(myCallback).toHaveBeenCalled();
+      });
+    });
+
+    describe("sessionExpired", () => {
+      it("calls the provided callback when receiving the appropriate event", async () => {
+        const myCallback = jest.fn();
+        const mySession = new Session({
+          clientAuthentication: mockClientAuthentication(),
+        });
+        mySession.events.on(EVENTS.SESSION_EXPIRED, myCallback);
+        (mySession.events as EventEmitter).emit(EVENTS.SESSION_EXPIRED);
+        expect(myCallback).toHaveBeenCalled();
+      });
+    });
+
+    describe("newRefreshToken", () => {
+      it("calls the registered callback on the newRefreshToken event", async () => {
+        const myCallback = jest.fn();
+        const mySession = new Session();
+        mySession.events.on(EVENTS.NEW_REFRESH_TOKEN, myCallback);
+        (mySession.events as EventEmitter).emit(
+          "newRefreshToken",
+          "some new refresh token"
+        );
+        expect(myCallback).toHaveBeenCalledWith("some new refresh token");
+      });
     });
   });
 
-  describe("onLogout", () => {
-    it("calls the registered callback on logout", async () => {
-      const myCallback = jest.fn();
-      const mySession = new Session({
-        clientAuthentication: mockClientAuthentication(),
-      });
-      mySession.onLogout(myCallback);
-      await mySession.logout();
-      expect(myCallback).toHaveBeenCalled();
-    });
-  });
-
-  describe("onNewRefreshToken", () => {
-    it("calls the registered callback on the newREfreshToken event", async () => {
-      const myCallback = jest.fn();
+  describe("proxies events to the session", () => {
+    // This describe block is only required as long as Session extends the EventEmitter
+    // class.
+    it("proxies the EventEmitter calls from events to the session object", () => {
       const mySession = new Session();
-      mySession.onNewRefreshToken(myCallback);
-      mySession.emit("newRefreshToken", "some new refresh token");
-      expect(myCallback).toHaveBeenCalledWith("some new refresh token");
+      const spiedOn = jest.spyOn(mySession, "on");
+      mySession.events.on("login", jest.fn());
+      expect(spiedOn).toHaveBeenCalled();
+    });
+
+    it("throws on calls from events which aren't part of the EventEmitter interface", () => {
+      const mySession = new Session();
+      // @ts-expect-error onLogin is a function on Session, and not SessionEventEmitter
+      expect(() => mySession.events.onLogin(jest.fn())).toThrow(
+        "[onLogin] is not supported"
+      );
     });
   });
 });

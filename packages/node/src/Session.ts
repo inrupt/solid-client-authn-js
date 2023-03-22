@@ -22,17 +22,20 @@
 /**
  * @hidden
  */
-import { EventEmitter } from "events";
 import {
   ILoginInputOptions,
   InMemoryStorage,
   ISessionInfo,
   IStorage,
   EVENTS,
+  ISessionEventListener,
+  IHasSessionEventListener,
+  buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
 import { fetch } from "cross-fetch";
+import EventEmitter from "events";
 import ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 
@@ -85,11 +88,17 @@ export const defaultStorage = new InMemoryStorage();
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter {
+export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Information regarding the current session.
    */
   public readonly info: ISessionInfo;
+
+  /**
+   * Session attribute exposing the EventEmitter interface, to listen on session
+   * events such as login, logout, etc.
+   */
+  public readonly events: ISessionEventListener;
 
   private clientAuthentication: ClientAuthentication;
 
@@ -119,6 +128,17 @@ export class Session extends EventEmitter {
     sessionId: string | undefined = undefined
   ) {
     super();
+    // Until Session no longer implements EventEmitter, this.events is just a proxy
+    // to this (with some interface filtering). When we make the breaking change,
+    // this.events will be a regular SessionEventsEmitter.
+    // this.events = new EventEmitter();
+    this.events = new Proxy(
+      this,
+      buildProxyHandler(
+        Session.prototype,
+        "events only implements ISessionEventListener"
+      )
+    );
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {
@@ -151,16 +171,19 @@ export class Session extends EventEmitter {
       };
     }
     if (sessionOptions.onNewRefreshToken !== undefined) {
-      this.onNewRefreshToken(sessionOptions.onNewRefreshToken);
+      this.events.on(
+        EVENTS.NEW_REFRESH_TOKEN,
+        sessionOptions.onNewRefreshToken
+      );
     }
     // Keeps track of the latest timeout handle in order to clean up on logout
     // and not leave open timeouts.
-    this.on(EVENTS.TIMEOUT_SET, (timeoutHandle: number) => {
+    this.events.on(EVENTS.TIMEOUT_SET, (timeoutHandle: number) => {
       this.lastTimeoutHandle = timeoutHandle;
     });
 
-    this.on(EVENTS.ERROR, () => this.internalLogout(false));
-    this.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
+    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
   }
 
   /**
@@ -177,13 +200,17 @@ export class Session extends EventEmitter {
       {
         ...options,
       },
-      this
+      this.events
     );
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
       this.info.sessionId = loginInfo.sessionId;
       this.info.webId = loginInfo.webId;
       this.info.expirationDate = loginInfo.expirationDate;
+    }
+    if (loginInfo?.isLoggedIn) {
+      // Send a signal on successful client credentials login.
+      (this.events as EventEmitter).emit(EVENTS.LOGIN);
     }
   };
 
@@ -214,7 +241,7 @@ export class Session extends EventEmitter {
     clearTimeout(this.lastTimeoutHandle);
     this.info.isLoggedIn = false;
     if (emitEvent) {
-      this.emit(EVENTS.LOGOUT);
+      (this.events as EventEmitter).emit(EVENTS.LOGOUT);
     }
   };
 
@@ -240,7 +267,7 @@ export class Session extends EventEmitter {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
           url,
-          this
+          this.events
         );
 
         if (sessionInfo) {
@@ -250,7 +277,7 @@ export class Session extends EventEmitter {
           if (sessionInfo.isLoggedIn) {
             // The login event can only be triggered **after** the user has been
             // redirected from the IdP with access and ID tokens.
-            this.emit(EVENTS.LOGIN);
+            (this.events as EventEmitter).emit(EVENTS.LOGIN);
           }
         }
       } finally {
@@ -266,21 +293,30 @@ export class Session extends EventEmitter {
    * The callback is called when {@link handleIncomingRedirect} completes successfully.
    *
    * @param callback The function called when a user completes login.
+   * @deprecated Prefer session.events.on(EVENTS.LOGIN, callback)
    */
   onLogin(callback: () => unknown): void {
-    this.on(EVENTS.LOGIN, callback);
+    this.events.on(EVENTS.LOGIN, callback);
   }
 
   /**
    * Register a callback function to be called when a user logs out:
    *
    * @param callback The function called when a user completes logout.
+   * @deprecated Prefer session.events.on(EVENTS.LOGOUT, callback)
    */
   onLogout(callback: () => unknown): void {
-    this.on(EVENTS.LOGOUT, callback);
+    this.events.on(EVENTS.LOGOUT, callback);
   }
 
+  /**
+   * Register a callback function to be called when a new Refresh Token is issued
+   * for the session. This helps keeping track of refresh token rotation.
+   *
+   * @param callback The function called when a new refresh token is issued.
+   * @deprecated Prefer session.events.on(EVENTS.NEW_REFRESH_TOKEN, callback)
+   */
   onNewRefreshToken(callback: (newToken: string) => unknown): void {
-    this.on(EVENTS.NEW_REFRESH_TOKEN, callback);
+    this.events.on(EVENTS.NEW_REFRESH_TOKEN, callback);
   }
 }

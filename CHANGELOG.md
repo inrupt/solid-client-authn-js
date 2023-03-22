@@ -5,6 +5,20 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Deprecation notice
+
+The following have been deprecated, and will be removed in future major releases.
+
+### browser and node
+
+- The `Session` class will no longer extend `EventEmitter`. Instead, it will expose
+  an `events` attribute implementing `EventEmitter`. We do not recommand to use
+  either a `Session` instance or its `events` attribute as an arbitrary events emitter,
+  and encourage users to only use the supported events and documented API.
+- `Session` methods `onLogin`, `onLogout`, `onError`, `onSessionRestore`,
+  `onSessionExpiration`, `onNewRefreshToken` are deprecated in favor of `session.events.on`
+  called with the appropriate event name.
+
 ## Unreleased
 
 The following changes have been implemented but not released yet:
@@ -26,6 +40,21 @@ The following changes have been implemented but not released yet:
 
 - The `Session` expiration date was not set in all contexts: `session.info.expirationDate`
   wasn't set properly using Client Credentials.
+
+### browser and node
+
+#### New feature
+
+- Added `events` attribute to the `Session` class to expose full `EventEmitter` API
+  with type hints for each supported event. This allows to write code such as the
+  following:
+
+  ```
+    const mySession = new Session();
+    mySession.events.on(EVENTS.LOGIN, () => { console.log("Logged in!") });
+  ```
+
+  This is closer to the EventEmitter API, so it should be familiar to more developers.
 
 ## 1.13.3 - 2023-03-07
 

@@ -31,7 +31,8 @@ import {
   logout,
   handleIncomingRedirect,
   ISessionInfo,
-  getDefaultSession,
+  events,
+  EVENTS,
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
 
@@ -61,17 +62,31 @@ export default function AppContainer() {
     useState<boolean>(false);
   const [logoutSignalReceived, setLogoutSignalReceived] =
     useState<boolean>(false);
+  const [extensionSignalReceived, setExtensionSignalReceived] =
+    useState<boolean>(false);
+  const [expirationSignalReceived, setExpirationSignalReceived] =
+    useState<boolean>(false);
 
   const onError = (error: string) => {
     setErrorMessage(error);
   };
 
-  getDefaultSession().onLogin(() => {
-    setLoginSignalReceived(true);
-  });
+  useEffect(() => {
+    events().on(EVENTS.LOGIN, () => {
+      setLoginSignalReceived(true);
+    });
 
-  getDefaultSession().onLogout(() => {
-    setLogoutSignalReceived(true);
+    events().on(EVENTS.LOGOUT, () => {
+      setLogoutSignalReceived(true);
+    });
+
+    events().on(EVENTS.SESSION_EXTENDED, () => {
+      setExtensionSignalReceived(true);
+    });
+
+    events().on(EVENTS.SESSION_EXPIRED, () => {
+      setExpirationSignalReceived(true);
+    });
   });
 
   useEffect(() => {
@@ -162,10 +177,13 @@ export default function AppContainer() {
           <td>Signals</td>
           <td>Login</td>
           <td>Logout</td>
+          <td>Extension</td>
+          <td>Expiration</td>
         </tr>
         <tr>
           <td>Received?</td>
           {/* Only set the testId when the value is set so that the test driver waits for React rendering. */}
+
           {loginSignalReceived ? (
             <td data-testId="loginSignalReceived">Yes</td>
           ) : (
@@ -174,6 +192,18 @@ export default function AppContainer() {
 
           {logoutSignalReceived ? (
             <td data-testId="logoutSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {extensionSignalReceived ? (
+            <td data-testId="extensionSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {expirationSignalReceived ? (
+            <td data-testId="expirationSignalReceived">Yes</td>
           ) : (
             <td>No</td>
           )}
