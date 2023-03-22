@@ -132,11 +132,13 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     // to this (with some interface filtering). When we make the breaking change,
     // this.events will be a regular SessionEventsEmitter.
     // this.events = new EventEmitter();
-    this.events = new Proxy(this, buildProxyHandler(
-      EventEmitter,
-      Session.prototype,
-      "events only implements SessionEventEmitter"
-    ););
+    this.events = new Proxy(
+      this,
+      buildProxyHandler(
+        Session.prototype,
+        "events only implements ISessionEventListener"
+      )
+    );
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {

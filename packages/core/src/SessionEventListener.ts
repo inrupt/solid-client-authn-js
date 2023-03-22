@@ -479,7 +479,9 @@ export interface ISessionEventListener extends EventEmitter {
  * Temporary internal builder for safe proxying.
  */
 export const buildProxyHandler = (
-  toInclude: any,
+  // The class to be excluded needs to be injected, because it is defined in a
+  // dependency.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   toExclude: any,
   errorMessage: string
 ) => ({
@@ -489,7 +491,7 @@ export const buildProxyHandler = (
   get(target: any, prop: any, receiver: any) {
     // Reject any calls to the proxy that isn't specific to the EventEmitter API
     if (
-      !Object.getOwnPropertyNames(toInclude).includes(prop) &&
+      !Object.getOwnPropertyNames(EventEmitter).includes(prop) &&
       Object.getOwnPropertyNames(toExclude).includes(prop)
     ) {
       throw new Error(`${errorMessage}: [${prop}] is not supported`);

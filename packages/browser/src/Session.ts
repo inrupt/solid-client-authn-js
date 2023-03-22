@@ -178,9 +178,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.events = new Proxy(
       this,
       buildProxyHandler(
-        EventEmitter,
         Session.prototype,
-        "events only implements SessionEventEmitter"
+        "events only implements ISessionEventListener"
       )
     );
     if (sessionOptions.clientAuthentication) {
