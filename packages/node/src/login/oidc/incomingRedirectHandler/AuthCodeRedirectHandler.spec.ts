@@ -275,7 +275,7 @@ describe("AuthCodeRedirectHandler", () => {
       expect(result.sessionId).toBe("mySession");
       expect(result.isLoggedIn).toBe(true);
       expect(result.webId).toEqual(mockWebId());
-      expect(result.expirationDate).toBeGreaterThan(Date.now());
+      expect(result.expirationDate).toEqual(Date.now() + 360 * 1000);
     });
 
     it("properly performs DPoP token exchange", async () => {
