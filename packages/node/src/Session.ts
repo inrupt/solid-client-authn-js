@@ -100,21 +100,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    */
   public readonly events: ISessionEventListener;
 
-  /**
-   * Proxy handler to ease transition to the Session no longer being an EvenEmitter,
-   * and instead Session["events"] being a SessionEventEmitter. For the time being,
-   * Session["events"] is just a proxy to the SessionEventEmitter interface of
-   * the Session.
-   *
-   * When Session no longer implements SessionEventEmitter, this can be removed.
-   * @hidden
-   */
-  private handler = buildProxyHandler(
-    EventEmitter,
-    Session.prototype,
-    "events only implements SessionEventEmitter"
-  );
-
   private clientAuthentication: ClientAuthentication;
 
   private tokenRequestInProgress = false;
@@ -147,7 +132,11 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     // to this (with some interface filtering). When we make the breaking change,
     // this.events will be a regular SessionEventsEmitter.
     // this.events = new EventEmitter();
-    this.events = new Proxy(this, this.handler);
+    this.events = new Proxy(this, buildProxyHandler(
+      EventEmitter,
+      Session.prototype,
+      "events only implements SessionEventEmitter"
+    ););
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {
