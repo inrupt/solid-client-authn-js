@@ -62,6 +62,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 jest.useFakeTimers();
+const DEFAULT_EXPIRATION_TIME_SECONDS = 300;
 
 const mockJwk = (): JWK => {
   return {
@@ -121,7 +122,7 @@ const mockDpopTokens = (): TokenSet => {
     token_type: "DPoP",
     expired: () => false,
     claims: mockIdTokenPayload,
-    expires_in: 3600,
+    expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
 
@@ -132,6 +133,7 @@ const mockBearerTokens = (): TokenSet => {
     token_type: "Bearer",
     expired: () => false,
     claims: mockIdTokenPayload,
+    expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
 
@@ -472,6 +474,8 @@ describe("handle", () => {
     expect(result?.isLoggedIn).toBe(true);
     expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
     expect(result?.webId).toBe("https://my.webid/");
-    expect(result?.expirationDate).toBeGreaterThan(Date.now());
+    expect(result?.expirationDate).toBe(
+      Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000
+    );
   });
 });

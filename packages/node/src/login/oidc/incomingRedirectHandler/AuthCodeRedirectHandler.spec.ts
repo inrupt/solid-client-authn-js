@@ -64,6 +64,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 jest.useFakeTimers();
+const DEFAULT_EXPIRATION_TIME_SECONDS = 300;
 
 const mockJwk = (): JWK => {
   return {
@@ -125,7 +126,7 @@ const mockBearerTokens = (): TokenSet => {
     token_type: "Bearer",
     expired: () => false,
     claims: mockIdTokenPayload,
-    expires_in: 3600,
+    expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
 
@@ -136,7 +137,7 @@ const mockDpopTokens = (): TokenSet => {
     token_type: "DPoP",
     expired: () => false,
     claims: mockIdTokenPayload,
-    expires_in: 3600,
+    expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
 
@@ -275,7 +276,9 @@ describe("AuthCodeRedirectHandler", () => {
       expect(result.sessionId).toBe("mySession");
       expect(result.isLoggedIn).toBe(true);
       expect(result.webId).toEqual(mockWebId());
-      expect(result.expirationDate).toBeGreaterThan(Date.now());
+      expect(result.expirationDate).toEqual(
+        Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000
+      );
     });
 
     it("properly performs DPoP token exchange", async () => {
