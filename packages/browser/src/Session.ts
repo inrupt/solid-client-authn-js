@@ -144,6 +144,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Session attribute exposing the EventEmitter interface, to listen on session
    * events such as login, logout, etc.
+   * @since 1.15.0
    */
   public readonly events: ISessionEventListener;
 
