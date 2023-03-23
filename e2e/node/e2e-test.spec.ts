@@ -256,7 +256,7 @@ describe("Session events", () => {
     }
     const expiresIn = session.info.expirationDate - Date.now();
     await new Promise((resolve) => {
-      setTimeout(resolve, expiresIn * 1000);
+      setTimeout(resolve, expiresIn);
     });
 
     expect(expirationSignalReceived).toBe(true);
