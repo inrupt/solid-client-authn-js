@@ -23,6 +23,20 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+## [1.14.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.14.0) - 2023-03-23
+
+### browser and node
+
+#### New features
+
+- The `Session` exposes an `events` attribute implementing `EventEmitter`, with
+  type hints to guide which events are supported. It allows to register a callback
+  listening on events using `session.events.on`, but also to unregister a callback
+  using `session.events.off`, or to register a one-off callback using `session.events.once`.
+  This attribute intends at replacing exising `Session` methods to listen on events,
+  namely `onLogin`, `onLogout`, `onError`, `onSessionRestore`, `onSessionExpiration`,
+  `onNewRefreshToken`.
+
 ### node
 
 #### Bugfixes
