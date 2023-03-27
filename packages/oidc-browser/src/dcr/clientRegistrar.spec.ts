@@ -21,7 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 // eslint-disable-next-line no-shadow
-import { Response } from "cross-fetch";
+import { Response } from "@inrupt/universal-fetch";
 import {
   IIssuerConfig,
   IClientRegistrarOptions,

@@ -27,6 +27,8 @@
 // being unauthenticated. This should be looked into when migrating to universal-fetch.
 // import { fetch } from "cross-fetch";
 
+import { fetch } from "@inrupt/universal-fetch";
+
 import {
   buildAuthenticatedFetch,
   IClient,

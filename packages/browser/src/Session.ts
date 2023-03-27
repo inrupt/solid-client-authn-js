@@ -31,6 +31,7 @@ import {
   ISessionEventListener,
   buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
+import { fetch } from "@inrupt/universal-fetch";
 import { v4 } from "uuid";
 import EventEmitter from "events";
 import ClientAuthentication from "./ClientAuthentication";

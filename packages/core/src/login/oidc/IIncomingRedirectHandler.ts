@@ -25,7 +25,7 @@
  */
 
 // eslint-disable-next-line no-shadow
-import { fetch } from "cross-fetch";
+import { fetch } from "@inrupt/universal-fetch";
 import { EventEmitter } from "events";
 import IHandleable from "../../util/handlerPattern/IHandleable";
 import { ISessionInfo } from "../../sessionInfo/ISessionInfo";

@@ -29,6 +29,7 @@ import {
   mockStorage,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import EventEmitter from "events";
 import {
   mockClientAuthentication,
@@ -44,7 +45,7 @@ import {
   getSessionIdFromStorageAll,
 } from "./multiSession";
 
-jest.mock("cross-fetch");
+jest.mock("@inrupt/universal-fetch");
 jest.mock("./dependencies");
 
 describe("Session", () => {
@@ -268,7 +269,9 @@ describe("Session", () => {
 
     it("defaults to non-authenticated fetch if not logged in", async () => {
       const clientAuthentication = mockClientAuthentication();
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const { fetch: mockedFetch } = jest.requireMock(
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url");
       expect(mockedFetch).toHaveBeenCalled();

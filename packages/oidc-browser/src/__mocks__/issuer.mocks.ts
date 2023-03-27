@@ -21,7 +21,8 @@
 
 import { jest } from "@jest/globals";
 // eslint-disable-next-line no-shadow
-import { Response } from "cross-fetch";
+import { Response, fetch } from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { JWK, importJWK, SignJWT } from "jose";
 import {
   IClient,
@@ -30,6 +31,13 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { TokenEndpointInput } from "../dpop/tokenExchange";
+
+jest.mock("@inrupt/universal-fetch", () => {
+  return {
+    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 
 /* eslint-disable camelcase */
 
@@ -163,13 +171,9 @@ export const mockClient = (clientId = "some client"): IClient => {
 // the object actually returned or with the .mock calls in the tests.
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const mockFetch = (payload: string, statusCode: number) => {
-  const mockedFetch = jest.fn(
-    async (
-      _url: RequestInfo | URL,
-      _init?: RequestInit
-    ): ReturnType<typeof window.fetch> =>
-      new Response(payload, { status: statusCode })
-  );
-  window.fetch = mockedFetch;
-  return mockedFetch;
+  const { fetch } = jest.requireMock("@inrupt/universal-fetch") as jest.Mocked<
+    typeof UniversalFetch
+  >;
+  fetch.mockResolvedValue(new Response(payload, { status: statusCode }));
+  return fetch;
 };

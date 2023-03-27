@@ -20,6 +20,7 @@
 //
 
 import { OidcClient } from "@inrupt/oidc-client";
+import { fetch } from "@inrupt/universal-fetch";
 import {
   IClient,
   IIssuerConfig,
@@ -239,10 +240,7 @@ export async function getTokens(
     body: new URLSearchParams(requestBody).toString(),
   };
 
-  const rawTokenResponse = await await fetch(
-    issuer.tokenEndpoint,
-    tokenRequestInit
-  );
+  const rawTokenResponse = await fetch(issuer.tokenEndpoint, tokenRequestInit);
 
   const jsonTokenResponse = (await rawTokenResponse.json()) as Record<
     string,

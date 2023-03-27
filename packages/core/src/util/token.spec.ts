@@ -21,16 +21,16 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { JWTPayload, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
-import { Response as NodeResponse } from "cross-fetch";
-import type * as CrossFetch from "cross-fetch";
+import { Response as NodeResponse } from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { getWebidFromTokenPayload } from "./token";
 
-jest.mock("cross-fetch", () => {
+jest.mock("@inrupt/universal-fetch", () => {
   return {
-    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
-    default: jest.fn(),
-    fetch: jest.fn(),
-  } as typeof CrossFetch;
+    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
+    default: jest.fn<typeof fetch>(),
+    fetch: jest.fn<typeof fetch>(),
+  };
 });
 
 describe("getWebidFromTokenPayload", () => {
@@ -76,17 +76,21 @@ describe("getWebidFromTokenPayload", () => {
       .sign(signingKey ?? (await mockJwk()).privateKey);
   };
 
-  const mockFetch = (payload: string, statusCode: number): void => {
+  const mockFetch = (
+    payload: string,
+    statusCode: number,
+    statusText?: string
+  ): void => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValueOnce(
-      new NodeResponse(payload, { status: statusCode })
+      new NodeResponse(payload, { status: statusCode, statusText })
     );
   };
 
   it("throws if the JWKS cannot be fetched", async () => {
-    mockFetch("", 404);
+    mockFetch("", 404, "Not Found");
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",

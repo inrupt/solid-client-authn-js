@@ -24,7 +24,7 @@ import {
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
-import { Response as NodeResponse } from "cross-fetch";
+import { Response as NodeResponse } from "@inrupt/universal-fetch";
 import ClientRegistrar from "./ClientRegistrar";
 import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfigFetcher";
 
