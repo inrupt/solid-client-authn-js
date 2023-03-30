@@ -37,9 +37,7 @@ export default function AuthenticatedFetch({
 
   const handleFetch = () => {
     if (resource !== undefined) {
-      authenticatedFetch(resource, {
-        headers: new Headers({ Accept: "text/turtle" }),
-      })
+      authenticatedFetch(resource)
         .then((response) => response.text())
         .then(setData)
         .catch((error) => {
@@ -53,12 +51,12 @@ export default function AuthenticatedFetch({
       <div>
         <p>
           Session expires at{" "}
-          <span data-testId="sessionExpiration">
+          <span data-testid="sessionExpiration">
             {sessionInfo?.expirationDate}
           </span>
         </p>
         <input
-          data-testId="fetchUriTextbox"
+          data-testid="fetchUriTextbox"
           type="text"
           value={resource}
           onChange={(e) => {
@@ -70,7 +68,7 @@ export default function AuthenticatedFetch({
             e.preventDefault();
             handleFetch();
           }}
-          data-testId="fetchButton"
+          data-testid="fetchButton"
         >
           Fetch
         </button>

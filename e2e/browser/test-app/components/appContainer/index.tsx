@@ -185,25 +185,25 @@ export default function AppContainer() {
           {/* Only set the testId when the value is set so that the test driver waits for React rendering. */}
 
           {loginSignalReceived ? (
-            <td data-testId="loginSignalReceived">Yes</td>
+            <td data-testid="loginSignalReceived">Yes</td>
           ) : (
             <td>No</td>
           )}
 
           {logoutSignalReceived ? (
-            <td data-testId="logoutSignalReceived">Yes</td>
+            <td data-testid="logoutSignalReceived">Yes</td>
           ) : (
             <td>No</td>
           )}
 
           {extensionSignalReceived ? (
-            <td data-testId="extensionSignalReceived">Yes</td>
+            <td data-testid="extensionSignalReceived">Yes</td>
           ) : (
             <td>No</td>
           )}
 
           {expirationSignalReceived ? (
-            <td data-testId="expirationSignalReceived">Yes</td>
+            <td data-testid="expirationSignalReceived">Yes</td>
           ) : (
             <td>No</td>
           )}
