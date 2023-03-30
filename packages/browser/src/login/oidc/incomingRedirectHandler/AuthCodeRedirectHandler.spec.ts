@@ -35,7 +35,7 @@ import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
-import { fetch, Response } from "@inrupt/universal-fetch";
+import { fetch, Response, Headers } from "@inrupt/universal-fetch";
 import * as UniversalFetch from "@inrupt/universal-fetch";
 import { JWK, importJWK } from "jose";
 import { KeyObject } from "crypto";

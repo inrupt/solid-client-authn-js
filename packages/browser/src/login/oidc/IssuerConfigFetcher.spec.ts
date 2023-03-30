@@ -82,7 +82,7 @@ describe("IssuerConfigFetcher", () => {
     const { fetch: mockFetch } = jest.requireMock(
       "@inrupt/universal-fetch"
     ) as jest.Mocked<typeof UniversalFetch>;
-    mockFetch.mockResolvedValueOnce(new Response("Not JSON."));
+    mockFetch.mockResolvedValueOnce(new NodeResponse("Not JSON."));
     const configFetcher = new IssuerConfigFetcher(mockStorageUtility({}));
 
     await expect(configFetcher.fetchConfig("https://some.url")).rejects.toThrow(
