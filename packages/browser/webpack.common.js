@@ -38,9 +38,5 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
-    alias: {
-      // undici is only useful in a Node context, the browser has a native fetch.
-      undici: false,
-    },
   },
 };
