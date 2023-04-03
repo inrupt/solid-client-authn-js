@@ -20,6 +20,9 @@
 //
 
 import { setupEnv } from "@inrupt/internal-test-env";
+import { ReadableStream } from "stream/web";
+
+globalThis.ReadableStream = ReadableStream as any;
 
 // Fail fast on dotenv:
 setupEnv();
