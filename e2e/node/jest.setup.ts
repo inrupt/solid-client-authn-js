@@ -20,9 +20,13 @@
 //
 
 import { setupEnv } from "@inrupt/internal-test-env";
-import { ReadableStream } from "stream/web";
 
-globalThis.ReadableStream = ReadableStream as any;
+const nodeMajor = Number(process.versions.node.split(".")[0]);
 
+// Readable stream was introduced in Node 17.
+if (nodeMajor <= 16) {
+    // @ts-ignore
+   delete globalThis.ReadableStream
+}
 // Fail fast on dotenv:
 setupEnv();
