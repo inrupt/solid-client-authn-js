@@ -25,8 +25,8 @@
 import { jest, it, describe, expect, afterEach } from "@jest/globals";
 import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
-import { Response, Headers } from "cross-fetch";
-import type * as CrossFetch from "cross-fetch";
+import { Response, Headers } from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import {
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
@@ -41,12 +41,12 @@ import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 
-jest.mock("cross-fetch", () => {
+jest.mock("@inrupt/universal-fetch", () => {
   return {
-    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
+    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
     default: jest.fn(),
     fetch: jest.fn(),
-  } as typeof CrossFetch;
+  } as typeof UniversalFetch;
 });
 
 const mockNotRedirectedResponse = () => {
@@ -88,8 +88,8 @@ const mockKeyPair = async () => {
 };
 
 const mockFetch = (response: Response, url: string) => {
-  const { fetch } = jest.requireMock("cross-fetch") as jest.Mocked<
-    typeof CrossFetch
+  const { fetch } = jest.requireMock("@inrupt/universal-fetch") as jest.Mocked<
+    typeof UniversalFetch
   >;
   const mockedResponse = response;
   jest.spyOn(mockedResponse, "url", "get").mockReturnValue(url);
@@ -337,8 +337,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("refreshes the token before it expires", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -364,8 +364,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("sets a default timeout if the OIDC provider did not return one", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -384,8 +384,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("does not rebind the DPoP token on refresh", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const keylikePair = await mockJwk();
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.
@@ -431,8 +431,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("sets up the timeout on refresh so that the tokens keep being valid", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
       // We get a new expiration date every time we refresh the tokens
@@ -469,8 +469,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("sets a default timeout on refresh if the OIDC provider does not return one", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
       // No new expiration date is provided on refresh
@@ -498,8 +498,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("calls the provided callback when the access token is refreshed", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const tokenSet = mockDefaultTokenSet();
     const mockedFreshener = mockTokenRefresher({
       ...tokenSet,
@@ -522,8 +522,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("calls the provided callback when a new refresh token is issued", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
@@ -547,8 +547,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("rotates the refresh token if a new one is issued", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.
     const mockedTokenRefresher: ITokenRefresher = {
@@ -581,8 +581,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("emits the appropriate events when refreshing the token fails", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
       .fn<
@@ -627,8 +627,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("emits the appropriate events when an unexpected response is received", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
       .fn<
@@ -660,8 +660,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("emits the appropriate events when the access token expires and may not be refreshed", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedFreshener.refresh = jest
@@ -689,8 +689,8 @@ describe("buildAuthenticatedFetch", () => {
 
   it("does not schedule any callback to be called if no event can be fired", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     const spyTimeout = jest.spyOn(global, "setTimeout");
     await buildAuthenticatedFetch(mockedFetch, "myToken");
     await sleep(100);

@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { fetch } from "@inrupt/universal-fetch";
 import {
   createDpopHeader,
   getWebidFromTokenPayload,

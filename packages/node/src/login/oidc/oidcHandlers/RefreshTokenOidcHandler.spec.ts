@@ -33,8 +33,11 @@ import {
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jwtVerify, exportJWK } from "jose";
 import { EventEmitter } from "events";
-import { Headers as NodeHeaders, Response as NodeResponse } from "cross-fetch";
-import type * as CrossFetch from "cross-fetch";
+import {
+  Headers as NodeHeaders,
+  Response as NodeResponse,
+} from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import {
   mockDefaultOidcOptions,
   mockOidcOptions,
@@ -46,12 +49,12 @@ import {
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
 
-jest.mock("cross-fetch", () => {
+jest.mock("@inrupt/universal-fetch", () => {
   return {
-    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
-    default: jest.fn(),
-    fetch: jest.fn(),
-  } as typeof CrossFetch;
+    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
+    default: jest.fn<typeof fetch>(),
+    fetch: jest.fn<typeof fetch>(),
+  };
 });
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
@@ -154,8 +157,8 @@ describe("RefreshTokenOidcHandler", () => {
       expect(result?.webId).toBe("https://my.webid/");
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValue({
         ...new NodeResponse(undefined, { status: 401 }),
         url: "https://my.pod/resource",
@@ -188,8 +191,8 @@ describe("RefreshTokenOidcHandler", () => {
       expect(result?.expirationDate).toBeGreaterThan(Date.now());
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValue({
         ...new NodeResponse(undefined, { status: 200 }),
         url: "https://my.pod/resource",
@@ -227,8 +230,8 @@ describe("RefreshTokenOidcHandler", () => {
       );
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValue({
         ...new NodeResponse(undefined, { status: 200 }),
         url: "https://my.pod/resource",
@@ -264,8 +267,8 @@ describe("RefreshTokenOidcHandler", () => {
       expect(result).toBeDefined();
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
 
       mockedFetch.mockResolvedValue({
         ...new NodeResponse(undefined, { status: 200 }),

@@ -27,8 +27,11 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { IdTokenClaims, TokenSet, BaseClient } from "openid-client";
 import { JWK } from "jose";
-import { Response as NodeResponse, Headers as NodeHeaders } from "cross-fetch";
-import type * as CrossFetch from "cross-fetch";
+import {
+  Response as NodeResponse,
+  Headers as NodeHeaders,
+} from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
@@ -41,14 +44,14 @@ import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
-// The fetch factory in the core module resolves cross-fetch to the environment-specific fetch
+// The fetch factory in the core module resolves @inrupt/universal-fetch to the environment-specific fetch
 
-jest.mock("cross-fetch", () => {
+jest.mock("@inrupt/universal-fetch", () => {
   return {
-    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
-    default: jest.fn(),
-    fetch: jest.fn(),
-  } as typeof CrossFetch;
+    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
+    default: jest.fn<typeof fetch>(),
+    fetch: jest.fn<typeof fetch>(),
+  };
 });
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
@@ -304,8 +307,8 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the returned fetch function is authenticated
       const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValueOnce(new NodeResponse());
       await result.fetch("https://some.url");
       const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
@@ -359,8 +362,8 @@ describe("AuthCodeRedirectHandler", () => {
 
       // Check that the returned fetch function is authenticated
       const { fetch: mockedFetch } = jest.requireMock(
-        "cross-fetch"
-      ) as jest.Mocked<typeof CrossFetch>;
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValueOnce(new NodeResponse());
       await result.fetch("https://some.url");
       const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);

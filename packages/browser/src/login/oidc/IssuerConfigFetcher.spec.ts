@@ -21,8 +21,19 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { Response as NodeResponse } from "cross-fetch";
+import { fetch, Response as NodeResponse } from "@inrupt/universal-fetch";
+import * as UniversalFetch from "@inrupt/universal-fetch";
 import IssuerConfigFetcher from "./IssuerConfigFetcher";
+
+jest.mock("@inrupt/universal-fetch", () => {
+  const fetchModule = jest.requireActual(
+    "@inrupt/universal-fetch"
+  ) as typeof UniversalFetch;
+  return {
+    ...fetchModule,
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 
 /**
  * Test for IssuerConfigFetcher
@@ -41,19 +52,22 @@ describe("IssuerConfigFetcher", () => {
   }
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    const fetchResponse = new NodeResponse(
-      JSON.stringify({
-        issuer: "https://example.com",
-        // eslint-disable-next-line camelcase
-        claim_types_supported: "oidc",
-        bleepBloop: "Meep Moop",
-      })
-    ) as unknown as Response;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
-    window.fetch = mockFetch as typeof window.fetch;
+    const { fetch: mockFetch } = jest.requireMock(
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
+    mockFetch.mockResolvedValueOnce(
+      new NodeResponse(
+        JSON.stringify({
+          issuer: "https://example.com",
+          // eslint-disable-next-line camelcase
+          claim_types_supported: "oidc",
+          bleepBloop: "Meep Moop",
+        })
+      )
+    );
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );
@@ -65,34 +79,34 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
-    const mockFetch = (): Promise<Response> =>
-      Promise.resolve({
-        json: () => {
-          throw new Error("Some error");
-        },
-      } as unknown as Response);
-    window.fetch = mockFetch;
+    const { fetch: mockFetch } = jest.requireMock(
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
+    mockFetch.mockResolvedValueOnce(new NodeResponse("Not JSON."));
     const configFetcher = new IssuerConfigFetcher(mockStorageUtility({}));
 
     await expect(configFetcher.fetchConfig("https://some.url")).rejects.toThrow(
-      "[https://some.url] has an invalid configuration: Some error"
+      "[https://some.url] has an invalid configuration:"
     );
   });
 
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
-    const fetchResponse = new NodeResponse(
-      JSON.stringify({
-        issuer: "https://example.com",
-        // eslint-disable-next-line camelcase
-        claim_types_supported: "oidc",
-        scopes_supported: ["openid", "offline_access", "webid"],
-      })
-    ) as unknown as Response;
+    const { fetch: mockFetch } = jest.requireMock(
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
+    mockFetch.mockResolvedValueOnce(
+      new NodeResponse(
+        JSON.stringify({
+          issuer: "https://example.com",
+          // eslint-disable-next-line camelcase
+          claim_types_supported: "oidc",
+          scopes_supported: ["openid", "offline_access", "webid"],
+        })
+      )
+    );
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
-    window.fetch = mockFetch as typeof window.fetch;
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );
@@ -102,18 +116,21 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a default value for the supported scopes if not advertized by the OpenID provider", async () => {
-    const fetchResponse = new NodeResponse(
-      JSON.stringify({
-        issuer: "https://example.com",
-        // eslint-disable-next-line camelcase
-        claim_types_supported: "oidc",
-      })
-    ) as unknown as Response;
+    const { fetch: mockFetch } = jest.requireMock(
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
+    mockFetch.mockResolvedValueOnce(
+      new NodeResponse(
+        JSON.stringify({
+          issuer: "https://example.com",
+          // eslint-disable-next-line camelcase
+          claim_types_supported: "oidc",
+        })
+      )
+    );
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    const mockFetch = (jest.fn() as any).mockResolvedValueOnce(fetchResponse);
-    window.fetch = mockFetch as typeof window.fetch;
     const fetchedConfig = await configFetcher.fetchConfig(
       "https://arbitrary.url"
     );
@@ -122,17 +139,20 @@ describe("IssuerConfigFetcher", () => {
 
   it("should append the .well-known/openid-configuration path at the end of the issuer URL", async () => {
     // The response value is irrelevant to this test.
-    const mockFetch = jest.fn<typeof fetch>().mockImplementation(
+    const { fetch: mockFetch } = jest.requireMock(
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
+    mockFetch.mockImplementation(
       async () =>
         new NodeResponse(
           JSON.stringify({
             issuer: "https://example.com",
             // eslint-disable-next-line camelcase
             claim_types_supported: "oidc",
+            scopes_supported: ["openid", "offline_access", "webid"],
           })
         )
     );
-    window.fetch = mockFetch as typeof window.fetch;
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });

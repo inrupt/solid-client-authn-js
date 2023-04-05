@@ -29,8 +29,8 @@ import { IdTokenClaims, TokenSet } from "openid-client";
 import type * as OpenidClient from "openid-client";
 import { JWK } from "jose";
 // eslint-disable-next-line no-shadow
-import { Headers, Response } from "cross-fetch";
-import type * as CrossFetch from "cross-fetch";
+import { Headers, Response } from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
@@ -40,12 +40,12 @@ import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
 
 jest.mock("openid-client");
 
-jest.mock("cross-fetch", () => {
+jest.mock("@inrupt/universal-fetch", () => {
   return {
-    ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
-    default: jest.fn(),
-    fetch: jest.fn(),
-  } as typeof CrossFetch;
+    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
+    default: jest.fn<typeof fetch>(),
+    fetch: jest.fn<typeof fetch>(),
+  };
 });
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
@@ -334,8 +334,8 @@ describe("handle", () => {
     });
 
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValue(
       new Response(undefined, {
         status: 200,
@@ -366,8 +366,8 @@ describe("handle", () => {
     });
 
     const { fetch: mockedFetch } = jest.requireMock(
-      "cross-fetch"
-    ) as jest.Mocked<typeof CrossFetch>;
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValue(
       new Response(undefined, {
         status: 200,
