@@ -40,7 +40,7 @@ migrate: clean
 
 	cp -R $(SOURCEDIR)/api/* $(SOURCECOPYDIR)
 
-	# Temporary workaround for the functions being in generated index.rst (which is the README.md file) instead of a separate module
+	# Temporary workaround for the functions being in the generated index.rst (which is the README.md file) instead of a separate module
    # We'll just put the functions in a functions.md file 
 
 	cp -R $(SOURCEDIR)/functions.md $(SOURCECOPYDIR)
