@@ -136,3 +136,6 @@ html_context = {
 }
 locale_dirs = ['locale/']   # path is example but recommended.
 gettext_compact = False     # optional.
+
+myst_heading_anchors = 6
+myst_url_schemes = ('https', 'http')
