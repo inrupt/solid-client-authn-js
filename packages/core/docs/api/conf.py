@@ -96,7 +96,8 @@ html_theme_options = {
     'show_api_menu': True,
 
     # below are pydata_sphinx_theme
-    "footer_items": [ "copyright.html"],
+    "footer_start": [ "copyright.html"],
+    "footer_end": [ ],
     "navbar_align": "left",
     "icon_links": [
         {
@@ -115,13 +116,7 @@ html_theme_options = {
             "icon": "fas fa-users",
         },
     ],
-    "favicons": [
-        {
-         "rel": "icon",
-         "sizes": "16x16",
-         "href": "https://docs.inrupt.com/inrupt_stickers_v2-03.png",
-        },
-    ],
+
 
 }
 
