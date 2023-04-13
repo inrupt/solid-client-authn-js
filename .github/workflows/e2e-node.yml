@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [16.x, 14.x]
+        node-version: ["18.x", "16.x", "14.x"]
         # NSS does not support static client registration, which we rely on for testing.
         environment-name: ["ESS PodSpaces"]
         experimental: [false]
@@ -24,7 +24,7 @@ jobs:
           - environment-name: "ESS Dev-Next"
             experimental: true
             # The experimental config only needs to run in one node version
-            node-version: 16.x
+            node-version: "18.x"
             # Ditto for the OS
             os: [ubuntu-latest]
     steps:

@@ -26,7 +26,7 @@ jobs:
       # the browser so we only need to test in one.
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: "18.x"
           cache: npm
       - run: npm ci
         if: github.actor != 'dependabot[bot]'
