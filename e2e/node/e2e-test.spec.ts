@@ -45,6 +45,15 @@ const ENV = getNodeTestingEnvironment();
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
   const authenticatedSession = new Session();
 
+  // Log back in on session expiration
+  authenticatedSession.events.on("sessionExpired", async () => {
+    await authenticatedSession.login({
+      clientId: ENV.clientCredentials.owner.id,
+      clientSecret: ENV.clientCredentials.owner.secret,
+      oidcIssuer: ENV.idp,
+    });
+  });
+
   beforeEach(async () => {
     await authenticatedSession.login({
       clientId: ENV.clientCredentials.owner.id,
