@@ -40,6 +40,11 @@ custom.setHttpOptionsDefaults({
   timeout: 15000,
 });
 
+if (process.env.CI === "true") {
+  // Tests running in the CI runners tend to be more flaky.
+  jest.retryTimes(3, { logErrorsBeforeRetry: true });
+}
+
 const ENV = getNodeTestingEnvironment();
 
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
