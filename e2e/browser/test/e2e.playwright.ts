@@ -158,9 +158,8 @@ test.describe("Using a Client ID", () => {
     await app.page.context().clearCookies();
     await app.page.fill("[data-testid=clientIdentifierInput]", "");
     await auth.login({ allow: true });
-    await app.page.waitForFunction(async () => {
-      "span[data-testid=loggedInStatus]";
-    });
+
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
     const failureResponse = await app.fetchResource(
       clientAccessControl.clientResourceUrl
     );
