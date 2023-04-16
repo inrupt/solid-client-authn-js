@@ -23,6 +23,8 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+## [1.14.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.14.0) - 2023-04-17
+
 ### New Feature
 
 - Node 18 support
