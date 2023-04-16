@@ -47,7 +47,7 @@ import {
 import { URL } from "url";
 import { Issuer } from "openid-client";
 import { KeyObject } from "crypto";
-import { fetch as globalFetch } from "cross-fetch";
+import { fetch as globalFetch } from "@inrupt/universal-fetch";
 
 import { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
@@ -209,6 +209,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      expirationDate:
+        typeof tokenSet.expires_in === "number"
+          ? (tokenSet.expires_in as number) * 1000 + Date.now()
+          : undefined,
     });
   }
 }

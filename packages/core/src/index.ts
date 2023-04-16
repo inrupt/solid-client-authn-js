@@ -21,6 +21,12 @@
 
 export * from "./constant";
 
+export {
+  IHasSessionEventListener,
+  ISessionEventListener,
+  buildProxyHandler,
+} from "./SessionEventListener";
+
 export { default as ILoginInputOptions } from "./ILoginInputOptions";
 
 export { default as ILoginHandler, LoginResult } from "./login/ILoginHandler";

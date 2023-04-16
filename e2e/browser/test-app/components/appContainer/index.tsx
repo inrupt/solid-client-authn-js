@@ -31,10 +31,12 @@ import {
   logout,
   handleIncomingRedirect,
   ISessionInfo,
+  events,
+  EVENTS,
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
 
-const REDIRECT_URL = "http://localhost:3001";
+const REDIRECT_URL = new URL("http://localhost:3001/").href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
 
@@ -56,10 +58,36 @@ export default function AppContainer() {
   const [issuer, setIssuer] = useState<string>(DEFAULT_ISSUER);
   const [clientId, setClientId] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [loginSignalReceived, setLoginSignalReceived] =
+    useState<boolean>(false);
+  const [logoutSignalReceived, setLogoutSignalReceived] =
+    useState<boolean>(false);
+  const [extensionSignalReceived, setExtensionSignalReceived] =
+    useState<boolean>(false);
+  const [expirationSignalReceived, setExpirationSignalReceived] =
+    useState<boolean>(false);
 
   const onError = (error: string) => {
     setErrorMessage(error);
   };
+
+  useEffect(() => {
+    events().on(EVENTS.LOGIN, () => {
+      setLoginSignalReceived(true);
+    });
+
+    events().on(EVENTS.LOGOUT, () => {
+      setLogoutSignalReceived(true);
+    });
+
+    events().on(EVENTS.SESSION_EXTENDED, () => {
+      setExtensionSignalReceived(true);
+    });
+
+    events().on(EVENTS.SESSION_EXPIRED, () => {
+      setExpirationSignalReceived(true);
+    });
+  });
 
   useEffect(() => {
     handleIncomingRedirect({ restorePreviousSession: true })
@@ -144,7 +172,44 @@ export default function AppContainer() {
         <strong>{errorMessage}</strong>
       </p>
       <br />
-      <AuthenticatedFetch onError={onError} />
+      <table>
+        <tr>
+          <td>Signals</td>
+          <td>Login</td>
+          <td>Logout</td>
+          <td>Extension</td>
+          <td>Expiration</td>
+        </tr>
+        <tr>
+          <td>Received?</td>
+          {/* Only set the testId when the value is set so that the test driver waits for React rendering. */}
+
+          {loginSignalReceived ? (
+            <td data-testid="loginSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {logoutSignalReceived ? (
+            <td data-testid="logoutSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {extensionSignalReceived ? (
+            <td data-testid="extensionSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {expirationSignalReceived ? (
+            <td data-testid="expirationSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+        </tr>
+      </table>
+      <AuthenticatedFetch onError={onError} sessionInfo={sessionInfo} />
     </div>
   );
 }

@@ -21,7 +21,8 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 // eslint-disable-next-line no-shadow
-import { Response as NodeResponse, fetch } from "cross-fetch";
+import { Response as NodeResponse, fetch } from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import {
   IIssuerConfig,
   mockStorageUtility,
@@ -36,7 +37,7 @@ import {
   PublicClientRegistrarMock,
 } from "./__mocks__/ClientRegistrar";
 
-jest.mock("cross-fetch");
+jest.mock("@inrupt/universal-fetch");
 
 describe("TokenRequester", () => {
   const defaultMocks = {
@@ -94,9 +95,10 @@ describe("TokenRequester", () => {
       issuerConfig
     );
 
-    const mockedFetch = (
-      jest.requireMock("cross-fetch") as jest.Mocked<typeof fetch>
-    ).mockResolvedValueOnce(
+    const { fetch: mockedFetch } = jest.requireMock(
+      "@inrupt/universal-fetch"
+    ) as jest.Mocked<typeof UniversalFetch>;
+    mockedFetch.mockResolvedValueOnce(
       new NodeResponse(values.responseBody ?? defaultReturnValues.responseBody)
     );
     return mockedFetch;

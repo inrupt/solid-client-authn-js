@@ -20,7 +20,19 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
+import { fetch } from "@inrupt/universal-fetch";
+import * as UniversalFetch from "@inrupt/universal-fetch";
 import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
+
+jest.mock("@inrupt/universal-fetch", () => {
+  const fetchModule = jest.requireActual(
+    "@inrupt/universal-fetch"
+  ) as typeof UniversalFetch;
+  return {
+    ...fetchModule,
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 
 describe("FallbackRedirectHandler", () => {
   describe("canHandle", () => {
@@ -51,7 +63,6 @@ describe("FallbackRedirectHandler", () => {
 
   describe("handle", () => {
     it("returns an unauthenticated session", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const redirectHandler = new FallbackRedirectHandler();
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toBe(false);

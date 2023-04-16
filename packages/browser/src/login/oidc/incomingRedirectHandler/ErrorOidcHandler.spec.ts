@@ -22,7 +22,19 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { EventEmitter } from "events";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
+import { fetch } from "@inrupt/universal-fetch";
+import * as UniversalFetch from "@inrupt/universal-fetch";
 import { ErrorOidcHandler } from "./ErrorOidcHandler";
+
+jest.mock("@inrupt/universal-fetch", () => {
+  const fetchModule = jest.requireActual(
+    "@inrupt/universal-fetch"
+  ) as typeof UniversalFetch;
+  return {
+    ...fetchModule,
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 
 describe("ErrorOidcHandler", () => {
   describe("canHandle", () => {
@@ -62,14 +74,12 @@ describe("ErrorOidcHandler", () => {
 
   describe("handle", () => {
     it("returns an unauthenticated session", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle("https://my.app");
       expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
     });
     it("calls the onError callback if given with both parameters", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const mockEmitter = new EventEmitter();
       // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events
       mockEmitter.on(EVENTS.ERROR, jest.fn());
@@ -90,7 +100,6 @@ describe("ErrorOidcHandler", () => {
     });
 
     it("calls the onError callback if given with just error parameters if no description is provided", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const mockEmitter = new EventEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
       // error events must be handled: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events

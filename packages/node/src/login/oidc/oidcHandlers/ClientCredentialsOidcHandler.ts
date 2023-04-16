@@ -43,7 +43,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
-import { fetch as globalFetch } from "cross-fetch";
+import { fetch as globalFetch } from "@inrupt/universal-fetch";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
@@ -146,8 +146,11 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
       webId,
+      expirationDate:
+        tokens.expires_in !== undefined
+          ? Date.now() + tokens.expires_in * 1000
+          : undefined,
     };
-
     return Object.assign(sessionInfo, {
       fetch: authFetch,
     });

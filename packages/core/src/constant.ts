@@ -41,7 +41,7 @@ export const EVENTS = {
   SESSION_EXTENDED: "sessionExtended",
   SESSION_RESTORED: "sessionRestore",
   TIMEOUT_SET: "timeoutSet",
-};
+} as const;
 /**
  * We want to refresh a token 5 seconds before it expires.
  */
