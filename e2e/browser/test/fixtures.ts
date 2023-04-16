@@ -384,6 +384,13 @@ export const test = base.extend<Fixtures>({
   clientAccessControl: async ({ setupEnvironment }, use) => {
     // Make the Client ID document publicly available.
     const session = new Session();
+    session.events.on("sessionExpired", async () => {
+      await session.login({
+        oidcIssuer: setupEnvironment.idp,
+        clientId: setupEnvironment.clientCredentials.owner.id,
+        clientSecret: setupEnvironment.clientCredentials.owner.secret,
+      });
+    });
 
     try {
       await session.login({

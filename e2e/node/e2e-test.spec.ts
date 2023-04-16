@@ -40,10 +40,24 @@ custom.setHttpOptionsDefaults({
   timeout: 15000,
 });
 
+if (process.env.CI === "true") {
+  // Tests running in the CI runners tend to be more flaky.
+  jest.retryTimes(3, { logErrorsBeforeRetry: true });
+}
+
 const ENV = getNodeTestingEnvironment();
 
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
   const authenticatedSession = new Session();
+
+  // Log back in on session expiration
+  authenticatedSession.events.on("sessionExpired", async () => {
+    await authenticatedSession.login({
+      clientId: ENV.clientCredentials.owner.id,
+      clientSecret: ENV.clientCredentials.owner.secret,
+      oidcIssuer: ENV.idp,
+    });
+  });
 
   beforeEach(async () => {
     await authenticatedSession.login({

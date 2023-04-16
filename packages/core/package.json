@@ -48,7 +48,7 @@
     "access": "public"
   },
   "engines": {
-    "node": "^14.0.0 || ^16.0.0"
+    "node": "^14.0.0 || ^16.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@types/lodash.clonedeep": "^4.5.7",
