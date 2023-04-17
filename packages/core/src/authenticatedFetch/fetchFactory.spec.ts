@@ -41,6 +41,13 @@ import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
 import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 
+if (process.env.CI === "true") {
+  // We don't want flaky tests to break the CI, and the fact that we are using
+  // actual timers instead of mock ones is a known issue that often requires the
+  // tests to re-run in CI.
+  jest.retryTimes(3, { logErrorsBeforeRetry: true });
+}
+
 jest.mock("@inrupt/universal-fetch", () => {
   return {
     ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
