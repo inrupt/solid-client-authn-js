@@ -11,18 +11,18 @@
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^1.6.2",
     "@inrupt/solid-client-authn-browser": "file:../../../packages/browser/",
-    "next": "^13.3.0",
+    "next": "^13.3.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^1.6.2",
-    "@playwright/test": "^1.32.3",
-    "@types/node": "^18.15.11",
-    "@types/react": "^18.0.35",
+    "@playwright/test": "^1.33.0",
+    "@types/node": "^18.16.3",
+    "@types/react": "^18.2.0",
     "@types/react-dom": "^18.0.11",
-    "eslint": "^8.38.0",
-    "eslint-config-next": "^13.3.0",
+    "eslint": "^8.39.0",
+    "eslint-config-next": "^13.3.4",
     "typescript": "^5.0.4"
   }
 }
