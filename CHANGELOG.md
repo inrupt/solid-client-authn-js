@@ -23,6 +23,10 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+### New Feature
+
+- Node 20 support
+
 ## [1.15.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.15.0) - 2023-04-17
 
 ### New Feature
