@@ -41,7 +41,6 @@
     "@inrupt/universal-fetch": "^1.0.1",
     "events": "^3.3.0",
     "jose": "^4.10.0",
-    "lodash.clonedeep": "^4.5.0",
     "uuid": "^9.0.0"
   },
   "publishConfig": {
@@ -51,7 +50,6 @@
     "node": "^14.0.0 || ^16.0.0 || ^18.0.0 || ^20.0.0"
   },
   "devDependencies": {
-    "@types/lodash.clonedeep": "^4.5.7",
     "@types/uuid": "^9.0.1"
   }
 }
