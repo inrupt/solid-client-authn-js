@@ -16,7 +16,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@inrupt/eslint-config-lib": "^1.6.2",
+    "@inrupt/eslint-config-lib": "^1.7.0",
     "@playwright/test": "^1.33.0",
     "@types/node": "^20.1.0",
     "@types/react": "^18.2.6",
