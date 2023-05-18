@@ -21,25 +21,73 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  TESTID_OPENID_PROVIDER_INPUT,
+  TESTID_LOGIN_BUTTON,
+  TESTID_LOGOUT_BUTTON,
+  TESTID_ERROR_MESSAGE,
+} from "@inrupt/internal-playwright-testids";
+import {
   login,
   logout,
   handleIncomingRedirect,
   ISessionInfo,
+  events,
+  EVENTS,
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
 
-const REDIRECT_URL = window.location.href;
+const REDIRECT_URL = new URL("http://localhost:3001/").href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
+
+const isValidUrl = (candidate?: string): boolean => {
+  if (typeof candidate !== "string") {
+    return false;
+  }
+  try {
+    // eslint-disable-next-line no-new
+    new URL(candidate);
+    return true;
+  } catch (_e) {
+    return false;
+  }
+};
 
 export default function AppContainer() {
   const [sessionInfo, setSessionInfo] = useState<ISessionInfo>();
   const [issuer, setIssuer] = useState<string>(DEFAULT_ISSUER);
+  const [clientId, setClientId] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [loginSignalReceived, setLoginSignalReceived] =
+    useState<boolean>(false);
+  const [logoutSignalReceived, setLogoutSignalReceived] =
+    useState<boolean>(false);
+  const [extensionSignalReceived, setExtensionSignalReceived] =
+    useState<boolean>(false);
+  const [expirationSignalReceived, setExpirationSignalReceived] =
+    useState<boolean>(false);
 
   const onError = (error: string) => {
     setErrorMessage(error);
   };
+
+  useEffect(() => {
+    events().on(EVENTS.LOGIN, () => {
+      setLoginSignalReceived(true);
+    });
+
+    events().on(EVENTS.LOGOUT, () => {
+      setLogoutSignalReceived(true);
+    });
+
+    events().on(EVENTS.SESSION_EXTENDED, () => {
+      setExtensionSignalReceived(true);
+    });
+
+    events().on(EVENTS.SESSION_EXPIRED, () => {
+      setExpirationSignalReceived(true);
+    });
+  });
 
   useEffect(() => {
     handleIncomingRedirect({ restorePreviousSession: true })
@@ -57,6 +105,8 @@ export default function AppContainer() {
         redirectUrl: REDIRECT_URL,
         oidcIssuer: issuer,
         clientName: APP_NAME,
+        // Only Solid-OIDC Client Identifiers are accepted here.
+        clientId: isValidUrl(clientId) ? clientId : undefined,
       });
     } catch (err) {
       onError((err as Error).toString());
@@ -74,7 +124,8 @@ export default function AppContainer() {
       <p>
         {sessionInfo?.isLoggedIn ? (
           <span data-testid="loggedInStatus">
-            Logged in as {sessionInfo.webId}
+            Logged in as {sessionInfo.webId} using client{" "}
+            {sessionInfo.clientAppId}.
           </span>
         ) : (
           <span data-testid="loggedOutStatus">Not logged in yet</span>
@@ -82,15 +133,24 @@ export default function AppContainer() {
       </p>
       <form>
         <input
-          data-testid="identityProviderInput"
+          data-testid={TESTID_OPENID_PROVIDER_INPUT}
+          placeholder="OpenID Provider URL"
           type="text"
           value={issuer}
           onChange={(e) => {
             setIssuer(e.target.value);
           }}
         />
+        <input
+          data-testid="clientIdentifierInput"
+          placeholder="Client Identifier"
+          type="text"
+          onChange={(e) => {
+            setClientId(e.target.value);
+          }}
+        />
         <button
-          data-testid="loginButton"
+          data-testid={TESTID_LOGIN_BUTTON}
           onClick={async (e) => {
             e.preventDefault();
             await handleLogin();
@@ -99,7 +159,7 @@ export default function AppContainer() {
           Log In
         </button>
         <button
-          data-testid="logoutButton"
+          data-testid={TESTID_LOGOUT_BUTTON}
           onClick={async (e) => {
             e.preventDefault();
             await handleLogout();
@@ -108,11 +168,48 @@ export default function AppContainer() {
           Log Out
         </button>
       </form>
-      <p data-testid="errorMessage">
+      <p data-testid={TESTID_ERROR_MESSAGE}>
         <strong>{errorMessage}</strong>
       </p>
       <br />
-      <AuthenticatedFetch onError={onError} />
+      <table>
+        <tr>
+          <td>Signals</td>
+          <td>Login</td>
+          <td>Logout</td>
+          <td>Extension</td>
+          <td>Expiration</td>
+        </tr>
+        <tr>
+          <td>Received?</td>
+          {/* Only set the testId when the value is set so that the test driver waits for React rendering. */}
+
+          {loginSignalReceived ? (
+            <td data-testid="loginSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {logoutSignalReceived ? (
+            <td data-testid="logoutSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {extensionSignalReceived ? (
+            <td data-testid="extensionSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+
+          {expirationSignalReceived ? (
+            <td data-testid="expirationSignalReceived">Yes</td>
+          ) : (
+            <td>No</td>
+          )}
+        </tr>
+      </table>
+      <AuthenticatedFetch onError={onError} sessionInfo={sessionInfo} />
     </div>
   );
 }

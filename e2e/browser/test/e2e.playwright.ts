@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { TESTID_SELECTORS } from "@inrupt/internal-playwright-testids";
 import { test, expect } from "./fixtures";
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
@@ -63,6 +64,16 @@ test.describe("Logged In", () => {
     await auth.login({ allow: true });
   });
 
+  test("The session information are set appropriately", async ({
+    app,
+    page,
+  }) => {
+    expect(await app.isLoginSignalReceived()).toBe(true);
+    expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
+    await page.click(TESTID_SELECTORS.LOGOUT_BUTTON);
+    expect(await app.isLogoutSignalReceived()).toBe(true);
+  });
+
   test("Public resource in my Pod", async ({ app, testContainer }) => {
     expect(await app.getFetchResponse()).toBe("not fetched");
 
@@ -95,4 +106,100 @@ test.describe("Logged In", () => {
   });
 
   test.fixme("Non-existent resource in my Pod", async () => {});
+
+  test("gets notified when session is extended", async ({ app }) => {
+    // The session should expire after 6 minutes. The additional second is for margin.
+    test.setTimeout(360_000 + 1000);
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+
+    // Wait for the session to expire
+    const expirationDateString = await app.page
+      .locator("span[data-testid=sessionExpiration]")
+      .textContent();
+    // This conditional doesn't impact test assertions.
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    if (expirationDateString === null) {
+      throw new Error("Could not read expiration date.");
+    }
+    const expirationDate = Number.parseInt(expirationDateString, 10);
+    await new Promise((resolve) => {
+      // Wait for the session to expire, with a small error margin
+      setTimeout(resolve, expirationDate - Date.now() + 500);
+    });
+    await expect(
+      app.page.locator("[data-testid=extensionSignalReceived]").textContent()
+    ).resolves.toContain("Yes");
+  });
+});
+
+test.describe("Using a Client ID", () => {
+  test("can log in using a Client ID document", async ({
+    auth,
+    clientAccessControl,
+    app,
+  }) => {
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.fill(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+    await auth.login({ allow: true });
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+    const successResponse = await app.fetchResource(
+      clientAccessControl.clientResourceUrl
+    );
+    // The resource content should be available, because it is fetched by an authorized client.
+    expect(successResponse).toBe(clientAccessControl.clientResourceContent);
+
+    // Try to log back in without using the Client Identifier, and verifies that it fails.
+    await app.page.click(TESTID_SELECTORS.LOGOUT_BUTTON);
+    // Enforce that we go through a full login again.
+    await app.page.context().clearCookies();
+    await app.page.fill("[data-testid=clientIdentifierInput]", "");
+    await auth.login({ allow: true });
+
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+    const failureResponse = await app.fetchResource(
+      clientAccessControl.clientResourceUrl
+    );
+    // The resource content shouldn't be available to a dynamically registered client.
+    expect(failureResponse).not.toBe(clientAccessControl.clientResourceContent);
+    expect(failureResponse).toContain("403");
+  });
+
+  test("can prevent the session from extending", async ({
+    auth,
+    clientAccessControl,
+    app,
+  }) => {
+    // The session should expire after 6 minutes. The additional second is for margin.
+    test.setTimeout(360_000 + 1000);
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.fill(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+    await auth.login({ allow: true });
+    await app.page.waitForSelector("span[data-testid=loggedInStatus]");
+
+    // Wait for the session to expire
+    const expirationDateString = await app.page
+      .locator("span[data-testid=sessionExpiration]")
+      .textContent();
+    // This conditional doesn't impact test assertions.
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    if (expirationDateString === null) {
+      throw new Error("Could not read expiration date.");
+    }
+    const expirationDate = Number.parseInt(expirationDateString, 10);
+    await new Promise((resolve) => {
+      // Wait for the session to expire, with a small error margin
+      setTimeout(resolve, expirationDate - Date.now() + 500);
+    });
+    await expect(
+      app.page.locator("[data-testid=expirationSignalReceived]").textContent()
+    ).resolves.toContain("Yes");
+  });
 });

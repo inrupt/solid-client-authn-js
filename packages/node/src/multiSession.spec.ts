@@ -58,6 +58,7 @@ describe("getSessionFromStorage", () => {
         webId: "https://my.webid",
         isLoggedIn: true,
         sessionId: "mySession",
+        expirationDate: Date.now() + 3600,
       });
     // Mocking the type definitions of the entire DI framework is a bit too
     // involved at this time, so settling for `any`:
@@ -66,11 +67,14 @@ describe("getSessionFromStorage", () => {
       .fn()
       .mockReturnValue(clientAuthentication);
     const mySession = await getSessionFromStorage("mySession", mockStorage({}));
-    expect(mySession?.info).toStrictEqual({
-      webId: "https://my.webid",
-      isLoggedIn: true,
-      sessionId: "mySession",
-    });
+    expect(mySession?.info).toStrictEqual(
+      expect.objectContaining({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        sessionId: "mySession",
+      })
+    );
+    expect(mySession?.info.expirationDate).toBeGreaterThan(Date.now());
   });
 
   it("returns a logged out Session if no refresh token is available", async () => {

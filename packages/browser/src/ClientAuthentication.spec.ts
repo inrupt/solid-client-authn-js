@@ -36,6 +36,9 @@ import {
   mockHandleIncomingRedirect,
 } from "@inrupt/solid-client-authn-core/mocks";
 
+import { fetch } from "@inrupt/universal-fetch";
+import * as UniversalFetch from "@inrupt/universal-fetch";
+
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
 import {
@@ -44,6 +47,16 @@ import {
 } from "./sessionInfo/__mocks__/SessionInfoManager";
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
+
+jest.mock("@inrupt/universal-fetch", () => {
+  const fetchModule = jest.requireActual(
+    "@inrupt/universal-fetch"
+  ) as typeof UniversalFetch;
+  return {
+    ...fetchModule,
+    fetch: jest.fn<typeof fetch>(),
+  };
+});
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -228,17 +241,65 @@ describe("ClientAuthentication", () => {
         nonEmptyStorage.get("clientKey", { secure: false })
       ).resolves.toBeUndefined();
     });
+
+    it("throws if the redirect IRI is a malformed URL", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() =>
+        clientAuthn.login(
+          {
+            sessionId: "someUser",
+            tokenType: "DPoP",
+            clientId: "coolApp",
+            redirectUrl: "not a valid URL",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter
+        )
+      ).rejects.toThrow();
+    });
+
+    it("throws if the redirect IRI contains a hash fragment, with a helpful message", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() =>
+        clientAuthn.login(
+          {
+            sessionId: "someUser",
+            tokenType: "DPoP",
+            clientId: "coolApp",
+            redirectUrl: "https://example.org/redirect#some-fragment",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter
+        )
+      ).rejects.toThrow("hash fragment");
+    });
+
+    it("does not normalize the redirect URL if provided by the user", async () => {
+      const clientAuthn = getClientAuthentication();
+      await clientAuthn.login(
+        {
+          sessionId: "mySession",
+          clientId: "coolApp",
+          // Note that the redirect IRI does not include a trailing slash.
+          redirectUrl: "https://example.org",
+          oidcIssuer: "https://idp.com",
+          tokenType: "Bearer",
+        },
+        mockEmitter
+      );
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          redirectUrl: "https://example.org",
+        })
+      );
+    });
   });
 
   describe("fetch", () => {
     it("calls fetch", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
-      expect(window.fetch).toHaveBeenCalledWith(
-        "https://html5zombo.com",
-        undefined
-      );
+      expect(fetch).toHaveBeenCalledWith("https://html5zombo.com", undefined);
     });
   });
 
@@ -247,7 +308,6 @@ describe("ClientAuthentication", () => {
     // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
-      window.fetch = jest.fn<typeof fetch>();
       // eslint-disable-next-line no-restricted-globals
       history.replaceState = jest.fn();
       const clientAuthn = getClientAuthentication();
@@ -262,13 +322,12 @@ describe("ClientAuthentication", () => {
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
 
       await clientAuthn.logout("mySession");
-      const spyFetch = jest.spyOn(window, "fetch");
       await clientAuthn.fetch("https://example.com", {
         credentials: "omit",
       });
       // Calling logout should revert back to our un-authenticated fetch.
       expect(clientAuthn.fetch).toBe(unauthFetch);
-      expect(spyFetch).toHaveBeenCalledWith("https://example.com", {
+      expect(fetch).toHaveBeenCalledWith("https://example.com", {
         credentials: "omit",
       });
     });

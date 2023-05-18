@@ -9,7 +9,9 @@
   "typedocOptions": {
     "out": "website/docs/api/core",
     "entryPoints": ["./src/index.ts"],
-    "entryDocument": "index.md"
+    "entryDocument": "index.rst",
+    "hideInPageTOC": true,
+    "plugin": ["typedoc-plugin-markdown"]
   },
 
   "include": ["src/**/*"],

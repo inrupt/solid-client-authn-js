@@ -5,11 +5,129 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Deprecation notice
+
+The following have been deprecated, and will be removed in future major releases.
+
+### browser and node
+
+- The `Session` class will no longer extend `EventEmitter`. Instead, it will expose
+  an `events` attribute implementing `EventEmitter`. We do not recommand to use
+  either a `Session` instance or its `events` attribute as an arbitrary events emitter,
+  and encourage users to only use the supported events and documented API.
+- `Session` methods `onLogin`, `onLogout`, `onError`, `onSessionRestore`,
+  `onSessionExpiration`, `onNewRefreshToken` are deprecated in favor of `session.events.on`
+  called with the appropriate event name.
+
 ## Unreleased
 
 The following changes have been implemented but not released yet:
 
-## 1.13.0 - 2023-01-12
+## [1.16.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.16.0) - 2023-05-09
+
+### New Feature
+
+- Node 20 support
+
+## [1.15.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.15.0) - 2023-04-17
+
+### New Feature
+
+- Node 18 support
+
+## [1.14.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.14.0) - 2023-03-23
+
+### browser and node
+
+#### New features
+
+- The `Session` exposes an `events` attribute implementing `EventEmitter`, with
+  type hints to guide which events are supported. It allows to register a callback
+  listening on events using `session.events.on`, but also to unregister a callback
+  using `session.events.off`, or to register a one-off callback using `session.events.once`.
+  This attribute intends at replacing exising `Session` methods to listen on events,
+  namely `onLogin`, `onLogout`, `onError`, `onSessionRestore`, `onSessionExpiration`,
+  `onNewRefreshToken`.
+
+### node
+
+#### Bugfixes
+
+- The session expiration date was incorrectly computed in the authorization code flow.
+
+## [1.13.4](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.13.4) - 2023-03-16
+
+### browser
+
+#### Bugfix
+
+- v1.13.3 introduced a bug in the silent reload flow, resulting in a "Mismatching
+  redirect URL" error when refreshing a page with an app logged in. This regression
+  went unnoticed because of a misconfiguration of the browser-based test app that
+  should have covered this scenario. Both issues are now resolved.
+
+### node
+
+#### Bugfix
+
+- The `Session` expiration date was not set in all contexts: `session.info.expirationDate`
+  wasn't set properly using Client Credentials.
+
+### browser and node
+
+#### New feature
+
+- Added `events` attribute to the `Session` class to expose full `EventEmitter` API
+  with type hints for each supported event. This allows to write code such as the
+  following:
+
+  ```
+    const mySession = new Session();
+    mySession.events.on(EVENTS.LOGIN, () => { console.log("Logged in!") });
+  ```
+
+  This is closer to the EventEmitter API, so it should be familiar to more developers.
+
+## 1.13.3 - 2023-03-07
+
+### browser
+
+#### Bugfixes
+
+- No longer remove the last issuer URL path component if it doesn't have a trailing
+  slash: a bug was introduced in baac030d33163ba08dadebabdaf676450be7fa88, resulting
+  in the issuer configuration discovery failing if the issuer URL had a path that
+  did not end with a trailing slash. This is now fixed.
+
+## 1.13.2 - 2023-02-16
+
+### node
+
+#### Bugfixes
+
+- The Client Credential flow had a bug where the expiration time set by the OpenID
+  Provider for the token was ignored, and an arbitrary default was applied instead.
+  This resulted in the session being unable to make authenticated requests, but
+  still acting as if it were logged in. The session now uses the expiration time
+  set by the OpenID Provider.
+
+## 1.13.1 - 2023-02-15
+
+### node and browser
+
+#### Dependency updates
+
+- Updated transitive dependencies to fix GHSA-rc47-6667-2j5j
+
+#### Bugfix
+
+- The redirect URL provided to the `login` function was being normalized, which
+  could result in misalignments with the redirect URLs declared in a Client Identifier
+  document, since the latter wasn't being normalized. The normalization step has
+  now been removed, and the redirect provided by the user is sent to the OpenID
+  Provider unchanged.
+
+## 1.13.0 - 2023-01-18
 
 ### node and browser
 

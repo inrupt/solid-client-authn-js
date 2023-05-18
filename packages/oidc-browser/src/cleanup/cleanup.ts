@@ -34,7 +34,19 @@ export function removeOidcQueryParam(redirectUrl: string): string {
   // As per https://tools.ietf.org/html/rfc6749#section-3.1.2, the redirect URL
   // must not include a hash fragment.
   cleanedUrl.hash = "";
-  return cleanedUrl.toString();
+  // Do not normalize the trailing slash, and respect the original redirect URL.
+  if (
+    // The trailing slash is present in the original redirect URL
+    redirectUrl.includes(`${cleanedUrl.origin}/`)
+  ) {
+    return cleanedUrl.href;
+  }
+  // Calling cleanedUrl.href appends a trailing slash to the origin, which may
+  // create a redirect URL mismatch if it wasn't originally present.
+  return `${cleanedUrl.origin}${cleanedUrl.href.substring(
+    // Adds 1 to the origin length to remove the trailing slash
+    cleanedUrl.origin.length + 1
+  )}`;
 }
 
 /**

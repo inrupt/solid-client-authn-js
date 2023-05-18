@@ -8,7 +8,8 @@
 
   "typedocOptions": {
     "out": "website/docs/api/oidc-client-ext",
-    "entryPoints": ["./src/index.ts"]
+    "entryPoints": ["./src/index.ts"],
+    "plugin": ["typedoc-plugin-markdown"]
   },
 
   "include": ["src/**/*"],

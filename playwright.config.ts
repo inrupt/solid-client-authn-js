@@ -1,31 +1,33 @@
-/*
- * Copyright 2022 Inrupt Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
- * Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+//
+// Copyright 2022 Inrupt Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+// Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
 import { PlaywrightTestConfig } from "@playwright/test";
 
 const env = () => (process.env.CI === "true" ? "in CI" : "locally");
 
+export const PLAYWRIGHT_PORT = 3001;
+
 const config: PlaywrightTestConfig = {
   testMatch: "*.playwright.ts",
-  retries: 1,
+  retries: process.env.CI ? 3 : 1,
   workers: process.env.CI ? 3 : 1,
   globalSetup: require.resolve("./e2e/browser/test/globalSetup.ts"),
   // On CI we want to use the automatic annotations, otherwise we use list:
@@ -48,7 +50,7 @@ const config: PlaywrightTestConfig = {
   timeout: process.env.CI ? 3 * 60_000 : 60_000,
   webServer: {
     command: "cd ./e2e/browser/test-app/ && npm run dev -- -p 3001",
-    port: 3001,
+    port: PLAYWRIGHT_PORT,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
   },

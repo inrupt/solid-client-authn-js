@@ -77,6 +77,7 @@ html_theme_path = ['./build/docs-assets/themes']
 html_copy_source = False
 
 html_title = 'Inrupt {0} API Documentation'.format(name)
+html_favicon = "https://docs.inrupt.com/inrupt_stickers_v2-03.png"
 
 # These theme options are declared in ./themes/inrupt/theme.conf
 # as well as some for pydata_sphinx_theme
@@ -95,7 +96,8 @@ html_theme_options = {
     'show_api_menu': True,
 
     # below are pydata_sphinx_theme
-    "footer_items": [ "copyright.html"],
+    "footer_start": [ "copyright.html"],
+    "footer_end": [ ],
     "navbar_align": "left",
     "icon_links": [
         {
@@ -114,13 +116,7 @@ html_theme_options = {
             "icon": "fas fa-users",
         },
     ],
-    "favicons": [
-        {
-         "rel": "icon",
-         "sizes": "16x16",
-         "href": "https://docs.inrupt.com/inrupt_stickers_v2-03.png",
-        },
-    ],
+
 
 }
 
@@ -129,10 +125,15 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['./build/docs-assets/_static']
 
+html_css_files = [
+    'css/inrupt.css',
+]
 
 html_sidebars = {
     '**': [  'search-field.html',  'docs-sidebar.html'],
 }
-
+html_context = {
+   "default_mode": "auto"
+}
 locale_dirs = ['locale/']   # path is example but recommended.
 gettext_compact = False     # optional.

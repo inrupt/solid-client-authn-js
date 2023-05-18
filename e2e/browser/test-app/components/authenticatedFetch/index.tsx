@@ -27,6 +27,7 @@ import {
 
 export default function AuthenticatedFetch({
   onError,
+  sessionInfo,
 }: {
   sessionInfo?: ISessionInfo;
   onError: (err: string) => void;
@@ -34,12 +35,9 @@ export default function AuthenticatedFetch({
   const [resource, setResource] = useState<string>();
   const [data, setData] = useState<string>("not fetched");
 
-  const handleFetch = (e: any) => {
-    e.preventDefault();
+  const handleFetch = () => {
     if (resource !== undefined) {
-      authenticatedFetch(resource, {
-        headers: new Headers({ Accept: "text/turtle" }),
-      })
+      authenticatedFetch(resource)
         .then((response) => response.text())
         .then(setData)
         .catch((error) => {
@@ -51,15 +49,27 @@ export default function AuthenticatedFetch({
   return (
     <>
       <div>
+        <p>
+          Session expires at{" "}
+          <span data-testid="sessionExpiration">
+            {sessionInfo?.expirationDate}
+          </span>
+        </p>
         <input
-          data-testId="fetchUriTextbox"
+          data-testid="fetchUriTextbox"
           type="text"
           value={resource}
           onChange={(e) => {
             setResource(e.target.value);
           }}
         />
-        <button onClick={(e) => handleFetch(e)} data-testId="fetchButton">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            handleFetch();
+          }}
+          data-testid="fetchButton"
+        >
           Fetch
         </button>
       </div>

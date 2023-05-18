@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/inrupt/solid-client-authn#readme",
   "dependencies": {
-    "cross-fetch": "^3.1.5",
     "express": "^4.17.1",
     "loglevel": "^1.7.0",
     "@inrupt/solid-client-authn-node": "../../"

@@ -7,7 +7,7 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 GIT_BRANCH    :=$(shell git rev-parse --abbrev-ref HEAD)
 BUILDDIR      = build
-SPHINXOPTS    = -d $(BUILDDIR)/doctrees -W 
+SPHINXOPTS    = -d $(BUILDDIR)/doctrees 
 SOURCECOPYDIR = $(BUILDDIR)/source/
 
 # Will need later for scrubbing generated .md files
@@ -33,23 +33,27 @@ migrate: clean
 
    # Using https (not ssh) to clone
 	git clone https://github.com/inrupt/docs-assets.git build/docs-assets
-   
+
+
 	# Copying to SOURCECOPYDIR instead of copying source dir to BUILDDIR
    # in case someone forgets to backslash after build/
 
-	cp -R $(SOURCEDIR)/index.rst $(SOURCECOPYDIR)
 	cp -R $(SOURCEDIR)/api/* $(SOURCECOPYDIR)
 
-	# Temporary workaround for the functions being in index.md (which is the README.md file) instead of a separate module
+	# Temporary workaround for the functions being in the generated index.rst (which is the README.md file) instead of a separate module
    # We'll just put the functions in a functions.md file 
 
 	cp -R $(SOURCEDIR)/functions.md $(SOURCECOPYDIR)
 	
-	if [ -f $(SOURCECOPYDIR)index.md ]; then \
-	   sed  -n -e '/Functions/,$$p' $(SOURCECOPYDIR)index.md >> $(SOURCECOPYDIR)functions.md ; \
-	   sed -i '' -e 's/index\.md/functions\.md/g' $(SOURCECOPYDIR)functions.md ; \
-	   rm $(SOURCECOPYDIR)index.md ; \
+	if [ -f $(SOURCECOPYDIR)index.rst ]; then \
+	   sed  -n -e '/Functions/,$$p' $(SOURCECOPYDIR)index.rst >> $(SOURCECOPYDIR)functions.md ; \
+	   sed -i '' -e 's/index\.rst/functions\.md/g' $(SOURCECOPYDIR)functions.md ; \
+	   rm $(SOURCECOPYDIR)index.rst ; \
 	fi
+	
+	# Use our custom index.rst
+	cp -R $(SOURCEDIR)/index.rst $(SOURCECOPYDIR)
+	
 
 html: Makefile migrate
 
@@ -57,12 +61,12 @@ html: Makefile migrate
 # If making html (e.g. foo.html), use sed to change .md# to .html#
 # Also, on macOS, need -i '' but not for Linux
 
-ifdef IS_MAC
-	find $(SOURCECOPYDIR)/ -type f -name "*.md" -exec sed -i '' -e 's?\.md#?\.html#?g' {} \;
-	
-else
-	find $(SOURCECOPYDIR)/ -type f -name "*.md" -exec sed -i  -e 's?\.md#?\.html#?g' {} \;
-endif
+# ifdef IS_MAC
+# 	find $(SOURCECOPYDIR)/ -type f -name "*.md" -exec sed -i '' -e 's?\.md#?\.html#?g' {} \;
+#
+# else
+# 	find $(SOURCECOPYDIR)/ -type f -name "*.md" -exec sed -i  -e 's?\.md#?\.html#?g' {} \;
+# endif
 	@$(SPHINXBUILD) -M $@ "$(SOURCECOPYDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -c .
 
 # Catch-all target: route all unknown targets to Sphinx using the new

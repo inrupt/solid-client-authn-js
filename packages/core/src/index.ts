@@ -21,6 +21,12 @@
 
 export * from "./constant";
 
+export {
+  IHasSessionEventListener,
+  ISessionEventListener,
+  buildProxyHandler,
+} from "./SessionEventListener";
+
 export { default as ILoginInputOptions } from "./ILoginInputOptions";
 
 export { default as ILoginHandler, LoginResult } from "./login/ILoginHandler";
@@ -35,6 +41,7 @@ export { getWebidFromTokenPayload, fetchJwks } from "./util/token";
 
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
+export { isValidRedirectUrl } from "./login/oidc/validateRedirectIri";
 
 export {
   default as IIncomingRedirectHandler,

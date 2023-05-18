@@ -19,37 +19,27 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { describe, it, expect } from "@jest/globals";
-import { appendToUrlPathname } from "./urlPath";
+import { it, describe, expect } from "@jest/globals";
+import { isValidRedirectUrl } from "./validateRedirectIri";
 
-describe("urlPath", () => {
-  it("should remove one slash if empty path", () => {
-    expect(appendToUrlPathname("https://ex.com/", "/test")).toBe(
-      "https://ex.com/test"
-    );
-
-    expect(
-      appendToUrlPathname("https://ex.com/", "////only-remove-one-slash")
-    ).toBe("https://ex.com////only-remove-one-slash");
+describe("isValidRedirectUrl", () => {
+  it("returns false if the provided IRI is malformed", () => {
+    expect(isValidRedirectUrl("not an IRI")).toBe(false);
   });
 
-  it("should remove one slash if non-empty path", () => {
-    expect(appendToUrlPathname("https://ex.com/a/", "/test")).toBe(
-      "https://ex.com/a/test"
-    );
-
+  it("returns false if the provided IRI contains a hash fragment", () => {
     expect(
-      appendToUrlPathname("https://ex.com/a/", "////only-remove-one-slash")
-    ).toBe("https://ex.com/a////only-remove-one-slash");
+      isValidRedirectUrl("https://example.org/redirect#some-fragment")
+    ).toBe(false);
   });
 
-  it("should add a slash before appending slash", () => {
-    expect(appendToUrlPathname("https://ex.com", "test")).toBe(
-      "https://ex.com/test"
-    );
-
-    expect(appendToUrlPathname("https://ex.com/a", "test")).toBe(
-      "https://ex.com/a/test"
-    );
+  it("returns true for a valid redirect IRI", () => {
+    expect(isValidRedirectUrl("https://example.org/")).toBe(true);
+    expect(isValidRedirectUrl("https://example.org/some/path")).toBe(true);
+    expect(
+      isValidRedirectUrl(
+        "https://example.org/?param=value&otherParam=otherValue"
+      )
+    ).toBe(true);
   });
 });

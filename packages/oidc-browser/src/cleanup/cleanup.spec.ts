@@ -43,8 +43,8 @@ describe("removeOidcQueryParam", () => {
   });
 
   it("removes the 'state' query string if present", () => {
-    expect(removeOidcQueryParam("https://some.url/?state=arkansas")).toBe(
-      "https://some.url/"
+    expect(removeOidcQueryParam("https://some.url?state=arkansas")).toBe(
+      "https://some.url"
     );
   });
 
@@ -58,12 +58,32 @@ describe("removeOidcQueryParam", () => {
     expect(removeOidcQueryParam("https://some.url/")).toBe("https://some.url/");
   });
 
+  it("does not normalize the trailing slash", () => {
+    expect(removeOidcQueryParam("https://some.url?state=ohio")).toBe(
+      "https://some.url"
+    );
+  });
+
+  it("preserves the path", () => {
+    expect(
+      removeOidcQueryParam("https://coolapp.test/some/redirect?state=ohio")
+    ).toBe("https://coolapp.test/some/redirect");
+  });
+
   it("preserves other query strings", () => {
     expect(
       removeOidcQueryParam(
         "https://some.url/?code=someCode&state=someState&otherQuery=aValue"
       )
     ).toBe("https://some.url/?otherQuery=aValue");
+  });
+
+  it("preserves other query strings when no trailing slash is present", () => {
+    expect(
+      removeOidcQueryParam(
+        "https://some.url?code=someCode&state=someState&otherQuery=aValue"
+      )
+    ).toBe("https://some.url?otherQuery=aValue");
   });
 });
 

@@ -26,7 +26,7 @@ jobs:
       # the browser so we only need to test in one.
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: "20.x"
           cache: npm
       - run: npm ci
         if: github.actor != 'dependabot[bot]'
@@ -59,4 +59,4 @@ jobs:
         if: failure()
         with:
           name: e2e-browser-failures
-          path: e2e/browser/test-results
+          path: test-results

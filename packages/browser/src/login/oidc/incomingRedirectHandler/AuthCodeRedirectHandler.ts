@@ -27,6 +27,8 @@
 // being unauthenticated. This should be looked into when migrating to universal-fetch.
 // import { fetch } from "cross-fetch";
 
+import { fetch } from "@inrupt/universal-fetch";
+
 import {
   buildAuthenticatedFetch,
   IClient,
@@ -174,19 +176,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         isLoggedIn: "true",
       },
       { secure: true }
-    );
-    // Clear the code query param from the redirect URL before storing it, but
-    // preserve any state that my have been provided by the client and returned
-    // by the IdP.
-    url.searchParams.delete("code");
-    await this.storageUtility.setForUser(
-      storedSessionId,
-      {
-        redirectUrl: url.toString(),
-      },
-      {
-        secure: false,
-      }
     );
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);

@@ -36,4 +36,5 @@ export {
   NotImplementedError,
   ConfigurationError,
   InMemoryStorage,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";

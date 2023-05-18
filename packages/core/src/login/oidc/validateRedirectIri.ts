@@ -19,23 +19,14 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-/**
- * Utility that appends the specified value to end of the specified URL's path.
- *
- * @param url  the URL to whose path we append the specified value
- * @param append  the value to append to the URL's path
- */
-export function appendToUrlPathname(url: string, append: string): string {
-  const parsedUrl = new URL(url);
-  const path = parsedUrl.pathname;
-  parsedUrl.pathname = `${path}${path.endsWith("/") ? "" : "/"}${
-    append.startsWith("/") ? append.substring(1) : append
-  }`;
-
-  return parsedUrl.toString();
+export function isValidRedirectUrl(redirectUrl: string): boolean {
+  // If the redirect URL is not a valid URL, an error will be thrown.
+  try {
+    const urlObject = new URL(redirectUrl);
+    // As per https://tools.ietf.org/html/rfc6749#section-3.1.2, the redirect URL
+    // must not include a hash fragment.
+    return urlObject.hash === "";
+  } catch (e) {
+    return false;
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-node",
-  "version": "1.12.4",
+  "version": "1.16.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index",
@@ -16,12 +16,12 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/node": "^18.0.3",
-    "@types/uuid": "^8.3.0"
+    "@types/node": "^20.1.0",
+    "@types/uuid": "^9.0.1"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-core": "^1.12.4",
-    "cross-fetch": "^3.1.5",
+    "@inrupt/solid-client-authn-core": "^1.16.0",
+    "@inrupt/universal-fetch": "^1.0.1",
     "jose": "^4.3.7",
     "openid-client": "^5.1.0",
     "uuid": "^9.0.0"
@@ -30,6 +30,6 @@
     "access": "public"
   },
   "engines": {
-    "node": "^14.0.0 || ^16.0.0"
+    "node": "^14.0.0 || ^16.0.0 || ^18.0.0 || ^20.0.0"
   }
 }

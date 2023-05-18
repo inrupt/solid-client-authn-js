@@ -27,6 +27,7 @@ import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
 } from "@inrupt/solid-client-authn-core/mocks";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { Session } from "./Session";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
@@ -38,7 +39,7 @@ import {
 
 import ClientAuthentication from "./ClientAuthentication";
 
-jest.mock("cross-fetch");
+jest.mock("@inrupt/universal-fetch");
 
 describe("ClientAuthentication", () => {
   const defaultMockStorage = mockStorageUtility({});
@@ -88,20 +89,51 @@ describe("ClientAuthentication", () => {
       });
     });
 
-    it("normalizes the redirect IRI", async () => {
+    it("throws if the redirect IRI is a malformed URL", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() =>
+        clientAuthn.login(
+          "mySession",
+          {
+            clientId: "coolApp",
+            redirectUrl: "not a valid URL",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter
+        )
+      ).rejects.toThrow();
+    });
+
+    it("throws if the redirect IRI contains a hash fragment, with a helpful message", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() =>
+        clientAuthn.login(
+          "mySession",
+          {
+            clientId: "coolApp",
+            redirectUrl: "https://example.org/redirect#some-fragment",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter
+        )
+      ).rejects.toThrow("hash fragment");
+    });
+
+    it("does not normalize the redirect URL if provided by the user", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(
         "mySession",
         {
           clientId: "coolApp",
-          redirectUrl: "https://coolapp.com",
+          // Note that the redirect IRI does not include a trailing slash.
+          redirectUrl: "https://example.org",
           oidcIssuer: "https://idp.com",
         },
         mockEmitter
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
-          redirectUrl: "https://coolapp.com/",
+          redirectUrl: "https://example.org",
         })
       );
     });
@@ -166,7 +198,9 @@ describe("ClientAuthentication", () => {
 
   describe("fetch", () => {
     it("calls fetch", async () => {
-      const mockedFetch = jest.requireMock("cross-fetch");
+      const { fetch: mockedFetch } = jest.requireMock(
+        "@inrupt/universal-fetch"
+      ) as jest.Mocked<typeof UniversalFetch>;
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
       expect(mockedFetch).toHaveBeenCalledWith("https://html5zombo.com");
