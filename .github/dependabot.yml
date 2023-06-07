@@ -6,11 +6,11 @@ updates:
     # files in .github/workflows.
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
     open-pull-requests-limit: 10
   - package-ecosystem: npm
     directory: "/e2e/browser/test-app"
