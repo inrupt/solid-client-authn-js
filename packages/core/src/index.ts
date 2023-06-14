@@ -91,6 +91,8 @@ export { default as NotImplementedError } from "./errors/NotImplementedError";
 export { InvalidResponseError } from "./errors/InvalidResponseError";
 export { OidcProviderError } from "./errors/OidcProviderError";
 
+export { default as GeneralLogoutHandler } from "./logout/GeneralLogoutHandler";
+
 export {
   createDpopHeader,
   KeyPair,

@@ -66,6 +66,10 @@ const issuerConfigKeyMap: Record<
     toKey: "registrationEndpoint",
     convertToUrl: true,
   },
+  end_session_endpoint: {
+    toKey: "endSessionEndpoint",
+    convertToUrl: true,
+  },
   scopes_supported: { toKey: "scopesSupported" },
   response_types_supported: { toKey: "responseTypesSupported" },
   response_modes_supported: { toKey: "responseModesSupported" },

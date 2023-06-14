@@ -34,6 +34,7 @@
 export interface IIssuerConfig {
   issuer: string;
   authorizationEndpoint: string;
+  endSessionEndpoint?: string;
   tokenEndpoint: string;
   userinfoEndpoint?: string;
   jwksUri: string;
