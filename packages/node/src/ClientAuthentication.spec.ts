@@ -31,7 +31,7 @@ import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { Session } from "./Session";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
-import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
+import { mockLogoutHandler } from "../../core/src/logout/__mocks__/LogoutHandler";
 import {
   mockSessionInfoManager,
   SessionCreatorCreateResponse,

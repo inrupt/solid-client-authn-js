@@ -40,7 +40,7 @@ import { fetch } from "@inrupt/universal-fetch";
 import * as UniversalFetch from "@inrupt/universal-fetch";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
-import { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
+import { mockLogoutHandler } from "../../core/src/logout/__mocks__/LogoutHandler";
 import {
   mockSessionInfoManager,
   SessionCreatorCreateResponse,

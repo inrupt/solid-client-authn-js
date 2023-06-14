@@ -27,7 +27,7 @@ import {
 import { jest, it, describe, expect } from "@jest/globals";
 
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
-import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
+import { mockLogoutHandler } from "../../../core/src/logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "./SessionInfoManager";
 
 const mockClearFunction = jest.fn();

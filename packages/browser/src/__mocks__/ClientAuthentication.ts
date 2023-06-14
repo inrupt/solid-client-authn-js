@@ -35,7 +35,7 @@ import {
 import ClientAuthentication from "../ClientAuthentication";
 import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";
 import { mockLoginHandler } from "../login/__mocks__/LoginHandler";
-import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
+import { mockLogoutHandler } from "../../../core/src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";
 
 type ClientAuthnDependencies = {
