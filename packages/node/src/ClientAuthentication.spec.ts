@@ -28,10 +28,10 @@ import {
   mockIncomingRedirectHandler,
 } from "@inrupt/solid-client-authn-core/mocks";
 import type * as UniversalFetch from "@inrupt/universal-fetch";
+import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/src/logout/__mocks__/LogoutHandler";
 import { Session } from "./Session";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
-import { mockLogoutHandler } from "../../core/src/logout/__mocks__/LogoutHandler";
 import {
   mockSessionInfoManager,
   SessionCreatorCreateResponse,

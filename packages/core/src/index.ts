@@ -95,8 +95,8 @@ export { default as GeneralLogoutHandler } from "./logout/GeneralLogoutHandler";
 export {
   clear,
   getUnauthenticatedSession,
-  SessionInfoManagerBase
-} from "./sessionInfo/SessionInfoManager"
+  SessionInfoManagerBase,
+} from "./sessionInfo/SessionInfoManager";
 
 export {
   createDpopHeader,

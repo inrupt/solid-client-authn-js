@@ -28,15 +28,22 @@ import {
   ISessionInternalInfo,
   ISessionInfoManager,
   SessionInfoManagerBase,
-  clear
+  clear,
 } from "@inrupt/solid-client-authn-core";
 import { KEY_REGISTERED_SESSIONS } from "../constant";
-export { getUnauthenticatedSession, clear } from "@inrupt/solid-client-authn-core"
+
+export {
+  getUnauthenticatedSession,
+  clear,
+} from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden
  */
-export class SessionInfoManager extends SessionInfoManagerBase implements ISessionInfoManager {
+export class SessionInfoManager
+  extends SessionInfoManagerBase
+  implements ISessionInfoManager
+{
   async get(
     sessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {

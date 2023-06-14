@@ -37,7 +37,7 @@ import {
   ILoginHandler,
   ISessionInfoManager,
   IIncomingRedirectHandler,
-  GeneralLogoutHandler
+  GeneralLogoutHandler,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";

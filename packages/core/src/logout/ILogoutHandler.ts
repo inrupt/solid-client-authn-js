@@ -26,20 +26,23 @@
 
 import IHandleable from "../util/handlerPattern/IHandleable";
 
-export interface RPLogoutOptions {
-  logoutType: "idp",
-  postLogoutUrl?: string | undefined,
-  state?: string | undefined,
+export interface IRPLogoutOptions {
+  logoutType: "idp";
+  postLogoutUrl?: string | undefined;
+  state?: string | undefined;
 }
 
-export interface AppLogoutOptions {
-  logoutType: "app",
-  postLogoutUrl?: undefined,
-  state?: undefined,
+export interface IAppLogoutOptions {
+  logoutType: "app";
+  postLogoutUrl?: undefined;
+  state?: undefined;
 }
 
 /**
  * @hidden
  */
-type ILogoutHandler = IHandleable<[string] | [string, RPLogoutOptions | AppLogoutOptions | undefined], void>;
+type ILogoutHandler = IHandleable<
+  [string] | [string, IRPLogoutOptions | IAppLogoutOptions | undefined],
+  void
+>;
 export default ILogoutHandler;

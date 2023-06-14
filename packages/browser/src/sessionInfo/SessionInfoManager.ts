@@ -31,10 +31,11 @@ import {
   IStorageUtility,
   isSupportedTokenType,
   clear as clearBase,
-  SessionInfoManagerBase
+  SessionInfoManagerBase,
 } from "@inrupt/solid-client-authn-core";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
-export { getUnauthenticatedSession } from "@inrupt/solid-client-authn-core"
+
+export { getUnauthenticatedSession } from "@inrupt/solid-client-authn-core";
 
 /**
  * @param sessionId
@@ -52,7 +53,10 @@ export async function clear(
 /**
  * @hidden
  */
-export class SessionInfoManager extends SessionInfoManagerBase implements ISessionInfoManager {
+export class SessionInfoManager
+  extends SessionInfoManagerBase
+  implements ISessionInfoManager
+{
   async get(
     sessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {

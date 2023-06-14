@@ -23,12 +23,12 @@ import {
   ISessionInfo,
   ISessionInfoManager,
   ISessionInternalInfo,
-  IStorageUtility
+  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManagerBase } from "../SessionInfoManager";
 
 class SessionInfoManager extends SessionInfoManagerBase {
-  get(sessionId: string): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
+  get(): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
     throw new Error("Method not implemented.");
   }
 }

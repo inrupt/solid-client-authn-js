@@ -159,7 +159,6 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       oidcIssuer.metadata
     );
 
-    console.log('setting in issuerConfig', issuerConfig)
     // Update store with fetched config
     await this.storageUtility.set(
       IssuerConfigFetcher.getLocalStorageKey(issuer),

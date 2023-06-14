@@ -32,10 +32,10 @@ import {
   mockIncomingRedirectHandler,
 } from "@inrupt/solid-client-authn-core/mocks";
 
+import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/src/logout/__mocks__/LogoutHandler";
 import ClientAuthentication from "../ClientAuthentication";
 import { IssuerConfigFetcherMock } from "../login/oidc/__mocks__/IssuerConfigFetcher";
 import { mockLoginHandler } from "../login/__mocks__/LoginHandler";
-import { mockLogoutHandler } from "../../../core/src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";
 
 type ClientAuthnDependencies = {

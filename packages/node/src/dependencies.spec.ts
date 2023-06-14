@@ -20,7 +20,10 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { mockStorage, GeneralLogoutHandler } from "@inrupt/solid-client-authn-core";
+import {
+  mockStorage,
+  GeneralLogoutHandler,
+} from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { EventEmitter } from "events";
 import {

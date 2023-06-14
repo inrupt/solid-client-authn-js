@@ -23,17 +23,22 @@
  * @hidden
  * @packageDocumentation
  */
-import ILogoutHandler, { RPLogoutOptions } from "./ILogoutHandler";
+import ILogoutHandler, { IRPLogoutOptions } from "./ILogoutHandler";
 import { ISessionInfoManager } from "../sessionInfo/ISessionInfoManager";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
-import { getEndSessionUrl } from './endSessionUrl';
+import { getEndSessionUrl } from "./endSessionUrl";
 
 /**
  * @hidden
  * This might need to be a base and then we vary the behavior between redirecting in the browser and fetching in node
  */
-export default class RPInitiatedLogoutHandler implements ILogoutHandler {
-  constructor(private sessionInfoManager: ISessionInfoManager, private configFetcher: IIssuerConfigFetcher) {}
+export default abstract class RPInitiatedLogoutHandler
+  implements ILogoutHandler
+{
+  constructor(
+    private sessionInfoManager: ISessionInfoManager,
+    private configFetcher: IIssuerConfigFetcher
+  ) {}
 
   /**
    * Get the issuer config pertaining to the current user session
@@ -41,22 +46,25 @@ export default class RPInitiatedLogoutHandler implements ILogoutHandler {
   private async getEndSessionEndpoint(sessionId: string): Promise<string> {
     const issuer = (await this.sessionInfoManager.get(sessionId))?.issuer;
 
-    if (typeof issuer !== 'string')
-      throw new Error("Issuer not found");
-    
+    if (typeof issuer !== "string") throw new Error("Issuer not found");
+
     const { endSessionEndpoint } = await this.configFetcher.fetchConfig(issuer);
 
-    if (typeof endSessionEndpoint !== 'string')
+    if (typeof endSessionEndpoint !== "string")
       throw new Error("Could not find end_session_endpoint");
-    
+
     return endSessionEndpoint;
   }
 
-  protected async getEndSessionUrl(userId: string, options: RPLogoutOptions): Promise<string> {
+  protected async getEndSessionUrl(
+    userId: string,
+    options: IRPLogoutOptions
+  ): Promise<string> {
+    // TODO: Work out where to get idTokenHint
     return getEndSessionUrl({
-      end_session_endpoint: await this.getEndSessionEndpoint(userId),
-      post_logout_redirect_uri: options.postLogoutUrl,
-      state: options.state
+      endSessionEndpoint: await this.getEndSessionEndpoint(userId),
+      postLogoutRedirectUri: options.postLogoutUrl,
+      state: options.state,
     });
   }
 
@@ -69,11 +77,5 @@ export default class RPInitiatedLogoutHandler implements ILogoutHandler {
     }
   }
 
-  async handle(userId: string, options: RPLogoutOptions): Promise<void> {
-    const url = getEndSessionUrl({
-      end_session_endpoint: await this.getEndSessionEndpoint(userId),
-      post_logout_redirect_uri: options.postLogoutUrl,
-      state: options.state
-    });
-  }
+  abstract handle(userId: string, options: IRPLogoutOptions): Promise<void>;
 }
