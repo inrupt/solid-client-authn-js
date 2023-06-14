@@ -26,8 +26,20 @@
 
 import IHandleable from "../util/handlerPattern/IHandleable";
 
+export interface RPLogoutOptions {
+  logoutType: "idp",
+  postLogoutUrl?: string | undefined,
+  state?: string | undefined,
+}
+
+export interface AppLogoutOptions {
+  logoutType: "app",
+  postLogoutUrl?: undefined,
+  state?: undefined,
+}
+
 /**
  * @hidden
  */
-type ILogoutHandler = IHandleable<[string], void>;
+type ILogoutHandler = IHandleable<[string] | [string, RPLogoutOptions | AppLogoutOptions | undefined], void>;
 export default ILogoutHandler;

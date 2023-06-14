@@ -23,11 +23,8 @@
  * @hidden
  * @packageDocumentation
  */
-
-import {
-  ILogoutHandler,
-  ISessionInfoManager,
-} from "@inrupt/solid-client-authn-core";
+import { ISessionInfoManager } from "../sessionInfo/ISessionInfoManager";
+import ILogoutHandler from "./ILogoutHandler";
 
 /**
  * @hidden

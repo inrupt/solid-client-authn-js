@@ -23,26 +23,10 @@
  * @hidden
  * @packageDocumentation
  */
-
-import {
-  ILogoutHandler,
-  ISessionInfoManager,
-} from "@inrupt/solid-client-authn-core";
-import IStorageUtility from "../storage/IStorageUtility";
+import ILogoutHandler, { RPLogoutOptions } from "./ILogoutHandler";
+import { ISessionInfoManager } from "../sessionInfo/ISessionInfoManager";
 import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
 import { getEndSessionUrl } from './endSessionUrl';
-
-interface RPLogoutOptions {
-  logoutType: "idp",
-  postLogoutUrl?: string | undefined,
-  state?: string | undefined,
-}
-
-interface AppLogoutOptions {
-  logoutType: "app",
-  postLogoutUrl?: undefined,
-  state?: undefined,
-}
 
 /**
  * @hidden

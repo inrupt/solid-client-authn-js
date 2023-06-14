@@ -1,4 +1,4 @@
-interface EndSessionOptions {
+export interface EndSessionOptions {
   end_session_endpoint: string;
   id_token_hint?: string;
   post_logout_redirect_uri?: string;
