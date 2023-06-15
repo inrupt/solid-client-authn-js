@@ -8,3 +8,5 @@ sampleFlows/
 coverage/
 docs/**/*.md
 packages/*/docs/**/*.md
+**/.next/
+**/umd/

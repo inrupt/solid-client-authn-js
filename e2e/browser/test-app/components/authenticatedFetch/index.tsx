@@ -64,11 +64,9 @@ export default function AuthenticatedFetch({
           }}
         />
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            handleFetch();
-          }}
-          data-testid="fetchButton"
+          onClick={() => handleFetch()}
+          data-testId="fetchButton"
+          type="button"
         >
           Fetch
         </button>
