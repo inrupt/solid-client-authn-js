@@ -23,7 +23,7 @@
     "@inrupt/solid-client-authn-core": "^1.16.0",
     "@inrupt/universal-fetch": "^1.0.1",
     "jose": "^4.3.7",
-    "openid-client": "^5.1.0",
+    "openid-client": "~5.4.2",
     "uuid": "^9.0.0"
   },
   "publishConfig": {
