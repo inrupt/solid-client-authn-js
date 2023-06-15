@@ -26,7 +26,8 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 
-import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/src/logout/__mocks__/LogoutHandler";
+// eslint-disable-next-line import/no-relative-packages
+import { mockLogoutHandler } from "../../../core/src/logout/__mocks__/LogoutHandler";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { SessionInfoManager } from "./SessionInfoManager";
 

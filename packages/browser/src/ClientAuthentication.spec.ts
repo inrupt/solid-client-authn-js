@@ -39,7 +39,8 @@ import {
 import { fetch } from "@inrupt/universal-fetch";
 import * as UniversalFetch from "@inrupt/universal-fetch";
 
-import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/src/logout/__mocks__/LogoutHandler";
+// eslint-disable-next-line import/no-relative-packages
+import { mockLogoutHandler } from "../../core/src/logout/__mocks__/LogoutHandler";
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import {
   mockSessionInfoManager,
