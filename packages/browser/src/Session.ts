@@ -252,9 +252,15 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    * @param url The URL from which data should be fetched.
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
-  fetch: typeof fetch = async (url, init) => {
+  fetch: typeof fetch = (url, init) => {
     return this.clientAuthentication.fetch(url, init);
   };
+
+
+  get idToken() {
+    // @ts-ignore
+    return this.clientAuthentication.idToken
+  }
 
   /**
    * An internal logout function, to control whether or not the logout signal

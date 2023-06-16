@@ -151,6 +151,10 @@ export default class StorageUtility implements IStorageUtility {
     userId: string,
     secure?: boolean
   ): Promise<Record<string, string>> {
+    console.log('get user data for', userId, this.getKey(userId), secure, await (secure
+      ? this.secureStorage
+      : this.insecureStorage
+    ).get(userId))
     const stored = await (secure
       ? this.secureStorage
       : this.insecureStorage

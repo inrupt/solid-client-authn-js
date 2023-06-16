@@ -144,6 +144,8 @@ export default class ClientAuthentication {
       // ClientAuthentication, to avoid the following error:
       // > 'fetch' called on an object that does not implement interface Window.
       this.fetch = redirectInfo.fetch.bind(window);
+      // @ts-ignore
+      this.idToken = redirectInfo.idToken;
 
       // Strip the oauth params:
       this.cleanUrlAfterRedirect(url);

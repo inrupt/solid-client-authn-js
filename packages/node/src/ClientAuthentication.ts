@@ -33,6 +33,8 @@ import {
   ISessionInternalInfo,
   ISessionInfoManager,
   isValidRedirectUrl,
+  RPInitiatedLogoutHandler,
+  getEndSessionUrl
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "@inrupt/universal-fetch";
@@ -82,6 +84,8 @@ export default class ClientAuthentication {
 
     if (loginReturn !== undefined) {
       this.fetch = loginReturn.fetch;
+      // @ts-ignore
+      this.idToken = loginReturn.idToken;
       return loginReturn;
     }
 
@@ -94,11 +98,33 @@ export default class ClientAuthentication {
   fetch = fetch;
 
   logout = async (sessionId: string): Promise<void> => {
+    console.log('\nlogging out in client authentication', sessionId);
+
+
+
+    // @ts-ignore
+    // console.log(this.idToken, this.sessionInfoManager)
+
+    const rpInitiatedLogout = new RPInitiatedLogoutHandler(this.sessionInfoManager, this.loginHandler.issuerConfigFetcher);
+    const endSessionUrl = await rpInitiatedLogout.getEndSessionUrl(sessionId, {
+      logoutType: "idp"
+    });
+
+    console.log(endSessionUrl)
+
+    const fullEndUrl = getEndSessionUrl({
+      endSessionEndpoint: endSessionUrl
+    })
+
+
+
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
     this.fetch = fetch;
+    // @ts-ignore
+    delete this.idToken;
   };
 
   getSessionInfo = async (
@@ -131,6 +157,8 @@ export default class ClientAuthentication {
     const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
 
     this.fetch = redirectInfo.fetch;
+    // @ts-ignore
+    this.idToken = redirectInfo.idToken;
 
     return {
       isLoggedIn: redirectInfo.isLoggedIn,

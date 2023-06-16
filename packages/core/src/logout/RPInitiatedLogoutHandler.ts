@@ -32,7 +32,7 @@ import { getEndSessionUrl } from "./endSessionUrl";
  * @hidden
  * This might need to be a base and then we vary the behavior between redirecting in the browser and fetching in node
  */
-export default abstract class RPInitiatedLogoutHandler
+export default class RPInitiatedLogoutHandler
   implements ILogoutHandler
 {
   constructor(
@@ -44,6 +44,10 @@ export default abstract class RPInitiatedLogoutHandler
    * Get the issuer config pertaining to the current user session
    */
   private async getEndSessionEndpoint(sessionId: string): Promise<string> {
+    console.log(
+      sessionId,
+      await this.sessionInfoManager.get(sessionId)
+    )
     const issuer = (await this.sessionInfoManager.get(sessionId))?.issuer;
 
     if (typeof issuer !== "string") throw new Error("Issuer not found");
@@ -56,7 +60,7 @@ export default abstract class RPInitiatedLogoutHandler
     return endSessionEndpoint;
   }
 
-  protected async getEndSessionUrl(
+  async getEndSessionUrl(
     userId: string,
     options: IRPLogoutOptions
   ): Promise<string> {
@@ -77,5 +81,7 @@ export default abstract class RPInitiatedLogoutHandler
     }
   }
 
-  abstract handle(userId: string, options: IRPLogoutOptions): Promise<void>;
+  async handle(userId: string, options: IRPLogoutOptions): Promise<void> {
+
+  }
 }

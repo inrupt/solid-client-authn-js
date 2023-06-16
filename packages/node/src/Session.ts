@@ -231,6 +231,11 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     return this.clientAuthentication.fetch(url, init);
   };
 
+  get idToken() {
+    // @ts-ignore
+    return this.clientAuthentication.idToken
+  }
+
   /**
    * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
    */

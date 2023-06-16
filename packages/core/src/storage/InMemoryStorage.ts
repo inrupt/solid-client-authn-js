@@ -33,6 +33,7 @@ export default class InMemoryStorage implements IStorage {
   private map: Record<string, string> = {};
 
   async get(key: string): Promise<string | undefined> {
+    console.log('getting', key, 'from in memory storage containing', JSON.stringify(this.map, null, 2))
     return this.map[key] || undefined;
   }
 

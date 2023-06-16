@@ -223,6 +223,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
 
     return Object.assign(sessionInfo, {
       fetch: accessInfo.fetch,
+      idToken: accessInfo.idToken
     });
   }
 }

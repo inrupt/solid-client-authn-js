@@ -213,6 +213,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         typeof tokenSet.expires_in === "number"
           ? (tokenSet.expires_in as number) * 1000 + Date.now()
           : undefined,
+      idToken: tokenSet.id_token,
     });
   }
 }

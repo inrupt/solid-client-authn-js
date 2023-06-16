@@ -40,6 +40,7 @@ import {
   buildAuthenticatedFetch,
   ITokenRefresher,
   DEFAULT_SCOPES,
+  getEndSessionUrl
 } from "@inrupt/solid-client-authn-core";
 import { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
@@ -67,6 +68,11 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     const issuer = new Issuer(
       configToIssuerMetadata(oidcLoginOptions.issuerConfiguration)
     );
+
+    console.log('the end session endpoint is', issuer.metadata.end_session_endpoint)
+
+      // throw new Error('boo')
+
     const client = new issuer.Client({
       client_id: oidcLoginOptions.client.clientId,
       client_secret: oidcLoginOptions.client.clientSecret,
@@ -93,6 +99,25 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
             : undefined,
       }
     );
+
+    console.log(issuer.metadata)
+
+
+    console.log('the end session endpoint is', issuer.metadata.end_session_endpoint, tokens.id_token)
+
+    console.log('fetching end ...');
+
+    const fullEndSessionUrl = getEndSessionUrl({
+      endSessionEndpoint: issuer.metadata.end_session_endpoint!,
+      idTokenHint: tokens.id_token
+    });
+
+    console.log(fullEndSessionUrl)
+
+    const res = await fetch(fullEndSessionUrl)
+
+    console.log(await res.text())
+
 
     let webId: string;
     if (tokens.access_token === undefined) {
@@ -151,8 +176,15 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
           ? Date.now() + tokens.expires_in * 1000
           : undefined,
     };
-    return Object.assign(sessionInfo, {
+
+    const resultantSessionInfo = Object.assign(sessionInfo, {
       fetch: authFetch,
+      idToken: tokens.id_token
     });
+
+          throw new Error('boo')
+
+
+    return resultantSessionInfo;
   }
 }

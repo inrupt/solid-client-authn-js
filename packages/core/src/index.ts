@@ -92,6 +92,8 @@ export { InvalidResponseError } from "./errors/InvalidResponseError";
 export { OidcProviderError } from "./errors/OidcProviderError";
 
 export { default as GeneralLogoutHandler } from "./logout/GeneralLogoutHandler";
+export { default as RPInitiatedLogoutHandler } from "./logout/RPInitiatedLogoutHandler";
+export { getEndSessionUrl } from './logout/endSessionUrl';
 export {
   clear,
   getUnauthenticatedSession,
