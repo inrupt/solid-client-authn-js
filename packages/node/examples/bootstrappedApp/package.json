@@ -1,5 +1,6 @@
 {
-  "name": "@inrupt/demo-authn-node-script",
+  "name": "@inrupt/bootstrapped-app",
+  "private": true,
   "version": "1.0.0",
   "description": "Demo for script authentication in NodeJS",
   "main": "src/index.js",

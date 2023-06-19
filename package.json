@@ -2,6 +2,10 @@
   "name": "root",
   "version": "0.0.0",
   "private": true,
+  "workspaces": [
+    "packages/**",
+    "e2e/**"
+  ],
   "scripts": {
     "demo-app": "cd packages/browser; npm run demo-app",
     "bootstrap": "lerna bootstrap",
@@ -16,7 +20,6 @@
     "lint:check": "npm run lint:eslint && npm run lint:prettier -- --check",
     "lint:eslint": "eslint \"e2e\" \"packages\"",
     "lint:prettier": "prettier \"{e2e,packages}/**/*.{ts,tsx,js,jsx,css}\" \"{e2e,packages}/**/*.{md,mdx,yml}\" \"./*.{md,mdx,yml}\"",
-    "postinstall": "lerna bootstrap --ci && npm run build",
     "prepublishOnly": "npm run build",
     "publish": "lerna publish",
     "test": "npm run test:unit:all",

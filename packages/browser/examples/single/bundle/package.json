@@ -1,5 +1,6 @@
 {
   "name": "browser-in-bundle",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

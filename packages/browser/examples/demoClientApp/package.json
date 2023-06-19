@@ -1,5 +1,6 @@
 {
   "name": "@inrupt/demo-app-authn-browser",
+  "private": true,
   "version": "1.0.0",
   "description": "Demo client application for authentication in a browser",
   "main": "index.js",
