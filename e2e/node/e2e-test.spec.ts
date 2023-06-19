@@ -19,7 +19,15 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, beforeAll, afterAll, expect } from "@jest/globals";
+import {
+  jest,
+  it,
+  describe,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  expect,
+} from "@jest/globals";
 import { custom } from "openid-client";
 import {
   getNodeTestingEnvironment,
