@@ -180,33 +180,36 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
 });
 
 describe("Session events", () => {
+  let session: Session;
+  let loginFunc: () => void;
+  let logoutFunc: () => void;
+  let expiredFunc: () => void;
+
+  beforeEach(async () => {
+    session = new Session();
+    loginFunc = jest.fn();
+    logoutFunc = jest.fn();
+    expiredFunc = jest.fn();
+    session.events.on(EVENTS.LOGIN, loginFunc);
+    session.events.on(EVENTS.LOGOUT, logoutFunc);
+    session.events.on(EVENTS.SESSION_EXPIRED, expiredFunc);
+
+    await session.login(credentials);
+  });
+
   // These tests will check for session expiration, so they'll need a longer timeout.
   jest.setTimeout(15 * 60 * 1000);
 
   it("sends an event on successful login and logout", async () => {
-    const session = new Session();
-    let loginSignalReceived = false;
-    let logoutSignalReceived = false;
-    session.events.on(EVENTS.LOGIN, () => {
-      loginSignalReceived = true;
-    });
-    session.events.on(EVENTS.LOGOUT, () => {
-      logoutSignalReceived = true;
-    });
-    await session.login(credentials);
     expect(session.info.isLoggedIn).toBe(true);
     await session.logout();
-    expect(loginSignalReceived).toBe(true);
-    expect(logoutSignalReceived).toBe(true);
+
+    expect(loginFunc).toHaveBeenCalledTimes(1);
+    expect(logoutFunc).toHaveBeenCalledTimes(1);
+    expect(expiredFunc).toHaveBeenCalledTimes(0);
   });
 
   it("sends an event on session expiration", async () => {
-    const session = new Session();
-    let expirationSignalReceived = false;
-    session.events.on(EVENTS.SESSION_EXPIRED, () => {
-      expirationSignalReceived = true;
-    });
-    await session.login(credentials);
     if (typeof session.info.expirationDate !== "number") {
       throw new Error("Cannot determine session expiration date");
     }
@@ -215,7 +218,12 @@ describe("Session events", () => {
       setTimeout(resolve, expiresIn);
     });
 
-    expect(expirationSignalReceived).toBe(true);
+    expect(loginFunc).toHaveBeenCalledTimes(1);
+    expect(logoutFunc).toHaveBeenCalledTimes(0);
+    expect(expiredFunc).toHaveBeenCalledTimes(1);
     await session.logout();
+    expect(loginFunc).toHaveBeenCalledTimes(1);
+    expect(logoutFunc).toHaveBeenCalledTimes(1);
+    expect(expiredFunc).toHaveBeenCalledTimes(1);
   });
 });
