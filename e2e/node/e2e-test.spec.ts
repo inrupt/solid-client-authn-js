@@ -110,12 +110,7 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       let response = await unauthSession.fetch(privateResourceUrl);
       expect(response.status).toBe(401);
 
-      await unauthSession.login({
-        clientId: ENV.clientCredentials.owner.id,
-        clientSecret: ENV.clientCredentials.owner.secret,
-        oidcIssuer: ENV.idp,
-      });
-
+      await unauthSession.login(credentials);
       response = await unauthSession.fetch(privateResourceUrl);
       expect(response.status).toBe(200);
 
