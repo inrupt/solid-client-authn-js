@@ -39,14 +39,14 @@ if (process.env.CI === "true") {
 }
 
 const ENV = getNodeTestingEnvironment();
+const credentials = {
+  clientId: ENV.clientCredentials.owner.id,
+  clientSecret: ENV.clientCredentials.owner.secret,
+  oidcIssuer: ENV.idp,
+};
 
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
   const authenticatedSession = new Session();
-  const credentials = {
-    clientId: ENV.clientCredentials.owner.id,
-    clientSecret: ENV.clientCredentials.owner.secret,
-    oidcIssuer: ENV.idp,
-  };
 
   // Log back in on session expiration
   authenticatedSession.events.on("sessionExpired", () =>
@@ -198,11 +198,7 @@ describe("Session events", () => {
     session.events.on(EVENTS.LOGOUT, () => {
       logoutSignalReceived = true;
     });
-    await session.login({
-      clientId: ENV.clientCredentials.owner.id,
-      clientSecret: ENV.clientCredentials.owner.secret,
-      oidcIssuer: ENV.idp,
-    });
+    await session.login(credentials);
     expect(session.info.isLoggedIn).toBe(true);
     await session.logout();
     expect(loginSignalReceived).toBe(true);
@@ -215,11 +211,7 @@ describe("Session events", () => {
     session.events.on(EVENTS.SESSION_EXPIRED, () => {
       expirationSignalReceived = true;
     });
-    await session.login({
-      clientId: ENV.clientCredentials.owner.id,
-      clientSecret: ENV.clientCredentials.owner.secret,
-      oidcIssuer: ENV.idp,
-    });
+    await session.login(credentials);
     if (typeof session.info.expirationDate !== "number") {
       throw new Error("Cannot determine session expiration date");
     }
