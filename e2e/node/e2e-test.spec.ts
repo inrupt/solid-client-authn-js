@@ -19,14 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import {
-  jest,
-  it,
-  describe,
-  beforeAll,
-  afterAll,
-  expect,
-} from "@jest/globals";
+import { jest, it, describe, beforeAll, afterAll, expect } from "@jest/globals";
 import { custom } from "openid-client";
 import {
   getNodeTestingEnvironment,
@@ -53,10 +46,12 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
     clientId: ENV.clientCredentials.owner.id,
     clientSecret: ENV.clientCredentials.owner.secret,
     oidcIssuer: ENV.idp,
-  }
+  };
 
   // Log back in on session expiration
-  authenticatedSession.events.on("sessionExpired", () => authenticatedSession.login(credentials));
+  authenticatedSession.events.on("sessionExpired", () =>
+    authenticatedSession.login(credentials)
+  );
   beforeAll(() => authenticatedSession.login(credentials));
 
   // Making sure the session is logged out prevents tests from hanging due
