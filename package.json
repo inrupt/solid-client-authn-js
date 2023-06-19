@@ -3,7 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": [
-    "packages/**",
+    "packages/browser",
+    "packages/core",
+    "packages/node",
+    "packages/oidc-browser",
+    "packages/node/examples/**",
+    "packages/browser/examples/**",
     "e2e/**"
   ],
   "scripts": {

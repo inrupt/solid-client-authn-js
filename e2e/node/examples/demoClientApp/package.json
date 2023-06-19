@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint \\\"src/**/*.js\\\"",
-    "start": "./node_modules/.bin/nodemon src/index.js",
+    "start": "nodemon src/index.js",
     "dev": "npm run start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,7 +23,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "loglevel": "^1.7.0",
-    "@inrupt/solid-client-authn-node": "../../"
+    "@inrupt/solid-client-authn-node": "^1.16.0"
   },
   "devDependencies": {
     "@inrupt/eslint-config-base": "0.0.4",
