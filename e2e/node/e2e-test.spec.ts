@@ -23,8 +23,8 @@ import {
   jest,
   it,
   describe,
-  beforeEach,
-  afterEach,
+  beforeAll,
+  afterAll,
   expect,
 } from "@jest/globals";
 import { custom } from "openid-client";
@@ -49,29 +49,19 @@ const ENV = getNodeTestingEnvironment();
 
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
   const authenticatedSession = new Session();
+  const credentials = {
+    clientId: ENV.clientCredentials.owner.id,
+    clientSecret: ENV.clientCredentials.owner.secret,
+    oidcIssuer: ENV.idp,
+  }
 
   // Log back in on session expiration
-  authenticatedSession.events.on("sessionExpired", async () => {
-    await authenticatedSession.login({
-      clientId: ENV.clientCredentials.owner.id,
-      clientSecret: ENV.clientCredentials.owner.secret,
-      oidcIssuer: ENV.idp,
-    });
-  });
+  authenticatedSession.events.on("sessionExpired", () => authenticatedSession.login(credentials));
+  beforeAll(() => authenticatedSession.login(credentials));
 
-  beforeEach(async () => {
-    await authenticatedSession.login({
-      clientId: ENV.clientCredentials.owner.id,
-      clientSecret: ENV.clientCredentials.owner.secret,
-      oidcIssuer: ENV.idp,
-    });
-  });
-
-  afterEach(async () => {
-    // Making sure the session is logged out prevents tests from hanging due
-    // to the callback refreshing the access token.
-    await authenticatedSession.logout();
-  });
+  // Making sure the session is logged out prevents tests from hanging due
+  // to the callback refreshing the access token.
+  afterAll(() => authenticatedSession.logout());
 
   describe("Authenticated fetch", () => {
     it("properly sets up session information", async () => {
@@ -170,10 +160,11 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
   });
 
   describe("Post-logout fetch", () => {
+    beforeAll(async () => authenticatedSession.logout());
+
     it("can fetch a public resource after logging out", async () => {
       // FIXME: the WebID isn't necessarily a Solid resource.
       const publicResourceUrl = authenticatedSession.info.webId as string;
-      await authenticatedSession.logout();
       const response = await authenticatedSession.fetch(publicResourceUrl, {
         headers: {
           Accept: "text/turtle",
@@ -186,7 +177,6 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
     });
 
     it("cannot fetch a private resource after logging out", async () => {
-      await authenticatedSession.logout();
       // The following line doesn't compile because of the recursive dependency
       // between the current package, the shared environment setup, and the
       // published version of the current package.
