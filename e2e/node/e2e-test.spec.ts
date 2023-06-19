@@ -180,6 +180,9 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
 });
 
 describe("Session events", () => {
+  // These tests will check for session expiration, so they'll need a longer timeout.
+  jest.setTimeout(15 * 60 * 1000);
+
   let session: Session;
   let loginFunc: () => void;
   let logoutFunc: () => void;
@@ -196,9 +199,6 @@ describe("Session events", () => {
 
     await session.login(credentials);
   });
-
-  // These tests will check for session expiration, so they'll need a longer timeout.
-  jest.setTimeout(15 * 60 * 1000);
 
   it("sends an event on successful login and logout", async () => {
     expect(session.info.isLoggedIn).toBe(true);
