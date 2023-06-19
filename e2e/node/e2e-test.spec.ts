@@ -112,7 +112,6 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       expect(response.status).toBe(200);
       // The root should contain at least one child
       await expect(response.text()).resolves.toContain("contains");
-      await authenticatedSession.logout();
     });
 
     it("can fetch a private resource when logged in after the same fetch failed", async () => {
@@ -171,35 +170,6 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
   });
 
   describe("Post-logout fetch", () => {
-    it("can fetch a public resource after logging out", async () => {
-      // FIXME: the WebID isn't necessarily a Solid resource.
-      const publicResourceUrl = authenticatedSession.info.webId as string;
-      await authenticatedSession.logout();
-      const response = await authenticatedSession.fetch(publicResourceUrl, {
-        headers: {
-          Accept: "text/turtle",
-        },
-      });
-      expect(response.status).toBe(200);
-      await expect(response.text()).resolves.toContain(
-        authenticatedSession.info.webId
-      );
-    });
-
-    it("cannot fetch a private resource after logging out", async () => {
-      await authenticatedSession.logout();
-      // The following line doesn't compile because of the recursive dependency
-      // between the current package, the shared environment setup, and the
-      // published version of the current package.
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const privateResourceUrl = await getPodRoot(authenticatedSession);
-      const response = await authenticatedSession.fetch(privateResourceUrl);
-      expect(response.status).toBe(401);
-    });
-  });
-
-  describe("Session events", () => {
     it("can fetch a public resource after logging out", async () => {
       // FIXME: the WebID isn't necessarily a Solid resource.
       const publicResourceUrl = authenticatedSession.info.webId as string;
