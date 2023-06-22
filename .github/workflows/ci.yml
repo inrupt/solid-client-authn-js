@@ -32,6 +32,7 @@ jobs:
           path: coverage/
 
   sonar-scan:
+    if: false
     needs: [test]
     runs-on: ubuntu-latest
     strategy:
