@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -22,21 +22,23 @@
 /**
  * @hidden
  */
-import {
+import type {
   ILoginInputOptions,
-  InMemoryStorage,
   ISessionInfo,
   IStorage,
-  EVENTS,
   ISessionEventListener,
   IHasSessionEventListener,
+} from "@inrupt/solid-client-authn-core";
+import {
+  InMemoryStorage,
+  EVENTS,
   buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 // eslint-disable-next-line no-shadow
 import { fetch } from "@inrupt/universal-fetch";
 import EventEmitter from "events";
-import ClientAuthentication from "./ClientAuthentication";
+import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 
 export interface ISessionOptions {

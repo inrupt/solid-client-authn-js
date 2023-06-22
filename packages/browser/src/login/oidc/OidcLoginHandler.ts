@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -28,7 +28,7 @@
  * Handles Common Oidc login functions (Like fetching the configuration)
  */
 
-import {
+import type {
   IClientRegistrar,
   IIssuerConfig,
   IIssuerConfigFetcher,
@@ -37,8 +37,10 @@ import {
   IOidcHandler,
   IOidcOptions,
   IStorageUtility,
-  ConfigurationError,
   LoginResult,
+} from "@inrupt/solid-client-authn-core";
+import {
+  ConfigurationError,
   handleRegistration,
 } from "@inrupt/solid-client-authn-core";
 

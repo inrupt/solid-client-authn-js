@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -22,8 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { EventEmitter } from "events";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
-import { fetch } from "@inrupt/universal-fetch";
-import * as UniversalFetch from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
 jest.mock("@inrupt/universal-fetch", () => {
@@ -32,7 +31,7 @@ jest.mock("@inrupt/universal-fetch", () => {
   ) as typeof UniversalFetch;
   return {
     ...fetchModule,
-    fetch: jest.fn<typeof fetch>(),
+    fetch: jest.fn<(typeof UniversalFetch)["fetch"]>(),
   };
 });
 

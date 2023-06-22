@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 // eslint-disable-next-line no-shadow
 import { Response } from "@inrupt/universal-fetch";
-import {
+import type {
   IIssuerConfig,
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";

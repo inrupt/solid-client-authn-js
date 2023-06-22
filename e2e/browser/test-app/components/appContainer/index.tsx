@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -26,11 +26,11 @@ import {
   TESTID_LOGOUT_BUTTON,
   TESTID_ERROR_MESSAGE,
 } from "@inrupt/internal-playwright-testids";
+import type { ISessionInfo } from "@inrupt/solid-client-authn-browser";
 import {
   login,
   logout,
   handleIncomingRedirect,
-  ISessionInfo,
   events,
   EVENTS,
 } from "@inrupt/solid-client-authn-browser";

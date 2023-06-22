@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,10 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { EventEmitter } from "events";
 
-import { ILoginHandler, ILoginOptions } from "@inrupt/solid-client-authn-core";
+import type {
+  ILoginHandler,
+  ILoginOptions,
+} from "@inrupt/solid-client-authn-core";
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,

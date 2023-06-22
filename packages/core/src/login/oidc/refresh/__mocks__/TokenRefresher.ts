@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,7 +20,10 @@
 //
 
 import { jest } from "@jest/globals";
-import { ITokenRefresher, TokenEndpointResponse } from "../ITokenRefresher";
+import type {
+  ITokenRefresher,
+  TokenEndpointResponse,
+} from "../ITokenRefresher";
 
 // Some identifiers are in camelcase on purpose.
 /* eslint-disable camelcase */

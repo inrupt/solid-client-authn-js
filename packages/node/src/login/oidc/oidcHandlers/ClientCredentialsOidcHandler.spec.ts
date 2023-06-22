@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -25,9 +25,8 @@
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import { IdTokenClaims, TokenSet } from "openid-client";
 import type * as OpenidClient from "openid-client";
-import { JWK } from "jose";
+import type { JWK } from "jose";
 // eslint-disable-next-line no-shadow
 import { Headers, Response } from "@inrupt/universal-fetch";
 import type * as UniversalFetch from "@inrupt/universal-fetch";
@@ -105,7 +104,7 @@ const mockKeyBoundToken = (): AccessJwt => {
   };
 };
 
-const mockIdTokenPayload = (): IdTokenClaims => {
+const mockIdTokenPayload = (): OpenidClient.IdTokenClaims => {
   return {
     sub: "https://my.webid/",
     iss: "https://my.idp/",
@@ -115,7 +114,7 @@ const mockIdTokenPayload = (): IdTokenClaims => {
   };
 };
 
-const mockDpopTokens = (): TokenSet => {
+const mockDpopTokens = (): OpenidClient.TokenSet => {
   return {
     access_token: JSON.stringify(mockKeyBoundToken()),
     id_token: mockIdToken(),
@@ -126,7 +125,7 @@ const mockDpopTokens = (): TokenSet => {
   };
 };
 
-const mockBearerTokens = (): TokenSet => {
+const mockBearerTokens = (): OpenidClient.TokenSet => {
   return {
     access_token: "some token",
     id_token: mockIdToken(),
@@ -137,7 +136,7 @@ const mockBearerTokens = (): TokenSet => {
   };
 };
 
-const setupOidcClientMock = (tokenSet: TokenSet) => {
+const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
     typeof OpenidClient

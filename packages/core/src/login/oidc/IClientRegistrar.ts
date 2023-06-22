@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,10 +24,10 @@
  * @packageDocumentation
  */
 
-import IStorageUtility from "../../storage/IStorageUtility";
-import ILoginOptions from "../ILoginOptions";
-import { ClientType, IClient } from "./IClient";
-import { IIssuerConfig } from "./IIssuerConfig";
+import type IStorageUtility from "../../storage/IStorageUtility";
+import type ILoginOptions from "../ILoginOptions";
+import type { ClientType, IClient } from "./IClient";
+import type { IIssuerConfig } from "./IIssuerConfig";
 
 export interface IClientRegistrarOptions {
   sessionId: string;

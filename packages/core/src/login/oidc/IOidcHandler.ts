@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,9 +27,9 @@
 /**
  * OidcHandlers handle the login process for a given IDP (as defined by the OIDC Options)
  */
-import IHandleable from "../../util/handlerPattern/IHandleable";
-import { IncomingRedirectResult } from "./IIncomingRedirectHandler";
-import IOidcOptions from "./IOidcOptions";
+import type IHandleable from "../../util/handlerPattern/IHandleable";
+import type { IncomingRedirectResult } from "./IIncomingRedirectHandler";
+import type IOidcOptions from "./IOidcOptions";
 
 export type OidcHandlerResult = IncomingRedirectResult | undefined;
 

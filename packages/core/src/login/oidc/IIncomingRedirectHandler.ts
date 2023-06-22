@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -25,10 +25,10 @@
  */
 
 // eslint-disable-next-line no-shadow
-import { fetch } from "@inrupt/universal-fetch";
-import { EventEmitter } from "events";
-import IHandleable from "../../util/handlerPattern/IHandleable";
-import { ISessionInfo } from "../../sessionInfo/ISessionInfo";
+import type { fetch } from "@inrupt/universal-fetch";
+import type { EventEmitter } from "events";
+import type IHandleable from "../../util/handlerPattern/IHandleable";
+import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
 
 export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch };
 export type IncomingRedirectInput = [string, EventEmitter | undefined];

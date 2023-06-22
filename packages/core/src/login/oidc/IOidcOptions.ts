@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,9 +27,9 @@
 /**
  * Defines how OIDC login should proceed
  */
-import { EventEmitter } from "events";
-import { IIssuerConfig } from "./IIssuerConfig";
-import { IClient } from "./IClient";
+import type { EventEmitter } from "events";
+import type { IIssuerConfig } from "./IIssuerConfig";
+import type { IClient } from "./IClient";
 
 /**
  * @hidden

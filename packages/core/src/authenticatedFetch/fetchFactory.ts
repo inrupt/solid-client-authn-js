@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,11 +20,13 @@
 //
 
 // eslint-disable-next-line no-shadow
-import { fetch, Headers } from "@inrupt/universal-fetch";
-import { EventEmitter } from "events";
+import type { fetch } from "@inrupt/universal-fetch";
+import { Headers } from "@inrupt/universal-fetch";
+import type { EventEmitter } from "events";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
-import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
-import { createDpopHeader, KeyPair } from "./dpopUtils";
+import type { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
+import type { KeyPair } from "./dpopUtils";
+import { createDpopHeader } from "./dpopUtils";
 import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
 

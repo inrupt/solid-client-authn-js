@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
@@ -32,24 +32,26 @@ import {
   ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
+  KeyPair,
+  RefreshOptions,
+  ITokenRefresher,
+} from "@inrupt/solid-client-authn-core";
+import {
   loadOidcContextFromStorage,
   saveSessionInfoToStorage,
   getSessionIdFromOauthState,
   getWebidFromTokenPayload,
-  KeyPair,
   generateDpopKeyPair,
-  RefreshOptions,
-  ITokenRefresher,
   buildAuthenticatedFetch,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
 import { Issuer } from "openid-client";
-import { KeyObject } from "crypto";
+import type { KeyObject } from "crypto";
 import { fetch as globalFetch } from "@inrupt/universal-fetch";
 
-import { EventEmitter } from "events";
+import type { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**

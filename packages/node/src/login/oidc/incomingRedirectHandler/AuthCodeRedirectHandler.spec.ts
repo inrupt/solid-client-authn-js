@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -25,8 +25,8 @@ import {
   mockStorageUtility,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { IdTokenClaims, TokenSet, BaseClient } from "openid-client";
-import { JWK } from "jose";
+import type { IdTokenClaims, TokenSet, BaseClient } from "openid-client";
+import type { JWK } from "jose";
 import {
   Response as NodeResponse,
   Headers as NodeHeaders,

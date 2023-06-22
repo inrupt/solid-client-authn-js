@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -21,7 +21,8 @@
 
 // eslint-disable-next-line no-shadow
 import { fetch } from "@inrupt/universal-fetch";
-import { JWK, JWTPayload, jwtVerify, importJWK } from "jose";
+import type { JWK, JWTPayload } from "jose";
+import { jwtVerify, importJWK } from "jose";
 
 type WithMessage = { message: string };
 type WithStack = { stack: string };

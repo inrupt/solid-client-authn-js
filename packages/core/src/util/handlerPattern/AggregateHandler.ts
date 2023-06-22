@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
 /**
  * An abstract class that will select the first handler that can handle certain parameters
  */
-import IHandleable from "./IHandleable";
+import type IHandleable from "./IHandleable";
 
 /**
  * @hidden

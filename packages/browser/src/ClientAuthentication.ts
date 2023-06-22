@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   ILoginHandler,
   ILogoutHandler,
   IIncomingRedirectHandler,
@@ -33,12 +33,11 @@ import {
   IIssuerConfigFetcher,
   ISessionInternalInfo,
   ILoginOptions,
-  EVENTS,
-  isValidRedirectUrl,
 } from "@inrupt/solid-client-authn-core";
+import { EVENTS, isValidRedirectUrl } from "@inrupt/solid-client-authn-core";
 import { fetch } from "@inrupt/universal-fetch";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
-import { EventEmitter } from "events";
+import type { EventEmitter } from "events";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a

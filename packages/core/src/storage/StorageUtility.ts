@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -28,11 +28,11 @@
  * A helper class that will validate items taken from local storage
  */
 import { exportJWK } from "jose";
-import IStorage from "./IStorage";
-import IStorageUtility from "./IStorageUtility";
-import { IIssuerConfig } from "../login/oidc/IIssuerConfig";
-import { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
-import { KeyPair } from "../authenticatedFetch/dpopUtils";
+import type IStorage from "./IStorage";
+import type IStorageUtility from "./IStorageUtility";
+import type { IIssuerConfig } from "../login/oidc/IIssuerConfig";
+import type { IIssuerConfigFetcher } from "../login/oidc/IIssuerConfigFetcher";
+import type { KeyPair } from "../authenticatedFetch/dpopUtils";
 
 export type OidcContext = {
   issuerConfig: IIssuerConfig;

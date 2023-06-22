@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,8 @@
 /**
  * A helper class that will validate items taken from local storage
  */
-import { IStorage, StorageUtility } from "@inrupt/solid-client-authn-core";
+import type { IStorage } from "@inrupt/solid-client-authn-core";
+import { StorageUtility } from "@inrupt/solid-client-authn-core";
 
 /**
  * This class in a no-value-added extension of StorageUtility from the core module.

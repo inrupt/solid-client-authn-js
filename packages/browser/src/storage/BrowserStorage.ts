@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import { IStorage } from "@inrupt/solid-client-authn-core";
+import type { IStorage } from "@inrupt/solid-client-authn-core";
 
 /**
  * @hidden

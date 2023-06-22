@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,12 +24,14 @@
  * @packageDocumentation
  */
 
-import {
-  determineSigningAlg,
-  PREFERRED_SIGNING_ALG,
+import type {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
+} from "@inrupt/solid-client-authn-core";
+import {
+  determineSigningAlg,
+  PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
 
 function processErrorResponse(
