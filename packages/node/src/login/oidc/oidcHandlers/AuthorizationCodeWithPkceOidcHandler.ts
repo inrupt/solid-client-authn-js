@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,14 +27,14 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
-import {
+import type {
   IOidcHandler,
   IOidcOptions,
   IRedirector,
   IStorageUtility,
   LoginResult,
-  DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
+import { DEFAULT_SCOPES } from "@inrupt/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 

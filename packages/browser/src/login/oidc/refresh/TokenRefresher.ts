@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,19 +24,21 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
   IStorageUtility,
-  loadOidcContextFromStorage,
   KeyPair,
   ITokenRefresher,
   TokenEndpointResponse,
+} from "@inrupt/solid-client-authn-core";
+import {
+  loadOidcContextFromStorage,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { refresh } from "@inrupt/oidc-client-ext";
-import { EventEmitter } from "events";
+import type { EventEmitter } from "events";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.

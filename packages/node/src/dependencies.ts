@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,9 +27,8 @@
 /**
  * Top Level core document. Responsible for setting up the dependency graph
  */
-import {
+import type {
   IStorage,
-  InMemoryStorage,
   ITokenRefresher,
   IIssuerConfigFetcher,
   IClientRegistrar,
@@ -38,6 +37,7 @@ import {
   ISessionInfoManager,
   IIncomingRedirectHandler,
 } from "@inrupt/solid-client-authn-core";
+import { InMemoryStorage } from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";

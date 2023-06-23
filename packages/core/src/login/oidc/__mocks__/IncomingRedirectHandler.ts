@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -19,10 +19,10 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { EventEmitter } from "events";
+import type { EventEmitter } from "events";
 import { jest } from "@jest/globals";
 
-import IIncomingRedirectHandler from "../IIncomingRedirectHandler";
+import type IIncomingRedirectHandler from "../IIncomingRedirectHandler";
 
 const canHandle = jest.fn((_url: string) => Promise.resolve(true));
 

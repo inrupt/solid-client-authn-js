@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,7 +20,8 @@
 //
 
 import { it, describe, expect } from "@jest/globals";
-import { KeyLike, generateKeyPair, exportJWK, jwtVerify } from "jose";
+import type { KeyLike } from "jose";
+import { generateKeyPair, exportJWK, jwtVerify } from "jose";
 import { createDpopHeader, generateDpopKeyPair } from "./dpopUtils";
 
 let publicKey: KeyLike | undefined;

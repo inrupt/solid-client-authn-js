@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,13 +27,14 @@
 /**
  * Responsible for fetching an IDP configuration
  */
-import {
+import type {
   IIssuerConfig,
   IIssuerConfigFetcher,
   IStorageUtility,
-  ConfigurationError,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer, IssuerMetadata } from "openid-client";
+import { ConfigurationError } from "@inrupt/solid-client-authn-core";
+import type { IssuerMetadata } from "openid-client";
+import { Issuer } from "openid-client";
 
 /**
  * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]

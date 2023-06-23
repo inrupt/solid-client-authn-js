@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -19,7 +19,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { JWK, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
+import type { JWK, KeyLike } from "jose";
+import { SignJWT, generateKeyPair, exportJWK } from "jose";
 import { v4 } from "uuid";
 import { PREFERRED_SIGNING_ALG } from "../constant";
 

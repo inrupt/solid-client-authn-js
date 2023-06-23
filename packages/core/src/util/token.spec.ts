@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,7 +20,8 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { JWTPayload, KeyLike, SignJWT, generateKeyPair, exportJWK } from "jose";
+import type { JWTPayload, KeyLike } from "jose";
+import { SignJWT, generateKeyPair, exportJWK } from "jose";
 import { Response as NodeResponse } from "@inrupt/universal-fetch";
 import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { getWebidFromTokenPayload } from "./token";

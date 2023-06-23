@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,8 +24,8 @@
  * @packageDocumentation
  */
 
-import { EventEmitter } from "events";
-import ILoginInputOptions from "../ILoginInputOptions";
+import type { EventEmitter } from "events";
+import type ILoginInputOptions from "../ILoginInputOptions";
 
 /**
  * We extend our public login option interface to add data and/or constraints

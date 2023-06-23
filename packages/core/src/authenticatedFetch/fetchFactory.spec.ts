@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -23,7 +23,8 @@
 /* eslint-disable no-shadow */
 
 import { jest, it, describe, expect, afterEach } from "@jest/globals";
-import { KeyLike, jwtVerify, generateKeyPair, exportJWK } from "jose";
+import type { KeyLike } from "jose";
+import { jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import { Response, Headers } from "@inrupt/universal-fetch";
 import type * as UniversalFetch from "@inrupt/universal-fetch";
@@ -39,7 +40,7 @@ import {
 import { EVENTS } from "../constant";
 import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
-import { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
+import type { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 
 if (process.env.CI === "true") {
   // We don't want flaky tests to break the CI, and the fact that we are using

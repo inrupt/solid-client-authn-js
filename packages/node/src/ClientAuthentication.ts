@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   ILoginInputOptions,
   ILoginHandler,
   ILogoutHandler,
@@ -32,11 +32,11 @@ import {
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
-  isValidRedirectUrl,
 } from "@inrupt/solid-client-authn-core";
+import { isValidRedirectUrl } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "@inrupt/universal-fetch";
-import { EventEmitter } from "events";
+import type { EventEmitter } from "events";
 
 /**
  * @hidden

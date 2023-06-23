@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,7 +20,7 @@
 //
 
 import { jest } from "@jest/globals";
-import { IUuidGenerator } from "../UuidGenerator";
+import type { IUuidGenerator } from "../UuidGenerator";
 
 export const UuidGeneratorMockResponse = "fee3fa53-a6a9-475c-a0da-b1343a4fff76";
 

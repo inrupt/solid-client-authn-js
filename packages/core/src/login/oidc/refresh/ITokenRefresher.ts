@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -19,8 +19,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { EventEmitter } from "events";
-import { KeyPair } from "../../../authenticatedFetch/dpopUtils";
+import type { EventEmitter } from "events";
+import type { KeyPair } from "../../../authenticatedFetch/dpopUtils";
 
 /**
  * Based on openid-client's TokenSetParameters. Re-creating the type allows not

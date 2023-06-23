@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,21 +20,21 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
+import type { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import {
   EVENTS,
-  ISessionInfo,
   StorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import { fetch } from "@inrupt/universal-fetch";
-import * as UniversalFetch from "@inrupt/universal-fetch";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import { Session } from "./Session";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import { KEY_CURRENT_SESSION, KEY_CURRENT_URL } from "./constant";
-import ClientAuthentication from "./ClientAuthentication";
+import type ClientAuthentication from "./ClientAuthentication";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 

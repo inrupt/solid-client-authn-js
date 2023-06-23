@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,21 +24,24 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
   IStorageUtility,
-  loadOidcContextFromStorage,
-  PREFERRED_SIGNING_ALG,
   KeyPair,
   ITokenRefresher,
   TokenEndpointResponse,
+} from "@inrupt/solid-client-authn-core";
+import {
+  loadOidcContextFromStorage,
+  PREFERRED_SIGNING_ALG,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer, IssuerMetadata, TokenSet } from "openid-client";
-import { KeyObject } from "crypto";
-import { EventEmitter } from "events";
+import type { IssuerMetadata, TokenSet } from "openid-client";
+import { Issuer } from "openid-client";
+import type { KeyObject } from "crypto";
+import type { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 

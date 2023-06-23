@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -19,26 +19,27 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import {
+import type {
   IClient,
   IClientRegistrar,
   IClientRegistrarOptions,
   IIssuerConfigFetcher,
-  USER_SESSION_PREFIX,
   IIssuerConfig,
+  buildAuthenticatedFetch,
 } from "@inrupt/solid-client-authn-core";
+import { USER_SESSION_PREFIX } from "@inrupt/solid-client-authn-core";
 import {
   StorageUtilityMock,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
-import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import { CodeExchangeResult, getBearerToken } from "@inrupt/oidc-client-ext";
+import { getBearerToken } from "@inrupt/oidc-client-ext";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
 import { fetch, Response, Headers } from "@inrupt/universal-fetch";
-import * as UniversalFetch from "@inrupt/universal-fetch";
-import { JWK, importJWK } from "jose";
-import { KeyObject } from "crypto";
+import type * as UniversalFetch from "@inrupt/universal-fetch";
+import type { JWK } from "jose";
+import { importJWK } from "jose";
+import type { KeyObject } from "crypto";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
@@ -116,31 +117,33 @@ const mockAccessTokenDpop = (): AccessJwt => {
 const mockAccessTokenBearer = (): string => "some token";
 
 const MOCK_EXPIRE_TIME = 1337;
-const mockTokenEndpointBearerResponse = (): CodeExchangeResult => {
-  return {
-    accessToken: mockAccessTokenBearer(),
-    idToken: mockIdToken(),
-    webId: mockWebId(),
-    expiresIn: MOCK_EXPIRE_TIME,
-    refreshToken: "some refresh token",
+const mockTokenEndpointBearerResponse =
+  (): OidcClientExt.CodeExchangeResult => {
+    return {
+      accessToken: mockAccessTokenBearer(),
+      idToken: mockIdToken(),
+      webId: mockWebId(),
+      expiresIn: MOCK_EXPIRE_TIME,
+      refreshToken: "some refresh token",
+    };
   };
-};
 
-const mockTokenEndpointDpopResponse = async (): Promise<CodeExchangeResult> => {
-  return {
-    accessToken: JSON.stringify(mockAccessTokenDpop()),
-    idToken: mockIdToken(),
-    webId: mockWebId(),
-    dpopKey: {
-      privateKey: (await importJWK(mockJwk())) as KeyObject,
-      // Note that here for convenience the private key is also used as public key.
-      // Obviously, this should never be done in non-test code.
-      publicKey: mockJwk(),
-    },
-    expiresIn: MOCK_EXPIRE_TIME,
-    refreshToken: "some DPoP-bound refresh token",
+const mockTokenEndpointDpopResponse =
+  async (): Promise<OidcClientExt.CodeExchangeResult> => {
+    return {
+      accessToken: JSON.stringify(mockAccessTokenDpop()),
+      idToken: mockIdToken(),
+      webId: mockWebId(),
+      dpopKey: {
+        privateKey: (await importJWK(mockJwk())) as KeyObject,
+        // Note that here for convenience the private key is also used as public key.
+        // Obviously, this should never be done in non-test code.
+        publicKey: mockJwk(),
+      },
+      expiresIn: MOCK_EXPIRE_TIME,
+      refreshToken: "some DPoP-bound refresh token",
+    };
   };
-};
 
 const mockLocalStorage = (stored: Record<string, string>) => {
   // Kinda weird: `(window as any).localStorage = new LocalStorageMock(stored)` does
@@ -154,11 +157,6 @@ const mockLocalStorage = (stored: Record<string, string>) => {
 };
 
 jest.mock("@inrupt/oidc-client-ext");
-// jest.mock("cross-fetch", () => ({
-//   ...(jest.requireActual("cross-fetch") as typeof CrossFetch),
-//   default: jest.fn<typeof fetch>(),
-//   fetch: jest.fn<typeof fetch>(),
-// }));
 
 jest.useFakeTimers();
 
@@ -580,9 +578,9 @@ describe("AuthCodeRedirectHandler", () => {
   it("returns a fetch that supports the refresh flow", async () => {
     mockOidcClient();
     const mockedStorage = mockDefaultStorageUtility();
-    const coreModule = jest.requireActual<typeof SolidClientAuthnCore>(
-      "@inrupt/solid-client-authn-core"
-    );
+    const coreModule = jest.requireActual<{
+      buildAuthenticatedFetch: typeof buildAuthenticatedFetch;
+    }>("@inrupt/solid-client-authn-core");
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
       "buildAuthenticatedFetch"

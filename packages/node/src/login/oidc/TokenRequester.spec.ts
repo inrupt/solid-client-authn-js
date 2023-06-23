@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,13 +20,10 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-// eslint-disable-next-line no-shadow
-import { Response as NodeResponse, fetch } from "@inrupt/universal-fetch";
+import { Response as NodeResponse } from "@inrupt/universal-fetch";
 import type * as UniversalFetch from "@inrupt/universal-fetch";
-import {
-  IIssuerConfig,
-  mockStorageUtility,
-} from "@inrupt/solid-client-authn-core";
+import type { IIssuerConfig } from "@inrupt/solid-client-authn-core";
+import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import {
   IssuerConfigFetcherMock,
   IssuerConfigFetcherFetchConfigResponse,
@@ -84,7 +81,7 @@ describe("TokenRequester", () => {
 
   async function setUpMockedReturnValues(
     values: Partial<typeof defaultReturnValues>
-  ): Promise<typeof fetch> {
+  ): Promise<(typeof UniversalFetch)["fetch"]> {
     await defaultMocks.storageUtility.setForUser("global", {
       issuer: values.storageIdp ?? defaultReturnValues.storageIdp,
     });

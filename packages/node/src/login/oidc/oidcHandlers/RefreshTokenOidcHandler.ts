@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,26 +27,29 @@
 /**
  * Handler for the Refresh Token Flow
  */
-import {
+import type {
   IOidcHandler,
   IOidcOptions,
   IStorageUtility,
   LoginResult,
-  saveSessionInfoToStorage,
-  getWebidFromTokenPayload,
   ISessionInfo,
-  generateDpopKeyPair,
   KeyPair,
-  PREFERRED_SIGNING_ALG,
   RefreshOptions,
   ITokenRefresher,
   TokenEndpointResponse,
+} from "@inrupt/solid-client-authn-core";
+import {
+  saveSessionInfoToStorage,
+  getWebidFromTokenPayload,
+  generateDpopKeyPair,
+  PREFERRED_SIGNING_ALG,
   buildAuthenticatedFetch,
 } from "@inrupt/solid-client-authn-core";
-import { JWK, importJWK } from "jose";
+import type { JWK } from "jose";
+import { importJWK } from "jose";
 import { fetch as globalFetch } from "@inrupt/universal-fetch";
-import { EventEmitter } from "events";
-import { KeyObject } from "crypto";
+import type { EventEmitter } from "events";
+import type { KeyObject } from "crypto";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions

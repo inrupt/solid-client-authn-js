@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -21,14 +21,16 @@
 
 import { OidcClient } from "@inrupt/oidc-client";
 import { fetch } from "@inrupt/universal-fetch";
-import {
+import type {
   IClient,
   IIssuerConfig,
+  KeyPair,
+  TokenEndpointResponse,
+} from "@inrupt/solid-client-authn-core";
+import {
   createDpopHeader,
   getWebidFromTokenPayload,
-  KeyPair,
   generateDpopKeyPair,
-  TokenEndpointResponse,
   OidcProviderError,
   InvalidResponseError,
 } from "@inrupt/solid-client-authn-core";

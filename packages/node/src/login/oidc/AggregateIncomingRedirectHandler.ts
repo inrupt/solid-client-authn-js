@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,12 +27,12 @@
 /**
  * Responsible for selecting the correct OidcHandler to handle the provided OIDC Options
  */
-import {
+import type {
   IIncomingRedirectHandler,
   ISessionInfo,
-  AggregateHandler,
 } from "@inrupt/solid-client-authn-core";
-import { EventEmitter } from "events";
+import { AggregateHandler } from "@inrupt/solid-client-authn-core";
+import type { EventEmitter } from "events";
 
 /**
  * @hidden

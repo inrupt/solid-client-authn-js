@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,21 +27,23 @@
 /**
  * Handler for the Client Credentials Flow
  */
-import {
+import type {
   IOidcHandler,
   IOidcOptions,
   LoginResult,
   IStorageUtility,
   ISessionInfo,
   KeyPair,
+  ITokenRefresher,
+} from "@inrupt/solid-client-authn-core";
+import {
   generateDpopKeyPair,
   PREFERRED_SIGNING_ALG,
   getWebidFromTokenPayload,
   buildAuthenticatedFetch,
-  ITokenRefresher,
   DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
-import { KeyObject } from "crypto";
+import type { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
 import { fetch as globalFetch } from "@inrupt/universal-fetch";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";

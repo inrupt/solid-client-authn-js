@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,10 +20,8 @@
 //
 
 import { useState } from "react";
-import {
-  fetch as authenticatedFetch,
-  ISessionInfo,
-} from "@inrupt/solid-client-authn-browser";
+import type { ISessionInfo } from "@inrupt/solid-client-authn-browser";
+import { fetch as authenticatedFetch } from "@inrupt/solid-client-authn-browser";
 
 export default function AuthenticatedFetch({
   onError,

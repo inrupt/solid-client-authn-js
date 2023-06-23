@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,19 +20,20 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import {
-  EVENTS,
+import type {
   KeyPair,
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import {
   StorageUtilityMock,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
-import { JWK, importJWK } from "jose";
-import { refresh } from "@inrupt/oidc-client-ext";
+import type { JWK } from "jose";
+import { importJWK } from "jose";
+import type { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
-import { KeyObject } from "crypto";
+import type { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockDefaultIssuerConfigFetcher,

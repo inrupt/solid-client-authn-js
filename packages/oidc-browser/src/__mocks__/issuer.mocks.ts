@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,22 +20,22 @@
 //
 
 import { jest } from "@jest/globals";
-// eslint-disable-next-line no-shadow
-import { Response, fetch } from "@inrupt/universal-fetch";
+import { Response } from "@inrupt/universal-fetch";
 import type * as UniversalFetch from "@inrupt/universal-fetch";
-import { JWK, importJWK, SignJWT } from "jose";
-import {
+import type { JWK } from "jose";
+import { importJWK, SignJWT } from "jose";
+import type {
   IClient,
   IIssuerConfig,
   KeyPair,
 } from "@inrupt/solid-client-authn-core";
-import { KeyObject } from "crypto";
-import { TokenEndpointInput } from "../dpop/tokenExchange";
+import type { KeyObject } from "crypto";
+import type { TokenEndpointInput } from "../dpop/tokenExchange";
 
 jest.mock("@inrupt/universal-fetch", () => {
   return {
     ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
-    fetch: jest.fn<typeof fetch>(),
+    fetch: jest.fn<(typeof UniversalFetch)["fetch"]>(),
   };
 });
 

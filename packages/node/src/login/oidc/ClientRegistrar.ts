@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,17 +24,20 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   IStorageUtility,
   IClientRegistrar,
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
+} from "@inrupt/solid-client-authn-core";
+import {
   ConfigurationError,
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
-import { Client, Issuer } from "openid-client";
+import type { Client } from "openid-client";
+import { Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 
 export function negotiateClientSigningAlg(

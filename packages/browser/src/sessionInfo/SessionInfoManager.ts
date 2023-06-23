@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -24,14 +24,14 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   ISessionInfo,
   ISessionInfoManager,
   ISessionInternalInfo,
   ISessionInfoManagerOptions,
   IStorageUtility,
-  isSupportedTokenType,
 } from "@inrupt/solid-client-authn-core";
+import { isSupportedTokenType } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
 import { fetch } from "@inrupt/universal-fetch";

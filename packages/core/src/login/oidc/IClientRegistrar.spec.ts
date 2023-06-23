@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -20,12 +20,9 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { IIssuerConfig, ILoginOptions, IStorageUtility } from "../..";
-import {
-  determineSigningAlg,
-  handleRegistration,
-  IClientRegistrar,
-} from "./IClientRegistrar";
+import type { IIssuerConfig, ILoginOptions, IStorageUtility } from "../..";
+import type { IClientRegistrar } from "./IClientRegistrar";
+import { determineSigningAlg, handleRegistration } from "./IClientRegistrar";
 
 describe("handleRegistration", () => {
   it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -29,8 +29,7 @@
 
 import { fetch } from "@inrupt/universal-fetch";
 
-import {
-  buildAuthenticatedFetch,
+import type {
   IClient,
   IClientRegistrar,
   IIssuerConfigFetcher,
@@ -39,15 +38,15 @@ import {
   ISessionInfoManager,
   IStorageUtility,
   ITokenRefresher,
-  loadOidcContextFromStorage,
   RefreshOptions,
 } from "@inrupt/solid-client-authn-core";
 import {
-  getDpopToken,
-  getBearerToken,
-  CodeExchangeResult,
-} from "@inrupt/oidc-client-ext";
-import { EventEmitter } from "events";
+  buildAuthenticatedFetch,
+  loadOidcContextFromStorage,
+} from "@inrupt/solid-client-authn-core";
+import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
+import { getDpopToken, getBearerToken } from "@inrupt/oidc-client-ext";
+import type { EventEmitter } from "events";
 
 /**
  * @hidden

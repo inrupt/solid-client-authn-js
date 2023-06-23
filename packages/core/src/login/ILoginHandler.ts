@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -27,9 +27,9 @@
 /**
  * A Login Handler will log a user in if it is able to use the provided Login Parameters
  */
-import IHandleable from "../util/handlerPattern/IHandleable";
-import ILoginOptions from "./ILoginOptions";
-import { IncomingRedirectResult } from "./oidc/IIncomingRedirectHandler";
+import type IHandleable from "../util/handlerPattern/IHandleable";
+import type ILoginOptions from "./ILoginOptions";
+import type { IncomingRedirectResult } from "./oidc/IIncomingRedirectHandler";
 
 // FIXME: Remove this file as we only have one login handler:
 export type LoginResult = IncomingRedirectResult | undefined;
