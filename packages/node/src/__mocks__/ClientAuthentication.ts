@@ -32,7 +32,8 @@ import {
 } from "@inrupt/solid-client-authn-core/mocks";
 import ClientAuthentication from "../ClientAuthentication";
 import { mockLoginHandler } from "../login/__mocks__/LoginHandler";
-import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
+// eslint-disable-next-line import/no-relative-packages
+import { mockLogoutHandler } from "../../../core/src/logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";
 
 type CustomMocks = {
