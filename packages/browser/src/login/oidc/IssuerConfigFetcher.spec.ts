@@ -65,7 +65,7 @@ describe("IssuerConfigFetcher", () => {
           // eslint-disable-next-line camelcase
           claim_types_supported: "oidc",
           bleepBloop: "Meep Moop",
-          end_session_endpoint: "https://example.com/endSessionEndpoint"
+          end_session_endpoint: "https://example.com/endSessionEndpoint",
         })
       )
     );
@@ -76,7 +76,9 @@ describe("IssuerConfigFetcher", () => {
     expect(fetchedConfig.issuer).toBe("https://example.com");
     expect((fetchedConfig as any).claim_types_supported).toBeUndefined();
     expect(fetchedConfig.claimTypesSupported).toBe("oidc");
-    expect(fetchedConfig.endSessionEndpoint).toBe("https://example.com/endSessionEndpoint");
+    expect(fetchedConfig.endSessionEndpoint).toBe(
+      "https://example.com/endSessionEndpoint"
+    );
     expect((fetchedConfig as any).bleepBloop).toBeUndefined();
   });
 

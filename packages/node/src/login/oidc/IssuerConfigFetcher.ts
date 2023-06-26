@@ -135,7 +135,7 @@ export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
     id_token_signing_alg_values_supported:
       config.idTokenSigningAlgValuesSupported,
     scopes_supported: config.scopesSupported,
-    end_session_endpoint: config.endSessionEndpoint
+    end_session_endpoint: config.endSessionEndpoint,
   };
 }
 
