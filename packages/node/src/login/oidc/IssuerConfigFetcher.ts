@@ -105,6 +105,7 @@ export function configFromIssuerMetadata(
       metadata.scopes_supported === undefined
         ? ["openid"]
         : (metadata.scopes_supported as string[]),
+    endSessionEndpoint: metadata.end_session_endpoint,
   };
 }
 
@@ -134,6 +135,7 @@ export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
     id_token_signing_alg_values_supported:
       config.idTokenSigningAlgValuesSupported,
     scopes_supported: config.scopesSupported,
+    end_session_endpoint: config.endSessionEndpoint
   };
 }
 

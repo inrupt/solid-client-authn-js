@@ -6,7 +6,7 @@
     "demo-app": "cd packages/browser; npm run demo-app",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
-    "clean": "rimraf packages/*/dist/ packages/*/node_modules/ packages/*/coverage/ packages/*/umd/",
+    "clean": "rimraf node_modules/ packages/*/dist/ packages/*/node_modules/ packages/*/coverage/ packages/*/umd/",
     "build-api-docs": "lerna run build-api-docs",
     "format-all": "prettier --write \"packages/*/src/**\" \"packages/*/__tests__/**\"",
     "audit-all": "lerna-audit --audit-level=moderate",

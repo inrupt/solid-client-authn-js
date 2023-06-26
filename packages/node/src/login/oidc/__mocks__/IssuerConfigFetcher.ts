@@ -63,6 +63,7 @@ export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
       "refresh_token",
       "client_credentials",
     ],
+    end_session_endpoint: "https://my.idp/endSessionEndpoint",
   };
 };
 
