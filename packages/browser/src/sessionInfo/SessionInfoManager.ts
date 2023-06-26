@@ -58,42 +58,10 @@ export async function clear(
 export class SessionInfoManager implements ISessionInfoManager {
   constructor(private storageUtility: IStorageUtility) {}
 
-  // eslint-disable-next-line class-methods-use-this
   update(
     _sessionId: string,
     _options: ISessionInfoManagerOptions
   ): Promise<void> {
-    // const localUserId: string = options.localUserId || this.uuidGenerator.v4();
-    // if (options.loggedIn) {
-    //   return {
-    //     sessionId,
-    //     loggedIn: true,
-    //     webId: options.webId as string,
-    //     neededAction: options.neededAction || { actionType: "inaction" },
-    //     state: options.state,
-    //     logout: async (): Promise<void> => {
-    //       // TODO: handle if webid isn't here
-    //       return this.logoutHandler.handle(localUserId);
-    //     },
-    //     fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    //       // TODO: handle if webid isn't here
-    //       return this.authenticatedFetcher.handle(
-    //         {
-    //           localUserId,
-    //           type: "dpop"
-    //         },
-    //         url,
-    //         init
-    //       );
-    //     }
-    //   };
-    // } else {
-    //   return {
-    //     localUserId,
-    //     loggedIn: false,
-    //     neededAction: options.neededAction || { actionType: "inaction" }
-    //   };
-    // }
     throw new Error("Not Implemented");
   }
 

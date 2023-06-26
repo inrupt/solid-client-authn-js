@@ -67,7 +67,6 @@ export async function clear(
 export abstract class SessionInfoManagerBase implements ISessionInfoManager {
   constructor(protected storageUtility: IStorageUtility) {}
 
-  // eslint-disable-next-line class-methods-use-this
   update(
     _sessionId: string,
     _options: ISessionInfoManagerOptions
