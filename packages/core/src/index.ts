@@ -49,6 +49,11 @@ export {
   IncomingRedirectResult,
 } from "./login/oidc/IIncomingRedirectHandler";
 export { default as GeneralLogoutHandler } from "./logout/GeneralLogoutHandler";
+export {
+  clear,
+  getUnauthenticatedSession,
+  SessionInfoManagerBase,
+} from "./sessionInfo/SessionInfoManager";
 
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 

@@ -31,20 +31,13 @@ import type {
   ISessionInfoManagerOptions,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { isSupportedTokenType } from "@inrupt/solid-client-authn-core";
-import { v4 } from "uuid";
+import {
+  isSupportedTokenType,
+  clear as clearBase,
+} from "@inrupt/solid-client-authn-core";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
-import { fetch } from "@inrupt/universal-fetch";
 
-export function getUnauthenticatedSession(): ISessionInfo & {
-  fetch: typeof fetch;
-} {
-  return {
-    isLoggedIn: false,
-    sessionId: v4(),
-    fetch,
-  };
-}
+export { getUnauthenticatedSession } from "@inrupt/solid-client-authn-core";
 
 /**
  * @param sessionId
@@ -55,12 +48,7 @@ export async function clear(
   sessionId: string,
   storage: IStorageUtility
 ): Promise<void> {
-  await Promise.all([
-    storage.deleteAllUserData(sessionId, { secure: false }),
-    storage.deleteAllUserData(sessionId, { secure: true }),
-    // FIXME: This is needed until the DPoP key is stored safely
-    storage.delete("clientKey", { secure: false }),
-  ]);
+  await clearBase(sessionId, storage);
   await clearOidcPersistentStorage();
 }
 
