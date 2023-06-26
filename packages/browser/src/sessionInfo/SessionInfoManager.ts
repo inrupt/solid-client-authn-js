@@ -28,12 +28,12 @@ import type {
   ISessionInfo,
   ISessionInfoManager,
   ISessionInternalInfo,
-  ISessionInfoManagerOptions,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import {
   isSupportedTokenType,
   clear as clearBase,
+  SessionInfoManagerBase,
 } from "@inrupt/solid-client-authn-core";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
 
@@ -55,16 +55,10 @@ export async function clear(
 /**
  * @hidden
  */
-export class SessionInfoManager implements ISessionInfoManager {
-  constructor(private storageUtility: IStorageUtility) {}
-
-  update(
-    _sessionId: string,
-    _options: ISessionInfoManagerOptions
-  ): Promise<void> {
-    throw new Error("Not Implemented");
-  }
-
+export class SessionInfoManager
+  extends SessionInfoManagerBase
+  implements ISessionInfoManager
+{
   async get(
     sessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
@@ -147,11 +141,6 @@ export class SessionInfoManager implements ISessionInfoManager {
     };
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  async getAll(): Promise<(ISessionInfo & ISessionInternalInfo)[]> {
-    throw new Error("Not implemented");
-  }
-
   /**
    * This function removes all session-related information from storage.
    * @param sessionId the session identifier
@@ -160,28 +149,5 @@ export class SessionInfoManager implements ISessionInfoManager {
    */
   async clear(sessionId: string): Promise<void> {
     return clear(sessionId, this.storageUtility);
-  }
-
-  /**
-   * Registers a new session, so that its ID can be retrieved.
-   * @param sessionId
-   */
-  async register(_sessionId: string): Promise<void> {
-    throw new Error("Not implemented");
-  }
-
-  /**
-   * Returns all the registered session IDs. Differs from getAll, which also
-   * returns additional session information.
-   */
-  async getRegisteredSessionIdAll(): Promise<string[]> {
-    throw new Error("Not implemented");
-  }
-
-  /**
-   * Deletes all information about all sessions, including their registrations.
-   */
-  async clearAll(): Promise<void> {
-    throw new Error("Not implemented");
   }
 }

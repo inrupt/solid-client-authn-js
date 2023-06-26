@@ -24,15 +24,15 @@
  * @packageDocumentation
  */
 
+import { v4 } from "uuid";
+import { fetch } from "@inrupt/universal-fetch";
 import type {
   ISessionInfo,
   ISessionInfoManager,
   ISessionInternalInfo,
   ISessionInfoManagerOptions,
   IStorageUtility,
-} from "@inrupt/solid-client-authn-core";
-import { v4 } from "uuid";
-import { fetch } from "@inrupt/universal-fetch";
+} from "..";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
   fetch: typeof fetch;

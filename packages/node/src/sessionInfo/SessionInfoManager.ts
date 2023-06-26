@@ -28,10 +28,8 @@ import type {
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
-  ISessionInfoManagerOptions,
-  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { clear } from "@inrupt/solid-client-authn-core";
+import { SessionInfoManagerBase } from "@inrupt/solid-client-authn-core";
 import { KEY_REGISTERED_SESSIONS } from "../constant";
 
 export {
@@ -42,16 +40,10 @@ export {
 /**
  * @hidden
  */
-export class SessionInfoManager implements ISessionInfoManager {
-  constructor(private storageUtility: IStorageUtility) {}
-
-  update(
-    _sessionId: string,
-    _options: ISessionInfoManagerOptions
-  ): Promise<void> {
-    throw new Error("Not Implemented");
-  }
-
+export class SessionInfoManager
+  extends SessionInfoManagerBase
+  implements ISessionInfoManager
+{
   async get(
     sessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
@@ -79,11 +71,6 @@ export class SessionInfoManager implements ISessionInfoManager {
     return undefined;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  async getAll(): Promise<(ISessionInfo & ISessionInternalInfo)[]> {
-    throw new Error("Not implemented");
-  }
-
   /**
    * This function removes all session-related information from storage.
    * @param sessionId the session identifier
@@ -101,7 +88,7 @@ export class SessionInfoManager implements ISessionInfoManager {
         )
       );
     }
-    return clear(sessionId, this.storageUtility);
+    return super.clear(sessionId);
   }
 
   /**
