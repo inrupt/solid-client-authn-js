@@ -40,6 +40,7 @@ import { fetch } from "@inrupt/universal-fetch";
 import EventEmitter from "events";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
+import { ILogoutOptions } from "@inrupt/solid-client-authn-core";
 
 export interface ISessionOptions {
   /**
@@ -197,7 +198,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    */
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
-  login = async (options: ILoginInputOptions): Promise<void> => {
+  login = async (options?: ILoginInputOptions): Promise<void> => {
     const loginInfo = await this.clientAuthentication.login(
       this.info.sessionId,
       {
@@ -236,10 +237,10 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
    */
-  logout = async (): Promise<void> => this.internalLogout(true);
+  logout = async (options: ILogoutOptions): Promise<void> => this.internalLogout(true, options);
 
-  private internalLogout = async (emitEvent: boolean): Promise<void> => {
-    await this.clientAuthentication.logout(this.info.sessionId);
+  private internalLogout = async (emitEvent: boolean, options?: ILogoutOptions): Promise<void> => {
+    await this.clientAuthentication.logout(this.info.sessionId, options);
     // Clears the timeouts on logout so that Node does not hang.
     clearTimeout(this.lastTimeoutHandle);
     this.info.isLoggedIn = false;

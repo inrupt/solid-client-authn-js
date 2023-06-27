@@ -131,6 +131,9 @@ const createClientIdDoc = async (
     scope: clientInfo.scope ?? "openid webid",
     grant_types: ["authorization_code"],
     response_types: ["code"],
+    post_logout_redirect_uris: [
+      "http://localhost:3001/postLogoutUrl"
+    ]
   };
   await overwriteFile(clientId, Buffer.from(JSON.stringify(clientIdDoc)), {
     fetch: session.fetch,

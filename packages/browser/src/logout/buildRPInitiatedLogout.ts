@@ -18,33 +18,21 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+import type {
+  IEndSessionOptions,
+  IRPLogoutOptions,
+} from "@inrupt/solid-client-authn-core";
+import { getEndSessionUrl } from "@inrupt/solid-client-authn-core";
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-import type IHandleable from "../util/handlerPattern/IHandleable";
-
-export interface IRPLogoutOptions {
-  logoutType: "idp";
-  postLogoutUrl?: string | undefined;
-  state?: string | undefined;
+export function buildRPInitiatedLogout(endSessionOptions: IEndSessionOptions) {
+  return function logout(logoutOptions: IRPLogoutOptions) {
+    console.log('logout function called')
+    window.location.href = getEndSessionUrl({
+      endSessionEndpoint: endSessionOptions.endSessionEndpoint,
+      idTokenHint: endSessionOptions.idTokenHint,
+      // state: logoutOptions.state ?? endSessionOptions.state,
+      postLogoutRedirectUri:
+        logoutOptions.postLogoutUrl ?? endSessionOptions.postLogoutRedirectUri,
+    });
+  };
 }
-
-export interface IAppLogoutOptions {
-  logoutType: "app";
-  postLogoutUrl?: undefined;
-  state?: undefined;
-}
-
-export type ILogoutOptions = IRPLogoutOptions | IAppLogoutOptions;
-
-/**
- * @hidden
- */
-type ILogoutHandler = IHandleable<
-  [string] | [string, ILogoutOptions | undefined],
-  void
->;
-export default ILogoutHandler;

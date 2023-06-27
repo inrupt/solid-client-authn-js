@@ -18,33 +18,36 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-
-/**
- * @hidden
- * @packageDocumentation
- */
-
-import type IHandleable from "../util/handlerPattern/IHandleable";
-
-export interface IRPLogoutOptions {
-  logoutType: "idp";
-  postLogoutUrl?: string | undefined;
-  state?: string | undefined;
+export interface IEndSessionOptions {
+  endSessionEndpoint: string;
+  idTokenHint?: string;
+  postLogoutRedirectUri?: string;
+  state?: string;
 }
 
-export interface IAppLogoutOptions {
-  logoutType: "app";
-  postLogoutUrl?: undefined;
-  state?: undefined;
-}
-
-export type ILogoutOptions = IRPLogoutOptions | IAppLogoutOptions;
-
 /**
+ * This function is designed to isomorphically capture the behavior in oidc-client-js and node-oidc-provider
+ * - https://github.com/IdentityModel/oidc-client-js/blob/edec8f59897bdeedcb0b4167586d49626203c2c1/src/OidcClient.js#L138
+ * - https://github.com/panva/node-openid-client/blob/35758419489ff751a71f5b66f5020087a63e1e88/lib/client.js#L284
+ *
+ * @param options IEndSessionOptions
+ * @returns The URL to redirect to in order to perform RP Initiated Logout
  * @hidden
  */
-type ILogoutHandler = IHandleable<
-  [string] | [string, ILogoutOptions | undefined],
-  void
->;
-export default ILogoutHandler;
+export function getEndSessionUrl({
+  endSessionEndpoint,
+  idTokenHint,
+  postLogoutRedirectUri,
+  state,
+}: IEndSessionOptions) {
+  const url = new URL(endSessionEndpoint);
+
+  if (idTokenHint) url.searchParams.append("id_token_hint", idTokenHint);
+
+  if (postLogoutRedirectUri) {
+    url.searchParams.append("post_logout_redirect_uri", postLogoutRedirectUri);
+    if (state) url.searchParams.append("state", state);
+  }
+
+  return url.toString();
+}

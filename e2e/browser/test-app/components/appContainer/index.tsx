@@ -37,6 +37,7 @@ import {
 import AuthenticatedFetch from "../authenticatedFetch";
 
 const REDIRECT_URL = new URL("http://localhost:3001/").href;
+const POST_LOGOUT_URL = new URL("http://localhost:3001/postLogoutUrl").href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
 
@@ -166,6 +167,19 @@ export default function AppContainer() {
           }}
         >
           Log Out
+        </button>
+        <button
+          data-testid={"rpLogoutButton"}
+          onClick={async (e) => {
+            console.log("rp logout button clicked")
+            e.preventDefault();
+            await logout({
+              logoutType: "idp",
+              // postLogoutUrl: POST_LOGOUT_URL
+            });
+          }}
+        >
+          RP Log Out
         </button>
       </form>
       <p data-testid={TESTID_ERROR_MESSAGE}>

@@ -34,11 +34,11 @@ import type {
   IClientRegistrar,
   IIssuerConfigFetcher,
   IIncomingRedirectHandler,
-  ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
   ITokenRefresher,
   RefreshOptions,
+  IncomingRedirectResult,
 } from "@inrupt/solid-client-authn-core";
 import {
   buildAuthenticatedFetch,
@@ -47,6 +47,7 @@ import {
 import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { getDpopToken, getBearerToken } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
+import { buildRPInitiatedLogout } from "../../../logout/buildRPInitiatedLogout";
 
 /**
  * @hidden
@@ -77,7 +78,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   async handle(
     redirectUrl: string,
     eventEmitter?: EventEmitter
-  ): Promise<ISessionInfo & { fetch: typeof fetch }> {
+  ): Promise<IncomingRedirectResult> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
@@ -184,10 +185,19 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
+      logout:
+        typeof issuerConfig.endSessionEndpoint === "string"
+          ? buildRPInitiatedLogout({
+              idTokenHint: tokens.idToken,
+              endSessionEndpoint: issuerConfig.endSessionEndpoint,
+              // TODO: Check if this is the correct state
+              state: oauthState,
+            })
+          : undefined,
       expirationDate:
         typeof tokens.expiresIn === "number"
           ? tokenCreatedAt + tokens.expiresIn * 1000
-          : null,
+          : undefined,
     });
   }
 }

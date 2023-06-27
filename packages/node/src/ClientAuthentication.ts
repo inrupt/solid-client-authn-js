@@ -33,6 +33,7 @@ import type {
   ISessionInternalInfo,
   ISessionInfoManager,
 } from "@inrupt/solid-client-authn-core";
+import { ILogoutOptions } from "@inrupt/solid-client-authn-core";
 import { isValidRedirectUrl } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { fetch } from "@inrupt/universal-fetch";
@@ -93,7 +94,7 @@ export default class ClientAuthentication {
   // By default, our fetch() resolves to the environment fetch() function.
   fetch = fetch;
 
-  logout = async (sessionId: string): Promise<void> => {
+  logout = async (sessionId: string, options?: ILogoutOptions): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
 
     // Restore our fetch() function back to the environment fetch(), effectively
