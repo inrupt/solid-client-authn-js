@@ -133,8 +133,8 @@ const createClientIdDoc = async (
     response_types: ["code"],
     post_logout_redirect_uris: [
       "http://localhost:3001/postLogoutUrl",
-      "http://localhost:3001/"
-    ]
+      "http://localhost:3001/",
+    ],
   };
   await overwriteFile(clientId, Buffer.from(JSON.stringify(clientIdDoc)), {
     fetch: session.fetch,

@@ -20,9 +20,9 @@
 //
 
 import { TESTID_SELECTORS } from "@inrupt/internal-playwright-testids";
-import { test, expect } from "./fixtures";
-import { v4 } from 'uuid';
+import { v4 } from "uuid";
 import { getBrowserTestingEnvironment } from "@inrupt/internal-test-env";
+import { test, expect } from "./fixtures";
 
 const env = getBrowserTestingEnvironment();
 
@@ -211,7 +211,7 @@ test.describe("Using a Client ID", () => {
     app,
     page,
     clientAccessControl,
-    auth
+    auth,
   }) => {
     const POST_LOGOUT_URL = "http://localhost:3001/postLogoutUrl";
 
@@ -227,7 +227,7 @@ test.describe("Using a Client ID", () => {
     expect(await app.isLoginSignalReceived()).toBe(true);
     expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
 
-    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]"),
+    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]");
     await app.page.fill("[data-testid=postLogoutUrlInput]", POST_LOGOUT_URL);
     await page.click(`[data-testid=rpLogoutButton]`);
     await page.waitForURL(POST_LOGOUT_URL);
@@ -237,7 +237,7 @@ test.describe("Using a Client ID", () => {
     app,
     page,
     clientAccessControl,
-    auth
+    auth,
   }) => {
     const POST_LOGOUT_URL = "http://localhost:3001/postLogoutUrl";
     const state = v4();
@@ -254,10 +254,10 @@ test.describe("Using a Client ID", () => {
     expect(await app.isLoginSignalReceived()).toBe(true);
     expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
 
-    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]"),
+    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]");
     await app.page.fill("[data-testid=postLogoutUrlInput]", POST_LOGOUT_URL);
 
-    await app.page.waitForSelector("[data-testid=stateInput]"),
+    await app.page.waitForSelector("[data-testid=stateInput]");
     await app.page.fill("[data-testid=stateInput]", state);
 
     await page.click(`[data-testid=rpLogoutButton]`);
@@ -268,7 +268,7 @@ test.describe("Using a Client ID", () => {
     app,
     page,
     clientAccessControl,
-    auth
+    auth,
   }) => {
     const POST_LOGOUT_URL = "http://localhost:3001/";
     const state = v4();
@@ -285,10 +285,10 @@ test.describe("Using a Client ID", () => {
     expect(await app.isLoginSignalReceived()).toBe(true);
     expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
 
-    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]"),
+    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]");
     await app.page.fill("[data-testid=postLogoutUrlInput]", POST_LOGOUT_URL);
 
-    await app.page.waitForSelector("[data-testid=stateInput]"),
+    await app.page.waitForSelector("[data-testid=stateInput]");
     await app.page.fill("[data-testid=stateInput]", state);
 
     await page.click(`[data-testid=rpLogoutButton]`);
@@ -302,7 +302,9 @@ test.describe("Using a Client ID", () => {
     auth,
   }) => {
     // Get the openId configuration
-    const config = await fetch(new URL(".well-known/openid-configuration", env.idp));
+    const config = await fetch(
+      new URL(".well-known/openid-configuration", env.idp)
+    );
     const configuration = await config.json();
 
     await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
@@ -320,13 +322,17 @@ test.describe("Using a Client ID", () => {
     await Promise.all([
       // Make sure the end session endpoint is requested at some point
       page.waitForRequest(configuration.end_session_endpoint),
-      page.click(`[data-testid=rpLogoutButton]`)
+      page.click(`[data-testid=rpLogoutButton]`),
     ]);
 
-    await new Promise(res => setTimeout(res, 5_000));
+    await new Promise((res) => {
+      setTimeout(res, 5_000);
+    });
 
     // We should remain on the same origin as the end_session_endpoint if we do not provide
     // a URL to take us back to the original webpage
-    expect(new URL(page.url()).origin).toEqual(new URL(configuration.end_session_endpoint).origin);
+    expect(new URL(page.url()).origin).toEqual(
+      new URL(configuration.end_session_endpoint).origin
+    );
   });
 });

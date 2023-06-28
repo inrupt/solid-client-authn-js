@@ -262,7 +262,10 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    *
    * @hidden
    */
-  private internalLogout = async (emitSignal: boolean, options?: ILogoutOptions): Promise<void> => {
+  private internalLogout = async (
+    emitSignal: boolean,
+    options?: ILogoutOptions
+  ): Promise<void> => {
     // Clearing this value means that silent refresh will no longer be attempted.
     // In particular, in the case of a silent authentication error it prevents
     // from getting stuck in an authentication retries loop.
@@ -277,7 +280,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
    */
-  logout = async (options?: ILogoutOptions): Promise<void> => this.internalLogout(true, options);
+  logout = async (options?: ILogoutOptions): Promise<void> =>
+    this.internalLogout(true, options);
 
   /**
    * Completes the login process by processing the information provided by the

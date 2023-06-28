@@ -192,7 +192,7 @@ export default function AppContainer() {
             await logout({
               logoutType: "idp",
               postLogoutUrl,
-              state
+              state,
             });
           }}
         >
