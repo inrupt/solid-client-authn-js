@@ -2,9 +2,12 @@
   "name": "root",
   "version": "0.0.0",
   "private": true,
+  "workspaces": [
+    "e2e/**",
+    "packages/**"
+  ],
   "scripts": {
-    "demo-app": "cd packages/browser; npm run demo-app",
-    "test:dev": "cd e2e/browser/test-app; npm i; npm run dev",
+    "test:dev": "lerna run dev --scope=test-app",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "clean": "rimraf packages/*/dist/ packages/*/node_modules/ packages/*/coverage/ packages/*/umd/",
@@ -17,7 +20,7 @@
     "lint:check": "npm run lint:eslint && npm run lint:prettier -- --check",
     "lint:eslint": "eslint \"e2e\" \"packages\"",
     "lint:prettier": "prettier \"{e2e,packages}/**/*.{ts,tsx,js,jsx,css}\" \"{e2e,packages}/**/*.{md,mdx,yml}\" \"./*.{md,mdx,yml}\"",
-    "postinstall": "lerna bootstrap --ci && npm run build",
+    "postinstall": "npm run build",
     "prepublishOnly": "npm run build",
     "publish": "lerna publish",
     "test": "npm run test:unit:all",

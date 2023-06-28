@@ -1,5 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser-via-script-tag-example",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

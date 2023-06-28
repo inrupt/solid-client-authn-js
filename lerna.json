@@ -1,7 +1,5 @@
 {
-  "packages": [
-    "packages/*",
-    "e2e/browser"
-  ],
+  "useNx": true,
+  "useWorkspaces": true,
   "version": "1.16.0"
 }
