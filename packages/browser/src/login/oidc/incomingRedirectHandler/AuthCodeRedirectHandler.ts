@@ -190,8 +190,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
           ? buildRPInitiatedLogout({
               idTokenHint: tokens.idToken,
               endSessionEndpoint: issuerConfig.endSessionEndpoint,
-              // TODO: Check if this is the correct state
-              state: oauthState,
             })
           : undefined,
       expirationDate:

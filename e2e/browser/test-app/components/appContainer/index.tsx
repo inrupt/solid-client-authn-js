@@ -37,7 +37,6 @@ import {
 import AuthenticatedFetch from "../authenticatedFetch";
 
 const REDIRECT_URL = new URL("http://localhost:3001/").href;
-const POST_LOGOUT_URL = new URL("http://localhost:3001/postLogoutUrl").href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
 
@@ -58,6 +57,8 @@ export default function AppContainer() {
   const [sessionInfo, setSessionInfo] = useState<ISessionInfo>();
   const [issuer, setIssuer] = useState<string>(DEFAULT_ISSUER);
   const [clientId, setClientId] = useState<string>();
+  const [state, setState] = useState<string>();
+  const [postLogoutUrl, setPostLogoutUrl] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [loginSignalReceived, setLoginSignalReceived] =
     useState<boolean>(false);
@@ -150,6 +151,22 @@ export default function AppContainer() {
             setClientId(e.target.value);
           }}
         />
+        <input
+          data-testid="postLogoutUrlInput"
+          placeholder="Post Logout Url"
+          type="text"
+          onChange={(e) => {
+            setPostLogoutUrl(e.target.value);
+          }}
+        />
+        <input
+          data-testid="stateInput"
+          placeholder="State parameter"
+          type="text"
+          onChange={(e) => {
+            setState(e.target.value);
+          }}
+        />
         <button
           data-testid={TESTID_LOGIN_BUTTON}
           onClick={async (e) => {
@@ -171,11 +188,11 @@ export default function AppContainer() {
         <button
           data-testid={"rpLogoutButton"}
           onClick={async (e) => {
-            console.log("rp logout button clicked")
             e.preventDefault();
             await logout({
               logoutType: "idp",
-              // postLogoutUrl: POST_LOGOUT_URL
+              postLogoutUrl,
+              state
             });
           }}
         >
