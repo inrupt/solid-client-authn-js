@@ -3,14 +3,23 @@
   "version": "1.16.0",
   "license": "MIT",
   "main": "dist/index.js",
-  "types": "dist/index",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
   "repository": {
     "url": "https://github.com/inrupt/solid-client-authn"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
   },
   "scripts": {
     "prepublishOnly": "npm run build",
     "clean": "rimraf ./dist && rimraf ./coverage",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && npm run build:esm",
+    "build:esm": "rollup --config rollup.config.mjs",
     "licenses:check": "license-checker --production --out license.csv --failOn \"AGPL-1.0-only; AGPL-1.0-or-later; AGPL-3.0-only; AGPL-3.0-or-later; Beerware; CC-BY-NC-1.0; CC-BY-NC-2.0; CC-BY-NC-2.5; CC-BY-NC-3.0; CC-BY-NC-4.0; CC-BY-NC-ND-1.0; CC-BY-NC-ND-2.0; CC-BY-NC-ND-2.5; CC-BY-NC-ND-3.0; CC-BY-NC-ND-4.0; CC-BY-NC-SA-1.0; CC-BY-NC-SA-2.0; CC-BY-NC-SA-2.5; CC-BY-NC-SA-3.0; CC-BY-NC-SA-4.0; CPAL-1.0; EUPL-1.0; EUPL-1.1; EUPL-1.1;  GPL-1.0-only; GPL-1.0-or-later; GPL-2.0-only;  GPL-2.0-or-later; GPL-3.0; GPL-3.0-only; GPL-3.0-or-later; SISSL;  SISSL-1.2; WTFPL\"",
     "build-api-docs": "npx typedoc --out docs/api/source/api --readme none",
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
