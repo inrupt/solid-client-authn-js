@@ -24,15 +24,16 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { getEndSessionUrl } from "@inrupt/solid-client-authn-core";
 
-export function buildRPInitiatedLogout(
-  endSessionOptions: Omit<IEndSessionOptions, keyof IRPLogoutOptions>
-) {
-  return function logout(logoutOptions: IRPLogoutOptions) {
+export function buildRPInitiatedLogout({
+  endSessionEndpoint,
+  idTokenHint,
+}: Omit<IEndSessionOptions, keyof IRPLogoutOptions>) {
+  return function logout({ state, postLogoutUrl }: IRPLogoutOptions) {
     window.location.href = getEndSessionUrl({
-      endSessionEndpoint: endSessionOptions.endSessionEndpoint,
-      idTokenHint: endSessionOptions.idTokenHint,
-      state: logoutOptions.state,
-      postLogoutRedirectUri: logoutOptions.postLogoutUrl,
+      endSessionEndpoint,
+      idTokenHint,
+      state,
+      postLogoutRedirectUri: postLogoutUrl,
     });
   };
 }
