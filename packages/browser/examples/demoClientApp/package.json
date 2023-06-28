@@ -1,5 +1,6 @@
 {
   "name": "@inrupt/demo-app-authn-browser",
+  "private": true,
   "version": "1.0.0",
   "description": "Demo client application for authentication in a browser",
   "main": "index.js",
@@ -29,7 +30,7 @@
     "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-browser": "file:../../",
+    "@inrupt/solid-client-authn-browser": "^1.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "regenerator-runtime": "^0.13.11"
