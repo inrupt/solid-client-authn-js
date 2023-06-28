@@ -24,10 +24,10 @@ import {
   StorageUtility,
   mockStorage,
 } from "@inrupt/solid-client-authn-core";
+import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
 
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
-import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
 import { SessionInfoManager } from "./SessionInfoManager";
 
 const mockClearFunction = jest.fn();

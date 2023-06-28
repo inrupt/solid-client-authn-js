@@ -20,7 +20,10 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { mockStorage } from "@inrupt/solid-client-authn-core";
+import {
+  mockStorage,
+  GeneralLogoutHandler,
+} from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { EventEmitter } from "events";
 import {
@@ -37,7 +40,6 @@ import {
 import { mockDefaultClientRegistrar } from "./login/oidc/__mocks__/ClientRegistrar";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import { mockDefaultTokenRefresher } from "./login/oidc/refresh/__mocks__/TokenRefresher";
-import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";

@@ -28,14 +28,16 @@
  * Top Level core document. Responsible for setting up the dependency graph
  */
 import type { IStorage } from "@inrupt/solid-client-authn-core";
-import { InMemoryStorage } from "@inrupt/solid-client-authn-core";
+import {
+  InMemoryStorage,
+  GeneralLogoutHandler,
+} from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import { FallbackRedirectHandler } from "./login/oidc/incomingRedirectHandler/FallbackRedirectHandler";
-import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import { AuthCodeRedirectHandler } from "./login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler";
 import AggregateRedirectHandler from "./login/oidc/AggregateRedirectHandler";

@@ -19,27 +19,22 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
 import type {
-  ILogoutHandler,
+  ISessionInfo,
   ISessionInfoManager,
+  ISessionInternalInfo,
+  IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import { SessionInfoManagerBase } from "../SessionInfoManager";
 
-/**
- * @hidden
- */
-export default class GeneralLogoutHandler implements ILogoutHandler {
-  constructor(private sessionInfoManager: ISessionInfoManager) {}
-
-  async canHandle(): Promise<boolean> {
-    return true;
+class SessionInfoManager extends SessionInfoManagerBase {
+  get(): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
+    throw new Error("Method not implemented.");
   }
+}
 
-  async handle(userId: string): Promise<void> {
-    await this.sessionInfoManager.clear(userId);
-  }
+export function mockSessionInfoManager(
+  storageUtility: IStorageUtility
+): ISessionInfoManager {
+  return new SessionInfoManager(storageUtility);
 }
