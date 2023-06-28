@@ -110,8 +110,13 @@ export default class ClientAuthentication {
 
     // We also need to make sure that any other cleanup that we want to do for
     // our session takes place before this condition is run
-    if (options?.logoutType === "idp" && this.boundLogout) {
-      // TODO: See if we should throw an error here if the logoutType is not "idp"
+    if (options?.logoutType === "idp") {
+      if (!this.boundLogout) {
+        throw new Error(
+          "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+        );
+      }
+
       this.boundLogout({
         logoutType: "idp",
         postLogoutUrl: options.postLogoutUrl,

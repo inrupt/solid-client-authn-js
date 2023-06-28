@@ -237,13 +237,17 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Logs the user out of the application. This does not log the user out of the identity provider, and should not redirect the user away.
    */
-  logout = async (options: ILogoutOptions): Promise<void> =>
+  logout = async (options?: ILogoutOptions): Promise<void> =>
     this.internalLogout(true, options);
 
   private internalLogout = async (
     emitEvent: boolean,
     options?: ILogoutOptions
   ): Promise<void> => {
+    if (options?.logoutType === "idp") {
+      throw new Error("Cannot perform IDP logout from NodeJS");
+    }
+
     await this.clientAuthentication.logout(this.info.sessionId, options);
     // Clears the timeouts on logout so that Node does not hang.
     clearTimeout(this.lastTimeoutHandle);
