@@ -1,5 +1,6 @@
 {
   "name": "demo-authentiation-monitor",
+  "private": true,
   "version": "1.0.0",
   "description": "Demo for monitoring Authentication interactions in real-time",
   "main": "index.js",
