@@ -56,8 +56,6 @@ export async function clear(
   await Promise.all([
     storage.deleteAllUserData(sessionId, { secure: false }),
     storage.deleteAllUserData(sessionId, { secure: true }),
-    // FIXME: This is needed until the DPoP key is stored safely
-    storage.delete("clientKey", { secure: false }),
   ]);
 }
 
