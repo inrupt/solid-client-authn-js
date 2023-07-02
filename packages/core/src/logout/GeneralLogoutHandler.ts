@@ -24,10 +24,8 @@
  * @packageDocumentation
  */
 
-import type {
-  ILogoutHandler,
-  ISessionInfoManager,
-} from "@inrupt/solid-client-authn-core";
+import type ILogoutHandler from "./ILogoutHandler";
+import type { ISessionInfoManager } from "../sessionInfo/ISessionInfoManager";
 
 /**
  * @hidden

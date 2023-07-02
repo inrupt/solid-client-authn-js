@@ -31,3 +31,5 @@ export {
   mockCanHandleIncomingRedirect,
   mockHandleIncomingRedirect,
 } from "./login/oidc/__mocks__/IncomingRedirectHandler";
+
+export { mockLogoutHandler } from "./logout/__mocks__/LogoutHandler";
