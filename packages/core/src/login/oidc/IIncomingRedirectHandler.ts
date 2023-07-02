@@ -29,8 +29,11 @@ import type { fetch } from "@inrupt/universal-fetch";
 import type { EventEmitter } from "events";
 import type IHandleable from "../../util/handlerPattern/IHandleable";
 import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
+import type { IRPLogoutOptions } from "../../logout/ILogoutHandler";
 
-export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch };
+export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch } & {
+  logout?: (options: IRPLogoutOptions) => void;
+};
 export type IncomingRedirectInput = [string, EventEmitter | undefined];
 
 /**

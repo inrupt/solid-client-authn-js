@@ -67,8 +67,10 @@ export const login: Session["login"] = (...args) => {
 };
 
 /**
- * Logs the user out of the application. This does not log the user out of their
- * Solid identity provider, and should not redirect the user away.
+ * Logs the user out of the application.
+ *
+ * By default this does not log the user out of their Solid identity provider.
+ * In order to do so, you must set the logoutType to `idp`.
  *
  * @since 1.3.0
  */

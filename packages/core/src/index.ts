@@ -32,7 +32,12 @@ export { default as ILoginInputOptions } from "./ILoginInputOptions";
 export { default as ILoginHandler, LoginResult } from "./login/ILoginHandler";
 export { default as ILoginOptions } from "./login/ILoginOptions";
 
-export { default as ILogoutHandler } from "./logout/ILogoutHandler";
+export {
+  default as ILogoutHandler,
+  type IAppLogoutOptions,
+  type IRPLogoutOptions,
+  type ILogoutOptions,
+} from "./logout/ILogoutHandler";
 
 export { default as IHandleable } from "./util/handlerPattern/IHandleable";
 export { default as AggregateHandler } from "./util/handlerPattern/AggregateHandler";
@@ -54,6 +59,10 @@ export {
   getUnauthenticatedSession,
   SessionInfoManagerBase,
 } from "./sessionInfo/SessionInfoManager";
+export {
+  getEndSessionUrl,
+  type IEndSessionOptions,
+} from "./logout/endSessionUrl";
 
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
 

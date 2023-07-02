@@ -33,6 +33,8 @@ import type {
   IIssuerConfigFetcher,
   ISessionInternalInfo,
   ILoginOptions,
+  IRPLogoutOptions,
+  ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
 import { EVENTS, isValidRedirectUrl } from "@inrupt/solid-client-authn-core";
 import { fetch } from "@inrupt/universal-fetch";
@@ -48,6 +50,8 @@ const globalFetch: typeof fetch = (request, init) => fetch(request, init);
  * @hidden
  */
 export default class ClientAuthentication {
+  private boundLogout?: (options: IRPLogoutOptions) => void;
+
   constructor(
     private loginHandler: ILoginHandler,
     private redirectHandler: IIncomingRedirectHandler,
@@ -95,12 +99,37 @@ export default class ClientAuthentication {
   // By default, our fetch() resolves to the environment fetch() function.
   fetch = globalFetch;
 
-  logout = async (sessionId: string): Promise<void> => {
+  logout = async (
+    sessionId: string,
+    options?: ILogoutOptions
+  ): Promise<void> => {
     await this.logoutHandler.handle(sessionId);
+
+    // This will redirect away from the current page, so we should not expect
+    // code after this condition to be run if it is true.
+
+    // We also need to make sure that any other cleanup that we want to do for
+    // our session takes place before this condition is run
+    if (options?.logoutType === "idp") {
+      if (!this.boundLogout) {
+        throw new Error(
+          "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+        );
+      }
+
+      this.boundLogout({
+        logoutType: "idp",
+        postLogoutUrl: options.postLogoutUrl,
+        state: options.state,
+      });
+    }
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
     this.fetch = globalFetch;
+
+    // Delete the bound logout function, so that it can't be called after this.
+    delete this.boundLogout;
   };
 
   getSessionInfo = async (
@@ -143,6 +172,7 @@ export default class ClientAuthentication {
       // ClientAuthentication, to avoid the following error:
       // > 'fetch' called on an object that does not implement interface Window.
       this.fetch = redirectInfo.fetch.bind(window);
+      this.boundLogout = redirectInfo.logout;
 
       // Strip the oauth params:
       this.cleanUrlAfterRedirect(url);
