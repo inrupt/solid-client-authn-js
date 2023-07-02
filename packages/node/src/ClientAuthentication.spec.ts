@@ -29,13 +29,12 @@ import type {
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
+  mockLogoutHandler,
 } from "@inrupt/solid-client-authn-core/mocks";
 import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { Session } from "./Session";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
-// eslint-disable-next-line import/no-relative-packages
-import { mockLogoutHandler } from "../../core/src/logout/__mocks__/LogoutHandler";
 import {
   mockSessionInfoManager,
   SessionCreatorCreateResponse,
