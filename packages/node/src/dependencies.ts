@@ -37,7 +37,10 @@ import type {
   ISessionInfoManager,
   IIncomingRedirectHandler,
 } from "@inrupt/solid-client-authn-core";
-import { InMemoryStorage } from "@inrupt/solid-client-authn-core";
+import {
+  InMemoryStorage,
+  GeneralLogoutHandler,
+} from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
 import OidcLoginHandler from "./login/oidc/OidcLoginHandler";
@@ -45,7 +48,6 @@ import AggregateOidcHandler from "./login/oidc/AggregateOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcHandler";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
-import GeneralLogoutHandler from "./logout/GeneralLogoutHandler";
 import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import { AuthCodeRedirectHandler } from "./login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler";
 import { FallbackRedirectHandler } from "./login/oidc/incomingRedirectHandler/FallbackRedirectHandler";

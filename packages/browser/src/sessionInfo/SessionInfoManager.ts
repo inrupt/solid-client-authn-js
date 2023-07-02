@@ -28,23 +28,16 @@ import type {
   ISessionInfo,
   ISessionInfoManager,
   ISessionInternalInfo,
-  ISessionInfoManagerOptions,
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import { isSupportedTokenType } from "@inrupt/solid-client-authn-core";
-import { v4 } from "uuid";
+import {
+  isSupportedTokenType,
+  clear as clearBase,
+  SessionInfoManagerBase,
+} from "@inrupt/solid-client-authn-core";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
-import { fetch } from "@inrupt/universal-fetch";
 
-export function getUnauthenticatedSession(): ISessionInfo & {
-  fetch: typeof fetch;
-} {
-  return {
-    isLoggedIn: false,
-    sessionId: v4(),
-    fetch,
-  };
-}
+export { getUnauthenticatedSession } from "@inrupt/solid-client-authn-core";
 
 /**
  * @param sessionId
@@ -55,60 +48,17 @@ export async function clear(
   sessionId: string,
   storage: IStorageUtility
 ): Promise<void> {
-  await Promise.all([
-    storage.deleteAllUserData(sessionId, { secure: false }),
-    storage.deleteAllUserData(sessionId, { secure: true }),
-    // FIXME: This is needed until the DPoP key is stored safely
-    storage.delete("clientKey", { secure: false }),
-  ]);
+  await clearBase(sessionId, storage);
   await clearOidcPersistentStorage();
 }
 
 /**
  * @hidden
  */
-export class SessionInfoManager implements ISessionInfoManager {
-  constructor(private storageUtility: IStorageUtility) {}
-
-  // eslint-disable-next-line class-methods-use-this
-  update(
-    _sessionId: string,
-    _options: ISessionInfoManagerOptions
-  ): Promise<void> {
-    // const localUserId: string = options.localUserId || this.uuidGenerator.v4();
-    // if (options.loggedIn) {
-    //   return {
-    //     sessionId,
-    //     loggedIn: true,
-    //     webId: options.webId as string,
-    //     neededAction: options.neededAction || { actionType: "inaction" },
-    //     state: options.state,
-    //     logout: async (): Promise<void> => {
-    //       // TODO: handle if webid isn't here
-    //       return this.logoutHandler.handle(localUserId);
-    //     },
-    //     fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    //       // TODO: handle if webid isn't here
-    //       return this.authenticatedFetcher.handle(
-    //         {
-    //           localUserId,
-    //           type: "dpop"
-    //         },
-    //         url,
-    //         init
-    //       );
-    //     }
-    //   };
-    // } else {
-    //   return {
-    //     localUserId,
-    //     loggedIn: false,
-    //     neededAction: options.neededAction || { actionType: "inaction" }
-    //   };
-    // }
-    throw new Error("Not Implemented");
-  }
-
+export class SessionInfoManager
+  extends SessionInfoManagerBase
+  implements ISessionInfoManager
+{
   async get(
     sessionId: string
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
@@ -191,11 +141,6 @@ export class SessionInfoManager implements ISessionInfoManager {
     };
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  async getAll(): Promise<(ISessionInfo & ISessionInternalInfo)[]> {
-    throw new Error("Not implemented");
-  }
-
   /**
    * This function removes all session-related information from storage.
    * @param sessionId the session identifier
@@ -204,28 +149,5 @@ export class SessionInfoManager implements ISessionInfoManager {
    */
   async clear(sessionId: string): Promise<void> {
     return clear(sessionId, this.storageUtility);
-  }
-
-  /**
-   * Registers a new session, so that its ID can be retrieved.
-   * @param sessionId
-   */
-  async register(_sessionId: string): Promise<void> {
-    throw new Error("Not implemented");
-  }
-
-  /**
-   * Returns all the registered session IDs. Differs from getAll, which also
-   * returns additional session information.
-   */
-  async getRegisteredSessionIdAll(): Promise<string[]> {
-    throw new Error("Not implemented");
-  }
-
-  /**
-   * Deletes all information about all sessions, including their registrations.
-   */
-  async clearAll(): Promise<void> {
-    throw new Error("Not implemented");
   }
 }

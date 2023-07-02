@@ -29,10 +29,10 @@ import type {
 import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
+  mockLogoutHandler,
 } from "@inrupt/solid-client-authn-core/mocks";
 import ClientAuthentication from "../ClientAuthentication";
 import { mockLoginHandler } from "../login/__mocks__/LoginHandler";
-import { mockLogoutHandler } from "../logout/__mocks__/LogoutHandler";
 import { mockSessionInfoManager } from "../sessionInfo/__mocks__/SessionInfoManager";
 
 type CustomMocks = {
