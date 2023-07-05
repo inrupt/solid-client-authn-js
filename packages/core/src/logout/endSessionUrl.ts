@@ -18,12 +18,24 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-export interface IEndSessionOptions {
+export interface IEndSessionOptionsBase {
   endSessionEndpoint: string;
-  idTokenHint?: string;
-  postLogoutRedirectUri?: string;
-  state?: string;
+  idTokenHint?: string | undefined;
+  postLogoutRedirectUri?: string | undefined;
+  state?: string | undefined;
 }
+
+export interface IEndSessionOptionsPostLogout extends IEndSessionOptionsBase {
+  postLogoutRedirectUri: string;
+  state?: string | undefined;
+}
+
+export interface IEndSessionOptionsNoCallback extends IEndSessionOptionsBase {
+  postLogoutRedirectUri?: undefined;
+  state?: undefined;
+}
+
+export type IEndSessionOptions = IEndSessionOptionsPostLogout | IEndSessionOptionsNoCallback;
 
 /**
  * This function is designed to isomorphically capture the behavior in oidc-client-js and node-oidc-provider

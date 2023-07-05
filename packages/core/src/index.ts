@@ -61,7 +61,7 @@ export {
 } from "./sessionInfo/SessionInfoManager";
 export {
   getEndSessionUrl,
-  type IEndSessionOptions,
+  type IEndSessionOptionsBase as IEndSessionOptions,
 } from "./logout/endSessionUrl";
 
 export { IRedirector, IRedirectorOptions } from "./login/oidc/IRedirector";
