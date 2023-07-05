@@ -44,7 +44,7 @@ export function getEndSessionUrl({
 
   if (idTokenHint !== undefined) url.searchParams.append("id_token_hint", idTokenHint);
 
-  if (postLogoutRedirectUri) {
+  if (postLogoutRedirectUri !== undefined) {
     url.searchParams.append("post_logout_redirect_uri", postLogoutRedirectUri);
     if (state) url.searchParams.append("state", state);
   }
