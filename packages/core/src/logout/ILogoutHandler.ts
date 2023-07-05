@@ -38,7 +38,7 @@ export interface IRpLogoutOptions {
   /**
    * The value that should be provided in the `state` query parameter when redirecting
    * back to the postLogoutUrl.
-   * 
+   *
    * Note: This parameter should only be provided when a postLogoutUrl is provided. If
    * this value is provided then you should clear it from the URL when redirected back
    * to the postLogoutUrl.
