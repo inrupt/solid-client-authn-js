@@ -46,7 +46,7 @@ export function getEndSessionUrl({
 
   if (postLogoutRedirectUri !== undefined) {
     url.searchParams.append("post_logout_redirect_uri", postLogoutRedirectUri);
-    if (state) url.searchParams.append("state", state);
+    if (state !== undefined) url.searchParams.append("state", state);
   }
 
   return url.toString();
