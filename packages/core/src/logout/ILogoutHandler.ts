@@ -26,7 +26,7 @@
 
 import type IHandleable from "../util/handlerPattern/IHandleable";
 
-export interface IRPLogoutOptions {
+export interface IRpLogoutOptions {
   logoutType: "idp";
   postLogoutUrl?: string | undefined;
   state?: string | undefined;
@@ -38,7 +38,7 @@ export interface IAppLogoutOptions {
   state?: undefined;
 }
 
-export type ILogoutOptions = IRPLogoutOptions | IAppLogoutOptions;
+export type ILogoutOptions = IRpLogoutOptions | IAppLogoutOptions;
 
 /**
  * @hidden

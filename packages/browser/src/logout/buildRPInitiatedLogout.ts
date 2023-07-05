@@ -20,7 +20,7 @@
 //
 import type {
   IEndSessionOptions,
-  IRPLogoutOptions,
+  IRpLogoutOptions,
 } from "@inrupt/solid-client-authn-core";
 import { getEndSessionUrl } from "@inrupt/solid-client-authn-core";
 
@@ -34,8 +34,8 @@ import { getEndSessionUrl } from "@inrupt/solid-client-authn-core";
 export function buildRpInitiatedLogout({
   endSessionEndpoint,
   idTokenHint,
-}: Omit<IEndSessionOptions, keyof IRPLogoutOptions>) {
-  return function logout({ state, postLogoutUrl }: IRPLogoutOptions) {
+}: Omit<IEndSessionOptions, keyof IRpLogoutOptions>) {
+  return function logout({ state, postLogoutUrl }: IRpLogoutOptions) {
     window.location.href = getEndSessionUrl({
       endSessionEndpoint,
       idTokenHint,

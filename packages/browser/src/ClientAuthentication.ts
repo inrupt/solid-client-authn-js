@@ -33,7 +33,7 @@ import type {
   IIssuerConfigFetcher,
   ISessionInternalInfo,
   ILoginOptions,
-  IRPLogoutOptions,
+  IRpLogoutOptions,
   ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
 import { EVENTS, isValidRedirectUrl } from "@inrupt/solid-client-authn-core";
@@ -50,7 +50,7 @@ const globalFetch: typeof fetch = (request, init) => fetch(request, init);
  * @hidden
  */
 export default class ClientAuthentication {
-  private boundLogout?: (options: IRPLogoutOptions) => void;
+  private boundLogout?: (options: IRpLogoutOptions) => void;
 
   constructor(
     private loginHandler: ILoginHandler,

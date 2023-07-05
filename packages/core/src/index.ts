@@ -35,7 +35,7 @@ export { default as ILoginOptions } from "./login/ILoginOptions";
 export {
   default as ILogoutHandler,
   type IAppLogoutOptions,
-  type IRPLogoutOptions,
+  type IRpLogoutOptions,
   type ILogoutOptions,
 } from "./logout/ILogoutHandler";
 
