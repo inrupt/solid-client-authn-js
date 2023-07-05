@@ -42,7 +42,7 @@ export function getEndSessionUrl({
 }: IEndSessionOptions) {
   const url = new URL(endSessionEndpoint);
 
-  if (idTokenHint) url.searchParams.append("id_token_hint", idTokenHint);
+  if (idTokenHint !== undefined) url.searchParams.append("id_token_hint", idTokenHint);
 
   if (postLogoutRedirectUri) {
     url.searchParams.append("post_logout_redirect_uri", postLogoutRedirectUri);
