@@ -47,7 +47,7 @@ import {
 import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { getDpopToken, getBearerToken } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
-import { buildRPInitiatedLogout } from "../../../logout/buildRPInitiatedLogout";
+import { buildRpInitiatedLogout } from "../../../logout/buildRpInitiatedLogout";
 
 /**
  * @hidden
@@ -187,7 +187,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       fetch: authFetch,
       logout:
         typeof issuerConfig.endSessionEndpoint === "string"
-          ? buildRPInitiatedLogout({
+          ? buildRpInitiatedLogout({
               idTokenHint: tokens.idToken,
               endSessionEndpoint: issuerConfig.endSessionEndpoint,
             })
