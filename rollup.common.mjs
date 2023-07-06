@@ -1,4 +1,3 @@
-
 import typescript from "rollup-plugin-typescript2";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
