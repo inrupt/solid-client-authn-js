@@ -4,42 +4,16 @@
 // Until we only support Node 18+, this should be used instead
 // (see https://rollupjs.org/guide/en/#importing-packagejson)
 import { createRequire } from "node:module";
+import createConfig, { sharedConfig } from '../../rollup.common.mjs'
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json");
 
-import typescript from "rollup-plugin-typescript2";
-
-const sharedConfig = {
-  plugins: [
-    typescript({
-      // Use our own version of TypeScript, rather than the one bundled with the plugin:
-      typescript: require("typescript"),
-      tsconfigOverride: {
-        compilerOptions: {
-          module: "esnext",
-        },
-      },
-    }),
-  ],
-  external: ["universal-fetch"],
-  // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true,
-};
+const external = sharedConfig.external.filter(file => file !== "@inrupt/solid-client-authn-core");
 
 export default [
   {
-    input: "./src/index.ts",
-    output: [
-      {
-        file: pkg.main,
-        format: "cjs",
-      },
-      {
-        file: pkg.module,
-        format: "esm",
-      },
-    ],
-    ...sharedConfig,
+    ...createConfig(pkg)[0],
+    external,
   },
   {
     input: "./src/mocks.ts",
@@ -54,5 +28,6 @@ export default [
       },
     ],
     ...sharedConfig,
+    external
   },
 ];

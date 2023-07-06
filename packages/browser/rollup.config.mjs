@@ -4,43 +4,36 @@
 // Until we only support Node 18+, this should be used instead
 // (see https://rollupjs.org/guide/en/#importing-packagejson)
 import { createRequire } from "node:module";
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import terser from '@rollup/plugin-terser';
+import createConfig, { sharedConfig } from '../../rollup.common.mjs';
+
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json");
 
-import typescript from "rollup-plugin-typescript2";
-
-const sharedConfig = {
-  plugins: [
-    typescript({
-      // Use our own version of TypeScript, rather than the one bundled with the plugin:
-      typescript: require("typescript"),
-      tsconfigOverride: {
-        compilerOptions: {
-          module: "esnext",
-        },
-      },
-    }),
-  ],
-  external: [
-    "@inrupt/solid-client-authn-core",
-    "@inrupt/universal-fetch",
-    "@inrupt/oidc-client-ext",
-    "uuid",
-    "events"
-  ],
-  // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true,
-};
-
 export default [
+  ...createConfig(pkg),
   {
     input: "./src/index.ts",
     output: [
       {
-        file: pkg.module,
-        format: "esm",
+        file: pkg.bundle,
+        format: "iife",
+        name: "solidClientAuthentication",
+        sourcemap: true,
       },
     ],
     ...sharedConfig,
+    external: [],
+    plugins: [
+      ...sharedConfig.plugins,
+      nodeResolve({
+        browser: true,
+        preferBuiltins: false
+      }),
+      commonjs(),
+      terser(),
+    ]
   },
 ];
