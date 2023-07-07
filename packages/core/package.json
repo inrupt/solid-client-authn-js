@@ -36,7 +36,7 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "dependencies": {
-    "@inrupt/universal-fetch": "^1.0.1",
+    "@inrupt/universal-fetch": "^1.0.2",
     "events": "^3.3.0",
     "jose": "^4.10.0",
     "uuid": "^9.0.0"
