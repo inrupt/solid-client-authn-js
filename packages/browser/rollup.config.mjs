@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
-import createConfig, { sharedConfig } from '../../rollup.common.mjs';
+import createConfig, { createSharedConfig } from '../../rollup.common.mjs';
 
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json");
@@ -24,10 +24,10 @@ export default [
         sourcemap: true,
       },
     ],
-    ...sharedConfig,
+    ...createSharedConfig(pkg),
     external: [],
     plugins: [
-      ...sharedConfig.plugins,
+      ...createSharedConfig(pkg).plugins,
       nodeResolve({
         browser: true,
         preferBuiltins: false
