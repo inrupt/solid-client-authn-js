@@ -23,18 +23,17 @@
  * @hidden
  * @packageDocumentation
  */
-import type {
-  ILoginHandler,
-  ILogoutHandler,
-  IIncomingRedirectHandler,
-  ISessionInfo,
-  ISessionInfoManager,
-  ISessionInternalInfo,
-  IRpLogoutOptions,
-  ILogoutOptions,
-} from "@inrupt/solid-client-authn-core";
 import { fetch } from "@inrupt/universal-fetch";
 import type { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
+import type { ILogoutOptions, IRpLogoutOptions } from "./logout/ILogoutHandler";
+import type ILogoutHandler from "./logout/ILogoutHandler";
+import type ILoginHandler from "./login/ILoginHandler";
+import type IIncomingRedirectHandler from "./login/oidc/IIncomingRedirectHandler";
+import type { ISessionInfoManager } from "./sessionInfo/ISessionInfoManager";
+import type {
+  ISessionInfo,
+  ISessionInternalInfo,
+} from "./sessionInfo/ISessionInfo";
 
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a

@@ -206,7 +206,10 @@ describe("ClientAuthentication", () => {
       ) as jest.Mocked<typeof UniversalFetch>;
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
-      expect(mockedFetch).toHaveBeenCalledWith("https://html5zombo.com");
+      expect(mockedFetch).toHaveBeenCalledWith(
+        "https://html5zombo.com",
+        undefined
+      );
     });
   });
 

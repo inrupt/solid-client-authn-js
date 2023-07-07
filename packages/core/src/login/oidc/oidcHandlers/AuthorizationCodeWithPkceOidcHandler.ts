@@ -18,9 +18,9 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-import IStorageUtility from "../../../storage/IStorageUtility";
-import IOidcOptions from "../IOidcOptions";
-import { IRedirector } from "../IRedirector";
+import type IStorageUtility from "../../../storage/IStorageUtility";
+import type IOidcOptions from "../IOidcOptions";
+import type { IRedirector } from "../IRedirector";
 
 /**
  * @hidden
