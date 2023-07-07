@@ -53,6 +53,7 @@ export {
   IncomingRedirectInput,
   IncomingRedirectResult,
 } from "./login/oidc/IIncomingRedirectHandler";
+export { default as AuthorizationCodeWithPkceOidcHandlerBase } from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 export { default as GeneralLogoutHandler } from "./logout/GeneralLogoutHandler";
 export {
   clear,
