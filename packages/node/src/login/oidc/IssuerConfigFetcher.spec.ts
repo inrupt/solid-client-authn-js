@@ -70,6 +70,9 @@ describe("IssuerConfigFetcher", () => {
     expect(fetchedConfig.subjectTypesSupported).toBe(
       mockedIssuerConfig.subject_types_supported
     );
+    expect(fetchedConfig.endSessionEndpoint).toBe(
+      mockedIssuerConfig.end_session_endpoint
+    );
   });
 
   it("throws an error if authorization_endpoint is missing", async () => {

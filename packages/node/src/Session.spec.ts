@@ -244,6 +244,18 @@ describe("Session", () => {
       await mySession.logout();
       expect(spiedClearTimeout).toHaveBeenCalledWith(12345);
     });
+
+    it("should error when attempting to perform idp logout", async () => {
+      const mySession = new Session({
+        clientAuthentication: mockClientAuthentication(),
+      });
+      (
+        mySession as unknown as { lastTimeoutHandle: number }
+      ).lastTimeoutHandle = 12345;
+      await expect(mySession.logout({ logoutType: "idp" })).rejects.toThrow(
+        new Error("Cannot perform IDP logout from NodeJS")
+      );
+    });
   });
 
   describe("fetch", () => {
