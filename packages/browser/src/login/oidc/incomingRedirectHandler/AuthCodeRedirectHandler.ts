@@ -43,11 +43,11 @@ import type {
 import {
   buildAuthenticatedFetch,
   loadOidcContextFromStorage,
+  maybeBuildRpInitiatedLogout,
 } from "@inrupt/solid-client-authn-core";
 import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { getDpopToken, getBearerToken } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
-import { buildRpInitiatedLogout } from "../../../logout/buildRpInitiatedLogout";
 
 /**
  * @hidden
@@ -185,13 +185,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
-      logout:
-        typeof issuerConfig.endSessionEndpoint === "string"
-          ? buildRpInitiatedLogout({
-              idTokenHint: tokens.idToken,
-              endSessionEndpoint: issuerConfig.endSessionEndpoint,
-            })
-          : undefined,
+      logout: maybeBuildRpInitiatedLogout({
+        idTokenHint: tokens.idToken,
+        endSessionEndpoint: issuerConfig.endSessionEndpoint,
+      }),
       expirationDate:
         typeof tokens.expiresIn === "number"
           ? tokenCreatedAt + tokens.expiresIn * 1000

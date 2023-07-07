@@ -25,41 +25,22 @@
  */
 
 import type {
-  ILoginHandler,
-  ILogoutHandler,
-  IIncomingRedirectHandler,
   ISessionInfo,
-  ISessionInfoManager,
-  IIssuerConfigFetcher,
   ISessionInternalInfo,
   ILoginOptions,
-  IRpLogoutOptions,
-  ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
-import { EVENTS, isValidRedirectUrl } from "@inrupt/solid-client-authn-core";
-import { fetch } from "@inrupt/universal-fetch";
+import {
+  EVENTS,
+  isValidRedirectUrl,
+  ClientAuthentication as ClientAuthenticationBase,
+} from "@inrupt/solid-client-authn-core";
 import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
-
-// By only referring to `window` at runtime, apps that do server-side rendering
-// won't run into errors when rendering code that instantiates a
-// ClientAuthentication:
-const globalFetch: typeof fetch = (request, init) => fetch(request, init);
 
 /**
  * @hidden
  */
-export default class ClientAuthentication {
-  private boundLogout?: (options: IRpLogoutOptions) => void;
-
-  constructor(
-    private loginHandler: ILoginHandler,
-    private redirectHandler: IIncomingRedirectHandler,
-    private logoutHandler: ILogoutHandler,
-    private sessionInfoManager: ISessionInfoManager,
-    private issuerConfigFetcher: IIssuerConfigFetcher
-  ) {}
-
+export default class ClientAuthentication extends ClientAuthenticationBase {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (
@@ -96,53 +77,6 @@ export default class ClientAuthentication {
     });
   };
 
-  // By default, our fetch() resolves to the environment fetch() function.
-  fetch = globalFetch;
-
-  logout = async (
-    sessionId: string,
-    options?: ILogoutOptions
-  ): Promise<void> => {
-    await this.logoutHandler.handle(sessionId);
-
-    // This will redirect away from the current page, so we should not expect
-    // code after this condition to be run if it is true.
-
-    // We also need to make sure that any other cleanup that we want to do for
-    // our session takes place before this condition is run
-    if (options?.logoutType === "idp") {
-      if (!this.boundLogout) {
-        throw new Error(
-          "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
-        );
-      }
-
-      this.boundLogout({
-        logoutType: "idp",
-        postLogoutUrl: options.postLogoutUrl,
-        state: options.state,
-      });
-    }
-
-    // Restore our fetch() function back to the environment fetch(), effectively
-    // leaving us with un-authenticated fetches from now on.
-    this.fetch = globalFetch;
-
-    // Delete the bound logout function, so that it can't be called after this.
-    delete this.boundLogout;
-  };
-
-  getSessionInfo = async (
-    sessionId: string
-  ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> => {
-    // TODO complete
-    return this.sessionInfoManager.get(sessionId);
-  };
-
-  getAllSessionInfo = async (): Promise<ISessionInfo[]> => {
-    return this.sessionInfoManager.getAll();
-  };
-
   // Collects session information from storage, and returns them. Returns null
   // if the expected information cannot be found.
   // Note that the ID token is not stored, which means the session information
@@ -172,7 +106,7 @@ export default class ClientAuthentication {
       // ClientAuthentication, to avoid the following error:
       // > 'fetch' called on an object that does not implement interface Window.
       this.fetch = redirectInfo.fetch.bind(window);
-      this.boundLogout = redirectInfo.logout;
+      this.boundLogout = redirectInfo.getLogoutUrl;
 
       // Strip the oauth params:
       this.cleanUrlAfterRedirect(url);

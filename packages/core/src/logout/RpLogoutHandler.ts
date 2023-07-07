@@ -18,29 +18,38 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-import type {
-  IEndSessionOptions,
-  IRpLogoutOptions,
-} from "@inrupt/solid-client-authn-core";
-import { getEndSessionUrl } from "@inrupt/solid-client-authn-core";
+import type ILogoutHandler from "./ILogoutHandler";
+import type { IRedirector } from "../login/oidc/IRedirector";
+import type { ILogoutHandlerOptions } from "./ILogoutHandler";
 
-/**
- * @param options.endSessionEndpoint The end_session_endpoint advertised by the server
- * @param options.idTokenHint The idToken supplied by the server after logging in
- * Redirects the window to the location required to perform RP initiated logout
- *
- * @hidden
- */
-export function buildRpInitiatedLogout({
-  endSessionEndpoint,
-  idTokenHint,
-}: Omit<IEndSessionOptions, keyof IRpLogoutOptions>) {
-  return function logout({ state, postLogoutUrl }: IRpLogoutOptions) {
-    window.location.href = getEndSessionUrl({
-      endSessionEndpoint,
-      idTokenHint,
-      state,
-      postLogoutRedirectUri: postLogoutUrl,
+export default class IRpLogoutHandler implements ILogoutHandler {
+  constructor(protected redirector: IRedirector) {}
+
+  async canHandle(
+    userId: string,
+    options?: ILogoutHandlerOptions | undefined
+  ): Promise<boolean> {
+    return options?.logoutType === "idp";
+  }
+
+  async handle(
+    userId: string,
+    options?: ILogoutHandlerOptions | undefined
+  ): Promise<void> {
+    if (options?.logoutType !== "idp") {
+      throw new Error(
+        "Attempting to call idp logout handler to perform app logout"
+      );
+    }
+
+    if (options.toLogoutUrl === undefined) {
+      throw new Error(
+        "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+      );
+    }
+
+    return this.redirector.redirect(options.toLogoutUrl(options), {
+      handleRedirect: options.handleRedirect,
     });
-  };
+  }
 }

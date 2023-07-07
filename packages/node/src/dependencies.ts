@@ -39,7 +39,7 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
-  GeneralLogoutHandler,
+  IWaterfallLogoutHandler,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityNode from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
@@ -143,7 +143,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   return new ClientAuthentication(
     loginHandler,
     redirectHandler,
-    new GeneralLogoutHandler(sessionInfoManager),
+    new IWaterfallLogoutHandler(sessionInfoManager, new Redirector()),
     sessionInfoManager
   );
 }

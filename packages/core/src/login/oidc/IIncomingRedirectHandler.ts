@@ -32,7 +32,7 @@ import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
 import type { IRpLogoutOptions } from "../../logout/ILogoutHandler";
 
 export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch } & {
-  logout?: (options: IRpLogoutOptions) => void;
+  getLogoutUrl?: (options: IRpLogoutOptions) => string;
 };
 export type IncomingRedirectInput = [string, EventEmitter | undefined];
 

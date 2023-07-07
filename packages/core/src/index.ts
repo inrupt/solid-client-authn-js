@@ -55,6 +55,8 @@ export {
 } from "./login/oidc/IIncomingRedirectHandler";
 export { default as AuthorizationCodeWithPkceOidcHandlerBase } from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 export { default as GeneralLogoutHandler } from "./logout/GeneralLogoutHandler";
+export { default as IRpLogoutHandler } from "./logout/RpLogoutHandler";
+export { default as IWaterfallLogoutHandler } from "./logout/IWaterfallLogoutHandler";
 export {
   clear,
   getUnauthenticatedSession,
@@ -62,6 +64,7 @@ export {
 } from "./sessionInfo/SessionInfoManager";
 export {
   getEndSessionUrl,
+  maybeBuildRpInitiatedLogout,
   type IEndSessionOptions,
 } from "./logout/endSessionUrl";
 
@@ -86,6 +89,7 @@ export {
   handleRegistration,
   determineSigningAlg,
 } from "./login/oidc/IClientRegistrar";
+export { default as ClientAuthentication } from "./ClientAuthentication";
 export { IClient } from "./login/oidc/IClient";
 
 // Storage.
