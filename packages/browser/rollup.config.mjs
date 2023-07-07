@@ -28,11 +28,18 @@ export default [
     external: [],
     plugins: [
       ...createSharedConfig(pkg).plugins,
+      // Locate modules using the Node resolution algorithm, for using third party modules in node_modules
+      // to bundle them into the browser build
       nodeResolve({
+        // Use browser exports from dependencies where available
         browser: true,
+        // Bundles in the events library from the node_modules
+        // rather than trying to use the node events library
         preferBuiltins: false
       }),
+      // Adds support for importing cjs libraries such as the 'events' library
       commonjs(),
+      // Minifies the browser bundle
       terser(),
     ]
   },
