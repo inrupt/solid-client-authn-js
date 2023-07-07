@@ -18,31 +18,37 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+export interface IEndSessionOptions {
+  endSessionEndpoint: string;
+  idTokenHint?: string;
+  postLogoutRedirectUri?: string;
+  state?: string;
+}
 
 /**
- * @hidden
- * @packageDocumentation
- */
-
-// eslint-disable-next-line no-shadow
-import type { fetch } from "@inrupt/universal-fetch";
-import type { EventEmitter } from "events";
-import type IHandleable from "../../util/handlerPattern/IHandleable";
-import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
-import type { IRpLogoutOptions } from "../../logout/ILogoutHandler";
-
-export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch } & {
-  logout?: (options: IRpLogoutOptions) => void;
-};
-export type IncomingRedirectInput = [string, EventEmitter | undefined];
-
-/**
+ * This function is designed to isomorphically capture the behavior in oidc-client-js and node-oidc-provider
+ * - https://github.com/IdentityModel/oidc-client-js/blob/edec8f59897bdeedcb0b4167586d49626203c2c1/src/OidcClient.js#L138
+ * - https://github.com/panva/node-openid-client/blob/35758419489ff751a71f5b66f5020087a63e1e88/lib/client.js#L284
+ *
+ * @param options IEndSessionOptions
+ * @returns The URL to redirect to in order to perform RP Initiated Logout
  * @hidden
  */
-type IIncomingRedirectHandler = IHandleable<
-  // Tuple of the URL to redirect to, an optional event listener for when
-  // we receive a new refresh token, and, an optional onError function:
-  IncomingRedirectInput,
-  IncomingRedirectResult
->;
-export default IIncomingRedirectHandler;
+export function getEndSessionUrl({
+  endSessionEndpoint,
+  idTokenHint,
+  postLogoutRedirectUri,
+  state,
+}: IEndSessionOptions) {
+  const url = new URL(endSessionEndpoint);
+
+  if (idTokenHint !== undefined)
+    url.searchParams.append("id_token_hint", idTokenHint);
+
+  if (postLogoutRedirectUri !== undefined) {
+    url.searchParams.append("post_logout_redirect_uri", postLogoutRedirectUri);
+    if (state !== undefined) url.searchParams.append("state", state);
+  }
+
+  return url.toString();
+}

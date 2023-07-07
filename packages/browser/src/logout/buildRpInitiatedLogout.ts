@@ -18,31 +18,29 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+import type {
+  IEndSessionOptions,
+  IRpLogoutOptions,
+} from "@inrupt/solid-client-authn-core";
+import { getEndSessionUrl } from "@inrupt/solid-client-authn-core";
 
 /**
- * @hidden
- * @packageDocumentation
- */
-
-// eslint-disable-next-line no-shadow
-import type { fetch } from "@inrupt/universal-fetch";
-import type { EventEmitter } from "events";
-import type IHandleable from "../../util/handlerPattern/IHandleable";
-import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
-import type { IRpLogoutOptions } from "../../logout/ILogoutHandler";
-
-export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch } & {
-  logout?: (options: IRpLogoutOptions) => void;
-};
-export type IncomingRedirectInput = [string, EventEmitter | undefined];
-
-/**
+ * @param options.endSessionEndpoint The end_session_endpoint advertised by the server
+ * @param options.idTokenHint The idToken supplied by the server after logging in
+ * Redirects the window to the location required to perform RP initiated logout
+ *
  * @hidden
  */
-type IIncomingRedirectHandler = IHandleable<
-  // Tuple of the URL to redirect to, an optional event listener for when
-  // we receive a new refresh token, and, an optional onError function:
-  IncomingRedirectInput,
-  IncomingRedirectResult
->;
-export default IIncomingRedirectHandler;
+export function buildRpInitiatedLogout({
+  endSessionEndpoint,
+  idTokenHint,
+}: Omit<IEndSessionOptions, keyof IRpLogoutOptions>) {
+  return function logout({ state, postLogoutUrl }: IRpLogoutOptions) {
+    window.location.href = getEndSessionUrl({
+      endSessionEndpoint,
+      idTokenHint,
+      state,
+      postLogoutRedirectUri: postLogoutUrl,
+    });
+  };
+}
