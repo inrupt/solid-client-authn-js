@@ -20,7 +20,11 @@
 //
 
 import { TESTID_SELECTORS } from "@inrupt/internal-playwright-testids";
+import { v4 } from "uuid";
+import { getBrowserTestingEnvironment } from "@inrupt/internal-test-env";
 import { test, expect } from "./fixtures";
+
+const env = getBrowserTestingEnvironment();
 
 // TODO: Redirected resource tests? I'm not sure what those actually show
 
@@ -201,5 +205,134 @@ test.describe("Using a Client ID", () => {
     await expect(
       app.page.locator("[data-testid=expirationSignalReceived]").textContent()
     ).resolves.toContain("Yes");
+  });
+
+  test("The session should perform RP Initiated Logout correctly", async ({
+    app,
+    page,
+    clientAccessControl,
+    auth,
+  }) => {
+    const POST_LOGOUT_URL = "http://localhost:3001/postLogoutUrl";
+
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.fill(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+
+    await auth.login({ allow: true });
+
+    expect(await app.isLoginSignalReceived()).toBe(true);
+    expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
+
+    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]");
+    await app.page.fill("[data-testid=postLogoutUrlInput]", POST_LOGOUT_URL);
+    await page.click(`[data-testid=rpLogoutButton]`);
+    await page.waitForURL(POST_LOGOUT_URL);
+  });
+
+  test("The session should perform RP Initiated Logout correctly with state", async ({
+    app,
+    page,
+    clientAccessControl,
+    auth,
+  }) => {
+    const POST_LOGOUT_URL = "http://localhost:3001/postLogoutUrl";
+    const state = v4();
+
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.fill(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+
+    await auth.login({ allow: true });
+
+    expect(await app.isLoginSignalReceived()).toBe(true);
+    expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
+
+    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]");
+    await app.page.fill("[data-testid=postLogoutUrlInput]", POST_LOGOUT_URL);
+
+    await app.page.waitForSelector("[data-testid=stateInput]");
+    await app.page.fill("[data-testid=stateInput]", state);
+
+    await page.click(`[data-testid=rpLogoutButton]`);
+    await page.waitForURL(`${POST_LOGOUT_URL}?state=${state}`);
+  });
+
+  test("The session should perform RP Initiated Logout redirecting to the home page with state", async ({
+    app,
+    page,
+    clientAccessControl,
+    auth,
+  }) => {
+    const POST_LOGOUT_URL = "http://localhost:3001/";
+    const state = v4();
+
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.fill(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+
+    await auth.login({ allow: true });
+
+    expect(await app.isLoginSignalReceived()).toBe(true);
+    expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
+
+    await app.page.waitForSelector("[data-testid=postLogoutUrlInput]");
+    await app.page.fill("[data-testid=postLogoutUrlInput]", POST_LOGOUT_URL);
+
+    await app.page.waitForSelector("[data-testid=stateInput]");
+    await app.page.fill("[data-testid=stateInput]", state);
+
+    await page.click(`[data-testid=rpLogoutButton]`);
+    await page.waitForURL(`${POST_LOGOUT_URL}?state=${state}`);
+  });
+
+  test("The session should perform RP Initiated Logout and not redirect to the app if postLogoutUrl is not provided", async ({
+    app,
+    page,
+    clientAccessControl,
+    auth,
+  }) => {
+    // Get the openId configuration
+    const config = await fetch(
+      new URL(".well-known/openid-configuration", env.idp)
+    );
+    const configuration = await config.json();
+
+    await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
+    // Type the Client ID before logging in, so that it is used during logging.
+    await app.page.fill(
+      "[data-testid=clientIdentifierInput]",
+      clientAccessControl.clientId
+    );
+
+    await auth.login({ allow: true });
+
+    expect(await app.isLoginSignalReceived()).toBe(true);
+    expect(await app.getExpirationDate()).toBeGreaterThan(Date.now());
+
+    await Promise.all([
+      // Make sure the end session endpoint is requested at some point
+      page.waitForRequest(configuration.end_session_endpoint),
+      page.click(`[data-testid=rpLogoutButton]`),
+    ]);
+
+    await new Promise((res) => {
+      setTimeout(res, 5_000);
+    });
+
+    // We should remain on the same origin as the end_session_endpoint if we do not provide
+    // a URL to take us back to the original webpage
+    expect(new URL(page.url()).origin).toEqual(
+      new URL(configuration.end_session_endpoint).origin
+    );
   });
 });

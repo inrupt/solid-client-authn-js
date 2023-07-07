@@ -556,7 +556,7 @@ describe("AuthCodeRedirectHandler", () => {
         mockRedirectUrl()
       );
 
-      expect(sessionInfo.expirationDate).toBeNull();
+      expect(sessionInfo.expirationDate).toBeUndefined();
     });
 
     it("clears the oidc-client specific session information", async () => {

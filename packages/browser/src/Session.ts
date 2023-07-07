@@ -28,6 +28,7 @@ import type {
   IStorage,
   IHasSessionEventListener,
   ISessionEventListener,
+  ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
 import { EVENTS, buildProxyHandler } from "@inrupt/solid-client-authn-core";
 import type { fetch } from "@inrupt/universal-fetch";
@@ -251,9 +252,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    * @param url The URL from which data should be fetched.
    * @param init Optional parameters customizing the request, by specifying an HTTP method, headers, a body, etc. Follows the [WHATWG Fetch Standard](https://fetch.spec.whatwg.org/).
    */
-  fetch: typeof fetch = async (url, init) => {
-    return this.clientAuthentication.fetch(url, init);
-  };
+  fetch: typeof fetch = (url, init) =>
+    this.clientAuthentication.fetch(url, init);
 
   /**
    * An internal logout function, to control whether or not the logout signal
@@ -262,12 +262,15 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    *
    * @hidden
    */
-  private internalLogout = async (emitSignal: boolean): Promise<void> => {
+  private internalLogout = async (
+    emitSignal: boolean,
+    options?: ILogoutOptions
+  ): Promise<void> => {
     // Clearing this value means that silent refresh will no longer be attempted.
     // In particular, in the case of a silent authentication error it prevents
     // from getting stuck in an authentication retries loop.
     window.localStorage.removeItem(KEY_CURRENT_SESSION);
-    await this.clientAuthentication.logout(this.info.sessionId);
+    await this.clientAuthentication.logout(this.info.sessionId, options);
     this.info.isLoggedIn = false;
     if (emitSignal) {
       (this.events as EventEmitter).emit(EVENTS.LOGOUT);
@@ -277,7 +280,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   /**
    * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
    */
-  logout = async (): Promise<void> => this.internalLogout(true);
+  logout = async (options?: ILogoutOptions): Promise<void> =>
+    this.internalLogout(true, options);
 
   /**
    * Completes the login process by processing the information provided by the

@@ -26,8 +26,42 @@
 
 import type IHandleable from "../util/handlerPattern/IHandleable";
 
+export interface IRpLogoutOptions {
+  /**
+   * Log out with through from the RP.
+   */
+  logoutType: "idp";
+  /**
+   * The URL to redirect back to when RP initiated logout is completed.
+   */
+  postLogoutUrl?: string | undefined;
+  /**
+   * The value that should be provided in the `state` query parameter when redirecting
+   * back to the postLogoutUrl.
+   *
+   * Note: This parameter should only be provided when a postLogoutUrl is provided. If
+   * this value is provided then you should clear it from the URL when redirected back
+   * to the postLogoutUrl.
+   */
+  state?: string | undefined;
+}
+
+export interface IAppLogoutOptions {
+  /**
+   * Logout within the application only.
+   */
+  logoutType: "app";
+  postLogoutUrl?: undefined;
+  state?: undefined;
+}
+
+export type ILogoutOptions = IRpLogoutOptions | IAppLogoutOptions;
+
 /**
  * @hidden
  */
-type ILogoutHandler = IHandleable<[string], void>;
+type ILogoutHandler = IHandleable<
+  [string] | [string, ILogoutOptions | undefined],
+  void
+>;
 export default ILogoutHandler;
