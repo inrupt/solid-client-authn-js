@@ -220,6 +220,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         idTokenHint: tokenSet.id_token,
         endSessionEndpoint: oidcContext.issuerConfig.endSessionEndpoint,
       }),
-    });
+    } as IncomingRedirectResult);
   }
 }

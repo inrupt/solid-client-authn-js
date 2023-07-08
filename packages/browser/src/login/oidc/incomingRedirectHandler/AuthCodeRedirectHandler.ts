@@ -185,7 +185,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
     return Object.assign(sessionInfo, {
       fetch: authFetch,
-      logout: maybeBuildRpInitiatedLogout({
+      getLogoutUrl: maybeBuildRpInitiatedLogout({
         idTokenHint: tokens.idToken,
         endSessionEndpoint: issuerConfig.endSessionEndpoint,
       }),
@@ -193,6 +193,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         typeof tokens.expiresIn === "number"
           ? tokenCreatedAt + tokens.expiresIn * 1000
           : undefined,
-    });
+    } as IncomingRedirectResult);
   }
 }
