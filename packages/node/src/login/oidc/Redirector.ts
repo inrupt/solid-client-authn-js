@@ -34,6 +34,7 @@ import type {
  */
 export default class Redirector implements IRedirector {
   redirect(redirectUrl: string, options?: IRedirectorOptions): void {
+    console.log('redirect called for node', redirectUrl, options)
     if (options && options.handleRedirect) {
       options.handleRedirect(redirectUrl);
     } else {
