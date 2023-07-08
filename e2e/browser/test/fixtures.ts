@@ -241,6 +241,65 @@ const createClientResource = async (
 const clientApplicationUrl =
   process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001/";
 
+export async function seedPod(setupEnvironment: TestingEnvironmentNode) {
+  if (
+    setupEnvironment.clientCredentials.owner.type !== "ESS Client Credentials"
+  ) {
+    throw new Error("Unsupported client credentials");
+  }
+
+  const credentials = {
+    oidcIssuer: setupEnvironment.idp,
+    clientId: setupEnvironment.clientCredentials.owner.id,
+    clientSecret: setupEnvironment.clientCredentials.owner.secret,
+  };
+
+  // Make the Client ID document publicly available.
+  const session = new Session();
+  session.events.on("sessionExpired", async () => {
+    await session.login(credentials);
+  });
+
+  try {
+    await session.login(credentials);
+  } catch (err) {
+    throw new Error(`Failed to login: ${(err as Error).message}`);
+  }
+
+  if (typeof session.info.webId !== "string") {
+    throw new Error("The provided session isn't logged in.");
+  }
+  const parentContainers = await getPodUrlAll(session.info.webId);
+  if (parentContainers.length === 0) {
+    throw new Error(`Couldn't find storage for ${session.info.webId}`);
+  }
+  const [podRoot] = parentContainers;
+
+  const clientId = await createClientIdDoc(
+    {
+      clientName: "Browser test app",
+      redirectUrl: new URL(`http://localhost:${PLAYWRIGHT_PORT}`).href,
+    },
+    podRoot,
+    session
+  );
+  const clientResourceContent =
+    "Access to this file is restricted to a specific client.";
+  const clientResourceUrl = await createClientResource(
+    podRoot,
+    clientResourceContent,
+    clientId,
+    session
+  );
+
+  return {
+    clientId,
+    clientResourceContent,
+    clientResourceUrl,
+    session,
+  };
+}
+
 // Extend basic test by providing a "defaultItem" option and a "todoPage" fixture.
 export const test = base.extend<Fixtures>({
   app: async ({ page }, use) => {
@@ -281,6 +340,12 @@ export const test = base.extend<Fixtures>({
     const session = new Session();
 
     try {
+      if (
+        setupEnvironment.clientCredentials.owner.type !==
+        "ESS Client Credentials"
+      ) {
+        throw new Error("Unsupported client credentials");
+      }
       await session.login({
         oidcIssuer: setupEnvironment.idp,
         clientId: setupEnvironment.clientCredentials.owner.id,
@@ -386,52 +451,8 @@ export const test = base.extend<Fixtures>({
   },
 
   clientAccessControl: async ({ setupEnvironment }, use) => {
-    // Make the Client ID document publicly available.
-    const session = new Session();
-    session.events.on("sessionExpired", async () => {
-      await session.login({
-        oidcIssuer: setupEnvironment.idp,
-        clientId: setupEnvironment.clientCredentials.owner.id,
-        clientSecret: setupEnvironment.clientCredentials.owner.secret,
-      });
-    });
-
-    try {
-      await session.login({
-        oidcIssuer: setupEnvironment.idp,
-        clientId: setupEnvironment.clientCredentials.owner.id,
-        clientSecret: setupEnvironment.clientCredentials.owner.secret,
-      });
-    } catch (err) {
-      throw new Error(`Failed to login: ${(err as Error).message}`);
-    }
-
-    if (typeof session.info.webId !== "string") {
-      throw new Error("The provided session isn't logged in.");
-    }
-    const parentContainers = await getPodUrlAll(session.info.webId);
-    if (parentContainers.length === 0) {
-      throw new Error(`Couldn't find storage for ${session.info.webId}`);
-    }
-    const [podRoot] = parentContainers;
-
-    const clientId = await createClientIdDoc(
-      {
-        clientName: "Browser test app",
-        redirectUrl: new URL(`http://localhost:${PLAYWRIGHT_PORT}`).href,
-      },
-      podRoot,
-      session
-    );
-    const clientResourceContent =
-      "Access to this file is restricted to a specific client.";
-    const clientResourceUrl = await createClientResource(
-      podRoot,
-      clientResourceContent,
-      clientId,
-      session
-    );
-
+    const { session, clientId, clientResourceUrl, clientResourceContent } =
+      await seedPod(setupEnvironment);
     // The code before the call to use is the setup, and after is the teardown.
     // This is the value the Fixture will be using.
     await use({ clientId, clientResourceUrl, clientResourceContent });

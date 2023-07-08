@@ -30,7 +30,7 @@
 import type { IStorage } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
-  GeneralLogoutHandler,
+  IWaterfallLogoutHandler,
 } from "@inrupt/solid-client-authn-core";
 import StorageUtilityBrowser from "./storage/StorageUtility";
 import ClientAuthentication from "./ClientAuthentication";
@@ -76,10 +76,12 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     clientRegistrar
   );
 
+  const redirector = new Redirector();
+
   // make new handler for redirect and login
   const loginHandler = new OidcLoginHandler(
     storageUtility,
-    new AuthorizationCodeWithPkceOidcHandler(storageUtility, new Redirector()),
+    new AuthorizationCodeWithPkceOidcHandler(storageUtility, redirector),
     issuerConfigFetcher,
     clientRegistrar
   );
@@ -101,7 +103,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   return new ClientAuthentication(
     loginHandler,
     redirectHandler,
-    new GeneralLogoutHandler(sessionInfoManager),
+    new IWaterfallLogoutHandler(sessionInfoManager, redirector),
     sessionInfoManager,
     issuerConfigFetcher
   );

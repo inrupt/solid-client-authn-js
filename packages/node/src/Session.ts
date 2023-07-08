@@ -244,10 +244,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     emitEvent: boolean,
     options?: ILogoutOptions
   ): Promise<void> => {
-    if (options?.logoutType === "idp") {
-      throw new Error("Cannot perform IDP logout from NodeJS");
-    }
-
     await this.clientAuthentication.logout(this.info.sessionId, options);
     // Clears the timeouts on logout so that Node does not hang.
     clearTimeout(this.lastTimeoutHandle);

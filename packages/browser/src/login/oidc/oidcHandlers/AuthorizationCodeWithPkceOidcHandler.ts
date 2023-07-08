@@ -30,11 +30,12 @@
 import type {
   IOidcHandler,
   IOidcOptions,
-  IRedirector,
-  IStorageUtility,
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
-import { DEFAULT_SCOPES } from "@inrupt/solid-client-authn-core";
+import {
+  DEFAULT_SCOPES,
+  AuthorizationCodeWithPkceOidcHandlerBase,
+} from "@inrupt/solid-client-authn-core";
 import { OidcClient } from "@inrupt/oidc-client-ext";
 
 /**
@@ -43,22 +44,9 @@ import { OidcClient } from "@inrupt/oidc-client-ext";
  * PKCE: https://tools.ietf.org/html/rfc7636
  */
 export default class AuthorizationCodeWithPkceOidcHandler
+  extends AuthorizationCodeWithPkceOidcHandlerBase
   implements IOidcHandler
 {
-  constructor(
-    private storageUtility: IStorageUtility,
-    private redirector: IRedirector
-  ) {}
-
-  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
-    return !!(
-      oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
-      oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
-        "authorization_code"
-      ) > -1
-    );
-  }
-
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     /* eslint-disable camelcase */
     const oidcOptions = {
@@ -81,42 +69,16 @@ export default class AuthorizationCodeWithPkceOidcHandler
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
 
-    const { redirector } = this;
-    const storage = this.storageUtility;
-
     try {
       const signingRequest = await oidcClientLibrary.createSigninRequest();
-      await Promise.all([
-        // We use the OAuth 'state' value (which should be crypto-random) as
-        // the key in our storage to store our actual SessionID. We do this
-        // 'cos we'll need to lookup our session information again when the
-        // browser is redirected back to us (i.e. the OAuth client
-        // application) from the Authorization Server.
-        // We don't want to use our session ID as the OAuth 'state' value, as
-        // that session ID can be any developer-specified value, and therefore
-        // may not be appropriate (since the OAuth 'state' value should really
-        // be an unguessable crypto-random value).
+      // Make sure to await the promise before returning so that the error is caught.
+      return await this.handleRedirect({
+        oidcLoginOptions,
         // eslint-disable-next-line no-underscore-dangle
-        storage.setForUser(signingRequest.state._id, {
-          sessionId: oidcLoginOptions.sessionId,
-        }),
-
-        // Store our login-process state using the session ID as the key.
-        // Strictly speaking, this indirection from our OAuth state value to
-        // our session ID is unnecessary, but it provides a slightly cleaner
-        // separation of concerns.
-        storage.setForUser(oidcLoginOptions.sessionId, {
-          // eslint-disable-next-line no-underscore-dangle
-          codeVerifier: signingRequest.state._code_verifier,
-          issuer: oidcLoginOptions.issuer.toString(),
-          // The redirect URL is read after redirect, so it must be stored now.
-          redirectUrl: oidcLoginOptions.redirectUrl,
-          dpop: oidcLoginOptions.dpop ? "true" : "false",
-        }),
-      ]);
-
-      redirector.redirect(signingRequest.url.toString(), {
-        handleRedirect: oidcLoginOptions.handleRedirect,
+        state: signingRequest.state._id,
+        // eslint-disable-next-line no-underscore-dangle
+        codeVerifier: signingRequest.state._code_verifier,
+        targetUrl: signingRequest.url.toString(),
       });
     } catch (err: unknown) {
       // eslint-disable-next-line no-console

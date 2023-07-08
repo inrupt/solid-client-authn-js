@@ -30,12 +30,16 @@ import {
 } from "@jest/globals";
 import { custom } from "openid-client";
 import {
+  getBrowserTestingEnvironment,
   getNodeTestingEnvironment,
   getPodRoot,
 } from "@inrupt/internal-test-env";
+import { CognitoPage, OpenIdPage } from "@inrupt/internal-playwright-helpers";
+import { firefox } from "@playwright/test";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
 import { Session, EVENTS } from "../../packages/node/src/index";
+import { seedPod } from "../browser/test/fixtures";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -47,6 +51,7 @@ if (process.env.CI === "true") {
 }
 
 const ENV = getNodeTestingEnvironment();
+const BROWSER_ENV = getBrowserTestingEnvironment();
 const { owner } = ENV.clientCredentials;
 const CSS = owner.type === "CSS Client Credentials";
 
@@ -63,6 +68,84 @@ function getCredentials() {
     oidcIssuer: ENV.idp,
   };
 }
+
+describe("handleIncomingRedirect", () => {
+  it("Should be able to login", async () => {
+    const session = new Session();
+    const { clientId, clientResourceUrl } = await seedPod(ENV);
+
+    const redirectUrl = await new Promise<string>((res) => {
+      (async () => {
+        const browser = await firefox.launch();
+        const page = await browser.newPage();
+
+        await session.login({
+          oidcIssuer: ENV.idp,
+          redirectUrl: "http://localhost:3001/",
+          async handleRedirect(url) {
+            await page.goto(url);
+            const cognitoPage = new CognitoPage(page);
+            await cognitoPage.login(
+              BROWSER_ENV.clientCredentials.owner.login,
+              BROWSER_ENV.clientCredentials.owner.password
+            );
+            const openidPage = new OpenIdPage(page);
+            try {
+              await openidPage.allow();
+            } catch (e) {
+              // Ignore allow error for now
+            }
+          },
+          clientId,
+        });
+
+        page.on("request", async (pg) => {
+          if (pg.url().startsWith("http://localhost:3001/")) {
+            await browser.close();
+            res(pg.url());
+          }
+        });
+      })().catch(console.error);
+    });
+
+    await session.handleIncomingRedirect(redirectUrl);
+
+    const res = await session.fetch(clientResourceUrl);
+    expect(res.status).toBe(200);
+
+    let resolveFunc: () => void;
+    const promise = new Promise<void>((resolve) => {
+      resolveFunc = resolve;
+    });
+
+    await session.logout({
+      logoutType: "idp",
+      async handleRedirect(url) {
+        const browser = await firefox.launch();
+        const page = await browser.newPage();
+        page.on("request", async (pg) => {
+          if (pg.url() === "http://localhost:3001/postLogoutUrl") {
+            await browser.close();
+            resolveFunc();
+          }
+        });
+        try {
+          await page.goto(url);
+        } catch (e) {
+          // Suppress this goto error; it occurs because we redirect to http://localhost:3001/postLogoutUrl
+          // which is not served
+        }
+      },
+      postLogoutUrl: "http://localhost:3001/postLogoutUrl",
+    });
+
+    const res2 = await session.fetch(clientResourceUrl);
+    expect(res2.status).toBe(401);
+
+    // This ensures that the browser redirects to http://localhost:3001/postLogoutUrl
+    await expect(promise).resolves.toBeUndefined();
+  }, 120_000);
+});
 
 (CSS ? describe.skip : describe)(
   `End-to-end authentication tests for environment [${ENV.environment}}]`,

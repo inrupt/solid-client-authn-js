@@ -24,32 +24,20 @@
  * @packageDocumentation
  */
 
-import { isValidRedirectUrl } from "@inrupt/solid-client-authn-core";
+import {
+  isValidRedirectUrl,
+  ClientAuthentication as ClientAuthenticationBase,
+} from "@inrupt/solid-client-authn-core";
 import type {
   ILoginInputOptions,
-  ILoginHandler,
-  ILogoutHandler,
-  IIncomingRedirectHandler,
   ISessionInfo,
-  ISessionInternalInfo,
-  ISessionInfoManager,
-  ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line no-shadow
-import { fetch } from "@inrupt/universal-fetch";
 import type { EventEmitter } from "events";
 
 /**
  * @hidden
  */
-export default class ClientAuthentication {
-  constructor(
-    private loginHandler: ILoginHandler,
-    private redirectHandler: IIncomingRedirectHandler,
-    private logoutHandler: ILogoutHandler,
-    private sessionInfoManager: ISessionInfoManager
-  ) {}
-
+export default class ClientAuthentication extends ClientAuthenticationBase {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (
@@ -91,24 +79,6 @@ export default class ClientAuthentication {
     return undefined;
   };
 
-  // By default, our fetch() resolves to the environment fetch() function.
-  fetch = fetch;
-
-  logout = async (sessionId: string, _?: ILogoutOptions): Promise<void> => {
-    await this.logoutHandler.handle(sessionId);
-
-    // Restore our fetch() function back to the environment fetch(), effectively
-    // leaving us with un-authenticated fetches from now on.
-    this.fetch = fetch;
-  };
-
-  getSessionInfo = async (
-    sessionId: string
-  ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> => {
-    // TODO complete
-    return this.sessionInfoManager.get(sessionId);
-  };
-
   getSessionIdAll = async (): Promise<string[]> => {
     return this.sessionInfoManager.getRegisteredSessionIdAll();
   };
@@ -121,10 +91,6 @@ export default class ClientAuthentication {
     return this.sessionInfoManager.clearAll();
   };
 
-  getAllSessionInfo = async (): Promise<ISessionInfo[]> => {
-    return this.sessionInfoManager.getAll();
-  };
-
   handleIncomingRedirect = async (
     url: string,
     eventEmitter: EventEmitter
@@ -132,6 +98,7 @@ export default class ClientAuthentication {
     const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
 
     this.fetch = redirectInfo.fetch;
+    this.boundLogout = redirectInfo.getLogoutUrl;
 
     return {
       isLoggedIn: redirectInfo.isLoggedIn,

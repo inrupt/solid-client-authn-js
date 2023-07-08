@@ -29,12 +29,12 @@ import type {
   IClientRegistrar,
   IIssuerConfigFetcher,
   IIncomingRedirectHandler,
-  ISessionInfo,
   ISessionInfoManager,
   IStorageUtility,
   KeyPair,
   RefreshOptions,
   ITokenRefresher,
+  IncomingRedirectResult,
 } from "@inrupt/solid-client-authn-core";
 import {
   loadOidcContextFromStorage,
@@ -44,6 +44,7 @@ import {
   generateDpopKeyPair,
   buildAuthenticatedFetch,
   EVENTS,
+  maybeBuildRpInitiatedLogout,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
@@ -84,7 +85,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   async handle(
     inputRedirectUrl: string,
     eventEmitter?: EventEmitter
-  ): Promise<ISessionInfo & { fetch: typeof globalFetch }> {
+  ): Promise<IncomingRedirectResult> {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
         `AuthCodeRedirectHandler cannot handle [${inputRedirectUrl}]: it is missing one of [code, state].`
@@ -215,6 +216,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         typeof tokenSet.expires_in === "number"
           ? (tokenSet.expires_in as number) * 1000 + Date.now()
           : undefined,
-    });
+      getLogoutUrl: maybeBuildRpInitiatedLogout({
+        idTokenHint: tokenSet.id_token,
+        endSessionEndpoint: oidcContext.issuerConfig.endSessionEndpoint,
+      }),
+    } as IncomingRedirectResult);
   }
 }
