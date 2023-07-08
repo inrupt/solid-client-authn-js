@@ -98,6 +98,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
 
     this.fetch = redirectInfo.fetch;
+    this.boundLogout = redirectInfo.getLogoutUrl;
 
     return {
       isLoggedIn: redirectInfo.isLoggedIn,
