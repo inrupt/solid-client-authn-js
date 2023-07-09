@@ -242,13 +242,15 @@ const clientApplicationUrl =
   process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001/";
 
 export interface ISeedPodResponse {
-    clientId: string;
-    clientResourceContent: string;
-    clientResourceUrl: string;
-    session: Session;
+  clientId: string;
+  clientResourceContent: string;
+  clientResourceUrl: string;
+  session: Session;
 }
 
-export async function seedPod(setupEnvironment: TestingEnvironmentNode): Promise<ISeedPodResponse> {
+export async function seedPod(
+  setupEnvironment: TestingEnvironmentNode
+): Promise<ISeedPodResponse> {
   if (
     setupEnvironment.clientCredentials.owner.type !== "ESS Client Credentials"
   ) {
@@ -307,7 +309,11 @@ export async function seedPod(setupEnvironment: TestingEnvironmentNode): Promise
   };
 }
 
-export async function tearDownPod({ clientId, session, clientResourceUrl }: ISeedPodResponse) {
+export async function tearDownPod({
+  clientId,
+  session,
+  clientResourceUrl,
+}: ISeedPodResponse) {
   // Teardown
   await deleteFile(clientId, {
     fetch: session.fetch,
@@ -477,6 +483,11 @@ export const test = base.extend<Fixtures>({
     // This is the value the Fixture will be using.
     await use({ clientId, clientResourceUrl, clientResourceContent });
 
-    await tearDownPod({ session, clientId, clientResourceUrl, clientResourceContent });
+    await tearDownPod({
+      session,
+      clientId,
+      clientResourceUrl,
+      clientResourceContent,
+    });
   },
 });
