@@ -23,7 +23,6 @@
  * @hidden
  * @packageDocumentation
  */
-
 import type IHandleable from "../util/handlerPattern/IHandleable";
 
 export interface IRpLogoutOptions {
@@ -51,13 +50,6 @@ export interface IRpLogoutOptions {
   handleRedirect?: ((redirectUrl: string) => void) | undefined;
 }
 
-// export interface IRpLogoutHandlerOptions extends IRpLogoutOptions {
-//   /**
-//    * Generate url from IRpLogoutOptions
-//    */
-//   toLogoutUrl?: ({ state, postLogoutUrl }: IRpLogoutOptions) => string;
-// }
-
 export interface IAppLogoutOptions {
   /**
    * Logout within the application only.
@@ -75,7 +67,6 @@ export type ILogoutHandlerOptions = ILogoutOptions & {
    */
   toLogoutUrl?: ({ state, postLogoutUrl }: IRpLogoutOptions) => string;
 };
-// export type ILogoutHandlerOptions = IRpLogoutHandlerOptions | IAppLogoutOptions;
 
 /**
  * @hidden
