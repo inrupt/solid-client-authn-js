@@ -39,7 +39,8 @@ import type { Request } from "@playwright/test";
 import { firefox } from "@playwright/test";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
-import { Session, EVENTS } from "../../packages/node/src/index";
+import type { ILogoutOptions } from "core";
+import { Session, EVENTS } from "@inrupt/solid-client-authn-node/src/index";
 import type { ISeedPodResponse } from "../browser/test/fixtures";
 import { seedPod, tearDownPod } from "../browser/test/fixtures";
 
@@ -86,7 +87,18 @@ describe("handleIncomingRedirect", () => {
     await tearDownPod(seedInfo);
   }, 30_000);
 
-  it("Should be able to login", async () => {
+  it("Should reject trying to perform RP initiated logout after login", async () => {
+    const session = new Session();
+
+    const logoutParams: ILogoutOptions = {
+      logoutType: "idp",
+    };
+
+    // FIXME Check the error message
+    await expect(session.login(logoutParams)).rejects.toThrow();
+  });
+
+  it("Should be able to login and out using oidc", async () => {
     const session = new Session();
 
     let rpLogoutUrl: string | undefined;
@@ -138,7 +150,7 @@ describe("handleIncomingRedirect", () => {
       resolveFunc = resolve;
     });
 
-    await session.logout({
+    const logoutParams: ILogoutOptions = {
       logoutType: "idp",
       async handleRedirect(url) {
         rpLogoutUrl = url;
@@ -147,7 +159,6 @@ describe("handleIncomingRedirect", () => {
 
         const requestListener2 = async (pg: Request) => {
           const responseUrl = pg.url();
-          console.log("responseUrl", responseUrl);
           if (pg.url().startsWith("http://localhost:3001/postLogoutUrl")) {
             page.off("request", requestListener2);
             await browser.close();
@@ -163,7 +174,9 @@ describe("handleIncomingRedirect", () => {
         }
       },
       postLogoutUrl: "http://localhost:3001/postLogoutUrl",
-    });
+    };
+
+    await session.logout(logoutParams);
 
     const res2 = await session.fetch(clientResourceUrl);
     expect(res2.status).toBe(401);
@@ -172,6 +185,8 @@ describe("handleIncomingRedirect", () => {
     await expect(finalRedirectUrl).resolves.toBe(
       "http://localhost:3001/postLogoutUrl"
     );
+
+    await expect(session.login(logoutParams)).rejects.toThrow();
 
     // Testing to make sure RP Initiated Logout occurred with an id_token_hint
     expect(
