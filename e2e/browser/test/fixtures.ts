@@ -241,7 +241,14 @@ const createClientResource = async (
 const clientApplicationUrl =
   process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001/";
 
-export async function seedPod(setupEnvironment: TestingEnvironmentNode) {
+export interface ISeedPodResponse {
+    clientId: string;
+    clientResourceContent: string;
+    clientResourceUrl: string;
+    session: Session;
+}
+
+export async function seedPod(setupEnvironment: TestingEnvironmentNode): Promise<ISeedPodResponse> {
   if (
     setupEnvironment.clientCredentials.owner.type !== "ESS Client Credentials"
   ) {
@@ -298,6 +305,19 @@ export async function seedPod(setupEnvironment: TestingEnvironmentNode) {
     clientResourceUrl,
     session,
   };
+}
+
+export async function tearDownPod({ clientId, session, clientResourceUrl }: ISeedPodResponse) {
+  // Teardown
+  await deleteFile(clientId, {
+    fetch: session.fetch,
+  });
+
+  await deleteFile(clientResourceUrl, {
+    fetch: session.fetch,
+  });
+
+  await session.logout();
 }
 
 // Extend basic test by providing a "defaultItem" option and a "todoPage" fixture.
@@ -457,15 +477,6 @@ export const test = base.extend<Fixtures>({
     // This is the value the Fixture will be using.
     await use({ clientId, clientResourceUrl, clientResourceContent });
 
-    // Teardown
-    await deleteFile(clientId, {
-      fetch: session.fetch,
-    });
-
-    await deleteFile(clientResourceUrl, {
-      fetch: session.fetch,
-    });
-
-    await session.logout();
+    await tearDownPod({ session, clientId, clientResourceUrl, clientResourceContent });
   },
 });

@@ -35,11 +35,11 @@ import {
   getPodRoot,
 } from "@inrupt/internal-test-env";
 import { CognitoPage, OpenIdPage } from "@inrupt/internal-playwright-helpers";
-import { firefox } from "@playwright/test";
+import { firefox, Request } from "@playwright/test";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
 import { Session, EVENTS } from "../../packages/node/src/index";
-import { seedPod } from "../browser/test/fixtures";
+import { ISeedPodResponse, seedPod, tearDownPod } from "../browser/test/fixtures";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -70,13 +70,28 @@ function getCredentials() {
 }
 
 describe("handleIncomingRedirect", () => {
+  let seedInfo: ISeedPodResponse;
+  let clientId: string;
+  let clientResourceUrl: string;
+
+  beforeAll(async () => {
+    seedInfo = await seedPod(ENV);
+    clientId = seedInfo.clientId;
+    clientResourceUrl = seedInfo.clientResourceUrl;
+  }, 30_000);
+
+  afterAll(async () => {
+    await tearDownPod(seedInfo);
+  }, 30_000);
+
   it("Should be able to login", async () => {
     const session = new Session();
-    const { clientId, clientResourceUrl } = await seedPod(ENV);
+
+    let rpLogoutUrl: string | undefined;
 
     const redirectUrl = await new Promise<string>((res) => {
       (async () => {
-        const browser = await firefox.launch();
+        const browser = await firefox.launch({ headless: false });
         const page = await browser.newPage();
 
         await session.login({
@@ -99,12 +114,15 @@ describe("handleIncomingRedirect", () => {
           clientId,
         });
 
-        page.on("request", async (pg) => {
+        const requestListener =  async (pg: Request) => {
           if (pg.url().startsWith("http://localhost:3001/")) {
+            page.off("request", requestListener)
             await browser.close();
             res(pg.url());
           }
-        });
+        }
+
+        page.on("request", requestListener);
       })().catch(console.error);
     });
 
@@ -113,22 +131,28 @@ describe("handleIncomingRedirect", () => {
     const res = await session.fetch(clientResourceUrl);
     expect(res.status).toBe(200);
 
-    let resolveFunc: () => void;
-    const promise = new Promise<void>((resolve) => {
+    let resolveFunc: (str: string) => void;
+    const finalRedirectUrl = new Promise<string>((resolve) => {
       resolveFunc = resolve;
     });
 
     await session.logout({
       logoutType: "idp",
       async handleRedirect(url) {
-        const browser = await firefox.launch();
+        rpLogoutUrl = url;
+        const browser = await firefox.launch({ headless: false });
         const page = await browser.newPage();
-        page.on("request", async (pg) => {
-          if (pg.url() === "http://localhost:3001/postLogoutUrl") {
+
+        const requestListener2 = async (pg: Request) => {
+          const responseUrl = pg.url();
+          console.log('responseUrl', responseUrl)
+          if (pg.url().startsWith("http://localhost:3001/postLogoutUrl")) {
+            page.off("request", requestListener2);
             await browser.close();
-            resolveFunc();
+            resolveFunc(responseUrl);
           }
-        });
+        }
+        page.on("request", requestListener2);
         try {
           await page.goto(url);
         } catch (e) {
@@ -143,7 +167,11 @@ describe("handleIncomingRedirect", () => {
     expect(res2.status).toBe(401);
 
     // This ensures that the browser redirects to http://localhost:3001/postLogoutUrl
-    await expect(promise).resolves.toBeUndefined();
+    await expect(finalRedirectUrl).resolves.toEqual("http://localhost:3001/postLogoutUrl");
+
+    // Testing to make sure RP Initiated Logout occurred with an id_token_hint 
+    expect(rpLogoutUrl && new URL(rpLogoutUrl).searchParams.get('id_token_hint')?.length).toBeGreaterThan(1);
+    await session.logout();
   }, 120_000);
 });
 
