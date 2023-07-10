@@ -6,7 +6,6 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
   },
   "repository": {
     "type": "git",
