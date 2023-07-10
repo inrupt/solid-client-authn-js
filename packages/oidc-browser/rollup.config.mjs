@@ -4,10 +4,9 @@
 // Until we only support Node 18+, this should be used instead
 // (see https://rollupjs.org/guide/en/#importing-packagejson) 
 import { createRequire } from 'node:module';
+import { createSharedConfig } from '../../rollup.common.mjs';
 const require = createRequire(import.meta.url);
 const pkg = require('./package.json');
-
-import typescript from "rollup-plugin-typescript2";
 
 export default {
   input: "./src/index.ts",
@@ -26,18 +25,5 @@ export default {
       name: "OidcDpopClient",
     },
   ],
-  plugins: [
-    typescript({
-      // Use our own version of TypeScript, rather than the one bundled with the plugin:
-      typescript: require("typescript"),
-      tsconfigOverride: {
-        compilerOptions: {
-          module: "esnext",
-        },
-      },
-    }),
-  ],
-  // external: ['crypto'],
-  // The following option is useful because symlinks are used in monorepos
-  preserveSymlinks: true,
+  ...createSharedConfig(pkg)
 };
