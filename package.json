@@ -36,11 +36,11 @@
     "build-demo-app": "npm run build; cd packages/browser/examples/demoClientApp/; npm ci; npm run build; mkdir -p ../../../../dist/website/demo/; cp -r dist/. ../../../../dist/website/demo/"
   },
   "devDependencies": {
-    "@inrupt/eslint-config-base": "^2.0.0",
-    "@inrupt/eslint-config-lib": "^2.0.0",
-    "@inrupt/internal-playwright-helpers": "^2.0.0",
-    "@inrupt/internal-test-env": "^2.0.0",
-    "@inrupt/jest-jsdom-polyfills": "^2.0.0",
+    "@inrupt/eslint-config-base": "^2.0.4",
+    "@inrupt/eslint-config-lib": "^2.0.4",
+    "@inrupt/internal-playwright-helpers": "^2.0.4",
+    "@inrupt/internal-test-env": "^2.0.4",
+    "@inrupt/jest-jsdom-polyfills": "^2.0.4",
     "@playwright/test": "^1.31.2",
     "@rollup/plugin-commonjs": "^25.0.2",
     "@rollup/plugin-node-resolve": "^15.1.0",
