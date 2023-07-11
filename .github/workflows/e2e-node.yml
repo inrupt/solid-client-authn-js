@@ -21,7 +21,7 @@ jobs:
         environment-name: ["ESS PodSpaces"]
         experimental: [false]
         include:
-          - environment-name: "ESS Dev-Next"
+          - environment-name: "ESS Dev-2-2"
             experimental: true
             # The experimental config only needs to run in one node version
             node-version: "20.x"
