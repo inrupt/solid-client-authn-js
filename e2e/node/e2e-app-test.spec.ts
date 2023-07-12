@@ -75,7 +75,7 @@ describe("Testing against express app", () => {
   }, 30_000);
 
   it("Should be able to properly login and out with idp logout", async () => {
-    const browser = await firefox.launch({ headless: false });
+    const browser = await firefox.launch();
     const page = await browser.newPage();
     const url = new URL("http://localhost:3001/login");
     url.searchParams.append("oidcIssuer", ENV.idp);
