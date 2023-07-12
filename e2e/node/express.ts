@@ -19,8 +19,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 import log from "loglevel";
-
-// The only import we need from the Node AuthN library is the Session class.
 import express from "express";
 import { Session } from "@inrupt/solid-client-authn-node/src/index";
 
@@ -104,7 +102,6 @@ export function createApp(onStart: () => void) {
           res.redirect(url);
         },
       });
-      // return res.status(200).send('successful logout').end();
     } catch (error) {
       return res.status(400).send(`Logout processing failed: [${error}]`).end();
     }

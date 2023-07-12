@@ -50,7 +50,7 @@ if (process.env.CI === "true") {
 const ENV = getNodeTestingEnvironment();
 const BROWSER_ENV = getBrowserTestingEnvironment();
 
-describe("Interacting with server via express", () => {
+describe("Testing against express app", () => {
   let app: Server;
   let seedInfo: ISeedPodResponse;
   let clientId: string;
@@ -74,7 +74,7 @@ describe("Interacting with server via express", () => {
     });
   }, 30_000);
 
-  it("Should be able to login", async () => {
+  it("Should be able to properly login and out with idp logout", async () => {
     const browser = await firefox.launch({ headless: false });
     const page = await browser.newPage();
     const url = new URL("http://localhost:3001/login");
