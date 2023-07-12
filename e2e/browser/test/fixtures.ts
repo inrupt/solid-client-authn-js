@@ -124,7 +124,7 @@ const createClientIdDoc = async (
     "@context": ["https://www.w3.org/ns/solid/oidc-context.jsonld"],
     client_name: clientInfo.clientName,
     client_id: clientId,
-    redirect_uris: [clientInfo.redirectUrl],
+    redirect_uris: [clientInfo.redirectUrl, "http://localhost:3001/redirect"],
     // Note: No refresh token will be issued by default. If the tests last too long, this
     // should be updated so that it has the offline_access scope and supports the
     // refresh_token grant type.
