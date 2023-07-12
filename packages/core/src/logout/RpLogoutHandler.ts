@@ -48,7 +48,7 @@ export default class IRpLogoutHandler implements ILogoutHandler {
       );
     }
 
-    return this.redirector.redirect(options.toLogoutUrl(options), {
+    this.redirector.redirect(options.toLogoutUrl(options), {
       handleRedirect: options.handleRedirect,
     });
   }
