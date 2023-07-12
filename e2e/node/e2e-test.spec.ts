@@ -38,7 +38,9 @@ import { CognitoPage, OpenIdPage } from "@inrupt/internal-playwright-helpers";
 import type { Request } from "@playwright/test";
 import { firefox } from "@playwright/test";
 import type { ILogoutOptions } from "core";
-import { Session, EVENTS } from "@inrupt/solid-client-authn-node/src/index";
+// Here we want to test how the local code behaves, not the already published one.
+// eslint-disable-next-line import/no-relative-packages
+import { Session, EVENTS } from "../../packages/node/src/index";
 import type { ISeedPodResponse } from "../browser/test/fixtures";
 import { seedPod, tearDownPod } from "../browser/test/fixtures";
 

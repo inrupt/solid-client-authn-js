@@ -20,7 +20,9 @@
 //
 import log from "loglevel";
 import express from "express";
-import { Session } from "@inrupt/solid-client-authn-node/src/index";
+// Here we want to test how the local code behaves, not the already published one.
+// eslint-disable-next-line import/no-relative-packages
+import { Session } from "../../packages/node/src/index";
 
 log.setLevel("TRACE");
 
