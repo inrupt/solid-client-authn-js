@@ -21,6 +21,7 @@
 
 import { describe, expect, it, jest } from "@jest/globals";
 import LogoutHandler from "./RpLogoutHandler";
+import { maybeBuildRpInitiatedLogout } from "./endSessionUrl";
 
 describe("RpLogoutHandler", () => {
   const defaultMocks = {
@@ -142,6 +143,53 @@ describe("RpLogoutHandler", () => {
       expect(fn).toHaveBeenCalledWith("prefix-s-myFixedString", {
         handleRedirect: undefined,
       });
+    });
+
+    it("calls redirect handler with expected logout url build by maybeBuildRpInitiatedLogout", async () => {
+      const fn = jest.fn();
+      const logoutHandler = getInitialisedHandler({ redirect: fn });
+      const toLogoutUrl = maybeBuildRpInitiatedLogout({
+        endSessionEndpoint: "https://example.com/logout",
+        idTokenHint: "idTokenHint",
+      });
+
+      await expect(
+        logoutHandler.handle("session", {
+          state: "s",
+          logoutType: "idp",
+          toLogoutUrl,
+          postLogoutUrl: "https://example.org/app/logout/url",
+        })
+      ).resolves.toBeUndefined();
+      expect(fn).toHaveBeenCalledWith(
+        "https://example.com/logout?id_token_hint=idTokenHint&post_logout_redirect_uri=https%3A%2F%2Fexample.org%2Fapp%2Flogout%2Furl&state=s",
+        {
+          handleRedirect: undefined,
+        }
+      );
+    });
+
+    it("redirect url should not include state if no postLogoutUrl is provided", async () => {
+      const fn = jest.fn();
+      const logoutHandler = getInitialisedHandler({ redirect: fn });
+      const toLogoutUrl = maybeBuildRpInitiatedLogout({
+        endSessionEndpoint: "https://example.com/logout",
+        idTokenHint: "idTokenHint",
+      });
+
+      await expect(
+        logoutHandler.handle("session", {
+          logoutType: "idp",
+          toLogoutUrl,
+          state: "s",
+        })
+      ).resolves.toBeUndefined();
+      expect(fn).toHaveBeenCalledWith(
+        "https://example.com/logout?id_token_hint=idTokenHint",
+        {
+          handleRedirect: undefined,
+        }
+      );
     });
   });
 });
