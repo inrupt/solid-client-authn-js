@@ -34,8 +34,11 @@ import {
 import { firefox } from "@playwright/test";
 import { custom } from "openid-client";
 import type { Server } from "http";
-import type { ISeedPodResponse } from "../browser/test/fixtures";
-import { seedPod, tearDownPod } from "../browser/test/fixtures";
+import {
+  type ISeedPodResponse,
+  seedPod,
+  tearDownPod,
+} from "../browser/test/fixtures";
 import { createApp } from "./express";
 
 custom.setHttpOptionsDefaults({
