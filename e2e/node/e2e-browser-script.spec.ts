@@ -61,7 +61,7 @@ describe("RP initiated login/out using playwright", () => {
     await tearDownPod(seedInfo);
   }, 30_000);
 
-  it("Should reject trying to perform RP initiated logout after login", async () => {
+  it("Should reject trying to perform RP initiated logout before login", async () => {
     const session = new Session();
 
     const logoutParams: ILogoutOptions = {
@@ -69,7 +69,9 @@ describe("RP initiated login/out using playwright", () => {
     };
 
     // FIXME Check the error message
-    await expect(session.login(logoutParams)).rejects.toThrow();
+    await expect(session.logout(logoutParams)).rejects.toThrow(
+      "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+    );
   });
 
   it("Should be able to login and out using oidc", async () => {
@@ -160,7 +162,10 @@ describe("RP initiated login/out using playwright", () => {
       "http://localhost:3001/postLogoutUrl"
     );
 
-    await expect(session.login(logoutParams)).rejects.toThrow();
+    // Should error when trying to logout again with idp logout
+    await expect(session.logout(logoutParams)).rejects.toThrow(
+      "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+    );
 
     // Testing to make sure RP Initiated Logout occurred with an id_token_hint
     expect(
