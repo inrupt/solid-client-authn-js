@@ -1,7 +1,7 @@
 {
   "name": "@inrupt/demo-app-authn-node",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.17.0",
   "description": "Demo client application for authentication in NodeJS",
   "main": "src/index.js",
   "scripts": {
@@ -21,9 +21,9 @@
   },
   "homepage": "https://github.com/inrupt/solid-client-authn#readme",
   "dependencies": {
+    "@inrupt/solid-client-authn-node": "../../",
     "express": "^4.17.1",
-    "loglevel": "^1.7.0",
-    "@inrupt/solid-client-authn-node": "../../"
+    "loglevel": "^1.7.0"
   },
   "devDependencies": {
     "@inrupt/eslint-config-base": "0.0.4",
