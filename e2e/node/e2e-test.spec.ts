@@ -20,22 +20,22 @@
 //
 
 import {
-  jest,
-  it,
-  describe,
-  beforeAll,
-  afterAll,
-  beforeEach,
-  expect,
-} from "@jest/globals";
-import { custom } from "openid-client";
-import {
   getNodeTestingEnvironment,
   getPodRoot,
 } from "@inrupt/internal-test-env";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from "@jest/globals";
+import { custom } from "openid-client";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
-import { Session, EVENTS } from "../../packages/node/src/index";
+import { EVENTS, Session } from "../../packages/node/src/index";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,

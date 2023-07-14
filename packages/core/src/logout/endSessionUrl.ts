@@ -18,6 +18,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+import type { IRpLogoutOptions } from "./ILogoutHandler";
+
 export interface IEndSessionOptions {
   endSessionEndpoint: string;
   idTokenHint?: string;
@@ -51,4 +53,27 @@ export function getEndSessionUrl({
   }
 
   return url.toString();
+}
+
+/**
+ * @param options.endSessionEndpoint The end_session_endpoint advertised by the server
+ * @param options.idTokenHint The idToken supplied by the server after logging in
+ * Redirects the window to the location required to perform RP initiated logout
+ *
+ * @hidden
+ */
+export function maybeBuildRpInitiatedLogout({
+  endSessionEndpoint,
+  idTokenHint,
+}: Partial<Omit<IEndSessionOptions, keyof IRpLogoutOptions>>) {
+  if (endSessionEndpoint === undefined) return undefined;
+
+  return function logout({ state, postLogoutUrl }: IRpLogoutOptions) {
+    return getEndSessionUrl({
+      endSessionEndpoint,
+      idTokenHint,
+      state,
+      postLogoutRedirectUri: postLogoutUrl,
+    });
+  };
 }

@@ -278,7 +278,35 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   };
 
   /**
-   * Logs the user out of the application. This does not log the user out of their Solid identity provider, and should not redirect the user away.
+   * Logs the user out of the application.
+   *
+   * There are 2 types of logout supported by this library,
+   * `app` logout and `idp` logout.
+   *
+   * App logout will log the user out within the application
+   * by clearing any session data from the browser. It does
+   * not log the user out of their Solid identity provider,
+   * and should not redirect the user away.
+   * App logout can be performed as follows:
+   * ```typescript
+   * await session.logout({ logoutType: 'app' });
+   * ```
+   *
+   * IDP logout will log the user out of their Solid identity provider,
+   * and will redirect the user away from the application to do so.
+   * IDP logout can be performed as follows:
+   * ```typescript
+   * await session.logout({
+   *  logoutType: 'idp',
+   *  // An optional URL to redirect to after logout has completed;
+   *  // this MUST match a logout URL listed in the clientId of
+   *  // the application that is logged in.
+   *  postLogoutUrl: 'https://example.com/logout',
+   *  // An optional value to be included in the query parameters
+   *  // when the IDP provider redirects the user to the postLogoutRedirectUrl.
+   *  state: "my-state"
+   * });
+   * ```
    */
   logout = async (options?: ILogoutOptions): Promise<void> =>
     this.internalLogout(true, options);

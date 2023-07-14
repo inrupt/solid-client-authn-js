@@ -18,31 +18,38 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+import type ILogoutHandler from "./ILogoutHandler";
+import type { IRedirector } from "../login/oidc/IRedirector";
+import type { ILogoutHandlerOptions } from "./ILogoutHandler";
 
-/**
- * @hidden
- * @packageDocumentation
- */
+export default class IRpLogoutHandler implements ILogoutHandler {
+  constructor(protected redirector: IRedirector) {}
 
-// eslint-disable-next-line no-shadow
-import type { fetch } from "@inrupt/universal-fetch";
-import type { EventEmitter } from "events";
-import type IHandleable from "../../util/handlerPattern/IHandleable";
-import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
-import type { IRpLogoutOptions } from "../../logout/ILogoutHandler";
+  async canHandle(
+    userId: string,
+    options?: ILogoutHandlerOptions | undefined
+  ): Promise<boolean> {
+    return options?.logoutType === "idp";
+  }
 
-export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch } & {
-  getLogoutUrl?: (options: IRpLogoutOptions) => string;
-};
-export type IncomingRedirectInput = [string, EventEmitter | undefined];
+  async handle(
+    userId: string,
+    options?: ILogoutHandlerOptions | undefined
+  ): Promise<void> {
+    if (options?.logoutType !== "idp") {
+      throw new Error(
+        "Attempting to call idp logout handler to perform app logout"
+      );
+    }
 
-/**
- * @hidden
- */
-type IIncomingRedirectHandler = IHandleable<
-  // Tuple of the URL to redirect to, an optional event listener for when
-  // we receive a new refresh token, and, an optional onError function:
-  IncomingRedirectInput,
-  IncomingRedirectResult
->;
-export default IIncomingRedirectHandler;
+    if (options.toLogoutUrl === undefined) {
+      throw new Error(
+        "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+      );
+    }
+
+    this.redirector.redirect(options.toLogoutUrl(options), {
+      handleRedirect: options.handleRedirect,
+    });
+  }
+}

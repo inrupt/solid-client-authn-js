@@ -10,6 +10,8 @@ concurrency:
 jobs:
   lint:
     uses: inrupt/typescript-sdk-tools/.github/workflows/reusable-lint.yml@v2.1.0
+    with:
+      build: true
 
   test:
     runs-on: ubuntu-latest

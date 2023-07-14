@@ -74,6 +74,7 @@ export default class OidcLoginHandler implements ILoginHandler {
 
   async handle(options: ILoginOptions): Promise<LoginResult> {
     if (!hasIssuer(options)) {
+      console.log("about to stringify options", options);
       throw new ConfigurationError(
         `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(
           options

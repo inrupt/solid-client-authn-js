@@ -30,11 +30,12 @@
 import type {
   IOidcHandler,
   IOidcOptions,
-  IRedirector,
-  IStorageUtility,
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
-import { DEFAULT_SCOPES } from "@inrupt/solid-client-authn-core";
+import {
+  DEFAULT_SCOPES,
+  AuthorizationCodeWithPkceOidcHandlerBase,
+} from "@inrupt/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
@@ -44,22 +45,9 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
  * PKCE: https://tools.ietf.org/html/rfc7636
  */
 export default class AuthorizationCodeWithPkceOidcHandler
+  extends AuthorizationCodeWithPkceOidcHandlerBase
   implements IOidcHandler
 {
-  constructor(
-    private storageUtility: IStorageUtility,
-    private redirector: IRedirector
-  ) {}
-
-  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
-    return !!(
-      oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
-      oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
-        "authorization_code"
-      ) > -1
-    );
-  }
-
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     const issuer = new Issuer(
       configToIssuerMetadata(oidcLoginOptions.issuerConfiguration)
@@ -69,11 +57,10 @@ export default class AuthorizationCodeWithPkceOidcHandler
       client_secret: oidcLoginOptions.client.clientSecret,
     });
     const codeVerifier = generators.codeVerifier();
-    const codeChallenge = generators.codeChallenge(codeVerifier);
     const state = generators.state();
 
     const targetUrl = client.authorizationUrl({
-      code_challenge: codeChallenge,
+      code_challenge: generators.codeChallenge(codeVerifier),
       state,
       response_type: "code",
       redirect_uri: oidcLoginOptions.redirectUrl,
@@ -82,23 +69,11 @@ export default class AuthorizationCodeWithPkceOidcHandler
       scope: DEFAULT_SCOPES,
     });
 
-    // Stores information to be reused after reload
-    await Promise.all([
-      this.storageUtility.setForUser(state, {
-        sessionId: oidcLoginOptions.sessionId,
-      }),
-      this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-        codeVerifier,
-        issuer: oidcLoginOptions.issuer,
-        redirectUrl: oidcLoginOptions.redirectUrl,
-        dpop: oidcLoginOptions.dpop ? "true" : "false",
-      }),
-    ]);
-
-    this.redirector.redirect(targetUrl, {
-      handleRedirect: oidcLoginOptions.handleRedirect,
+    return this.handleRedirect({
+      oidcLoginOptions,
+      state,
+      codeVerifier,
+      targetUrl,
     });
-    // The login is only completed AFTER redirect, so there is nothing to return.
-    return undefined;
   }
 }
