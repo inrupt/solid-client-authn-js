@@ -68,7 +68,6 @@ describe("RP initiated login/out using playwright", () => {
       logoutType: "idp",
     };
 
-    // FIXME Check the error message
     await expect(session.logout(logoutParams)).rejects.toThrow(
       "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
     );
