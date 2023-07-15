@@ -230,6 +230,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (options: ILoginInputOptions): Promise<void> => {
+    console.log("login called on session in browser");
     await this.clientAuthentication.login(
       {
         sessionId: this.info.sessionId,
