@@ -105,7 +105,7 @@ describe("RP initiated login/out using playwright", () => {
   }, 30_000);
 
   it("Should work with solid-ui-react", async () => {
-    const browser = await firefox.launch({ headless: false });
+    const browser = await firefox.launch();
     const page = await browser.newPage();
     await page.goto("http://localhost:3000/");
 
