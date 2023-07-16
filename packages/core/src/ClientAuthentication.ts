@@ -23,7 +23,7 @@
  * @hidden
  * @packageDocumentation
  */
-import { fetch } from "@inrupt/universal-fetch";
+import { fetch as uniFetch } from "@inrupt/universal-fetch";
 import type { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
 import type { ILogoutOptions, IRpLogoutOptions } from "./logout/ILogoutHandler";
 import type ILogoutHandler from "./logout/ILogoutHandler";
@@ -38,7 +38,8 @@ import type {
 // By only referring to `window` at runtime, apps that do server-side rendering
 // won't run into errors when rendering code that instantiates a
 // ClientAuthentication:
-const globalFetch: typeof fetch = (request, init) => fetch(request, init);
+const globalFetch: typeof uniFetch = (request, init) =>
+  uniFetch.call(globalThis, request, init);
 
 /**
  * @hidden

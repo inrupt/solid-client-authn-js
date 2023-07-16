@@ -20,7 +20,7 @@
 //
 
 // eslint-disable-next-line no-shadow
-import { fetch } from "@inrupt/universal-fetch";
+import { fetch as uniFetch } from "@inrupt/universal-fetch";
 import type { JWK, JWTPayload } from "jose";
 import { jwtVerify, importJWK } from "jose";
 
@@ -35,7 +35,7 @@ export async function fetchJwks(
   // to be mocked properly by our test code. It would be nicer to replace calls to this
   // function by the following line and to fix the mocks.
   // const jwks = createRemoteJWKSet(new URL(jwksIri));
-  const jwksResponse = await fetch(jwksIri);
+  const jwksResponse = await uniFetch.call(globalThis, jwksIri);
   if (jwksResponse.status !== 200) {
     throw new Error(
       `Could not fetch JWKS for [${issuerIri}] at [${jwksIri}]: ${jwksResponse.status} ${jwksResponse.statusText}`

@@ -23,6 +23,10 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+#### Bugfixes
+
+- The `fetch` function is now bound to the window object in all uses within `authn-browser`
+
 ## [1.17.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.0) - 2023-07-14
 
 ### New Feature

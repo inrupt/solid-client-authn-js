@@ -25,7 +25,7 @@
  */
 
 import { v4 } from "uuid";
-import { fetch } from "@inrupt/universal-fetch";
+import { fetch as uniFetch } from "@inrupt/universal-fetch";
 import type {
   ISessionInfo,
   ISessionInfoManager,
@@ -35,12 +35,12 @@ import type {
 } from "..";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
-  fetch: typeof fetch;
+  fetch: typeof uniFetch;
 } {
   return {
     isLoggedIn: false,
     sessionId: v4(),
-    fetch,
+    fetch: (...args) => uniFetch.call(globalThis, ...args),
   };
 }
 

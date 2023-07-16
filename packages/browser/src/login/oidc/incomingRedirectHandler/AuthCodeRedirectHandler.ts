@@ -27,7 +27,7 @@
 // being unauthenticated. This should be looked into when migrating to universal-fetch.
 // import { fetch } from "cross-fetch";
 
-import { fetch } from "@inrupt/universal-fetch";
+import { fetch as uniFetch } from "@inrupt/universal-fetch";
 
 import type {
   IClient,
@@ -48,6 +48,9 @@ import {
 import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { getDpopToken, getBearerToken } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
+
+const globalFetch: typeof uniFetch = (...args) =>
+  uniFetch.call(globalThis, ...args);
 
 /**
  * @hidden
@@ -162,12 +165,16 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       };
     }
 
-    const authFetch = await buildAuthenticatedFetch(fetch, tokens.accessToken, {
-      dpopKey: tokens.dpopKey,
-      refreshOptions,
-      eventEmitter,
-      expiresIn: tokens.expiresIn,
-    });
+    const authFetch = await buildAuthenticatedFetch(
+      globalFetch,
+      tokens.accessToken,
+      {
+        dpopKey: tokens.dpopKey,
+        refreshOptions,
+        eventEmitter,
+        expiresIn: tokens.expiresIn,
+      }
+    );
 
     await this.storageUtility.setForUser(
       storedSessionId,
