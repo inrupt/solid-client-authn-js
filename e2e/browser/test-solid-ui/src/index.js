@@ -19,7 +19,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 import React, { useState, useEffect } from "react";
-import { getPodUrlAll } from "@inrupt/solid-client";
 import {
   SessionProvider,
   useSession,
@@ -30,23 +29,18 @@ import ReactDOM from "react-dom/client";
 function Show() {
   const { session } = useSession();
   const [data, setData] = useState(false);
-  const [authData, setAuthData] = useState(false);
+  const [resourceUrl, setResourceUrl] = useState(false);
 
   useEffect(() => {
-    session
-      .fetch("http://localhost:3000/")
-      .then((res) => res.text())
-      .then((text) => setData(text));
-  }, []);
+    if (resourceUrl) {
+      setData(false);
 
-  useEffect(() => {
-    if (session.info.webId) {
-      getPodUrlAll(session.info.webId)
-        .then(([url]) => session.fetch(url))
+      session
+        .fetch(resourceUrl)
         .then((res) => res.text())
-        .then((text) => setAuthData(text));
+        .then((text) => setData(text));
     }
-  }, [session.info.webId]);
+  }, [resourceUrl]);
 
   return (
     <div>
@@ -55,8 +49,15 @@ function Show() {
       ) : (
         "Not logged in"
       )}
+
+      <input
+        id="resourceInput"
+        value={resourceUrl}
+        onChange={(e) => {
+          setResourceUrl(e.target.value);
+        }}
+      />
       {data && <div id="data">{data}</div>}
-      {authData && <div id="authData">{authData}</div>}
     </div>
   );
 }

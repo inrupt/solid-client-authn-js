@@ -22,12 +22,17 @@ import { CognitoPage, OpenIdPage } from "@inrupt/internal-playwright-helpers";
 import {
   getBrowserTestingEnvironment,
   getNodeTestingEnvironment,
+  getPodRoot,
 } from "@inrupt/internal-test-env";
+import { deleteFile, saveFileInContainer } from "@inrupt/solid-client";
+import { Session } from "@inrupt/solid-client-authn-node";
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
-import type { Request } from "@playwright/test";
 import { firefox } from "@playwright/test";
-import type { ILogoutOptions } from "core";
+import express from "express";
+import type { Server } from "http";
 import { custom } from "openid-client";
+import path from "path";
+import { v4 } from "uuid";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -40,132 +45,101 @@ if (process.env.CI === "true") {
 
 const ENV = getNodeTestingEnvironment();
 const BROWSER_ENV = getBrowserTestingEnvironment();
+const TEXT = "SAMPLE DATA TEXT";
 
-// describe("RP initiated login/out using playwright", () => {
-//   let seedInfo: ISeedPodResponse;
-//   let clientId: string;
-//   let clientResourceUrl: string;
+describe("RP initiated login/out using playwright", () => {
+  let session: Session;
+  let clientResourceUrl: string;
+  const clientResourceContent = "This is a plain piece of text";
+  let server: Server;
+  let webId: string;
 
-//   beforeAll(async () => {
-//     seedInfo = await seedPod(ENV);
-//     clientId = seedInfo.clientId;
-//     clientResourceUrl = seedInfo.clientResourceUrl;
-//   }, 30_000);
+  beforeAll(async () => {
+    const app = express();
+    app.use(
+      express.static(path.join(__dirname, "..", "test-solid-ui", "build"))
+    );
+    app.get("/data", (_, res) => {
+      return res.send(TEXT).status(200);
+    });
+    server = app.listen(3000);
+    await new Promise((res) => {
+      server.on("listening", res);
+    });
 
-//   afterAll(async () => {
-//     await tearDownPod(seedInfo);
-//   }, 30_000);
+    if (ENV.clientCredentials.owner.type !== "ESS Client Credentials") {
+      throw new Error("Only ESS Client Credentials supported");
+    }
 
-//   it("Should reject trying to perform RP initiated logout before login", async () => {
-//     const session = new Session();
+    session = new Session();
+    await session.login({
+      oidcIssuer: ENV.idp,
+      clientId: ENV.clientCredentials.owner.id,
+      clientSecret: ENV.clientCredentials.owner.secret,
+    });
 
-//     const logoutParams: ILogoutOptions = {
-//       logoutType: "idp",
-//     };
+    const root = await getPodRoot(session);
+    const name = v4();
 
-//     await expect(session.logout(logoutParams)).rejects.toThrow(
-//       "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
-//     );
-//   });
+    await saveFileInContainer(
+      root,
+      new File([clientResourceContent], "myFile", { type: "plain/text" }),
+      { slug: name, contentType: "text/plain", fetch: session.fetch }
+    );
 
-//   it("Should be able to login and out using oidc", async () => {
-//     const session = new Session();
+    clientResourceUrl = `${root}/${name}`;
 
-//     let rpLogoutUrl: string | undefined;
+    if (session.info.webId === undefined) {
+      throw new Error("Unexpected undefined WebId");
+    }
 
-//     const redirectUrl = await new Promise<string>((res) => {
-//       (async () => {
-//         const browser = await firefox.launch();
-//         const page = await browser.newPage();
+    webId = session.info.webId;
+  }, 30_000);
 
-//         await session.login({
-//           oidcIssuer: ENV.idp,
-//           redirectUrl: "http://localhost:3001/",
-//           async handleRedirect(url) {
-//             await page.goto(url);
-//             const cognitoPage = new CognitoPage(page);
-//             await cognitoPage.login(
-//               BROWSER_ENV.clientCredentials.owner.login,
-//               BROWSER_ENV.clientCredentials.owner.password
-//             );
-//             const openidPage = new OpenIdPage(page);
-//             try {
-//               await openidPage.allow();
-//             } catch (e) {
-//               // Ignore allow error for now
-//             }
-//           },
-//           clientId,
-//         });
+  afterAll(async () => {
+    await new Promise((res) => {
+      server.close(res);
+    });
+    await deleteFile(clientResourceUrl, { fetch: session.fetch });
+    await session.logout();
+  }, 30_000);
 
-//         const requestListener = async (pg: Request) => {
-//           if (pg.url().startsWith("http://localhost:3001/")) {
-//             page.off("request", requestListener);
-//             await browser.close();
-//             res(pg.url());
-//           }
-//         };
+  it("Should work with solid-ui-react", async () => {
+    const browser = await firefox.launch({ headless: false });
+    const page = await browser.newPage();
+    await page.goto("http://localhost:3000/");
 
-//         page.on("request", requestListener);
-//       })().catch(console.error);
-//     });
+    await page.fill('input[id="resourceInput"]', "http://localhost:3000/data");
+    const attribute = await page.waitForSelector('div[id="data"]');
+    await expect(attribute.innerText()).resolves.toEqual(TEXT);
 
-//     await session.handleIncomingRedirect(redirectUrl);
+    await page.fill('input[id="issuerInput"]', BROWSER_ENV.idp);
+    await page.click("button");
 
-//     const res = await session.fetch(clientResourceUrl);
-//     expect(res.status).toBe(200);
+    // Wait for navigation outside the localhost session
+    await page.waitForURL(/^https/);
 
-//     let resolveFunc: (str: string) => void;
-//     const finalRedirectUrl = new Promise<string>((resolve) => {
-//       resolveFunc = resolve;
-//     });
+    const cognitoPage = new CognitoPage(page);
+    await cognitoPage.login(
+      BROWSER_ENV.clientCredentials.owner.login,
+      BROWSER_ENV.clientCredentials.owner.password
+    );
+    const openidPage = new OpenIdPage(page);
+    try {
+      await openidPage.allow();
+    } catch (e) {
+      // Ignore allow error for now
+    }
 
-//     const logoutParams: ILogoutOptions = {
-//       logoutType: "idp",
-//       async handleRedirect(url) {
-//         rpLogoutUrl = url;
-//         const browser = await firefox.launch();
-//         const page = await browser.newPage();
+    const webIdContent = await page.waitForSelector('div[id="webId"]');
+    await expect(webIdContent.innerText()).resolves.toEqual(webId);
 
-//         const requestListener2 = async (pg: Request) => {
-//           const responseUrl = pg.url();
-//           if (pg.url().startsWith("http://localhost:3001/postLogoutUrl")) {
-//             page.off("request", requestListener2);
-//             await browser.close();
-//             resolveFunc(responseUrl);
-//           }
-//         };
-//         page.on("request", requestListener2);
-//         try {
-//           await page.goto(url);
-//         } catch (e) {
-//           // Suppress this goto error; it occurs because we redirect to http://localhost:3001/postLogoutUrl
-//           // which is not served
-//         }
-//       },
-//       postLogoutUrl: "http://localhost:3001/postLogoutUrl",
-//     };
+    await page.fill('input[id="resourceInput"]', clientResourceUrl);
+    const authenticatedContent = await page.waitForSelector('div[id="data"]');
+    await expect(authenticatedContent.innerText()).resolves.toEqual(
+      clientResourceContent
+    );
 
-//     await session.logout(logoutParams);
-
-//     const res2 = await session.fetch(clientResourceUrl);
-//     expect(res2.status).toBe(401);
-
-//     // This ensures that the browser redirects to http://localhost:3001/postLogoutUrl
-//     await expect(finalRedirectUrl).resolves.toBe(
-//       "http://localhost:3001/postLogoutUrl"
-//     );
-
-//     // Should error when trying to logout again with idp logout
-//     await expect(session.logout(logoutParams)).rejects.toThrow(
-//       "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
-//     );
-
-//     // Testing to make sure RP Initiated Logout occurred with an id_token_hint
-//     expect(
-//       rpLogoutUrl &&
-//         new URL(rpLogoutUrl).searchParams.get("id_token_hint")?.length
-//     ).toBeGreaterThan(1);
-//     await session.logout();
-//   }, 120_000);
-// });
+    await browser.close();
+  }, 60_000);
+});

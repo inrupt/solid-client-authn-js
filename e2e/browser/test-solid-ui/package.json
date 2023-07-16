@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@inrupt/solid-client-authn-browser": "^1.17.1",
     "@inrupt/solid-ui-react": "^2.8.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -23,5 +24,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "@inrupt/solid-client-authn-browser": "$@inrupt/solid-client-authn-browser"
   }
 }
