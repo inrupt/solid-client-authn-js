@@ -2,7 +2,7 @@
   "name": "solid-ui-test",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
+  "devDependencies": {
     "@inrupt/solid-client-authn-browser": "^1.17.1",
     "@inrupt/solid-ui-react": "^2.8.2",
     "react": "^18.2.0",
