@@ -40,7 +40,7 @@
     "@inrupt/eslint-config-base": "^2.0.4",
     "@inrupt/eslint-config-lib": "^2.0.4",
     "@inrupt/internal-playwright-helpers": "^2.0.4",
-    "@inrupt/internal-test-env": "^2.0.4",
+    "@inrupt/internal-test-env": "^2.1.0",
     "@inrupt/jest-jsdom-polyfills": "^2.0.4",
     "@playwright/test": "^1.31.2",
     "@rollup/plugin-commonjs": "^25.0.2",
