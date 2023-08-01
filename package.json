@@ -42,7 +42,7 @@
     "@inrupt/internal-playwright-helpers": "^2.1.0",
     "@inrupt/internal-test-env": "^2.1.0",
     "@inrupt/jest-jsdom-polyfills": "^2.0.4",
-    "@playwright/test": "^1.31.2",
+    "@playwright/test": "^1.36.2",
     "@rollup/plugin-commonjs": "^25.0.2",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-terser": "^0.4.3",
