@@ -55,7 +55,7 @@ If you have questions about working with Solid or just want to share what you’
 
 Any of the `solid-client-authn` libraries require at least:
 
-- Node.js >= 14
+- Node.js >= 16
 - npm >= 8.7
   **Note**: We recommand using [nvm](https://github.com/nvm-sh/nvm) to manage your node version
 
