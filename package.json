@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@inrupt/eslint-config-base": "^2.0.4",
-    "@inrupt/eslint-config-lib": "^2.1.1",
+    "@inrupt/eslint-config-lib": "^2.1.2",
     "@inrupt/internal-playwright-helpers": "^2.1.0",
     "@inrupt/internal-test-env": "^2.1.0",
     "@inrupt/jest-jsdom-polyfills": "^2.0.4",
