@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@inrupt/eslint-config-base": "^2.0.4",
-    "@inrupt/eslint-config-lib": "^2.1.1",
+    "@inrupt/eslint-config-lib": "^2.1.2",
     "@inrupt/internal-playwright-helpers": "^2.1.0",
     "@inrupt/internal-test-env": "^2.1.0",
     "@inrupt/jest-jsdom-polyfills": "^2.0.4",
@@ -79,6 +79,6 @@
     "fsevents": "^2.3.2"
   },
   "engines": {
-    "node": "^14.0.0 || ^16.0.0 || ^18.0.0 || ^20.0.0"
+    "node": "^16.0.0 || ^18.0.0 || ^20.0.0"
   }
 }
