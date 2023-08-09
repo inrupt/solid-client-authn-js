@@ -114,7 +114,7 @@ export const onLogin: Session["onLogin"] = (...args) => {
  * @param callback The function called when a user completes logout.
  * @since 1.3.0
  * @deprecated Prefer events.on(EVENTS.LOGOUT, callback)
- * 
+ *
  */
 export const onLogout: Session["onLogout"] = (...args) => {
   const session = getDefaultSession();
