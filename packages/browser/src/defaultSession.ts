@@ -135,7 +135,7 @@ export const onSessionRestore: Session["onSessionRestore"] = (...args) => {
 /**
  * {@link SessionEventEmitter} instance to subscribe to events by the default session.
  *
- * @since Unreleased
+ * @since 1.14.0
  */
 export const events = (): Session["events"] => {
   return getDefaultSession().events;
