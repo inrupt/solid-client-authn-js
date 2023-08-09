@@ -257,7 +257,9 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    *  logoutType: 'idp',
    *  // An optional URL to redirect to after logout has completed;
    *  // this MUST match a logout URL listed in the clientId of
-   *  // the application that is logged in.
+   *  // the application that is logged in using static client registration.
+   *  // If the application is logged in using dynamic registration then
+   *  // Solid Servers will not redirect back to the `postLogoutUrl`.
    *  postLogoutUrl: 'https://example.com/logout',
    *  // An optional value to be included in the query parameters
    *  // when the IDP provider redirects the user to the postLogoutRedirectUrl.
