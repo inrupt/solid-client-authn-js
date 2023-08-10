@@ -31,7 +31,7 @@ export interface IRpLogoutOptions {
    */
   logoutType: "idp";
   /**
-   * An optional URL to redirect to after logout has completed;
+   * An optional URL to redirect to after idp logout has completed;
    * this MUST match a logout URL listed in the
    * [Client ID Document](https://docs.inrupt.com/ess/latest/security/authentication/#client-identifier-client-id)
    * of the application that is logged in.
