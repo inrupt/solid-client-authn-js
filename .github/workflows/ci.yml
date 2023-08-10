@@ -26,6 +26,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test
+      # Check that we can build our test apps using esbuild
+      - run: npm run test:esbuild
       # Upload coverage for sonarcube (only matching OS and one node version required)
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.node-version == '20.x' }}
