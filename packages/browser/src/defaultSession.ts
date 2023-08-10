@@ -70,7 +70,8 @@ export const login: Session["login"] = (...args) => {
  * Logs the user out of the application.
  *
  * By default this does not log the user out of their Solid identity provider.
- * In order to do so, you must set the logoutType to `idp`.
+ * In order to do so, you must set the logoutType to `idp`. For usage details
+ * see {@link Session.logout}.
  *
  * @since 1.3.0
  */
@@ -113,7 +114,7 @@ export const onLogin: Session["onLogin"] = (...args) => {
  * @param callback The function called when a user completes logout.
  * @since 1.3.0
  * @deprecated Prefer events.on(EVENTS.LOGOUT, callback)
-
+ *
  */
 export const onLogout: Session["onLogout"] = (...args) => {
   const session = getDefaultSession();
