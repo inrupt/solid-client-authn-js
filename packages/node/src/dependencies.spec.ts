@@ -23,6 +23,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import {
   mockStorage,
   GeneralLogoutHandler,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { EventEmitter } from "events";
@@ -132,8 +133,7 @@ describe("resolution order", () => {
     );
   };
 
-  // FIXME There are unresolved async operations going on here
-  it.skip("calls the refresh token handler if a refresh token is present", async () => {
+  it("calls the refresh token handler if a refresh token is present", async () => {
     const clientAuthn = mockClientAuthentication();
     const handlerSelectSpy = jest.spyOn(
       // The easiest way to test this is to look into the injected dependencies
@@ -141,6 +141,11 @@ describe("resolution order", () => {
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );
+    const mockTimeout = jest.fn();
+    // @ts-expect-error If setTimeout is called within the test
+    // then this leaves open handles in jest. Instead we mock it.
+    // setTimeout should be called once to start proactive refresh
+    globalThis.setTimeout = mockTimeout;
     await clientAuthn.login(
       "someSession",
       {
@@ -154,10 +159,10 @@ describe("resolution order", () => {
     await expect(
       handlerSelectSpy.mock.results[0].value
     ).resolves.toBeInstanceOf(RefreshTokenOidcHandler);
+    expect(mockTimeout).toHaveBeenCalledTimes(1);
   });
 
-  // FIXME There are unresolved async operations going on here
-  it.skip("calls the client credentials handler if client credentials are present, but no refresh token is provided", async () => {
+  it("calls the client credentials handler if client credentials are present, but no refresh token is provided", async () => {
     setupOidcClientMock();
     const clientAuthn = mockClientAuthentication();
     const handlerSelectSpy = jest.spyOn(
@@ -166,6 +171,12 @@ describe("resolution order", () => {
       (clientAuthn as any).loginHandler.oidcHandler,
       "getProperHandler"
     );
+    const emitter = new EventEmitter();
+    emitter.on(EVENTS.TIMEOUT_SET, (t: NodeJS.Timeout) => {
+      // If not cleared the expiry timeout handler leaves an
+      // open handle in tests.
+      clearTimeout(t);
+    });
     await clientAuthn.login(
       "someSession",
       {
@@ -173,7 +184,7 @@ describe("resolution order", () => {
         clientSecret: "some client secret",
         oidcIssuer: "https://some.issuer",
       },
-      new EventEmitter()
+      emitter
     );
     await expect(
       handlerSelectSpy.mock.results[0].value
