@@ -58,7 +58,7 @@ describe("createDpopHeader", () => {
     const header = await createDpopHeader(
       "https://some.resource",
       "GET",
-      await mockKeyPair()
+      await mockKeyPair(),
     );
     const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
     expect(payload.htm).toBe("GET");
@@ -71,7 +71,7 @@ describe("createDpopHeader", () => {
     const header = await createDpopHeader(
       "https://user:pass@some.resource/?query#hash",
       "GET",
-      await mockKeyPair()
+      await mockKeyPair(),
     );
     const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
     expect(payload.htm).toBe("GET");
@@ -84,13 +84,11 @@ describe("createDpopHeader", () => {
     const header = await createDpopHeader(
       "https://some.resource",
       "GET",
-      await mockKeyPair()
+      await mockKeyPair(),
     );
     const { protectedHeader } = await jwtVerify(
       header,
-      (
-        await mockJwk()
-      ).publicKey
+      (await mockJwk()).publicKey,
     );
     expect(protectedHeader.alg).toBe("ES256");
     expect(protectedHeader.typ).toBe("dpop+jwt");

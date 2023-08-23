@@ -55,7 +55,7 @@ export function createApp(onStart: () => void) {
 
   app.get("/redirect", async (req, res) => {
     const info = await session.handleIncomingRedirect(
-      `${req.protocol}://${req.get("host")}${req.originalUrl}`
+      `${req.protocol}://${req.get("host")}${req.originalUrl}`,
     );
 
     if (info?.isLoggedIn) {

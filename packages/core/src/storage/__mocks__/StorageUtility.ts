@@ -38,19 +38,19 @@ export const StorageUtilityMock: IStorageUtility = {
   getForUser: async (
     userId: string,
     key: string,
-    options?: { errorIfNull?: boolean; secure?: boolean }
+    options?: { errorIfNull?: boolean; secure?: boolean },
   ) => StorageUtilityGetResponse,
   setForUser: async (
     userId: string,
     values: Record<string, string>,
-    options?: { secure?: boolean }
+    options?: { secure?: boolean },
   ) => {
     /* do nothing */
   },
   deleteForUser: async (
     userId: string,
     key: string,
-    options?: { secure?: boolean }
+    options?: { secure?: boolean },
   ) => {
     /* do nothing */
   },
@@ -60,7 +60,7 @@ export const StorageUtilityMock: IStorageUtility = {
 };
 
 export const mockStorage = (
-  stored: Record<string, string | Record<string, string>>
+  stored: Record<string, string | Record<string, string>>,
 ): IStorage => {
   const store = stored;
   return {
@@ -84,7 +84,7 @@ export const mockStorage = (
 
 export const mockStorageUtility = (
   stored: Record<string, string | Record<string, string>>,
-  isSecure = false
+  isSecure = false,
 ): IStorageUtility => {
   if (isSecure) {
     return new StorageUtility(mockStorage(stored), mockStorage({}));

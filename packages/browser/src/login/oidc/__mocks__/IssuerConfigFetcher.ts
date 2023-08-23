@@ -40,7 +40,7 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
 export const IssuerConfigFetcherMock: jest.Mocked<IIssuerConfigFetcher> = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchConfig: jest.fn((_issuer: string) =>
-    Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
+    Promise.resolve(IssuerConfigFetcherFetchConfigResponse),
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
@@ -49,14 +49,14 @@ export const mockDefaultIssuerConfigFetcher = (): IIssuerConfigFetcher => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchConfig: (jest.fn() as any).mockResolvedValue(
-      IssuerConfigFetcherFetchConfigResponse
+      IssuerConfigFetcherFetchConfigResponse,
     ),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 };
 
 export const mockIssuerConfigFetcher = (
-  config: IIssuerConfig
+  config: IIssuerConfig,
 ): IIssuerConfigFetcher => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

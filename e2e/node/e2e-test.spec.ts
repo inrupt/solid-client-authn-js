@@ -53,7 +53,7 @@ const CSS = owner.type === "CSS Client Credentials";
 function getCredentials() {
   if (CSS) {
     throw new Error(
-      "CSS Does not support client credentials - these tests are not supported"
+      "CSS Does not support client credentials - these tests are not supported",
     );
   }
 
@@ -71,7 +71,7 @@ function getCredentials() {
 
     // Log back in on session expiration
     authenticatedSession.events.on("sessionExpired", () =>
-      authenticatedSession.login(getCredentials())
+      authenticatedSession.login(getCredentials()),
     );
     beforeAll(() => authenticatedSession.login(getCredentials()));
 
@@ -85,7 +85,7 @@ function getCredentials() {
         expect(authenticatedSession.info.sessionId).toBeDefined();
         expect(authenticatedSession.info.webId).toBeDefined();
         expect(authenticatedSession.info.expirationDate).toBeGreaterThan(
-          Date.now()
+          Date.now(),
         );
       });
 
@@ -99,7 +99,7 @@ function getCredentials() {
         });
         expect(response.status).toBe(200);
         await expect(response.text()).resolves.toContain(
-          authenticatedSession.info.webId
+          authenticatedSession.info.webId,
         );
       });
 
@@ -154,7 +154,7 @@ function getCredentials() {
         });
         expect(response.status).toBe(200);
         await expect(response.text()).resolves.toContain(
-          authenticatedSession.info.webId
+          authenticatedSession.info.webId,
         );
       });
 
@@ -184,7 +184,7 @@ function getCredentials() {
         });
         expect(response.status).toBe(200);
         await expect(response.text()).resolves.toContain(
-          authenticatedSession.info.webId
+          authenticatedSession.info.webId,
         );
       });
 
@@ -199,7 +199,7 @@ function getCredentials() {
         expect(response.status).toBe(401);
       });
     });
-  }
+  },
 );
 
 describe("Session events", () => {

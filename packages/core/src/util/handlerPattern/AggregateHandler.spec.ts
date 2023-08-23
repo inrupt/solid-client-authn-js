@@ -37,7 +37,7 @@ describe("AggregateHandler", () => {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function initMocks(
-    configs: { canHandle: boolean; executeTime: number; toReturn: string }[]
+    configs: { canHandle: boolean; executeTime: number; toReturn: string }[],
   ) {
     const mockHandlerInfo = configs.map((config) => {
       const canHandleFunction = jest.fn(
@@ -45,14 +45,14 @@ describe("AggregateHandler", () => {
           return new Promise((resolve, _reject) => {
             setTimeout(() => resolve(config.canHandle), config.executeTime);
           });
-        }
+        },
       );
       const handleFunction = jest.fn(
         async (_input: string): Promise<string> => {
           return new Promise((resolve, _reject) => {
             setTimeout(() => resolve(config.toReturn), config.executeTime);
           });
-        }
+        },
       );
       const mock: () => MockHandler = jest.fn(() => ({
         canHandle: canHandleFunction,
@@ -65,7 +65,7 @@ describe("AggregateHandler", () => {
       };
     });
     const aggregateMockHandler = new AggregateMockHandler(
-      mockHandlerInfo.map((info) => info.mock())
+      mockHandlerInfo.map((info) => info.mock()),
     );
     return {
       mockHandlerInfo,
@@ -89,7 +89,7 @@ describe("AggregateHandler", () => {
         { canHandle: false, executeTime: 0, toReturn: "" },
       ]);
       expect(await mocks.aggregateMockHandler.canHandle("something")).toBe(
-        false
+        false,
       );
     });
   });
@@ -104,11 +104,11 @@ describe("AggregateHandler", () => {
     });
 
     it.todo(
-      "should run the correct handler even when it is preceded by the incorrect handler"
+      "should run the correct handler even when it is preceded by the incorrect handler",
     );
 
     it.todo(
-      "should run the first correct handler even when succeeded by a handler that takes a shorter time to execute"
+      "should run the first correct handler even when succeeded by a handler that takes a shorter time to execute",
     );
 
     it("should error when there is no correct handler", async () => {
@@ -117,7 +117,7 @@ describe("AggregateHandler", () => {
         { canHandle: false, executeTime: 0, toReturn: "" },
       ]);
       await expect(() =>
-        mocks.aggregateMockHandler.handle("something")
+        mocks.aggregateMockHandler.handle("something"),
       ).rejects.toThrow();
     });
 
@@ -134,7 +134,7 @@ describe("AggregateHandler", () => {
       obj.prop = obj;
 
       await expect(() =>
-        mocks.aggregateMockHandler.handle(obj)
+        mocks.aggregateMockHandler.handle(obj),
       ).rejects.toThrow();
     });
   });

@@ -25,7 +25,7 @@ import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
 
 jest.mock("@inrupt/universal-fetch", () => {
   const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch"
+    "@inrupt/universal-fetch",
   ) as typeof UniversalFetch;
   return {
     ...fetchModule,
@@ -39,23 +39,23 @@ describe("FallbackRedirectHandler", () => {
       const redirectHandler = new FallbackRedirectHandler();
       expect(
         await redirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode&state=oauth2_state_value"
-        )
+          "https://coolparty.com/?code=someCode&state=oauth2_state_value",
+        ),
       ).toBe(true);
       expect(await redirectHandler.canHandle("https://coolparty.com/")).toBe(
-        true
+        true,
       );
       expect(
-        await redirectHandler.canHandle("https://coolparty.com/?test=test")
+        await redirectHandler.canHandle("https://coolparty.com/?test=test"),
       ).toBe(true);
     });
 
     it("throws on invalid url", async () => {
       const redirectHandler = new FallbackRedirectHandler();
       await expect(
-        redirectHandler.canHandle("beep boop I am a robot")
+        redirectHandler.canHandle("beep boop I am a robot"),
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot"
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot",
       );
     });
   });

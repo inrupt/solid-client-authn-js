@@ -57,7 +57,7 @@ describe("Headers interoperability function", () => {
   it("supports non-iterable headers if they provide a reasonably standard way of browsing them", () => {
     const myHeaders: any = {};
     myHeaders.forEach = (
-      callback: (value: string, key: string) => void
+      callback: (value: string, key: string) => void,
     ): void => {
       callback("application/json", "accept");
       callback("text/turtle", "content-type");

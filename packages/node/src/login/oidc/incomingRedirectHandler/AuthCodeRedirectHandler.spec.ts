@@ -56,13 +56,13 @@ jest.mock("@inrupt/universal-fetch", () => {
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as any;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/")
+      Promise.resolve("https://my.webid/"),
     ),
   };
 });
@@ -153,14 +153,14 @@ const defaultMocks = {
 };
 
 function getAuthCodeRedirectHandler(
-  mocks: Partial<typeof defaultMocks> = defaultMocks
+  mocks: Partial<typeof defaultMocks> = defaultMocks,
 ): AuthCodeRedirectHandler {
   return new AuthCodeRedirectHandler(
     mocks.storageUtility ?? defaultMocks.storageUtility,
     mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
     mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
     mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
-    mocks.tokenRefresher ?? defaultMocks.tokenRefresher
+    mocks.tokenRefresher ?? defaultMocks.tokenRefresher,
   );
 }
 
@@ -170,17 +170,17 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode&state=oauth2_state_value"
-        )
+          "https://coolparty.com/?code=someCode&state=oauth2_state_value",
+        ),
       ).toBe(true);
     });
 
     it("throws on invalid url", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(() =>
-        authCodeRedirectHandler.canHandle("beep boop I am a robot")
+        authCodeRedirectHandler.canHandle("beep boop I am a robot"),
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL"
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL",
       );
     });
 
@@ -188,8 +188,8 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?meep=mop"
-        )
+          "https://coolparty.com/?meep=mop",
+        ),
       ).toBe(false);
     });
 
@@ -197,8 +197,8 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?state=someState"
-        )
+          "https://coolparty.com/?state=someState",
+        ),
       ).toBe(false);
     });
 
@@ -206,8 +206,8 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode"
-        )
+          "https://coolparty.com/?code=someCode",
+        ),
       ).toBe(false);
     });
   });
@@ -256,9 +256,9 @@ describe("AuthCodeRedirectHandler", () => {
     it("throws on non-redirect URL", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
-        authCodeRedirectHandler.handle("https://my.app")
+        authCodeRedirectHandler.handle("https://my.app"),
       ).rejects.toThrow(
-        "AuthCodeRedirectHandler cannot handle [https://my.app]: it is missing one of [code, state]."
+        "AuthCodeRedirectHandler cannot handle [https://my.app]: it is missing one of [code, state].",
       );
     });
 
@@ -272,7 +272,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       const result = await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
+        "https://my.app/redirect?code=someCode&state=someState",
       );
 
       // Check that the returned session is the one we expected
@@ -280,7 +280,7 @@ describe("AuthCodeRedirectHandler", () => {
       expect(result.isLoggedIn).toBe(true);
       expect(result.webId).toEqual(mockWebId());
       expect(result.expirationDate).toEqual(
-        Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000
+        Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
       );
     });
 
@@ -294,20 +294,20 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       const result = await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
+        "https://my.app/redirect?code=someCode&state=someState",
       );
 
       // Check that the session information is stored in the provided storage
       await expect(
-        mockedStorage.getForUser("mySession", "webId")
+        mockedStorage.getForUser("mySession", "webId"),
       ).resolves.toEqual(mockWebId());
       await expect(
-        mockedStorage.getForUser("mySession", "isLoggedIn")
+        mockedStorage.getForUser("mySession", "isLoggedIn"),
       ).resolves.toBe("true");
 
       // Check that the returned fetch function is authenticated
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValueOnce(new NodeResponse());
       await result.fetch("https://some.url");
@@ -333,13 +333,13 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
+        "https://my.app/redirect?code=someCode&state=someState",
       );
 
       expect(mockedIssuer.Client).toHaveBeenCalledWith(
         expect.objectContaining({
           token_endpoint_auth_method: "none",
-        })
+        }),
       );
     });
 
@@ -357,12 +357,12 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       const result = await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
+        "https://my.app/redirect?code=someCode&state=someState",
       );
 
       // Check that the returned fetch function is authenticated
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValueOnce(new NodeResponse());
       await result.fetch("https://some.url");
@@ -373,7 +373,7 @@ describe("AuthCodeRedirectHandler", () => {
     it("cleans up the redirect IRI from the OIDC parameters", async () => {
       // This function represents the openid-client callback
       const callback = (jest.fn() as any).mockResolvedValueOnce(
-        mockDpopTokens()
+        mockDpopTokens(),
       );
       setupOidcClientMock(undefined, callback);
       const mockedStorage = mockDefaultRedirectStorage();
@@ -384,7 +384,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
+        "https://my.app/redirect?code=someCode&state=someState",
       );
 
       expect(callback).toHaveBeenCalledWith(
@@ -392,7 +392,7 @@ describe("AuthCodeRedirectHandler", () => {
         { code: "someCode", state: "someState" },
         // The code verifier comes from the mocked storage.
         { code_verifier: "some code verifier", state: "someState" },
-        expect.anything()
+        expect.anything(),
       );
     });
 
@@ -409,12 +409,12 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
+        "https://my.app/redirect?code=someCode&state=someState",
       );
 
       // Check that the session information is stored in the provided storage
       await expect(
-        mockedStorage.getForUser("mySession", "refreshToken")
+        mockedStorage.getForUser("mySession", "refreshToken"),
       ).resolves.toBe("some refresh token");
     });
 
@@ -431,15 +431,15 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState"
+        "https://my.app/redirect?code=someCode&state=someState",
       );
 
       // Check that the session information is stored in the provided storage
       await expect(
-        mockedStorage.getForUser("mySession", "privateKey")
+        mockedStorage.getForUser("mySession", "privateKey"),
       ).resolves.toBeDefined();
       await expect(
-        mockedStorage.getForUser("mySession", "publicKey")
+        mockedStorage.getForUser("mySession", "publicKey"),
       ).resolves.toBeDefined();
     });
 
@@ -459,12 +459,12 @@ describe("AuthCodeRedirectHandler", () => {
 
       await authCodeRedirectHandler.handle(
         "https://my.app/redirect?code=someCode&state=someState",
-        mockEmitter
+        mockEmitter,
       );
 
       expect(mockEmit).toHaveBeenCalledWith(
         EVENTS.NEW_REFRESH_TOKEN,
-        "some refresh token"
+        "some refresh token",
       );
     });
 
@@ -479,12 +479,12 @@ describe("AuthCodeRedirectHandler", () => {
 
       await expect(
         authCodeRedirectHandler.handle(
-          "https://my.app/redirect?code=someCode&state=someState&iss=someIssuer"
-        )
+          "https://my.app/redirect?code=someCode&state=someState&iss=someIssuer",
+        ),
       ).rejects.toThrow(
         `The value of the iss parameter (someIssuer) does not match the issuer identifier of the authorization server (${
           mockDefaultIssuerConfig().issuer
-        }). See [rfc9207](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.3-3.1.1)`
+        }). See [rfc9207](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.3-3.1.1)`,
       );
     });
 
@@ -502,12 +502,12 @@ describe("AuthCodeRedirectHandler", () => {
 
       await expect(
         authCodeRedirectHandler.handle(
-          "https://my.app/redirect?code=someCode&state=someState"
-        )
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
       ).rejects.toThrow(
         `The Identity Provider [${
           mockDefaultIssuerConfig().issuer
-        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`
+        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`,
       );
     });
 
@@ -525,12 +525,12 @@ describe("AuthCodeRedirectHandler", () => {
 
       await expect(
         authCodeRedirectHandler.handle(
-          "https://my.app/redirect?code=someCode&state=someState"
-        )
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
       ).rejects.toThrow(
         `The Identity Provider [${
           mockDefaultIssuerConfig().issuer
-        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`
+        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`,
       );
     });
 
@@ -550,10 +550,10 @@ describe("AuthCodeRedirectHandler", () => {
 
       await expect(
         authCodeRedirectHandler.handle(
-          "https://my.app/redirect?code=someCode&state=someState"
-        )
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
       ).rejects.toThrow(
-        "Could not find any session information associated with SessionID [mySession] in our storage"
+        "Could not find any session information associated with SessionID [mySession] in our storage",
       );
     });
 
@@ -568,10 +568,10 @@ describe("AuthCodeRedirectHandler", () => {
 
       await expect(
         authCodeRedirectHandler.handle(
-          "https://my.app/redirect?code=someCode&state=someState"
-        )
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
       ).rejects.toThrow(
-        "No stored session is associated with the state [someState]"
+        "No stored session is associated with the state [someState]",
       );
     });
   });

@@ -27,7 +27,7 @@ import { jest } from "@jest/globals";
 import { clear } from "../../sessionInfo/SessionInfoManager";
 
 export const mockLogoutHandler = (
-  storageUtility: IStorageUtility
+  storageUtility: IStorageUtility,
 ): ILogoutHandler => {
   return {
     canHandle: jest.fn(async (_localUserId: string) => Promise.resolve(true)),

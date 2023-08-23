@@ -44,12 +44,12 @@ describe("TokenRequester", () => {
   };
 
   function getTokenRequester(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): TokenRequester {
     return new TokenRequester(
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.issueConfigFetcher ?? defaultMocks.issueConfigFetcher,
-      mocks.clientRegistrar ?? ClientRegistrarMock
+      mocks.clientRegistrar ?? ClientRegistrarMock,
     );
   }
 
@@ -80,7 +80,7 @@ describe("TokenRequester", () => {
   };
 
   async function setUpMockedReturnValues(
-    values: Partial<typeof defaultReturnValues>
+    values: Partial<typeof defaultReturnValues>,
   ): Promise<(typeof UniversalFetch)["fetch"]> {
     await defaultMocks.storageUtility.setForUser("global", {
       issuer: values.storageIdp ?? defaultReturnValues.storageIdp,
@@ -89,14 +89,14 @@ describe("TokenRequester", () => {
     const issuerConfig =
       values.issuerConfig ?? defaultReturnValues.issuerConfig;
     defaultMocks.issueConfigFetcher.fetchConfig.mockResolvedValueOnce(
-      issuerConfig
+      issuerConfig,
     );
 
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValueOnce(
-      new NodeResponse(values.responseBody ?? defaultReturnValues.responseBody)
+      new NodeResponse(values.responseBody ?? defaultReturnValues.responseBody),
     );
     return mockedFetch;
   }
@@ -111,7 +111,7 @@ describe("TokenRequester", () => {
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
         refresh_token: "thisIsARefreshToken",
-      })
+      }),
     ).rejects.toThrow("not implemented");
     /* eslint-enable camelcase */
   });

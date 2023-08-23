@@ -42,26 +42,26 @@ import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 
 export function negotiateClientSigningAlg(
   issuerConfig: IIssuerConfig,
-  clientPreference: string[]
+  clientPreference: string[],
 ): string {
   if (!Array.isArray(issuerConfig.idTokenSigningAlgValuesSupported)) {
     throw new Error(
-      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory.",
     );
   }
 
   const signingAlg = determineSigningAlg(
     issuerConfig.idTokenSigningAlgValuesSupported,
-    clientPreference
+    clientPreference,
   );
 
   if (signingAlg === null) {
     throw new Error(
       `No signature algorithm match between ${JSON.stringify(
-        issuerConfig.idTokenSigningAlgValuesSupported
+        issuerConfig.idTokenSigningAlgValuesSupported,
       )} supported by the Identity Provider and ${JSON.stringify(
-        clientPreference
-      )} preferred by the client.`
+        clientPreference,
+      )} preferred by the client.`,
     );
   }
 
@@ -76,7 +76,7 @@ export default class ClientRegistrar implements IClientRegistrar {
 
   async getClient(
     options: IClientRegistrarOptions,
-    issuerConfig: IIssuerConfig
+    issuerConfig: IIssuerConfig,
   ): Promise<IClient> {
     // If client secret and/or client id are stored in storage, use those.
     const [
@@ -90,7 +90,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       this.storageUtility.getForUser(options.sessionId, "clientName"),
       this.storageUtility.getForUser(
         options.sessionId,
-        "idTokenSignedResponseAlg"
+        "idTokenSignedResponseAlg",
       ),
     ]);
     if (storedClientId) {
@@ -111,14 +111,14 @@ export default class ClientRegistrar implements IClientRegistrar {
     if (issuer.metadata.registration_endpoint === undefined) {
       throw new ConfigurationError(
         `Dynamic client registration cannot be performed, because issuer does not have a registration endpoint: ${JSON.stringify(
-          issuer.metadata
-        )}`
+          issuer.metadata,
+        )}`,
       );
     }
 
     const signingAlg = negotiateClientSigningAlg(
       issuerConfig,
-      PREFERRED_SIGNING_ALG
+      PREFERRED_SIGNING_ALG,
     );
 
     // The following is compliant with the example code, but seems to mismatch the

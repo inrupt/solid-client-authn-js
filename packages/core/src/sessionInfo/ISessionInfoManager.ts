@@ -44,7 +44,7 @@ export interface ISessionInfoManager {
    * @param sessionId
    */
   get(
-    sessionId: string
+    sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined>;
   /**
    * Returns all information about all registered sessions

@@ -39,7 +39,7 @@ export class OidcProviderError extends Error {
   constructor(
     message: string,
     public readonly error: string,
-    public readonly errorDescription?: string
+    public readonly errorDescription?: string,
   ) {
     super(message);
   }

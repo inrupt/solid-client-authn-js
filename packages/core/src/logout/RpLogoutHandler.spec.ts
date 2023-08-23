@@ -35,10 +35,10 @@ describe("RpLogoutHandler", () => {
     it("should only be able to handle idp logout; whether or not handleRedirect is supplied", async () => {
       const logoutHandler = getInitialisedHandler();
       await expect(
-        logoutHandler.canHandle("session", { logoutType: "idp" })
+        logoutHandler.canHandle("session", { logoutType: "idp" }),
       ).resolves.toBe(true);
       await expect(
-        logoutHandler.canHandle("session", { logoutType: "app" })
+        logoutHandler.canHandle("session", { logoutType: "app" }),
       ).resolves.toBe(false);
       await expect(logoutHandler.canHandle("session")).resolves.toBe(false);
       await expect(
@@ -47,7 +47,7 @@ describe("RpLogoutHandler", () => {
           handleRedirect: () => {
             /* noop */
           },
-        })
+        }),
       ).resolves.toBe(true);
     });
   });
@@ -63,7 +63,7 @@ describe("RpLogoutHandler", () => {
       const logoutHandler = getInitialisedHandler();
 
       await expect(
-        logoutHandler.handle("session", { logoutType: "app" })
+        logoutHandler.handle("session", { logoutType: "app" }),
       ).rejects.toThrow();
     });
 
@@ -74,7 +74,7 @@ describe("RpLogoutHandler", () => {
         logoutHandler.handle("session", {
           logoutType: "app",
           toLogoutUrl: () => "myFixedString",
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -82,7 +82,7 @@ describe("RpLogoutHandler", () => {
       const logoutHandler = getInitialisedHandler();
 
       await expect(
-        logoutHandler.handle("session", { logoutType: "idp" })
+        logoutHandler.handle("session", { logoutType: "idp" }),
       ).rejects.toThrow();
     });
 
@@ -93,7 +93,7 @@ describe("RpLogoutHandler", () => {
         logoutHandler.handle("session", {
           logoutType: "idp",
           toLogoutUrl: undefined,
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -105,7 +105,7 @@ describe("RpLogoutHandler", () => {
         logoutHandler.handle("session", {
           logoutType: "idp",
           toLogoutUrl: () => "myFixedString",
-        })
+        }),
       ).resolves.toBeUndefined();
       expect(fn).toHaveBeenCalledWith("myFixedString", {
         handleRedirect: undefined,
@@ -121,7 +121,7 @@ describe("RpLogoutHandler", () => {
           logoutType: "idp",
           toLogoutUrl: (p) => `${p.postLogoutUrl}-myFixedString`,
           postLogoutUrl: "prefix",
-        })
+        }),
       ).resolves.toBeUndefined();
       expect(fn).toHaveBeenCalledWith("prefix-myFixedString", {
         handleRedirect: undefined,
@@ -138,7 +138,7 @@ describe("RpLogoutHandler", () => {
           logoutType: "idp",
           toLogoutUrl: (p) => `${p.postLogoutUrl}-${p.state}-myFixedString`,
           postLogoutUrl: "prefix",
-        })
+        }),
       ).resolves.toBeUndefined();
       expect(fn).toHaveBeenCalledWith("prefix-s-myFixedString", {
         handleRedirect: undefined,
@@ -159,13 +159,13 @@ describe("RpLogoutHandler", () => {
           logoutType: "idp",
           toLogoutUrl,
           postLogoutUrl: "https://example.org/app/logout/url",
-        })
+        }),
       ).resolves.toBeUndefined();
       expect(fn).toHaveBeenCalledWith(
         "https://example.com/logout?id_token_hint=idTokenHint&post_logout_redirect_uri=https%3A%2F%2Fexample.org%2Fapp%2Flogout%2Furl&state=s",
         {
           handleRedirect: undefined,
-        }
+        },
       );
     });
 
@@ -182,13 +182,13 @@ describe("RpLogoutHandler", () => {
           logoutType: "idp",
           toLogoutUrl,
           state: "s",
-        })
+        }),
       ).resolves.toBeUndefined();
       expect(fn).toHaveBeenCalledWith(
         "https://example.com/logout?id_token_hint=idTokenHint",
         {
           handleRedirect: undefined,
-        }
+        },
       );
     });
   });

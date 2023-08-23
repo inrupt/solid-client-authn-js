@@ -88,7 +88,7 @@ export interface ISessionInternalInfo {
 }
 
 export function isSupportedTokenType(
-  token: string | "DPoP" | "Bearer"
+  token: string | "DPoP" | "Bearer",
 ): token is "DPoP" | "Bearer" {
   return typeof token === "string" && ["DPoP", "Bearer"].includes(token);
 }

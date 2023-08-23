@@ -48,13 +48,13 @@ import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/Auth
 jest.mock("openid-client");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/")
+      Promise.resolve("https://my.webid/"),
     ),
   };
 });
@@ -98,11 +98,11 @@ describe("resolution order", () => {
   const mockClientAuthentication = () => {
     const storageUtility = new StorageUtilityNode(
       mockStorage({}),
-      mockStorage({})
+      mockStorage({}),
     );
 
     const issuerConfigFetcher = mockIssuerConfigFetcher(
-      mockDefaultIssuerConfig()
+      mockDefaultIssuerConfig(),
     );
     const clientRegistrar = mockDefaultClientRegistrar();
 
@@ -114,7 +114,7 @@ describe("resolution order", () => {
       storageUtility,
       tokenRefresher,
       issuerConfigFetcher,
-      clientRegistrar
+      clientRegistrar,
     );
 
     const redirectHandler = buildRedirectHandler(
@@ -122,14 +122,14 @@ describe("resolution order", () => {
       sessionInfoManager,
       issuerConfigFetcher,
       clientRegistrar,
-      tokenRefresher
+      tokenRefresher,
     );
 
     return new ClientAuthentication(
       loginHandler,
       redirectHandler,
       new GeneralLogoutHandler(sessionInfoManager),
-      sessionInfoManager
+      sessionInfoManager,
     );
   };
 
@@ -139,7 +139,7 @@ describe("resolution order", () => {
       // The easiest way to test this is to look into the injected dependencies
       // (which is why we look up private attributes).
       (clientAuthn as any).loginHandler.oidcHandler,
-      "getProperHandler"
+      "getProperHandler",
     );
     const mockTimeout = jest.fn();
     // @ts-expect-error If setTimeout is called within the test
@@ -154,10 +154,10 @@ describe("resolution order", () => {
         refreshToken: "some refresh token",
         oidcIssuer: "https://some.issuer",
       },
-      new EventEmitter()
+      new EventEmitter(),
     );
     await expect(
-      handlerSelectSpy.mock.results[0].value
+      handlerSelectSpy.mock.results[0].value,
     ).resolves.toBeInstanceOf(RefreshTokenOidcHandler);
     expect(mockTimeout).toHaveBeenCalledTimes(1);
   });
@@ -169,7 +169,7 @@ describe("resolution order", () => {
       // The easiest way to test this is to look into the injected dependencies
       // (which is why we look up private attributes).
       (clientAuthn as any).loginHandler.oidcHandler,
-      "getProperHandler"
+      "getProperHandler",
     );
     const emitter = new EventEmitter();
     emitter.on(EVENTS.TIMEOUT_SET, (t: NodeJS.Timeout) => {
@@ -184,10 +184,10 @@ describe("resolution order", () => {
         clientSecret: "some client secret",
         oidcIssuer: "https://some.issuer",
       },
-      emitter
+      emitter,
     );
     await expect(
-      handlerSelectSpy.mock.results[0].value
+      handlerSelectSpy.mock.results[0].value,
     ).resolves.toBeInstanceOf(ClientCredentialsOidcHandler);
   });
 
@@ -198,7 +198,7 @@ describe("resolution order", () => {
       // The easiest way to test this is to look into the injected dependencies
       // (which is why we look up private attributes).
       (clientAuthn as any).loginHandler.oidcHandler,
-      "getProperHandler"
+      "getProperHandler",
     );
     await clientAuthn.login(
       "someSession",
@@ -207,10 +207,10 @@ describe("resolution order", () => {
         oidcIssuer: "https://some.issuer",
         handleRedirect: jest.fn(),
       },
-      new EventEmitter()
+      new EventEmitter(),
     );
     await expect(
-      handlerSelectSpy.mock.results[0].value
+      handlerSelectSpy.mock.results[0].value,
     ).resolves.toBeInstanceOf(AuthorizationCodeWithPkceOidcHandler);
   });
 });

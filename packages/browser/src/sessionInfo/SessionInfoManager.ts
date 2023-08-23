@@ -46,7 +46,7 @@ export { getUnauthenticatedSession } from "@inrupt/solid-client-authn-core";
  */
 export async function clear(
   sessionId: string,
-  storage: IStorageUtility
+  storage: IStorageUtility,
 ): Promise<void> {
   await clearBase(sessionId, storage);
   await clearOidcPersistentStorage();
@@ -60,14 +60,14 @@ export class SessionInfoManager
   implements ISessionInfoManager
 {
   async get(
-    sessionId: string
+    sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
     const isLoggedIn = await this.storageUtility.getForUser(
       sessionId,
       "isLoggedIn",
       {
         secure: true,
-      }
+      },
     );
 
     const webId = await this.storageUtility.getForUser(sessionId, "webId", {
@@ -79,7 +79,7 @@ export class SessionInfoManager
       "clientId",
       {
         secure: false,
-      }
+      },
     );
 
     const clientSecret = await this.storageUtility.getForUser(
@@ -87,7 +87,7 @@ export class SessionInfoManager
       "clientSecret",
       {
         secure: false,
-      }
+      },
     );
 
     const redirectUrl = await this.storageUtility.getForUser(
@@ -95,7 +95,7 @@ export class SessionInfoManager
       "redirectUrl",
       {
         secure: false,
-      }
+      },
     );
 
     const refreshToken = await this.storageUtility.getForUser(
@@ -103,7 +103,7 @@ export class SessionInfoManager
       "refreshToken",
       {
         secure: true,
-      }
+      },
     );
 
     const issuer = await this.storageUtility.getForUser(sessionId, "issuer", {

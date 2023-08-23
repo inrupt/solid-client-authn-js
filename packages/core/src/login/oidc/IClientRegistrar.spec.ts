@@ -38,7 +38,7 @@ describe("handleRegistration", () => {
       options,
       { scopesSupported: ["openid"] } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
-      clientRegistrar as IClientRegistrar
+      clientRegistrar as IClientRegistrar,
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
   });
@@ -55,7 +55,7 @@ describe("handleRegistration", () => {
       options,
       { scopesSupported: ["openid"] } as IIssuerConfig,
       jest.fn() as unknown as IStorageUtility,
-      clientRegistrar as IClientRegistrar
+      clientRegistrar as IClientRegistrar,
     );
     expect(clientRegistrar.getClient).toHaveBeenCalled();
   });
@@ -78,7 +78,7 @@ describe("handleRegistration", () => {
         scopesSupported: ["openid", "offline_access", "webid"],
       } as IIssuerConfig,
       storageUtility,
-      clientRegistrar as IClientRegistrar
+      clientRegistrar as IClientRegistrar,
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
@@ -105,7 +105,7 @@ describe("handleRegistration", () => {
         scopesSupported: ["openid"],
       } as IIssuerConfig,
       storageUtility,
-      clientRegistrar as IClientRegistrar
+      clientRegistrar as IClientRegistrar,
     );
     expect(clientRegistrar.getClient).not.toHaveBeenCalled();
     expect(storageUtility.setForUser).toHaveBeenCalled();
@@ -116,10 +116,10 @@ describe("handleRegistration", () => {
 describe("determineSigningAlg", () => {
   it("returns the preferred algorithm of the supported list", () => {
     expect(
-      determineSigningAlg(["ES256", "HS256", "RS256"], ["ES256", "RS256"])
+      determineSigningAlg(["ES256", "HS256", "RS256"], ["ES256", "RS256"]),
     ).toBe("ES256");
     expect(determineSigningAlg(["ES256", "HS256", "RS256"], ["RS256"])).toBe(
-      "RS256"
+      "RS256",
     );
     expect(determineSigningAlg(["RS256"], ["RS256"])).toBe("RS256");
   });

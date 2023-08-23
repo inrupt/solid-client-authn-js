@@ -29,7 +29,7 @@ describe("isValidRedirectUrl", () => {
 
   it("returns false if the provided IRI contains a hash fragment", () => {
     expect(
-      isValidRedirectUrl("https://example.org/redirect#some-fragment")
+      isValidRedirectUrl("https://example.org/redirect#some-fragment"),
     ).toBe(false);
   });
 
@@ -38,8 +38,8 @@ describe("isValidRedirectUrl", () => {
     expect(isValidRedirectUrl("https://example.org/some/path")).toBe(true);
     expect(
       isValidRedirectUrl(
-        "https://example.org/?param=value&otherParam=otherValue"
-      )
+        "https://example.org/?param=value&otherParam=otherValue",
+      ),
     ).toBe(true);
   });
 });

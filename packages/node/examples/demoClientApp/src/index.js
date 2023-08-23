@@ -96,8 +96,8 @@ app.get("/login", async (req, res, next) => {
   } else {
     next(
       new Error(
-        "No OIDC issuer provided to login API (expected 'oidcIssuer' query parameter)!"
-      )
+        "No OIDC issuer provided to login API (expected 'oidcIssuer' query parameter)!",
+      ),
     );
   }
 });
@@ -190,7 +190,7 @@ app.listen(PORT, async () => {
   session = new Session();
 
   log.info(
-    `[${clientApplicationName}] successfully initialized - listening at: [http://localhost:${PORT}]`
+    `[${clientApplicationName}] successfully initialized - listening at: [http://localhost:${PORT}]`,
   );
 });
 

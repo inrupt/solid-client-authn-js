@@ -27,7 +27,7 @@ import { ErrorOidcHandler } from "./ErrorOidcHandler";
 
 jest.mock("@inrupt/universal-fetch", () => {
   const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch"
+    "@inrupt/universal-fetch",
   ) as typeof UniversalFetch;
   return {
     ...fetchModule,
@@ -41,14 +41,14 @@ describe("ErrorOidcHandler", () => {
       const redirectHandler = new ErrorOidcHandler();
       expect(
         await redirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode&state=oauth2_state_value"
-        )
+          "https://coolparty.com/?code=someCode&state=oauth2_state_value",
+        ),
       ).toBe(false);
       expect(await redirectHandler.canHandle("https://coolparty.com/")).toBe(
-        false
+        false,
       );
       expect(
-        await redirectHandler.canHandle("https://coolparty.com/?test=test")
+        await redirectHandler.canHandle("https://coolparty.com/?test=test"),
       ).toBe(false);
     });
 
@@ -56,17 +56,17 @@ describe("ErrorOidcHandler", () => {
       const redirectHandler = new ErrorOidcHandler();
       expect(
         await redirectHandler.canHandle(
-          "https://coolparty.com/?error=some_error"
-        )
+          "https://coolparty.com/?error=some_error",
+        ),
       ).toBe(true);
     });
 
     it("throws on invalid url", async () => {
       const redirectHandler = new ErrorOidcHandler();
       await expect(
-        redirectHandler.canHandle("beep boop I am a robot")
+        redirectHandler.canHandle("beep boop I am a robot"),
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot"
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot",
       );
     });
   });
@@ -87,14 +87,14 @@ describe("ErrorOidcHandler", () => {
       const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle(
         "https://coolparty.com/?error=error&error_description=unable_to_fetch",
-        mockEmitter
+        mockEmitter,
       );
       expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();
       expect(mockEmit).toHaveBeenCalledWith(
         EVENTS.ERROR,
         "error",
-        "unable_to_fetch"
+        "unable_to_fetch",
       );
     });
 
@@ -107,7 +107,7 @@ describe("ErrorOidcHandler", () => {
       const redirectHandler = new ErrorOidcHandler();
       const mySession = await redirectHandler.handle(
         "https://coolparty.com/?error=error",
-        mockEmitter
+        mockEmitter,
       );
       expect(mySession.isLoggedIn).toBe(false);
       expect(mySession.webId).toBeUndefined();

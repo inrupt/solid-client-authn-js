@@ -34,7 +34,7 @@ class SessionInfoManager extends SessionInfoManagerBase {
 }
 
 export function mockSessionInfoManager(
-  storageUtility: IStorageUtility
+  storageUtility: IStorageUtility,
 ): ISessionInfoManager {
   return new SessionInfoManager(storageUtility);
 }

@@ -52,7 +52,7 @@ export default class ClientAuthentication {
     protected redirectHandler: IIncomingRedirectHandler,
     protected logoutHandler: ILogoutHandler,
     protected sessionInfoManager: ISessionInfoManager,
-    protected issuerConfigFetcher?: IIssuerConfigFetcher
+    protected issuerConfigFetcher?: IIssuerConfigFetcher,
   ) {}
 
   // By default, our fetch() resolves to the environment fetch() function.
@@ -60,7 +60,7 @@ export default class ClientAuthentication {
 
   logout = async (
     sessionId: string,
-    options?: ILogoutOptions
+    options?: ILogoutOptions,
   ): Promise<void> => {
     // When doing IDP logout this will redirect away from the current page, so we should not expect
     // code after this condition to be run if it is true.
@@ -73,7 +73,7 @@ export default class ClientAuthentication {
             ...options,
             toLogoutUrl: this.boundLogout,
           }
-        : options
+        : options,
     );
 
     // Restore our fetch() function back to the environment fetch(), effectively
@@ -85,7 +85,7 @@ export default class ClientAuthentication {
   };
 
   getSessionInfo = async (
-    sessionId: string
+    sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> => {
     // TODO complete
     return this.sessionInfoManager.get(sessionId);

@@ -41,7 +41,7 @@ export interface IClientRegistrarOptions {
 export interface IClientRegistrar {
   getClient(
     options: IClientRegistrarOptions,
-    issuerConfig: IIssuerConfig
+    issuerConfig: IIssuerConfig,
   ): Promise<IClient>;
 }
 
@@ -59,7 +59,7 @@ function isValidUrl(url: string): boolean {
 
 export function determineSigningAlg(
   supported: string[],
-  preferred: string[]
+  preferred: string[],
 ): string | null {
   return (
     preferred.find((signingAlg) => {
@@ -70,7 +70,7 @@ export function determineSigningAlg(
 
 function determineClientType(
   options: ILoginOptions,
-  issuerConfig: IIssuerConfig
+  issuerConfig: IIssuerConfig,
 ): ClientType {
   if (options.clientId !== undefined && !isValidUrl(options.clientId)) {
     return "static";
@@ -93,7 +93,7 @@ export async function handleRegistration(
   options: ILoginOptions,
   issuerConfig: IIssuerConfig,
   storageUtility: IStorageUtility,
-  clientRegistrar: IClientRegistrar
+  clientRegistrar: IClientRegistrar,
 ): Promise<IClient> {
   const clientType = determineClientType(options, issuerConfig);
   if (clientType === "dynamic") {
@@ -103,7 +103,7 @@ export async function handleRegistration(
         clientName: options.clientName,
         redirectUrl: options.redirectUrl,
       },
-      issuerConfig
+      issuerConfig,
     );
   }
   // If a client_id was provided, and the Identity Provider is Solid-OIDC compliant,

@@ -64,11 +64,11 @@ export async function refresh(
   refreshToken: string,
   issuer: IIssuerConfig,
   client: IClient,
-  dpopKey?: KeyPair
+  dpopKey?: KeyPair,
 ): Promise<TokenEndpointResponse> {
   if (client.clientId === undefined) {
     throw new Error(
-      "No client ID available when trying to refresh the access token."
+      "No client ID available when trying to refresh the access token.",
     );
   }
 
@@ -91,7 +91,7 @@ export async function refresh(
       // We assume that client_secret_basic is the client authentication method.
       // TODO: Get the authentication method from the IClient configuration object.
       Authorization: `Basic ${btoa(
-        `${client.clientId}:${client.clientSecret}`
+        `${client.clientId}:${client.clientSecret}`,
       )}`,
     };
   } else if (isValidUrl(client.clientId)) {
@@ -116,18 +116,18 @@ export async function refresh(
   } catch (e) {
     // The response is left out of the error on purpose not to leak any sensitive information.
     throw new Error(
-      `The token endpoint of issuer ${issuer.issuer} returned a malformed response.`
+      `The token endpoint of issuer ${issuer.issuer} returned a malformed response.`,
     );
   }
   const validatedResponse = validateTokenEndpointResponse(
     response,
-    dpopKey !== undefined
+    dpopKey !== undefined,
   );
   const webId = await getWebidFromTokenPayload(
     validatedResponse.id_token,
     issuer.jwksUri,
     issuer.issuer,
-    client.clientId
+    client.clientId,
   );
   return {
     accessToken: validatedResponse.access_token,

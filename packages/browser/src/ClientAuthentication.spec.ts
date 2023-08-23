@@ -50,7 +50,7 @@ import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerCon
 
 jest.mock("@inrupt/universal-fetch", () => {
   const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch"
+    "@inrupt/universal-fetch",
   ) as typeof UniversalFetch;
   return {
     ...fetchModule,
@@ -60,7 +60,7 @@ jest.mock("@inrupt/universal-fetch", () => {
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
@@ -78,7 +78,7 @@ const mockSessionStorage = async (
   options: SessionStorageOptions = {
     clientId: "https://some.app/registration",
     issuer: "https://some.issuer",
-  }
+  },
 ): Promise<StorageUtility> => {
   return new StorageUtility(
     mockStorage({
@@ -92,7 +92,7 @@ const mockSessionStorage = async (
         clientId: options.clientId,
         issuer: options.issuer,
       },
-    })
+    }),
   );
 };
 
@@ -107,14 +107,14 @@ describe("ClientAuthentication", () => {
   };
 
   function getClientAuthentication(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): ClientAuthentication {
     return new ClientAuthentication(
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
-      mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher
+      mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
     );
   }
 
@@ -144,7 +144,7 @@ describe("ClientAuthentication", () => {
           clientId: "coolApp",
           oidcIssuer: "https://idp.com",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
@@ -167,7 +167,7 @@ describe("ClientAuthentication", () => {
           redirectUrl: "https://coolapp.com/redirect",
           oidcIssuer: "https://idp.com",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
@@ -192,7 +192,7 @@ describe("ClientAuthentication", () => {
           oidcIssuer: "https://idp.com",
           tokenType: "Bearer",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
@@ -214,7 +214,7 @@ describe("ClientAuthentication", () => {
       await nonEmptyStorage.setForUser(
         "someUser",
         { someKey: "someValue" },
-        { secure: true }
+        { secure: true },
       );
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
@@ -228,17 +228,17 @@ describe("ClientAuthentication", () => {
           redirectUrl: "https://coolapp.com/redirect",
           oidcIssuer: "https://idp.com",
         },
-        mockEmitter
+        mockEmitter,
       );
       await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true }),
       ).resolves.toBeUndefined();
       await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false }),
       ).resolves.toBeUndefined();
       // This test is only necessary until the key is stored safely
       await expect(
-        nonEmptyStorage.get("clientKey", { secure: false })
+        nonEmptyStorage.get("clientKey", { secure: false }),
       ).resolves.toBeUndefined();
     });
 
@@ -253,8 +253,8 @@ describe("ClientAuthentication", () => {
             redirectUrl: "not a valid URL",
             oidcIssuer: "https://idp.com",
           },
-          mockEmitter
-        )
+          mockEmitter,
+        ),
       ).rejects.toThrow();
     });
 
@@ -269,8 +269,8 @@ describe("ClientAuthentication", () => {
             redirectUrl: "https://example.org/redirect#some-fragment",
             oidcIssuer: "https://idp.com",
           },
-          mockEmitter
-        )
+          mockEmitter,
+        ),
       ).rejects.toThrow("hash fragment");
     });
 
@@ -285,12 +285,12 @@ describe("ClientAuthentication", () => {
           oidcIssuer: "https://idp.com",
           tokenType: "Bearer",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
           redirectUrl: "https://example.org",
-        })
+        }),
       );
     });
   });
@@ -337,7 +337,7 @@ describe("ClientAuthentication", () => {
     it("creates a session for the global user", async () => {
       const clientAuthn = getClientAuthentication();
       await expect(() => clientAuthn.getAllSessionInfo()).rejects.toThrow(
-        "Not implemented"
+        "Not implemented",
       );
     });
   });
@@ -355,8 +355,8 @@ describe("ClientAuthentication", () => {
             {
               "solidClientAuthenticationUser:mySession": { ...sessionInfo },
             },
-            true
-          )
+            true,
+          ),
         ),
       });
       const session = await clientAuthn.getSessionInfo("mySession");
@@ -383,7 +383,7 @@ describe("ClientAuthentication", () => {
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
-        mockEmitter
+        mockEmitter,
       );
 
       // Our injected mocked response may also contain internal-only data (for
@@ -395,11 +395,11 @@ describe("ClientAuthentication", () => {
       expect(redirectInfo?.webId).toEqual(expectedResult.webId);
       expect(redirectInfo?.isLoggedIn).toEqual(expectedResult.isLoggedIn);
       expect(redirectInfo?.expirationDate).toEqual(
-        expectedResult.expirationDate
+        expectedResult.expirationDate,
       );
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        mockEmitter
+        mockEmitter,
       );
 
       // Calling the redirect handler should have updated the fetch.
@@ -418,7 +418,7 @@ describe("ClientAuthentication", () => {
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
         "",
-        "https://coolapp.com/redirect"
+        "https://coolapp.com/redirect",
       );
       expect(mockEmitter.emit).not.toHaveBeenCalled();
     });
@@ -428,7 +428,7 @@ describe("ClientAuthentication", () => {
       history.replaceState = jest.fn();
 
       mockHandleIncomingRedirect.mockImplementationOnce(() =>
-        Promise.reject(new Error("Something went wrong"))
+        Promise.reject(new Error("Something went wrong")),
       );
 
       const clientAuthn = getClientAuthentication();
@@ -440,13 +440,13 @@ describe("ClientAuthentication", () => {
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
         "",
-        "https://coolapp.com/redirect"
+        "https://coolapp.com/redirect",
       );
 
       expect(mockEmitter.emit).toHaveBeenCalledWith(
         EVENTS.ERROR,
         "redirect",
-        new Error("Something went wrong")
+        new Error("Something went wrong"),
       );
     });
 
@@ -461,7 +461,7 @@ describe("ClientAuthentication", () => {
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
         "",
-        "https://coolapp.com/redirect"
+        "https://coolapp.com/redirect",
       );
       expect(mockEmitter.emit).not.toHaveBeenCalled();
     });
@@ -477,7 +477,7 @@ describe("ClientAuthentication", () => {
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
         "",
-        "https://coolapp.com/redirect?someQuery=someValue"
+        "https://coolapp.com/redirect?someQuery=someValue",
       );
       expect(mockEmitter.emit).not.toHaveBeenCalled();
     });
@@ -497,14 +497,14 @@ describe("ClientAuthentication", () => {
           [`${USER_SESSION_PREFIX}:${sessionId}`]: {
             clientId: "https://some.app/registration",
           },
-        })
+        }),
       );
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
       await expect(
-        clientAuthn.validateCurrentSession(sessionId)
+        clientAuthn.validateCurrentSession(sessionId),
       ).resolves.toBeNull();
     });
 
@@ -519,14 +519,14 @@ describe("ClientAuthentication", () => {
         }),
         mockStorage({
           [`${USER_SESSION_PREFIX}:${sessionId}`]: {},
-        })
+        }),
       );
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
       await expect(
-        clientAuthn.validateCurrentSession(sessionId)
+        clientAuthn.validateCurrentSession(sessionId),
       ).resolves.toBeNull();
     });
 
@@ -542,14 +542,14 @@ describe("ClientAuthentication", () => {
       });
 
       await expect(
-        clientAuthn.validateCurrentSession(sessionId)
+        clientAuthn.validateCurrentSession(sessionId),
       ).resolves.toStrictEqual(
         expect.objectContaining({
           issuer: "https://some.issuer",
           clientAppId: "https://some.app/registration",
           sessionId,
           webId: "https://my.pod/profile#me",
-        })
+        }),
       );
     });
   });

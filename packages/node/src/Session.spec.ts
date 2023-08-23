@@ -78,7 +78,7 @@ describe("Session", () => {
       });
       expect(mySession).toBeDefined();
       expect(
-        dependencies.getClientAuthenticationWithDependencies
+        dependencies.getClientAuthenticationWithDependencies,
       ).toHaveBeenCalledWith({
         secureStorage,
         insecureStorage,
@@ -96,7 +96,7 @@ describe("Session", () => {
       });
       expect(mySession).toBeDefined();
       expect(
-        dependencies.getClientAuthenticationWithDependencies
+        dependencies.getClientAuthenticationWithDependencies,
       ).toHaveBeenCalledWith({
         secureStorage: storage,
         insecureStorage: storage,
@@ -118,7 +118,7 @@ describe("Session", () => {
       });
       expect(mySession).toBeDefined();
       expect(
-        dependencies.getClientAuthenticationWithDependencies
+        dependencies.getClientAuthenticationWithDependencies,
       ).toHaveBeenCalledWith({
         secureStorage: storage,
         insecureStorage: storage,
@@ -145,10 +145,10 @@ describe("Session", () => {
       });
       (mySession.events as EventEmitter).emit(
         EVENTS.NEW_REFRESH_TOKEN,
-        "some refresh token"
+        "some refresh token",
       );
       expect(legacyTokenRotationCallback).toHaveBeenCalledWith(
-        "some refresh token"
+        "some refresh token",
       );
     });
 
@@ -157,7 +157,7 @@ describe("Session", () => {
       (mySession.events as EventEmitter).emit(EVENTS.TIMEOUT_SET, 0);
       expect(
         (mySession as unknown as { lastTimeoutHandle: number })
-          .lastTimeoutHandle
+          .lastTimeoutHandle,
       ).toBe(0);
     });
 
@@ -168,7 +168,7 @@ describe("Session", () => {
       // Spy on the private session logout
       const spiedLogout = jest.spyOn(
         mySession as unknown as { internalLogout: () => Promise<void> },
-        "internalLogout"
+        "internalLogout",
       );
       const logoutEventcallback = jest.fn();
       mySession.events.on(EVENTS.LOGOUT, logoutEventcallback);
@@ -186,7 +186,7 @@ describe("Session", () => {
       // Spy on the private session logout
       const spiedLogout = jest.spyOn(
         mySession as unknown as { internalLogout: () => Promise<void> },
-        "internalLogout"
+        "internalLogout",
       );
       const logoutEventcallback = jest.fn();
       mySession.events.on(EVENTS.LOGOUT, logoutEventcallback);
@@ -267,7 +267,7 @@ describe("Session", () => {
     it("defaults to non-authenticated fetch if not logged in", async () => {
       const clientAuthentication = mockClientAuthentication();
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
       const mySession = new Session({ clientAuthentication });
       await mySession.fetch("https://some.url");
@@ -280,7 +280,7 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication();
       const clientAuthnHandle = jest.spyOn(
         clientAuthentication,
-        "handleIncomingRedirect"
+        "handleIncomingRedirect",
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
@@ -296,7 +296,7 @@ describe("Session", () => {
             sessionId: "a session ID",
             webId: "https://some.webid#them",
           };
-        }
+        },
       );
       const mySession = new Session({ clientAuthentication });
       expect(mySession.info.isLoggedIn).toBe(false);
@@ -315,7 +315,7 @@ describe("Session", () => {
             sessionId: "a session ID",
             webId: "https://some.webid#them",
           };
-        }
+        },
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
@@ -323,14 +323,14 @@ describe("Session", () => {
       await mySession.handleIncomingRedirect("https://some.url");
       // The second request should not hit the wrapped function
       expect(clientAuthentication.handleIncomingRedirect).toHaveBeenCalledTimes(
-        1
+        1,
       );
     });
 
     it("leaves the session's info unchanged if no session is obtained after redirect", async () => {
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => undefined
+        async (_url: string) => undefined,
       );
       const mySession = new Session({ clientAuthentication }, "mySession");
       await mySession.handleIncomingRedirect("https://some.url");
@@ -361,14 +361,14 @@ describe("Session", () => {
       // The ClientAuthn's handleIncomingRedirect will only return when the
       // second Session's handleIncomingRedirect has been called.
       clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => blockingRequest()
+        async (_url: string) => blockingRequest(),
       );
       const mySession = new Session({ clientAuthentication });
       const firstTokenRequest = mySession.handleIncomingRedirect(
-        "https://my.app/?code=someCode&state=arizona"
+        "https://my.app/?code=someCode&state=arizona",
       );
       const secondTokenRequest = mySession.handleIncomingRedirect(
-        "https://my.app/?code=someCode&state=arizona"
+        "https://my.app/?code=someCode&state=arizona",
       );
       secondRequestIssued = true;
       const tokenRequests = await Promise.all([
@@ -393,7 +393,7 @@ describe("Session", () => {
               sessionId: "a session ID",
               webId: "https://some.webid#them",
             };
-          }
+          },
         );
         const mySession = new Session({ clientAuthentication });
         mySession.onLogin(myCallback);
@@ -404,7 +404,7 @@ describe("Session", () => {
       it("does not call the registered callback if login isn't successful", async () => {
         const failCallback = (): void => {
           throw new Error(
-            "Should *NOT* call callback - this means test has failed!"
+            "Should *NOT* call callback - this means test has failed!",
           );
         };
         const clientAuthentication = mockClientAuthentication();
@@ -415,12 +415,12 @@ describe("Session", () => {
               sessionId: "a session ID",
               webId: "https://some.webid#them",
             };
-          }
+          },
         );
         const mySession = new Session({ clientAuthentication });
         mySession.onLogin(failCallback);
         await expect(
-          mySession.handleIncomingRedirect("https://some.url")
+          mySession.handleIncomingRedirect("https://some.url"),
         ).resolves.not.toThrow();
       });
 
@@ -433,7 +433,7 @@ describe("Session", () => {
               sessionId: "a session ID",
               webId: "https://some.webid#them",
             };
-          }
+          },
         );
         const mySession = new Session({ clientAuthentication });
         const myCallback = jest.fn((): void => {
@@ -466,7 +466,7 @@ describe("Session", () => {
         mySession.events.on(EVENTS.NEW_REFRESH_TOKEN, myCallback);
         (mySession.events as EventEmitter).emit(
           "newRefreshToken",
-          "some new refresh token"
+          "some new refresh token",
         );
         expect(myCallback).toHaveBeenCalledWith("some new refresh token");
       });
@@ -559,7 +559,7 @@ describe("Session", () => {
         mySession.events.on(EVENTS.NEW_REFRESH_TOKEN, myCallback);
         (mySession.events as EventEmitter).emit(
           "newRefreshToken",
-          "some new refresh token"
+          "some new refresh token",
         );
         expect(myCallback).toHaveBeenCalledWith("some new refresh token");
       });
@@ -580,7 +580,7 @@ describe("Session", () => {
       const mySession = new Session();
       // @ts-expect-error onLogin is a function on Session, and not SessionEventEmitter
       expect(() => mySession.events.onLogin(jest.fn())).toThrow(
-        "[onLogin] is not supported"
+        "[onLogin] is not supported",
       );
     });
   });
@@ -618,7 +618,7 @@ describe("getSessionFromStorage", () => {
         webId: "https://my.webid",
         isLoggedIn: true,
         sessionId: "mySession",
-      })
+      }),
     );
     expect(mySession?.info.expirationDate).toBeGreaterThan(Date.now());
   });
@@ -679,7 +679,7 @@ describe("getSessionFromStorage", () => {
     await getSessionFromStorage("mySession");
     const mockDefaultStorage = new InMemoryStorage();
     expect(
-      dependencies.getClientAuthenticationWithDependencies
+      dependencies.getClientAuthenticationWithDependencies,
     ).toHaveBeenCalledWith({
       insecureStorage: mockDefaultStorage,
       secureStorage: mockDefaultStorage,
@@ -729,7 +729,7 @@ describe("getStoredSessionIdAll", () => {
     await getSessionIdFromStorageAll();
     const mockDefaultStorage = new InMemoryStorage();
     expect(
-      dependencies.getClientAuthenticationWithDependencies
+      dependencies.getClientAuthenticationWithDependencies,
     ).toHaveBeenCalledWith({
       insecureStorage: mockDefaultStorage,
       secureStorage: mockDefaultStorage,
@@ -757,7 +757,7 @@ describe("clearSessionAll", () => {
       .mockReturnValue(clientAuthentication);
     await clearSessionFromStorageAll(storage);
     await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toStrictEqual(
-      JSON.stringify([])
+      JSON.stringify([]),
     );
   });
 
@@ -776,7 +776,7 @@ describe("clearSessionAll", () => {
     await clearSessionFromStorageAll();
     const mockDefaultStorage = new InMemoryStorage();
     expect(
-      dependencies.getClientAuthenticationWithDependencies
+      dependencies.getClientAuthenticationWithDependencies,
     ).toHaveBeenCalledWith({
       insecureStorage: mockDefaultStorage,
       secureStorage: mockDefaultStorage,

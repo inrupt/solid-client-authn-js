@@ -45,7 +45,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   // Isn't Javascript fun?
   login = async (
     options: ILoginOptions,
-    eventEmitter: EventEmitter
+    eventEmitter: EventEmitter,
   ): Promise<void> => {
     // In order to get a clean start, make sure that the session is logged out
     // on login.
@@ -65,7 +65,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       options.redirectUrl ?? removeOidcQueryParam(window.location.href);
     if (!isValidRedirectUrl(redirectUrl)) {
       throw new Error(
-        `${redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`
+        `${redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`,
       );
     }
     await this.loginHandler.handle({
@@ -82,7 +82,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   // Note that the ID token is not stored, which means the session information
   // cannot be validated at this point.
   validateCurrentSession = async (
-    currentSessionId: string
+    currentSessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | null> => {
     const sessionInfo = await this.sessionInfoManager.get(currentSessionId);
     if (
@@ -97,7 +97,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
 
   handleIncomingRedirect = async (
     url: string,
-    eventEmitter: EventEmitter
+    eventEmitter: EventEmitter,
   ): Promise<ISessionInfo | undefined> => {
     try {
       const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);

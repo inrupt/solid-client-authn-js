@@ -149,7 +149,7 @@ class DemoClientApp extends Component {
   async handleFetchIdentityProviderConfig() {
     try {
       const config = await fetchIdentityProviderConfig(
-        identityProviderConfigUrl(this.state.loginIssuer)
+        identityProviderConfigUrl(this.state.loginIssuer),
       );
 
       this.setState({ idpConfig: JSON.stringify(config, null, 2) });
@@ -256,7 +256,7 @@ class DemoClientApp extends Component {
       })
       .catch((error) => {
         console.error(
-          `It appears that [${idpConfigEndpoint}] is not a valid Identity Provider configuration endpoint: ${error}`
+          `It appears that [${idpConfigEndpoint}] is not a valid Identity Provider configuration endpoint: ${error}`,
         );
 
         this.setState({
@@ -320,7 +320,7 @@ class DemoClientApp extends Component {
                 this.displaySnackBar(
                   e.target.checked
                     ? "Login will force a re-authorization"
-                    : "Login will use existing authorizations (if any!)"
+                    : "Login will use existing authorizations (if any!)",
                 );
               }}
             />

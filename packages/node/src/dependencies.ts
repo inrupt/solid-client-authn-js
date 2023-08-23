@@ -61,7 +61,7 @@ export const buildLoginHandler = (
   storageUtility: IStorageUtility,
   tokenRefresher: ITokenRefresher,
   issuerConfigFetcher: IIssuerConfigFetcher,
-  clientRegistrar: IClientRegistrar
+  clientRegistrar: IClientRegistrar,
 ): ILoginHandler => {
   return new OidcLoginHandler(
     storageUtility,
@@ -70,11 +70,11 @@ export const buildLoginHandler = (
       new ClientCredentialsOidcHandler(tokenRefresher, storageUtility),
       new AuthorizationCodeWithPkceOidcHandler(
         storageUtility,
-        new Redirector()
+        new Redirector(),
       ),
     ]),
     issuerConfigFetcher,
-    clientRegistrar
+    clientRegistrar,
   );
 };
 
@@ -83,7 +83,7 @@ export const buildRedirectHandler = (
   sessionInfoManager: ISessionInfoManager,
   issuerConfigFetcher: IIssuerConfigFetcher,
   clientRegistrar: IClientRegistrar,
-  tokenRefresher: ITokenRefresher
+  tokenRefresher: ITokenRefresher,
 ): IIncomingRedirectHandler => {
   return new AggregateIncomingRedirectHandler([
     new AuthCodeRedirectHandler(
@@ -91,7 +91,7 @@ export const buildRedirectHandler = (
       sessionInfoManager,
       issuerConfigFetcher,
       clientRegistrar,
-      tokenRefresher
+      tokenRefresher,
     ),
     // This catch-all class will always be able to handle the
     // redirect IRI, so it must be registered last.
@@ -122,14 +122,14 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   const tokenRefresher = new TokenRefresher(
     storageUtility,
     issuerConfigFetcher,
-    clientRegistrar
+    clientRegistrar,
   );
 
   const loginHandler = buildLoginHandler(
     storageUtility,
     tokenRefresher,
     issuerConfigFetcher,
-    clientRegistrar
+    clientRegistrar,
   );
 
   const redirectHandler = buildRedirectHandler(
@@ -137,13 +137,13 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     sessionInfoManager,
     issuerConfigFetcher,
     clientRegistrar,
-    tokenRefresher
+    tokenRefresher,
   );
 
   return new ClientAuthentication(
     loginHandler,
     redirectHandler,
     new IWaterfallLogoutHandler(sessionInfoManager, new Redirector()),
-    sessionInfoManager
+    sessionInfoManager,
   );
 }

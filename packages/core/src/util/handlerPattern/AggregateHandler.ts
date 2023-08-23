@@ -65,7 +65,7 @@ export default class AggregateHandler<P extends Array<unknown>, R>
     // })
 
     const canHandleList = await Promise.all(
-      this.handleables.map((handleable) => handleable.canHandle(...params))
+      this.handleables.map((handleable) => handleable.canHandle(...params)),
     );
 
     for (let i = 0; i < canHandleList.length; i += 1) {
@@ -96,7 +96,7 @@ export default class AggregateHandler<P extends Array<unknown>, R>
             return (param as any).toString();
           }
         })
-        .join(", ")}`
+        .join(", ")}`,
     );
   }
 }

@@ -27,24 +27,24 @@ export default class IRpLogoutHandler implements ILogoutHandler {
 
   async canHandle(
     userId: string,
-    options?: ILogoutHandlerOptions | undefined
+    options?: ILogoutHandlerOptions | undefined,
   ): Promise<boolean> {
     return options?.logoutType === "idp";
   }
 
   async handle(
     userId: string,
-    options?: ILogoutHandlerOptions | undefined
+    options?: ILogoutHandlerOptions | undefined,
   ): Promise<void> {
     if (options?.logoutType !== "idp") {
       throw new Error(
-        "Attempting to call idp logout handler to perform app logout"
+        "Attempting to call idp logout handler to perform app logout",
       );
     }
 
     if (options.toLogoutUrl === undefined) {
       throw new Error(
-        "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+        "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?",
       );
     }
 

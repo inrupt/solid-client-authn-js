@@ -39,13 +39,13 @@ import {
 /* eslint-disable camelcase */
 
 function hasError(
-  value: { error: string } | Record<string, unknown>
+  value: { error: string } | Record<string, unknown>,
 ): value is { error: string } {
   return value.error !== undefined && typeof value.error === "string";
 }
 
 function hasErrorDescription(
-  value: { error_description: string } | Record<string, unknown>
+  value: { error_description: string } | Record<string, unknown>,
 ): value is { error_description: string } {
   return (
     value.error_description !== undefined &&
@@ -54,13 +54,13 @@ function hasErrorDescription(
 }
 
 function hasErrorUri(
-  value: { error_uri: string } | Record<string, unknown>
+  value: { error_uri: string } | Record<string, unknown>,
 ): value is { error_uri: string } {
   return value.error_uri !== undefined && typeof value.error_uri === "string";
 }
 
 function hasAccessToken(
-  value: { access_token: string } | Record<string, unknown>
+  value: { access_token: string } | Record<string, unknown>,
 ): value is { access_token: string } {
   return (
     value.access_token !== undefined && typeof value.access_token === "string"
@@ -68,13 +68,13 @@ function hasAccessToken(
 }
 
 function hasIdToken(
-  value: { id_token: string } | Record<string, unknown>
+  value: { id_token: string } | Record<string, unknown>,
 ): value is { id_token: string } {
   return value.id_token !== undefined && typeof value.id_token === "string";
 }
 
 function hasRefreshToken(
-  value: { refresh_token: string } | Record<string, unknown>
+  value: { refresh_token: string } | Record<string, unknown>,
 ): value is { refresh_token: string } {
   return (
     value.refresh_token !== undefined && typeof value.refresh_token === "string"
@@ -82,13 +82,13 @@ function hasRefreshToken(
 }
 
 function hasTokenType(
-  value: { token_type: string } | Record<string, unknown>
+  value: { token_type: string } | Record<string, unknown>,
 ): value is { token_type: string } {
   return value.token_type !== undefined && typeof value.token_type === "string";
 }
 
 function hasExpiresIn(
-  value: { expires_in?: number } | Record<string, unknown>
+  value: { expires_in?: number } | Record<string, unknown>,
 ): value is { expires_in?: number } {
   return value.expires_in === undefined || typeof value.expires_in === "number";
 }
@@ -109,7 +109,7 @@ export type TokenEndpointInput = {
 
 function validatePreconditions(
   issuer: IIssuerConfig,
-  data: TokenEndpointInput
+  data: TokenEndpointInput,
 ): void {
   if (
     data.grantType &&
@@ -117,19 +117,19 @@ function validatePreconditions(
       !issuer.grantTypesSupported.includes(data.grantType))
   ) {
     throw new Error(
-      `The issuer [${issuer.issuer}] does not support the [${data.grantType}] grant`
+      `The issuer [${issuer.issuer}] does not support the [${data.grantType}] grant`,
     );
   }
   if (!issuer.tokenEndpoint) {
     throw new Error(
-      `This issuer [${issuer.issuer}] does not have a token endpoint`
+      `This issuer [${issuer.issuer}] does not have a token endpoint`,
     );
   }
 }
 
 export function validateTokenEndpointResponse(
   tokenResponse: Record<string, unknown>,
-  dpop: boolean
+  dpop: boolean,
 ): Record<string, unknown> & {
   access_token: string;
   id_token: string;
@@ -147,7 +147,7 @@ export function validateTokenEndpointResponse(
       tokenResponse.error,
       hasErrorDescription(tokenResponse)
         ? tokenResponse.error_description
-        : undefined
+        : undefined,
     );
   }
 
@@ -179,7 +179,7 @@ export function validateTokenEndpointResponse(
 
   if (!dpop && tokenResponse.token_type.toLowerCase() !== "bearer") {
     throw new Error(
-      `Invalid token endpoint response: requested a [Bearer] token, but got a 'token_type' value of [${tokenResponse.token_type}].`
+      `Invalid token endpoint response: requested a [Bearer] token, but got a 'token_type' value of [${tokenResponse.token_type}].`,
     );
   }
   return tokenResponse;
@@ -189,19 +189,19 @@ export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
-  dpop: true
+  dpop: true,
 ): Promise<CodeExchangeResult>;
 export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
-  dpop: false
+  dpop: false,
 ): Promise<CodeExchangeResult>;
 export async function getTokens(
   issuer: IIssuerConfig,
   client: IClient,
   data: TokenEndpointInput,
-  dpop: boolean
+  dpop: boolean,
 ): Promise<CodeExchangeResult> {
   validatePreconditions(issuer, data);
   const headers: Record<string, string> = {
@@ -213,14 +213,14 @@ export async function getTokens(
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",
-      dpopKey
+      dpopKey,
     );
   }
 
   // TODO: Find out where this is specified.
   if (client.clientSecret) {
     headers.Authorization = `Basic ${btoa(
-      `${client.clientId}:${client.clientSecret}`
+      `${client.clientId}:${client.clientSecret}`,
     )}`;
   }
 
@@ -255,7 +255,7 @@ export async function getTokens(
     tokenResponse.id_token,
     issuer.jwksUri,
     issuer.issuer,
-    client.clientId
+    client.clientId,
   );
 
   return {
@@ -277,7 +277,7 @@ export async function getTokens(
  * @param redirectUrl The URL to which the user has been redirected
  */
 export async function getBearerToken(
-  redirectUrl: string
+  redirectUrl: string,
 ): Promise<CodeExchangeResult> {
   let signinResponse;
   try {
@@ -308,29 +308,29 @@ export async function getBearerToken(
     signinResponse = await client.processSigninResponse(redirectUrl);
     if (client.settings.metadata === undefined) {
       throw new Error(
-        "Cannot retrieve issuer metadata from client information in storage."
+        "Cannot retrieve issuer metadata from client information in storage.",
       );
     }
     if (client.settings.metadata.jwks_uri === undefined) {
       throw new Error(
-        "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined"
+        "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined",
       );
     }
     if (client.settings.metadata.issuer === undefined) {
       throw new Error(
-        "Missing some issuer metadata from client information in storage: 'issuer' is undefined"
+        "Missing some issuer metadata from client information in storage: 'issuer' is undefined",
       );
     }
     if (client.settings.client_id === undefined) {
       throw new Error(
-        "Missing some client information in storage: 'client_id' is undefined"
+        "Missing some client information in storage: 'client_id' is undefined",
       );
     }
     const webId = await getWebidFromTokenPayload(
       signinResponse.id_token,
       client.settings.metadata.jwks_uri,
       client.settings.metadata.issuer,
-      client.settings.client_id
+      client.settings.client_id,
     );
     return {
       accessToken: signinResponse.access_token,
@@ -347,7 +347,7 @@ export async function getBearerToken(
     };
   } catch (err) {
     throw new Error(
-      `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`
+      `Problem handling Auth Code Grant (Flow) redirect - URL [${redirectUrl}]: ${err}`,
     );
   }
 }
@@ -355,7 +355,7 @@ export async function getBearerToken(
 export async function getDpopToken(
   issuer: IIssuerConfig,
   client: IClient,
-  data: TokenEndpointInput
+  data: TokenEndpointInput,
 ): Promise<CodeExchangeResult> {
   return getTokens(issuer, client, data, true);
 }
