@@ -40,7 +40,7 @@ import type ClientAuthentication from "./ClientAuthentication";
 
 jest.mock("@inrupt/universal-fetch", () => {
   const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch"
+    "@inrupt/universal-fetch",
   ) as typeof UniversalFetch;
   return {
     ...fetchModule,
@@ -164,7 +164,7 @@ describe("Session", () => {
         expect.objectContaining({
           tokenType: "Bearer",
         }),
-        mySession
+        mySession,
       );
     });
 
@@ -248,14 +248,14 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest.spyOn(
         clientAuthentication,
-        "handleIncomingRedirect"
+        "handleIncomingRedirect",
       );
 
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect();
       expect(incomingRedirectHandler).toHaveBeenCalledWith(
         "https://some.url",
-        mySession
+        mySession,
       );
     });
 
@@ -264,7 +264,7 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest.spyOn(
         clientAuthentication,
-        "handleIncomingRedirect"
+        "handleIncomingRedirect",
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
@@ -299,12 +299,12 @@ describe("Session", () => {
             sessionId: "a session ID",
             webId: "https://some.webid#them",
           };
-        }
+        },
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
       expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBe(
-        mySession.info.sessionId
+        mySession.info.sessionId,
       );
     });
 
@@ -317,7 +317,7 @@ describe("Session", () => {
             sessionId: "a session ID",
             webId: "https://some.webid#them",
           };
-        }
+        },
       );
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
@@ -325,7 +325,7 @@ describe("Session", () => {
       await mySession.handleIncomingRedirect("https://some.url");
       // The second request should not hit the wrapped function
       expect(clientAuthentication.handleIncomingRedirect).toHaveBeenCalledTimes(
-        1
+        1,
       );
     });
 
@@ -336,7 +336,7 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest.spyOn(
         clientAuthentication,
-        "handleIncomingRedirect"
+        "handleIncomingRedirect",
       );
       incomingRedirectHandler.mockResolvedValueOnce({
         isLoggedIn: true,
@@ -348,14 +348,14 @@ describe("Session", () => {
       expect(mySession.info.expirationDate).toBe(MOCK_TIMESTAMP + 1337);
       mySession.emit(EVENTS.SESSION_EXTENDED, 1337 * 2);
       expect(mySession.info.expirationDate).toBe(
-        MOCK_TIMESTAMP + 1337 * 2 * 1000
+        MOCK_TIMESTAMP + 1337 * 2 * 1000,
       );
     });
 
     it("leaves the session's info unchanged if no session is obtained after redirect", async () => {
       const clientAuthentication = mockClientAuthentication();
       clientAuthentication.handleIncomingRedirect = jest.fn(
-        async (_url: string) => undefined
+        async (_url: string) => undefined,
       );
       const mySession = new Session({ clientAuthentication }, "mySession");
       await mySession.handleIncomingRedirect("https://some.url");
@@ -382,10 +382,10 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = jest.fn(blockingRequest);
       const mySession = new Session({ clientAuthentication });
       const firstTokenRequest = mySession.handleIncomingRedirect(
-        "https://my.app/?code=someCode&state=arizona"
+        "https://my.app/?code=someCode&state=arizona",
       );
       const secondTokenRequest = mySession.handleIncomingRedirect(
-        "https://my.app/?code=someCode&state=arizona"
+        "https://my.app/?code=someCode&state=arizona",
       );
       // We know that it has been set by the call to `blockingRequest`.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -403,14 +403,14 @@ describe("Session", () => {
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest.spyOn(
         clientAuthentication,
-        "handleIncomingRedirect"
+        "handleIncomingRedirect",
       );
       const mySession = new Session({ clientAuthentication });
       const objectWithHandleIncomingRedirect = {
         handleIncomingRedirect: mySession.handleIncomingRedirect,
       };
       await objectWithHandleIncomingRedirect.handleIncomingRedirect(
-        "https://some.url"
+        "https://some.url",
       );
       expect(incomingRedirectHandler).toHaveBeenCalled();
     });
@@ -422,7 +422,7 @@ describe("Session", () => {
       mockLocation("https://mock.current/location");
       const mockedStorage = new StorageUtility(
         mockStorage({}),
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -431,7 +431,7 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockReturnValue(
-          incomingRedirectPromise
+          incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
@@ -456,7 +456,7 @@ describe("Session", () => {
         }),
         // No session information need to be mocked, because `validateCurrentSession`
         // itself is mocked.
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -465,15 +465,15 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockReturnValueOnce(
-          incomingRedirectPromise
+          incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
       const validateCurrentSessionPromise = Promise.resolve(
-        "https://some.issuer/"
+        "https://some.issuer/",
       );
       clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockReturnValue(
-          validateCurrentSessionPromise
+          validateCurrentSessionPromise,
         ) as typeof clientAuthentication.validateCurrentSession;
 
       const mySession = new Session({ clientAuthentication });
@@ -485,7 +485,7 @@ describe("Session", () => {
       await incomingRedirectPromise;
       await validateCurrentSessionPromise;
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBe(
-        "https://mock.current/location"
+        "https://mock.current/location",
       );
     });
 
@@ -505,7 +505,7 @@ describe("Session", () => {
           [`${USER_SESSION_PREFIX}:${sessionId}`]: {
             clientId: "value doesn't matter",
           },
-        })
+        }),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -513,7 +513,7 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = (
         jest.fn() as any
       ).mockResolvedValue(
-        undefined
+        undefined,
       ) as typeof clientAuthentication.handleIncomingRedirect;
       const mySession = new Session({ clientAuthentication });
       // eslint-disable-next-line no-void
@@ -536,7 +536,7 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -551,13 +551,13 @@ describe("Session", () => {
       clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockReturnValue(
-          validateCurrentSessionPromise
+          validateCurrentSessionPromise,
         ) as typeof clientAuthentication.validateCurrentSession;
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockReturnValueOnce(
-          incomingRedirectPromise
+          incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
@@ -579,11 +579,11 @@ describe("Session", () => {
           clientSecret: "some client secret",
           redirectUrl: "https://some.redirect/url",
         },
-        expect.anything()
+        expect.anything(),
       );
       // Check that second parameter is of type session
       expect(
-        (clientAuthentication.login as any).mock.calls[0][1]
+        (clientAuthentication.login as any).mock.calls[0][1],
       ).toBeInstanceOf(Session);
     });
 
@@ -599,7 +599,7 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -608,13 +608,13 @@ describe("Session", () => {
       clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockReturnValue(
-          validateCurrentSessionPromise
+          validateCurrentSessionPromise,
         ) as typeof clientAuthentication.validateCurrentSession;
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
         .mockReturnValueOnce(
-          incomingRedirectPromise
+          incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
@@ -640,7 +640,7 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -656,7 +656,7 @@ describe("Session", () => {
       clientAuthentication.handleIncomingRedirect = (
         jest.fn() as any
       ).mockResolvedValue(
-        undefined
+        undefined,
       ) as typeof clientAuthentication.handleIncomingRedirect;
       clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
@@ -679,7 +679,7 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -720,7 +720,7 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -759,7 +759,7 @@ describe("Session", () => {
             isLoggedIn: "true",
           },
         }),
-        mockStorage({})
+        mockStorage({}),
       );
       const clientAuthentication = mockClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -781,7 +781,7 @@ describe("Session", () => {
         mySession.emit(EVENTS.ERROR, "error", "error_description");
         expect(onErrorCallback).toHaveBeenCalledWith(
           "error",
-          "error_description"
+          "error_description",
         );
       });
     });
@@ -807,7 +807,7 @@ describe("Session", () => {
       it("does not call the registered callback if login isn't successful", async () => {
         const failCallback = (): void => {
           throw new Error(
-            "Should *NOT* call callback - this means test has failed!"
+            "Should *NOT* call callback - this means test has failed!",
           );
         };
         const clientAuthentication = mockClientAuthentication();
@@ -818,12 +818,12 @@ describe("Session", () => {
               sessionId: "a session ID",
               webId: "https://some.webid#them",
             };
-          }
+          },
         );
         const mySession = new Session({ clientAuthentication });
         mySession.onLogin(failCallback);
         await expect(
-          mySession.handleIncomingRedirect("https://some.url")
+          mySession.handleIncomingRedirect("https://some.url"),
         ).resolves.not.toThrow();
       });
 
@@ -836,7 +836,7 @@ describe("Session", () => {
               sessionId: "a session ID",
               webId: "https://some.webid#them",
             };
-          }
+          },
         );
         const mySession = new Session({ clientAuthentication });
         const myCallback = jest.fn((): void => {
@@ -1035,7 +1035,7 @@ describe("Session", () => {
       const mySession = new Session();
       // @ts-expect-error onLogin is a function on Session, and not SessionEventEmitter
       expect(() => mySession.events.onLogin(jest.fn())).toThrow(
-        "[onLogin] is not supported"
+        "[onLogin] is not supported",
       );
     });
   });

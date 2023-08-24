@@ -45,7 +45,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 function hasIssuer(
-  options: ILoginOptions
+  options: ILoginOptions,
 ): options is ILoginOptions & { oidcIssuer: string } {
   return typeof options.oidcIssuer === "string";
 }
@@ -65,7 +65,7 @@ export default class OidcLoginHandler implements ILoginHandler {
     private storageUtility: IStorageUtility,
     private oidcHandler: IOidcHandler,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar,
   ) {}
 
   async canHandle(options: ILoginOptions): Promise<boolean> {
@@ -76,8 +76,8 @@ export default class OidcLoginHandler implements ILoginHandler {
     if (!hasIssuer(options)) {
       throw new ConfigurationError(
         `OidcLoginHandler requires an OIDC issuer: missing property 'oidcIssuer' in ${JSON.stringify(
-          options
-        )}`
+          options,
+        )}`,
       );
     }
     // TODO: the following code must be pushed to the handlers that actually need redirection
@@ -90,14 +90,14 @@ export default class OidcLoginHandler implements ILoginHandler {
     // }
 
     const issuerConfig = await this.issuerConfigFetcher.fetchConfig(
-      options.oidcIssuer
+      options.oidcIssuer,
     );
 
     const clientInfo: IClient = await handleRegistration(
       options,
       issuerConfig,
       this.storageUtility,
-      this.clientRegistrar
+      this.clientRegistrar,
     );
 
     // Construct OIDC Options
@@ -115,7 +115,7 @@ export default class OidcLoginHandler implements ILoginHandler {
         options.refreshToken ??
         (await this.storageUtility.getForUser(
           options.sessionId,
-          "refreshToken"
+          "refreshToken",
         )),
       handleRedirect: options.handleRedirect,
       eventEmitter: options.eventEmitter,

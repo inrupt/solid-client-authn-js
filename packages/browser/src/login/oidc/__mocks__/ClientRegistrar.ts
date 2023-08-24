@@ -41,7 +41,7 @@ export const PublicClientRegistrarResponse: IClient = {
 export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
     (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
-      Promise.resolve(ClientRegistrarResponse)
+      Promise.resolve(ClientRegistrarResponse),
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
@@ -49,7 +49,7 @@ export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
 export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
     (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
-      Promise.resolve(PublicClientRegistrarResponse)
+      Promise.resolve(PublicClientRegistrarResponse),
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
@@ -58,7 +58,7 @@ export const mockDefaultClientRegistrar = (): IClientRegistrar => {
   return {
     getClient: jest.fn(
       (_options: IClientRegistrarOptions, _issuerConfig: IIssuerConfig) =>
-        Promise.resolve(ClientRegistrarResponse)
+        Promise.resolve(ClientRegistrarResponse),
     ),
   };
 };

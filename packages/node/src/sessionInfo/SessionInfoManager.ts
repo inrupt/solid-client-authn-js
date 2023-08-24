@@ -45,16 +45,16 @@ export class SessionInfoManager
   implements ISessionInfoManager
 {
   async get(
-    sessionId: string
+    sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
     const webId = await this.storageUtility.getForUser(sessionId, "webId");
     const isLoggedIn = await this.storageUtility.getForUser(
       sessionId,
-      "isLoggedIn"
+      "isLoggedIn",
     );
     const refreshToken = await this.storageUtility.getForUser(
       sessionId,
-      "refreshToken"
+      "refreshToken",
     );
     const issuer = await this.storageUtility.getForUser(sessionId, "issuer");
 
@@ -84,8 +84,8 @@ export class SessionInfoManager
       await this.storageUtility.set(
         KEY_REGISTERED_SESSIONS,
         JSON.stringify(
-          sessions.filter((storedSessionId) => storedSessionId !== sessionId)
-        )
+          sessions.filter((storedSessionId) => storedSessionId !== sessionId),
+        ),
       );
     }
     return super.clear(sessionId);
@@ -100,7 +100,7 @@ export class SessionInfoManager
     if (rawSessions === undefined) {
       return this.storageUtility.set(
         KEY_REGISTERED_SESSIONS,
-        JSON.stringify([sessionId])
+        JSON.stringify([sessionId]),
       );
     }
     const sessions: string[] = JSON.parse(rawSessions);
@@ -108,7 +108,7 @@ export class SessionInfoManager
       sessions.push(sessionId);
       return this.storageUtility.set(
         KEY_REGISTERED_SESSIONS,
-        JSON.stringify(sessions)
+        JSON.stringify(sessions),
       );
     }
     return Promise.resolve();

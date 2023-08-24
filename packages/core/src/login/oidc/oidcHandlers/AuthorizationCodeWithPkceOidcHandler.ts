@@ -35,14 +35,14 @@ import type { IRedirector } from "../IRedirector";
 export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
   constructor(
     protected storageUtility: IStorageUtility,
-    protected redirector: IRedirector
+    protected redirector: IRedirector,
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return !!(
       oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
-        "authorization_code"
+        "authorization_code",
       ) > -1
     );
   }

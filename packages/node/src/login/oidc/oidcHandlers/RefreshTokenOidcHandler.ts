@@ -52,7 +52,7 @@ import type { EventEmitter } from "events";
 import type { KeyObject } from "crypto";
 
 function validateOptions(
-  oidcLoginOptions: IOidcOptions
+  oidcLoginOptions: IOidcOptions,
 ): oidcLoginOptions is IOidcOptions & {
   refreshToken: string;
   client: { clientId: string; clientSecret: string };
@@ -73,7 +73,7 @@ async function refreshAccess(
   refreshOptions: RefreshOptions,
   dpop: boolean,
   refreshBindingKey?: KeyPair,
-  eventEmitter?: EventEmitter
+  eventEmitter?: EventEmitter,
 ): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
   try {
     let dpopKey: KeyPair | undefined;
@@ -85,7 +85,7 @@ async function refreshAccess(
     const tokens = await refreshOptions.tokenRefresher.refresh(
       refreshOptions.sessionId,
       refreshOptions.refreshToken,
-      dpopKey
+      dpopKey,
     );
     // Rotate the refresh token if applicable
     const rotatedRefreshOptions = {
@@ -99,7 +99,7 @@ async function refreshAccess(
         dpopKey,
         refreshOptions: rotatedRefreshOptions,
         eventEmitter,
-      }
+      },
     );
     return Object.assign(tokens, {
       fetch: authFetch,
@@ -116,7 +116,7 @@ async function refreshAccess(
 export default class RefreshTokenOidcHandler implements IOidcHandler {
   constructor(
     private tokenRefresher: ITokenRefresher,
-    private storageUtility: IStorageUtility
+    private storageUtility: IStorageUtility,
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -127,8 +127,8 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     if (!(await this.canHandle(oidcLoginOptions))) {
       throw new Error(
         `RefreshTokenOidcHandler cannot handle the provided options, missing one of 'refreshToken', 'clientId' in: ${JSON.stringify(
-          oidcLoginOptions
-        )}`
+          oidcLoginOptions,
+        )}`,
       );
     }
     const refreshOptions: RefreshOptions = {
@@ -151,11 +151,11 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     // be used during the refresh grant.
     const publicKey = await this.storageUtility.getForUser(
       oidcLoginOptions.sessionId,
-      "publicKey"
+      "publicKey",
     );
     const privateKey = await this.storageUtility.getForUser(
       oidcLoginOptions.sessionId,
-      "privateKey"
+      "privateKey",
     );
     let keyPair: undefined | KeyPair;
     if (publicKey !== undefined && privateKey !== undefined) {
@@ -163,7 +163,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         publicKey: JSON.parse(publicKey) as JWK,
         privateKey: (await importJWK(
           JSON.parse(privateKey),
-          PREFERRED_SIGNING_ALG[0]
+          PREFERRED_SIGNING_ALG[0],
         )) as KeyObject,
       };
     }
@@ -171,7 +171,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     const accessInfo = await refreshAccess(
       refreshOptions,
       oidcLoginOptions.dpop,
-      keyPair
+      keyPair,
     );
 
     const sessionInfo: ISessionInfo = {
@@ -181,14 +181,14 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
 
     if (accessInfo.idToken === undefined) {
       throw new Error(
-        `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`
+        `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`,
       );
     }
     sessionInfo.webId = await getWebidFromTokenPayload(
       accessInfo.idToken,
       oidcLoginOptions.issuerConfiguration.jwksUri,
       oidcLoginOptions.issuer,
-      oidcLoginOptions.client.clientId
+      oidcLoginOptions.client.clientId,
     );
 
     await saveSessionInfoToStorage(
@@ -198,7 +198,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       "true",
       accessInfo.refreshToken ?? refreshOptions.refreshToken,
       undefined,
-      keyPair
+      keyPair,
     );
 
     await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {

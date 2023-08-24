@@ -72,7 +72,7 @@ describe("getSessionFromStorage", () => {
         webId: "https://my.webid",
         isLoggedIn: true,
         sessionId: "mySession",
-      })
+      }),
     );
     expect(mySession?.info.expirationDate).toBeGreaterThan(Date.now());
   });
@@ -133,7 +133,7 @@ describe("getSessionFromStorage", () => {
     await getSessionFromStorage("mySession");
     const mockDefaultStorage = new InMemoryStorage();
     expect(
-      dependencies.getClientAuthenticationWithDependencies
+      dependencies.getClientAuthenticationWithDependencies,
     ).toHaveBeenCalledWith({
       insecureStorage: mockDefaultStorage,
       secureStorage: mockDefaultStorage,
@@ -183,7 +183,7 @@ describe("getStoredSessionIdAll", () => {
     await getSessionIdFromStorageAll();
     const mockDefaultStorage = new InMemoryStorage();
     expect(
-      dependencies.getClientAuthenticationWithDependencies
+      dependencies.getClientAuthenticationWithDependencies,
     ).toHaveBeenCalledWith({
       insecureStorage: mockDefaultStorage,
       secureStorage: mockDefaultStorage,
@@ -211,7 +211,7 @@ describe("clearSessionAll", () => {
       .mockReturnValue(clientAuthentication);
     await clearSessionFromStorageAll(storage);
     await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toStrictEqual(
-      JSON.stringify([])
+      JSON.stringify([]),
     );
   });
 
@@ -230,7 +230,7 @@ describe("clearSessionAll", () => {
     await clearSessionFromStorageAll();
     const mockDefaultStorage = new InMemoryStorage();
     expect(
-      dependencies.getClientAuthenticationWithDependencies
+      dependencies.getClientAuthenticationWithDependencies,
     ).toHaveBeenCalledWith({
       insecureStorage: mockDefaultStorage,
       secureStorage: mockDefaultStorage,

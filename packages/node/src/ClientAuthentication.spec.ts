@@ -54,13 +54,13 @@ describe("ClientAuthentication", () => {
   };
 
   function getClientAuthentication(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): ClientAuthentication {
     return new ClientAuthentication(
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
-      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager
+      mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
     );
   }
 
@@ -76,7 +76,7 @@ describe("ClientAuthentication", () => {
           redirectUrl: "https://coolapp.com/redirect",
           oidcIssuer: "https://idp.com",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
@@ -102,8 +102,8 @@ describe("ClientAuthentication", () => {
             redirectUrl: "not a valid URL",
             oidcIssuer: "https://idp.com",
           },
-          mockEmitter
-        )
+          mockEmitter,
+        ),
       ).rejects.toThrow();
     });
 
@@ -117,8 +117,8 @@ describe("ClientAuthentication", () => {
             redirectUrl: "https://example.org/redirect#some-fragment",
             oidcIssuer: "https://idp.com",
           },
-          mockEmitter
-        )
+          mockEmitter,
+        ),
       ).rejects.toThrow("hash fragment");
     });
 
@@ -132,12 +132,12 @@ describe("ClientAuthentication", () => {
           redirectUrl: "https://example.org",
           oidcIssuer: "https://idp.com",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
           redirectUrl: "https://example.org",
-        })
+        }),
       );
     });
 
@@ -147,13 +147,13 @@ describe("ClientAuthentication", () => {
         // jest's Mock types don't seem to align here after an update.
         // Not sure what happened; taking the `any` escape since the tests worked.
         canHandle: jest.fn((_options: ILoginOptions) =>
-          Promise.resolve(true)
+          Promise.resolve(true),
         ) as any,
         handle: jest.fn((_options: ILoginOptions) =>
           Promise.resolve({
             fetch: mockedAuthFetch,
             webId: "https://my.webid/",
-          })
+          }),
         ) as any,
       };
       const clientAuthn = getClientAuthentication({
@@ -166,7 +166,7 @@ describe("ClientAuthentication", () => {
           clientId: "some client ID",
           clientSecret: "some client secret",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(loginResult).toBeDefined();
       expect(loginResult?.webId).toBe("https://my.webid/");
@@ -183,7 +183,7 @@ describe("ClientAuthentication", () => {
           oidcIssuer: "https://idp.com",
           tokenType: "Bearer",
         },
-        mockEmitter
+        mockEmitter,
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
@@ -202,13 +202,13 @@ describe("ClientAuthentication", () => {
   describe("fetch", () => {
     it("calls fetch", async () => {
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
       expect(mockedFetch).toHaveBeenCalledWith(
         "https://html5zombo.com",
-        undefined
+        undefined,
       );
     });
   });
@@ -244,7 +244,7 @@ describe("ClientAuthentication", () => {
         sessionInfoManager: mockSessionInfoManager(
           mockStorageUtility({
             "solidClientAuthenticationUser:mySession": { ...sessionInfo },
-          })
+          }),
         ),
       });
       const session = await clientAuthn.getSessionInfo("mySession");
@@ -257,7 +257,7 @@ describe("ClientAuthentication", () => {
     it("gets all session info instances", async () => {
       const clientAuthn = getClientAuthentication();
       await expect(clientAuthn.getAllSessionInfo()).rejects.toThrow(
-        "Not implemented"
+        "Not implemented",
       );
     });
   });
@@ -267,7 +267,7 @@ describe("ClientAuthentication", () => {
       const sessionInfoManager = mockSessionInfoManager(mockStorageUtility({}));
       const sessionManagerGetAllSpy = jest.spyOn(
         sessionInfoManager,
-        "getRegisteredSessionIdAll"
+        "getRegisteredSessionIdAll",
       );
       const clientAuthn = getClientAuthentication({
         sessionInfoManager,
@@ -310,14 +310,14 @@ describe("ClientAuthentication", () => {
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
-        session
+        session,
       );
       expect(redirectInfo).toEqual({
         ...SessionCreatorCreateResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        session
+        session,
       );
 
       // Calling the redirect handler should have updated the fetch.
@@ -332,14 +332,14 @@ describe("ClientAuthentication", () => {
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
-        session
+        session,
       );
       expect(redirectInfo).toEqual({
         ...SessionCreatorCreateResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        session
+        session,
       );
 
       // Calling the redirect handler should have updated the fetch.

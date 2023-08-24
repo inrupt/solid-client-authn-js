@@ -69,6 +69,6 @@ export interface ITokenRefresher {
     localUserId: string,
     refreshToken?: string,
     dpopKey?: KeyPair,
-    eventEmitter?: EventEmitter
+    eventEmitter?: EventEmitter,
   ): Promise<TokenEndpointResponse>;
 }

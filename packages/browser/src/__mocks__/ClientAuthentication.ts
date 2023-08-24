@@ -48,7 +48,7 @@ type ClientAuthnDependencies = {
 };
 
 export const mockClientAuthentication = (
-  mocks?: Partial<ClientAuthnDependencies>
+  mocks?: Partial<ClientAuthnDependencies>,
 ): ClientAuthentication => {
   const storage = mocks?.storage ?? mockStorageUtility({});
   return new ClientAuthentication(
@@ -56,6 +56,6 @@ export const mockClientAuthentication = (
     mocks?.redirectHandler ?? mockIncomingRedirectHandler(),
     mocks?.logoutHandler ?? mockLogoutHandler(storage),
     mocks?.sessionInfoManager ?? mockSessionInfoManager(storage),
-    mocks?.issuerConfigFetcher ?? IssuerConfigFetcherMock
+    mocks?.issuerConfigFetcher ?? IssuerConfigFetcherMock,
   );
 };

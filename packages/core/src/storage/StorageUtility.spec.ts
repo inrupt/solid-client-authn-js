@@ -43,11 +43,11 @@ describe("StorageUtility", () => {
   const userId = "animals";
 
   function getStorageUtility(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): StorageUtility {
     return new StorageUtility(
       mocks.secureStorage ?? defaultMocks.secureStorage,
-      mocks.insecureStorage ?? defaultMocks.insecureStorage
+      mocks.insecureStorage ?? defaultMocks.insecureStorage,
     );
   }
 
@@ -84,7 +84,7 @@ describe("StorageUtility", () => {
         insecureStorage: storageMock,
       });
       await expect(
-        storageUtility.get("key", { errorIfNull: true })
+        storageUtility.get("key", { errorIfNull: true }),
       ).rejects.toThrow("[key] is not stored");
     });
   });
@@ -119,16 +119,16 @@ describe("StorageUtility", () => {
       });
 
       await expect(
-        storageUtility.get(key, { secure: true })
+        storageUtility.get(key, { secure: true }),
       ).resolves.toBeUndefined();
       await storageUtility.set(key, value, { secure: true });
       await expect(storageUtility.get(key, { secure: true })).resolves.toEqual(
-        value
+        value,
       );
 
       await storageUtility.delete(key, { secure: true });
       await expect(
-        storageUtility.get(key, { secure: true })
+        storageUtility.get(key, { secure: true }),
       ).resolves.toBeUndefined();
     });
   });
@@ -139,7 +139,7 @@ describe("StorageUtility", () => {
       mockedStorageUtility.get = jest
         .fn()
         .mockReturnValue(
-          "This response deliberately cannot be parsed as JSON!"
+          "This response deliberately cannot be parsed as JSON!",
         ) as typeof mockedStorageUtility.get;
       const storageUtility = getStorageUtility({
         insecureStorage: mockedStorageUtility,
@@ -147,15 +147,15 @@ describe("StorageUtility", () => {
       });
 
       await expect(
-        storageUtility.getForUser("irrelevant for this test", "Doesn't matter")
+        storageUtility.getForUser("irrelevant for this test", "Doesn't matter"),
       ).rejects.toThrow("cannot be parsed as JSON!");
 
       await expect(
         storageUtility.getForUser(
           "irrelevant for this test",
           "Doesn't matter",
-          { secure: true }
-        )
+          { secure: true },
+        ),
       ).rejects.toThrow("cannot be parsed as JSON!");
     });
 
@@ -217,7 +217,7 @@ describe("StorageUtility", () => {
         insecureStorage: mockStorage({}),
       });
       await expect(
-        storageUtility.getForUser(userId, "jackie", { errorIfNull: true })
+        storageUtility.getForUser(userId, "jackie", { errorIfNull: true }),
       ).rejects.toThrow(`Field [jackie] for user [${userId}] is not stored`);
     });
   });
@@ -239,7 +239,7 @@ describe("StorageUtility", () => {
       const storageMock = defaultMocks.insecureStorage;
       await storageMock.set(
         `solidClientAuthenticationUser:${userId}`,
-        'cool: "bleep bloop not parsable"'
+        'cool: "bleep bloop not parsable"',
       );
 
       const storageUtility = getStorageUtility({
@@ -267,10 +267,10 @@ describe("StorageUtility", () => {
       await storageUtility.deleteForUser(userId, "jackie");
 
       await expect(
-        storageUtility.getForUser(userId, "jackie")
+        storageUtility.getForUser(userId, "jackie"),
       ).resolves.toBeUndefined();
       await expect(storageUtility.getForUser(userId, "sledge")).resolves.toBe(
-        "The Dog"
+        "The Dog",
       );
     });
 
@@ -289,10 +289,10 @@ describe("StorageUtility", () => {
       });
 
       await expect(
-        storageUtility.getForUser("someUser", "jackie", { secure: true })
+        storageUtility.getForUser("someUser", "jackie", { secure: true }),
       ).resolves.toBeUndefined();
       await expect(
-        storageUtility.getForUser("someUser", "sledge", { secure: true })
+        storageUtility.getForUser("someUser", "sledge", { secure: true }),
       ).resolves.toBe("The Dog");
     });
   });
@@ -310,13 +310,13 @@ describe("StorageUtility", () => {
       // Write some user data, and make sure it's there.
       await storageUtility.setForUser(userId, userData);
       await expect(storageUtility.getForUser(userId, "jackie")).resolves.toBe(
-        "The Cat"
+        "The Cat",
       );
 
       // Delete that user data, and make sure it's gone.
       await storageUtility.deleteAllUserData(userId);
       await expect(
-        storageUtility.getForUser(userId, "jackie")
+        storageUtility.getForUser(userId, "jackie"),
       ).resolves.toBeUndefined();
     });
 
@@ -332,13 +332,13 @@ describe("StorageUtility", () => {
       // Write some user data, and make sure it's there.
       await storageUtility.setForUser(userId, userData, { secure: true });
       await expect(
-        storageUtility.getForUser(userId, "jackie", { secure: true })
+        storageUtility.getForUser(userId, "jackie", { secure: true }),
       ).resolves.toBe("The Cat");
 
       // Delete that user data, and make sure it's gone.
       await storageUtility.deleteAllUserData(userId, { secure: true });
       await expect(
-        storageUtility.getForUser(userId, "jackie", { secure: true })
+        storageUtility.getForUser(userId, "jackie", { secure: true }),
       ).resolves.toBeUndefined();
     });
   });
@@ -354,11 +354,11 @@ describe("getSessionIdFromOauthState", () => {
           sessionId: oauthStateValue,
         },
       },
-      false
+      false,
     );
 
     await expect(
-      getSessionIdFromOauthState(mockedStorage, oauthState)
+      getSessionIdFromOauthState(mockedStorage, oauthState),
     ).resolves.toBe(oauthStateValue);
   });
 
@@ -368,8 +368,8 @@ describe("getSessionIdFromOauthState", () => {
     await expect(
       getSessionIdFromOauthState(
         mockedStorage,
-        "some non-existent 'state' value"
-      )
+        "some non-existent 'state' value",
+      ),
     ).resolves.toBeUndefined();
   });
 });
@@ -388,10 +388,10 @@ describe("loadOidcContextFromStorage", () => {
       loadOidcContextFromStorage(
         "mySession",
         mockedStorage,
-        mockIssuerConfigFetcher(mockIssuerConfig())
-      )
+        mockIssuerConfigFetcher(mockIssuerConfig()),
+      ),
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage associated with session [mySession]"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]",
     );
   });
 
@@ -408,10 +408,10 @@ describe("loadOidcContextFromStorage", () => {
       loadOidcContextFromStorage(
         "mySession",
         mockedStorage,
-        mockIssuerConfigFetcher(mockIssuerConfig())
-      )
+        mockIssuerConfigFetcher(mockIssuerConfig()),
+      ),
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage associated with session [mySession]"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]",
     );
   });
 
@@ -429,8 +429,8 @@ describe("loadOidcContextFromStorage", () => {
       loadOidcContextFromStorage(
         "mySession",
         mockedStorage,
-        mockIssuerConfigFetcher(mockIssuerConfig())
-      )
+        mockIssuerConfigFetcher(mockIssuerConfig()),
+      ),
     ).resolves.toEqual({
       issuerConfig: mockIssuerConfig(),
       codeVerifier: "some code verifier",
@@ -452,10 +452,10 @@ describe("loadOidcContextFromStorage", () => {
     await loadOidcContextFromStorage(
       "mySession",
       mockedStorage,
-      mockIssuerConfigFetcher(mockIssuerConfig())
+      mockIssuerConfigFetcher(mockIssuerConfig()),
     );
     await expect(
-      mockedStorage.getForUser("mySession", "codeVerifier")
+      mockedStorage.getForUser("mySession", "codeVerifier"),
     ).resolves.toBeUndefined();
   });
 });
@@ -469,11 +469,13 @@ describe("saveSessionInfoToStorage", () => {
       "https://my.webid",
       "true",
       "a refresh token",
-      true
+      true,
     );
 
     await expect(
-      mockedStorage.getForUser("some session", "refreshToken", { secure: true })
+      mockedStorage.getForUser("some session", "refreshToken", {
+        secure: true,
+      }),
     ).resolves.toBe("a refresh token");
   });
 
@@ -485,11 +487,11 @@ describe("saveSessionInfoToStorage", () => {
       "https://my.webid",
       undefined,
       undefined,
-      true
+      true,
     );
 
     await expect(
-      mockedStorage.getForUser("some session", "webId", { secure: true })
+      mockedStorage.getForUser("some session", "webId", { secure: true }),
     ).resolves.toBe("https://my.webid");
   });
 
@@ -501,11 +503,11 @@ describe("saveSessionInfoToStorage", () => {
       undefined,
       "true",
       undefined,
-      true
+      true,
     );
 
     await expect(
-      mockedStorage.getForUser("some session", "isLoggedIn", { secure: true })
+      mockedStorage.getForUser("some session", "isLoggedIn", { secure: true }),
     ).resolves.toBe("true");
   });
 
@@ -548,7 +550,7 @@ describe("saveSessionInfoToStorage", () => {
       "true",
       "a refresh token",
       true,
-      dpopKey
+      dpopKey,
     );
 
     expect(
@@ -556,17 +558,17 @@ describe("saveSessionInfoToStorage", () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (await mockedStorage.getForUser("some session", "publicKey", {
           secure: true,
-        }))!
-      )
+        }))!,
+      ),
     ).toEqual(dpopKey.publicKey);
     const privateJwk = await mockedStorage.getForUser(
       "some session",
       "privateKey",
-      { secure: true }
+      { secure: true },
     );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(JSON.parse(privateJwk!)).toEqual(
-      await exportJWK(dpopKey.privateKey)
+      await exportJWK(dpopKey.privateKey),
     );
   });
 });

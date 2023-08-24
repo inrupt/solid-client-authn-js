@@ -50,7 +50,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
 {
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     const issuer = new Issuer(
-      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration)
+      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration),
     );
     const client = new issuer.Client({
       client_id: oidcLoginOptions.client.clientId,

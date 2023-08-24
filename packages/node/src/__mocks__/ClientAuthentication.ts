@@ -44,14 +44,14 @@ type CustomMocks = {
 };
 
 export const mockCustomClientAuthentication = (
-  mocks: Partial<CustomMocks>
+  mocks: Partial<CustomMocks>,
 ): ClientAuthentication => {
   const storage = mocks.storage ?? mockStorageUtility({});
   return new ClientAuthentication(
     mocks.loginHandler ?? mockLoginHandler(),
     mocks.redirectHandler ?? mockIncomingRedirectHandler(),
     mocks.logoutHandler ?? mockLogoutHandler(storage),
-    mocks.sessionInfoManager ?? mockSessionInfoManager(storage)
+    mocks.sessionInfoManager ?? mockSessionInfoManager(storage),
   );
 };
 

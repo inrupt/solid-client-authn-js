@@ -33,7 +33,7 @@
  * @param headersToFlatten A structure containing headers potentially in several formats
  */
 export function flattenHeaders(
-  headersToFlatten: Headers | Record<string, string> | string[][] | undefined
+  headersToFlatten: Headers | Record<string, string> | string[][] | undefined,
 ): Record<string, string> {
   if (typeof headersToFlatten === "undefined") {
     return {};

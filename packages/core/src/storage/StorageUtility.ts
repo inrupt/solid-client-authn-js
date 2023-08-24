@@ -43,7 +43,7 @@ export type OidcContext = {
 
 export async function getSessionIdFromOauthState(
   storageUtility: IStorageUtility,
-  oauthState: string
+  oauthState: string,
 ): Promise<string | undefined> {
   return storageUtility.getForUser(oauthState, "sessionId");
 }
@@ -59,7 +59,7 @@ export async function getSessionIdFromOauthState(
 export async function loadOidcContextFromStorage(
   sessionId: string,
   storageUtility: IStorageUtility,
-  configFetcher: IIssuerConfigFetcher
+  configFetcher: IIssuerConfigFetcher,
 ): Promise<OidcContext> {
   try {
     const [issuerIri, codeVerifier, storedRedirectIri, dpop] =
@@ -84,7 +84,7 @@ export async function loadOidcContextFromStorage(
     };
   } catch (e) {
     throw new Error(
-      `Failed to retrieve OIDC context from storage associated with session [${sessionId}]: ${e}`
+      `Failed to retrieve OIDC context from storage associated with session [${sessionId}]: ${e}`,
     );
   }
 }
@@ -109,7 +109,7 @@ export async function saveSessionInfoToStorage(
   isLoggedIn?: string,
   refreshToken?: string,
   secure?: boolean,
-  dpopKey?: KeyPair
+  dpopKey?: KeyPair,
 ): Promise<void> {
   // TODO: Investigate why this does not work with a Promise.all
   if (refreshToken !== undefined) {
@@ -128,7 +128,7 @@ export async function saveSessionInfoToStorage(
         publicKey: JSON.stringify(dpopKey.publicKey),
         privateKey: JSON.stringify(await exportJWK(dpopKey.privateKey)),
       },
-      { secure }
+      { secure },
     );
   }
 }
@@ -140,7 +140,7 @@ export async function saveSessionInfoToStorage(
 export default class StorageUtility implements IStorageUtility {
   constructor(
     private secureStorage: IStorage,
-    private insecureStorage: IStorage
+    private insecureStorage: IStorage,
   ) {}
 
   private getKey(userId: string): string {
@@ -149,7 +149,7 @@ export default class StorageUtility implements IStorageUtility {
 
   private async getUserData(
     userId: string,
-    secure?: boolean
+    secure?: boolean,
   ): Promise<Record<string, string>> {
     const stored = await (secure
       ? this.secureStorage
@@ -166,7 +166,7 @@ export default class StorageUtility implements IStorageUtility {
       throw new Error(
         `Data for user [${userId}] in [${
           secure ? "secure" : "unsecure"
-        }] storage is corrupted - expected valid JSON, but got: ${stored}`
+        }] storage is corrupted - expected valid JSON, but got: ${stored}`,
       );
     }
   }
@@ -174,17 +174,17 @@ export default class StorageUtility implements IStorageUtility {
   private async setUserData(
     userId: string,
     data: Record<string, string>,
-    secure?: boolean
+    secure?: boolean,
   ): Promise<void> {
     await (secure ? this.secureStorage : this.insecureStorage).set(
       this.getKey(userId),
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
   async get(
     key: string,
-    options?: { errorIfNull?: boolean; secure?: boolean }
+    options?: { errorIfNull?: boolean; secure?: boolean },
   ): Promise<string | undefined> {
     const value = await (options?.secure
       ? this.secureStorage
@@ -199,24 +199,24 @@ export default class StorageUtility implements IStorageUtility {
   async set(
     key: string,
     value: string,
-    options?: { secure?: boolean }
+    options?: { secure?: boolean },
   ): Promise<void> {
     return (options?.secure ? this.secureStorage : this.insecureStorage).set(
       key,
-      value
+      value,
     );
   }
 
   async delete(key: string, options?: { secure?: boolean }): Promise<void> {
     return (options?.secure ? this.secureStorage : this.insecureStorage).delete(
-      key
+      key,
     );
   }
 
   async getForUser(
     userId: string,
     key: string,
-    options?: { errorIfNull?: boolean; secure?: boolean }
+    options?: { errorIfNull?: boolean; secure?: boolean },
   ): Promise<string | undefined> {
     const userData = await this.getUserData(userId, options?.secure);
     let value;
@@ -233,7 +233,7 @@ export default class StorageUtility implements IStorageUtility {
   async setForUser(
     userId: string,
     values: Record<string, string>,
-    options?: { secure?: boolean }
+    options?: { secure?: boolean },
   ): Promise<void> {
     let userData: Record<string, string>;
     try {
@@ -249,7 +249,7 @@ export default class StorageUtility implements IStorageUtility {
   async deleteForUser(
     userId: string,
     key: string,
-    options?: { secure?: boolean }
+    options?: { secure?: boolean },
   ): Promise<void> {
     const userData = await this.getUserData(userId, options?.secure);
     delete userData[key];
@@ -258,10 +258,10 @@ export default class StorageUtility implements IStorageUtility {
 
   async deleteAllUserData(
     userId: string,
-    options?: { secure?: boolean }
+    options?: { secure?: boolean },
   ): Promise<void> {
     await (options?.secure ? this.secureStorage : this.insecureStorage).delete(
-      this.getKey(userId)
+      this.getKey(userId),
     );
   }
 }

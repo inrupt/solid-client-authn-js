@@ -125,7 +125,7 @@ const mockOidcModule = async (response?: TokenEndpointResponse) => {
           dpopKey: await mockKeyPair(),
           webId: mockWebId(),
         }
-      : response
+      : response,
   ) as typeof refresh;
   return oidcModule;
 };
@@ -137,12 +137,12 @@ const defaultMocks = {
 };
 
 function getTokenRefresher(
-  mocks: Partial<typeof defaultMocks> = defaultMocks
+  mocks: Partial<typeof defaultMocks> = defaultMocks,
 ): TokenRefresher {
   return new TokenRefresher(
     mocks.storageUtility ?? defaultMocks.storageUtility,
     mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-    mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+    mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
   );
 }
 
@@ -156,9 +156,9 @@ describe("TokenRefresher", () => {
       });
 
       await expect(
-        refresher.refresh("mySession", "some refresh token")
+        refresher.refresh("mySession", "some refresh token"),
       ).rejects.toThrow(
-        "Failed to retrieve OIDC context from storage associated with session [mySession]"
+        "Failed to retrieve OIDC context from storage associated with session [mySession]",
       );
     });
 
@@ -174,9 +174,9 @@ describe("TokenRefresher", () => {
       });
 
       await expect(
-        refresher.refresh("mySession", "some refresh token")
+        refresher.refresh("mySession", "some refresh token"),
       ).rejects.toThrow(
-        "Failed to retrieve OIDC context from storage associated with session [mySession]"
+        "Failed to retrieve OIDC context from storage associated with session [mySession]",
       );
     });
 
@@ -188,7 +188,7 @@ describe("TokenRefresher", () => {
       });
 
       await expect(refresher.refresh("mySession")).rejects.toThrow(
-        "Session [mySession] has no refresh token to allow it to refresh its access token."
+        "Session [mySession] has no refresh token to allow it to refresh its access token.",
       );
     });
 
@@ -200,9 +200,9 @@ describe("TokenRefresher", () => {
       });
 
       await expect(
-        refresher.refresh("mySession", "some refresh token")
+        refresher.refresh("mySession", "some refresh token"),
       ).rejects.toThrow(
-        "For session [mySession], the key bound to the DPoP access token must be provided to refresh said access token."
+        "For session [mySession], the key bound to the DPoP access token must be provided to refresh said access token.",
       );
     });
 
@@ -217,7 +217,7 @@ describe("TokenRefresher", () => {
       const result = await refresher.refresh(
         "mySession",
         "some refresh token",
-        await mockKeyPair()
+        await mockKeyPair(),
       );
       expect(oidcModule.refresh).toHaveBeenCalled();
       expect(result).toEqual({
@@ -246,11 +246,11 @@ describe("TokenRefresher", () => {
         "mySession",
         "some old refresh token",
         await mockKeyPair(),
-        mockEmitter
+        mockEmitter,
       );
       expect(mockEmit).toHaveBeenCalledWith(
         EVENTS.NEW_REFRESH_TOKEN,
-        "Some rotated refresh token"
+        "Some rotated refresh token",
       );
     });
 
@@ -268,7 +268,7 @@ describe("TokenRefresher", () => {
       const result = await refresher.refresh(
         "mySession",
         "some refresh token",
-        await mockKeyPair()
+        await mockKeyPair(),
       );
       expect(result.refreshToken).toBe("Some rotated refresh token");
     });

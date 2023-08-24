@@ -75,7 +75,7 @@ describe("Redirector", () => {
       expect(window.history.replaceState).toHaveBeenCalledWith(
         {},
         "",
-        "https://someUrl.com/redirect"
+        "https://someUrl.com/redirect",
       );
       expect(window.location.href).toBe("https://coolSite.com");
     });

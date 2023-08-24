@@ -38,10 +38,10 @@ export const SessionCreatorGetSessionResponse: ISessionInfo =
 
 export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
   update: jest.fn(
-    async (_sessionId: string, _options: ISessionInfoManagerOptions) => {}
+    async (_sessionId: string, _options: ISessionInfoManagerOptions) => {},
   ),
   get: jest.fn(async (_sessionId: string) =>
-    Promise.resolve(SessionCreatorCreateResponse)
+    Promise.resolve(SessionCreatorCreateResponse),
   ),
   getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse])),
   clear: jest.fn(async (_sessionId: string) => Promise.resolve()),
@@ -54,7 +54,7 @@ export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
 } as any;
 
 export function mockSessionInfoManager(
-  storageUtility: IStorageUtility
+  storageUtility: IStorageUtility,
 ): ISessionInfoManager {
   return new SessionInfoManager(storageUtility);
 }

@@ -49,7 +49,7 @@ export const mockDefaultOidcOptions = (): IOidcOptions => {
 };
 
 export const mockOidcOptions = (
-  overriddenOptions: Partial<IOidcOptions>
+  overriddenOptions: Partial<IOidcOptions>,
 ): IOidcOptions => {
   return {
     ...standardOidcOptions,

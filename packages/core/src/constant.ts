@@ -55,5 +55,5 @@ const SCOPE_OFFLINE = "offline_access";
 const SCOPE_WEBID = "webid";
 // The scopes are expected as a space-separated list.
 export const DEFAULT_SCOPES = [SCOPE_OPENID, SCOPE_OFFLINE, SCOPE_WEBID].join(
-  " "
+  " ",
 );

@@ -38,10 +38,10 @@ describe("IssuerConfigFetcher", () => {
   };
 
   function getIssuerConfigFetcher(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): IssuerConfigFetcher {
     return new IssuerConfigFetcher(
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility,
     );
   }
 
@@ -59,19 +59,19 @@ describe("IssuerConfigFetcher", () => {
     const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
     expect(fetchedConfig.issuer).toBe(mockedIssuerConfig.issuer);
     expect(fetchedConfig.authorizationEndpoint).toBe(
-      mockedIssuerConfig.authorization_endpoint
+      mockedIssuerConfig.authorization_endpoint,
     );
     expect(fetchedConfig.claimsSupported).toBe(
-      mockedIssuerConfig.claims_supported
+      mockedIssuerConfig.claims_supported,
     );
     expect(fetchedConfig.issuer).toBe(mockedIssuerConfig.issuer);
     expect(fetchedConfig.jwksUri).toBe(mockedIssuerConfig.jwks_uri);
     expect(fetchedConfig.tokenEndpoint).toBe(mockedIssuerConfig.token_endpoint);
     expect(fetchedConfig.subjectTypesSupported).toBe(
-      mockedIssuerConfig.subject_types_supported
+      mockedIssuerConfig.subject_types_supported,
     );
     expect(fetchedConfig.endSessionEndpoint).toBe(
-      mockedIssuerConfig.end_session_endpoint
+      mockedIssuerConfig.end_session_endpoint,
     );
   });
 
@@ -89,7 +89,7 @@ describe("IssuerConfigFetcher", () => {
     });
 
     await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "Issuer metadata is missing an authorization endpoint"
+      "Issuer metadata is missing an authorization endpoint",
     );
   });
 
@@ -107,7 +107,7 @@ describe("IssuerConfigFetcher", () => {
     });
 
     await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "Issuer metadata is missing an token endpoint"
+      "Issuer metadata is missing an token endpoint",
     );
   });
 
@@ -125,7 +125,7 @@ describe("IssuerConfigFetcher", () => {
     });
 
     await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "Issuer metadata is missing a keyset URI"
+      "Issuer metadata is missing a keyset URI",
     );
   });
 
@@ -143,7 +143,7 @@ describe("IssuerConfigFetcher", () => {
     });
 
     await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "Issuer metadata is missing supported claims:"
+      "Issuer metadata is missing supported claims:",
     );
   });
 
@@ -161,7 +161,7 @@ describe("IssuerConfigFetcher", () => {
     });
 
     await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "Issuer metadata is missing supported subject types:"
+      "Issuer metadata is missing supported subject types:",
     );
   });
 

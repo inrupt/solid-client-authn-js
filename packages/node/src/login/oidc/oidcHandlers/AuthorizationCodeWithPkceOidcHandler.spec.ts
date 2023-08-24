@@ -46,11 +46,11 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   };
 
   function getAuthorizationCodeWithPkceOidcHandler(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): AuthorizationCodeWithPkceOidcHandler {
     return new AuthorizationCodeWithPkceOidcHandler(
       mocks.storageUtility ?? defaultMocks.storageUtility,
-      mocks.redirector ?? defaultMocks.redirector
+      mocks.redirector ?? defaultMocks.redirector,
     );
   }
 
@@ -62,11 +62,11 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         // eslint-disable-next-line jest/valid-title
         it(testConfig.message, async () => {
           const value = await authorizationCodeWithPkceOidcHandler.canHandle(
-            testConfig.oidcOptions
+            testConfig.oidcOptions,
           );
           expect(value).toBe(testConfig.shouldPass);
         });
-      }
+      },
     );
   });
 
@@ -76,12 +76,12 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         getAuthorizationCodeWithPkceOidcHandler();
 
       await authorizationCodeWithPkceOidcHandler.handle(
-        mockDefaultOidcOptions()
+        mockDefaultOidcOptions(),
       );
 
       const builtUrl = new URL(mockedRedirector.mock.calls[0][0]);
       expect(builtUrl.hostname).toEqual(
-        new URL(mockDefaultOidcOptions().issuer).hostname
+        new URL(mockDefaultOidcOptions().issuer).hostname,
       );
     });
 
@@ -94,16 +94,16 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
       const builtUrl = new URL(mockedRedirector.mock.calls[0][0]);
       expect(builtUrl.searchParams.get("client_id")).toEqual(
-        oidcOptions.client.clientId
+        oidcOptions.client.clientId,
       );
       expect(builtUrl.searchParams.get("response_type")).toBe("code");
       expect(builtUrl.searchParams.get("redirect_uri")).toEqual(
-        oidcOptions.redirectUrl
+        oidcOptions.redirectUrl,
       );
       expect(builtUrl.searchParams.get("code_challenge")).not.toBeNull();
       expect(builtUrl.searchParams.get("prompt")).toBe("consent");
       expect(builtUrl.searchParams.get("scope")).toBe(
-        "openid offline_access webid"
+        "openid offline_access webid",
       );
     });
 
@@ -118,16 +118,16 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
 
       await expect(
-        mockedStorage.getForUser(oidcOptions.sessionId, "codeVerifier")
+        mockedStorage.getForUser(oidcOptions.sessionId, "codeVerifier"),
       ).resolves.not.toBeNull();
       await expect(
-        mockedStorage.getForUser(oidcOptions.sessionId, "issuer")
+        mockedStorage.getForUser(oidcOptions.sessionId, "issuer"),
       ).resolves.toEqual(oidcOptions.issuer);
       await expect(
-        mockedStorage.getForUser(oidcOptions.sessionId, "redirectUrl")
+        mockedStorage.getForUser(oidcOptions.sessionId, "redirectUrl"),
       ).resolves.toEqual(oidcOptions.redirectUrl);
       await expect(
-        mockedStorage.getForUser(oidcOptions.sessionId, "dpop")
+        mockedStorage.getForUser(oidcOptions.sessionId, "dpop"),
       ).resolves.toBe("true");
     });
 
@@ -144,7 +144,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
 
       await expect(
-        mockedStorage.getForUser(oidcOptions.sessionId, "dpop")
+        mockedStorage.getForUser(oidcOptions.sessionId, "dpop"),
       ).resolves.toBe("false");
     });
   });

@@ -38,19 +38,19 @@ jest.mock("@inrupt/oidc-client", () => {
 describe("removeOidcQueryParam", () => {
   it("removes the 'code' query string if present", () => {
     expect(removeOidcQueryParam("https://some.url/?code=aCode")).toBe(
-      "https://some.url/"
+      "https://some.url/",
     );
   });
 
   it("removes the 'state' query string if present", () => {
     expect(removeOidcQueryParam("https://some.url?state=arkansas")).toBe(
-      "https://some.url"
+      "https://some.url",
     );
   });
 
   it("removes the hash part of the IRI", () => {
     expect(removeOidcQueryParam("https://some.url/#some-anchor")).toBe(
-      "https://some.url/"
+      "https://some.url/",
     );
   });
 
@@ -60,29 +60,29 @@ describe("removeOidcQueryParam", () => {
 
   it("does not normalize the trailing slash", () => {
     expect(removeOidcQueryParam("https://some.url?state=ohio")).toBe(
-      "https://some.url"
+      "https://some.url",
     );
   });
 
   it("preserves the path", () => {
     expect(
-      removeOidcQueryParam("https://coolapp.test/some/redirect?state=ohio")
+      removeOidcQueryParam("https://coolapp.test/some/redirect?state=ohio"),
     ).toBe("https://coolapp.test/some/redirect");
   });
 
   it("preserves other query strings", () => {
     expect(
       removeOidcQueryParam(
-        "https://some.url/?code=someCode&state=someState&otherQuery=aValue"
-      )
+        "https://some.url/?code=someCode&state=someState&otherQuery=aValue",
+      ),
     ).toBe("https://some.url/?otherQuery=aValue");
   });
 
   it("preserves other query strings when no trailing slash is present", () => {
     expect(
       removeOidcQueryParam(
-        "https://some.url?code=someCode&state=someState&otherQuery=aValue"
-      )
+        "https://some.url?code=someCode&state=someState&otherQuery=aValue",
+      ),
     ).toBe("https://some.url?otherQuery=aValue");
   });
 });
@@ -93,7 +93,7 @@ describe("clearOidcPersistentStorage", () => {
     // or test that the 'clearStaleState' function is called, which is done here.
     const clearSpy = jest.spyOn(
       new OidcClient.OidcClient({}),
-      "clearStaleState"
+      "clearStaleState",
     );
     await clearOidcPersistentStorage();
     expect(clearSpy).toHaveBeenCalled();
@@ -103,7 +103,7 @@ describe("clearOidcPersistentStorage", () => {
     window.localStorage.setItem("oidc.someOidcState", "a value");
     window.localStorage.setItem(
       "solidClientAuthenticationUser:someSessionId",
-      "a value"
+      "a value",
     );
     window.localStorage.setItem("anArbitraryKey", "a value");
     await clearOidcPersistentStorage();

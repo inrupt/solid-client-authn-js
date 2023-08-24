@@ -38,7 +38,7 @@ function processErrorResponse(
   // The type is any here because the object is parsed from a JSON response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseBody: any,
-  options: IClientRegistrarOptions
+  options: IClientRegistrarOptions,
 ): void {
   // The following errors are defined by the spec, and allow providing some context.
   // See https://tools.ietf.org/html/rfc7591#section-3.2.2 for more information
@@ -46,14 +46,14 @@ function processErrorResponse(
     throw new Error(
       `Dynamic client registration failed: the provided redirect uri [${options.redirectUrl?.toString()}] is invalid - ${
         responseBody.error_description ?? ""
-      }`
+      }`,
     );
   }
   if (responseBody.error === "invalid_client_metadata") {
     throw new Error(
       `Dynamic client registration failed: the provided client metadata ${JSON.stringify(
-        options
-      )} is invalid - ${responseBody.error_description ?? ""}`
+        options,
+      )} is invalid - ${responseBody.error_description ?? ""}`,
     );
   }
   // We currently don't support software statements, so no related error should happen.
@@ -61,7 +61,7 @@ function processErrorResponse(
   throw new Error(
     `Dynamic client registration failed: ${responseBody.error} - ${
       responseBody.error_description ?? ""
-    }`
+    }`,
   );
 }
 
@@ -69,13 +69,13 @@ function validateRegistrationResponse(
   // The type is any here because the object is parsed from a JSON response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responseBody: any,
-  options: IClientRegistrarOptions
+  options: IClientRegistrarOptions,
 ): void {
   if (responseBody.client_id === undefined) {
     throw new Error(
       `Dynamic client registration failed: no client_id has been found on ${JSON.stringify(
-        responseBody
-      )}`
+        responseBody,
+      )}`,
     );
   }
   if (
@@ -85,32 +85,32 @@ function validateRegistrationResponse(
   ) {
     throw new Error(
       `Dynamic client registration failed: the returned redirect URIs ${JSON.stringify(
-        responseBody.redirect_uris
+        responseBody.redirect_uris,
       )} don't match the provided ${JSON.stringify([
         options.redirectUrl.toString(),
-      ])}`
+      ])}`,
     );
   }
 }
 
 export async function registerClient(
   options: IClientRegistrarOptions,
-  issuerConfig: IIssuerConfig
+  issuerConfig: IIssuerConfig,
 ): Promise<IClient> {
   if (!issuerConfig.registrationEndpoint) {
     throw new Error(
-      "Dynamic Registration could not be completed because the issuer has no registration endpoint."
+      "Dynamic Registration could not be completed because the issuer has no registration endpoint.",
     );
   }
   if (!Array.isArray(issuerConfig.idTokenSigningAlgValuesSupported)) {
     throw new Error(
-      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory.",
     );
   }
 
   const signingAlg = determineSigningAlg(
     issuerConfig.idTokenSigningAlgValuesSupported,
-    PREFERRED_SIGNING_ALG
+    PREFERRED_SIGNING_ALG,
   );
 
   const config = {
@@ -135,7 +135,7 @@ export async function registerClient(
       method: "POST",
       headers,
       body: JSON.stringify(config),
-    }
+    },
   );
 
   if (registerResponse.ok) {
@@ -154,6 +154,6 @@ export async function registerClient(
   throw new Error(
     `Dynamic client registration failed: the server returned ${
       registerResponse.status
-    } ${registerResponse.statusText} - ${await registerResponse.text()}`
+    } ${registerResponse.statusText} - ${await registerResponse.text()}`,
   );
 }

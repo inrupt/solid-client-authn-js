@@ -59,13 +59,13 @@ jest.mock("@inrupt/universal-fetch", () => {
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/")
+      Promise.resolve("https://my.webid/"),
     ),
   };
 });
@@ -76,7 +76,7 @@ describe("RefreshTokenOidcHandler", () => {
     it("doesn't handle options missing a refresh token", async () => {
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       await expect(
         refreshTokenOidcHandler.canHandle(
@@ -87,15 +87,15 @@ describe("RefreshTokenOidcHandler", () => {
               clientSecret: "some client secret",
               clientType: "dynamic",
             },
-          })
-        )
+          }),
+        ),
       ).resolves.toBe(false);
     });
 
     it("doesn't handle options missing a client ID", async () => {
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       await expect(
         refreshTokenOidcHandler.canHandle(
@@ -109,8 +109,8 @@ describe("RefreshTokenOidcHandler", () => {
               clientSecret: "some client secret",
               clientType: "dynamic",
             },
-          })
-        )
+          }),
+        ),
       ).resolves.toBe(false);
     });
   });
@@ -119,7 +119,7 @@ describe("RefreshTokenOidcHandler", () => {
     it("throws if the refresh token is missing", async () => {
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       await expect(() =>
         refreshTokenOidcHandler.handle(
@@ -130,8 +130,8 @@ describe("RefreshTokenOidcHandler", () => {
               clientSecret: "some client secret",
               clientType: "dynamic",
             },
-          })
-        )
+          }),
+        ),
       ).rejects.toThrow("missing one of 'refreshToken', 'clientId'");
     });
 
@@ -142,7 +142,7 @@ describe("RefreshTokenOidcHandler", () => {
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
         mockedTokenRefresher,
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -152,12 +152,12 @@ describe("RefreshTokenOidcHandler", () => {
             clientSecret: "some client secret",
             clientType: "dynamic",
           },
-        })
+        }),
       );
       expect(result?.webId).toBe("https://my.webid/");
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValue({
         ...new NodeResponse(undefined, { status: 401 }),
@@ -174,7 +174,7 @@ describe("RefreshTokenOidcHandler", () => {
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       const result = (await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -184,14 +184,14 @@ describe("RefreshTokenOidcHandler", () => {
             clientSecret: "some client secret",
             clientType: "dynamic",
           },
-        })
+        }),
       )) as SolidClientAuthnCore.LoginResult;
       expect(result).toBeDefined();
       expect(result?.webId).toBe("https://my.webid/");
       expect(result?.expirationDate).toBeGreaterThan(Date.now());
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValue({
         ...new NodeResponse(undefined, { status: 200 }),
@@ -201,7 +201,7 @@ describe("RefreshTokenOidcHandler", () => {
       await result!.fetch("https://some.pod/resource");
       const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(
-        "DPoP some refreshed access token"
+        "DPoP some refreshed access token",
       );
     });
 
@@ -216,7 +216,7 @@ describe("RefreshTokenOidcHandler", () => {
             publicKey: JSON.stringify(dpopKeyPair.publicKey),
             privateKey: JSON.stringify(await exportJWK(dpopKeyPair.privateKey)),
           },
-        })
+        }),
       );
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -226,11 +226,11 @@ describe("RefreshTokenOidcHandler", () => {
             clientSecret: "some client secret",
             clientType: "dynamic",
           },
-        })
+        }),
       );
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
       mockedFetch.mockResolvedValue({
         ...new NodeResponse(undefined, { status: 200 }),
@@ -243,7 +243,7 @@ describe("RefreshTokenOidcHandler", () => {
       // This checks that the refreshed access token is bound to the initial DPoP key.
       await expect(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        jwtVerify(dpopProof!, dpopKeyPair.privateKey)
+        jwtVerify(dpopProof!, dpopKeyPair.privateKey),
       ).resolves.not.toThrow();
     });
 
@@ -251,7 +251,7 @@ describe("RefreshTokenOidcHandler", () => {
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -262,12 +262,12 @@ describe("RefreshTokenOidcHandler", () => {
             clientType: "dynamic",
           },
           dpop: false,
-        })
+        }),
       );
       expect(result).toBeDefined();
 
       const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch"
+        "@inrupt/universal-fetch",
       ) as jest.Mocked<typeof UniversalFetch>;
 
       mockedFetch.mockResolvedValue({
@@ -278,7 +278,7 @@ describe("RefreshTokenOidcHandler", () => {
       await result!.fetch("https://some.pod/resource");
       const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(
-        "Bearer some refreshed access token"
+        "Bearer some refreshed access token",
       );
     });
 
@@ -286,7 +286,7 @@ describe("RefreshTokenOidcHandler", () => {
       const mockedStorage = mockStorageUtility({});
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
         mockDefaultTokenRefresher(),
-        mockedStorage
+        mockedStorage,
       );
       await refreshTokenOidcHandler.handle(
         mockOidcOptions({
@@ -297,25 +297,28 @@ describe("RefreshTokenOidcHandler", () => {
             clientName: "some client name",
             clientType: "dynamic",
           },
-        })
+        }),
       );
       await expect(
-        mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "clientId")
+        mockedStorage.getForUser(
+          mockDefaultOidcOptions().sessionId,
+          "clientId",
+        ),
       ).resolves.toBe("some client id");
       await expect(
         mockedStorage.getForUser(
           mockDefaultOidcOptions().sessionId,
-          "clientSecret"
-        )
+          "clientSecret",
+        ),
       ).resolves.toBe("some client secret");
       await expect(
         mockedStorage.getForUser(
           mockDefaultOidcOptions().sessionId,
-          "clientName"
-        )
+          "clientName",
+        ),
       ).resolves.toBe("some client name");
       await expect(
-        mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "issuer")
+        mockedStorage.getForUser(mockDefaultOidcOptions().sessionId, "issuer"),
       ).resolves.toEqual(mockDefaultOidcOptions().issuer);
     });
   });
@@ -324,7 +327,7 @@ describe("RefreshTokenOidcHandler", () => {
     const mockedStorage = mockStorageUtility({});
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       mockDefaultTokenRefresher(),
-      mockedStorage
+      mockedStorage,
     );
     const result = await refreshTokenOidcHandler.handle(
       mockOidcOptions({
@@ -335,7 +338,7 @@ describe("RefreshTokenOidcHandler", () => {
           clientName: "some client name",
           clientType: "dynamic",
         },
-      })
+      }),
     );
     expect(result).toBeDefined();
   });
@@ -346,7 +349,7 @@ describe("RefreshTokenOidcHandler", () => {
       mockTokenRefresher({
         accessToken: "some access token",
       }),
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     const result = refreshTokenOidcHandler.handle(
       mockOidcOptions({
@@ -356,10 +359,10 @@ describe("RefreshTokenOidcHandler", () => {
           clientSecret: "some client secret",
           clientType: "dynamic",
         },
-      })
+      }),
     );
     await expect(result).rejects.toThrow(
-      "The Identity Provider [https://example.com] did not return an ID token on refresh, which prevents us from getting the user's WebID."
+      "The Identity Provider [https://example.com] did not return an ID token on refresh, which prevents us from getting the user's WebID.",
     );
   });
 
@@ -368,17 +371,17 @@ describe("RefreshTokenOidcHandler", () => {
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedTokenRefresher = mockTokenRefresher(tokenSet);
     const coreModule = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
+      "@inrupt/solid-client-authn-core",
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch"
+      "buildAuthenticatedFetch",
     );
 
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       mockedTokenRefresher,
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     const result = await refreshTokenOidcHandler.handle(
       mockOidcOptions({
@@ -388,7 +391,7 @@ describe("RefreshTokenOidcHandler", () => {
           clientSecret: "some client secret",
           clientType: "dynamic",
         },
-      })
+      }),
     );
     expect(result?.webId).toBe("https://my.webid/");
 
@@ -401,7 +404,7 @@ describe("RefreshTokenOidcHandler", () => {
           sessionId: "mySession",
           tokenRefresher: mockedTokenRefresher,
         },
-      })
+      }),
     );
   });
 
@@ -414,7 +417,7 @@ describe("RefreshTokenOidcHandler", () => {
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       mockedTokenRefresher,
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     await refreshTokenOidcHandler.handle(
       mockOidcOptions({
@@ -425,13 +428,13 @@ describe("RefreshTokenOidcHandler", () => {
           clientType: "dynamic",
         },
         eventEmitter: mockEmitter,
-      })
+      }),
     );
 
     expect(mockedTokenRefresher.refresh).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -444,7 +447,7 @@ describe("RefreshTokenOidcHandler", () => {
       .mockRejectedValue("Invalid credentials");
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       tokenRefresher,
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     const result = refreshTokenOidcHandler.handle(
       mockOidcOptions({
@@ -454,7 +457,7 @@ describe("RefreshTokenOidcHandler", () => {
           clientSecret: "some client secret",
           clientType: "dynamic",
         },
-      })
+      }),
     );
     await expect(result).rejects.toThrow("Invalid credentials");
   });

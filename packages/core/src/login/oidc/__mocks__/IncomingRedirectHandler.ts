@@ -32,7 +32,7 @@ const handle = jest.fn((_url: string, _emitter: EventEmitter | undefined) =>
     isLoggedIn: true,
     webId: "https://pod.com/profile/card#me",
     fetch: jest.fn(globalThis.fetch),
-  })
+  }),
 );
 
 export const mockCanHandleIncomingRedirect = canHandle;

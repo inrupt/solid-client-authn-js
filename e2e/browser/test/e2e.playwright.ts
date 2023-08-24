@@ -55,11 +55,11 @@ test.describe("Not Logged In", () => {
       expect(await app.getFetchResponse()).toBe("not fetched");
 
       const response = await app.fetchResource(
-        testContainer.nonExistentResource
+        testContainer.nonExistentResource,
       );
 
       expect(response).toContain("Can't find file requested");
-    }
+    },
   );
 });
 
@@ -131,7 +131,7 @@ test.describe("Logged In", () => {
       setTimeout(resolve, expirationDate - Date.now() + 500);
     });
     await expect(
-      app.page.locator("[data-testid=extensionSignalReceived]").textContent()
+      app.page.locator("[data-testid=extensionSignalReceived]").textContent(),
     ).resolves.toContain("Yes");
   });
 });
@@ -146,12 +146,12 @@ test.describe("Using a Client ID", () => {
     // Type the Client ID before logging in, so that it is used during logging.
     await app.page.fill(
       "[data-testid=clientIdentifierInput]",
-      clientAccessControl.clientId
+      clientAccessControl.clientId,
     );
     await auth.login({ allow: true });
     await app.page.waitForSelector("span[data-testid=loggedInStatus]");
     const successResponse = await app.fetchResource(
-      clientAccessControl.clientResourceUrl
+      clientAccessControl.clientResourceUrl,
     );
     // The resource content should be available, because it is fetched by an authorized client.
     expect(successResponse).toBe(clientAccessControl.clientResourceContent);
@@ -165,7 +165,7 @@ test.describe("Using a Client ID", () => {
 
     await app.page.waitForSelector("span[data-testid=loggedInStatus]");
     const failureResponse = await app.fetchResource(
-      clientAccessControl.clientResourceUrl
+      clientAccessControl.clientResourceUrl,
     );
     // The resource content shouldn't be available to a dynamically registered client.
     expect(failureResponse).not.toBe(clientAccessControl.clientResourceContent);
@@ -183,7 +183,7 @@ test.describe("Using a Client ID", () => {
     // Type the Client ID before logging in, so that it is used during logging.
     await app.page.fill(
       "[data-testid=clientIdentifierInput]",
-      clientAccessControl.clientId
+      clientAccessControl.clientId,
     );
     await auth.login({ allow: true });
     await app.page.waitForSelector("span[data-testid=loggedInStatus]");
@@ -203,7 +203,7 @@ test.describe("Using a Client ID", () => {
       setTimeout(resolve, expirationDate - Date.now() + 500);
     });
     await expect(
-      app.page.locator("[data-testid=expirationSignalReceived]").textContent()
+      app.page.locator("[data-testid=expirationSignalReceived]").textContent(),
     ).resolves.toContain("Yes");
   });
 
@@ -219,7 +219,7 @@ test.describe("Using a Client ID", () => {
     // Type the Client ID before logging in, so that it is used during logging.
     await app.page.fill(
       "[data-testid=clientIdentifierInput]",
-      clientAccessControl.clientId
+      clientAccessControl.clientId,
     );
 
     await auth.login({ allow: true });
@@ -246,7 +246,7 @@ test.describe("Using a Client ID", () => {
     // Type the Client ID before logging in, so that it is used during logging.
     await app.page.fill(
       "[data-testid=clientIdentifierInput]",
-      clientAccessControl.clientId
+      clientAccessControl.clientId,
     );
 
     await auth.login({ allow: true });
@@ -277,7 +277,7 @@ test.describe("Using a Client ID", () => {
     // Type the Client ID before logging in, so that it is used during logging.
     await app.page.fill(
       "[data-testid=clientIdentifierInput]",
-      clientAccessControl.clientId
+      clientAccessControl.clientId,
     );
 
     await auth.login({ allow: true });
@@ -303,7 +303,7 @@ test.describe("Using a Client ID", () => {
   }) => {
     // Get the openId configuration
     const config = await fetch(
-      new URL(".well-known/openid-configuration", env.idp)
+      new URL(".well-known/openid-configuration", env.idp),
     );
     const configuration = await config.json();
 
@@ -311,7 +311,7 @@ test.describe("Using a Client ID", () => {
     // Type the Client ID before logging in, so that it is used during logging.
     await app.page.fill(
       "[data-testid=clientIdentifierInput]",
-      clientAccessControl.clientId
+      clientAccessControl.clientId,
     );
 
     await auth.login({ allow: true });
@@ -332,7 +332,7 @@ test.describe("Using a Client ID", () => {
     // We should remain on the same origin as the end_session_endpoint if we do not provide
     // a URL to take us back to the original webpage
     expect(new URL(page.url()).origin).toEqual(
-      new URL(configuration.end_session_endpoint).origin
+      new URL(configuration.end_session_endpoint).origin,
     );
   });
 });

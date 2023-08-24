@@ -37,13 +37,13 @@ import { refresh } from "./refreshGrant";
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as any;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/")
+      Promise.resolve("https://my.webid/"),
     ),
   };
 });
@@ -55,12 +55,12 @@ describe("refreshGrant", () => {
     client.clientSecret = "some secret";
     await refresh("some refresh token", mockIssuer(), client);
     expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString()
+      mockIssuer().tokenEndpoint.toString(),
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     // c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ= is 'some client:some secret' encoded in base 64
     expect(headers.Authorization).toBe(
-      "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ="
+      "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ=",
     );
   });
 
@@ -70,7 +70,7 @@ describe("refreshGrant", () => {
 
     await refresh("some refresh token", mockIssuer(), client);
     expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString()
+      mockIssuer().tokenEndpoint.toString(),
     );
     // The basic auth scheme should not have been used
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
@@ -78,7 +78,7 @@ describe("refreshGrant", () => {
 
     const body = myFetch.mock.calls[0][1]?.body as BodyInit;
     expect(body.toString()).toContain(
-      "client_id=https%3A%2F%2Fclient.identifier"
+      "client_id=https%3A%2F%2Fclient.identifier",
     );
   });
 
@@ -103,14 +103,14 @@ describe("refreshGrant", () => {
     const keyPair = await mockKeyPair();
     await refresh("some refresh token", mockIssuer(), client, keyPair);
     expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString()
+      mockIssuer().tokenEndpoint.toString(),
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers.DPoP).toBeDefined();
     const dpopHeader = headers.DPoP;
     const dpopProof = await jwtVerify(
       dpopHeader,
-      await importJWK(keyPair.publicKey)
+      await importJWK(keyPair.publicKey),
     );
     expect(dpopProof.payload.htu).toBe(mockIssuer().tokenEndpoint.toString());
   });
@@ -119,9 +119,9 @@ describe("refreshGrant", () => {
     await expect(
       refresh("some refresh token", mockIssuer(), {
         clientId: undefined,
-      } as unknown as IClient)
+      } as unknown as IClient),
     ).rejects.toThrow(
-      "No client ID available when trying to refresh the access token"
+      "No client ID available when trying to refresh the access token",
     );
   });
 
@@ -129,11 +129,11 @@ describe("refreshGrant", () => {
     mockFetch("Some non-JSON data", 200);
     const client = mockClient();
     await expect(
-      refresh("some refresh token", mockIssuer(), client)
+      refresh("some refresh token", mockIssuer(), client),
     ).rejects.toThrow(
       `The token endpoint of issuer ${
         mockIssuer().issuer
-      } returned a malformed response.`
+      } returned a malformed response.`,
     );
   });
 
@@ -143,7 +143,7 @@ describe("refreshGrant", () => {
     const requestInit = myFetch.mock.calls[0][1];
     expect(requestInit?.method).toBe("POST");
     expect(
-      (requestInit?.headers as Record<string, string>)["Content-Type"]
+      (requestInit?.headers as Record<string, string>)["Content-Type"],
     ).toBe("application/x-www-form-urlencoded");
     const body = requestInit?.body;
     const searchableBody = new URLSearchParams(body?.toString());
@@ -166,10 +166,10 @@ describe("refreshGrant", () => {
         ...mockBearerTokens(),
         access_token: undefined,
       }),
-      200
+      200,
     );
     await expect(
-      refresh("some refresh token", mockIssuer(), mockClient())
+      refresh("some refresh token", mockIssuer(), mockClient()),
     ).rejects.toThrow("access_token");
   });
 
@@ -179,10 +179,10 @@ describe("refreshGrant", () => {
         ...mockBearerTokens(),
         id_token: undefined,
       }),
-      200
+      200,
     );
     await expect(
-      refresh("some refresh token", mockIssuer(), mockClient())
+      refresh("some refresh token", mockIssuer(), mockClient()),
     ).rejects.toThrow("id_token");
   });
 
@@ -191,10 +191,10 @@ describe("refreshGrant", () => {
       JSON.stringify({
         error: "Some error",
       }),
-      400
+      400,
     );
     await expect(
-      refresh("some refresh token", mockIssuer(), mockClient())
+      refresh("some refresh token", mockIssuer(), mockClient()),
     ).rejects.toThrow("Token endpoint returned error [Some error]");
   });
 
@@ -205,7 +205,7 @@ describe("refreshGrant", () => {
         refresh_token: "Some new refresh token",
         expires_in: 1800,
       }),
-      200
+      200,
     );
     const client = mockClient();
     const keyPair = await mockKeyPair();
@@ -213,7 +213,7 @@ describe("refreshGrant", () => {
       "some refresh token",
       mockIssuer(),
       client,
-      keyPair
+      keyPair,
     );
     expect(result.accessToken).toBe(JSON.stringify(mockKeyBoundToken()));
     expect(result.idToken).toBe(mockIdToken());

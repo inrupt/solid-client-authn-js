@@ -39,7 +39,7 @@ describe("Redirector", () => {
     it("throws if no handler is provided", () => {
       const redirector = new Redirector();
       expect(() =>
-        redirector.redirect("https://someUrl.com/redirect")
+        redirector.redirect("https://someUrl.com/redirect"),
       ).toThrow();
     });
   });

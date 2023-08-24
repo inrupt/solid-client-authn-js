@@ -43,39 +43,41 @@ import { Issuer } from "openid-client";
  * @internal
  */
 export function configFromIssuerMetadata(
-  metadata: IssuerMetadata
+  metadata: IssuerMetadata,
 ): IIssuerConfig {
   // If the fields required as per https://openid.net/specs/openid-connect-discovery-1_0.html are missing,
   // throw an error.
   if (metadata.authorization_endpoint === undefined) {
     throw new ConfigurationError(
       `Issuer metadata is missing an authorization endpoint: ${JSON.stringify(
-        metadata
-      )}`
+        metadata,
+      )}`,
     );
   }
   if (metadata.token_endpoint === undefined) {
     throw new ConfigurationError(
       `Issuer metadata is missing an token endpoint: ${JSON.stringify(
-        metadata
-      )}`
+        metadata,
+      )}`,
     );
   }
   if (metadata.jwks_uri === undefined) {
     throw new ConfigurationError(
-      `Issuer metadata is missing a keyset URI: ${JSON.stringify(metadata)}`
+      `Issuer metadata is missing a keyset URI: ${JSON.stringify(metadata)}`,
     );
   }
   if (metadata.claims_supported === undefined) {
     throw new ConfigurationError(
-      `Issuer metadata is missing supported claims: ${JSON.stringify(metadata)}`
+      `Issuer metadata is missing supported claims: ${JSON.stringify(
+        metadata,
+      )}`,
     );
   }
   if (metadata.subject_types_supported === undefined) {
     throw new ConfigurationError(
       `Issuer metadata is missing supported subject types: ${JSON.stringify(
-        metadata
-      )}`
+        metadata,
+      )}`,
     );
   }
   return {
@@ -157,12 +159,12 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     // The codebase could be refactored so that issuer discovery only happens once.
     const oidcIssuer = await Issuer.discover(issuer);
     const issuerConfig: IIssuerConfig = configFromIssuerMetadata(
-      oidcIssuer.metadata
+      oidcIssuer.metadata,
     );
     // Update store with fetched config
     await this.storageUtility.set(
       IssuerConfigFetcher.getLocalStorageKey(issuer),
-      JSON.stringify(issuerConfig)
+      JSON.stringify(issuerConfig),
     );
 
     return issuerConfig;

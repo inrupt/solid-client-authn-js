@@ -86,5 +86,5 @@ root.render(
       <Login />
       <Show />
     </SessionProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

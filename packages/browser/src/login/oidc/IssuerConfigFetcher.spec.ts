@@ -27,7 +27,7 @@ import IssuerConfigFetcher from "./IssuerConfigFetcher";
 
 jest.mock("@inrupt/universal-fetch", () => {
   const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch"
+    "@inrupt/universal-fetch",
   ) as typeof UniversalFetch;
   return {
     ...fetchModule,
@@ -44,10 +44,10 @@ describe("IssuerConfigFetcher", () => {
   };
 
   function getIssuerConfigFetcher(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): IssuerConfigFetcher {
     return new IssuerConfigFetcher(
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility,
     );
   }
 
@@ -56,7 +56,7 @@ describe("IssuerConfigFetcher", () => {
       storageUtility: mockStorageUtility({}),
     });
     const { fetch: mockFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockFetch.mockResolvedValueOnce(
       new NodeResponse(
@@ -66,37 +66,37 @@ describe("IssuerConfigFetcher", () => {
           claim_types_supported: "oidc",
           bleepBloop: "Meep Moop",
           end_session_endpoint: "https://example.com/endSessionEndpoint",
-        })
-      )
+        }),
+      ),
     );
     const fetchedConfig = await configFetcher.fetchConfig(
-      "https://arbitrary.url"
+      "https://arbitrary.url",
     );
     expect(fetchedConfig.issuer.startsWith("https:")).toBeTruthy();
     expect(fetchedConfig.issuer).toBe("https://example.com");
     expect((fetchedConfig as any).claim_types_supported).toBeUndefined();
     expect(fetchedConfig.claimTypesSupported).toBe("oidc");
     expect(fetchedConfig.endSessionEndpoint).toBe(
-      "https://example.com/endSessionEndpoint"
+      "https://example.com/endSessionEndpoint",
     );
     expect((fetchedConfig as any).bleepBloop).toBeUndefined();
   });
 
   it("should throw an error if the fetched config could not be converted to JSON", async () => {
     const { fetch: mockFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockFetch.mockResolvedValueOnce(new NodeResponse("Not JSON."));
     const configFetcher = new IssuerConfigFetcher(mockStorageUtility({}));
 
     await expect(configFetcher.fetchConfig("https://some.url")).rejects.toThrow(
-      "[https://some.url] has an invalid configuration:"
+      "[https://some.url] has an invalid configuration:",
     );
   });
 
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
     const { fetch: mockFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockFetch.mockResolvedValueOnce(
       new NodeResponse(
@@ -105,14 +105,14 @@ describe("IssuerConfigFetcher", () => {
           // eslint-disable-next-line camelcase
           claim_types_supported: "oidc",
           scopes_supported: ["openid", "offline_access", "webid"],
-        })
-      )
+        }),
+      ),
     );
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
     const fetchedConfig = await configFetcher.fetchConfig(
-      "https://arbitrary.url"
+      "https://arbitrary.url",
     );
     expect(fetchedConfig.scopesSupported).toContain("webid");
     expect(fetchedConfig.scopesSupported).toContain("openid");
@@ -121,7 +121,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("should return a default value for the supported scopes if not advertized by the OpenID provider", async () => {
     const { fetch: mockFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockFetch.mockResolvedValueOnce(
       new NodeResponse(
@@ -129,14 +129,14 @@ describe("IssuerConfigFetcher", () => {
           issuer: "https://example.com",
           // eslint-disable-next-line camelcase
           claim_types_supported: "oidc",
-        })
-      )
+        }),
+      ),
     );
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
     const fetchedConfig = await configFetcher.fetchConfig(
-      "https://arbitrary.url"
+      "https://arbitrary.url",
     );
     expect(fetchedConfig.scopesSupported).toContain("openid");
   });
@@ -144,7 +144,7 @@ describe("IssuerConfigFetcher", () => {
   it("should append the .well-known/openid-configuration path at the end of the issuer URL", async () => {
     // The response value is irrelevant to this test.
     const { fetch: mockFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockFetch.mockImplementation(
       async () =>
@@ -154,8 +154,8 @@ describe("IssuerConfigFetcher", () => {
             // eslint-disable-next-line camelcase
             claim_types_supported: "oidc",
             scopes_supported: ["openid", "offline_access", "webid"],
-          })
-        )
+          }),
+        ),
     );
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -163,22 +163,22 @@ describe("IssuerConfigFetcher", () => {
     // No trailing slash
     await configFetcher.fetchConfig("https://arbitrary.url");
     expect(mockFetch).toHaveBeenLastCalledWith(
-      "https://arbitrary.url/.well-known/openid-configuration"
+      "https://arbitrary.url/.well-known/openid-configuration",
     );
     // A trailing slash
     await configFetcher.fetchConfig("https://arbitrary.url/");
     expect(mockFetch).toHaveBeenLastCalledWith(
-      "https://arbitrary.url/.well-known/openid-configuration"
+      "https://arbitrary.url/.well-known/openid-configuration",
     );
     // A path without a trailing slash
     await configFetcher.fetchConfig("https://arbitrary.url/path");
     expect(mockFetch).toHaveBeenLastCalledWith(
-      "https://arbitrary.url/path/.well-known/openid-configuration"
+      "https://arbitrary.url/path/.well-known/openid-configuration",
     );
     // A path with a trailing slash
     await configFetcher.fetchConfig("https://arbitrary.url/path/");
     expect(mockFetch).toHaveBeenLastCalledWith(
-      "https://arbitrary.url/path/.well-known/openid-configuration"
+      "https://arbitrary.url/path/.well-known/openid-configuration",
     );
   });
 });

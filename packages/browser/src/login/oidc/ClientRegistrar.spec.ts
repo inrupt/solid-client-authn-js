@@ -36,7 +36,7 @@ describe("ClientRegistrar", () => {
     storage: StorageUtilityMock,
   };
   function getClientRegistrar(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): ClientRegistrar {
     return new ClientRegistrar(mocks.storage ?? defaultMocks.storage);
   }
@@ -53,8 +53,8 @@ describe("ClientRegistrar", () => {
             client_secret: "1234",
             redirect_uris: ["https://example.com"],
             id_token_signed_response_alg: "RS256",
-          })
-        ) as unknown as Response
+          }),
+        ) as unknown as Response,
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -71,8 +71,8 @@ describe("ClientRegistrar", () => {
           {
             ...IssuerConfigFetcherFetchConfigResponse,
             registrationEndpoint: registrationUrl,
-          }
-        )
+          },
+        ),
       ).toMatchObject({
         clientId: "abcd",
         clientSecret: "1234",
@@ -102,8 +102,8 @@ describe("ClientRegistrar", () => {
           JSON.stringify({
             client_id: "abcd",
             redirect_uris: ["https://example.com"],
-          })
-        ) as unknown as Response
+          }),
+        ) as unknown as Response,
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -119,7 +119,7 @@ describe("ClientRegistrar", () => {
         {
           ...IssuerConfigFetcherFetchConfigResponse,
           registrationEndpoint: registrationUrl,
-        }
+        },
       );
       expect(registeredClient.clientSecret).toBeUndefined();
     });
@@ -134,10 +134,10 @@ describe("ClientRegistrar", () => {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          IssuerConfigFetcherFetchConfigResponse
-        )
+          IssuerConfigFetcherFetchConfigResponse,
+        ),
       ).rejects.toThrow(
-        "Dynamic Registration could not be completed because the issuer has no registration endpoint."
+        "Dynamic Registration could not be completed because the issuer has no registration endpoint.",
       );
     });
 
@@ -146,7 +146,7 @@ describe("ClientRegistrar", () => {
         /* eslint-disable camelcase */
         new NodeResponse('{"error":"bad stuff that\'s an error"}', {
           status: 400,
-        }) as unknown as Response
+        }) as unknown as Response,
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -163,10 +163,10 @@ describe("ClientRegistrar", () => {
           {
             ...IssuerConfigFetcherFetchConfigResponse,
             registrationEndpoint: registrationUrl,
-          }
-        )
+          },
+        ),
       ).rejects.toThrow(
-        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]"
+        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]",
       );
     });
 
@@ -179,7 +179,7 @@ describe("ClientRegistrar", () => {
               clientSecret: "a secret",
             },
           },
-          false
+          false,
         ),
       });
       const client = await clientRegistrar.getClient(
@@ -189,7 +189,7 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
       expect(client.clientId).toBe("an id");
       expect(client.clientSecret).toBe("a secret");
@@ -203,8 +203,8 @@ describe("ClientRegistrar", () => {
             client_id: "some id",
             client_secret: "some secret",
             redirect_uris: ["https://example.com"],
-          })
-        ) as unknown as Response
+          }),
+        ) as unknown as Response,
         /* eslint-enable camelcase */
       );
       global.fetch = mockFetch;
@@ -222,14 +222,14 @@ describe("ClientRegistrar", () => {
         {
           ...IssuerConfigFetcherFetchConfigResponse,
           registrationEndpoint: registrationUrl,
-        }
+        },
       );
 
       await expect(
-        myStorage.getForUser("mySession", "clientId", { secure: false })
+        myStorage.getForUser("mySession", "clientId", { secure: false }),
       ).resolves.toBe("some id");
       await expect(
-        myStorage.getForUser("mySession", "clientSecret", { secure: false })
+        myStorage.getForUser("mySession", "clientSecret", { secure: false }),
       ).resolves.toBe("some secret");
     });
   });

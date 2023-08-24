@@ -69,7 +69,7 @@ describe("RP initiated login/out using playwright", () => {
     };
 
     await expect(session.logout(logoutParams)).rejects.toThrow(
-      "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+      "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?",
     );
   });
 
@@ -91,7 +91,7 @@ describe("RP initiated login/out using playwright", () => {
             const cognitoPage = new CognitoPage(page);
             await cognitoPage.login(
               BROWSER_ENV.clientCredentials.owner.login,
-              BROWSER_ENV.clientCredentials.owner.password
+              BROWSER_ENV.clientCredentials.owner.password,
             );
             const openidPage = new OpenIdPage(page);
             try {
@@ -158,18 +158,18 @@ describe("RP initiated login/out using playwright", () => {
 
     // This ensures that the browser redirects to http://localhost:3001/postLogoutUrl
     await expect(finalRedirectUrl).resolves.toBe(
-      "http://localhost:3001/postLogoutUrl"
+      "http://localhost:3001/postLogoutUrl",
     );
 
     // Should error when trying to logout again with idp logout
     await expect(session.logout(logoutParams)).rejects.toThrow(
-      "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?"
+      "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?",
     );
 
     // Testing to make sure RP Initiated Logout occurred with an id_token_hint
     expect(
       rpLogoutUrl &&
-        new URL(rpLogoutUrl).searchParams.get("id_token_hint")?.length
+        new URL(rpLogoutUrl).searchParams.get("id_token_hint")?.length,
     ).toBeGreaterThan(1);
     await session.logout();
   }, 120_000);

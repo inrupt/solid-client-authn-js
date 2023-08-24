@@ -47,10 +47,10 @@ describe("SessionInfoManager", () => {
   };
 
   function getSessionInfoManager(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): SessionInfoManager {
     const sessionManager = new SessionInfoManager(
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility,
     );
     return sessionManager;
   }
@@ -59,7 +59,7 @@ describe("SessionInfoManager", () => {
     it("is not implemented yet", async () => {
       const sessionManager = getSessionInfoManager();
       await expect(async () =>
-        sessionManager.update("commanderCool", {})
+        sessionManager.update("commanderCool", {}),
       ).rejects.toThrow("Not Implemented");
     });
   });
@@ -68,7 +68,7 @@ describe("SessionInfoManager", () => {
     it("is not implemented yet", async () => {
       const sessionManager = getSessionInfoManager();
       await expect(async () =>
-        sessionManager.register("commanderCool")
+        sessionManager.register("commanderCool"),
       ).rejects.toThrow("Not implemented");
     });
   });
@@ -77,7 +77,7 @@ describe("SessionInfoManager", () => {
     it("is not implemented yet", async () => {
       const sessionManager = getSessionInfoManager();
       await expect(async () =>
-        sessionManager.getRegisteredSessionIdAll()
+        sessionManager.getRegisteredSessionIdAll(),
       ).rejects.toThrow("Not implemented");
     });
   });
@@ -86,7 +86,7 @@ describe("SessionInfoManager", () => {
     it("is not implemented yet", async () => {
       const sessionManager = getSessionInfoManager();
       await expect(async () => sessionManager.clearAll()).rejects.toThrow(
-        "Not implemented"
+        "Not implemented",
       );
     });
   });
@@ -113,7 +113,7 @@ describe("SessionInfoManager", () => {
             issuer: "https://some.issuer",
             tokenType: "DPoP",
           },
-        })
+        }),
       );
 
       const sessionManager = getSessionInfoManager({
@@ -141,7 +141,7 @@ describe("SessionInfoManager", () => {
             isLoggedIn: "false",
           },
         }),
-        mockStorage({})
+        mockStorage({}),
       );
 
       const sessionManager = getSessionInfoManager({
@@ -186,14 +186,14 @@ describe("SessionInfoManager", () => {
             issuer: "https://my.idp",
             tokenType: "Some arbitrary token type",
           },
-        })
+        }),
       );
 
       const sessionManager = getSessionInfoManager({
         storageUtility: storageMock,
       });
       await expect(sessionManager.get(sessionId)).rejects.toThrow(
-        "Tokens of type [Some arbitrary token type] are not supported."
+        "Tokens of type [Some arbitrary token type] are not supported.",
       );
     });
 
@@ -214,7 +214,7 @@ describe("SessionInfoManager", () => {
           [`solidClientAuthenticationUser:${sessionId}`]: {
             issuer: "https://my.idp",
           },
-        })
+        }),
       );
 
       const sessionManager = getSessionInfoManager({
@@ -247,14 +247,14 @@ describe("SessionInfoManager", () => {
             key: "value",
           },
         },
-        true
+        true,
       );
       const sessionManager = getSessionInfoManager({
         storageUtility: mockedStorage,
       });
       await sessionManager.clear("mySession");
       expect(
-        await mockedStorage.getForUser("mySession", "key", { secure: true })
+        await mockedStorage.getForUser("mySession", "key", { secure: true }),
       ).toBeUndefined();
     });
 
@@ -265,14 +265,14 @@ describe("SessionInfoManager", () => {
             key: "value",
           },
         },
-        false
+        false,
       );
       const sessionManager = getSessionInfoManager({
         storageUtility: mockedStorage,
       });
       await sessionManager.clear("mySession");
       expect(
-        await mockedStorage.getForUser("mySession", "key", { secure: false })
+        await mockedStorage.getForUser("mySession", "key", { secure: false }),
       ).toBeUndefined();
     });
   });

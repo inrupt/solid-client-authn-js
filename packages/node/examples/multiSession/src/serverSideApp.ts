@@ -47,7 +47,7 @@ app.use(
       "Required, but value not relevant for this demo - key2",
     ],
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  })
+  }),
 );
 
 app.get("/", async (req, res, next) => {
@@ -55,7 +55,7 @@ app.get("/", async (req, res, next) => {
   const sessions = await Promise.all(
     sessionIds.map(async (sessionId) => {
       return getSessionFromStorage(sessionId);
-    })
+    }),
   );
   const htmlSessions = `${sessions.reduce((sessionList, session) => {
     if (session?.info.isLoggedIn) {
@@ -64,7 +64,7 @@ app.get("/", async (req, res, next) => {
     return `${sessionList}<li>Logging in process</li>`;
   }, "<ul>")}</ul>`;
   res.send(
-    `<p>There are currently [${sessionIds.length}] visitors: ${htmlSessions}</p>`
+    `<p>There are currently [${sessionIds.length}] visitors: ${htmlSessions}</p>`,
   );
 });
 
@@ -79,7 +79,7 @@ app.get("/login", async (req, res, next) => {
   });
   if (session.info.isLoggedIn) {
     res.send(
-      `<p>Already logged in with WebID: <strong>[${session.info.webId}]</strong></p>`
+      `<p>Already logged in with WebID: <strong>[${session.info.webId}]</strong></p>`,
     );
   }
 });
@@ -94,7 +94,7 @@ app.get("/redirect", async (req, res) => {
     await session.handleIncomingRedirect(getRequestFullUrl(req));
     if (session.info.isLoggedIn) {
       res.send(
-        `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`
+        `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`,
       );
     } else {
       res.status(400).send(`<p>Not logged in after redirect</p>`);
@@ -109,14 +109,14 @@ app.get("/fetch", async (req, res, next) => {
     res
       .status(400)
       .send(
-        "<p>Expected a 'resource' query param, for example <strong>http://localhost:3001/fetch?resource=https://pod.inrupt.com/MY_USERNAME/</strong> to fetch the resource at the root of your Pod (which, by default, only <strong>you</strong> will have access to).</p>"
+        "<p>Expected a 'resource' query param, for example <strong>http://localhost:3001/fetch?resource=https://pod.inrupt.com/MY_USERNAME/</strong> to fetch the resource at the root of your Pod (which, by default, only <strong>you</strong> will have access to).</p>",
       );
   } else {
     const { fetch } = session ?? new Session();
     res.send(
       `<pre>${(
         await (await fetch(req.query.resource as string)).text()
-      ).replace(/</g, "&lt;")}</pre>`
+      ).replace(/</g, "&lt;")}</pre>`,
     );
   }
 });

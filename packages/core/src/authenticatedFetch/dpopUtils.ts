@@ -53,7 +53,7 @@ export type KeyPair = {
 export async function createDpopHeader(
   audience: string,
   method: string,
-  dpopKey: KeyPair
+  dpopKey: KeyPair,
 ): Promise<string> {
   return new SignJWT({
     htu: normalizeHTU(audience),
@@ -71,7 +71,7 @@ export async function createDpopHeader(
 
 export async function generateDpopKeyPair(): Promise<KeyPair> {
   const { privateKey, publicKey } = await generateKeyPair(
-    PREFERRED_SIGNING_ALG[0]
+    PREFERRED_SIGNING_ALG[0],
   );
   const dpopKeyPair = {
     privateKey,

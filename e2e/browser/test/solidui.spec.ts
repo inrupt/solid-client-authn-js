@@ -57,7 +57,7 @@ describe("RP initiated login/out using playwright", () => {
   beforeAll(async () => {
     const app = express();
     app.use(
-      express.static(path.join(__dirname, "..", "test-solid-ui", "build"))
+      express.static(path.join(__dirname, "..", "test-solid-ui", "build")),
     );
     app.get("/data", (_, res) => {
       return res.send(TEXT).status(200);
@@ -84,7 +84,7 @@ describe("RP initiated login/out using playwright", () => {
     await saveFileInContainer(
       root,
       new File([clientResourceContent], "myFile", { type: "plain/text" }),
-      { slug: name, contentType: "text/plain", fetch: session.fetch }
+      { slug: name, contentType: "text/plain", fetch: session.fetch },
     );
 
     clientResourceUrl = `${root}/${name}`;
@@ -122,7 +122,7 @@ describe("RP initiated login/out using playwright", () => {
     const cognitoPage = new CognitoPage(page);
     await cognitoPage.login(
       BROWSER_ENV.clientCredentials.owner.login,
-      BROWSER_ENV.clientCredentials.owner.password
+      BROWSER_ENV.clientCredentials.owner.password,
     );
     const openidPage = new OpenIdPage(page);
     try {
@@ -137,7 +137,7 @@ describe("RP initiated login/out using playwright", () => {
     await page.fill('input[id="resourceInput"]', clientResourceUrl);
     const authenticatedContent = await page.waitForSelector('div[id="data"]');
     await expect(authenticatedContent.innerText()).resolves.toEqual(
-      clientResourceContent
+      clientResourceContent,
     );
 
     await browser.close();

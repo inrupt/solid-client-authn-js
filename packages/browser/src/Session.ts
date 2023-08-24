@@ -101,7 +101,7 @@ export interface IHandleIncomingRedirectOptions {
 export async function silentlyAuthenticate(
   sessionId: string,
   clientAuthn: ClientAuthentication,
-  session: Session
+  session: Session,
 ): Promise<boolean> {
   const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
   if (storedSessionInfo !== null) {
@@ -120,7 +120,7 @@ export async function silentlyAuthenticate(
         clientSecret: storedSessionInfo.clientAppSecret,
         tokenType: storedSessionInfo.tokenType ?? "DPoP",
       },
-      session.events
+      session.events,
     );
     return true;
   }
@@ -128,7 +128,7 @@ export async function silentlyAuthenticate(
 }
 
 function isLoggedIn(
-  sessionInfo?: ISessionInfo
+  sessionInfo?: ISessionInfo,
 ): sessionInfo is ISessionInfo & { isLoggedIn: true } {
   return !!sessionInfo?.isLoggedIn;
 }
@@ -170,7 +170,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    */
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
-    sessionId: string | undefined = undefined
+    sessionId: string | undefined = undefined,
   ) {
     super();
     // Until Session no longer implements EventEmitter, this.events is just a proxy
@@ -181,8 +181,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
       this,
       buildProxyHandler(
         Session.prototype,
-        "events only implements ISessionEventListener"
-      )
+        "events only implements ISessionEventListener",
+      ),
     );
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
@@ -213,7 +213,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     // (as opposed to using our storage abstraction layer) because it is only
     // used in a browser-specific mechanism.
     this.events.on(EVENTS.LOGIN, () =>
-      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId)
+      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId),
     );
 
     this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
@@ -237,7 +237,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
         // Defaults the token type to DPoP
         tokenType: options.tokenType ?? "DPoP",
       },
-      this.events
+      this.events,
     );
     // `login` redirects the user away from the app,
     // so unless it throws an error, there is no code that should run afterwards
@@ -264,7 +264,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    */
   private internalLogout = async (
     emitSignal: boolean,
-    options?: ILogoutOptions
+    options?: ILogoutOptions,
   ): Promise<void> => {
     // Clearing this value means that silent refresh will no longer be attempted.
     // In particular, in the case of a silent authentication error it prevents
@@ -324,7 +324,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    * @param options See {@see IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
-    inputOptions: string | IHandleIncomingRedirectOptions = {}
+    inputOptions: string | IHandleIncomingRedirectOptions = {},
   ): Promise<ISessionInfo | undefined> => {
     if (this.info.isLoggedIn) {
       return this.info;
@@ -340,7 +340,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.tokenRequestInProgress = true;
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
-      this.events
+      this.events,
     );
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);
@@ -369,7 +369,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
         const attemptedSilentAuthentication = await silentlyAuthenticate(
           storedSessionId,
           this.clientAuthentication,
-          this
+          this,
         );
         // At this point, we know that the main window will imminently be redirected.
         // However, this redirect is asynchronous and there is no way to halt execution
@@ -416,8 +416,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   onError(
     callback: (
       error: string | null,
-      errorDescription?: string | null
-    ) => unknown
+      errorDescription?: string | null,
+    ) => unknown,
   ): void {
     this.events.on(EVENTS.ERROR, callback);
   }
@@ -447,7 +447,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
   }
 
   private setSessionInfo(
-    sessionInfo: ISessionInfo & { isLoggedIn: true }
+    sessionInfo: ISessionInfo & { isLoggedIn: true },
   ): void {
     this.info.isLoggedIn = sessionInfo.isLoggedIn;
     this.info.webId = sessionInfo.webId;

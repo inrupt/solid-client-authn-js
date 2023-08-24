@@ -66,7 +66,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: LOGIN_ARGS["eventName"],
-    listener: LOGIN_ARGS["listener"]
+    listener: LOGIN_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on successful logout.
@@ -75,7 +75,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: LOGOUT_ARGS["eventName"],
-    listener: LOGOUT_ARGS["listener"]
+    listener: LOGOUT_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session expiration.
@@ -84,7 +84,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: SESSION_EXPIRED_ARGS["eventName"],
-    listener: SESSION_EXPIRED_ARGS["listener"]
+    listener: SESSION_EXPIRED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session restoration after a silent login.
@@ -93,7 +93,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: SESSION_RESTORED_ARGS["eventName"],
-    listener: SESSION_RESTORED_ARGS["listener"]
+    listener: SESSION_RESTORED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on error, with an error identifier and description.
@@ -102,7 +102,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: ERROR_ARGS["eventName"],
-    listener: ERROR_ARGS["listener"]
+    listener: ERROR_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session extension.
@@ -111,7 +111,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: SESSION_EXTENDED_ARGS["eventName"],
-    listener: SESSION_EXTENDED_ARGS["listener"]
+    listener: SESSION_EXTENDED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called when a timeout is set for a session event with
@@ -121,7 +121,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: TIMEOUT_SET_ARGS["eventName"],
-    listener: TIMEOUT_SET_ARGS["listener"]
+    listener: TIMEOUT_SET_ARGS["listener"],
   ): this;
   /**
    * Register a listener called when a new refresh token is issued for the session.
@@ -130,7 +130,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
-    listener: NEW_REFRESH_TOKEN_ARGS["listener"]
+    listener: NEW_REFRESH_TOKEN_ARGS["listener"],
   ): this;
   /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
@@ -138,7 +138,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   on(
     eventName: FALLBACK_ARGS["eventName"],
-    listener: FALLBACK_ARGS["listener"]
+    listener: FALLBACK_ARGS["listener"],
   ): this;
 
   /**
@@ -148,7 +148,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: LOGIN_ARGS["eventName"],
-    listener: LOGIN_ARGS["listener"]
+    listener: LOGIN_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on successful logout.
@@ -157,7 +157,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: LOGOUT_ARGS["eventName"],
-    listener: LOGOUT_ARGS["listener"]
+    listener: LOGOUT_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session expiration.
@@ -166,7 +166,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: SESSION_EXPIRED_ARGS["eventName"],
-    listener: SESSION_EXPIRED_ARGS["listener"]
+    listener: SESSION_EXPIRED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session restoration after a silent login.
@@ -175,7 +175,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: SESSION_RESTORED_ARGS["eventName"],
-    listener: SESSION_RESTORED_ARGS["listener"]
+    listener: SESSION_RESTORED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on error, with an error identifier and description.
@@ -184,7 +184,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: ERROR_ARGS["eventName"],
-    listener: ERROR_ARGS["listener"]
+    listener: ERROR_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session extension.
@@ -193,7 +193,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: SESSION_EXTENDED_ARGS["eventName"],
-    listener: SESSION_EXTENDED_ARGS["listener"]
+    listener: SESSION_EXTENDED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called when a timeout is set for a session event with
@@ -203,7 +203,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: TIMEOUT_SET_ARGS["eventName"],
-    listener: TIMEOUT_SET_ARGS["listener"]
+    listener: TIMEOUT_SET_ARGS["listener"],
   ): this;
   /**
    * Register a listener called when a new refresh token is issued for the session.
@@ -212,7 +212,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
-    listener: NEW_REFRESH_TOKEN_ARGS["listener"]
+    listener: NEW_REFRESH_TOKEN_ARGS["listener"],
   ): this;
   /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
@@ -220,7 +220,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   addListener(
     eventName: FALLBACK_ARGS["eventName"],
-    listener: FALLBACK_ARGS["listener"]
+    listener: FALLBACK_ARGS["listener"],
   ): this;
 
   /**
@@ -230,7 +230,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: LOGIN_ARGS["eventName"],
-    listener: LOGIN_ARGS["listener"]
+    listener: LOGIN_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on the next successful logout.
@@ -239,7 +239,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: LOGOUT_ARGS["eventName"],
-    listener: LOGOUT_ARGS["listener"]
+    listener: LOGOUT_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on the next session expiration.
@@ -248,7 +248,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: SESSION_EXPIRED_ARGS["eventName"],
-    listener: SESSION_EXPIRED_ARGS["listener"]
+    listener: SESSION_EXPIRED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on the next session restoration after a silent login.
@@ -257,7 +257,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: SESSION_RESTORED_ARGS["eventName"],
-    listener: SESSION_RESTORED_ARGS["listener"]
+    listener: SESSION_RESTORED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on the next error, with an error identifier and description.
@@ -266,7 +266,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: ERROR_ARGS["eventName"],
-    listener: ERROR_ARGS["listener"]
+    listener: ERROR_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on the next session extension.
@@ -275,7 +275,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: SESSION_EXTENDED_ARGS["eventName"],
-    listener: SESSION_EXTENDED_ARGS["listener"]
+    listener: SESSION_EXTENDED_ARGS["listener"],
   ): this;
   /**
    * Register a listener called the next time a timeout is set for a session event
@@ -285,7 +285,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: TIMEOUT_SET_ARGS["eventName"],
-    listener: TIMEOUT_SET_ARGS["listener"]
+    listener: TIMEOUT_SET_ARGS["listener"],
   ): this;
   /**
    * Register a listener called the next time a new refresh token is issued for
@@ -295,7 +295,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
-    listener: NEW_REFRESH_TOKEN_ARGS["listener"]
+    listener: NEW_REFRESH_TOKEN_ARGS["listener"],
   ): this;
   /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
@@ -303,7 +303,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   once(
     eventName: FALLBACK_ARGS["eventName"],
-    listener: FALLBACK_ARGS["listener"]
+    listener: FALLBACK_ARGS["listener"],
   ): this;
 
   /**
@@ -313,7 +313,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: LOGIN_ARGS["eventName"],
-    listener: LOGIN_ARGS["listener"]
+    listener: LOGIN_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on successful logout.
@@ -322,7 +322,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: LOGOUT_ARGS["eventName"],
-    listener: LOGOUT_ARGS["listener"]
+    listener: LOGOUT_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on session expiration.
@@ -331,7 +331,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: SESSION_EXPIRED_ARGS["eventName"],
-    listener: SESSION_EXPIRED_ARGS["listener"]
+    listener: SESSION_EXPIRED_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on session restoration after a silent login.
@@ -340,7 +340,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: SESSION_RESTORED_ARGS["eventName"],
-    listener: SESSION_RESTORED_ARGS["listener"]
+    listener: SESSION_RESTORED_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on error, with an error identifier and description.
@@ -349,7 +349,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: ERROR_ARGS["eventName"],
-    listener: ERROR_ARGS["listener"]
+    listener: ERROR_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on session extension.
@@ -358,7 +358,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: SESSION_EXTENDED_ARGS["eventName"],
-    listener: SESSION_EXTENDED_ARGS["listener"]
+    listener: SESSION_EXTENDED_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called when a timeout is set for a session event.
@@ -367,7 +367,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: TIMEOUT_SET_ARGS["eventName"],
-    listener: TIMEOUT_SET_ARGS["listener"]
+    listener: TIMEOUT_SET_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called when a new refresh token is issued.
@@ -376,7 +376,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
-    listener: NEW_REFRESH_TOKEN_ARGS["listener"]
+    listener: NEW_REFRESH_TOKEN_ARGS["listener"],
   ): this;
   /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
@@ -384,7 +384,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   off(
     eventName: FALLBACK_ARGS["eventName"],
-    listener: FALLBACK_ARGS["listener"]
+    listener: FALLBACK_ARGS["listener"],
   ): this;
 
   /**
@@ -394,7 +394,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: LOGIN_ARGS["eventName"],
-    listener: LOGIN_ARGS["listener"]
+    listener: LOGIN_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on successful logout.
@@ -403,7 +403,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: LOGOUT_ARGS["eventName"],
-    listener: LOGOUT_ARGS["listener"]
+    listener: LOGOUT_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on session expiration.
@@ -412,7 +412,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: SESSION_EXPIRED_ARGS["eventName"],
-    listener: SESSION_EXPIRED_ARGS["listener"]
+    listener: SESSION_EXPIRED_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on session restoration after a silent login.
@@ -421,7 +421,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: SESSION_RESTORED_ARGS["eventName"],
-    listener: SESSION_RESTORED_ARGS["listener"]
+    listener: SESSION_RESTORED_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on error, with an error identifier and description.
@@ -430,7 +430,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: ERROR_ARGS["eventName"],
-    listener: ERROR_ARGS["listener"]
+    listener: ERROR_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on session extension.
@@ -439,7 +439,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: SESSION_EXTENDED_ARGS["eventName"],
-    listener: SESSION_EXTENDED_ARGS["listener"]
+    listener: SESSION_EXTENDED_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called when a timeout is set for a session event.
@@ -448,7 +448,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: TIMEOUT_SET_ARGS["eventName"],
-    listener: TIMEOUT_SET_ARGS["listener"]
+    listener: TIMEOUT_SET_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called when a new refresh token is issued.
@@ -457,7 +457,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
-    listener: NEW_REFRESH_TOKEN_ARGS["listener"]
+    listener: NEW_REFRESH_TOKEN_ARGS["listener"],
   ): this;
   /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
@@ -465,7 +465,7 @@ export interface ISessionEventListener extends EventEmitter {
    */
   removeListener(
     eventName: FALLBACK_ARGS["eventName"],
-    listener: FALLBACK_ARGS["listener"]
+    listener: FALLBACK_ARGS["listener"],
   ): this;
 
   /**
@@ -483,7 +483,7 @@ export const buildProxyHandler = (
   // dependency.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   toExclude: any,
-  errorMessage: string
+  errorMessage: string,
 ) => ({
   // This proxy is only a temporary measure until Session no longer extends
   // SessionEventEmitter, and the proxying is no longer necessary.

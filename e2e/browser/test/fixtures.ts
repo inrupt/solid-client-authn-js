@@ -109,7 +109,7 @@ const createClientIdDoc = async (
     scope?: string;
   },
   container: string,
-  session: Session
+  session: Session,
 ): Promise<string> => {
   const emptyClientIdDoc = await saveFileInContainer(
     container,
@@ -117,7 +117,7 @@ const createClientIdDoc = async (
     {
       contentType: "application/json",
       fetch: session.fetch,
-    }
+    },
   );
   const clientId = getSourceUrl(emptyClientIdDoc);
   const clientIdDoc = {
@@ -145,7 +145,7 @@ const createClientIdDoc = async (
   await setPublicAccess(
     clientId,
     { read: true, write: false },
-    { fetch: session.fetch } // fetch function from authenticated session
+    { fetch: session.fetch }, // fetch function from authenticated session
   );
   return clientId;
 };
@@ -154,7 +154,7 @@ const createClientResource = async (
   container: string,
   content: string,
   clientId: string,
-  session: Session
+  session: Session,
 ): Promise<string> => {
   const clientResource = await saveFileInContainer(
     container,
@@ -162,7 +162,7 @@ const createClientResource = async (
     {
       contentType: "application/json",
       fetch: session.fetch,
-    }
+    },
   );
   const resourceUrl = getSourceUrl(clientResource);
 
@@ -182,12 +182,12 @@ const createClientResource = async (
   const acrThing = getThing(acrDataset, acrUrl);
   if (acrThing === null) {
     throw new Error(
-      `The ACR ${acrUrl} doens't have a subject matching its own URL.`
+      `The ACR ${acrUrl} doens't have a subject matching its own URL.`,
     );
   }
   const applicableAccessControls = getUrlAll(
     acrThing,
-    "http://www.w3.org/ns/solid/acp#accessControl"
+    "http://www.w3.org/ns/solid/acp#accessControl",
   );
   if (applicableAccessControls.length === 0) {
     throw new Error(`ACR ${acrUrl} has no applicable Access Control.`);
@@ -200,7 +200,7 @@ const createClientResource = async (
   const publicClientMatcher = buildThing({ url: publicClientMatcherUri })
     .addUrl(
       "http://www.w3.org/ns/solid/acp#client",
-      "http://www.w3.org/ns/solid/acp#PublicClient"
+      "http://www.w3.org/ns/solid/acp#PublicClient",
     )
     .build();
   const clientPolicyUri = new URL(randomUUID(), acrUrl).href;
@@ -208,7 +208,7 @@ const createClientResource = async (
   const clientPolicy = buildThing({ url: clientPolicyUri })
     .addUrl(
       "http://www.w3.org/ns/solid/acp#deny",
-      "http://www.w3.org/ns/auth/acl#Read"
+      "http://www.w3.org/ns/auth/acl#Read",
     )
     .addUrl("http://www.w3.org/ns/solid/acp#anyOf", publicClientMatcher)
     .addUrl("http://www.w3.org/ns/solid/acp#noneOf", clientMatcherUri)
@@ -216,7 +216,7 @@ const createClientResource = async (
 
   const accessControlThing = buildThing(
     getThing(acrDataset, applicableAccessControls[0]) ??
-      createThing({ url: applicableAccessControls[0] })
+      createThing({ url: applicableAccessControls[0] }),
   )
     .addUrl("http://www.w3.org/ns/solid/acp#apply", clientPolicyUri)
     .build();
@@ -249,7 +249,7 @@ export interface ISeedPodResponse {
 }
 
 export async function seedPod(
-  setupEnvironment: TestingEnvironmentNode
+  setupEnvironment: TestingEnvironmentNode,
 ): Promise<ISeedPodResponse> {
   if (
     setupEnvironment.clientCredentials.owner.type !== "ESS Client Credentials"
@@ -290,7 +290,7 @@ export async function seedPod(
       redirectUrl: new URL(`http://localhost:${PLAYWRIGHT_PORT}`).href,
     },
     podRoot,
-    session
+    session,
   );
   const clientResourceContent =
     "Access to this file is restricted to a specific client.";
@@ -298,7 +298,7 @@ export async function seedPod(
     podRoot,
     clientResourceContent,
     clientId,
-    session
+    session,
   );
 
   return {
@@ -349,7 +349,7 @@ export const test = base.extend<Fixtures>({
             password: true,
           },
         },
-      })
+      }),
     );
   },
 
@@ -398,7 +398,7 @@ export const test = base.extend<Fixtures>({
       pods[0],
       {
         fetch: session.fetch,
-      }
+      },
     );
 
     const testContainerUrl = getSourceUrl(testContainer);
@@ -425,19 +425,19 @@ export const test = base.extend<Fixtures>({
     await setPublicAccess(
       publicFileUrl,
       { read: true, write: false },
-      { fetch: session.fetch } // fetch function from authenticated session
+      { fetch: session.fetch }, // fetch function from authenticated session
     );
 
     await setAgentAccess(
       privateFileUrl,
       session.info.webId,
       { read: true, write: true },
-      { fetch: session.fetch }
+      { fetch: session.fetch },
     );
 
     const nonExistentResource = new URL(
       `${randomUUID()}.txt`,
-      getSourceUrl(testContainer)
+      getSourceUrl(testContainer),
     ).href;
 
     // The code before the call to use is the setup, and after is the teardown.

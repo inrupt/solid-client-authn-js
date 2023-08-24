@@ -43,7 +43,7 @@ app.post("/register_pod", async (req, res) => {
 });
 
 const server = app.listen(port, () =>
-  console.log(`Listening on port: [${port}]...`)
+  console.log(`Listening on port: [${port}]...`),
 );
 
 process.on("SIGTERM", () => {

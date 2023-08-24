@@ -29,7 +29,7 @@ import type {
 /* eslint-disable camelcase */
 
 export const mockTokenRefresher = (
-  tokenSet: TokenEndpointResponse
+  tokenSet: TokenEndpointResponse,
 ): ITokenRefresher => {
   return {
     refresh: jest.fn<ITokenRefresher["refresh"]>().mockResolvedValue(tokenSet),

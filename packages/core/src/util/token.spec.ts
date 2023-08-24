@@ -66,7 +66,7 @@ describe("getWebidFromTokenPayload", () => {
     claims: JWTPayload,
     issuer: string,
     audience: string,
-    signingKey?: KeyLike
+    signingKey?: KeyLike,
   ): Promise<string> => {
     return new SignJWT(claims)
       .setProtectedHeader({ alg: "ES256" })
@@ -80,13 +80,13 @@ describe("getWebidFromTokenPayload", () => {
   const mockFetch = (
     payload: string,
     statusCode: number,
-    statusText?: string
+    statusText?: string,
   ): void => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValueOnce(
-      new NodeResponse(payload, { status: statusCode, statusText })
+      new NodeResponse(payload, { status: statusCode, statusText }),
     );
   };
 
@@ -95,17 +95,17 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
-      "https://some.clientId"
+      "https://some.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).rejects.toThrow(
-      "Could not fetch JWKS for [https://some.issuer] at [https://some.jwks]: 404 Not Found"
+      "Could not fetch JWKS for [https://some.issuer] at [https://some.jwks]: 404 Not Found",
     );
   });
 
@@ -115,17 +115,17 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
-      "https://some.clientId"
+      "https://some.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).rejects.toThrow(
-      "Malformed JWKS for [https://some.issuer] at [https://some.jwks]:"
+      "Malformed JWKS for [https://some.issuer] at [https://some.jwks]:",
     );
   });
 
@@ -137,17 +137,17 @@ describe("getWebidFromTokenPayload", () => {
       { someClaim: true },
       "https://some.issuer",
       "https://some.clientId",
-      anotherKey
+      anotherKey,
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).rejects.toThrow(
-      "Token verification failed: JWSSignatureVerificationFailed: signature verification failed"
+      "Token verification failed: JWSSignatureVerificationFailed: signature verification failed",
     );
   });
 
@@ -156,17 +156,17 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.other.issuer",
-      "https://some.clientId"
+      "https://some.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).rejects.toThrow(
-      'Token verification failed: JWTClaimValidationFailed: unexpected "iss" claim value'
+      'Token verification failed: JWTClaimValidationFailed: unexpected "iss" claim value',
     );
   });
 
@@ -175,17 +175,17 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
-      "https://some.other.clientId"
+      "https://some.other.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).rejects.toThrow(
-      'Token verification failed: JWTClaimValidationFailed: unexpected "aud" claim value'
+      'Token verification failed: JWTClaimValidationFailed: unexpected "aud" claim value',
     );
   });
 
@@ -194,15 +194,15 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
-      "https://some.clientId"
+      "https://some.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).rejects.toThrow("it has no 'webid' claim and no 'sub' claim.");
   });
 
@@ -211,17 +211,17 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { sub: "some user ID" },
       "https://some.issuer",
-      "https://some.clientId"
+      "https://some.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).rejects.toThrow(
-      "The token has no 'webid' claim, and its 'sub' claim of [some user ID] is invalid as a URL - error"
+      "The token has no 'webid' claim, and its 'sub' claim of [some user ID] is invalid as a URL - error",
     );
   });
 
@@ -230,15 +230,15 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { webid: "https://some.webid#me" },
       "https://some.issuer",
-      "https://some.clientId"
+      "https://some.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).resolves.toBe("https://some.webid#me");
   });
 
@@ -247,15 +247,15 @@ describe("getWebidFromTokenPayload", () => {
     const jwt = await mockJwt(
       { sub: "https://some.webid#me" },
       "https://some.issuer",
-      "https://some.clientId"
+      "https://some.clientId",
     );
     await expect(
       getWebidFromTokenPayload(
         jwt,
         "https://some.jwks",
         "https://some.issuer",
-        "https://some.clientId"
-      )
+        "https://some.clientId",
+      ),
     ).resolves.toBe("https://some.webid#me");
   });
 });

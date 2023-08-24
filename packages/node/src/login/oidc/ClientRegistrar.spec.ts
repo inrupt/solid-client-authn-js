@@ -42,7 +42,7 @@ describe("ClientRegistrar", () => {
     storage: mockStorageUtility({}),
   };
   function getClientRegistrar(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): ClientRegistrar {
     return new ClientRegistrar(mocks.storage ?? defaultMocks.storage);
   }
@@ -69,10 +69,10 @@ describe("ClientRegistrar", () => {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          IssuerConfigFetcherFetchConfigResponse
-        )
+          IssuerConfigFetcherFetchConfigResponse,
+        ),
       ).rejects.toThrow(
-        "Dynamic client registration cannot be performed, because issuer does not have a registration endpoint"
+        "Dynamic client registration cannot be performed, because issuer does not have a registration endpoint",
       );
     });
 
@@ -87,7 +87,7 @@ describe("ClientRegistrar", () => {
               idTokenSignedResponseAlg: "ES256",
             },
           },
-          false
+          false,
         ),
       });
       const client = await clientRegistrar.getClient(
@@ -97,7 +97,7 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
       expect(client.clientId).toBe("an id");
       expect(client.clientSecret).toBe("a secret");
@@ -115,7 +115,7 @@ describe("ClientRegistrar", () => {
               clientName: "my client name",
             },
           },
-          false
+          false,
         ),
       });
       const client = await clientRegistrar.getClient(
@@ -125,7 +125,7 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
       expect(client.idTokenSignedResponseAlg).toBe("ES256");
     });
@@ -155,29 +155,29 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
 
       // Check that the returned value is what we expect
       expect(client.clientId).toEqual(mockDefaultClientConfig().client_id);
       expect(client.clientSecret).toEqual(
-        mockDefaultClientConfig().client_secret
+        mockDefaultClientConfig().client_secret,
       );
       expect(client.idTokenSignedResponseAlg).toEqual(
-        mockDefaultClientConfig().id_token_signed_response_alg
+        mockDefaultClientConfig().id_token_signed_response_alg,
       );
 
       // Check that the client information have been saved in storage
       await expect(
-        mockStorage.getForUser("mySession", "clientId")
+        mockStorage.getForUser("mySession", "clientId"),
       ).resolves.toEqual(mockDefaultClientConfig().client_id);
       await expect(
-        mockStorage.getForUser("mySession", "clientSecret")
+        mockStorage.getForUser("mySession", "clientSecret"),
       ).resolves.toEqual(mockDefaultClientConfig().client_secret);
       await expect(
-        mockStorage.getForUser("mySession", "idTokenSignedResponseAlg")
+        mockStorage.getForUser("mySession", "idTokenSignedResponseAlg"),
       ).resolves.toEqual(
-        mockDefaultClientConfig().id_token_signed_response_alg
+        mockDefaultClientConfig().id_token_signed_response_alg,
       );
     });
 
@@ -207,10 +207,10 @@ describe("ClientRegistrar", () => {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          issuerConfig
-        )
+          issuerConfig,
+        ),
       ).rejects.toThrow(
-        "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+        "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory.",
       );
     });
 
@@ -241,10 +241,10 @@ describe("ClientRegistrar", () => {
           {
             ...IssuerConfigFetcherFetchConfigResponse,
             idTokenSigningAlgValuesSupported: ["Some_bogus_algorithm"],
-          }
-        )
+          },
+        ),
       ).rejects.toThrow(
-        'No signature algorithm match between ["Some_bogus_algorithm"] supported by the Identity Provider and ["ES256","RS256"] preferred by the client.'
+        'No signature algorithm match between ["Some_bogus_algorithm"] supported by the Identity Provider and ["ES256","RS256"] preferred by the client.',
       );
     });
 
@@ -275,7 +275,7 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
       // Re-request for the client. If not returned from memory, the mock throws.
       client = await clientRegistrar.getClient(
@@ -285,7 +285,7 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
 
       // Check that the returned value is what we expect
@@ -320,13 +320,13 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
       await expect(
-        mockStorage.getForUser("mySession", "clientId")
+        mockStorage.getForUser("mySession", "clientId"),
       ).resolves.toEqual(mockDefaultClientConfig().client_id);
       await expect(
-        mockStorage.getForUser("mySession", "clientSecret")
+        mockStorage.getForUser("mySession", "clientSecret"),
       ).resolves.toBeUndefined();
     });
 
@@ -357,21 +357,21 @@ describe("ClientRegistrar", () => {
         },
         {
           ...IssuerConfigFetcherFetchConfigResponse,
-        }
+        },
       );
 
       // Check that the returned algorithm value is what we expect
       expect(client.idTokenSignedResponseAlg).toBe(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0]
+        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0],
       );
 
       // Check that the expected algorithm information have been saved in storage
       await expect(
-        mockStorage.getForUser("mySession", "idTokenSignedResponseAlg")
+        mockStorage.getForUser("mySession", "idTokenSignedResponseAlg"),
       ).resolves.toBe(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0]
+        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0],
       );
     });
   });
