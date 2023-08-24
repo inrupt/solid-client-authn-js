@@ -111,10 +111,11 @@ describe("buildAuthenticatedFetch", () => {
   afterEach(() => {
     // Clear the latest timeout to avoid dangling open handles.
     // FIXME: Should just use fake timers, but that chokes on recursive calls.
-    const handle = spyTimeout.mock.results[spyTimeout.mock.results.length - 1];
-    if (handle !== undefined) {
-      (handle.value as ReturnType<typeof setTimeout>).unref();
-    }
+    spyTimeout.mock.results.forEach((handle) => {
+      if (handle !== undefined) {
+        (handle.value as ReturnType<typeof setTimeout>).unref();
+      }
+    });
   });
 
   it("builds a DPoP fetch if a DPoP key is provided", async () => {
