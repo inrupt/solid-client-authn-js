@@ -113,7 +113,8 @@ describe("buildAuthenticatedFetch", () => {
     // FIXME: Should just use fake timers, but that chokes on recursive calls.
     spyTimeout.mock.results.forEach((handle) => {
       if (handle !== undefined) {
-        (handle.value as ReturnType<typeof setTimeout>).unref();
+        clearTimeout(handle.value as number);
+        // (handle.value as ReturnType<typeof setTimeout>).unref();
       }
     });
   });
@@ -449,6 +450,8 @@ describe("buildAuthenticatedFetch", () => {
     });
     const spyTimeout = jest.spyOn(global, "setTimeout");
     const mockedEmitter = new EventEmitter();
+    // const handles: ReturnType<typeof setTimeout>[] = [];
+    // mockedEmitter.on(EVENTS.TIMEOUT_SET, (handle) => {handles.push(handle); console.log("timeout set")});
     const spiedEmit = jest.spyOn(mockedEmitter, "emit");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -474,6 +477,7 @@ describe("buildAuthenticatedFetch", () => {
       EVENTS.TIMEOUT_SET,
       expect.anything()
     );
+    // handles.forEach((handle) => { console.log("clearing handle"); clearTimeout(handle)});
   });
 
   it("sets a default timeout on refresh if the OIDC provider does not return one", async () => {
