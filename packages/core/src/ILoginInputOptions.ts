@@ -55,4 +55,9 @@ export default interface ILoginInputOptions {
    * secret to authenticate.
    */
   refreshToken?: string;
+  /**
+   * OIDC prompt. Options include "none", "login", "consent", "select_account", and "create". Not all Solid Identity
+   * Providers support OIDC prompt.
+   */
+  prompt?: string;
 }

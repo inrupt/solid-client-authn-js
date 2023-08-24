@@ -22,6 +22,7 @@ The following have been deprecated, and will be removed in future major releases
 ## Unreleased
 
 The following changes have been implemented but not released yet:
+ - Added `prompt` as a login option.
 
 ## [1.17.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.1) - 2023-07-15
 
