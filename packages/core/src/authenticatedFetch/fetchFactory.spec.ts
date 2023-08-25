@@ -114,7 +114,6 @@ describe("buildAuthenticatedFetch", () => {
     spyTimeout.mock.results.forEach((handle) => {
       if (handle !== undefined) {
         clearTimeout(handle.value as number);
-        // (handle.value as ReturnType<typeof setTimeout>).unref();
       }
     });
   });
