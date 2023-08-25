@@ -51,7 +51,7 @@ const expectedSigninRedirectUrl = "https://test";
 
 const mockOidcModule = (
   url: string = expectedSigninRedirectUrl,
-  state = "test state"
+  state = "test state",
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const oidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
@@ -78,11 +78,11 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
   };
 
   function getAuthorizationCodeWithPkceOidcHandler(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): AuthorizationCodeWithPkceOidcHandler {
     return new AuthorizationCodeWithPkceOidcHandler(
       mocks.storageUtility ?? defaultMocks.storageUtility,
-      mocks.redirector ?? defaultMocks.redirector
+      mocks.redirector ?? defaultMocks.redirector,
     );
   }
 
@@ -94,11 +94,11 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         // eslint-disable-next-line jest/valid-title
         it(testConfig.message, async () => {
           const value = await authorizationCodeWithPkceOidcHandler.canHandle(
-            testConfig.oidcOptions
+            testConfig.oidcOptions,
           );
           expect(value).toBe(testConfig.shouldPass);
         });
-      }
+      },
     );
   });
 
@@ -110,9 +110,9 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       mockedRedirector.mockImplementationOnce(
         (redirectUrl: string, redirectOptions: IRedirectorOptions) => {
           throw new Error(
-            `Redirecting to [${redirectUrl}] with options [${redirectOptions}] throws...`
+            `Redirecting to [${redirectUrl}] with options [${redirectOptions}] throws...`,
           );
-        }
+        },
       );
 
       const authorizationCodeWithPkceOidcHandler =
@@ -129,7 +129,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       };
 
       await expect(
-        authorizationCodeWithPkceOidcHandler.handle(oidcOptions)
+        authorizationCodeWithPkceOidcHandler.handle(oidcOptions),
       ).resolves.toBeUndefined();
 
       expect(mockedRedirector).toHaveBeenCalledTimes(1);
@@ -141,7 +141,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       // eslint-disable-next-line no-console
       expect(console.error).toHaveBeenCalledTimes(1);
       expect(
-        (console as jest.Mocked<Console>).error.mock.calls[0][0].toString()
+        (console as jest.Mocked<Console>).error.mock.calls[0][0].toString(),
       ).toMatch(/Error: Redirecting to \[[^\]]+\] with options/);
     });
 
@@ -161,7 +161,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         expectedSigninRedirectUrl,
         {
           handleRedirect: standardOidcOptions.handleRedirect,
-        }
+        },
       );
     });
 
@@ -169,7 +169,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       mockOidcModule();
       const mockedStorage = new StorageUtility(
         mockStorage({}),
-        mockStorage({})
+        mockStorage({}),
       );
       const authorizationCodeWithPkceOidcHandler =
         getAuthorizationCodeWithPkceOidcHandler({
@@ -187,12 +187,12 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       await expect(
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
-        })
+        }),
       ).resolves.toBe("https://app.example.com?someQuery=someValue");
       await expect(
         mockedStorage.getForUser("mySession", "codeVerifier", {
           secure: false,
-        })
+        }),
       ).resolves.not.toBeNull();
     });
 
@@ -212,7 +212,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(oidcModule.OidcClient).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: "none",
-        })
+        }),
       );
     });
 
@@ -231,7 +231,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(oidcModule.OidcClient).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: "consent",
-        })
+        }),
       );
     });
 
@@ -250,7 +250,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(oidcModule.OidcClient).toHaveBeenCalledWith(
         expect.objectContaining({
           scope: "openid offline_access webid",
-        })
+        }),
       );
     });
 
@@ -274,7 +274,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         expectedSigninRedirectUrl,
         {
           handleRedirect: standardOidcOptions.handleRedirect,
-        }
+        },
       );
     });
   });

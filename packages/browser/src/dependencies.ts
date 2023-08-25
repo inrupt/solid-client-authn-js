@@ -62,7 +62,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
 
   const storageUtility = new StorageUtilityBrowser(
     secureStorage,
-    insecureStorage
+    insecureStorage,
   );
 
   const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
@@ -73,7 +73,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
   const tokenRefresher = new TokenRefresher(
     storageUtility,
     issuerConfigFetcher,
-    clientRegistrar
+    clientRegistrar,
   );
 
   const redirector = new Redirector();
@@ -83,7 +83,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     storageUtility,
     new AuthorizationCodeWithPkceOidcHandler(storageUtility, redirector),
     issuerConfigFetcher,
-    clientRegistrar
+    clientRegistrar,
   );
 
   const redirectHandler = new AggregateRedirectHandler([
@@ -93,7 +93,7 @@ export function getClientAuthenticationWithDependencies(dependencies: {
       sessionInfoManager,
       issuerConfigFetcher,
       clientRegistrar,
-      tokenRefresher
+      tokenRefresher,
     ),
     // This catch-all class will always be able to handle the
     // redirect IRI, so it must be registered last.
@@ -105,6 +105,6 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     redirectHandler,
     new IWaterfallLogoutHandler(sessionInfoManager, redirector),
     sessionInfoManager,
-    issuerConfigFetcher
+    issuerConfigFetcher,
   );
 }

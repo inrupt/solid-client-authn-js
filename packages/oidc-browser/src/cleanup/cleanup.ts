@@ -45,7 +45,7 @@ export function removeOidcQueryParam(redirectUrl: string): string {
   // create a redirect URL mismatch if it wasn't originally present.
   return `${cleanedUrl.origin}${cleanedUrl.href.substring(
     // Adds 1 to the origin length to remove the trailing slash
-    cleanedUrl.origin.length + 1
+    cleanedUrl.origin.length + 1,
   )}`;
 }
 

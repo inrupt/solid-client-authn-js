@@ -54,7 +54,7 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
   constructor(
     private tokenRefresher: ITokenRefresher,
-    private _storageUtility: IStorageUtility
+    private _storageUtility: IStorageUtility,
   ) {}
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
@@ -67,7 +67,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
     const issuer = new Issuer(
-      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration)
+      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration),
     );
     const client = new issuer.Client({
       client_id: oidcLoginOptions.client.clientId,
@@ -93,7 +93,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
           oidcLoginOptions.dpop && dpopKey !== undefined
             ? (dpopKey.privateKey as KeyObject)
             : undefined,
-      }
+      },
     );
 
     let webId: string;
@@ -101,7 +101,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       throw new Error(
         `Invalid response from Solid Identity Provider [${
           oidcLoginOptions.issuer
-        }]: ${JSON.stringify(tokens)} is missing 'access_token'.`
+        }]: ${JSON.stringify(tokens)} is missing 'access_token'.`,
       );
     }
 
@@ -116,14 +116,14 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
         oidcLoginOptions.issuerConfiguration.jwksUri,
         oidcLoginOptions.issuer,
         // When validating the Access Token, the audience should always be 'solid'
-        "solid"
+        "solid",
       );
     } else {
       webId = await getWebidFromTokenPayload(
         tokens.id_token,
         oidcLoginOptions.issuerConfiguration.jwksUri,
         oidcLoginOptions.issuer,
-        oidcLoginOptions.client.clientId
+        oidcLoginOptions.client.clientId,
       );
     }
 
@@ -141,7 +141,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
           : undefined,
         eventEmitter: oidcLoginOptions.eventEmitter,
         expiresIn: tokens.expires_in,
-      }
+      },
     );
 
     const sessionInfo: ISessionInfo = {

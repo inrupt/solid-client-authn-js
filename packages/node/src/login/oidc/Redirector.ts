@@ -38,7 +38,7 @@ export default class Redirector implements IRedirector {
       options.handleRedirect(redirectUrl);
     } else {
       throw new Error(
-        "A redirection handler must be provided in the Node environment."
+        "A redirection handler must be provided in the Node environment.",
       );
     }
   }

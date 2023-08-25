@@ -51,18 +51,18 @@ import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
 const tokenSetToTokenEndpointResponse = (
   tokenSet: TokenSet,
-  issuerMetadata: IssuerMetadata
+  issuerMetadata: IssuerMetadata,
 ): TokenEndpointResponse => {
   if (tokenSet.access_token === undefined) {
     // The error message is left minimal on purpose not to leak the tokens.
     throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] did not return an access token on refresh.`
+      `The Identity Provider [${issuerMetadata.issuer}] did not return an access token on refresh.`,
     );
   }
 
   if (tokenSet.token_type !== "Bearer" && tokenSet.token_type !== "DPoP") {
     throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] returned an unknown token type: [${tokenSet.token_type}].`
+      `The Identity Provider [${issuerMetadata.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
     );
   }
   return {
@@ -81,31 +81,31 @@ export default class TokenRefresher implements ITokenRefresher {
   constructor(
     private storageUtility: IStorageUtility,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar,
   ) {}
 
   async refresh(
     sessionId: string,
     refreshToken?: string,
     dpopKey?: KeyPair,
-    eventEmitter?: EventEmitter
+    eventEmitter?: EventEmitter,
   ): Promise<TokenEndpointResponse> {
     const oidcContext = await loadOidcContextFromStorage(
       sessionId,
       this.storageUtility,
-      this.issuerConfigFetcher
+      this.issuerConfigFetcher,
     );
 
     const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
     // This should also retrieve the client from storage
     const clientInfo: IClient = await this.clientRegistrar.getClient(
       { sessionId },
-      oidcContext.issuerConfig
+      oidcContext.issuerConfig,
     );
     if (clientInfo.idTokenSignedResponseAlg === undefined) {
       clientInfo.idTokenSignedResponseAlg = negotiateClientSigningAlg(
         oidcContext.issuerConfig,
-        PREFERRED_SIGNING_ALG
+        PREFERRED_SIGNING_ALG,
       );
     }
     const client = new issuer.Client({
@@ -120,13 +120,13 @@ export default class TokenRefresher implements ITokenRefresher {
     if (refreshToken === undefined) {
       // TODO: in a next PR, look up storage for a refresh token
       throw new Error(
-        `Session [${sessionId}] has no refresh token to allow it to refresh its access token.`
+        `Session [${sessionId}] has no refresh token to allow it to refresh its access token.`,
       );
     }
 
     if (oidcContext.dpop && dpopKey === undefined) {
       throw new Error(
-        `For session [${sessionId}], the key bound to the DPoP access token must be provided to refresh said access token.`
+        `For session [${sessionId}], the key bound to the DPoP access token must be provided to refresh said access token.`,
       );
     }
 
@@ -138,7 +138,7 @@ export default class TokenRefresher implements ITokenRefresher {
         // assertion.
         DPoP: dpopKey ? (dpopKey.privateKey as KeyObject) : undefined,
       }),
-      issuer.metadata
+      issuer.metadata,
     );
 
     if (tokenSet.refreshToken !== undefined) {

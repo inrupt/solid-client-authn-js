@@ -61,7 +61,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     private sessionInfoManager: ISessionInfoManager,
     private issuerConfigFetcher: IIssuerConfigFetcher,
     private clientRegistrar: IClientRegistrar,
-    private tokerRefresher: ITokenRefresher
+    private tokerRefresher: ITokenRefresher,
   ) {}
 
   async canHandle(redirectUrl: string): Promise<boolean> {
@@ -73,18 +73,18 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       );
     } catch (e) {
       throw new Error(
-        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`,
       );
     }
   }
 
   async handle(
     redirectUrl: string,
-    eventEmitter?: EventEmitter
+    eventEmitter?: EventEmitter,
   ): Promise<IncomingRedirectResult> {
     if (!(await this.canHandle(redirectUrl))) {
       throw new Error(
-        `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`
+        `AuthCodeRedirectHandler cannot handle [${redirectUrl}]: it is missing one of [code, state].`,
       );
     }
 
@@ -96,7 +96,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       "sessionId",
       {
         errorIfNull: true,
-      }
+      },
     )) as string;
 
     const {
@@ -107,32 +107,32 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     } = await loadOidcContextFromStorage(
       storedSessionId,
       this.storageUtility,
-      this.issuerConfigFetcher
+      this.issuerConfigFetcher,
     );
 
     const iss = url.searchParams.get("iss");
 
     if (typeof iss === "string" && iss !== issuerConfig.issuer) {
       throw new Error(
-        `The value of the iss parameter (${iss}) does not match the issuer identifier of the authorization server (${issuerConfig.issuer}). See [rfc9207](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.3-3.1.1)`
+        `The value of the iss parameter (${iss}) does not match the issuer identifier of the authorization server (${issuerConfig.issuer}). See [rfc9207](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.3-3.1.1)`,
       );
     }
 
     if (codeVerifier === undefined) {
       throw new Error(
-        `The code verifier for session ${storedSessionId} is missing from storage.`
+        `The code verifier for session ${storedSessionId} is missing from storage.`,
       );
     }
 
     if (storedRedirectIri === undefined) {
       throw new Error(
-        `The redirect URL for session ${storedSessionId} is missing from storage.`
+        `The redirect URL for session ${storedSessionId} is missing from storage.`,
       );
     }
 
     const client: IClient = await this.clientRegistrar.getClient(
       { sessionId: storedSessionId },
-      issuerConfig
+      issuerConfig,
     );
 
     let tokens: CodeExchangeResult;
@@ -173,7 +173,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         refreshOptions,
         eventEmitter,
         expiresIn: tokens.expiresIn,
-      }
+      },
     );
 
     await this.storageUtility.setForUser(
@@ -182,7 +182,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         webId: tokens.webId,
         isLoggedIn: "true",
       },
-      { secure: true }
+      { secure: true },
     );
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);

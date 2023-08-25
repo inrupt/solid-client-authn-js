@@ -111,10 +111,11 @@ describe("buildAuthenticatedFetch", () => {
   afterEach(() => {
     // Clear the latest timeout to avoid dangling open handles.
     // FIXME: Should just use fake timers, but that chokes on recursive calls.
-    const handle = spyTimeout.mock.results[spyTimeout.mock.results.length - 1];
-    if (handle !== undefined) {
-      (handle.value as ReturnType<typeof setTimeout>).unref();
-    }
+    spyTimeout.mock.results.forEach((handle) => {
+      if (handle !== undefined) {
+        clearTimeout(handle.value as number);
+      }
+    });
   });
 
   it("builds a DPoP fetch if a DPoP key is provided", async () => {
@@ -122,7 +123,7 @@ describe("buildAuthenticatedFetch", () => {
       new Response(undefined, {
         status: 401,
       }),
-      "https://my.pod/resource"
+      "https://my.pod/resource",
     );
     const keylikePair = await mockJwk();
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -148,9 +149,7 @@ describe("buildAuthenticatedFetch", () => {
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     const decodedHeader = await jwtVerify(
       headers.get("DPoP") as string,
-      (
-        await mockJwk()
-      ).publicKey
+      (await mockJwk()).publicKey,
     );
     expect(decodedHeader.payload).toMatchObject({
       htu: "https://my.pod/resource",
@@ -160,7 +159,7 @@ describe("buildAuthenticatedFetch", () => {
   it("builds the appropriate DPoP header for a given HTTP verb.", async () => {
     const mockedFetch = mockFetch(
       mockNotRedirectedResponse(),
-      "https://my.pod/resource"
+      "https://my.pod/resource",
     );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -173,9 +172,7 @@ describe("buildAuthenticatedFetch", () => {
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     const { payload } = await jwtVerify(
       headers.get("DPoP") as string,
-      (
-        await mockKeyPair()
-      ).privateKey
+      (await mockKeyPair()).privateKey,
     );
     expect(payload.htu).toBe("http://some.url/");
     expect(payload.htm).toBe("POST");
@@ -184,12 +181,12 @@ describe("buildAuthenticatedFetch", () => {
   it("builds a Bearer fetch if no DPoP key is provided", async () => {
     const mockedFetch = mockFetch(
       new Response(undefined, { status: 401 }),
-      "https://my.pod/resource"
+      "https://my.pod/resource",
     );
     const myFetch = await buildAuthenticatedFetch(
       mockedFetch,
       "myToken",
-      undefined
+      undefined,
     );
     await myFetch("https://my.pod/resource");
     expect(mockedFetch.mock.calls[0][0]).toBe("https://my.pod/resource");
@@ -200,7 +197,7 @@ describe("buildAuthenticatedFetch", () => {
   it("returns a fetch that rebuilds the DPoP token if redirected", async () => {
     const mockedFetch = mockFetch(
       new Response(undefined, { status: 403 }),
-      "https://my.pod/container/"
+      "https://my.pod/container/",
     );
     // Redirects once
     mockedFetch.mockResolvedValueOnce({
@@ -218,9 +215,7 @@ describe("buildAuthenticatedFetch", () => {
     const headers = new Headers(mockedFetch.mock.calls[1][1]?.headers);
     const { payload } = await jwtVerify(
       headers.get("DPoP") as string,
-      (
-        await mockKeyPair()
-      ).privateKey
+      (await mockKeyPair()).privateKey,
     );
     expect(payload.htu).toBe("https://my.pod/container/");
   });
@@ -228,7 +223,7 @@ describe("buildAuthenticatedFetch", () => {
   it("returns a fetch that does not retry fetching with a Bearer token if redirected", async () => {
     const mockedFetch = mockFetch(
       new Response(undefined, { status: 403 }),
-      "https://my.pod/container/"
+      "https://my.pod/container/",
     );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken");
@@ -241,12 +236,12 @@ describe("buildAuthenticatedFetch", () => {
   it("returns a fetch preserving optional headers passed as a map", async () => {
     const mockedFetch = mockFetch(
       mockNotRedirectedResponse(),
-      "https://my.pod/container/"
+      "https://my.pod/container/",
     );
     const myFetch = await buildAuthenticatedFetch(
       mockedFetch,
       "myToken",
-      undefined
+      undefined,
     );
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
@@ -259,12 +254,12 @@ describe("buildAuthenticatedFetch", () => {
   it("returns a fetch preserving optional headers passed as a Header object", async () => {
     const mockedFetch = mockFetch(
       mockNotRedirectedResponse(),
-      "https://my.pod/container/"
+      "https://my.pod/container/",
     );
     const myFetch = await buildAuthenticatedFetch(
       mockedFetch,
       "myToken",
-      undefined
+      undefined,
     );
     await myFetch("someUrl", {
       headers: new Headers({ someHeader: "SomeValue" }),
@@ -279,7 +274,7 @@ describe("buildAuthenticatedFetch", () => {
   it("returns a fetch overriding any pre-existing Authorization or DPoP headers", async () => {
     const mockedFetch = mockFetch(
       mockNotRedirectedResponse(),
-      "https://my.pod/container/"
+      "https://my.pod/container/",
     );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -299,7 +294,7 @@ describe("buildAuthenticatedFetch", () => {
     // Mimics a redirect that lead to a non-auth error.
     const mockedFetch = mockFetch(
       new Response(undefined, { status: 400 }),
-      "https://my.pod/container/"
+      "https://my.pod/container/",
     );
 
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -314,7 +309,7 @@ describe("buildAuthenticatedFetch", () => {
   it("returns the initial response in case of non-redirected auth error", async () => {
     const mockedFetch = mockFetch(
       new Response(undefined, { status: 401 }),
-      "https://my.pod/container/"
+      "https://my.pod/container/",
     );
     const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -345,7 +340,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("refreshes the token before it expires", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -372,7 +367,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("sets a default timeout if the OIDC provider did not return one", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
@@ -386,13 +381,13 @@ describe("buildAuthenticatedFetch", () => {
 
     expect(spyTimeout).toHaveBeenLastCalledWith(
       expect.any(Function),
-      DEFAULT_EXPIRATION_TIME_SECONDS * 1000
+      DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
     );
   });
 
   it("does not rebind the DPoP token on refresh", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const keylikePair = await mockJwk();
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
@@ -433,13 +428,13 @@ describe("buildAuthenticatedFetch", () => {
       {
         privateKey: keylikePair.privateKey,
         publicKey: await exportJWK(keylikePair.publicKey),
-      }
+      },
     );
   });
 
   it("sets up the timeout on refresh so that the tokens keep being valid", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
@@ -448,6 +443,8 @@ describe("buildAuthenticatedFetch", () => {
     });
     const spyTimeout = jest.spyOn(global, "setTimeout");
     const mockedEmitter = new EventEmitter();
+    // const handles: ReturnType<typeof setTimeout>[] = [];
+    // mockedEmitter.on(EVENTS.TIMEOUT_SET, (handle) => {handles.push(handle); console.log("timeout set")});
     const spiedEmit = jest.spyOn(mockedEmitter, "emit");
     await buildAuthenticatedFetch(mockedFetch, "myToken", {
       refreshOptions: {
@@ -467,17 +464,18 @@ describe("buildAuthenticatedFetch", () => {
     expect(spyTimeout).toHaveBeenLastCalledWith(
       expect.any(Function),
       // 2000 is 7 - 5, which is the number of seconds before refreshing, converted to ms.
-      2 * 1000
+      2 * 1000,
     );
     expect(spiedEmit).toHaveBeenCalledWith(
       EVENTS.TIMEOUT_SET,
-      expect.anything()
+      expect.anything(),
     );
+    // handles.forEach((handle) => { console.log("clearing handle"); clearTimeout(handle)});
   });
 
   it("sets a default timeout on refresh if the OIDC provider does not return one", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
@@ -500,13 +498,13 @@ describe("buildAuthenticatedFetch", () => {
     // A new timer should have been set.
     expect(spyTimeout).toHaveBeenLastCalledWith(
       expect.any(Function),
-      DEFAULT_EXPIRATION_TIME_SECONDS * 1000
+      DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
     );
   });
 
   it("calls the provided callback when the access token is refreshed", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const tokenSet = mockDefaultTokenSet();
     const mockedFreshener = mockTokenRefresher({
@@ -530,7 +528,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("calls the provided callback when a new refresh token is issued", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
@@ -549,13 +547,13 @@ describe("buildAuthenticatedFetch", () => {
     await sleep(200);
     expect(spiedEmit).toHaveBeenCalledWith(
       EVENTS.NEW_REFRESH_TOKEN,
-      "some rotated refresh token"
+      "some rotated refresh token",
     );
   });
 
   it("rotates the refresh token if a new one is issued", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.
@@ -589,7 +587,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("emits the appropriate events when refreshing the token fails", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
@@ -602,8 +600,8 @@ describe("buildAuthenticatedFetch", () => {
         new OidcProviderError(
           "Some error message",
           "error_identifier",
-          "Some error description"
-        )
+          "Some error description",
+        ),
       ) as any;
     const mockEmitter = new EventEmitter();
     // 'error' events must be listened to.
@@ -623,19 +621,19 @@ describe("buildAuthenticatedFetch", () => {
     expect(spiedEmit).toHaveBeenCalledTimes(3);
     expect(spiedEmit).toHaveBeenCalledWith(
       EVENTS.TIMEOUT_SET,
-      expect.anything()
+      expect.anything(),
     );
     expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
     expect(spiedEmit).toHaveBeenCalledWith(
       EVENTS.ERROR,
       "error_identifier",
-      "Some error description"
+      "Some error description",
     );
   });
 
   it("emits the appropriate events when an unexpected response is received", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
@@ -661,14 +659,14 @@ describe("buildAuthenticatedFetch", () => {
     expect(spiedEmit).toHaveBeenCalledTimes(2);
     expect(spiedEmit).toHaveBeenCalledWith(
       EVENTS.TIMEOUT_SET,
-      expect.anything()
+      expect.anything(),
     );
     expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
   });
 
   it("emits the appropriate events when the access token expires and may not be refreshed", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -690,14 +688,14 @@ describe("buildAuthenticatedFetch", () => {
     expect(spiedEmit).toHaveBeenCalledTimes(2);
     expect(spiedEmit).toHaveBeenCalledWith(
       EVENTS.TIMEOUT_SET,
-      expect.anything()
+      expect.anything(),
     );
     expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXPIRED);
   });
 
   it("does not schedule any callback to be called if no event can be fired", async () => {
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     const spyTimeout = jest.spyOn(global, "setTimeout");
     await buildAuthenticatedFetch(mockedFetch, "myToken");

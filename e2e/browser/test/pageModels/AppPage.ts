@@ -46,16 +46,16 @@ export class AppPage {
     this.fetchTimeout = options.fetchTimeout;
 
     this.fetchResponseText = this.page.locator(
-      '[data-testid="fetchResponseTextbox"]'
+      '[data-testid="fetchResponseTextbox"]',
     );
     this.loginSignalReceived = this.page.locator(
-      '[data-testid="loginSignalReceived"]'
+      '[data-testid="loginSignalReceived"]',
     );
     this.logoutSignalReceived = this.page.locator(
-      '[data-testid="loginSignalReceived"]'
+      '[data-testid="loginSignalReceived"]',
     );
     this.expirationDate = this.page.locator(
-      '[data-testid="sessionExpiration"]'
+      '[data-testid="sessionExpiration"]',
     );
   }
 
@@ -65,7 +65,7 @@ export class AppPage {
       this.page.click('[data-testid="fetchButton"]'),
       // A response should be sent to the issued fetch.
       this.page.waitForResponse((response) =>
-        response.url().includes(new URL(url).href)
+        response.url().includes(new URL(url).href),
       ),
     ]);
 

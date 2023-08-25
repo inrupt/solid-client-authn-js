@@ -45,12 +45,12 @@ export default class TokenRequester {
   constructor(
     private storageUtility: IStorageUtility,
     private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar
+    private clientRegistrar: IClientRegistrar,
   ) {}
 
   async request(
     _sessionId: string,
-    _body: Record<string, string>
+    _body: Record<string, string>,
   ): Promise<void> {
     throw new NotImplementedError("TokenRequester not implemented for Node");
   }

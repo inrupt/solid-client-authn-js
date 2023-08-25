@@ -51,7 +51,7 @@ export function getUnauthenticatedSession(): ISessionInfo & {
  */
 export async function clear(
   sessionId: string,
-  storage: IStorageUtility
+  storage: IStorageUtility,
 ): Promise<void> {
   await Promise.all([
     storage.deleteAllUserData(sessionId, { secure: false }),
@@ -67,7 +67,7 @@ export abstract class SessionInfoManagerBase implements ISessionInfoManager {
 
   update(
     _sessionId: string,
-    _options: ISessionInfoManagerOptions
+    _options: ISessionInfoManagerOptions,
   ): Promise<void> {
     throw new Error("Not Implemented");
   }

@@ -49,7 +49,7 @@ jest.mock("@inrupt/universal-fetch", () => {
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
@@ -158,7 +158,7 @@ const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
 
 const setupGetWebidMock = (webid: string) => {
   const { getWebidFromTokenPayload } = jest.requireMock(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as jest.Mocked<typeof SolidClientAuthnCore>;
   getWebidFromTokenPayload.mockResolvedValueOnce(webid);
 };
@@ -168,7 +168,7 @@ describe("ClientCredentialsOidcHandler", () => {
     it("cannot handle if the client ID is missing", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -177,14 +177,14 @@ describe("ClientCredentialsOidcHandler", () => {
             clientId: undefined as unknown as string,
             clientType: "static",
           },
-        })
+        }),
       ).resolves.toBe(false);
     });
 
     it("cannot handle if the client secret is missing", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -194,14 +194,14 @@ describe("ClientCredentialsOidcHandler", () => {
             clientSecret: undefined,
             clientType: "static",
           },
-        })
+        }),
       ).resolves.toBe(false);
     });
 
     it("cannot handle if the client is not statically registered", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -211,14 +211,14 @@ describe("ClientCredentialsOidcHandler", () => {
             clientSecret: "some secret",
             clientType: "dynamic",
           },
-        })
+        }),
       ).resolves.toBe(false);
     });
 
     it("can handle if both client ID and secret are present for a confidential client", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({})
+        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -228,7 +228,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientSecret: "some client secret",
             clientType: "static",
           },
-        })
+        }),
       ).resolves.toBe(true);
     });
   });
@@ -241,7 +241,7 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     await expect(
       clientCredentialsOidcHandler.handle({
@@ -251,9 +251,9 @@ describe("handle", () => {
           clientSecret: "some client secret",
           clientType: "static",
         },
-      })
+      }),
     ).rejects.toThrow(
-      /Invalid response from Solid Identity Provider \[.+\]: \{.+\} is missing 'access_token'/
+      /Invalid response from Solid Identity Provider \[.+\]: \{.+\} is missing 'access_token'/,
     );
   });
 
@@ -267,7 +267,7 @@ describe("handle", () => {
     setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
 
     const sessionInfo = await clientCredentialsOidcHandler.handle({
@@ -281,7 +281,7 @@ describe("handle", () => {
     // The session's WebID should have been picked up from the access token in
     // the absence of an ID token.
     expect((sessionInfo as SolidClientAuthnCore.ISessionInfo).webId).toBe(
-      "https://my.webid/"
+      "https://my.webid/",
     );
   });
 
@@ -294,13 +294,13 @@ describe("handle", () => {
     tokens.id_token = undefined;
     setupOidcClientMock(tokens);
     const { getWebidFromTokenPayload } = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
+      "@inrupt/solid-client-authn-core",
     ) as jest.Mocked<typeof SolidClientAuthnCore>;
     // Pretend the token validation function throws
     getWebidFromTokenPayload.mockRejectedValueOnce(new Error("Bad audience"));
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
 
     await expect(
@@ -311,7 +311,7 @@ describe("handle", () => {
           clientSecret: "some client secret",
           clientType: "static",
         },
-      })
+      }),
     ).rejects.toThrow("Bad audience");
   });
 
@@ -320,7 +320,7 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     const result = await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -333,17 +333,17 @@ describe("handle", () => {
     });
 
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValue(
       new Response(undefined, {
         status: 200,
-      })
+      }),
     );
     await result?.fetch("https://some.pod/resource");
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     expect(headers.get("Authorization")).toContain(
-      `DPoP ${tokens.access_token}`
+      `DPoP ${tokens.access_token}`,
     );
   });
 
@@ -352,7 +352,7 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     const result = await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -365,17 +365,17 @@ describe("handle", () => {
     });
 
     const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch"
+      "@inrupt/universal-fetch",
     ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValue(
       new Response(undefined, {
         status: 200,
-      })
+      }),
     );
     await result?.fetch("https://some.pod/resource");
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     expect(headers.get("Authorization")).toContain(
-      `Bearer ${tokens.access_token}`
+      `Bearer ${tokens.access_token}`,
     );
   });
 
@@ -384,16 +384,16 @@ describe("handle", () => {
     tokens.refresh_token = "some refresh token";
     setupOidcClientMock(tokens);
     const coreModule = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
+      "@inrupt/solid-client-authn-core",
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch"
+      "buildAuthenticatedFetch",
     );
     const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockedRefresher,
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -414,7 +414,7 @@ describe("handle", () => {
           sessionId: "mySession",
           tokenRefresher: mockedRefresher,
         },
-      })
+      }),
     );
   });
 
@@ -422,16 +422,16 @@ describe("handle", () => {
     const tokens = mockDpopTokens();
     setupOidcClientMock(tokens);
     const coreModule = jest.requireMock(
-      "@inrupt/solid-client-authn-core"
+      "@inrupt/solid-client-authn-core",
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch"
+      "buildAuthenticatedFetch",
     );
     const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockedRefresher,
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -448,7 +448,7 @@ describe("handle", () => {
       expect.anything(),
       expect.objectContaining({
         expiresIn: mockDpopTokens().expires_in,
-      })
+      }),
     );
   });
 
@@ -458,7 +458,7 @@ describe("handle", () => {
     setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({})
+      mockStorageUtility({}),
     );
     const result = await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -474,7 +474,7 @@ describe("handle", () => {
     expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
     expect(result?.webId).toBe("https://my.webid/");
     expect(result?.expirationDate).toBe(
-      Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000
+      Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
     );
   });
 });

@@ -129,7 +129,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    */
   constructor(
     sessionOptions: Partial<ISessionOptions> = {},
-    sessionId: string | undefined = undefined
+    sessionId: string | undefined = undefined,
   ) {
     super();
     // Until Session no longer implements EventEmitter, this.events is just a proxy
@@ -140,8 +140,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
       this,
       buildProxyHandler(
         Session.prototype,
-        "events only implements ISessionEventListener"
-      )
+        "events only implements ISessionEventListener",
+      ),
     );
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
@@ -177,7 +177,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     if (sessionOptions.onNewRefreshToken !== undefined) {
       this.events.on(
         EVENTS.NEW_REFRESH_TOKEN,
-        sessionOptions.onNewRefreshToken
+        sessionOptions.onNewRefreshToken,
       );
     }
     // Keeps track of the latest timeout handle in order to clean up on logout
@@ -204,7 +204,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
       {
         ...options,
       },
-      this.events
+      this.events,
     );
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
@@ -276,7 +276,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
 
   private internalLogout = async (
     emitEvent: boolean,
-    options?: ILogoutOptions
+    options?: ILogoutOptions,
   ): Promise<void> => {
     await this.clientAuthentication.logout(this.info.sessionId, options);
     // Clears the timeouts on logout so that Node does not hang.
@@ -293,7 +293,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
    */
   handleIncomingRedirect = async (
-    url: string
+    url: string,
   ): Promise<ISessionInfo | undefined> => {
     let sessionInfo;
 
@@ -309,7 +309,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
         this.tokenRequestInProgress = true;
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
           url,
-          this.events
+          this.events,
         );
 
         if (sessionInfo) {

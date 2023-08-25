@@ -131,7 +131,7 @@ const issuerConfigKeyMap: Record<
 /* eslint-enable camelcase */
 
 function processConfig(
-  config: Record<string, string | string[]>
+  config: Record<string, string | string[]>,
 ): IIssuerConfig {
   const parsedConfig: Record<string, string | string[]> = {};
   Object.keys(config).forEach((key) => {
@@ -168,11 +168,11 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       WELL_KNOWN_OPENID_CONFIG,
       // Make sure to append a slash at issuer URL, so that the .well-known URL
       // includes the full issuer path. See https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig.
-      issuer.endsWith("/") ? issuer : `${issuer}/`
+      issuer.endsWith("/") ? issuer : `${issuer}/`,
     ).href;
     const issuerConfigRequestBody = await uniFetch.call(
       globalThis,
-      openIdConfigUrl
+      openIdConfigUrl,
     );
     // Check the validity of the fetched config
     try {
@@ -181,14 +181,14 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       throw new ConfigurationError(
         `[${issuer.toString()}] has an invalid configuration: ${
           (err as { message: string }).message
-        }`
+        }`,
       );
     }
 
     // Update store with fetched config
     await this.storageUtility.set(
       IssuerConfigFetcher.getLocalStorageKey(issuer),
-      JSON.stringify(issuerConfig)
+      JSON.stringify(issuerConfig),
     );
 
     return issuerConfig;

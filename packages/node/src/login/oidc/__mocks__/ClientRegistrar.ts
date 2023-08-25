@@ -43,7 +43,7 @@ export const ClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
-      Promise.resolve(ClientRegistrarResponse)
+      Promise.resolve(ClientRegistrarResponse),
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
@@ -52,7 +52,7 @@ export const PublicClientRegistrarMock: jest.Mocked<IClientRegistrar> = {
   getClient: jest.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (options: IClientRegistrarOptions, issuerConfig: IIssuerConfig) =>
-      Promise.resolve(PublicClientRegistrarResponse)
+      Promise.resolve(PublicClientRegistrarResponse),
   ),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
@@ -68,7 +68,7 @@ export const mockDefaultClientConfig = (): ClientMetadata => {
 };
 
 export const mockClientConfig = (
-  config: Record<string, string | undefined>
+  config: Record<string, string | undefined>,
 ): ClientMetadata => {
   return {
     ...mockDefaultClientConfig(),

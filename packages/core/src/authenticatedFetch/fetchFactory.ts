@@ -59,14 +59,14 @@ async function buildDpopFetchOptions(
   targetUrl: string,
   authToken: string,
   dpopKey: KeyPair,
-  defaultOptions?: RequestInit
+  defaultOptions?: RequestInit,
 ): Promise<RequestInit> {
   const headers = new Headers(defaultOptions?.headers);
   // Any pre-existing Authorization header should be overriden.
   headers.set("Authorization", `DPoP ${authToken}`);
   headers.set(
     "DPoP",
-    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey)
+    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
   );
   return {
     ...defaultOptions,
@@ -78,7 +78,7 @@ async function buildAuthenticatedHeaders(
   targetUrl: string,
   authToken: string,
   dpopKey?: KeyPair,
-  defaultOptions?: RequestInit
+  defaultOptions?: RequestInit,
 ): Promise<RequestInit> {
   if (dpopKey !== undefined) {
     return buildDpopFetchOptions(targetUrl, authToken, dpopKey, defaultOptions);
@@ -97,7 +97,7 @@ async function makeAuthenticatedRequest(
   accessToken: string,
   url: RequestInfo | URL,
   defaultRequestInit?: RequestInit,
-  dpopKey?: KeyPair
+  dpopKey?: KeyPair,
 ) {
   return unauthFetch(
     url,
@@ -105,24 +105,24 @@ async function makeAuthenticatedRequest(
       url.toString(),
       accessToken,
       dpopKey,
-      defaultRequestInit
-    )
+      defaultRequestInit,
+    ),
   );
 }
 
 async function refreshAccessToken(
   refreshOptions: RefreshOptions,
   dpopKey?: KeyPair,
-  eventEmitter?: EventEmitter
+  eventEmitter?: EventEmitter,
 ): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }> {
   const tokenSet = await refreshOptions.tokenRefresher.refresh(
     refreshOptions.sessionId,
     refreshOptions.refreshToken,
-    dpopKey
+    dpopKey,
   );
   eventEmitter?.emit(
     EVENTS.SESSION_EXTENDED,
-    tokenSet.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS
+    tokenSet.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS,
   );
   if (typeof tokenSet.refreshToken === "string") {
     eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
@@ -166,7 +166,7 @@ export async function buildAuthenticatedFetch(
     refreshOptions?: RefreshOptions;
     expiresIn?: number;
     eventEmitter?: EventEmitter;
-  }
+  },
 ): Promise<typeof fetch> {
   let currentAccessToken = accessToken;
   let latestTimeout: Parameters<typeof clearTimeout>[0];
@@ -188,7 +188,7 @@ export async function buildAuthenticatedFetch(
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           options!.dpopKey,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          options!.eventEmitter
+          options!.eventEmitter,
         );
         // Update the tokens in the closure if appropriate.
         currentAccessToken = refreshedAccessToken;
@@ -200,7 +200,7 @@ export async function buildAuthenticatedFetch(
         clearTimeout(latestTimeout);
         latestTimeout = setTimeout(
           proactivelyRefreshToken,
-          computeRefreshDelay(expiresIn) * 1000
+          computeRefreshDelay(expiresIn) * 1000,
         );
         // If currentRefreshOptions is defined, options is necessarily defined too.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -218,7 +218,7 @@ export async function buildAuthenticatedFetch(
           options?.eventEmitter?.emit(
             EVENTS.ERROR,
             e.error,
-            e.errorDescription
+            e.errorDescription,
           );
           /* istanbul ignore next 100% coverage would require testing that nothing
             happens here if the emitter is undefined, which is more cumbersome
@@ -242,18 +242,21 @@ export async function buildAuthenticatedFetch(
       proactivelyRefreshToken,
       // If currentRefreshOptions is defined, options is necessarily defined too.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      computeRefreshDelay(options!.expiresIn) * 1000
+      computeRefreshDelay(options!.expiresIn) * 1000,
     );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     options!.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
   } else if (options !== undefined && options.eventEmitter !== undefined) {
     // If no refresh options are provided, the session expires when the access token does.
-    const expirationTimeout = setTimeout(() => {
-      // The event emitter is always defined in our code, and it would be tedious
-      // to test for conditions when it is not.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      options.eventEmitter!.emit(EVENTS.SESSION_EXPIRED);
-    }, computeRefreshDelay(options.expiresIn) * 1000);
+    const expirationTimeout = setTimeout(
+      () => {
+        // The event emitter is always defined in our code, and it would be tedious
+        // to test for conditions when it is not.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        options.eventEmitter!.emit(EVENTS.SESSION_EXPIRED);
+      },
+      computeRefreshDelay(options.expiresIn) * 1000,
+    );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     options.eventEmitter!.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
   }
@@ -263,7 +266,7 @@ export async function buildAuthenticatedFetch(
       currentAccessToken,
       url,
       requestInit,
-      options?.dpopKey
+      options?.dpopKey,
     );
 
     const failedButNotExpectedAuthError =
@@ -286,7 +289,7 @@ export async function buildAuthenticatedFetch(
         // Replace the original target IRI (`url`) by the redirection target
         response.url,
         requestInit,
-        options.dpopKey
+        options.dpopKey,
       );
     }
     return response;

@@ -29,7 +29,7 @@ type WithStack = { stack: string };
 
 export async function fetchJwks(
   jwksIri: string,
-  issuerIri: string
+  issuerIri: string,
 ): Promise<JWK> {
   // FIXME: the following line works, but the underlying network calls don't seem
   // to be mocked properly by our test code. It would be nicer to replace calls to this
@@ -38,7 +38,7 @@ export async function fetchJwks(
   const jwksResponse = await uniFetch.call(globalThis, jwksIri);
   if (jwksResponse.status !== 200) {
     throw new Error(
-      `Could not fetch JWKS for [${issuerIri}] at [${jwksIri}]: ${jwksResponse.status} ${jwksResponse.statusText}`
+      `Could not fetch JWKS for [${issuerIri}] at [${jwksIri}]: ${jwksResponse.status} ${jwksResponse.statusText}`,
     );
   }
   // The JWKS should only contain the current key for the issuer.
@@ -49,7 +49,7 @@ export async function fetchJwks(
     throw new Error(
       `Malformed JWKS for [${issuerIri}] at [${jwksIri}]: ${
         (e as WithMessage).message
-      }`
+      }`,
     );
   }
   return jwk;
@@ -68,7 +68,7 @@ export async function getWebidFromTokenPayload(
   idToken: string,
   jwksIri: string,
   issuerIri: string,
-  clientId: string
+  clientId: string,
 ): Promise<string> {
   const jwk = await fetchJwks(jwksIri, issuerIri);
   let payload: JWTPayload;
@@ -79,7 +79,7 @@ export async function getWebidFromTokenPayload(
       {
         issuer: issuerIri,
         audience: clientId,
-      }
+      },
     );
     payload = verifiedPayload;
   } catch (e) {
@@ -92,8 +92,8 @@ export async function getWebidFromTokenPayload(
   if (typeof payload.sub !== "string") {
     throw new Error(
       `The token ${JSON.stringify(
-        payload
-      )} is invalid: it has no 'webid' claim and no 'sub' claim.`
+        payload,
+      )} is invalid: it has no 'webid' claim and no 'sub' claim.`,
     );
   }
   try {
@@ -105,7 +105,7 @@ export async function getWebidFromTokenPayload(
     return payload.sub;
   } catch (e) {
     throw new Error(
-      `The token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`
+      `The token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`,
     );
   }
 }

@@ -35,10 +35,10 @@ describe("SessionInfoManager", () => {
   };
 
   function getSessionInfoManager(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): SessionInfoManager {
     const sessionManager = new SessionInfoManager(
-      mocks.storageUtility ?? defaultMocks.storageUtility
+      mocks.storageUtility ?? defaultMocks.storageUtility,
     );
     return sessionManager;
   }
@@ -49,7 +49,7 @@ describe("SessionInfoManager", () => {
         storageUtility: mockStorageUtility({}),
       });
       await expect(async () =>
-        sessionManager.update("commanderCool", {})
+        sessionManager.update("commanderCool", {}),
       ).rejects.toThrow("Not Implemented");
     });
   });
@@ -133,14 +133,14 @@ describe("SessionInfoManager", () => {
             key: "value",
           },
         },
-        true
+        true,
       );
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorage,
       });
       await sessionManager.clear("mySession");
       expect(
-        await mockStorage.getForUser("mySession", "key", { secure: true })
+        await mockStorage.getForUser("mySession", "key", { secure: true }),
       ).toBeUndefined();
     });
 
@@ -151,14 +151,14 @@ describe("SessionInfoManager", () => {
             key: "value",
           },
         },
-        false
+        false,
       );
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorage,
       });
       await sessionManager.clear("mySession");
       expect(
-        await mockStorage.getForUser("mySession", "key", { secure: false })
+        await mockStorage.getForUser("mySession", "key", { secure: false }),
       ).toBeUndefined();
     });
 
@@ -174,7 +174,7 @@ describe("SessionInfoManager", () => {
       });
       await sessionManager.clear("a session");
       await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toStrictEqual(
-        JSON.stringify(["another session"])
+        JSON.stringify(["another session"]),
       );
     });
   });
@@ -197,7 +197,7 @@ describe("SessionInfoManager", () => {
       await sessionManager.register("someSession");
 
       await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
-        JSON.stringify(["someSession"])
+        JSON.stringify(["someSession"]),
       );
     });
 
@@ -211,7 +211,7 @@ describe("SessionInfoManager", () => {
       await sessionManager.register("some session");
 
       await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
-        JSON.stringify(["some existing session", "some session"])
+        JSON.stringify(["some existing session", "some session"]),
       );
     });
 
@@ -225,7 +225,7 @@ describe("SessionInfoManager", () => {
       await sessionManager.register("some session");
 
       await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
-        JSON.stringify(["some session"])
+        JSON.stringify(["some session"]),
       );
     });
 
@@ -238,7 +238,7 @@ describe("SessionInfoManager", () => {
       await sessionManager.register("some other session");
 
       await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toBe(
-        JSON.stringify(["some session", "some other session"])
+        JSON.stringify(["some session", "some other session"]),
       );
     });
   });
@@ -256,7 +256,7 @@ describe("SessionInfoManager", () => {
       });
 
       await expect(
-        sessionManager.getRegisteredSessionIdAll()
+        sessionManager.getRegisteredSessionIdAll(),
       ).resolves.toStrictEqual(["a session", "another session"]);
     });
 
@@ -265,7 +265,7 @@ describe("SessionInfoManager", () => {
         storageUtility: mockStorageUtility({}),
       });
       await expect(
-        sessionManager.getRegisteredSessionIdAll()
+        sessionManager.getRegisteredSessionIdAll(),
       ).resolves.toStrictEqual([]);
     });
   });
@@ -283,7 +283,7 @@ describe("SessionInfoManager", () => {
       });
       await sessionManager.clearAll();
       await expect(storage.get(KEY_REGISTERED_SESSIONS)).resolves.toStrictEqual(
-        JSON.stringify([])
+        JSON.stringify([]),
       );
     });
 
@@ -299,7 +299,7 @@ describe("SessionInfoManager", () => {
       });
       await sessionManager.clearAll();
       await expect(
-        storage.getForUser("a session", "some user info")
+        storage.getForUser("a session", "some user info"),
       ).resolves.toBeUndefined();
     });
 
@@ -310,7 +310,7 @@ describe("SessionInfoManager", () => {
       });
       await sessionManager.clearAll();
       await expect(
-        storage.getForUser("a session", "some user info")
+        storage.getForUser("a session", "some user info"),
       ).resolves.toBeUndefined();
     });
   });

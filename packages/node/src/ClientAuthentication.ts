@@ -43,7 +43,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   login = async (
     sessionId: string,
     options: ILoginInputOptions,
-    eventEmitter: EventEmitter
+    eventEmitter: EventEmitter,
   ): Promise<ISessionInfo | undefined> => {
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
@@ -52,7 +52,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       !isValidRedirectUrl(options.redirectUrl)
     ) {
       throw new Error(
-        `${options.redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`
+        `${options.redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`,
       );
     }
     const loginReturn = await this.loginHandler.handle({
@@ -93,7 +93,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
 
   handleIncomingRedirect = async (
     url: string,
-    eventEmitter: EventEmitter
+    eventEmitter: EventEmitter,
   ): Promise<ISessionInfo | undefined> => {
     const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
 

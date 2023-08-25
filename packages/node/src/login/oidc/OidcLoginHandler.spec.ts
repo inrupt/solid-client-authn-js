@@ -47,13 +47,13 @@ describe("OidcLoginHandler", () => {
     clientRegistrar: mockDefaultClientRegistrar(),
   };
   function getInitialisedHandler(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): OidcLoginHandler {
     return new OidcLoginHandler(
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.oidcHandler ?? defaultMocks.oidcHandler,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-      mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+      mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
     );
   }
 
@@ -65,7 +65,7 @@ describe("OidcLoginHandler", () => {
           sessionId: "mySession",
           tokenType: "DPoP",
           redirectUrl: "https://my.app/redirect",
-        })
+        }),
       ).resolves.toBe(false);
     });
 
@@ -90,7 +90,7 @@ describe("OidcLoginHandler", () => {
           tokenType: "DPoP",
           oidcIssuer: "https://my.idp/",
           redirectUrl: "https://my.app/redirect",
-        })
+        }),
       ).resolves.toBe(true);
     });
   });
@@ -103,7 +103,7 @@ describe("OidcLoginHandler", () => {
           sessionId: "mySession",
           tokenType: "DPoP",
           redirectUrl: "https://my.app/redirect",
-        })
+        }),
       ).rejects.toThrow("OidcLoginHandler requires an OIDC issuer");
     });
 
@@ -124,7 +124,7 @@ describe("OidcLoginHandler", () => {
       const { oidcHandler } = defaultMocks;
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
-        mockDefaultClient()
+        mockDefaultClient(),
       );
       const handler = getInitialisedHandler({ oidcHandler, clientRegistrar });
       await handler.handle({
@@ -141,7 +141,7 @@ describe("OidcLoginHandler", () => {
       const mockedStorage = mockStorageUtility({});
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
-        mockDefaultClient()
+        mockDefaultClient(),
       );
       const handler = getInitialisedHandler({
         oidcHandler,
@@ -159,20 +159,20 @@ describe("OidcLoginHandler", () => {
       });
       expect(clientRegistrar.getClient).not.toHaveBeenCalled();
       await expect(
-        mockedStorage.getForUser("mySession", "clientId")
+        mockedStorage.getForUser("mySession", "clientId"),
       ).resolves.toBe("some pre-registered client id");
       await expect(
-        mockedStorage.getForUser("mySession", "clientSecret")
+        mockedStorage.getForUser("mySession", "clientSecret"),
       ).resolves.toBe("some pre-registered client secret");
       await expect(
-        mockedStorage.getForUser("mySession", "clientName")
+        mockedStorage.getForUser("mySession", "clientName"),
       ).resolves.toBe("My App");
     });
 
     it("should save client WebID if one is provided, and the target IdP supports Solid-OIDC", async () => {
       const mockedStorage = new StorageUtility(
         mockStorage({}),
-        mockStorage({})
+        mockStorage({}),
       );
 
       const actualHandler = defaultMocks.oidcHandler;
@@ -196,12 +196,12 @@ describe("OidcLoginHandler", () => {
 
       const calledWith = actualHandler.handle.mock.calls[0][0];
       expect(calledWith.client.clientId).toBe(
-        "https://my.app/registration#app"
+        "https://my.app/registration#app",
       );
 
       const storedClientId = await mockedStorage.getForUser(
         "mySession",
-        "clientId"
+        "clientId",
       );
       expect(storedClientId).toBe("https://my.app/registration#app");
     });
@@ -216,7 +216,7 @@ describe("OidcLoginHandler", () => {
 
       const mockedEmptyStorage = new StorageUtility(
         mockStorage({}),
-        mockStorage({})
+        mockStorage({}),
       );
 
       const handler = getInitialisedHandler({
@@ -238,7 +238,7 @@ describe("OidcLoginHandler", () => {
 
       const calledWith = oidcHandler.handle.mock.calls[0][0];
       expect(calledWith.client.clientId).toBe(
-        "a dynamically registered client id"
+        "a dynamically registered client id",
       );
     });
 
@@ -247,7 +247,7 @@ describe("OidcLoginHandler", () => {
       const mockedStorage = mockStorageUtility({});
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
-        mockDefaultClient()
+        mockDefaultClient(),
       );
       const handler = getInitialisedHandler({
         oidcHandler,
@@ -263,7 +263,7 @@ describe("OidcLoginHandler", () => {
       });
       expect(clientRegistrar.getClient).not.toHaveBeenCalled();
       await expect(
-        mockedStorage.getForUser("mySession", "clientId")
+        mockedStorage.getForUser("mySession", "clientId"),
       ).resolves.toBe("some pre-registered client id");
     });
 
@@ -275,7 +275,7 @@ describe("OidcLoginHandler", () => {
       });
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
-        mockDefaultClient()
+        mockDefaultClient(),
       );
       const handler = getInitialisedHandler({
         oidcHandler,
@@ -291,7 +291,7 @@ describe("OidcLoginHandler", () => {
       expect(oidcHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
           refreshToken: "some token",
-        })
+        }),
       );
     });
 
@@ -303,7 +303,7 @@ describe("OidcLoginHandler", () => {
       });
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
-        mockDefaultClient()
+        mockDefaultClient(),
       );
       const handler = getInitialisedHandler({
         oidcHandler,
@@ -320,7 +320,7 @@ describe("OidcLoginHandler", () => {
       expect(oidcHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
           refreshToken: "some other refresh token",
-        })
+        }),
       );
     });
 
@@ -330,7 +330,7 @@ describe("OidcLoginHandler", () => {
       issuerConfig.issuer = "https://some.issuer/";
       const handler = getInitialisedHandler({
         issuerConfigFetcher: mockIssuerConfigFetcher(
-          issuerConfig
+          issuerConfig,
         ) as jest.Mocked<IIssuerConfigFetcher>,
         oidcHandler: actualHandler,
       });
@@ -345,7 +345,7 @@ describe("OidcLoginHandler", () => {
       expect(actualHandler.handle).toHaveBeenCalledWith(
         expect.objectContaining({
           issuer: "https://some.issuer/",
-        })
+        }),
       );
     });
   });

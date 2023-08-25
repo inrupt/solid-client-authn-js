@@ -44,7 +44,7 @@ import { defaultStorage, Session } from "./Session";
 export async function getSessionFromStorage(
   sessionId: string,
   storage?: IStorage,
-  onNewRefreshToken?: (newToken: string) => unknown
+  onNewRefreshToken?: (newToken: string) => unknown,
 ): Promise<Session | undefined> {
   const clientAuth: ClientAuthentication = storage
     ? getClientAuthenticationWithDependencies({
@@ -91,7 +91,7 @@ export async function getSessionFromStorage(
  * @returns An array of Session IDs
  */
 export async function getSessionIdFromStorageAll(
-  storage?: IStorage
+  storage?: IStorage,
 ): Promise<string[]> {
   const clientAuth: ClientAuthentication = storage
     ? getClientAuthenticationWithDependencies({
@@ -120,7 +120,7 @@ export async function getSessionIdFromStorageAll(
  * @param storage The storage where the Session can be found
  */
 export async function clearSessionFromStorageAll(
-  storage?: IStorage
+  storage?: IStorage,
 ): Promise<void> {
   const clientAuth: ClientAuthentication = storage
     ? getClientAuthenticationWithDependencies({

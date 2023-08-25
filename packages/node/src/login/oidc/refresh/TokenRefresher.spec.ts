@@ -151,12 +151,12 @@ describe("TokenRefresher", () => {
   };
 
   function getTokenRefresher(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): TokenRefresher {
     return new TokenRefresher(
       mocks.storageUtility ?? defaultMocks.storageUtility,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
-      mocks.clientRegistrar ?? defaultMocks.clientRegistrar
+      mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
     );
   }
 
@@ -174,9 +174,9 @@ describe("TokenRefresher", () => {
     });
 
     await expect(
-      refresher.refresh("mySession", "some refresh token")
+      refresher.refresh("mySession", "some refresh token"),
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage associated with session [mySession]"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]",
     );
   });
 
@@ -192,9 +192,9 @@ describe("TokenRefresher", () => {
     });
 
     await expect(
-      refresher.refresh("mySession", "some refresh token")
+      refresher.refresh("mySession", "some refresh token"),
     ).rejects.toThrow(
-      "Failed to retrieve OIDC context from storage associated with session [mySession]"
+      "Failed to retrieve OIDC context from storage associated with session [mySession]",
     );
   });
 
@@ -214,7 +214,7 @@ describe("TokenRefresher", () => {
     });
 
     await expect(refresher.refresh("mySession")).rejects.toThrow(
-      "Session [mySession] has no refresh token to allow it to refresh its access token."
+      "Session [mySession] has no refresh token to allow it to refresh its access token.",
     );
   });
 
@@ -233,9 +233,9 @@ describe("TokenRefresher", () => {
     });
 
     await expect(
-      refresher.refresh("mySession", "some refresh token")
+      refresher.refresh("mySession", "some refresh token"),
     ).rejects.toThrow(
-      "For session [mySession], the key bound to the DPoP access token must be provided to refresh said access token."
+      "For session [mySession], the key bound to the DPoP access token must be provided to refresh said access token.",
     );
   });
 
@@ -259,7 +259,7 @@ describe("TokenRefresher", () => {
     await refresher.refresh(
       "mySession",
       "some refresh token",
-      await mockKeyPair()
+      await mockKeyPair(),
     );
 
     expect(mockedModule.negotiateClientSigningAlg).not.toHaveBeenCalled();
@@ -278,13 +278,13 @@ describe("TokenRefresher", () => {
     await refresher.refresh(
       "mySession",
       "some refresh token",
-      await mockKeyPair()
+      await mockKeyPair(),
     );
 
     expect(mockedIssuer.Client).toHaveBeenCalledWith(
       expect.objectContaining({
         token_endpoint_auth_method: "none",
-      })
+      }),
     );
   });
 
@@ -299,7 +299,7 @@ describe("TokenRefresher", () => {
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some refresh token",
-      await mockKeyPair()
+      await mockKeyPair(),
     );
 
     expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
@@ -322,7 +322,7 @@ describe("TokenRefresher", () => {
 
     const refreshedTokens = await refresher.refresh(
       "mySession",
-      "some refresh token"
+      "some refresh token",
     );
 
     expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
@@ -342,13 +342,13 @@ describe("TokenRefresher", () => {
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some old refresh token",
-      await mockKeyPair()
+      await mockKeyPair(),
     );
     expect(refreshedTokens.refreshToken).toBe("some new refresh token");
 
     // Check that the session information is stored in the provided storage
     await expect(
-      mockedStorage.getForUser("mySession", "refreshToken")
+      mockedStorage.getForUser("mySession", "refreshToken"),
     ).resolves.toBe("some new refresh token");
   });
 
@@ -368,13 +368,13 @@ describe("TokenRefresher", () => {
       "mySession",
       "some old refresh token",
       await mockKeyPair(),
-      mockEmitter
+      mockEmitter,
     );
 
     expect(refreshedTokens.refreshToken).toBe("some new refresh token");
     expect(mockEmit).toHaveBeenCalledWith(
       EVENTS.NEW_REFRESH_TOKEN,
-      "some new refresh token"
+      "some new refresh token",
     );
   });
 
@@ -393,12 +393,12 @@ describe("TokenRefresher", () => {
       refresher.refresh(
         "mySession",
         "some old refresh token",
-        await mockKeyPair()
-      )
+        await mockKeyPair(),
+      ),
     ).rejects.toThrow(
       `The Identity Provider [${
         mockDefaultIssuerConfig().issuer
-      }] did not return an access token on refresh`
+      }] did not return an access token on refresh`,
     );
   });
 
@@ -417,12 +417,12 @@ describe("TokenRefresher", () => {
       refresher.refresh(
         "mySession",
         "some old refresh token",
-        await mockKeyPair()
-      )
+        await mockKeyPair(),
+      ),
     ).rejects.toThrow(
       `The Identity Provider [${
         mockDefaultIssuerConfig().issuer
-      }] returned an unknown token type: [Some unknown token type]`
+      }] returned an unknown token type: [Some unknown token type]`,
     );
   });
 });

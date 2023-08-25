@@ -53,13 +53,13 @@ jest.mock("@inrupt/universal-fetch", () => {
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
-    "@inrupt/solid-client-authn-core"
+    "@inrupt/solid-client-authn-core",
   ) as any;
   return {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/")
+      Promise.resolve("https://my.webid/"),
     ),
   };
 });
@@ -87,13 +87,13 @@ describe("validateTokenEndpointResponse", () => {
         expires_in: 1337,
       };
       expect(() =>
-        validateTokenEndpointResponse(fakeValidResponse, true)
+        validateTokenEndpointResponse(fakeValidResponse, true),
       ).not.toThrow();
     });
 
     it("does not throw when the Response does not contain an expiration time", () => {
       expect(() =>
-        validateTokenEndpointResponse(fakeTokenEndpointResponse, true)
+        validateTokenEndpointResponse(fakeTokenEndpointResponse, true),
       ).not.toThrow();
     });
 
@@ -103,7 +103,7 @@ describe("validateTokenEndpointResponse", () => {
         expires_in: "Not a number",
       };
       expect(() =>
-        validateTokenEndpointResponse(fakeInvalidResponse, true)
+        validateTokenEndpointResponse(fakeInvalidResponse, true),
       ).toThrow();
     });
   });
@@ -121,13 +121,13 @@ describe("validateTokenEndpointResponse", () => {
         expires_in: 1337,
       };
       expect(() =>
-        validateTokenEndpointResponse(fakeValidResponse, false)
+        validateTokenEndpointResponse(fakeValidResponse, false),
       ).not.toThrow();
     });
 
     it("does not throw when the Response does not contain an expiration time", () => {
       expect(() =>
-        validateTokenEndpointResponse(fakeTokenEndpointResponse, false)
+        validateTokenEndpointResponse(fakeTokenEndpointResponse, false),
       ).not.toThrow();
     });
 
@@ -137,7 +137,7 @@ describe("validateTokenEndpointResponse", () => {
         expires_in: "Not a number",
       };
       expect(() =>
-        validateTokenEndpointResponse(fakeInvalidResponse, false)
+        validateTokenEndpointResponse(fakeInvalidResponse, false),
       ).toThrow();
     });
   });
@@ -154,10 +154,10 @@ describe("getTokens", () => {
         codeVerifier: "some pkce token",
         redirectUrl: "https://my.app/redirect",
       },
-      true
+      true,
     );
     await expect(tokenRequest).rejects.toThrow(
-      `The issuer [${mockIssuer().issuer.toString()}] does not support the [some_custom_grant] grant`
+      `The issuer [${mockIssuer().issuer.toString()}] does not support the [some_custom_grant] grant`,
     );
   });
 
@@ -176,10 +176,10 @@ describe("getTokens", () => {
       issuer,
       mockClient(),
       mockEndpointInput(),
-      true
+      true,
     );
     await expect(tokenRequest).rejects.toThrow(
-      `This issuer [${issuer.issuer.toString()}] does not have a token endpoint`
+      `This issuer [${issuer.issuer.toString()}] does not have a token endpoint`,
     );
   });
 
@@ -190,7 +190,7 @@ describe("getTokens", () => {
     core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString()
+      mockIssuer().tokenEndpoint.toString(),
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers.DPoP).toBe("some DPoP header");
@@ -200,7 +200,7 @@ describe("getTokens", () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString()
+      mockIssuer().tokenEndpoint.toString(),
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers.Authorization).toBeUndefined();
@@ -212,12 +212,12 @@ describe("getTokens", () => {
     client.clientSecret = "some secret";
     await getTokens(mockIssuer(), client, mockEndpointInput(), true);
     expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString()
+      mockIssuer().tokenEndpoint.toString(),
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     // c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ= is 'some client:some secret' encoded in base 64
     expect(headers.Authorization).toBe(
-      "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ="
+      "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ=",
     );
   });
 
@@ -232,10 +232,10 @@ describe("getTokens", () => {
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      true
+      true,
     );
     await expect(request).rejects.toThrow(
-      `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [Bearer].`
+      `Invalid token endpoint response: requested a [DPoP] token, but got a 'token_type' value of [Bearer].`,
     );
   });
 
@@ -245,10 +245,10 @@ describe("getTokens", () => {
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      false
+      false,
     );
     await expect(request).rejects.toThrow(
-      `Invalid token endpoint response: requested a [Bearer] token, but got a 'token_type' value of [DPoP].`
+      `Invalid token endpoint response: requested a [Bearer] token, but got a 'token_type' value of [DPoP].`,
     );
   });
 
@@ -262,7 +262,7 @@ describe("getTokens", () => {
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      false
+      false,
     );
     await expect(request).rejects.toThrow("token_type");
   });
@@ -275,7 +275,7 @@ describe("getTokens", () => {
     expect(headers["content-type"]).toBe("application/x-www-form-urlencoded");
     const body = myFetch.mock.calls[0][1]?.body as string;
     expect(body).toBe(
-      "grant_type=authorization_code&redirect_uri=https%3A%2F%2Fmy.app%2Fredirect&code=some+code&code_verifier=some+pkce+token&client_id=some+client"
+      "grant_type=authorization_code&redirect_uri=https%3A%2F%2Fmy.app%2Fredirect&code=some+code&code_verifier=some+pkce+token&client_id=some+client",
     );
   });
 
@@ -284,13 +284,13 @@ describe("getTokens", () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
     core.generateDpopKeyPair = jest.fn(() =>
-      Promise.resolve("some DPoP key pair")
+      Promise.resolve("some DPoP key pair"),
     );
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      true
+      true,
     );
     expect(result?.dpopKey).toBe("some DPoP key pair");
   });
@@ -301,7 +301,7 @@ describe("getTokens", () => {
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      true
+      true,
     );
     expect(result?.accessToken).toEqual(JSON.stringify(mockKeyBoundToken()));
     expect(result?.idToken).toEqual(mockIdToken());
@@ -316,7 +316,7 @@ describe("getTokens", () => {
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      true
+      true,
     );
     expect(result?.refreshToken).toBe("some token");
   });
@@ -327,7 +327,7 @@ describe("getTokens", () => {
     };
     mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true),
     ).rejects.toThrow("access_token");
   });
 
@@ -337,7 +337,7 @@ describe("getTokens", () => {
     };
     mockFetch(JSON.stringify(tokenEndpointResponse), 200);
     await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true),
     ).rejects.toThrow("id_token");
   });
 
@@ -347,7 +347,7 @@ describe("getTokens", () => {
     };
     mockFetch(JSON.stringify(tokenEndpointResponse), 400);
     await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true),
     ).rejects.toThrow(`Token endpoint returned error [SomeError]`);
   });
 
@@ -358,9 +358,9 @@ describe("getTokens", () => {
     };
     mockFetch(JSON.stringify(tokenEndpointResponse), 400);
     await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true),
     ).rejects.toThrow(
-      `Token endpoint returned error [SomeError]: This is an error`
+      `Token endpoint returned error [SomeError]: This is an error`,
     );
   });
 
@@ -371,9 +371,9 @@ describe("getTokens", () => {
     };
     mockFetch(JSON.stringify(tokenEndpointResponse), 400);
     await expect(
-      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true)
+      getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true),
     ).rejects.toThrow(
-      `Token endpoint returned error [SomeError] (see https://some.vocab/error#id)`
+      `Token endpoint returned error [SomeError] (see https://some.vocab/error#id)`,
     );
   });
 
@@ -383,7 +383,7 @@ describe("getTokens", () => {
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      false
+      false,
     );
     expect(result?.dpopKey).toBeUndefined();
   });
@@ -393,14 +393,14 @@ describe("getTokens", () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
     core.getWebidFromTokenPayload = jest.fn(() =>
-      Promise.resolve("https://some.webid#me")
+      Promise.resolve("https://some.webid#me"),
     );
 
     const result = await getTokens(
       mockIssuer(),
       mockClient(),
       mockEndpointInput(),
-      false
+      false,
     );
     expect(result?.webId).toBe("https://some.webid#me");
   });
@@ -416,10 +416,10 @@ describe("getDpopToken", () => {
     const tokens = await getDpopToken(
       mockIssuer(),
       mockClient(),
-      mockEndpointInput()
+      mockEndpointInput(),
     );
     expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString()
+      mockIssuer().tokenEndpoint.toString(),
     );
     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers.DPoP).toBe("some DPoP header");
@@ -439,14 +439,14 @@ const defaultOidcClient = {
 const mockOidcClient = (clientSettings: any = defaultOidcClient) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const { processSigninResponse } = jest.requireActual(
-    "@inrupt/oidc-client"
+    "@inrupt/oidc-client",
   ) as any;
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const oidcModule = jest.requireMock("@inrupt/oidc-client") as any;
   oidcModule.OidcClient = jest.fn().mockImplementation(() => {
     return {
       processSigninResponse: async (
-        redirectUrl: string
+        redirectUrl: string,
       ): Promise<ReturnType<typeof processSigninResponse>> => {
         if (redirectUrl === "https://invalid.url") {
           throw new Error("Dummy error");
@@ -480,7 +480,7 @@ describe("getBearerToken", () => {
     });
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-      "Cannot retrieve issuer metadata from client information in storage."
+      "Cannot retrieve issuer metadata from client information in storage.",
     );
   });
 
@@ -494,7 +494,7 @@ describe("getBearerToken", () => {
     });
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-      "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined"
+      "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined",
     );
   });
 
@@ -508,7 +508,7 @@ describe("getBearerToken", () => {
     });
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-      "Missing some issuer metadata from client information in storage: 'issuer' is undefined"
+      "Missing some issuer metadata from client information in storage: 'issuer' is undefined",
     );
   });
 
@@ -522,7 +522,7 @@ describe("getBearerToken", () => {
     });
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-      "Missing some client information in storage: 'client_id' is undefined"
+      "Missing some client information in storage: 'client_id' is undefined",
     );
   });
 
@@ -531,7 +531,7 @@ describe("getBearerToken", () => {
     mockFetch("", 200);
     const tokenRequest = getBearerToken("https://invalid.url");
     await expect(tokenRequest).rejects.toThrow(
-      `Problem handling Auth Code Grant (Flow) redirect - URL [https://invalid.url]: Error: Dummy error`
+      `Problem handling Auth Code Grant (Flow) redirect - URL [https://invalid.url]: Error: Dummy error`,
     );
   });
 });

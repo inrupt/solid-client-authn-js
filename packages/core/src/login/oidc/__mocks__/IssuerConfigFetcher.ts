@@ -23,7 +23,7 @@ import type { IIssuerConfig } from "../IIssuerConfig";
 import type { IIssuerConfigFetcher } from "../IIssuerConfigFetcher";
 
 export function mockIssuerConfigFetcher(
-  config: IIssuerConfig
+  config: IIssuerConfig,
 ): IIssuerConfigFetcher {
   return {
     fetchConfig: async (): Promise<IIssuerConfig> => config,

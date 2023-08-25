@@ -30,7 +30,7 @@ export default class IWaterfallLogoutHandler implements ILogoutHandler {
 
   constructor(
     sessionInfoManager: ISessionInfoManager,
-    redirector: IRedirector
+    redirector: IRedirector,
   ) {
     this.handlers = [
       new GeneralLogoutHandler(sessionInfoManager),
@@ -44,7 +44,7 @@ export default class IWaterfallLogoutHandler implements ILogoutHandler {
 
   async handle(
     userId: string,
-    options?: ILogoutHandlerOptions | undefined
+    options?: ILogoutHandlerOptions | undefined,
   ): Promise<void> {
     for (const handler of this.handlers) {
       /* eslint-disable no-await-in-loop */

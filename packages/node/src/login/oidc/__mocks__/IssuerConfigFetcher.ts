@@ -42,7 +42,7 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
 export const IssuerConfigFetcherMock = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchConfig: jest.fn((_issuer: string) =>
-    Promise.resolve(IssuerConfigFetcherFetchConfigResponse)
+    Promise.resolve(IssuerConfigFetcherFetchConfigResponse),
   ),
 } as unknown as jest.Mocked<IIssuerConfigFetcher>;
 
@@ -68,7 +68,7 @@ export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
 };
 
 export const mockIssuerMetadata = (
-  config: Partial<IssuerMetadata>
+  config: Partial<IssuerMetadata>,
 ): IssuerMetadata => {
   return {
     ...mockDefaultIssuerMetadata(),
@@ -79,7 +79,7 @@ export const mockIssuerMetadata = (
 export const mockDefaultIssuerConfig = (): IIssuerConfig =>
   configFromIssuerMetadata(mockDefaultIssuerMetadata());
 export const mockIssuerConfig = (
-  config: Partial<IIssuerConfig>
+  config: Partial<IIssuerConfig>,
 ): IIssuerConfig => {
   return {
     ...configFromIssuerMetadata(mockDefaultIssuerMetadata()),
@@ -88,7 +88,7 @@ export const mockIssuerConfig = (
 };
 
 export function mockIssuerConfigFetcher(
-  config: IIssuerConfig
+  config: IIssuerConfig,
 ): IIssuerConfigFetcher {
   return {
     fetchConfig: async (): Promise<IIssuerConfig> => config,

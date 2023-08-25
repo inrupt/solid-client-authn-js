@@ -46,14 +46,14 @@ export class FallbackRedirectHandler implements IIncomingRedirectHandler {
       return true;
     } catch (e) {
       throw new Error(
-        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`
+        `[${redirectUrl}] is not a valid URL, and cannot be used as a redirect URL: ${e}`,
       );
     }
   }
 
   async handle(
     // The argument is ignored, but must be present to implement the interface
-    _redirectUrl: string
+    _redirectUrl: string,
   ): Promise<ISessionInfo & { fetch: typeof fetch }> {
     return getUnauthenticatedSession();
   }

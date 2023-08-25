@@ -59,8 +59,8 @@ const getSuccessfulFetch = (): typeof fetch =>
         redirect_uris: ["https://some.url"],
         id_token_signed_response_alg: "RS256",
       }),
-      { status: 200 }
-    )
+      { status: 200 },
+    ),
   );
 
 describe("registerClient", () => {
@@ -70,9 +70,9 @@ describe("registerClient", () => {
     const mockIssuer = getMockIssuer();
     delete mockIssuer.registrationEndpoint;
     await expect(() =>
-      registerClient(getMockOptions(), mockIssuer)
+      registerClient(getMockOptions(), mockIssuer),
     ).rejects.toThrow(
-      "Dynamic Registration could not be completed because the issuer has no registration endpoint."
+      "Dynamic Registration could not be completed because the issuer has no registration endpoint.",
     );
   });
 
@@ -82,9 +82,9 @@ describe("registerClient", () => {
     };
     delete mockIssuer.idTokenSigningAlgValuesSupported;
     await expect(() =>
-      registerClient(getMockOptions(), mockIssuer)
+      registerClient(getMockOptions(), mockIssuer),
     ).rejects.toThrow(
-      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory."
+      "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory.",
     );
   });
 
@@ -147,17 +147,17 @@ describe("registerClient", () => {
           client_secret: "some secret",
           redirect_uris: ["https://some.other.url"],
         }),
-        { status: 200 }
-      )
+        { status: 200 },
+      ),
     );
     global.fetch = myFetch;
     const options = getMockOptions();
     options.redirectUrl = "https://some.url";
 
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      'Dynamic client registration failed: the returned redirect URIs ["https://some.other.url"] don\'t match the provided ["https://some.url"]'
+      'Dynamic client registration failed: the returned redirect URIs ["https://some.other.url"] don\'t match the provided ["https://some.url"]',
     );
   });
 
@@ -167,16 +167,16 @@ describe("registerClient", () => {
         JSON.stringify({
           some_key: "some value",
         }),
-        { status: 200 }
-      )
+        { status: 200 },
+      ),
     );
     global.fetch = myFetch;
     const options = getMockOptions();
 
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      'Dynamic client registration failed: no client_id has been found on {"some_key":"some value"}'
+      'Dynamic client registration failed: no client_id has been found on {"some_key":"some value"}',
     );
   });
 
@@ -187,17 +187,17 @@ describe("registerClient", () => {
           error: "invalid_redirect_uri",
           error_description: "some description",
         }),
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
     global.fetch = myFetch;
     const options = getMockOptions();
     options.redirectUrl = "https://some.url";
 
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      "Dynamic client registration failed: the provided redirect uri [https://some.url] is invalid - some description"
+      "Dynamic client registration failed: the provided redirect uri [https://some.url] is invalid - some description",
     );
   });
 
@@ -208,28 +208,28 @@ describe("registerClient", () => {
           error: "invalid_redirect_uri",
           error_description: "some description",
         }),
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
     const options = getMockOptions();
 
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - some description"
+      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - some description",
     );
     global.fetch = jest.fn(fetch).mockResolvedValueOnce(
       new Response(
         JSON.stringify({
           error: "invalid_redirect_uri",
         }),
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - "
+      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - ",
     );
   });
 
@@ -240,15 +240,15 @@ describe("registerClient", () => {
           error: "invalid_client_metadata",
           error_description: "some description",
         }),
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
     const options = getMockOptions();
 
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - some description'
+      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - some description',
     );
 
     global.fetch = jest.fn(fetch).mockResolvedValueOnce(
@@ -256,13 +256,13 @@ describe("registerClient", () => {
         JSON.stringify({
           error: "invalid_client_metadata",
         }),
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - '
+      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - ',
     );
   });
 
@@ -273,15 +273,15 @@ describe("registerClient", () => {
           error: "custom_error",
           error_description: "some description",
         }),
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
     const options = getMockOptions();
 
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      "Dynamic client registration failed: custom_error - some description"
+      "Dynamic client registration failed: custom_error - some description",
     );
 
     global.fetch = jest.fn(fetch).mockResolvedValueOnce(
@@ -289,11 +289,11 @@ describe("registerClient", () => {
         JSON.stringify({
           error: "custom_error",
         }),
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow("Dynamic client registration failed: custom_error - ");
   });
 
@@ -302,15 +302,15 @@ describe("registerClient", () => {
       new Response("Resource not found", {
         status: 404,
         statusText: "Not found",
-      })
+      }),
     );
     global.fetch = myFetch;
     const options = getMockOptions();
 
     await expect(() =>
-      registerClient(options, getMockIssuer())
+      registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
-      "Dynamic client registration failed: the server returned 404 Not found - Resource not found"
+      "Dynamic client registration failed: the server returned 404 Not found - Resource not found",
     );
   });
 });

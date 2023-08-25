@@ -75,7 +75,7 @@ async function run() {
   });
 
   const containers = getContainedResourceUrlAll(dataset).filter(
-    (containerUrl) => /[a-f0-9]{32}/.test(containerUrl)
+    (containerUrl) => /[a-f0-9]{32}/.test(containerUrl),
   );
 
   console.log(`Found ${containers.length} test containers!`);
@@ -93,7 +93,7 @@ async function run() {
       await Promise.all(
         containedResources.map(async (url) => {
           return deleteFile(url, { fetch: session.fetch });
-        })
+        }),
       );
 
       await deleteContainer(containerUrl, { fetch: session.fetch });

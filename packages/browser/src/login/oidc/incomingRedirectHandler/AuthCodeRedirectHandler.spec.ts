@@ -50,7 +50,7 @@ import {
 
 jest.mock("@inrupt/universal-fetch", () => {
   const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch"
+    "@inrupt/universal-fetch",
   ) as typeof UniversalFetch;
   return {
     ...fetchModule,
@@ -162,7 +162,7 @@ jest.useFakeTimers();
 
 function mockOidcClient(): typeof OidcClientExt {
   const mockedOidcClient = jest.requireMock<typeof OidcClientExt>(
-    "@inrupt/oidc-client-ext"
+    "@inrupt/oidc-client-ext",
   );
   mockedOidcClient.getDpopToken = jest
     .fn<typeof mockedOidcClient.getDpopToken>()
@@ -196,14 +196,14 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
   return {
     getClient: async (
       _options: IClientRegistrarOptions,
-      _issuer: IIssuerConfig
+      _issuer: IIssuerConfig,
     ): Promise<IClient> => client,
   };
 }
 
 const mockFetch = (response: Response) => {
   const { fetch: mockedFetch } = jest.requireMock(
-    "@inrupt/universal-fetch"
+    "@inrupt/universal-fetch",
   ) as jest.Mocked<typeof UniversalFetch>;
   mockedFetch.mockResolvedValueOnce(response);
   return mockedFetch;
@@ -218,14 +218,14 @@ const defaultMocks = {
 };
 
 function getAuthCodeRedirectHandler(
-  mocks: Partial<typeof defaultMocks> = defaultMocks
+  mocks: Partial<typeof defaultMocks> = defaultMocks,
 ): AuthCodeRedirectHandler {
   return new AuthCodeRedirectHandler(
     mocks.storageUtility ?? defaultMocks.storageUtility,
     mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
     mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
     mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
-    mocks.tokenRefresher ?? defaultMocks.tokenRefresher
+    mocks.tokenRefresher ?? defaultMocks.tokenRefresher,
   );
 }
 
@@ -246,7 +246,7 @@ const mockDefaultStorageUtility = (
     dpop: true,
     codeVerifier: DEFAULT_CODE_VERIFIER,
     redirectUrl: DEFAULT_REDIRECT_URL,
-  }
+  },
 ) =>
   mockStorageUtility({
     [`${USER_SESSION_PREFIX}:${DEFAULT_OAUTH_STATE}`]: {
@@ -265,16 +265,16 @@ describe("AuthCodeRedirectHandler", () => {
     it("Accepts a valid url with the correct query", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(await authCodeRedirectHandler.canHandle(mockRedirectUrl())).toBe(
-        true
+        true,
       );
     });
 
     it("throws on invalid url", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(() =>
-        authCodeRedirectHandler.canHandle("beep boop I am a robot")
+        authCodeRedirectHandler.canHandle("beep boop I am a robot"),
       ).rejects.toThrow(
-        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot"
+        "[beep boop I am a robot] is not a valid URL, and cannot be used as a redirect URL: TypeError: Invalid URL: beep boop I am a robot",
       );
     });
 
@@ -282,8 +282,8 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?meep=mop"
-        )
+          "https://coolparty.com/?meep=mop",
+        ),
       ).toBe(false);
     });
 
@@ -291,8 +291,8 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?state=someState"
-        )
+          "https://coolparty.com/?state=someState",
+        ),
       ).toBe(false);
     });
 
@@ -300,8 +300,8 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       expect(
         await authCodeRedirectHandler.canHandle(
-          "https://coolparty.com/?code=someCode"
-        )
+          "https://coolparty.com/?code=someCode",
+        ),
       ).toBe(false);
     });
   });
@@ -310,9 +310,9 @@ describe("AuthCodeRedirectHandler", () => {
     it("throws on non-redirect URL", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
-        authCodeRedirectHandler.handle("https://my.app")
+        authCodeRedirectHandler.handle("https://my.app"),
       ).rejects.toThrow(
-        "AuthCodeRedirectHandler cannot handle [https://my.app]: it is missing one of [code, state]."
+        "AuthCodeRedirectHandler cannot handle [https://my.app]: it is missing one of [code, state].",
       );
     });
 
@@ -321,7 +321,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockFetch(
         new Response("", {
           status: 200,
-        })
+        }),
       );
       const storage = mockDefaultStorageUtility();
 
@@ -337,7 +337,7 @@ describe("AuthCodeRedirectHandler", () => {
         expect.objectContaining({
           codeVerifier: DEFAULT_CODE_VERIFIER,
           redirectUrl: DEFAULT_REDIRECT_URL,
-        })
+        }),
       );
     });
 
@@ -346,7 +346,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockFetch(
         new Response("", {
           status: 200,
-        })
+        }),
       );
       const storageUtility = mockDefaultStorageUtility();
       await storageUtility.deleteForUser("mySession", "codeVerifier");
@@ -355,7 +355,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await expect(
-        authCodeRedirectHandler.handle(mockRedirectUrl())
+        authCodeRedirectHandler.handle(mockRedirectUrl()),
       ).rejects.toThrow();
     });
 
@@ -364,7 +364,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockFetch(
         new Response("", {
           status: 200,
-        })
+        }),
       );
       const storageUtility = mockDefaultStorageUtility();
       await storageUtility.deleteForUser("mySession", "redirectUrl");
@@ -373,7 +373,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await expect(
-        authCodeRedirectHandler.handle(mockRedirectUrl())
+        authCodeRedirectHandler.handle(mockRedirectUrl()),
       ).rejects.toThrow();
     });
 
@@ -382,13 +382,13 @@ describe("AuthCodeRedirectHandler", () => {
       mockFetch(
         new Response("", {
           status: 200,
-        })
+        }),
       );
       defaultMocks.sessionInfoManager.get.mockResolvedValueOnce(undefined);
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
       await expect(
-        authCodeRedirectHandler.handle(mockRedirectUrl())
+        authCodeRedirectHandler.handle(mockRedirectUrl()),
       ).rejects.toThrow("Could not retrieve session");
     });
 
@@ -402,7 +402,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockFetch(
         new Response("", {
           status: 200,
-        })
+        }),
       );
       const storageUtility = mockDefaultStorageUtility();
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -410,7 +410,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await expect(
-        authCodeRedirectHandler.handle(redirectUrl.href)
+        authCodeRedirectHandler.handle(redirectUrl.href),
       ).rejects.toThrow();
     });
 
@@ -420,7 +420,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
-        })
+        }),
       );
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -428,7 +428,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       const redirectInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl()
+        mockRedirectUrl(),
       );
 
       // This will call the oidc-client-ext module, which is mocked at
@@ -448,14 +448,14 @@ describe("AuthCodeRedirectHandler", () => {
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
-        })
+        }),
       );
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockDefaultStorageUtility({ dpop: true }),
       });
       const redirectInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl()
+        mockRedirectUrl(),
       );
       await redirectInfo.fetch("https://some.other.url");
 
@@ -468,7 +468,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockFetch(
         new Response("", {
           status: 200,
-        })
+        }),
       );
 
       const mockedStorage = mockDefaultStorageUtility();
@@ -482,7 +482,7 @@ describe("AuthCodeRedirectHandler", () => {
       await expect(
         mockedStorage.getForUser("mySession", "idToken", {
           secure: false,
-        })
+        }),
       ).resolves.toBeUndefined();
     });
 
@@ -492,7 +492,7 @@ describe("AuthCodeRedirectHandler", () => {
       mockFetch(
         new Response("", {
           status: 200,
-        })
+        }),
       );
 
       const mockedStorage = mockDefaultStorageUtility();
@@ -506,7 +506,7 @@ describe("AuthCodeRedirectHandler", () => {
       await expect(
         mockedStorage.getForUser("mySession", "redirectUrl", {
           secure: false,
-        })
+        }),
         // The redirect URL already in storage shouldn't be overriden on redirect.
       ).resolves.toBe(DEFAULT_REDIRECT_URL);
     });
@@ -526,11 +526,11 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       const sessionInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl()
+        mockRedirectUrl(),
       );
 
       expect(sessionInfo.expirationDate).toBe(
-        MOCK_TIMESTAMP + MOCK_EXPIRE_TIME * 1000
+        MOCK_TIMESTAMP + MOCK_EXPIRE_TIME * 1000,
       );
     });
 
@@ -553,7 +553,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       const sessionInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl()
+        mockRedirectUrl(),
       );
 
       expect(sessionInfo.expirationDate).toBeUndefined();
@@ -583,11 +583,11 @@ describe("AuthCodeRedirectHandler", () => {
     }>("@inrupt/solid-client-authn-core");
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch"
+      "buildAuthenticatedFetch",
     );
 
     const tokenRefresher = mockTokenRefresher(
-      await mockTokenEndpointDpopResponse()
+      await mockTokenEndpointDpopResponse(),
     );
     // Run the test
     const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -607,7 +607,7 @@ describe("AuthCodeRedirectHandler", () => {
           tokenRefresher,
         },
         expiresIn: 1337,
-      })
+      }),
     );
   });
 });

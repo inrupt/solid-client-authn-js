@@ -41,7 +41,7 @@ export default class ClientRegistrar implements IClientRegistrar {
 
   async getClient(
     options: IClientRegistrarOptions,
-    issuerConfig: IIssuerConfig
+    issuerConfig: IIssuerConfig,
   ): Promise<IClient> {
     // If client secret and/or client id are stored in storage, use those.
     const [

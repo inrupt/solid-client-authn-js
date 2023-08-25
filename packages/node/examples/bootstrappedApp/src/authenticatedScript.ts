@@ -25,7 +25,7 @@ const { argv } = require("yargs/yargs")(process.argv.slice(2))
   .describe("clientSecret", "The secret associated with the client ID.")
   .describe(
     "oidcIssuer",
-    "The identity provider that issued the token (i.e. the OIDC issuer)."
+    "The identity provider that issued the token (i.e. the OIDC issuer).",
   )
   .describe("resource", "The resource to fetch")
   .demandOption(["clientId", "clientSecret", "oidcIssuer", "resource"])

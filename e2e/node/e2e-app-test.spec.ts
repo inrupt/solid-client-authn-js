@@ -93,7 +93,7 @@ describe("Testing against express app", () => {
     const cognitoPage = new CognitoPage(page);
     await cognitoPage.login(
       BROWSER_ENV.clientCredentials.owner.login,
-      BROWSER_ENV.clientCredentials.owner.password
+      BROWSER_ENV.clientCredentials.owner.password,
     );
     const openidPage = new OpenIdPage(page);
     try {
@@ -109,20 +109,20 @@ describe("Testing against express app", () => {
     resourceUrl.searchParams.append("resource", clientResourceUrl);
     await page.goto(resourceUrl.toString());
     await expect(page.content()).resolves.toBe(
-      `<html><head></head><body>${clientResourceContent}</body></html>`
+      `<html><head></head><body>${clientResourceContent}</body></html>`,
     );
 
     // Performing idp logout and being redirected to the postLogoutUrl after doing so
     await page.goto("http://localhost:3001/idplogout");
     await page.waitForURL("http://localhost:3001/postLogoutUrl");
     await expect(page.content()).resolves.toBe(
-      `<html><head></head><body>successfully at post logout</body></html>`
+      `<html><head></head><body>successfully at post logout</body></html>`,
     );
 
     // Should not be able to retrieve the protected resource after logout
     await page.goto(resourceUrl.toString());
     await expect(page.content()).resolves.toBe(
-      `<html><head></head><body>{"description":"HTTP 401 Unauthorized"}</body></html>`
+      `<html><head></head><body>{"description":"HTTP 401 Unauthorized"}</body></html>`,
     );
 
     // Testing what happens if we try to log back in again after logging out

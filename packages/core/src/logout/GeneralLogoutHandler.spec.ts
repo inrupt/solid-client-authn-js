@@ -29,10 +29,10 @@ describe("GeneralLogoutHandler", () => {
     sessionManager: mockSessionInfoManager(mockStorageUtility({})),
   };
   function getInitialisedHandler(
-    mocks: Partial<typeof defaultMocks> = defaultMocks
+    mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): LogoutHandler {
     return new LogoutHandler(
-      mocks.sessionManager ?? defaultMocks.sessionManager
+      mocks.sessionManager ?? defaultMocks.sessionManager,
     );
   }
 
@@ -51,21 +51,21 @@ describe("GeneralLogoutHandler", () => {
       await nonEmptyStorage.setForUser(
         "someUser",
         { someKey: "someValue" },
-        { secure: true }
+        { secure: true },
       );
       const logoutHandler = getInitialisedHandler({
         sessionManager: mockSessionInfoManager(nonEmptyStorage),
       });
       await logoutHandler.handle("someUser");
       await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true })
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: true }),
       ).resolves.toBeUndefined();
       await expect(
-        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false })
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false }),
       ).resolves.toBeUndefined();
       // This test is only necessary until the key is stored safely
       await expect(
-        nonEmptyStorage.get("clientKey", { secure: false })
+        nonEmptyStorage.get("clientKey", { secure: false }),
       ).resolves.toBeUndefined();
     });
   });
