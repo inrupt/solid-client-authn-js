@@ -60,6 +60,13 @@ const config: Config = {
     {
       ...baseConfig,
       displayName: "oidc-browser",
+      // This combination of preset/transformIgnorePatterns enforces that both TS and
+      // JS files are transformed to CJS, and that the transform also applies to the
+      // dependencies in the node_modules, so that ESM-only dependencies are supported.
+      preset: "ts-jest/presets/js-with-ts",
+      // Deliberately allow including node_modules when transforming code. undici can
+      // also be ignored, as it isn't necessary in the browser setting.
+      transformIgnorePatterns: ["undici"],
       roots: ["<rootDir>/packages/oidc-browser"],
       // This test environment is an extension of jsdom. This module targets the
       // browser environment only, so tests only need to run in jsdom.
@@ -69,6 +76,13 @@ const config: Config = {
     },
     {
       ...baseConfig,
+      // This combination of preset/transformIgnorePatterns enforces that both TS and
+      // JS files are transformed to CJS, and that the transform also applies to the
+      // dependencies in the node_modules, so that ESM-only dependencies are supported.
+      preset: "ts-jest/presets/js-with-ts",
+      // Deliberately allow including node_modules when transforming code. undici can
+      // also be ignored, as it isn't necessary in the browser setting.
+      transformIgnorePatterns: ["undici"],
       displayName: "browser",
       roots: ["<rootDir>/packages/browser"],
       // This test environment is an extension of jsdom. This module targets the
