@@ -4,7 +4,7 @@
 // Until we only support Node 18+, this should be used instead
 // (see https://rollupjs.org/guide/en/#importing-packagejson)
 import { createRequire } from "node:module";
-import createConfig, { createSharedConfig } from '../../rollup.common.mjs'
+import createConfig, { createSharedConfig } from '@inrupt/base-rollup-config'
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json");
 

@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
-import createConfig, { createSharedConfig } from '../../rollup.common.mjs';
+import createConfig, { createSharedConfig } from '@inrupt/base-rollup-config';
 
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json");
