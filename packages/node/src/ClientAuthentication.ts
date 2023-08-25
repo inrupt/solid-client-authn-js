@@ -52,7 +52,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       !isValidRedirectUrl(options.redirectUrl)
     ) {
       throw new Error(
-        `${options.redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`,
+        `${options.redirectUrl} is not a valid redirect URL, it is either a malformed IRI, includes a hash fragment, or reserved query parameters ('code' or 'state').`,
       );
     }
     const loginReturn = await this.loginHandler.handle({

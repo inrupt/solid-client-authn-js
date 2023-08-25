@@ -122,6 +122,34 @@ describe("ClientAuthentication", () => {
       ).rejects.toThrow("hash fragment");
     });
 
+    it("throws if the redirect IRI contains a reserved query parameter, with a helpful message", async () => {
+      const clientAuthn = getClientAuthentication();
+      await expect(() =>
+        clientAuthn.login(
+          "mySession",
+          {
+            tokenType: "DPoP",
+            clientId: "coolApp",
+            redirectUrl: "https://example.org/redirect?state=1234",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter,
+        ),
+      ).rejects.toThrow("query parameter");
+      await expect(() =>
+        clientAuthn.login(
+          "mySession",
+          {
+            tokenType: "DPoP",
+            clientId: "coolApp",
+            redirectUrl: "https://example.org/redirect?code=1234",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter,
+        ),
+      ).rejects.toThrow("query parameter");
+    });
+
     it("does not normalize the redirect URL if provided by the user", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(

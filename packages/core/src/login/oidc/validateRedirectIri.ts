@@ -23,9 +23,13 @@ export function isValidRedirectUrl(redirectUrl: string): boolean {
   // If the redirect URL is not a valid URL, an error will be thrown.
   try {
     const urlObject = new URL(redirectUrl);
+    const noReservedQuery =
+      !urlObject.searchParams.has("code") &&
+      !urlObject.searchParams.has("state");
     // As per https://tools.ietf.org/html/rfc6749#section-3.1.2, the redirect URL
     // must not include a hash fragment.
-    return urlObject.hash === "";
+    const noHash = urlObject.hash === "";
+    return noReservedQuery && noHash;
   } catch (e) {
     return false;
   }
