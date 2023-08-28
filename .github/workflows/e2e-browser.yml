@@ -33,7 +33,7 @@ jobs:
       - name: Install e2e tests dependencies
         run: npx playwright install --with-deps
         if: github.actor != 'dependabot[bot]'
-      - run: npm run test:e2e:browser:authn-node
+      - run: npm run test:e2e:browser:authn-browser
         # Running end-to-end tests requires accessing secrets which aren't available to dependabot.
         # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
         # We want jobs in this workflow to be gating PRs, so the whole matrix must
