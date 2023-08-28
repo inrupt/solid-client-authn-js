@@ -70,7 +70,7 @@ export default function App() {
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
       clientName: "Demo app",
-      // clientId: CLIENT_IDENTIFIER,
+      clientId: CLIENT_IDENTIFIER,
     });
   };
 
