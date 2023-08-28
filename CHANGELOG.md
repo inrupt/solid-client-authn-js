@@ -23,9 +23,17 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+### Bugfixes
+
+#### browser
+
+- [Mismatching redirect URI](https://github.com/inrupt/solid-client-authn-js/issues/2891) on refresh: this bug was caused by an invalid redirect URL stored with session data.
+  Saving an invalid redirect URL is now prohibited, and in addition the storage of users impacted by this bug will be cleared so that they don't have to do anything manually
+  to clear their local storage. Users affected by this bug will be asked to log back in, as if they logged out.
+
 ## [1.17.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.1) - 2023-07-15
 
-#### Bugfixes
+### Bugfixes
 
 - The `fetch` function is now bound to the window object in all uses within `authn-browser`
 
