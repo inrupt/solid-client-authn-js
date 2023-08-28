@@ -36,7 +36,7 @@ export class AppPage {
 
   private readonly fetchButton: Locator;
 
-  constructor(page: Page, options: AppPageOptions) {
+  constructor(page: Page) {
     this.page = page;
 
     this.resourceUrl = this.page.locator('input[id="resourceInput"]');

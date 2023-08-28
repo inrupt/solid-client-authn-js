@@ -25,14 +25,8 @@
 import { test as base } from "@inrupt/internal-playwright-helpers";
 import { File } from "buffer";
 
-import type {
-  TestingEnvironmentBrowser,
-  TestingEnvironmentNode,
-} from "@inrupt/internal-test-env";
-import {
-  getNodeTestingEnvironment,
-  getBrowserTestingEnvironment,
-} from "@inrupt/internal-test-env";
+import type { TestingEnvironmentNode } from "@inrupt/internal-test-env";
+import { getNodeTestingEnvironment } from "@inrupt/internal-test-env";
 import { Session } from "@inrupt/solid-client-authn-node";
 import {
   getPodUrlAll,
@@ -47,7 +41,7 @@ export { expect } from "@inrupt/internal-playwright-helpers";
 export type Fixtures = {
   app: AppPage;
   testResource: { url: string; expectedContent: string };
-  expectedWebid: string
+  expectedWebid: string;
   setupEnvironment: TestingEnvironmentNode;
 };
 
