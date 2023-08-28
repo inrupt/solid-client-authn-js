@@ -30,7 +30,7 @@ export const baseConfig: PlaywrightTestConfig = {
   // On CI we want to use the automatic annotations, otherwise we use list:
   reporter: process.env.CI ? "github" : "list",
   use: {
-    headless: false,
+    headless: true,
     // Screenshots actually don't give us any value when trying to debug:
     screenshot: "off",
     // On CI we want all the trace results, but in local development, you really
