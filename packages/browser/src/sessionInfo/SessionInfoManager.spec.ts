@@ -161,6 +161,28 @@ describe("SessionInfoManager", () => {
       });
     });
 
+    it("returns undefined and clears storage if the redirect URL is invalid", async () => {
+      const sessionId = "commanderCool";
+      const storageMock = new StorageUtility(
+        mockStorage({}),
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            // The state query parameter is reserved in OpenID.
+            redirectUrl: "https://client.example.org/callback?state=1234",
+          },
+        }),
+      );
+      const spiedClear = jest.spyOn(storageMock, "deleteAllUserData");
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storageMock,
+      });
+
+      const session = await sessionManager.get(sessionId);
+      expect(session).toBeUndefined();
+      expect(spiedClear).toHaveBeenCalledWith(sessionId, { secure: false });
+      expect(spiedClear).toHaveBeenCalledWith(sessionId, { secure: true });
+    });
+
     it("returns undefined if the specified storage does not contain the user", async () => {
       const sessionManager = getSessionInfoManager({
         storageUtility: mockStorageUtility({}, true),

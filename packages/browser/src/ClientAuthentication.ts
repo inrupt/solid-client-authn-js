@@ -65,7 +65,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       options.redirectUrl ?? removeOidcQueryParam(window.location.href);
     if (!isValidRedirectUrl(redirectUrl)) {
       throw new Error(
-        `${redirectUrl} is not a valid redirect URL, it is either a malformed IRI or it includes a hash fragment.`,
+        `${redirectUrl} is not a valid redirect URL, it is either a malformed IRI, includes a hash fragment, or reserved query parameters ('code' or 'state').`,
       );
     }
     await this.loginHandler.handle({

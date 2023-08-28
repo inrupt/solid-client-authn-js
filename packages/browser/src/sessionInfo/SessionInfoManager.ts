@@ -34,6 +34,7 @@ import {
   isSupportedTokenType,
   clear as clearBase,
   SessionInfoManagerBase,
+  isValidRedirectUrl,
 } from "@inrupt/solid-client-authn-core";
 import { clearOidcPersistentStorage } from "@inrupt/oidc-client-ext";
 
@@ -62,60 +63,54 @@ export class SessionInfoManager
   async get(
     sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
-    const isLoggedIn = await this.storageUtility.getForUser(
-      sessionId,
-      "isLoggedIn",
-      {
+    const [
+      isLoggedIn,
+      webId,
+      clientId,
+      clientSecret,
+      redirectUrl,
+      refreshToken,
+      issuer,
+      tokenType,
+    ] = await Promise.all([
+      this.storageUtility.getForUser(sessionId, "isLoggedIn", {
         secure: true,
-      },
-    );
-
-    const webId = await this.storageUtility.getForUser(sessionId, "webId", {
-      secure: true,
-    });
-
-    const clientId = await this.storageUtility.getForUser(
-      sessionId,
-      "clientId",
-      {
-        secure: false,
-      },
-    );
-
-    const clientSecret = await this.storageUtility.getForUser(
-      sessionId,
-      "clientSecret",
-      {
-        secure: false,
-      },
-    );
-
-    const redirectUrl = await this.storageUtility.getForUser(
-      sessionId,
-      "redirectUrl",
-      {
-        secure: false,
-      },
-    );
-
-    const refreshToken = await this.storageUtility.getForUser(
-      sessionId,
-      "refreshToken",
-      {
+      }),
+      this.storageUtility.getForUser(sessionId, "webId", {
         secure: true,
-      },
-    );
-
-    const issuer = await this.storageUtility.getForUser(sessionId, "issuer", {
-      secure: false,
-    });
-
-    const tokenType =
-      (await this.storageUtility.getForUser(sessionId, "tokenType", {
+      }),
+      this.storageUtility.getForUser(sessionId, "clientId", {
         secure: false,
-      })) ?? "DPoP";
+      }),
+      this.storageUtility.getForUser(sessionId, "clientSecret", {
+        secure: false,
+      }),
+      this.storageUtility.getForUser(sessionId, "redirectUrl", {
+        secure: false,
+      }),
+      this.storageUtility.getForUser(sessionId, "refreshToken", {
+        secure: true,
+      }),
+      this.storageUtility.getForUser(sessionId, "issuer", {
+        secure: false,
+      }),
+      this.storageUtility.getForUser(sessionId, "tokenType", {
+        secure: false,
+      }),
+    ]);
 
-    if (!isSupportedTokenType(tokenType)) {
+    if (typeof redirectUrl === "string" && !isValidRedirectUrl(redirectUrl)) {
+      // This resolves the issue for people experiencing https://github.com/inrupt/solid-client-authn-js/issues/2891.
+      // An invalid redirect URL is present in the storage, and the session should
+      // be cleared to get a fresh start. This will require the user to log back in.
+      await Promise.all([
+        this.storageUtility.deleteAllUserData(sessionId, { secure: false }),
+        this.storageUtility.deleteAllUserData(sessionId, { secure: true }),
+      ]);
+      return undefined;
+    }
+
+    if (tokenType !== undefined && !isSupportedTokenType(tokenType)) {
       throw new Error(`Tokens of type [${tokenType}] are not supported.`);
     }
 
@@ -137,7 +132,8 @@ export class SessionInfoManager
       issuer,
       clientAppId: clientId,
       clientAppSecret: clientSecret,
-      tokenType,
+      // Default the token type to DPoP if unspecified.
+      tokenType: tokenType ?? "DPoP",
     };
   }
 
