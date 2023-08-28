@@ -63,7 +63,7 @@ export default function AuthenticatedFetch({
         />
         <button
           onClick={() => handleFetch()}
-          data-testId="fetchButton"
+          data-testid="fetchButton"
           type="button"
         >
           Fetch

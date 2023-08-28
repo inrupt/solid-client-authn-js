@@ -18,33 +18,29 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SessionProvider,
   useSession,
   LoginButton,
 } from "@inrupt/solid-ui-react";
-import {
-  TESTID_OPENID_PROVIDER_INPUT,
-  TESTID_LOGIN_BUTTON,
-} from "@inrupt/internal-playwright-testids";
+import ReactDOM from "react-dom/client";
 
 function Show() {
   const { session } = useSession();
-  const [data, setData] = useState<string>();
-  const [resourceUrl, setResourceUrl] = useState<string>();
+  const [data, setData] = useState(false);
+  const [resourceUrl, setResourceUrl] = useState(false);
 
-  const handleResource = async () => {
+  useEffect(() => {
     if (resourceUrl) {
-      await session
+      setData(false);
+
+      session
         .fetch(resourceUrl)
         .then((res) => res.text())
         .then((text) => setData(text));
     }
-  };
+  }, [resourceUrl]);
 
   return (
     <div>
@@ -61,44 +57,34 @@ function Show() {
           setResourceUrl(e.target.value);
         }}
       />
-      <button
-        role="button"
-        onClick={() => handleResource()}
-        data-testid="fetchButton"
-      >
-        Fetch
-      </button>
       {data && <div id="data">{data}</div>}
     </div>
   );
 }
 
 function Login() {
-  const [op, setOp] = useState<string>("https://login.inrupt.com");
+  const [text, setText] = useState();
   return (
     <div>
       <input
-        data-testid={TESTID_OPENID_PROVIDER_INPUT}
-        value={op}
+        id="issuerInput"
+        value={text}
         onChange={(e) => {
-          setOp(e.target.value);
+          setText(e.target.value);
         }}
       />
 
-      <LoginButton oidcIssuer={op} redirectUrl={`http://localhost:3001`}>
-        <button data-testid={TESTID_LOGIN_BUTTON}>Login</button>
-      </LoginButton>
+      <LoginButton oidcIssuer={text} />
     </div>
   );
 }
 
-export default function Home() {
-  return (
-    <main>
-      <SessionProvider>
-        <Login />
-        <Show />
-      </SessionProvider>
-    </main>
-  );
-}
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <React.StrictMode>
+    <SessionProvider>
+      <Login />
+      <Show />
+    </SessionProvider>
+  </React.StrictMode>,
+);

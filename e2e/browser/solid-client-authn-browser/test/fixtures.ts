@@ -53,7 +53,7 @@ import {
   setThing,
 } from "@inrupt/solid-client";
 import LinkHeaders from "http-link-header";
-import { PLAYWRIGHT_PORT } from "../../../playwright.config";
+import { CLIENT_AUTHN_TEST_PORT } from "../../../../playwright.client-authn.config";
 import { AppPage } from "./pageModels/AppPage";
 
 export { expect } from "@inrupt/internal-playwright-helpers";
@@ -155,7 +155,10 @@ const createClientIdDoc = async (
     "@context": ["https://www.w3.org/ns/solid/oidc-context.jsonld"],
     client_name: clientInfo.clientName,
     client_id: clientId,
-    redirect_uris: [clientInfo.redirectUrl, "http://localhost:3001/redirect"],
+    redirect_uris: [
+      clientInfo.redirectUrl,
+      `http://localhost:${CLIENT_AUTHN_TEST_PORT}/redirect`,
+    ],
     // Note: No refresh token will be issued by default. If the tests last too long, this
     // should be updated so that it has the offline_access scope and supports the
     // refresh_token grant type.
@@ -163,8 +166,8 @@ const createClientIdDoc = async (
     grant_types: ["authorization_code"],
     response_types: ["code"],
     post_logout_redirect_uris: [
-      "http://localhost:3001/postLogoutUrl",
-      "http://localhost:3001/",
+      `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+      `http://localhost:${CLIENT_AUTHN_TEST_PORT}/`,
     ],
   };
 
@@ -339,7 +342,7 @@ export async function seedPod(
   const clientId = await createClientIdDoc(
     {
       clientName: "Browser test app",
-      redirectUrl: new URL(`http://localhost:${PLAYWRIGHT_PORT}`).href,
+      redirectUrl: new URL(`http://localhost:${CLIENT_AUTHN_TEST_PORT}`).href,
     },
     podRoot,
     session,

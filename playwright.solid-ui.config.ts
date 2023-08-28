@@ -19,13 +19,21 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-"use client";
+import type { PlaywrightTestConfig } from "@playwright/test";
 
-import type { NextPage } from "next";
-import App from "../components/appContainer";
+import { baseConfig} from "./playwright.shared.config"
 
-const Home: NextPage = () => {
-  return <App />;
+export const UI_REACT_TEST_PORT = 3001;
+
+const config: PlaywrightTestConfig = {
+  ...baseConfig,
+  testMatch: "solidui.playwright.ts",
+  webServer: {
+    command: `cd ./e2e/browser/solid-ui-react/test-app/ && npm run build && npm run start -- -p ${UI_REACT_TEST_PORT}`,
+    port: UI_REACT_TEST_PORT,
+    timeout: 120 * 1000,
+    reuseExistingServer: !process.env.CI,
+  },
 };
 
-export default Home;
+export default config;

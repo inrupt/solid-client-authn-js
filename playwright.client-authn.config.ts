@@ -19,13 +19,20 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-"use client";
+import type { PlaywrightTestConfig } from "@playwright/test";
+import { baseConfig } from "./playwright.shared.config"
 
-import type { NextPage } from "next";
-import App from "../components/appContainer";
+export const CLIENT_AUTHN_TEST_PORT = 3002;
 
-const Home: NextPage = () => {
-  return <App />;
+const config: PlaywrightTestConfig = {
+  ...baseConfig,
+  testMatch: "e2e.playwright.ts",
+  webServer: {
+    command: `cd ./e2e/browser/solid-client-authn-browser/test-app/ && npm run dev -- -p ${CLIENT_AUTHN_TEST_PORT}`,
+    port: CLIENT_AUTHN_TEST_PORT,
+    timeout: 120 * 1000,
+    reuseExistingServer: !process.env.CI,
+  },
 };
 
-export default Home;
+export default config;

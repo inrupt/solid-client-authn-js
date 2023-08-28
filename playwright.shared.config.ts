@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -19,26 +19,18 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { PlaywrightTestConfig } from "@playwright/test";
+import type { PlaywrightTestConfig } from "@playwright/test";
 
 const env = () => (process.env.CI === "true" ? "in CI" : "locally");
 
-export const PLAYWRIGHT_PORT = 3001;
-
-const config: PlaywrightTestConfig = {
-  testMatch: "*.playwright.ts",
+export const baseConfig: PlaywrightTestConfig = {
   retries: process.env.CI ? 3 : 1,
   workers: process.env.CI ? 3 : 1,
-  globalSetup: require.resolve("./e2e/browser/test/globalSetup.ts"),
+  globalSetup: require.resolve("./e2e/browser/globalSetup.ts"),
   // On CI we want to use the automatic annotations, otherwise we use list:
   reporter: process.env.CI ? "github" : "list",
   use: {
-    headless: true,
-    // Don't leak the env to the browser:
-    // Comment out if not running headless browser
-    launchOptions: {
-      env: {},
-    },
+    headless: false,
     // Screenshots actually don't give us any value when trying to debug:
     screenshot: "off",
     // On CI we want all the trace results, but in local development, you really
@@ -48,12 +40,6 @@ const config: PlaywrightTestConfig = {
   },
   // We need just a little more time on CI:
   timeout: process.env.CI ? 3 * 60_000 : 60_000,
-  webServer: {
-    command: "cd ./e2e/browser/test-app/ && npm run dev -- -p 3001",
-    port: PLAYWRIGHT_PORT,
-    timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
-  },
   projects: [
     {
       name: "Firefox",
@@ -79,5 +65,3 @@ const config: PlaywrightTestConfig = {
     // },
   ],
 };
-
-export default config;
