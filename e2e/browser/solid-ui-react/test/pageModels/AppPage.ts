@@ -32,7 +32,6 @@ export class AppPage {
 
   private readonly resourceContent: Locator;
 
-
   private readonly webIdContent: Locator;
 
   private readonly fetchButton: Locator;
@@ -51,13 +50,11 @@ export class AppPage {
   }
 
   async sampleRequest() {
-    await this.resourceUrl.fill("http://localhost:3001/data");
+    await this.resourceUrl.fill("http://localhost:3001/api/data");
     await Promise.all([
       this.fetchButton.click(),
       // A response should be sent to the issued fetch.
-      this.page.waitForResponse((response) =>
-        response.url().includes(new URL("http://localhost:3001/data").href),
-      ),
+      this.page.waitForResponse((response) => response.status() === 200),
     ]);
 
     return this.resourceContent.textContent();

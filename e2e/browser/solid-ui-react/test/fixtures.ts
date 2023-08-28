@@ -23,6 +23,7 @@
 /* eslint-disable camelcase */
 
 import { test as base } from "@inrupt/internal-playwright-helpers";
+import { File } from "buffer";
 
 import type {
   TestingEnvironmentBrowser,

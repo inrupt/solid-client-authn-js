@@ -25,7 +25,7 @@ custom.setHttpOptionsDefaults({
   timeout: 15000,
 });
 
-test("Public resource in my Pod", async ({ app, testResource, auth }) => {
+test("solid-ui-react smoke test", async ({ app, testResource, auth }) => {
   await app.home();
   await expect(app.sampleRequest()).resolves.toEqual("Sample response");
 
