@@ -21,7 +21,7 @@
     "@babel/core": "^7.22.10",
     "@babel/preset-env": "^7.22.10",
     "@babel/preset-react": "^7.18.6",
-    "babel-loader": "^9.1.0",
+    "babel-loader": "^9.1.3",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.0",
     "source-map-loader": "^4.0.1",
