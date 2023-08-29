@@ -36,6 +36,7 @@ import {
   seedPod,
   tearDownPod,
 } from "../browser/solid-client-authn-browser/test/fixtures";
+import { CLIENT_AUTHN_TEST_PORT } from "../../playwright.client-authn.config";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -80,15 +81,13 @@ describe("RP initiated login/out using playwright", () => {
     const session = new Session();
 
     let rpLogoutUrl: string | undefined;
-
     const redirectUrl = await new Promise<string>((res) => {
       (async () => {
         const browser = await firefox.launch();
         const page = await browser.newPage();
-
         await session.login({
           oidcIssuer: ENV.idp,
-          redirectUrl: "http://localhost:3001/",
+          redirectUrl: `http://localhost:${CLIENT_AUTHN_TEST_PORT}/`,
           async handleRedirect(url) {
             await page.goto(url);
             const cognitoPage = new CognitoPage(page);
@@ -107,7 +106,9 @@ describe("RP initiated login/out using playwright", () => {
         });
 
         const requestListener = async (pg: Request) => {
-          if (pg.url().startsWith("http://localhost:3001/")) {
+          if (
+            pg.url().startsWith(`http://localhost:${CLIENT_AUTHN_TEST_PORT}/`)
+          ) {
             page.off("request", requestListener);
             await browser.close();
             res(pg.url());
@@ -117,12 +118,9 @@ describe("RP initiated login/out using playwright", () => {
         page.on("request", requestListener);
       })().catch(console.error);
     });
-
     await session.handleIncomingRedirect(redirectUrl);
-
     const res = await session.fetch(clientResourceUrl);
     expect(res.status).toBe(200);
-
     let resolveFunc: (str: string) => void;
     const finalRedirectUrl = new Promise<string>((resolve) => {
       resolveFunc = resolve;
@@ -137,7 +135,13 @@ describe("RP initiated login/out using playwright", () => {
 
         const requestListener2 = async (pg: Request) => {
           const responseUrl = pg.url();
-          if (pg.url().startsWith("http://localhost:3001/postLogoutUrl")) {
+          if (
+            pg
+              .url()
+              .startsWith(
+                `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+              )
+          ) {
             page.off("request", requestListener2);
             await browser.close();
             resolveFunc(responseUrl);
@@ -147,28 +151,23 @@ describe("RP initiated login/out using playwright", () => {
         try {
           await page.goto(url);
         } catch (e) {
-          // Suppress this goto error; it occurs because we redirect to http://localhost:3001/postLogoutUrl
+          // Suppress this goto error; it occurs because we redirect to http://localhost:3002/postLogoutUrl
           // which is not served
         }
       },
-      postLogoutUrl: "http://localhost:3001/postLogoutUrl",
+      postLogoutUrl: `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
     };
-
     await session.logout(logoutParams);
-
     const res2 = await session.fetch(clientResourceUrl);
     expect(res2.status).toBe(401);
-
-    // This ensures that the browser redirects to http://localhost:3001/postLogoutUrl
+    // This ensures that the browser redirects to http://localhost:3002/postLogoutUrl
     await expect(finalRedirectUrl).resolves.toBe(
-      "http://localhost:3001/postLogoutUrl",
+      "http://localhost:3002/postLogoutUrl",
     );
-
     // Should error when trying to logout again with idp logout
     await expect(session.logout(logoutParams)).rejects.toThrow(
       "Cannot perform IDP logout. Did you log in using the OIDC authentication flow?",
     );
-
     // Testing to make sure RP Initiated Logout occurred with an id_token_hint
     expect(
       rpLogoutUrl &&

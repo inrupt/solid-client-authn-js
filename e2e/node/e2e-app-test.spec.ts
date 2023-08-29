@@ -38,8 +38,8 @@ import {
   type ISeedPodResponse,
   seedPod,
   tearDownPod,
-} from "../browser/test/fixtures";
-import { createApp } from "./express";
+} from "../browser/solid-client-authn-browser/test/fixtures";
+import { createApp, PORT } from "./express";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -80,7 +80,7 @@ describe("Testing against express app", () => {
   it("Should be able to properly login and out with idp logout", async () => {
     const browser = await firefox.launch();
     const page = await browser.newPage();
-    const url = new URL("http://localhost:3001/login");
+    const url = new URL(`http://localhost:${PORT}/login`);
     url.searchParams.append("oidcIssuer", ENV.idp);
     url.searchParams.append("clientId", clientId);
 
@@ -102,10 +102,10 @@ describe("Testing against express app", () => {
       // Ignore allow error for now
     }
 
-    await page.waitForURL("http://localhost:3001/");
+    await page.waitForURL(`http://localhost:${PORT}/`);
 
     // Fetching a protected resource once logged in
-    const resourceUrl = new URL("http://localhost:3001/fetch");
+    const resourceUrl = new URL(`http://localhost:${PORT}/fetch`);
     resourceUrl.searchParams.append("resource", clientResourceUrl);
     await page.goto(resourceUrl.toString());
     await expect(page.content()).resolves.toBe(
@@ -113,8 +113,8 @@ describe("Testing against express app", () => {
     );
 
     // Performing idp logout and being redirected to the postLogoutUrl after doing so
-    await page.goto("http://localhost:3001/idplogout");
-    await page.waitForURL("http://localhost:3001/postLogoutUrl");
+    await page.goto(`http://localhost:${PORT}/idplogout`);
+    await page.waitForURL(`http://localhost:${PORT}/postLogoutUrl`);
     await expect(page.content()).resolves.toBe(
       `<html><head></head><body>successfully at post logout</body></html>`,
     );

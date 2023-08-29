@@ -23,10 +23,11 @@ import express from "express";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
 import { Session } from "../../packages/node/src/index";
+import { CLIENT_AUTHN_TEST_PORT } from "../../playwright.client-authn.config";
 
 log.setLevel("TRACE");
 
-export const PORT = 3001;
+export const PORT = CLIENT_AUTHN_TEST_PORT;
 
 export function createApp(onStart: () => void) {
   const app = express();
@@ -46,7 +47,7 @@ export function createApp(onStart: () => void) {
     }
 
     return session.login({
-      redirectUrl: "http://localhost:3001/redirect",
+      redirectUrl: `http://localhost:${PORT}/redirect`,
       oidcIssuer,
       clientId: typeof clientId === "string" ? clientId : undefined,
       handleRedirect: (url) => res.redirect(url),
@@ -99,7 +100,7 @@ export function createApp(onStart: () => void) {
     try {
       return await session.logout({
         logoutType: "idp",
-        postLogoutUrl: "http://localhost:3001/postLogoutUrl",
+        postLogoutUrl: `http://localhost:${PORT}/postLogoutUrl`,
         handleRedirect: (url) => {
           res.redirect(url);
         },
