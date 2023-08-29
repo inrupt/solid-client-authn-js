@@ -23,8 +23,6 @@
 /* eslint-disable camelcase */
 
 import { test as base } from "@inrupt/internal-playwright-helpers";
-import { File } from "node:buffer";
-
 import { randomUUID } from "crypto";
 import type {
   TestingEnvironmentBrowser,
@@ -90,6 +88,7 @@ export async function retryAsync<T>(
   interval = 5_000,
 ): Promise<T> {
   let tries = 0;
+  const errors: Error[] = [];
   while (tries < maxRetries) {
     try {
       // The purpose here is to retry an async operation, not to parallelize.
@@ -97,6 +96,7 @@ export async function retryAsync<T>(
       // eslint-disable-next-line no-await-in-loop
       return await callback();
     } catch (e: unknown) {
+      errors.push(e as Error);
       tries += 1;
       // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve) => {
@@ -104,8 +104,9 @@ export async function retryAsync<T>(
       });
     }
   }
+  const errorsString = errors.map((e) => e.toString()).join("\n");
   throw new Error(
-    `An async callback is still failing after ${maxRetries} retries.`,
+    `An async callback is still failing after ${maxRetries} retries. The errors were: ${errorsString}`,
   );
 }
 
