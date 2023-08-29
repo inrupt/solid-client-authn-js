@@ -23,6 +23,7 @@
 /* eslint-disable camelcase */
 
 import { test as base } from "@inrupt/internal-playwright-helpers";
+import { File } from "node:buffer";
 
 import { randomUUID } from "crypto";
 import type {
@@ -83,23 +84,48 @@ export type TestContainer = {
   privateFileText: string;
 };
 
+export async function retryAsync<T>(
+  callback: () => Promise<T>,
+  maxRetries = 5,
+  interval = 5_000,
+): Promise<T> {
+  let tries = 0;
+  while (tries < maxRetries) {
+    try {
+      // The purpose here is to retry an async operation, not to parallelize.
+      // Awaiting the callback will throw on error before returning.
+      // eslint-disable-next-line no-await-in-loop
+      return await callback();
+    } catch (e: unknown) {
+      tries += 1;
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => {
+        setTimeout(resolve, interval);
+      });
+    }
+  }
+  throw new Error(
+    `An async callback is still failing after ${maxRetries} retries.`,
+  );
+}
+
 const saveTextFile = async (options: {
   name: string;
   contents: string;
   containerUrl: string;
   session: Session;
 }): Promise<string> => {
-  const data = Buffer.from(options.contents, "utf-8");
-
-  const file = await saveFileInContainer(options.containerUrl, data, {
-    slug: options.name,
-    contentType: "text/plain",
-    fetch: options.session.fetch,
+  const data = new File([options.contents], options.name, {
+    type: "plain/text",
   });
-
-  const url = getSourceUrl(file);
-
-  return url;
+  const savedFile = await retryAsync(() =>
+    saveFileInContainer(options.containerUrl, data, {
+      slug: options.name,
+      contentType: "text/plain",
+      fetch: options.session.fetch,
+    }),
+  );
+  return getSourceUrl(savedFile);
 };
 
 const createClientIdDoc = async (
@@ -111,13 +137,17 @@ const createClientIdDoc = async (
   container: string,
   session: Session,
 ): Promise<string> => {
-  const emptyClientIdDoc = await saveFileInContainer(
-    container,
-    Buffer.from([]),
-    {
-      contentType: "application/json",
-      fetch: session.fetch,
-    },
+  const emptyClientIdDoc = await retryAsync(() =>
+    saveFileInContainer(
+      container,
+      new File([], "clientId", {
+        type: "application/ld+json",
+      }),
+      {
+        contentType: "application/json",
+        fetch: session.fetch,
+      },
+    ),
   );
   const clientId = getSourceUrl(emptyClientIdDoc);
   const clientIdDoc = {
@@ -136,16 +166,27 @@ const createClientIdDoc = async (
       "http://localhost:3001/",
     ],
   };
-  await overwriteFile(clientId, Buffer.from(JSON.stringify(clientIdDoc)), {
-    fetch: session.fetch,
-  });
+
+  await retryAsync(() =>
+    overwriteFile(
+      clientId,
+      new File([JSON.stringify(clientIdDoc)], "clientId", {
+        type: "application/json",
+      }),
+      {
+        fetch: session.fetch,
+      },
+    ),
+  );
 
   // The Client Identifier Document should be public.
   const { setPublicAccess } = universalAccess;
-  await setPublicAccess(
-    clientId,
-    { read: true, write: false },
-    { fetch: session.fetch }, // fetch function from authenticated session
+  await retryAsync(() =>
+    setPublicAccess(
+      clientId,
+      { read: true, write: false },
+      { fetch: session.fetch }, // fetch function from authenticated session
+    ),
   );
   return clientId;
 };
@@ -156,21 +197,27 @@ const createClientResource = async (
   clientId: string,
   session: Session,
 ): Promise<string> => {
-  const clientResource = await saveFileInContainer(
-    container,
-    Buffer.from(content),
-    {
-      contentType: "application/json",
-      fetch: session.fetch,
-    },
+  const clientResource = await retryAsync(() =>
+    saveFileInContainer(
+      container,
+      new File([content], "resource", {
+        type: "application/json",
+      }),
+      {
+        contentType: "application/json",
+        fetch: session.fetch,
+      },
+    ),
   );
   const resourceUrl = getSourceUrl(clientResource);
 
   // Adding client access control restrictions on a Resource isn't part of the
   // high-level API yet.
-  const headResponse = await session.fetch(resourceUrl, {
-    method: "HEAD",
-  });
+  const headResponse = await retryAsync(() =>
+    session.fetch(resourceUrl, {
+      method: "HEAD",
+    }),
+  );
   const responseLinks = headResponse.headers.get("Link");
   if (responseLinks === null) {
     throw new Error("Could not find links to the resource's ACR.");
@@ -178,7 +225,9 @@ const createClientResource = async (
   const links = LinkHeaders.parse(responseLinks.toString());
   const acrUrl = links.get("rel", "acl")[0].uri;
   // Fetch the ACR, and add a matcher to match the given client ID.
-  const acrDataset = await getSolidDataset(acrUrl, { fetch: session.fetch });
+  const acrDataset = await retryAsync(() =>
+    getSolidDataset(acrUrl, { fetch: session.fetch }),
+  );
   const acrThing = getThing(acrDataset, acrUrl);
   if (acrThing === null) {
     throw new Error(
@@ -226,9 +275,11 @@ const createClientResource = async (
     clientMatcher,
     publicClientMatcher,
   ].reduce(setThing, acrDataset);
-  await saveSolidDatasetAt(acrUrl, updatedAcr, {
-    fetch: session.fetch,
-  });
+  await retryAsync(() =>
+    saveSolidDatasetAt(acrUrl, updatedAcr, {
+      fetch: session.fetch,
+    }),
+  );
   return resourceUrl;
 };
 
@@ -315,13 +366,17 @@ export async function tearDownPod({
   clientResourceUrl,
 }: ISeedPodResponse) {
   // Teardown
-  await deleteFile(clientId, {
-    fetch: session.fetch,
-  });
+  await retryAsync(() =>
+    deleteFile(clientId, {
+      fetch: session.fetch,
+    }),
+  );
 
-  await deleteFile(clientResourceUrl, {
-    fetch: session.fetch,
-  });
+  await retryAsync(() =>
+    deleteFile(clientResourceUrl, {
+      fetch: session.fetch,
+    }),
+  );
 
   await session.logout();
 }
@@ -393,12 +448,14 @@ export const test = base.extend<Fixtures>({
     });
 
     // Create the container:
-    const testContainer = await createContainerInContainer(
-      // Usually there's only a single Pod URL on the test accounts, so this *should* be fine:
-      pods[0],
-      {
-        fetch: session.fetch,
-      },
+    const testContainer = await retryAsync(() =>
+      createContainerInContainer(
+        // Usually there's only a single Pod URL on the test accounts, so this *should* be fine:
+        pods[0],
+        {
+          fetch: session.fetch,
+        },
+      ),
     );
 
     const testContainerUrl = getSourceUrl(testContainer);
@@ -461,17 +518,23 @@ export const test = base.extend<Fixtures>({
     }
 
     // teardown: delete the container & files:
-    await deleteFile(publicFileUrl, {
-      fetch: session.fetch,
-    });
+    await retryAsync(() =>
+      deleteFile(publicFileUrl, {
+        fetch: session.fetch,
+      }),
+    );
 
-    await deleteFile(privateFileUrl, {
-      fetch: session.fetch,
-    });
+    await retryAsync(() =>
+      deleteFile(privateFileUrl, {
+        fetch: session.fetch,
+      }),
+    );
 
-    await deleteContainer(testContainerUrl, {
-      fetch: session.fetch,
-    });
+    await retryAsync(() =>
+      deleteContainer(testContainerUrl, {
+        fetch: session.fetch,
+      }),
+    );
 
     await session.logout();
   },
