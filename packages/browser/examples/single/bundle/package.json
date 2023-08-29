@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf ./dist",
-    "start": "webpack serve",
+    "start": "webpack serve --no-client-overlay",
     "dev": "npm run start",
     "build": "webpack --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,16 +16,16 @@
   "devDependencies": {
     "@babel/core": "^7.22.11",
     "@babel/preset-env": "^7.22.10",
-    "@babel/preset-react": "^7.16.7",
     "babel-loader": "^9.1.3",
-    "html-loader": "^3.1.0",
     "html-webpack-plugin": "^5.5.0",
+    "@babel/preset-react": "^7.22.5",
+    "html-loader": "^4.2.0",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.7.3"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-browser": "^1.17.1",
+    "@inrupt/solid-client-authn-browser": "file:../../../",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "regenerator-runtime": "^0.13.9"

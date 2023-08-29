@@ -39,7 +39,7 @@ const CLIENT_IDENTIFIER =
 
 export default function App() {
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
-  const [issuer, setIssuer] = useState("https://broker.pod.inrupt.com/");
+  const [issuer, setIssuer] = useState("https://login.inrupt.com/");
   const [resource, setResource] = useState(webId);
   const [data, setData] = useState(null);
 
