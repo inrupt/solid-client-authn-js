@@ -20,11 +20,6 @@
 //
 import type { Locator, Page } from "@playwright/test";
 
-type AppPageOptions = {
-  clientApplicationUrl: string;
-  fetchTimeout: number;
-};
-
 export class AppPage {
   readonly page: Page;
 
