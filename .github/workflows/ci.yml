@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: ['ubuntu-latest', 'windows-latest']
         node-version: ["20.x", "18.x", "16.x"]
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-      - if: ${{ matrix.os == "windows-latest" }}
+      - if: ${{ matrix.os == 'windows-latest' }}
         run: npm i @nx/nx-win32-x64-msvc
       - run: npm ci
       - run: npm run test
