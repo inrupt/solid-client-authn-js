@@ -116,9 +116,7 @@ const saveTextFile = async (options: {
   containerUrl: string;
   session: Session;
 }): Promise<string> => {
-  const data = new File([options.contents], options.name, {
-    type: "plain/text",
-  });
+  const data = new Blob([options.contents]);
   const savedFile = await retryAsync(() =>
     saveFileInContainer(options.containerUrl, data, {
       slug: options.name,
@@ -139,16 +137,10 @@ const createClientIdDoc = async (
   session: Session,
 ): Promise<string> => {
   const emptyClientIdDoc = await retryAsync(() =>
-    saveFileInContainer(
-      container,
-      new File([], "clientId", {
-        type: "application/ld+json",
-      }),
-      {
-        contentType: "application/json",
-        fetch: session.fetch,
-      },
-    ),
+    saveFileInContainer(container, new Blob([]), {
+      contentType: "application/json",
+      fetch: session.fetch,
+    }),
   );
   const clientId = getSourceUrl(emptyClientIdDoc);
   const clientIdDoc = {
@@ -172,15 +164,9 @@ const createClientIdDoc = async (
   };
 
   await retryAsync(() =>
-    overwriteFile(
-      clientId,
-      new File([JSON.stringify(clientIdDoc)], "clientId", {
-        type: "application/json",
-      }),
-      {
-        fetch: session.fetch,
-      },
-    ),
+    overwriteFile(clientId, new Blob([JSON.stringify(clientIdDoc)]), {
+      fetch: session.fetch,
+    }),
   );
 
   // The Client Identifier Document should be public.
@@ -202,16 +188,10 @@ const createClientResource = async (
   session: Session,
 ): Promise<string> => {
   const clientResource = await retryAsync(() =>
-    saveFileInContainer(
-      container,
-      new File([content], "resource", {
-        type: "application/json",
-      }),
-      {
-        contentType: "application/json",
-        fetch: session.fetch,
-      },
-    ),
+    saveFileInContainer(container, new Blob([content]), {
+      contentType: "application/json",
+      fetch: session.fetch,
+    }),
   );
   const resourceUrl = getSourceUrl(clientResource);
 

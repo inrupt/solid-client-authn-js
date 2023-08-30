@@ -108,7 +108,7 @@ export const test = base.extend<Fixtures>({
     const testResource = await saveFileInContainer(
       // Usually there's only a single Pod URL on the test accounts, so this *should* be fine:
       pods[0],
-      new File([resourceContent], "myFile", { type: "plain/text" }),
+      new Blob([resourceContent]),
       {
         fetch: session.fetch,
         contentType: "text/plain",
