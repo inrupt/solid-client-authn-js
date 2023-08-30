@@ -23,7 +23,6 @@
 /* eslint-disable camelcase */
 
 import { test as base } from "@inrupt/internal-playwright-helpers";
-import { File } from "buffer";
 
 import type { TestingEnvironmentNode } from "@inrupt/internal-test-env";
 import { getNodeTestingEnvironment } from "@inrupt/internal-test-env";
