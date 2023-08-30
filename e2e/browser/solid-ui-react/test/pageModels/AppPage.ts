@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 import type { Locator, Page } from "@playwright/test";
+import { UI_REACT_TEST_PORT } from "../../../../../playwright.solid-ui.config";
 
 export class AppPage {
   readonly page: Page;
@@ -41,11 +42,13 @@ export class AppPage {
   }
 
   async home() {
-    await this.page.goto("http://localhost:3001");
+    await this.page.goto(`http://localhost:${UI_REACT_TEST_PORT}`);
   }
 
   async sampleRequest() {
-    await this.resourceUrl.fill("http://localhost:3001/api/data");
+    await this.resourceUrl.fill(
+      `http://localhost:${UI_REACT_TEST_PORT}/api/data`,
+    );
     await Promise.all([
       this.fetchButton.click(),
       // A response should be sent to the issued fetch.

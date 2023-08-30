@@ -45,21 +45,9 @@ export type Fixtures = {
   setupEnvironment: TestingEnvironmentNode;
 };
 
-// This is the deployed client application that we'll be using to exercise
-// various authentication scenarios. We expect the system environment value to
-// point at a deployed instance (e.g. an automated Vercel deployment), but I
-// don't think it makes sense to default to a hard-coded Vercel instance.
-// Instead, for running locally, it seems helpful to default to 'localhost'
-// instance.
-const clientApplicationUrl =
-  process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001/";
-
 export const test = base.extend<Fixtures>({
   app: async ({ page }, use) => {
-    const app = new AppPage(page, {
-      clientApplicationUrl,
-      fetchTimeout: 2000,
-    });
+    const app = new AppPage(page);
 
     await use(app);
   },

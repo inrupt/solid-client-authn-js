@@ -41,7 +41,6 @@ jobs:
         # of the whole pipeline.
         if: github.actor != 'dependabot[bot]'
         env:
-          E2E_DEMO_CLIENT_APP_URL: http://localhost:3001
           E2E_TEST_USER: ${{ secrets.E2E_TEST_USER }}
           E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
           E2E_TEST_IDP: ${{ secrets.E2E_TEST_IDP }}
