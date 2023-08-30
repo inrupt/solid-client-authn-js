@@ -36,6 +36,7 @@ import {
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
 
+// Importing the playwright config file crashes the Next Web server.
 const REDIRECT_URL = new URL(`http://localhost:3002/`).href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";

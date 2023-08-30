@@ -23,6 +23,7 @@ import { TESTID_SELECTORS } from "@inrupt/internal-playwright-testids";
 import { v4 } from "uuid";
 import { getBrowserTestingEnvironment } from "@inrupt/internal-test-env";
 import { test, expect } from "./fixtures";
+import { CLIENT_AUTHN_TEST_PORT } from "../../../../playwright.client-authn.config";
 
 const env = getBrowserTestingEnvironment();
 
@@ -213,7 +214,7 @@ test.describe("Using a Client ID", () => {
     clientAccessControl,
     auth,
   }) => {
-    const POST_LOGOUT_URL = "http://localhost:3001/postLogoutUrl";
+    const POST_LOGOUT_URL = `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`;
 
     await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
     // Type the Client ID before logging in, so that it is used during logging.
@@ -239,7 +240,7 @@ test.describe("Using a Client ID", () => {
     clientAccessControl,
     auth,
   }) => {
-    const POST_LOGOUT_URL = "http://localhost:3001/postLogoutUrl";
+    const POST_LOGOUT_URL = `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`;
     const state = v4();
 
     await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
@@ -270,7 +271,7 @@ test.describe("Using a Client ID", () => {
     clientAccessControl,
     auth,
   }) => {
-    const POST_LOGOUT_URL = "http://localhost:3001/";
+    const POST_LOGOUT_URL = `http://localhost:${CLIENT_AUTHN_TEST_PORT}/`;
     const state = v4();
 
     await app.page.waitForSelector("[data-testid=clientIdentifierInput]");
