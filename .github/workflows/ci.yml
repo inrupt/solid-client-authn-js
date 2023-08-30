@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-      - if: ${{ matrix.os == windows-latest }}
+      - if: ${{ matrix.os == "windows-latest" }}
         run: npm i @nx/nx-win32-x64-msvc
       - run: npm ci
       - run: npm run test
