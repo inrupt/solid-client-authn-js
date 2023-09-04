@@ -53,7 +53,9 @@ import {
   setThing,
 } from "@inrupt/solid-client";
 import LinkHeaders from "http-link-header";
-import { CLIENT_AUTHN_TEST_PORT } from "../../../../playwright.client-authn.config";
+// Extensions are required for JSON imports.
+// eslint-disable-next-line import/extensions
+import CONSTANTS from "../../../../playwright.client-authn.constants.json";
 import { AppPage } from "./pageModels/AppPage";
 
 export { expect } from "@inrupt/internal-playwright-helpers";
@@ -149,7 +151,7 @@ const createClientIdDoc = async (
     client_id: clientId,
     redirect_uris: [
       clientInfo.redirectUrl,
-      `http://localhost:${CLIENT_AUTHN_TEST_PORT}/redirect`,
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/redirect`,
     ],
     // Note: No refresh token will be issued by default. If the tests last too long, this
     // should be updated so that it has the offline_access scope and supports the
@@ -267,15 +269,6 @@ const createClientResource = async (
   return resourceUrl;
 };
 
-// This is the deployed client application that we'll be using to exercise
-// various authentication scenarios. We expect the system environment value to
-// point at a deployed instance (e.g. an automated Vercel deployment), but I
-// don't think it makes sense to default to a hard-coded Vercel instance.
-// Instead, for running locally, it seems helpful to default to 'localhost'
-// instance.
-const clientApplicationUrl =
-  process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001/";
-
 export interface ISeedPodResponse {
   clientId: string;
   clientResourceContent: string;
@@ -322,7 +315,9 @@ export async function seedPod(
   const clientId = await createClientIdDoc(
     {
       clientName: "Browser test app",
-      redirectUrl: new URL(`http://localhost:${CLIENT_AUTHN_TEST_PORT}`).href,
+      redirectUrl: new URL(
+        `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}`,
+      ).href,
     },
     podRoot,
     session,
@@ -369,7 +364,7 @@ export async function tearDownPod({
 export const test = base.extend<Fixtures>({
   app: async ({ page }, use) => {
     const app = new AppPage(page, {
-      clientApplicationUrl,
+      clientApplicationUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
       fetchTimeout: 2000,
     });
 

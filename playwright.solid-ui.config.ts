@@ -21,16 +21,17 @@
 
 import type { PlaywrightTestConfig } from "@playwright/test";
 
-import { baseConfig} from "./playwright.shared.config"
-
-export const UI_REACT_TEST_PORT = 3001;
+import { baseConfig } from "./playwright.shared.config";
+// The extension is necessary for JSON imports.
+// eslint-disable-next-line import/extensions
+import CONSTANTS from "./playwright.solid-ui.constants.json";
 
 const config: PlaywrightTestConfig = {
   ...baseConfig,
   testMatch: "solidui.playwright.ts",
   webServer: {
-    command: `cd ./e2e/browser/solid-ui-react/test-app/ && npm run build && npm run start -- -p ${UI_REACT_TEST_PORT}`,
-    port: UI_REACT_TEST_PORT,
+    command: `cd ./e2e/browser/solid-ui-react/test-app/ && npm run build && npm run start -- -p ${CONSTANTS.UI_REACT_TEST_PORT}`,
+    port: CONSTANTS.UI_REACT_TEST_PORT,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
   },

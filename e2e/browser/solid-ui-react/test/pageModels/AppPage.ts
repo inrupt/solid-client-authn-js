@@ -19,7 +19,9 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 import type { Locator, Page } from "@playwright/test";
-import { UI_REACT_TEST_PORT } from "../../../../../playwright.solid-ui.config";
+// Extension is required for json imports.
+// eslint-disable-next-line import/extensions
+import PLAYWRIGHT_CONSTANTS from "../../../../../playwright.solid-ui.constants.json";
 
 export class AppPage {
   readonly page: Page;
@@ -42,12 +44,14 @@ export class AppPage {
   }
 
   async home() {
-    await this.page.goto(`http://localhost:${UI_REACT_TEST_PORT}`);
+    await this.page.goto(
+      `http://localhost:${PLAYWRIGHT_CONSTANTS.UI_REACT_TEST_PORT}`,
+    );
   }
 
   async sampleRequest() {
     await this.resourceUrl.fill(
-      `http://localhost:${UI_REACT_TEST_PORT}/api/data`,
+      `http://localhost:${PLAYWRIGHT_CONSTANTS.UI_REACT_TEST_PORT}/api/data`,
     );
     await Promise.all([
       this.fetchButton.click(),

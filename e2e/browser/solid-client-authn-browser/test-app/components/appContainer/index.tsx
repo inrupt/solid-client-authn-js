@@ -35,9 +35,14 @@ import {
   EVENTS,
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../authenticatedFetch";
+// The extension is required for JSON imports.
+// eslint-disable-next-line import/extensions, import/no-relative-packages
+import CONSTANTS from "../../../../../../playwright.client-authn.constants.json";
 
 // Importing the playwright config file crashes the Next Web server.
-const REDIRECT_URL = new URL(`http://localhost:3002/`).href;
+const REDIRECT_URL = new URL(
+  `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
+).href;
 const APP_NAME = "Authn browser-based tests app";
 const DEFAULT_ISSUER = "https://login.inrupt.com/";
 

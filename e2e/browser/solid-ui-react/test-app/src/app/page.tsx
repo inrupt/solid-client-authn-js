@@ -31,6 +31,9 @@ import {
   TESTID_OPENID_PROVIDER_INPUT,
   TESTID_LOGIN_BUTTON,
 } from "@inrupt/internal-playwright-testids";
+// Extension is required for json imports.
+// eslint-disable-next-line import/extensions
+import PLAYWRIGHT_CONSTANTS from "root/playwright.solid-ui.constants.json";
 
 function Show() {
   const { session } = useSession();
@@ -85,7 +88,10 @@ function Login() {
         }}
       />
 
-      <LoginButton oidcIssuer={op} redirectUrl={`http://localhost:3001`}>
+      <LoginButton
+        oidcIssuer={op}
+        redirectUrl={`http://localhost:${PLAYWRIGHT_CONSTANTS.UI_REACT_TEST_PORT}`}
+      >
         <button data-testid={TESTID_LOGIN_BUTTON}>Login</button>
       </LoginButton>
     </div>

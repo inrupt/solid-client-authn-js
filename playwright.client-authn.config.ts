@@ -20,16 +20,17 @@
 //
 
 import type { PlaywrightTestConfig } from "@playwright/test";
-import { baseConfig } from "./playwright.shared.config"
-
-export const CLIENT_AUTHN_TEST_PORT = 3002;
+import { baseConfig } from "./playwright.shared.config";
+// The extension is necessary for JSON imports.
+// eslint-disable-next-line import/extensions
+import CONSTANTS from "./playwright.client-authn.constants.json";
 
 const config: PlaywrightTestConfig = {
   ...baseConfig,
   testMatch: "e2e.playwright.ts",
   webServer: {
-    command: `cd ./e2e/browser/solid-client-authn-browser/test-app/ && npm run dev -- -p ${CLIENT_AUTHN_TEST_PORT}`,
-    port: CLIENT_AUTHN_TEST_PORT,
+    command: `cd ./e2e/browser/solid-client-authn-browser/test-app/ && npm run dev -- -p ${CONSTANTS.CLIENT_AUTHN_TEST_PORT}`,
+    port: CONSTANTS.CLIENT_AUTHN_TEST_PORT,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
   },

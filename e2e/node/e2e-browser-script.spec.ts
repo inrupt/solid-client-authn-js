@@ -36,7 +36,9 @@ import {
   seedPod,
   tearDownPod,
 } from "../browser/solid-client-authn-browser/test/fixtures";
-import { CLIENT_AUTHN_TEST_PORT } from "../../playwright.client-authn.config";
+// Extesion is required for JSON imports.
+// eslint-disable-next-line import/extensions
+import CONSTANTS from "../../playwright.client-authn.constants.json";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -87,7 +89,7 @@ describe("RP initiated login/out using playwright", () => {
         const page = await browser.newPage();
         await session.login({
           oidcIssuer: ENV.idp,
-          redirectUrl: `http://localhost:${CLIENT_AUTHN_TEST_PORT}/`,
+          redirectUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
           async handleRedirect(url) {
             await page.goto(url);
             const cognitoPage = new CognitoPage(page);
@@ -107,7 +109,11 @@ describe("RP initiated login/out using playwright", () => {
 
         const requestListener = async (pg: Request) => {
           if (
-            pg.url().startsWith(`http://localhost:${CLIENT_AUTHN_TEST_PORT}/`)
+            pg
+              .url()
+              .startsWith(
+                `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
+              )
           ) {
             page.off("request", requestListener);
             await browser.close();
@@ -139,7 +145,7 @@ describe("RP initiated login/out using playwright", () => {
             pg
               .url()
               .startsWith(
-                `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+                `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
               )
           ) {
             page.off("request", requestListener2);
@@ -155,14 +161,14 @@ describe("RP initiated login/out using playwright", () => {
           // which is not served
         }
       },
-      postLogoutUrl: `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+      postLogoutUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
     };
     await session.logout(logoutParams);
     const res2 = await session.fetch(clientResourceUrl);
     expect(res2.status).toBe(401);
     // This ensures that the browser redirects to http://localhost:3002/postLogoutUrl
     await expect(finalRedirectUrl).resolves.toBe(
-      "http://localhost:3002/postLogoutUrl",
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
     );
     // Should error when trying to logout again with idp logout
     await expect(session.logout(logoutParams)).rejects.toThrow(
