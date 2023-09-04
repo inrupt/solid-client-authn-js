@@ -89,11 +89,14 @@ export const test = base.extend<Fixtures>({
     const pods = await getPodUrlAll(session.info.webId, {
       fetch: session.fetch,
     });
-
+    if (pods.length !== 1) {
+      throw new Error(
+        `Exactly one storage was expected in ${session.info.webId}, found ${pods.length}`,
+      );
+    }
     const resourceContent = "This is a plain piece of text";
     // Create the container:
     const testResource = await saveFileInContainer(
-      // Usually there's only a single Pod URL on the test accounts, so this *should* be fine:
       pods[0],
       new Blob([resourceContent]),
       {
