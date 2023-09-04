@@ -113,7 +113,6 @@ export async function retryAsync<T>(
 }
 
 const saveTextFile = async (options: {
-  name: string;
   contents: string;
   containerUrl: string;
   session: Session;
@@ -121,7 +120,6 @@ const saveTextFile = async (options: {
   const data = new Blob([options.contents]);
   const savedFile = await retryAsync(() =>
     saveFileInContainer(options.containerUrl, data, {
-      slug: options.name,
       contentType: "text/plain",
       fetch: options.session.fetch,
     }),
@@ -441,7 +439,6 @@ export const test = base.extend<Fixtures>({
 
     const publicFileText = "This is a publicly readable file";
     const publicFileUrl = await saveTextFile({
-      name: "public.txt",
       contents: publicFileText,
       containerUrl: testContainerUrl,
       session,
@@ -449,7 +446,6 @@ export const test = base.extend<Fixtures>({
 
     const privateFileText = `This is a private file, only readable by ${session.info.webId}`;
     const privateFileUrl = await saveTextFile({
-      name: "private.txt",
       contents: privateFileText,
       containerUrl: testContainerUrl,
       session,
