@@ -39,7 +39,10 @@ import {
   seedPod,
   tearDownPod,
 } from "../browser/solid-client-authn-browser/test/fixtures";
-import { createApp, PORT } from "./express";
+import { createApp } from "./express";
+// Extensions are required for JSON-LD imports.
+// eslint-disable-next-line import/extensions
+import CONSTANTS from "../../playwright.client-authn.constants.json";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -80,7 +83,9 @@ describe("Testing against express app", () => {
   it("Should be able to properly login and out with idp logout", async () => {
     const browser = await firefox.launch();
     const page = await browser.newPage();
-    const url = new URL(`http://localhost:${PORT}/login`);
+    const url = new URL(
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/login`,
+    );
     url.searchParams.append("oidcIssuer", ENV.idp);
     url.searchParams.append("clientId", clientId);
 
@@ -102,10 +107,14 @@ describe("Testing against express app", () => {
       // Ignore allow error for now
     }
 
-    await page.waitForURL(`http://localhost:${PORT}/`);
+    await page.waitForURL(
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
+    );
 
     // Fetching a protected resource once logged in
-    const resourceUrl = new URL(`http://localhost:${PORT}/fetch`);
+    const resourceUrl = new URL(
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetch`,
+    );
     resourceUrl.searchParams.append("resource", clientResourceUrl);
     await page.goto(resourceUrl.toString());
     await expect(page.content()).resolves.toBe(
@@ -113,8 +122,12 @@ describe("Testing against express app", () => {
     );
 
     // Performing idp logout and being redirected to the postLogoutUrl after doing so
-    await page.goto(`http://localhost:${PORT}/idplogout`);
-    await page.waitForURL(`http://localhost:${PORT}/postLogoutUrl`);
+    await page.goto(
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/idplogout`,
+    );
+    await page.waitForURL(
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+    );
     await expect(page.content()).resolves.toBe(
       `<html><head></head><body>successfully at post logout</body></html>`,
     );
