@@ -166,6 +166,7 @@ const createClientIdDoc = async (
   await retryAsync(() =>
     overwriteFile(clientId, new Blob([JSON.stringify(clientIdDoc)]), {
       fetch: session.fetch,
+      contentType: "application/json",
     }),
   );
 
