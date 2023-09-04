@@ -158,8 +158,8 @@ const createClientIdDoc = async (
     grant_types: ["authorization_code"],
     response_types: ["code"],
     post_logout_redirect_uris: [
-      `http://localhost:${CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
-      `http://localhost:${CLIENT_AUTHN_TEST_PORT}/`,
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
     ],
   };
 
