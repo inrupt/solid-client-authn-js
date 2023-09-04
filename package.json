@@ -19,7 +19,7 @@
     "lint:fix": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write",
     "lint:check": "npm run lint:eslint && npm run lint:prettier -- --check",
     "lint:eslint": "eslint \"e2e\" \"packages\"",
-    "lint:prettier": "prettier \"{e2e,packages}/**/*.{ts,tsx,js,jsx,css}\" \"{e2e,packages}/**/*.{md,mdx,yml}\" \"./*.{md,mdx,yml}\"",
+    "lint:prettier": "prettier \"{e2e,packages,.github}/**/*.{ts,tsx,js,jsx,css,md,mdx,yml}\" \"./*.{md,mdx,yml,ts,json}\"",
     "postinstall": "npm run build",
     "prepublishOnly": "npm run build",
     "publish": "lerna publish",
