@@ -32,8 +32,8 @@ import {
   TESTID_LOGIN_BUTTON,
 } from "@inrupt/internal-playwright-testids";
 // Extension is required for json imports.
-// eslint-disable-next-line import/extensions
-import PLAYWRIGHT_CONSTANTS from "root/playwright.solid-ui.constants.json";
+// eslint-disable-next-line import/extensions, import/no-relative-packages
+import PLAYWRIGHT_CONSTANTS from "../../../../../../playwright.solid-ui.constants.json";
 
 function Show() {
   const { session } = useSession();
