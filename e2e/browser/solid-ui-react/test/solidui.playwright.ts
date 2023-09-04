@@ -28,6 +28,10 @@ custom.setHttpOptionsDefaults({
 test("solid-ui-react smoke test", async ({ app, testResource, auth }) => {
   await app.home();
   await expect(app.sampleRequest()).resolves.toEqual("Sample response");
+  // Test unauthorized fetch of a protected resource.
+  await expect(app.fetchResource(testResource.url)).resolves.toContain(
+    "Unauthorized",
+  );
 
   await auth.login();
   await expect(app.getWebid()).resolves.not.toBeNull();
