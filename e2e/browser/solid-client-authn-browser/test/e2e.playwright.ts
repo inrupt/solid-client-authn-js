@@ -210,7 +210,7 @@ test.describe("Using a Client ID", () => {
     ).resolves.toContain("Yes");
   });
 
-  test.only("The session should perform RP Initiated Logout correctly", async ({
+  test("The session should perform RP Initiated Logout correctly", async ({
     app,
     page,
     clientAccessControl,
