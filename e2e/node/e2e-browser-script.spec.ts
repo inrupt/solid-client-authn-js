@@ -122,6 +122,8 @@ describe("RP initiated login/out using playwright", () => {
         };
 
         page.on("request", requestListener);
+        // Printing the error into the console helps debugging the test.
+        // eslint-disable-next-line no-console
       })().catch(console.error);
     });
     await session.handleIncomingRedirect(redirectUrl);

@@ -22,7 +22,6 @@
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import type * as OpenidClient from "openid-client";

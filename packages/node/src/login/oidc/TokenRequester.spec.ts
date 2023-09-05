@@ -31,7 +31,6 @@ import {
 import TokenRequester from "./TokenRequester";
 import {
   ClientRegistrarMock,
-  PublicClientRegistrarMock,
 } from "./__mocks__/ClientRegistrar";
 
 jest.mock("@inrupt/universal-fetch");
@@ -42,12 +41,6 @@ describe("TokenRequester", () => {
     issueConfigFetcher: IssuerConfigFetcherMock,
     clientRegistrar: ClientRegistrarMock,
   };
-
-  function getTokenRequester(
-    mocks: Partial<typeof defaultMocks> = defaultMocks,
-  ): TokenRequester {
-    return new TokenRequester();
-  }
 
   const defaultReturnValues: {
     storageIdp: string;
@@ -99,9 +92,7 @@ describe("TokenRequester", () => {
 
   it("the refresh flow isn't implemented", async () => {
     await setUpMockedReturnValues({});
-    const TokenRefresher = getTokenRequester({
-      clientRegistrar: PublicClientRegistrarMock,
-    });
+    const TokenRefresher = new TokenRequester();
     /* eslint-disable camelcase */
     await expect(
       TokenRefresher.request("global", {

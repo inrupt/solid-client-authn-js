@@ -51,9 +51,7 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
  * @hidden
  */
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
-  constructor(
-    private tokenRefresher: ITokenRefresher,
-  ) {
+  constructor(private tokenRefresher: ITokenRefresher) {
     this.tokenRefresher = tokenRefresher;
   }
 
