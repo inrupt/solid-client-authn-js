@@ -168,7 +168,6 @@ describe("ClientCredentialsOidcHandler", () => {
     it("cannot handle if the client ID is missing", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -184,7 +183,6 @@ describe("ClientCredentialsOidcHandler", () => {
     it("cannot handle if the client secret is missing", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -201,7 +199,6 @@ describe("ClientCredentialsOidcHandler", () => {
     it("cannot handle if the client is not statically registered", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -218,7 +215,6 @@ describe("ClientCredentialsOidcHandler", () => {
     it("can handle if both client ID and secret are present for a confidential client", async () => {
       const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
         mockDefaultTokenRefresher(),
-        mockStorageUtility({}),
       );
       await expect(
         clientCredentialsOidcHandler.canHandle({
@@ -241,7 +237,6 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({}),
     );
     await expect(
       clientCredentialsOidcHandler.handle({
@@ -267,7 +262,6 @@ describe("handle", () => {
     setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({}),
     );
 
     const sessionInfo = await clientCredentialsOidcHandler.handle({
@@ -300,7 +294,6 @@ describe("handle", () => {
     getWebidFromTokenPayload.mockRejectedValueOnce(new Error("Bad audience"));
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({}),
     );
 
     await expect(
@@ -320,7 +313,6 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({}),
     );
     const result = await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -352,7 +344,6 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({}),
     );
     const result = await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -393,7 +384,6 @@ describe("handle", () => {
     const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockedRefresher,
-      mockStorageUtility({}),
     );
     await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -431,7 +421,6 @@ describe("handle", () => {
     const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockedRefresher,
-      mockStorageUtility({}),
     );
     await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
@@ -458,7 +447,6 @@ describe("handle", () => {
     setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
-      mockStorageUtility({}),
     );
     const result = await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,

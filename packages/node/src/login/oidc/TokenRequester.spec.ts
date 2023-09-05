@@ -46,11 +46,7 @@ describe("TokenRequester", () => {
   function getTokenRequester(
     mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): TokenRequester {
-    return new TokenRequester(
-      mocks.storageUtility ?? defaultMocks.storageUtility,
-      mocks.issueConfigFetcher ?? defaultMocks.issueConfigFetcher,
-      mocks.clientRegistrar ?? ClientRegistrarMock,
-    );
+    return new TokenRequester();
   }
 
   const defaultReturnValues: {
