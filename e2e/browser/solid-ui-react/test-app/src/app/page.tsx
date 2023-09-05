@@ -18,29 +18,36 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-import React, { useState, useEffect } from "react";
+
+"use client";
+
+import React, { useState } from "react";
 import {
   SessionProvider,
   useSession,
   LoginButton,
 } from "@inrupt/solid-ui-react";
-import ReactDOM from "react-dom/client";
+import {
+  TESTID_OPENID_PROVIDER_INPUT,
+  TESTID_LOGIN_BUTTON,
+} from "@inrupt/internal-playwright-testids";
+// Extension is required for json imports.
+// eslint-disable-next-line import/extensions, import/no-relative-packages
+import PLAYWRIGHT_CONSTANTS from "../../../../../../playwright.solid-ui.constants.json";
 
 function Show() {
   const { session } = useSession();
-  const [data, setData] = useState(false);
-  const [resourceUrl, setResourceUrl] = useState(false);
+  const [data, setData] = useState<string>();
+  const [resourceUrl, setResourceUrl] = useState<string>();
 
-  useEffect(() => {
+  const handleResource = async () => {
     if (resourceUrl) {
-      setData(false);
-
-      session
+      await session
         .fetch(resourceUrl)
         .then((res) => res.text())
         .then((text) => setData(text));
     }
-  }, [resourceUrl]);
+  };
 
   return (
     <div>
@@ -57,34 +64,47 @@ function Show() {
           setResourceUrl(e.target.value);
         }}
       />
+      <button
+        role="button"
+        onClick={() => handleResource()}
+        data-testid="fetchButton"
+      >
+        Fetch
+      </button>
       {data && <div id="data">{data}</div>}
     </div>
   );
 }
 
 function Login() {
-  const [text, setText] = useState();
+  const [op, setOp] = useState<string>("https://login.inrupt.com");
   return (
     <div>
       <input
-        id="issuerInput"
-        value={text}
+        data-testid={TESTID_OPENID_PROVIDER_INPUT}
+        value={op}
         onChange={(e) => {
-          setText(e.target.value);
+          setOp(e.target.value);
         }}
       />
 
-      <LoginButton oidcIssuer={text} />
+      <LoginButton
+        oidcIssuer={op}
+        redirectUrl={`http://localhost:${PLAYWRIGHT_CONSTANTS.UI_REACT_TEST_PORT}`}
+      >
+        <button data-testid={TESTID_LOGIN_BUTTON}>Login</button>
+      </LoginButton>
     </div>
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <SessionProvider>
-      <Login />
-      <Show />
-    </SessionProvider>
-  </React.StrictMode>,
-);
+export default function Home() {
+  return (
+    <main>
+      <SessionProvider>
+        <Login />
+        <Show />
+      </SessionProvider>
+    </main>
+  );
+}

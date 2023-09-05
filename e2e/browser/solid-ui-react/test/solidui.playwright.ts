@@ -18,15 +18,24 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-import type { NextPage } from "next";
-import dynamic from "next/dynamic";
+import { custom } from "openid-client";
+import { test, expect } from "./fixtures";
 
-const App = dynamic(() => import("../components/appContainer"), {
-  ssr: false,
+custom.setHttpOptionsDefaults({
+  timeout: 15000,
 });
 
-const Home: NextPage = () => {
-  return <App />;
-};
+test("solid-ui-react smoke test", async ({ app, testResource, auth }) => {
+  await app.home();
+  await expect(app.sampleRequest()).resolves.toEqual("Sample response");
+  // Test unauthorized fetch of a protected resource.
+  await expect(app.fetchResource(testResource.url)).resolves.toContain(
+    "Unauthorized",
+  );
 
-export default Home;
+  await auth.login();
+  await expect(app.getWebid()).resolves.not.toBeNull();
+  await expect(app.fetchResource(testResource.url)).resolves.toEqual(
+    testResource.expectedContent,
+  );
+});

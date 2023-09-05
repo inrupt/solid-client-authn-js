@@ -107,13 +107,6 @@ const config: Config = {
       setupFiles: ["<rootDir>/e2e/node/jest.setup.ts"],
       slowTestThreshold: 30,
     },
-    {
-      ...baseConfig,
-      displayName: "e2e-browser",
-      roots: ["<rootDir>/e2e/browser"],
-      setupFiles: [],
-      slowTestThreshold: 30,
-    },
   ],
 };
 

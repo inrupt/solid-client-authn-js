@@ -53,7 +53,9 @@ import {
   setThing,
 } from "@inrupt/solid-client";
 import LinkHeaders from "http-link-header";
-import { PLAYWRIGHT_PORT } from "../../../playwright.config";
+// Extensions are required for JSON imports.
+// eslint-disable-next-line import/extensions
+import CONSTANTS from "../../../../playwright.client-authn.constants.json";
 import { AppPage } from "./pageModels/AppPage";
 
 export { expect } from "@inrupt/internal-playwright-helpers";
@@ -111,17 +113,13 @@ export async function retryAsync<T>(
 }
 
 const saveTextFile = async (options: {
-  name: string;
   contents: string;
   containerUrl: string;
   session: Session;
 }): Promise<string> => {
-  const data = new File([options.contents], options.name, {
-    type: "plain/text",
-  });
+  const data = new Blob([options.contents]);
   const savedFile = await retryAsync(() =>
     saveFileInContainer(options.containerUrl, data, {
-      slug: options.name,
       contentType: "text/plain",
       fetch: options.session.fetch,
     }),
@@ -139,23 +137,20 @@ const createClientIdDoc = async (
   session: Session,
 ): Promise<string> => {
   const emptyClientIdDoc = await retryAsync(() =>
-    saveFileInContainer(
-      container,
-      new File([], "clientId", {
-        type: "application/ld+json",
-      }),
-      {
-        contentType: "application/json",
-        fetch: session.fetch,
-      },
-    ),
+    saveFileInContainer(container, new Blob([]), {
+      contentType: "application/json",
+      fetch: session.fetch,
+    }),
   );
   const clientId = getSourceUrl(emptyClientIdDoc);
   const clientIdDoc = {
     "@context": ["https://www.w3.org/ns/solid/oidc-context.jsonld"],
     client_name: clientInfo.clientName,
     client_id: clientId,
-    redirect_uris: [clientInfo.redirectUrl, "http://localhost:3001/redirect"],
+    redirect_uris: [
+      clientInfo.redirectUrl,
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/redirect`,
+    ],
     // Note: No refresh token will be issued by default. If the tests last too long, this
     // should be updated so that it has the offline_access scope and supports the
     // refresh_token grant type.
@@ -163,21 +158,16 @@ const createClientIdDoc = async (
     grant_types: ["authorization_code"],
     response_types: ["code"],
     post_logout_redirect_uris: [
-      "http://localhost:3001/postLogoutUrl",
-      "http://localhost:3001/",
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
     ],
   };
 
   await retryAsync(() =>
-    overwriteFile(
-      clientId,
-      new File([JSON.stringify(clientIdDoc)], "clientId", {
-        type: "application/json",
-      }),
-      {
-        fetch: session.fetch,
-      },
-    ),
+    overwriteFile(clientId, new Blob([JSON.stringify(clientIdDoc)]), {
+      fetch: session.fetch,
+      contentType: "application/json",
+    }),
   );
 
   // The Client Identifier Document should be public.
@@ -199,16 +189,10 @@ const createClientResource = async (
   session: Session,
 ): Promise<string> => {
   const clientResource = await retryAsync(() =>
-    saveFileInContainer(
-      container,
-      new File([content], "resource", {
-        type: "application/json",
-      }),
-      {
-        contentType: "application/json",
-        fetch: session.fetch,
-      },
-    ),
+    saveFileInContainer(container, new Blob([content]), {
+      contentType: "application/json",
+      fetch: session.fetch,
+    }),
   );
   const resourceUrl = getSourceUrl(clientResource);
 
@@ -284,15 +268,6 @@ const createClientResource = async (
   return resourceUrl;
 };
 
-// This is the deployed client application that we'll be using to exercise
-// various authentication scenarios. We expect the system environment value to
-// point at a deployed instance (e.g. an automated Vercel deployment), but I
-// don't think it makes sense to default to a hard-coded Vercel instance.
-// Instead, for running locally, it seems helpful to default to 'localhost'
-// instance.
-const clientApplicationUrl =
-  process.env.E2E_DEMO_CLIENT_APP_URL ?? "http://localhost:3001/";
-
 export interface ISeedPodResponse {
   clientId: string;
   clientResourceContent: string;
@@ -339,7 +314,9 @@ export async function seedPod(
   const clientId = await createClientIdDoc(
     {
       clientName: "Browser test app",
-      redirectUrl: new URL(`http://localhost:${PLAYWRIGHT_PORT}`).href,
+      redirectUrl: new URL(
+        `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}`,
+      ).href,
     },
     podRoot,
     session,
@@ -386,7 +363,7 @@ export async function tearDownPod({
 export const test = base.extend<Fixtures>({
   app: async ({ page }, use) => {
     const app = new AppPage(page, {
-      clientApplicationUrl,
+      clientApplicationUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
       fetchTimeout: 2000,
     });
 
@@ -463,7 +440,6 @@ export const test = base.extend<Fixtures>({
 
     const publicFileText = "This is a publicly readable file";
     const publicFileUrl = await saveTextFile({
-      name: "public.txt",
       contents: publicFileText,
       containerUrl: testContainerUrl,
       session,
@@ -471,7 +447,6 @@ export const test = base.extend<Fixtures>({
 
     const privateFileText = `This is a private file, only readable by ${session.info.webId}`;
     const privateFileUrl = await saveTextFile({
-      name: "private.txt",
       contents: privateFileText,
       containerUrl: testContainerUrl,
       session,

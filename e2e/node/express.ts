@@ -23,10 +23,11 @@ import express from "express";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
 import { Session } from "../../packages/node/src/index";
+// Extensions are required for JSON-LD imports.
+// eslint-disable-next-line import/extensions
+import CONSTANTS from "../../playwright.client-authn.constants.json";
 
 log.setLevel("TRACE");
-
-export const PORT = 3001;
 
 export function createApp(onStart: () => void) {
   const app = express();
@@ -46,7 +47,7 @@ export function createApp(onStart: () => void) {
     }
 
     return session.login({
-      redirectUrl: "http://localhost:3001/redirect",
+      redirectUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/redirect`,
       oidcIssuer,
       clientId: typeof clientId === "string" ? clientId : undefined,
       handleRedirect: (url) => res.redirect(url),
@@ -99,7 +100,7 @@ export function createApp(onStart: () => void) {
     try {
       return await session.logout({
         logoutType: "idp",
-        postLogoutUrl: "http://localhost:3001/postLogoutUrl",
+        postLogoutUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
         handleRedirect: (url) => {
           res.redirect(url);
         },
@@ -109,7 +110,7 @@ export function createApp(onStart: () => void) {
     }
   });
 
-  return app.listen(PORT, async () => {
+  return app.listen(CONSTANTS.CLIENT_AUTHN_TEST_PORT, async () => {
     session = new Session();
 
     onStart();
