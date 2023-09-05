@@ -31,7 +31,6 @@ import type {
   IOidcHandler,
   IOidcOptions,
   LoginResult,
-  IStorageUtility,
   ISessionInfo,
   KeyPair,
   ITokenRefresher,
@@ -54,8 +53,9 @@ import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 export default class ClientCredentialsOidcHandler implements IOidcHandler {
   constructor(
     private tokenRefresher: ITokenRefresher,
-    private _storageUtility: IStorageUtility,
-  ) {}
+  ) {
+    this.tokenRefresher = tokenRefresher;
+  }
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return (
