@@ -53,7 +53,13 @@ export default class ClientAuthentication {
     protected logoutHandler: ILogoutHandler,
     protected sessionInfoManager: ISessionInfoManager,
     protected issuerConfigFetcher?: IIssuerConfigFetcher,
-  ) {}
+  ) {
+    this.loginHandler = loginHandler;
+    this.redirectHandler = redirectHandler;
+    this.logoutHandler = logoutHandler;
+    this.sessionInfoManager = sessionInfoManager;
+    this.issuerConfigFetcher = issuerConfigFetcher;
+  }
 
   // By default, our fetch() resolves to the environment fetch() function.
   fetch = globalFetch;

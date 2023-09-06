@@ -52,7 +52,11 @@ export default class TokenRefresher implements ITokenRefresher {
     private storageUtility: IStorageUtility,
     private issuerConfigFetcher: IIssuerConfigFetcher,
     private clientRegistrar: IClientRegistrar,
-  ) {}
+  ) {
+    this.storageUtility = storageUtility;
+    this.issuerConfigFetcher = issuerConfigFetcher;
+    this.clientRegistrar = clientRegistrar;
+  }
 
   async refresh(
     sessionId: string,

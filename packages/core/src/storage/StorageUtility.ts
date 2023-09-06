@@ -141,7 +141,10 @@ export default class StorageUtility implements IStorageUtility {
   constructor(
     private secureStorage: IStorage,
     private insecureStorage: IStorage,
-  ) {}
+  ) {
+    this.secureStorage = secureStorage;
+    this.insecureStorage = insecureStorage;
+  }
 
   private getKey(userId: string): string {
     return `solidClientAuthenticationUser:${userId}`;

@@ -35,7 +35,9 @@ import type IHandleable from "./IHandleable";
 export default class AggregateHandler<P extends Array<unknown>, R>
   implements IHandleable<P, R>
 {
-  constructor(private handleables: IHandleable<P, R>[]) {}
+  constructor(private handleables: IHandleable<P, R>[]) {
+    this.handleables = handleables;
+  }
 
   /**
    * Helper function that will asynchronously determine the proper handler to use. If multiple

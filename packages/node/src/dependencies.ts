@@ -67,7 +67,7 @@ export const buildLoginHandler = (
     storageUtility,
     new AggregateOidcHandler([
       new RefreshTokenOidcHandler(tokenRefresher, storageUtility),
-      new ClientCredentialsOidcHandler(tokenRefresher, storageUtility),
+      new ClientCredentialsOidcHandler(tokenRefresher),
       new AuthorizationCodeWithPkceOidcHandler(
         storageUtility,
         new Redirector(),
