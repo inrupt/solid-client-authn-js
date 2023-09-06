@@ -35,6 +35,9 @@ import {
 import { custom } from "openid-client";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
+import { getSolidDataset } from "@inrupt/solid-client";
+// The relative import is used to run on latest library, rather than latest published.
+// eslint-disable-next-line import/no-relative-packages
 import { EVENTS, Session } from "../../packages/node/src/index";
 
 custom.setHttpOptionsDefaults({
@@ -78,6 +81,28 @@ function getCredentials() {
     // Making sure the session is logged out prevents tests from hanging due
     // to the callback refreshing the access token.
     afterAll(() => authenticatedSession.logout());
+
+    // eslint-disable-next-line jest/expect-expect
+    it("test", async () => {
+      let headerResolver: (p: Headers) => void;
+      const headersPromise: Promise<Headers> = new Promise((resolve) => {
+        headerResolver = resolve;
+      });
+      await getSolidDataset("https://id.inrupt.com/zwifi", {
+        fetch: (info, init) =>
+          fetch(info, {
+            ...init,
+            headers: {
+              "some-custom-header": "custom-value",
+            },
+          }).then((response) => {
+            headerResolver(response.headers);
+            return response;
+          }),
+      });
+      const headers = await headersPromise;
+      console.log(headers.get("Content-Type"));
+    });
 
     describe("Authenticated fetch", () => {
       it("properly sets up session information", async () => {

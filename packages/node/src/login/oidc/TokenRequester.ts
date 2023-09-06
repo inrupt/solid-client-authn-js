@@ -24,11 +24,6 @@
  * @packageDocumentation
  */
 
-import type {
-  IClientRegistrar,
-  IStorageUtility,
-  IIssuerConfigFetcher,
-} from "@inrupt/solid-client-authn-core";
 import { NotImplementedError } from "@inrupt/solid-client-authn-core";
 
 /**
@@ -42,12 +37,6 @@ export interface ITokenRequester {
  * @hidden
  */
 export default class TokenRequester {
-  constructor(
-    private storageUtility: IStorageUtility,
-    private issuerConfigFetcher: IIssuerConfigFetcher,
-    private clientRegistrar: IClientRegistrar,
-  ) {}
-
   async request(
     _sessionId: string,
     _body: Record<string, string>,
