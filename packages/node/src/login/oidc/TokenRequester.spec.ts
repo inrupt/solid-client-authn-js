@@ -29,9 +29,7 @@ import {
   IssuerConfigFetcherFetchConfigResponse,
 } from "./__mocks__/IssuerConfigFetcher";
 import TokenRequester from "./TokenRequester";
-import {
-  ClientRegistrarMock,
-} from "./__mocks__/ClientRegistrar";
+import { ClientRegistrarMock } from "./__mocks__/ClientRegistrar";
 
 jest.mock("@inrupt/universal-fetch");
 
