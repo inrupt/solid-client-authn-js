@@ -69,9 +69,13 @@ export default class Fetcher implements IFetcher {
       }
     }
     debug(`curl -v ${options.join(" ")} ${url}`);
+    let ret;
     if (typeof window !== "undefined" && typeof window.fetch !== "undefined") {
-      return window.fetch(fetchUrl, init);
+      ret = window.fetch(fetchUrl, init);
+    } else {
+      ret = _fetch(fetchUrl, init);
     }
-    return _fetch(fetchUrl, init);
+    debug(`resulting status code: ${(await ret).status}`);
+    return ret;
   }
 }

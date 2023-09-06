@@ -24,6 +24,9 @@
 import { customAuthFetcher } from "./index";
 import fetch from "node-fetch";
 import AuthFetcher from "./AuthFetcher";
+import Debug from "debug";
+
+const debug = Debug("SolidAuthFetcher");
 
 export async function getAuthFetcher(
   oidcIssuer: string,
@@ -42,6 +45,8 @@ export async function getAuthFetcher(
   });
   let redirectedTo = (session.neededAction as any).redirectUrl;
   do {
+    debug(`curl -H 'cookie: ${oidcProviderCookie}' ${redirectedTo}`);
+
     const result = await fetch(redirectedTo, {
       headers: { cookie: oidcProviderCookie },
       redirect: "manual"
