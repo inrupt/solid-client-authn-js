@@ -66,7 +66,13 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     private issuerConfigFetcher: IIssuerConfigFetcher,
     private clientRegistrar: IClientRegistrar,
     private tokenRefresher: ITokenRefresher,
-  ) {}
+  ) {
+    this.storageUtility = storageUtility;
+    this.sessionInfoManager = sessionInfoManager;
+    this.issuerConfigFetcher = issuerConfigFetcher;
+    this.clientRegistrar = clientRegistrar;
+    this.tokenRefresher = tokenRefresher;
+  }
 
   async canHandle(redirectUrl: string): Promise<boolean> {
     try {

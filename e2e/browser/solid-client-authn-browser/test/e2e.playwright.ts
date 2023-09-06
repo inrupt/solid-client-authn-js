@@ -112,6 +112,7 @@ test.describe("Logged In", () => {
     expect(response).toBe(testContainer.privateFileText);
   });
 
+  // eslint-disable-next-line playwright/expect-expect
   test.fixme("Non-existent resource in my Pod", async () => {});
 
   test("gets notified when session is extended", async ({ app }) => {

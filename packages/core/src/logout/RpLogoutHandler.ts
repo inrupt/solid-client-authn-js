@@ -23,7 +23,9 @@ import type { IRedirector } from "../login/oidc/IRedirector";
 import type { ILogoutHandlerOptions } from "./ILogoutHandler";
 
 export default class IRpLogoutHandler implements ILogoutHandler {
-  constructor(protected redirector: IRedirector) {}
+  constructor(protected redirector: IRedirector) {
+    this.redirector = redirector;
+  }
 
   async canHandle(
     userId: string,
