@@ -36,7 +36,10 @@ export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
   constructor(
     protected storageUtility: IStorageUtility,
     protected redirector: IRedirector,
-  ) {}
+  ) {
+    this.storageUtility = storageUtility;
+    this.redirector = redirector;
+  }
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return !!(

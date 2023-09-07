@@ -63,7 +63,9 @@ export async function clear(
  * @hidden
  */
 export abstract class SessionInfoManagerBase implements ISessionInfoManager {
-  constructor(protected storageUtility: IStorageUtility) {}
+  constructor(protected storageUtility: IStorageUtility) {
+    this.storageUtility = storageUtility;
+  }
 
   update(
     _sessionId: string,

@@ -72,7 +72,9 @@ export function negotiateClientSigningAlg(
  * @hidden
  */
 export default class ClientRegistrar implements IClientRegistrar {
-  constructor(private storageUtility: IStorageUtility) {}
+  constructor(private storageUtility: IStorageUtility) {
+    this.storageUtility = storageUtility;
+  }
 
   async getClient(
     options: IClientRegistrarOptions,
