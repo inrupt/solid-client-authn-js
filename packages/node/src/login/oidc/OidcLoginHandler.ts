@@ -66,7 +66,12 @@ export default class OidcLoginHandler implements ILoginHandler {
     private oidcHandler: IOidcHandler,
     private issuerConfigFetcher: IIssuerConfigFetcher,
     private clientRegistrar: IClientRegistrar,
-  ) {}
+  ) {
+    this.storageUtility = storageUtility;
+    this.oidcHandler = oidcHandler;
+    this.issuerConfigFetcher = issuerConfigFetcher;
+    this.clientRegistrar = clientRegistrar;
+  }
 
   async canHandle(options: ILoginOptions): Promise<boolean> {
     return hasIssuer(options);

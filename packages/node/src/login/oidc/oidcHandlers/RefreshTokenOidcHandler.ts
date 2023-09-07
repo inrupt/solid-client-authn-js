@@ -117,7 +117,10 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
   constructor(
     private tokenRefresher: ITokenRefresher,
     private storageUtility: IStorageUtility,
-  ) {}
+  ) {
+    this.tokenRefresher = tokenRefresher;
+    this.storageUtility = storageUtility;
+  }
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return validateOptions(oidcLoginOptions);
