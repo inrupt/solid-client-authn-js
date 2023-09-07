@@ -37,7 +37,9 @@ import { registerClient } from "@inrupt/oidc-client-ext";
  * @hidden
  */
 export default class ClientRegistrar implements IClientRegistrar {
-  constructor(private storageUtility: IStorageUtility) {}
+  constructor(private storageUtility: IStorageUtility) {
+    this.storageUtility = storageUtility;
+  }
 
   async getClient(
     options: IClientRegistrarOptions,

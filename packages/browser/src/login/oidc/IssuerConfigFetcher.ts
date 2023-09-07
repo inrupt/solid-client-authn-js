@@ -153,7 +153,9 @@ function processConfig(
  * @hidden
  */
 export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
-  constructor(private storageUtility: IStorageUtility) {}
+  constructor(private storageUtility: IStorageUtility) {
+    this.storageUtility = storageUtility;
+  }
 
   // This method needs no state (so can be static), and can be exposed to allow
   // callers to know where this implementation puts state it needs.

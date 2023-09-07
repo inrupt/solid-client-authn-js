@@ -31,7 +31,9 @@ import type { ISessionInfoManager } from "../sessionInfo/ISessionInfoManager";
  * @hidden
  */
 export default class GeneralLogoutHandler implements ILogoutHandler {
-  constructor(private sessionInfoManager: ISessionInfoManager) {}
+  constructor(private sessionInfoManager: ISessionInfoManager) {
+    this.sessionInfoManager = sessionInfoManager;
+  }
 
   async canHandle(): Promise<boolean> {
     return true;
