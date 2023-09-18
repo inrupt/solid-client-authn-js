@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@inrupt/internal-playwright-testids": "^2.1.3",
+    "@inrupt/internal-playwright-testids": "^2.4.0",
     "@inrupt/solid-client-authn-browser": "^1.17.2",
     "@inrupt/solid-ui-react": "^2.9.0",
     "next": "13.4.19",
