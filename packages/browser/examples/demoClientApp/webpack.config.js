@@ -47,7 +47,7 @@ module.exports = {
     }),
   ],
   output: {
-    publicPath: process.env.ASSET_PATH || "/",
+    publicPath: "./demo/",
   },
   devServer: {
     // TODO: PMCB55: make demo's 'prettier' by avoiding 'localhost'...
