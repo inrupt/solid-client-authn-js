@@ -10,7 +10,7 @@
     "test:esbuild": "esbuild components/appContainer/index.tsx --bundle"
   },
   "dependencies": {
-    "@inrupt/internal-playwright-testids": "^2.0.2",
+    "@inrupt/internal-playwright-testids": "^2.4.0",
     "@inrupt/solid-client-authn-browser": "^1.17.2",
     "next": "^13.4.7",
     "react": "^18.2.0",
