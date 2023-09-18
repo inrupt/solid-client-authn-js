@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         # We test against different OSes, because the build toolchain has OS-specific dependencies.
-        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
         node-version: ["20.x", "18.x", "16.x"]
     steps:
       - uses: actions/checkout@v4
