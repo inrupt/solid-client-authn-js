@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.6.0",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^9.0.4"
   },
   "dependencies": {
     "@inrupt/oidc-client-ext": "^1.17.2",
@@ -34,7 +34,7 @@
     "@inrupt/universal-fetch": "^1.0.2",
     "events": "^3.3.0",
     "jose": "^4.14.6",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "publishConfig": {
     "access": "public"
