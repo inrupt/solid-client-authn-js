@@ -109,7 +109,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       this.boundLogout = redirectInfo.getLogoutUrl;
 
       // Strip the oauth params:
-      this.cleanUrlAfterRedirect(url);
+      await this.cleanUrlAfterRedirect(url);
 
       return {
         isLoggedIn: redirectInfo.isLoggedIn,
@@ -119,7 +119,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       };
     } catch (err) {
       // Strip the oauth params:
-      this.cleanUrlAfterRedirect(url);
+      await this.cleanUrlAfterRedirect(url);
 
       // FIXME: EVENTS.ERROR should be errorCode, errorDescription
       //
@@ -132,7 +132,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     }
   };
 
-  private cleanUrlAfterRedirect(url: string): void {
+  private async cleanUrlAfterRedirect(url: string): Promise<void> {
     const cleanedUpUrl = new URL(url);
     cleanedUpUrl.searchParams.delete("state");
     // For auth code flow
@@ -145,11 +145,16 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     cleanedUpUrl.searchParams.delete("error_description");
     cleanedUpUrl.searchParams.delete("iss");
 
-    // Remove OAuth-specific query params (since the login flow finishes with
-    // the browser being redirected back with OAuth2 query params (e.g. for
-    // 'code' and 'state'), and so if the user simply refreshes this page our
-    // authentication library will be called again with what are now invalid
-    // query parameters!).
-    window.history.replaceState(null, "", cleanedUpUrl.toString());
+    return new Promise<void>((resolve) => {
+      window.addEventListener("popstate", () => {
+        resolve();
+      });
+      // Remove OAuth-specific query params (since the login flow finishes with
+      // the browser being redirected back with OAuth2 query params (e.g. for
+      // 'code' and 'state'), and so if the user simply refreshes this page our
+      // authentication library will be called again with what are now invalid
+      // query parameters!).
+      window.history.replaceState(null, "", cleanedUpUrl.toString());
+    });
   }
 }

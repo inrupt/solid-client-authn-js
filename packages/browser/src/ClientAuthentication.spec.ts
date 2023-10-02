@@ -436,8 +436,12 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
-      // eslint-disable-next-line no-restricted-globals
-      history.replaceState = jest.fn();
+      window.history.replaceState = jest.fn();
+      window.addEventListener = jest
+        .fn()
+        .mockImplementation((_event: unknown, callback: unknown) => {
+          (callback as () => void)();
+        });
       const clientAuthn = getClientAuthentication();
       const url =
         "https://coolapp.com/redirect?state=someState&code=someAuthCode&iss=someIssuer";
