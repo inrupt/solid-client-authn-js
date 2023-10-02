@@ -30,7 +30,6 @@ The following changes have been implemented but not released yet:
 - [Mismatching redirect URI](https://github.com/inrupt/solid-client-authn-js/issues/2891) on refresh: the root cause of the bug was a race
   condition because of the asynchronous nature of updating the browser URL. The appropriate event is now awaited for, which should prevent
   the issue from manifesting.
- 
 
 ## [1.17.2](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.2) - 2023-09-15
 
