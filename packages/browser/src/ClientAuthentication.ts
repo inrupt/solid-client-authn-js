@@ -145,16 +145,22 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     cleanedUpUrl.searchParams.delete("error_description");
     cleanedUpUrl.searchParams.delete("iss");
 
-    return new Promise<void>((resolve) => {
-      window.addEventListener("popstate", () => {
-        resolve();
+    // Remove OAuth-specific query params (since the login flow finishes with
+    // the browser being redirected back with OAuth2 query params (e.g. for
+    // 'code' and 'state'), and so if the user simply refreshes this page our
+    // authentication library will be called again with what are now invalid
+    // query parameters!).
+    window.history.replaceState(null, "", cleanedUpUrl.toString());
+    while (window.location.href !== cleanedUpUrl.href) {
+      // Poll the current URL every ms. Active polling is required because
+      // window.history.replaceState is asynchronous, but the associated
+      // 'popstate' event which should be listened to is only sent on active
+      // navigation, which we will not have here.
+      // See https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event#when_popstate_is_sent
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise<void>((resolve) => {
+        setTimeout(() => resolve(), 1);
       });
-      // Remove OAuth-specific query params (since the login flow finishes with
-      // the browser being redirected back with OAuth2 query params (e.g. for
-      // 'code' and 'state'), and so if the user simply refreshes this page our
-      // authentication library will be called again with what are now invalid
-      // query parameters!).
-      window.history.replaceState(null, "", cleanedUpUrl.toString());
-    });
+    }
   }
 }

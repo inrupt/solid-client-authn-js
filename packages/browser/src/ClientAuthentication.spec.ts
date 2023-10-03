@@ -336,11 +336,11 @@ describe("ClientAuthentication", () => {
     // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
-      window.history.replaceState = jest.fn();
-      window.addEventListener = jest
-        .fn()
-        .mockImplementation((_event: unknown, callback: unknown) => {
-          (callback as () => void)();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
         });
       const clientAuthn = getClientAuthentication();
 
@@ -406,17 +406,17 @@ describe("ClientAuthentication", () => {
     mockEmitter.emit = jest.fn<typeof mockEmitter.emit>();
 
     it("calls handle redirect", async () => {
-      window.history.replaceState = jest.fn();
-      window.addEventListener = jest
-        .fn()
-        .mockImplementation((_event: unknown, callback: unknown) => {
-          (callback as () => void)();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
         });
       const expectedResult = SessionCreatorCreateResponse;
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
       const url =
-        "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
+        "https://example.org/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
         mockEmitter,
@@ -444,11 +444,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
-      window.history.replaceState = jest.fn();
-      window.addEventListener = jest
-        .fn()
-        .mockImplementation((_event: unknown, callback: unknown) => {
-          (callback as () => void)();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
         });
       const clientAuthn = getClientAuthentication();
       const url =
@@ -464,11 +464,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters even if auth flow fails", async () => {
-      window.history.replaceState = jest.fn();
-      window.addEventListener = jest
-        .fn()
-        .mockImplementation((_event: unknown, callback: unknown) => {
-          (callback as () => void)();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
         });
 
       mockHandleIncomingRedirect.mockImplementationOnce(() =>
@@ -494,11 +494,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters in the implicit flow", async () => {
-      window.history.replaceState = jest.fn();
-      window.addEventListener = jest
-        .fn()
-        .mockImplementation((_event: unknown, callback: unknown) => {
-          (callback as () => void)();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
         });
       const clientAuthn = getClientAuthentication();
       const url =
@@ -513,11 +513,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("preserves non-OAuth query strings", async () => {
-      window.history.replaceState = jest.fn();
-      window.addEventListener = jest
-        .fn()
-        .mockImplementation((_event: unknown, callback: unknown) => {
-          (callback as () => void)();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
         });
       const clientAuthn = getClientAuthentication();
       const url =
