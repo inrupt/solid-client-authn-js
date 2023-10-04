@@ -338,12 +338,10 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     const url = options.url ?? window.location.href;
 
     this.tokenRequestInProgress = true;
-    window.console.log("Awaiting incoming redirect handling");
     const sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
       url,
       this.events,
     );
-    window.console.log("incoming redirect handled");
     if (isLoggedIn(sessionInfo)) {
       this.setSessionInfo(sessionInfo);
       const currentUrl = window.localStorage.getItem(KEY_CURRENT_URL);
