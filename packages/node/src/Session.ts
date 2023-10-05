@@ -398,6 +398,7 @@ export class Session implements IHasSessionEventListener {
     });
   }
 
+
   /**
    * Triggers the login process. Note that this method will redirect the user away from your app.
    *

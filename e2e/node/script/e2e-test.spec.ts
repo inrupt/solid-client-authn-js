@@ -283,4 +283,30 @@ describe("Session events", () => {
     expect(logoutFunc).toHaveBeenCalledTimes(1);
     expect(expiredFunc).toHaveBeenCalledTimes(1);
   });
+
+  it("sends a session status changed event on login, logout, and session expiration", async() => {
+    let sessionStatusChangeFunc: () => void;
+    sessionStatusChangeFunc = jest.fn();
+    session.events.on(EVENTS.SESSION_STATUS_CHANGE, sessionStatusChangeFunc);
+    
+    expect(session.info.isLoggedIn).toBe(true);
+
+    if (typeof session.info.expirationDate !== "number") {
+      throw new Error("Cannot determine session expiration date");
+    }
+    const expiresIn = session.info.expirationDate - Date.now();
+    await new Promise((resolve) => {
+      setTimeout(resolve, expiresIn);
+    });
+
+    expect(loginFunc).toHaveBeenCalledTimes(1);
+    expect(logoutFunc).toHaveBeenCalledTimes(0);
+    expect(expiredFunc).toHaveBeenCalledTimes(1);
+    expect(sessionStatusChangeFunc).toHaveBeenCalledTimes(2);
+    await session.logout();
+    expect(loginFunc).toHaveBeenCalledTimes(1);
+    expect(logoutFunc).toHaveBeenCalledTimes(1);
+    expect(expiredFunc).toHaveBeenCalledTimes(1);
+    expect(sessionStatusChangeFunc).toHaveBeenCalledTimes(3);
+  })
 });
