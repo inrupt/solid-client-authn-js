@@ -216,6 +216,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     if (loginInfo?.isLoggedIn) {
       // Send a signal on successful client credentials login.
       (this.events as EventEmitter).emit(EVENTS.LOGIN);
+      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
@@ -285,6 +286,8 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.info.isLoggedIn = false;
     if (emitEvent) {
       (this.events as EventEmitter).emit(EVENTS.LOGOUT);
+      // I can't think of a better way to do this without reworking the events library
+      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
