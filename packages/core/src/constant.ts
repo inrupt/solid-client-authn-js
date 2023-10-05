@@ -34,6 +34,7 @@ export const EVENTS = {
   // Note that an `error` events MUST be listened to: https://nodejs.org/dist/latest-v16.x/docs/api/events.html#error-events.
   ERROR: "error",
   LOGIN: "login",
+  LOGIN_AND_LOGOUT: "login" || "logout",
   LOGOUT: "logout",
   NEW_REFRESH_TOKEN: "newRefreshToken",
   NEW_TOKENS: "newTokens",
