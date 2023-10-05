@@ -146,7 +146,7 @@ type FALLBACK_ARGS = {
   listener: never;
 };
 type LOGIN_AND_LOGOUT_ARGS = {
-  eventName: typeof EVENTS.LOGIN | typeof EVENTS.LOGOUT;
+  eventName: typeof EVENTS.LOGIN_AND_LOGOUT;
   listener: () => void;
 }
 export interface ISessionEventListener extends EventEmitter {
