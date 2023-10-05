@@ -190,6 +190,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
   }
 
+
   /**
    * Triggers the login process. Note that this method will redirect the user away from your app.
    *

@@ -257,6 +257,12 @@ describe("Session events", () => {
     expect(expiredFunc).toHaveBeenCalledTimes(0);
   });
 
+  it("is currently a work in progress", async () => {
+    session.events.on(EVENTS.LOGIN_OR_LOGOUT, () => {
+
+    })
+  })
+
   it("sends an event on session expiration", async () => {
     if (typeof session.info.expirationDate !== "number") {
       throw new Error("Cannot determine session expiration date");
@@ -275,3 +281,29 @@ describe("Session events", () => {
     expect(expiredFunc).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("New combined login and logout session event", () => {
+  jest.setTimeout(15 * 60 * 1000);
+
+  let session: Session;
+  let loginAndLogoutFunc: () => void;
+  let expiredFunc: () => void;
+
+  beforeEach(async () => {
+    session = new Session();
+    loginAndLogoutFunc = jest.fn();
+    expiredFunc = jest.fn();
+    session.events.on(EVENTS.LOGIN_OR_LOGOUT, loginAndLogoutFunc);
+    session.events.on(EVENTS.SESSION_EXPIRED, expiredFunc);
+
+    await session.login(getCredentials());
+  });
+
+  it("tests to make sure the function is called during both login and logout", async () => {
+    expect(session.info.isLoggedIn).toBe(true);
+    await session.logout();
+
+    expect(loginAndLogoutFunc).toHaveBeenCalledTimes(2);
+    expect(expiredFunc).toHaveBeenCalledTimes(0);  
+  })
+})
