@@ -109,7 +109,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       this.boundLogout = redirectInfo.getLogoutUrl;
 
       // Strip the oauth params:
-      this.cleanUrlAfterRedirect(url);
+      await this.cleanUrlAfterRedirect(url);
 
       return {
         isLoggedIn: redirectInfo.isLoggedIn,
@@ -119,7 +119,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       };
     } catch (err) {
       // Strip the oauth params:
-      this.cleanUrlAfterRedirect(url);
+      await this.cleanUrlAfterRedirect(url);
 
       // FIXME: EVENTS.ERROR should be errorCode, errorDescription
       //
@@ -132,7 +132,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     }
   };
 
-  private cleanUrlAfterRedirect(url: string): void {
+  private async cleanUrlAfterRedirect(url: string): Promise<void> {
     const cleanedUpUrl = new URL(url);
     cleanedUpUrl.searchParams.delete("state");
     // For auth code flow
@@ -151,5 +151,16 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     // authentication library will be called again with what are now invalid
     // query parameters!).
     window.history.replaceState(null, "", cleanedUpUrl.toString());
+    while (window.location.href !== cleanedUpUrl.href) {
+      // Poll the current URL every ms. Active polling is required because
+      // window.history.replaceState is asynchronous, but the associated
+      // 'popstate' event which should be listened to is only sent on active
+      // navigation, which we will not have here.
+      // See https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event#when_popstate_is_sent
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise<void>((resolve) => {
+        setTimeout(() => resolve(), 1);
+      });
+    }
   }
 }

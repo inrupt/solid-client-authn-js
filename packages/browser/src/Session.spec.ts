@@ -246,10 +246,9 @@ describe("Session", () => {
     it("uses current window location as default redirect URL", async () => {
       mockLocation("https://some.url");
       const clientAuthentication = mockClientAuthentication();
-      const incomingRedirectHandler = jest.spyOn(
-        clientAuthentication,
-        "handleIncomingRedirect",
-      );
+      const incomingRedirectHandler = jest
+        .spyOn(clientAuthentication, "handleIncomingRedirect")
+        .mockResolvedValue(undefined);
 
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect();
@@ -259,13 +258,12 @@ describe("Session", () => {
       );
     });
 
-    it("wraps up ClientAuthentication handleIncomingRedirect", async () => {
+    it("wraps ClientAuthentication handleIncomingRedirect", async () => {
       mockLocation("https://some.url");
       const clientAuthentication = mockClientAuthentication();
-      const incomingRedirectHandler = jest.spyOn(
-        clientAuthentication,
-        "handleIncomingRedirect",
-      );
+      const incomingRedirectHandler = jest
+        .spyOn(clientAuthentication, "handleIncomingRedirect")
+        .mockResolvedValue(undefined);
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
       expect(incomingRedirectHandler).toHaveBeenCalled();
@@ -401,10 +399,9 @@ describe("Session", () => {
 
     it("preserves a binding to its Session instance", async () => {
       const clientAuthentication = mockClientAuthentication();
-      const incomingRedirectHandler = jest.spyOn(
-        clientAuthentication,
-        "handleIncomingRedirect",
-      );
+      const incomingRedirectHandler = jest
+        .spyOn(clientAuthentication, "handleIncomingRedirect")
+        .mockResolvedValue(undefined);
       const mySession = new Session({ clientAuthentication });
       const objectWithHandleIncomingRedirect = {
         handleIncomingRedirect: mySession.handleIncomingRedirect,
