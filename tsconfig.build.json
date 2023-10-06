@@ -11,7 +11,9 @@
     "strict": true,
     "declaration": true,
     "noImplicitAny": true,
-    "removeComments": true,
+    // Preserve JSDoc comments in .d.ts files so that they are available
+    // to consumers at development time. 
+    "removeComments": false,
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -23,7 +25,7 @@
     "resolveJsonModule": true,
     "outDir": "./dist",
     // This is required to transform native ESM from our dependencies using ts-jest.
-    "allowJs": true
+    "allowJs": true,
   },
   "exclude": ["node_modules", "dist"],
 
