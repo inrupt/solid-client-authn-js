@@ -11,9 +11,6 @@
     "strict": true,
     "declaration": true,
     "noImplicitAny": true,
-    "noLib": false,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "esModuleInterop": true,
     "target": "es2018",
     "sourceMap": true,
@@ -22,7 +19,7 @@
     "resolveJsonModule": true,
     "outDir": "./dist",
     // This is required to transform native ESM from our dependencies using ts-jest.
-    "allowJs": true,
+    "allowJs": true
   },
   "exclude": ["node_modules", "dist"],
 
