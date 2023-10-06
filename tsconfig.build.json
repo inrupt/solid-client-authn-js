@@ -11,9 +11,6 @@
     "strict": true,
     "declaration": true,
     "noImplicitAny": true,
-    // Preserve JSDoc comments in .d.ts files so that they are available
-    // to consumers at development time. 
-    "removeComments": false,
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
