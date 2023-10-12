@@ -31,11 +31,10 @@ import {
 } from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = "http://localhost:3113/";
-// This is the IRI where the Client identifier document (i.e. client-app-profile.jsonld)
+// This is an example IRI where the Client identifier document (i.e. ../client-app-profile.jsonld)
 // is available to the OIDC issuer. See https://solid.github.io/solid-oidc/#clientids-document
-// for more information.
-const CLIENT_IDENTIFIER =
-  "https://raw.githubusercontent.com/inrupt/solid-client-authn-js/main/packages/browser/examples/single/bundle/client-app-profile.jsonld";
+// for more information. Note that the URL of the document should match its `client_id` field.
+// const CLIENT_IDENTIFIER = "https://example.org/your-client-id";
 
 export default function App() {
   const [webId, setWebId] = useState(getDefaultSession().info.webId);
@@ -70,7 +69,7 @@ export default function App() {
       redirectUrl: REDIRECT_URL,
       oidcIssuer: issuer,
       clientName: "Demo app",
-      clientId: CLIENT_IDENTIFIER,
+      // clientId: CLIENT_IDENTIFIER,
     });
   };
 
