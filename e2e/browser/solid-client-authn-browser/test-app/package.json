@@ -21,7 +21,7 @@
     "@playwright/test": "^1.38.1",
     "@types/node": "^20.6.0",
     "@types/react": "^18.2.25",
-    "@types/react-dom": "^18.2.12",
+    "@types/react-dom": "^18.2.13",
     "esbuild": "^0.19.2",
     "eslint": "^8.43.0",
     "eslint-config-next": "^13.4.13"
