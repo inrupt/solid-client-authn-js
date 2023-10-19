@@ -24,7 +24,7 @@
     "@inrupt/oidc-client": "^1.11.6",
     "@inrupt/solid-client-authn-core": "^1.17.3",
     "@inrupt/universal-fetch": "^1.0.1",
-    "jose": "^4.14.6",
+    "jose": "^4.15.4",
     "uuid": "^9.0.1"
   },
   "publishConfig": {

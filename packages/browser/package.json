@@ -33,7 +33,7 @@
     "@inrupt/solid-client-authn-core": "^1.17.3",
     "@inrupt/universal-fetch": "^1.0.2",
     "events": "^3.3.0",
-    "jose": "^4.14.6",
+    "jose": "^4.15.4",
     "uuid": "^9.0.1"
   },
   "publishConfig": {
