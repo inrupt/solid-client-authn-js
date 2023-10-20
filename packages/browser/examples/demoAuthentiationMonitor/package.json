@@ -1,7 +1,7 @@
 {
   "name": "demo-authentiation-monitor",
   "private": true,
-  "version": "1.17.2",
+  "version": "1.17.3",
   "description": "Demo for monitoring Authentication interactions in real-time",
   "main": "index.js",
   "scripts": {

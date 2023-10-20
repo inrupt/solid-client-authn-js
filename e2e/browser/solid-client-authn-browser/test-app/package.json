@@ -1,6 +1,6 @@
 {
   "name": "test-app",
-  "version": "1.17.2",
+  "version": "1.17.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,18 +11,18 @@
   },
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^2.4.0",
-    "@inrupt/solid-client-authn-browser": "^1.17.2",
+    "@inrupt/solid-client-authn-browser": "^1.17.3",
     "next": "^13.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@inrupt/eslint-config-lib": "^2.1.2",
+    "@inrupt/eslint-config-lib": "^2.4.1",
     "@playwright/test": "^1.38.1",
     "@types/node": "^20.6.0",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
-    "esbuild": "^0.19.2",
+    "@types/react": "^18.2.25",
+    "@types/react-dom": "^18.2.14",
+    "esbuild": "^0.19.5",
     "eslint": "^8.43.0",
     "eslint-config-next": "^13.4.13"
   }
