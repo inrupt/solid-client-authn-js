@@ -38,7 +38,7 @@
   "dependencies": {
     "@inrupt/universal-fetch": "^1.0.1",
     "events": "^3.3.0",
-    "jose": "^4.15.4",
+    "jose": "^5.0.1",
     "uuid": "^9.0.1"
   },
   "publishConfig": {
