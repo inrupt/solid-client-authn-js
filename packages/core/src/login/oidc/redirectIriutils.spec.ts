@@ -20,7 +20,7 @@
 //
 
 import { it, describe, expect } from "@jest/globals";
-import { isValidRedirectUrl } from "./validateRedirectIri";
+import { isValidRedirectUrl, removeOpenIdParams } from "./redirectIriUtils";
 
 describe("isValidRedirectUrl", () => {
   it("returns false if the provided IRI is malformed", () => {
@@ -41,5 +41,26 @@ describe("isValidRedirectUrl", () => {
         "https://example.org/?param=value&otherParam=otherValue",
       ),
     ).toBe(true);
+  });
+});
+
+describe("removeOpenIdParams", () => {
+  it("removes the auth code query parameters", () => {
+    expect(
+      removeOpenIdParams("https://example.org/callback?code=1234&state=5678"),
+    ).toBe("https://example.org/callback");
+  });
+  it("removes the error query parameters", () => {
+    expect(
+      removeOpenIdParams(
+        "https://example.org/callback?error=1234&error_description=5678",
+      ),
+    ).toBe("https://example.org/callback");
+  });
+
+  it("removes the RFC9207 query parameters", () => {
+    expect(removeOpenIdParams("https://example.org/callback?iss=1234")).toBe(
+      "https://example.org/callback",
+    );
   });
 });

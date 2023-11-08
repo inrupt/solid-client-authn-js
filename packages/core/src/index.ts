@@ -46,7 +46,10 @@ export { getWebidFromTokenPayload, fetchJwks } from "./util/token";
 
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
-export { isValidRedirectUrl } from "./login/oidc/validateRedirectIri";
+export {
+  isValidRedirectUrl,
+  removeOpenIdParams,
+} from "./login/oidc/redirectIriUtils";
 
 export {
   default as IIncomingRedirectHandler,

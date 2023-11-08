@@ -34,3 +34,16 @@ export function isValidRedirectUrl(redirectUrl: string): boolean {
     return false;
   }
 }
+
+export function removeOpenIdParams(redirectUrl: string): string {
+  const cleanedUpUrl = new URL(redirectUrl);
+  // For auth code flow
+  cleanedUpUrl.searchParams.delete("state");
+  cleanedUpUrl.searchParams.delete("code");
+  // For login error
+  cleanedUpUrl.searchParams.delete("error");
+  cleanedUpUrl.searchParams.delete("error_description");
+  // For RFC9207
+  cleanedUpUrl.searchParams.delete("iss");
+  return cleanedUpUrl.href;
+}
