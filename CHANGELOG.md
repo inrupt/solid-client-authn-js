@@ -23,6 +23,14 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+### Bugfixes
+
+#### node
+
+- [Support for `iss` parameter](https://github.com/inrupt/solid-client-authn-js/issues/2985): [RFC9207](https://www.rfc-editor.org/rfc/rfc9207) adds
+  an `iss` parameter to the callback IRI, and the Node library wasn't removing it before comparing the effective callback URL to the URL used
+  when making the Authorization request.
+
 ## [1.17.3](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.3) - 2023-10-10
 
 ### Bugfixes
