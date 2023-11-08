@@ -21,7 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import OidcClient from "@inrupt/oidc-client";
-import { removeOidcQueryParam, clearOidcPersistentStorage } from "./cleanup";
+import { normalizeCallbackUrl, clearOidcPersistentStorage } from "./cleanup";
 
 jest.mock("@inrupt/oidc-client", () => {
   const mockClient = {
@@ -37,42 +37,42 @@ jest.mock("@inrupt/oidc-client", () => {
 
 describe("removeOidcQueryParam", () => {
   it("removes the 'code' query string if present", () => {
-    expect(removeOidcQueryParam("https://some.url/?code=aCode")).toBe(
+    expect(normalizeCallbackUrl("https://some.url/?code=aCode")).toBe(
       "https://some.url/",
     );
   });
 
   it("removes the 'state' query string if present", () => {
-    expect(removeOidcQueryParam("https://some.url?state=arkansas")).toBe(
+    expect(normalizeCallbackUrl("https://some.url?state=arkansas")).toBe(
       "https://some.url",
     );
   });
 
   it("removes the hash part of the IRI", () => {
-    expect(removeOidcQueryParam("https://some.url/#some-anchor")).toBe(
+    expect(normalizeCallbackUrl("https://some.url/#some-anchor")).toBe(
       "https://some.url/",
     );
   });
 
   it("returns an URL without query strings as is", () => {
-    expect(removeOidcQueryParam("https://some.url/")).toBe("https://some.url/");
+    expect(normalizeCallbackUrl("https://some.url/")).toBe("https://some.url/");
   });
 
   it("does not normalize the trailing slash", () => {
-    expect(removeOidcQueryParam("https://some.url?state=ohio")).toBe(
+    expect(normalizeCallbackUrl("https://some.url?state=ohio")).toBe(
       "https://some.url",
     );
   });
 
   it("preserves the path", () => {
     expect(
-      removeOidcQueryParam("https://coolapp.test/some/redirect?state=ohio"),
+      normalizeCallbackUrl("https://coolapp.test/some/redirect?state=ohio"),
     ).toBe("https://coolapp.test/some/redirect");
   });
 
   it("preserves other query strings", () => {
     expect(
-      removeOidcQueryParam(
+      normalizeCallbackUrl(
         "https://some.url/?code=someCode&state=someState&otherQuery=aValue",
       ),
     ).toBe("https://some.url/?otherQuery=aValue");
@@ -80,7 +80,7 @@ describe("removeOidcQueryParam", () => {
 
   it("preserves other query strings when no trailing slash is present", () => {
     expect(
-      removeOidcQueryParam(
+      normalizeCallbackUrl(
         "https://some.url?code=someCode&state=someState&otherQuery=aValue",
       ),
     ).toBe("https://some.url?otherQuery=aValue");

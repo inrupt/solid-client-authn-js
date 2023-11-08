@@ -50,6 +50,6 @@ export {
 } from "./dpop/tokenExchange";
 export { refresh } from "./refresh/refreshGrant";
 export {
-  removeOidcQueryParam,
+  normalizeCallbackUrl,
   clearOidcPersistentStorage,
 } from "./cleanup/cleanup";
