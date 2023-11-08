@@ -28,6 +28,7 @@ import type {
   ISessionInfo,
   ISessionInternalInfo,
   ILoginOptions,
+  removeOpenIdParams
 } from "@inrupt/solid-client-authn-core";
 import {
   EVENTS,
@@ -133,17 +134,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   };
 
   private async cleanUrlAfterRedirect(url: string): Promise<void> {
-    const cleanedUpUrl = new URL(url);
-    cleanedUpUrl.searchParams.delete("state");
-    // For auth code flow
-    cleanedUpUrl.searchParams.delete("code");
-    // For implicit flow
-    cleanedUpUrl.searchParams.delete("id_token");
-    cleanedUpUrl.searchParams.delete("access_token");
-    // For login error
-    cleanedUpUrl.searchParams.delete("error");
-    cleanedUpUrl.searchParams.delete("error_description");
-    cleanedUpUrl.searchParams.delete("iss");
+    const cleanedUpUrl = removeOidcQueryParam(url);
 
     // Remove OAuth-specific query params (since the login flow finishes with
     // the browser being redirected back with OAuth2 query params (e.g. for
