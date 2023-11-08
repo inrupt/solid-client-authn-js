@@ -45,6 +45,7 @@ import {
   buildAuthenticatedFetch,
   EVENTS,
   maybeBuildRpInitiatedLogout,
+  removeOpenIdParams
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
@@ -101,8 +102,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     const url = new URL(inputRedirectUrl);
     // The type assertion is ok, because we checked in canHandle for the presence of a state
     const oauthState = url.searchParams.get("state") as string;
-    url.searchParams.delete("code");
-    url.searchParams.delete("state");
 
     const sessionId = await getSessionIdFromOauthState(
       this.storageUtility,
@@ -142,7 +141,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       dpopKey = await generateDpopKeyPair();
     }
     const tokenSet = await client.callback(
-      url.href,
+      removeOpenIdParams(inputRedirectUrl),
       params,
       { code_verifier: oidcContext.codeVerifier, state: oauthState },
       // The KeyLike type is dynamically bound to either KeyObject or CryptoKey

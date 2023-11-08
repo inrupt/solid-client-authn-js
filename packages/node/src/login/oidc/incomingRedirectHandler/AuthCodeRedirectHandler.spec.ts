@@ -384,7 +384,7 @@ describe("AuthCodeRedirectHandler", () => {
       });
 
       await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState",
+        "https://my.app/redirect?code=someCode&state=someState&iss=https://example.org/issuer",
       );
 
       expect(callback).toHaveBeenCalledWith(
