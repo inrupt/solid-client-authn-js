@@ -24,16 +24,16 @@
  * @packageDocumentation
  */
 
-import {
+import type {
   ISessionInfo,
   ISessionInternalInfo,
   ILoginOptions,
-  removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
 import {
   EVENTS,
   isValidRedirectUrl,
   ClientAuthentication as ClientAuthenticationBase,
+  removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
 import { normalizeCallbackUrl } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";

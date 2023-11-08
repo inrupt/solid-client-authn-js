@@ -472,7 +472,9 @@ describe("AuthCodeRedirectHandler", () => {
       const mockedStorage = mockDefaultRedirectStorage();
       const mockedTokens = mockDpopTokens();
       // oidc-client will throw if the iss parameter mismatches.
-      setupOidcClientMock(mockedTokens, () => { throw new Error() });
+      setupOidcClientMock(mockedTokens, () => {
+        throw new Error();
+      });
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockedStorage,
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
