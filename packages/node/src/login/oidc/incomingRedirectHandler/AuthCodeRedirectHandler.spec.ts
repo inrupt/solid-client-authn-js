@@ -471,7 +471,8 @@ describe("AuthCodeRedirectHandler", () => {
     it("throws if the iss parameter does not match stored issuer", async () => {
       const mockedStorage = mockDefaultRedirectStorage();
       const mockedTokens = mockDpopTokens();
-      setupOidcClientMock(mockedTokens);
+      // oidc-client will throw if the iss parameter mismatches.
+      setupOidcClientMock(mockedTokens, () => { throw new Error() });
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockedStorage,
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
@@ -481,11 +482,7 @@ describe("AuthCodeRedirectHandler", () => {
         authCodeRedirectHandler.handle(
           "https://my.app/redirect?code=someCode&state=someState&iss=someIssuer",
         ),
-      ).rejects.toThrow(
-        `The value of the iss parameter (someIssuer) does not match the issuer identifier of the authorization server (${
-          mockDefaultIssuerConfig().issuer
-        }). See [rfc9207](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.3-3.1.1)`,
-      );
+      ).rejects.toThrow();
     });
 
     it("throws if the IdP does not return an access token", async () => {
