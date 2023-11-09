@@ -47,20 +47,21 @@ describe("isValidRedirectUrl", () => {
 describe("removeOpenIdParams", () => {
   it("removes the auth code query parameters", () => {
     expect(
-      removeOpenIdParams("https://example.org/callback?code=1234&state=5678"),
+      removeOpenIdParams("https://example.org/callback?code=1234&state=5678")
+        .href,
     ).toBe("https://example.org/callback");
   });
   it("removes the error query parameters", () => {
     expect(
       removeOpenIdParams(
         "https://example.org/callback?error=1234&error_description=5678",
-      ),
+      ).href,
     ).toBe("https://example.org/callback");
   });
 
   it("removes the RFC9207 query parameters", () => {
-    expect(removeOpenIdParams("https://example.org/callback?iss=1234")).toBe(
-      "https://example.org/callback",
-    );
+    expect(
+      removeOpenIdParams("https://example.org/callback?iss=1234").href,
+    ).toBe("https://example.org/callback");
   });
 });

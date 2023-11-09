@@ -134,7 +134,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   };
 
   private async cleanUrlAfterRedirect(url: string): Promise<void> {
-    const cleanedUpUrl = removeOpenIdParams(url);
+    const cleanedUpUrl = removeOpenIdParams(url).href;
 
     // Remove OAuth-specific query params (since the login flow finishes with
     // the browser being redirected back with OAuth2 query params (e.g. for

@@ -29,7 +29,7 @@ import { removeOpenIdParams } from "@inrupt/solid-client-authn-core";
  * @returns A copy of the URL, without OIDC-specific query params.
  */
 export function normalizeCallbackUrl(redirectUrl: string): string {
-  const cleanedUrl = new URL(removeOpenIdParams(redirectUrl));
+  const cleanedUrl = removeOpenIdParams(redirectUrl);
   // As per https://tools.ietf.org/html/rfc6749#section-3.1.2, the redirect URL
   // must not include a hash fragment.
   cleanedUrl.hash = "";

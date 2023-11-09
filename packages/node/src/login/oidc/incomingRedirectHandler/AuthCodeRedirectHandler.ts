@@ -141,7 +141,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       dpopKey = await generateDpopKeyPair();
     }
     const tokenSet = await client.callback(
-      removeOpenIdParams(inputRedirectUrl),
+      removeOpenIdParams(inputRedirectUrl).href,
       params,
       { code_verifier: oidcContext.codeVerifier, state: oauthState },
       // The KeyLike type is dynamically bound to either KeyObject or CryptoKey
