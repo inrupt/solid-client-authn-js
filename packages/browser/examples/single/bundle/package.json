@@ -1,7 +1,7 @@
 {
   "name": "browser-in-bundle",
   "private": true,
-  "version": "1.17.3",
+  "version": "1.17.4",
   "description": "",
   "main": "index.js",
   "scripts": {
