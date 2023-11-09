@@ -33,8 +33,9 @@ import {
   EVENTS,
   isValidRedirectUrl,
   ClientAuthentication as ClientAuthenticationBase,
+  removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
-import { removeOidcQueryParam } from "@inrupt/oidc-client-ext";
+import { normalizeCallbackUrl } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
 
 /**
@@ -62,7 +63,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     // normalization only applies if we default to the current location (which is
     // a bad practice and should be discouraged).
     const redirectUrl =
-      options.redirectUrl ?? removeOidcQueryParam(window.location.href);
+      options.redirectUrl ?? normalizeCallbackUrl(window.location.href);
     if (!isValidRedirectUrl(redirectUrl)) {
       throw new Error(
         `${redirectUrl} is not a valid redirect URL, it is either a malformed IRI, includes a hash fragment, or reserved query parameters ('code' or 'state').`,
@@ -133,25 +134,15 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   };
 
   private async cleanUrlAfterRedirect(url: string): Promise<void> {
-    const cleanedUpUrl = new URL(url);
-    cleanedUpUrl.searchParams.delete("state");
-    // For auth code flow
-    cleanedUpUrl.searchParams.delete("code");
-    // For implicit flow
-    cleanedUpUrl.searchParams.delete("id_token");
-    cleanedUpUrl.searchParams.delete("access_token");
-    // For login error
-    cleanedUpUrl.searchParams.delete("error");
-    cleanedUpUrl.searchParams.delete("error_description");
-    cleanedUpUrl.searchParams.delete("iss");
+    const cleanedUpUrl = removeOpenIdParams(url).href;
 
     // Remove OAuth-specific query params (since the login flow finishes with
     // the browser being redirected back with OAuth2 query params (e.g. for
     // 'code' and 'state'), and so if the user simply refreshes this page our
     // authentication library will be called again with what are now invalid
     // query parameters!).
-    window.history.replaceState(null, "", cleanedUpUrl.toString());
-    while (window.location.href !== cleanedUpUrl.href) {
+    window.history.replaceState(null, "", cleanedUpUrl);
+    while (window.location.href !== cleanedUpUrl) {
       // Poll the current URL every ms. Active polling is required because
       // window.history.replaceState is asynchronous, but the associated
       // 'popstate' event which should be listened to is only sent on active

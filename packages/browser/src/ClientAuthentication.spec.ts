@@ -493,25 +493,6 @@ describe("ClientAuthentication", () => {
       );
     });
 
-    it("clears the current IRI from OAuth query parameters in the implicit flow", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
-        .mockImplementationOnce((_data, _unused, url) => {
-          // Pretend the current location is updated
-          window.location.href = url as string;
-        });
-      const clientAuthn = getClientAuthentication();
-      const url =
-        "https://coolapp.com/redirect?state=someState&id_token=idToken&access_token=accessToken";
-      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
-      expect(window.history.replaceState).toHaveBeenCalledWith(
-        null,
-        "",
-        "https://coolapp.com/redirect",
-      );
-      expect(mockEmitter.emit).not.toHaveBeenCalled();
-    });
-
     it("preserves non-OAuth query strings", async () => {
       window.history.replaceState = jest
         .fn<typeof window.history.replaceState>()
