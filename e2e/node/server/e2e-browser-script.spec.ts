@@ -30,15 +30,15 @@ import type { ILogoutOptions } from "core";
 import { custom } from "openid-client";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
-import { Session } from "../../packages/node/src/index";
-import type { ISeedPodResponse } from "../browser/solid-client-authn-browser/test/fixtures";
+import { Session } from "../../../packages/node/src/index";
+import type { ISeedPodResponse } from "../../browser/solid-client-authn-browser/test/fixtures";
 import {
   seedPod,
   tearDownPod,
-} from "../browser/solid-client-authn-browser/test/fixtures";
+} from "../../browser/solid-client-authn-browser/test/fixtures";
 // Extesion is required for JSON imports.
 // eslint-disable-next-line import/extensions
-import CONSTANTS from "../../playwright.client-authn.constants.json";
+import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,

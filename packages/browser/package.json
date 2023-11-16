@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "1.17.2",
+  "version": "1.17.5",
   "license": "MIT",
   "types": "dist/index.d.ts",
   "browser": "dist/index.js",
@@ -26,15 +26,15 @@
   },
   "devDependencies": {
     "@types/node": "^20.6.0",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^9.0.4"
   },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^1.17.2",
-    "@inrupt/solid-client-authn-core": "^1.17.2",
+    "@inrupt/oidc-client-ext": "^1.17.5",
+    "@inrupt/solid-client-authn-core": "^1.17.5",
     "@inrupt/universal-fetch": "^1.0.2",
     "events": "^3.3.0",
-    "jose": "^4.14.6",
-    "uuid": "^9.0.0"
+    "jose": "^4.15.4",
+    "uuid": "^9.0.1"
   },
   "publishConfig": {
     "access": "public"

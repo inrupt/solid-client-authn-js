@@ -102,8 +102,15 @@ const config: Config = {
     },
     {
       ...baseConfig,
-      displayName: "e2e-node",
-      roots: ["<rootDir>/e2e/node"],
+      displayName: "e2e-node-script",
+      roots: ["<rootDir>/e2e/node/script"],
+      setupFiles: ["<rootDir>/e2e/node/jest.setup.ts"],
+      slowTestThreshold: 30,
+    },
+    {
+      ...baseConfig,
+      displayName: "e2e-node-server",
+      roots: ["<rootDir>/e2e/node/server"],
       setupFiles: ["<rootDir>/e2e/node/jest.setup.ts"],
       slowTestThreshold: 30,
     },

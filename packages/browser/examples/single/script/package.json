@@ -1,7 +1,7 @@
 {
   "name": "@inrupt/solid-client-authn-browser-via-script-tag-example",
   "private": true,
-  "version": "1.17.2",
+  "version": "1.17.5",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
   },
   "author": "",
   "dependencies": {
-    "@types/express": "^4.17.17",
+    "@types/express": "^4.17.20",
     "express": "^4.18.2"
   },
   "devDependencies": {

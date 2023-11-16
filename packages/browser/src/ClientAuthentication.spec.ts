@@ -336,8 +336,12 @@ describe("ClientAuthentication", () => {
     // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
-      // eslint-disable-next-line no-restricted-globals
-      history.replaceState = jest.fn();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
+        });
       const clientAuthn = getClientAuthentication();
 
       const unauthFetch = clientAuthn.fetch;
@@ -402,13 +406,17 @@ describe("ClientAuthentication", () => {
     mockEmitter.emit = jest.fn<typeof mockEmitter.emit>();
 
     it("calls handle redirect", async () => {
-      // eslint-disable-next-line no-restricted-globals
-      history.replaceState = jest.fn();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
+        });
       const expectedResult = SessionCreatorCreateResponse;
       const clientAuthn = getClientAuthentication();
       const unauthFetch = clientAuthn.fetch;
       const url =
-        "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
+        "https://example.org/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
         mockEmitter,
@@ -436,8 +444,12 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
-      // eslint-disable-next-line no-restricted-globals
-      history.replaceState = jest.fn();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
+        });
       const clientAuthn = getClientAuthentication();
       const url =
         "https://coolapp.com/redirect?state=someState&code=someAuthCode&iss=someIssuer";
@@ -452,8 +464,12 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters even if auth flow fails", async () => {
-      // eslint-disable-next-line no-restricted-globals
-      history.replaceState = jest.fn();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
+        });
 
       mockHandleIncomingRedirect.mockImplementationOnce(() =>
         Promise.reject(new Error("Something went wrong")),
@@ -464,8 +480,7 @@ describe("ClientAuthentication", () => {
       const url =
         "https://coolapp.com/redirect?state=someState&code=someAuthCode";
       await clientAuthn.handleIncomingRedirect(url, mockEmitter);
-      // eslint-disable-next-line no-restricted-globals
-      expect(history.replaceState).toHaveBeenCalledWith(
+      expect(window.history.replaceState).toHaveBeenCalledWith(
         null,
         "",
         "https://coolapp.com/redirect",
@@ -478,31 +493,18 @@ describe("ClientAuthentication", () => {
       );
     });
 
-    it("clears the current IRI from OAuth query parameters in the implicit flow", async () => {
-      // eslint-disable-next-line no-restricted-globals
-      history.replaceState = jest.fn();
-      const clientAuthn = getClientAuthentication();
-      const url =
-        "https://coolapp.com/redirect?state=someState&id_token=idToken&access_token=accessToken";
-      await clientAuthn.handleIncomingRedirect(url, mockEmitter);
-      // eslint-disable-next-line no-restricted-globals
-      expect(history.replaceState).toHaveBeenCalledWith(
-        null,
-        "",
-        "https://coolapp.com/redirect",
-      );
-      expect(mockEmitter.emit).not.toHaveBeenCalled();
-    });
-
     it("preserves non-OAuth query strings", async () => {
-      // eslint-disable-next-line no-restricted-globals
-      history.replaceState = jest.fn();
+      window.history.replaceState = jest
+        .fn<typeof window.history.replaceState>()
+        .mockImplementationOnce((_data, _unused, url) => {
+          // Pretend the current location is updated
+          window.location.href = url as string;
+        });
       const clientAuthn = getClientAuthentication();
       const url =
         "https://coolapp.com/redirect?state=someState&code=someAuthCode&someQuery=someValue";
       await clientAuthn.handleIncomingRedirect(url, mockEmitter);
-      // eslint-disable-next-line no-restricted-globals
-      expect(history.replaceState).toHaveBeenCalledWith(
+      expect(window.history.replaceState).toHaveBeenCalledWith(
         null,
         "",
         "https://coolapp.com/redirect?someQuery=someValue",

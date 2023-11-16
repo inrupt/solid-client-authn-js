@@ -1,7 +1,7 @@
 {
   "name": "@inrupt/demo-app-authn-node",
   "private": true,
-  "version": "1.17.2",
+  "version": "1.17.5",
   "description": "Demo client application for authentication in NodeJS",
   "main": "src/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "loglevel": "^1.7.0"
   },
   "devDependencies": {
-    "@inrupt/eslint-config-base": "0.0.4",
+    "@inrupt/eslint-config-base": "2.5.0",
     "eslint": "^7.13.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.10.0",
