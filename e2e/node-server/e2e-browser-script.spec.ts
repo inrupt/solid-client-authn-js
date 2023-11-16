@@ -30,7 +30,7 @@ import type { ILogoutOptions } from "core";
 import { custom } from "openid-client";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
-import { Session } from "../../packages/node/src/index";
+import { Session } from "@inrupt/solid-client-authn-node/src";
 import type { ISeedPodResponse } from "../browser/solid-client-authn-browser/test/fixtures";
 import {
   seedPod,
