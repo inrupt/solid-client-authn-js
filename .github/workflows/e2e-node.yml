@@ -43,7 +43,7 @@ jobs:
         # run even for dependabot so that the matrixed jobs are skipped, instead
         # of the whole pipeline.
         if: ${{ github.actor != 'dependabot[bot]' }}
-        run: npm run test:e2e:node
+        run: npm run test:e2e:node:all
         env:
           E2E_TEST_IDP: ${{ secrets.E2E_TEST_IDP }}
           E2E_TEST_OWNER_CLIENT_ID: ${{ secrets.E2E_TEST_OWNER_CLIENT_ID }}
