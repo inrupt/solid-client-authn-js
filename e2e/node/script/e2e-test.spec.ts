@@ -38,7 +38,7 @@ import { custom } from "openid-client";
 import { getSolidDataset } from "@inrupt/solid-client";
 // The relative import is used to run on latest library, rather than latest published.
 // eslint-disable-next-line import/no-relative-packages
-import { EVENTS, Session } from "../../packages/node/src/index";
+import { EVENTS, Session } from "../../../packages/node/src/index";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,

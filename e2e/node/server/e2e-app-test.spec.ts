@@ -38,11 +38,11 @@ import {
   type ISeedPodResponse,
   seedPod,
   tearDownPod,
-} from "../browser/solid-client-authn-browser/test/fixtures";
+} from "../../browser/solid-client-authn-browser/test/fixtures";
 import { createApp } from "./express";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
-import CONSTANTS from "../../playwright.client-authn.constants.json";
+import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
