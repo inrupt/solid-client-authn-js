@@ -23,6 +23,12 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+## [1.17.5](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.5) - 2023-11-16
+
+### Internal changes
+
+- This refactors how the the node-based end-to-end tests run to make it possible to run them without having playwright installed. This should not impact downstream consumers.
+
 ## [1.17.4](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.4) - 2023-11-09
 
 ### Bugfixes

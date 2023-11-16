@@ -1,7 +1,7 @@
 {
   "name": "@inrupt/demo-app-authn-node",
   "private": true,
-  "version": "1.17.4",
+  "version": "1.17.5",
   "description": "Demo client application for authentication in NodeJS",
   "main": "src/index.js",
   "scripts": {
