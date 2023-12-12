@@ -19,19 +19,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect } from "@jest/globals";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
+import { it, describe, expect } from "@jest/globals";
 import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
-
-jest.mock("@inrupt/universal-fetch", () => {
-  const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch",
-  ) as typeof UniversalFetch;
-  return {
-    ...fetchModule,
-    fetch: jest.fn<(typeof UniversalFetch)["fetch"]>(),
-  };
-});
 
 describe("FallbackRedirectHandler", () => {
   describe("canHandle", () => {

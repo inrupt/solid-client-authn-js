@@ -23,12 +23,6 @@
  * @hidden
  * @packageDocumentation
  */
-// FIXME: The following doesn't work in the browser, it results in all the fetches
-// being unauthenticated. This should be looked into when migrating to universal-fetch.
-// import { fetch } from "cross-fetch";
-
-import { fetch as uniFetch } from "@inrupt/universal-fetch";
-
 import type {
   IClient,
   IClientRegistrar,
@@ -48,9 +42,6 @@ import {
 import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { getDpopToken, getBearerToken } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
-
-const globalFetch: typeof uniFetch = (...args) =>
-  uniFetch.call(globalThis, ...args);
 
 /**
  * @hidden
@@ -172,7 +163,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     }
 
     const authFetch = await buildAuthenticatedFetch(
-      globalFetch,
       tokens.accessToken,
       {
         dpopKey: tokens.dpopKey,

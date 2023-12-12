@@ -22,18 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { EventEmitter } from "events";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { ErrorOidcHandler } from "./ErrorOidcHandler";
-
-jest.mock("@inrupt/universal-fetch", () => {
-  const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch",
-  ) as typeof UniversalFetch;
-  return {
-    ...fetchModule,
-    fetch: jest.fn<(typeof UniversalFetch)["fetch"]>(),
-  };
-});
 
 describe("ErrorOidcHandler", () => {
   describe("canHandle", () => {

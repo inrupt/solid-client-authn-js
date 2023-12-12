@@ -44,7 +44,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
-import { fetch as globalFetch } from "@inrupt/universal-fetch";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
@@ -126,7 +125,6 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     }
 
     const authFetch = await buildAuthenticatedFetch(
-      globalFetch,
       tokens.access_token,
       {
         dpopKey,

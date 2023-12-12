@@ -26,10 +26,6 @@ import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import type * as OpenidClient from "openid-client";
 import type { JWK } from "jose";
-// eslint-disable-next-line no-shadow
-import { Headers, Response } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
-
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
@@ -38,13 +34,7 @@ import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
 
 jest.mock("openid-client");
 
-jest.mock("@inrupt/universal-fetch", () => {
-  return {
-    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
-    default: jest.fn<typeof fetch>(),
-    fetch: jest.fn<typeof fetch>(),
-  };
-});
+const mockedFetch = jest.spyOn(globalThis, "fetch");
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -323,9 +313,7 @@ describe("handle", () => {
       },
     });
 
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
+
     mockedFetch.mockResolvedValue(
       new Response(undefined, {
         status: 200,
@@ -354,9 +342,6 @@ describe("handle", () => {
       },
     });
 
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     mockedFetch.mockResolvedValue(
       new Response(undefined, {
         status: 200,
@@ -396,7 +381,6 @@ describe("handle", () => {
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
       expect.anything(),
-      expect.anything(),
       expect.objectContaining({
         refreshOptions: {
           refreshToken: "some refresh token",
@@ -432,7 +416,6 @@ describe("handle", () => {
     });
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
-      expect.anything(),
       expect.anything(),
       expect.objectContaining({
         expiresIn: mockDpopTokens().expires_in,

@@ -26,8 +26,6 @@ import { jest, it, describe, expect, afterEach } from "@jest/globals";
 import type { KeyLike } from "jose";
 import { jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
-import { Response, Headers } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import {
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
@@ -48,14 +46,6 @@ if (process.env.CI === "true") {
   // tests to re-run in CI.
   jest.retryTimes(3, { logErrorsBeforeRetry: true });
 }
-
-jest.mock("@inrupt/universal-fetch", () => {
-  return {
-    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
-    default: jest.fn(),
-    fetch: jest.fn(),
-  } as typeof UniversalFetch;
-});
 
 const mockNotRedirectedResponse = () => {
   const mockedResponse = new Response(undefined);
@@ -96,13 +86,11 @@ const mockKeyPair = async () => {
 };
 
 const mockFetch = (response: Response, url: string) => {
-  const { fetch } = jest.requireMock("@inrupt/universal-fetch") as jest.Mocked<
-    typeof UniversalFetch
-  >;
   const mockedResponse = response;
+  const fetchSpy = jest.spyOn(globalThis, 'fetch');
   jest.spyOn(mockedResponse, "url", "get").mockReturnValue(url);
-  fetch.mockResolvedValueOnce(mockedResponse);
-  return fetch;
+  fetchSpy.mockResolvedValueOnce(mockedResponse);
+  return fetchSpy;
 };
 
 describe("buildAuthenticatedFetch", () => {
@@ -126,7 +114,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/resource",
     );
     const keylikePair = await mockJwk();
-    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    const myFetch = await buildAuthenticatedFetch("myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
         publicKey: await exportJWK(keylikePair.publicKey),
@@ -162,7 +150,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/resource",
     );
 
-    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    const myFetch = await buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     await myFetch("http://some.url", {
@@ -184,7 +172,6 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/resource",
     );
     const myFetch = await buildAuthenticatedFetch(
-      mockedFetch,
       "myToken",
       undefined,
     );
@@ -206,7 +193,7 @@ describe("buildAuthenticatedFetch", () => {
       status: 200,
     } as Response);
 
-    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    const myFetch = await buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     await myFetch("https://my.pod/container");
@@ -226,7 +213,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
 
-    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken");
+    const myFetch = await buildAuthenticatedFetch("myToken");
     const response = await myFetch("https://my.pod/container");
 
     expect(response.status).toBe(403);
@@ -239,7 +226,6 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
     const myFetch = await buildAuthenticatedFetch(
-      mockedFetch,
       "myToken",
       undefined,
     );
@@ -257,7 +243,6 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
     const myFetch = await buildAuthenticatedFetch(
-      mockedFetch,
       "myToken",
       undefined,
     );
@@ -277,7 +262,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
 
-    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    const myFetch = await buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     await myFetch("http://some.url", {
@@ -297,7 +282,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
 
-    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    const myFetch = await buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     const response = await myFetch("https://my.pod/container");
@@ -311,7 +296,7 @@ describe("buildAuthenticatedFetch", () => {
       new Response(undefined, { status: 401 }),
       "https://my.pod/container/",
     );
-    const myFetch = await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    const myFetch = await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -339,11 +324,8 @@ describe("buildAuthenticatedFetch", () => {
   }
 
   it("refreshes the token before it expires", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -366,11 +348,8 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("sets a default timeout if the OIDC provider did not return one", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockDefaultTokenRefresher();
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -386,9 +365,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("does not rebind the DPoP token on refresh", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const keylikePair = await mockJwk();
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.
@@ -406,7 +382,7 @@ describe("buildAuthenticatedFetch", () => {
         })
         .mockResolvedValue({ ...mockDefaultTokenSet(), expiresIn: 1000 }),
     };
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
         publicKey: await exportJWK(keylikePair.publicKey),
@@ -433,9 +409,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("sets up the timeout on refresh so that the tokens keep being valid", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
       // We get a new expiration date every time we refresh the tokens
@@ -446,7 +419,7 @@ describe("buildAuthenticatedFetch", () => {
     // const handles: ReturnType<typeof setTimeout>[] = [];
     // mockedEmitter.on(EVENTS.TIMEOUT_SET, (handle) => {handles.push(handle); console.log("timeout set")});
     const spiedEmit = jest.spyOn(mockedEmitter, "emit");
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -474,16 +447,13 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("sets a default timeout on refresh if the OIDC provider does not return one", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const mockRefresher = mockTokenRefresher({
       ...mockDefaultTokenSet(),
       // No new expiration date is provided on refresh
       expiresIn: undefined,
     });
     const spyTimeout = jest.spyOn(global, "setTimeout");
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -503,9 +473,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("calls the provided callback when the access token is refreshed", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const tokenSet = mockDefaultTokenSet();
     const mockedFreshener = mockTokenRefresher({
       ...tokenSet,
@@ -513,7 +480,7 @@ describe("buildAuthenticatedFetch", () => {
     });
     const eventEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(eventEmitter, "emit");
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -527,15 +494,12 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("calls the provided callback when a new refresh token is issued", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const tokenSet = mockDefaultTokenSet();
     tokenSet.refreshToken = "some rotated refresh token";
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const eventEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(eventEmitter, "emit");
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -552,9 +516,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("rotates the refresh token if a new one is issued", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.
     const mockedTokenRefresher: ITokenRefresher = {
@@ -573,7 +534,7 @@ describe("buildAuthenticatedFetch", () => {
     };
     const refreshCall = jest.spyOn(mockedTokenRefresher, "refresh");
 
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -586,9 +547,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("emits the appropriate events when refreshing the token fails", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
       .fn<
@@ -608,7 +566,7 @@ describe("buildAuthenticatedFetch", () => {
     mockEmitter.on(EVENTS.ERROR, jest.fn());
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -632,9 +590,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("emits the appropriate events when an unexpected response is received", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     mockedFreshener.refresh = jest
       .fn<
@@ -646,7 +601,7 @@ describe("buildAuthenticatedFetch", () => {
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -665,9 +620,6 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("emits the appropriate events when the access token expires and may not be refreshed", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedFreshener.refresh = jest
@@ -680,7 +632,7 @@ describe("buildAuthenticatedFetch", () => {
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
-    await buildAuthenticatedFetch(mockedFetch, "myToken", {
+    await buildAuthenticatedFetch("myToken", {
       expiresIn: 0,
       eventEmitter: mockEmitter,
     });
@@ -694,11 +646,8 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("does not schedule any callback to be called if no event can be fired", async () => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
     const spyTimeout = jest.spyOn(global, "setTimeout");
-    await buildAuthenticatedFetch(mockedFetch, "myToken");
+    await buildAuthenticatedFetch("myToken");
     await sleep(100);
     // The only call to setTimeout should come from the `sleep` function
     expect(spyTimeout).toHaveBeenCalledTimes(1);

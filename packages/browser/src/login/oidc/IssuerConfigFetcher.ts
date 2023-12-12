@@ -33,7 +33,6 @@ import type {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
-import { fetch as uniFetch } from "@inrupt/universal-fetch";
 
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
@@ -172,10 +171,7 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       // includes the full issuer path. See https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig.
       issuer.endsWith("/") ? issuer : `${issuer}/`,
     ).href;
-    const issuerConfigRequestBody = await uniFetch.call(
-      globalThis,
-      openIdConfigUrl,
-    );
+    const issuerConfigRequestBody = await fetch(openIdConfigUrl);
     // Check the validity of the fetched config
     try {
       issuerConfig = processConfig(await issuerConfigRequestBody.json());

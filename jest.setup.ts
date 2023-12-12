@@ -20,3 +20,6 @@
  */
 
 import "@inrupt/jest-jsdom-polyfills";
+const { Response: R } = require('undici');
+globalThis.fetch = async () => new R();
+globalThis.Response = R;

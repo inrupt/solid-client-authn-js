@@ -20,8 +20,6 @@
 //
 
 import { describe, it, expect } from "@jest/globals";
-
-import { Headers as NodeHeaders } from "@inrupt/universal-fetch";
 import { flattenHeaders } from "./HeadersUtils";
 
 describe("Headers interoperability function", () => {
@@ -38,7 +36,7 @@ describe("Headers interoperability function", () => {
   });
 
   it("transforms an incoming Headers object into a flat headers structure", () => {
-    const myHeaders = new NodeHeaders();
+    const myHeaders = new Headers();
     myHeaders.append("accept", "application/json");
     myHeaders.append("content-type", "text/turtle");
     // The following needs to be ignored because `node-fetch::Headers` and

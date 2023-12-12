@@ -31,7 +31,6 @@ import type {
   ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
 import { EVENTS, buildProxyHandler } from "@inrupt/solid-client-authn-core";
-import type { fetch } from "@inrupt/universal-fetch";
 import { v4 } from "uuid";
 import EventEmitter from "events";
 import type ClientAuthentication from "./ClientAuthentication";

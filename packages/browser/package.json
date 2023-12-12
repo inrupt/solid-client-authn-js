@@ -31,7 +31,6 @@
   "dependencies": {
     "@inrupt/oidc-client-ext": "^1.17.5",
     "@inrupt/solid-client-authn-core": "^1.17.5",
-    "@inrupt/universal-fetch": "^1.0.2",
     "events": "^3.3.0",
     "jose": "^4.15.4",
     "uuid": "^9.0.1"

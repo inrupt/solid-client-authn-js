@@ -20,8 +20,6 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-// eslint-disable-next-line no-shadow
-import { Response } from "@inrupt/universal-fetch";
 import type {
   IIssuerConfig,
   IClientRegistrarOptions,

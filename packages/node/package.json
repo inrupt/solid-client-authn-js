@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^1.17.5",
-    "@inrupt/universal-fetch": "^1.0.1",
     "jose": "^4.15.4",
     "openid-client": "~5.5.0",
     "uuid": "^9.0.1"

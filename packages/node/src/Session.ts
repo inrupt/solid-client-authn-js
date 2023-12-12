@@ -36,8 +36,6 @@ import {
   buildProxyHandler,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
-// eslint-disable-next-line no-shadow
-import { fetch } from "@inrupt/universal-fetch";
 import EventEmitter from "events";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
@@ -226,9 +224,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    */
   fetch: typeof fetch = async (url, init) => {
     if (!this.info.isLoggedIn) {
-      // TODO: why does this.clientAuthentication.fetch return throws
-      // ""'fetch' called on an object that does not implement interface Window"
-      // when unauthenticated ?
       return fetch(url, init);
     }
     return this.clientAuthentication.fetch(url, init);

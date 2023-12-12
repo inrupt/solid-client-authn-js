@@ -51,8 +51,6 @@ import {
 import { URL } from "url";
 import { Issuer } from "openid-client";
 import type { KeyObject } from "crypto";
-import { fetch as globalFetch } from "@inrupt/universal-fetch";
-
 import type { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
@@ -169,7 +167,6 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       };
     }
     const authFetch = await buildAuthenticatedFetch(
-      globalFetch,
       tokenSet.access_token,
       {
         dpopKey,
