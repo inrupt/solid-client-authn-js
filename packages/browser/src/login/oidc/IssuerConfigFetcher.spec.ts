@@ -131,7 +131,7 @@ describe("IssuerConfigFetcher", () => {
   it("should append the .well-known/openid-configuration path at the end of the issuer URL", async () => {
     // The response value is irrelevant to this test.
 
-    mockFetch.mockImplementationOnce(
+    mockFetch.mockImplementation(
       async () =>
         new Response(
           JSON.stringify({
