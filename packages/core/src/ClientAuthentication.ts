@@ -34,6 +34,8 @@ import type {
   ISessionInternalInfo,
 } from "./sessionInfo/ISessionInfo";
 
+const boundFetch: typeof fetch = (request, init) => fetch(request, init);
+
 /**
  * @hidden
  */
@@ -55,7 +57,7 @@ export default class ClientAuthentication {
   }
 
   // By default, our fetch() resolves to the environment fetch() function.
-  fetch: typeof fetch = (request, init) => fetch(request, init);
+  fetch = boundFetch;
 
   logout = async (
     sessionId: string,
@@ -77,7 +79,7 @@ export default class ClientAuthentication {
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
-    this.fetch = (request, init) => fetch(request, init);
+    this.fetch = boundFetch;
 
     // Delete the bound logout function, so that it can't be called after this.
     delete this.boundLogout;
