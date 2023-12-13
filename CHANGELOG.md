@@ -23,6 +23,11 @@ The following have been deprecated, and will be removed in future major releases
 
 The following changes have been implemented but not released yet:
 
+### Breaking Changes
+
+- Use the global `fetch` function instead of `@inrupt/universal-fetch`. This means this library now only works
+  with Node 18 and higher.
+
 ## [1.17.5](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.5) - 2023-11-16
 
 ### Internal changes
