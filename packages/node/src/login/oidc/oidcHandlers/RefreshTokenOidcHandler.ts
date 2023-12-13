@@ -91,14 +91,11 @@ async function refreshAccess(
       ...refreshOptions,
       refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
     };
-    const authFetch = await buildAuthenticatedFetch(
-      tokens.accessToken,
-      {
-        dpopKey,
-        refreshOptions: rotatedRefreshOptions,
-        eventEmitter,
-      },
-    );
+    const authFetch = await buildAuthenticatedFetch(tokens.accessToken, {
+      dpopKey,
+      refreshOptions: rotatedRefreshOptions,
+      eventEmitter,
+    });
     return Object.assign(tokens, {
       fetch: authFetch,
     });

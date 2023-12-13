@@ -72,9 +72,11 @@ describe("getWebidFromTokenPayload", () => {
     statusCode: number,
     statusText?: string,
   ): void => {
-    jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      new Response(payload, { status: statusCode, statusText }),
-    );
+    jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(payload, { status: statusCode, statusText }),
+      );
   };
 
   it("throws if the JWKS cannot be fetched", async () => {

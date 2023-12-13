@@ -87,7 +87,7 @@ const mockKeyPair = async () => {
 
 const mockFetch = (response: Response, url: string) => {
   const mockedResponse = response;
-  const fetchSpy = jest.spyOn(globalThis, 'fetch');
+  const fetchSpy = jest.spyOn(globalThis, "fetch");
   jest.spyOn(mockedResponse, "url", "get").mockReturnValue(url);
   fetchSpy.mockResolvedValueOnce(mockedResponse);
   return fetchSpy;
@@ -171,10 +171,7 @@ describe("buildAuthenticatedFetch", () => {
       new Response(undefined, { status: 401 }),
       "https://my.pod/resource",
     );
-    const myFetch = await buildAuthenticatedFetch(
-      "myToken",
-      undefined,
-    );
+    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
     await myFetch("https://my.pod/resource");
     expect(mockedFetch.mock.calls[0][0]).toBe("https://my.pod/resource");
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
@@ -225,10 +222,7 @@ describe("buildAuthenticatedFetch", () => {
       mockNotRedirectedResponse(),
       "https://my.pod/container/",
     );
-    const myFetch = await buildAuthenticatedFetch(
-      "myToken",
-      undefined,
-    );
+    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
@@ -242,10 +236,7 @@ describe("buildAuthenticatedFetch", () => {
       mockNotRedirectedResponse(),
       "https://my.pod/container/",
     );
-    const myFetch = await buildAuthenticatedFetch(
-      "myToken",
-      undefined,
-    );
+    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
     await myFetch("someUrl", {
       headers: new Headers({ someHeader: "SomeValue" }),
     });
@@ -292,7 +283,7 @@ describe("buildAuthenticatedFetch", () => {
   });
 
   it("returns the initial response in case of non-redirected auth error", async () => {
-    const mockedFetch = mockFetch(
+    mockFetch(
       new Response(undefined, { status: 401 }),
       "https://my.pod/container/",
     );

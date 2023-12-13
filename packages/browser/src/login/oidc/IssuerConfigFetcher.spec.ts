@@ -53,7 +53,7 @@ describe("IssuerConfigFetcher", () => {
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
-    
+
     mockFetch.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -88,7 +88,6 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
-    
     mockFetch.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -111,7 +110,6 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a default value for the supported scopes if not advertized by the OpenID provider", async () => {
-    
     mockFetch.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -132,7 +130,7 @@ describe("IssuerConfigFetcher", () => {
 
   it("should append the .well-known/openid-configuration path at the end of the issuer URL", async () => {
     // The response value is irrelevant to this test.
-    
+
     mockFetch.mockImplementationOnce(
       async () =>
         new Response(

@@ -46,7 +46,7 @@ import {
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
 
-const mockedFetch = jest.spyOn(globalThis, 'fetch');
+const mockedFetch = jest.spyOn(globalThis, "fetch");
 
 const mockJwk = (): JWK => {
   return {
@@ -403,7 +403,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated bearer fetch if requested", async () => {
       mockOidcClient();
-      const mockedFetch = jest.mocked<typeof fetch>(fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
@@ -431,7 +430,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
-      const mockedFetch = jest.mocked<typeof fetch>(fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,

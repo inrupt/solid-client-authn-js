@@ -226,7 +226,7 @@ describe("ClientAuthentication", () => {
 
   describe("fetch", () => {
     it("calls fetch", async () => {
-      const fetchSpy = jest.spyOn(globalThis, 'fetch')
+      const fetchSpy = jest.spyOn(globalThis, "fetch");
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
       expect(fetchSpy).toHaveBeenCalledWith(

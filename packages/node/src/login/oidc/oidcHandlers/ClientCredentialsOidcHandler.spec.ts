@@ -313,7 +313,6 @@ describe("handle", () => {
       },
     });
 
-
     mockedFetch.mockResolvedValue(
       new Response(undefined, {
         status: 200,

@@ -124,21 +124,18 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       );
     }
 
-    const authFetch = await buildAuthenticatedFetch(
-      tokens.access_token,
-      {
-        dpopKey,
-        refreshOptions: tokens.refresh_token
-          ? {
-              refreshToken: tokens.refresh_token,
-              sessionId: oidcLoginOptions.sessionId,
-              tokenRefresher: this.tokenRefresher,
-            }
-          : undefined,
-        eventEmitter: oidcLoginOptions.eventEmitter,
-        expiresIn: tokens.expires_in,
-      },
-    );
+    const authFetch = await buildAuthenticatedFetch(tokens.access_token, {
+      dpopKey,
+      refreshOptions: tokens.refresh_token
+        ? {
+            refreshToken: tokens.refresh_token,
+            sessionId: oidcLoginOptions.sessionId,
+            tokenRefresher: this.tokenRefresher,
+          }
+        : undefined,
+      eventEmitter: oidcLoginOptions.eventEmitter,
+      expiresIn: tokens.expires_in,
+    });
 
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,

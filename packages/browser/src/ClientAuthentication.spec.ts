@@ -45,8 +45,7 @@ import {
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 
-jest.spyOn(globalThis, "fetch")
-  .mockResolvedValue(new Response());
+jest.spyOn(globalThis, "fetch").mockResolvedValue(new Response());
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(

@@ -30,8 +30,6 @@ import type {
 import type { KeyObject } from "crypto";
 import type { TokenEndpointInput } from "../dpop/tokenExchange";
 
-jest.spyOn(globalThis, "fetch").mockResolvedValue(new Response());
-
 /* eslint-disable camelcase */
 
 export const mockJwk = (): JWK => {
@@ -160,7 +158,7 @@ export const mockClient = (clientId = "some client"): IClient => {
 };
 
 export const mockFetch = (payload: string, statusCode: number) => {
-  const mockFetch = jest.spyOn(globalThis, "fetch");
-  mockFetch.mockResolvedValue(new Response(payload, { status: statusCode }));
-  return mockFetch;
+  const mock = jest.spyOn(globalThis, "fetch");
+  mock.mockResolvedValue(new Response(payload, { status: statusCode }));
+  return mock;
 };

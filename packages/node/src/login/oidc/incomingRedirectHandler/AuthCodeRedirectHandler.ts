@@ -166,15 +166,12 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         tokenRefresher: this.tokenRefresher,
       };
     }
-    const authFetch = await buildAuthenticatedFetch(
-      tokenSet.access_token,
-      {
-        dpopKey,
-        refreshOptions,
-        eventEmitter,
-        expiresIn: tokenSet.expires_in,
-      },
-    );
+    const authFetch = await buildAuthenticatedFetch(tokenSet.access_token, {
+      dpopKey,
+      refreshOptions,
+      eventEmitter,
+      expiresIn: tokenSet.expires_in,
+    });
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns
     // its payload as a JSON object.

@@ -36,7 +36,7 @@ import type ClientAuthentication from "./ClientAuthentication";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-jest.spyOn(globalThis, 'fetch').mockResolvedValue(new Response());
+jest.spyOn(globalThis, "fetch").mockResolvedValue(new Response());
 
 const mockLocalStorage = (stored: Record<string, string>) => {
   Object.defineProperty(window, "localStorage", {

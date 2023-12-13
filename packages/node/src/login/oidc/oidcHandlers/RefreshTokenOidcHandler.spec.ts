@@ -44,7 +44,9 @@ import {
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
 
-const mockedFetch = jest.spyOn(globalThis, "fetch").mockResolvedValue(new Response());
+const mockedFetch = jest
+  .spyOn(globalThis, "fetch")
+  .mockResolvedValue(new Response());
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -145,7 +147,6 @@ describe("RefreshTokenOidcHandler", () => {
       );
       expect(result?.webId).toBe("https://my.webid/");
 
-
       mockedFetch.mockResolvedValue({
         ...new Response(undefined, { status: 401 }),
         url: "https://my.pod/resource",
@@ -176,7 +177,6 @@ describe("RefreshTokenOidcHandler", () => {
       expect(result).toBeDefined();
       expect(result?.webId).toBe("https://my.webid/");
       expect(result?.expirationDate).toBeGreaterThan(Date.now());
-
 
       mockedFetch.mockResolvedValue({
         ...new Response(undefined, { status: 200 }),
@@ -214,7 +214,6 @@ describe("RefreshTokenOidcHandler", () => {
         }),
       );
 
-
       mockedFetch.mockResolvedValue({
         ...new Response(undefined, { status: 200 }),
         url: "https://my.pod/resource",
@@ -248,8 +247,6 @@ describe("RefreshTokenOidcHandler", () => {
         }),
       );
       expect(result).toBeDefined();
-
-
 
       mockedFetch.mockResolvedValue({
         ...new Response(undefined, { status: 200 }),
