@@ -18,7 +18,7 @@
   "author": "Inrupt, Inc.",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.23.5",
+    "@babel/core": "^7.23.6",
     "@babel/preset-env": "^7.23.2",
     "@babel/preset-react": "^7.23.3",
     "babel-loader": "^9.1.3",
