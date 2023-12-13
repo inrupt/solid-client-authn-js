@@ -82,6 +82,9 @@ const config: Config = {
       preset: "ts-jest/presets/js-with-ts",
       displayName: "browser",
       roots: ["<rootDir>/packages/browser"],
+      // Deliberately allow including node_modules when transforming code. undici can
+      // also be ignored, as it isn't necessary in the browser setting.
+      transformIgnorePatterns: ["undici"],
       // This test environment is an extension of jsdom. This module targets the
       // browser environment only, so tests only need to run in jsdom.
       // Currently, this is still required despite the polyfills in jest setup.
