@@ -413,9 +413,8 @@ describe("AuthCodeRedirectHandler", () => {
         storageUtility: mockDefaultStorageUtility({ dpop: false }),
       });
 
-      const redirectInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl(),
-      );
+      const redirectInfo =
+        await authCodeRedirectHandler.handle(mockRedirectUrl());
 
       // This will call the oidc-client-ext module, which is mocked at
       // the top of this file. The purpose of this test is to check that, if
@@ -439,9 +438,8 @@ describe("AuthCodeRedirectHandler", () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockDefaultStorageUtility({ dpop: true }),
       });
-      const redirectInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl(),
-      );
+      const redirectInfo =
+        await authCodeRedirectHandler.handle(mockRedirectUrl());
       await redirectInfo.fetch("https://some.other.url");
 
       const header = new Headers(mockedFetch.mock.calls[0][1]?.headers);
@@ -510,9 +508,8 @@ describe("AuthCodeRedirectHandler", () => {
         storageUtility: mockDefaultStorageUtility(),
       });
 
-      const sessionInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl(),
-      );
+      const sessionInfo =
+        await authCodeRedirectHandler.handle(mockRedirectUrl());
 
       expect(sessionInfo.expirationDate).toBe(
         MOCK_TIMESTAMP + MOCK_EXPIRE_TIME * 1000,
@@ -537,9 +534,8 @@ describe("AuthCodeRedirectHandler", () => {
         storageUtility: mockedStorage,
       });
 
-      const sessionInfo = await authCodeRedirectHandler.handle(
-        mockRedirectUrl(),
-      );
+      const sessionInfo =
+        await authCodeRedirectHandler.handle(mockRedirectUrl());
 
       expect(sessionInfo.expirationDate).toBeUndefined();
     });
