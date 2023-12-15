@@ -27,11 +27,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { IdTokenClaims, TokenSet, BaseClient } from "openid-client";
 import type { JWK } from "jose";
-import {
-  Response as NodeResponse,
-  Headers as NodeHeaders,
-} from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
@@ -44,15 +39,6 @@ import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
-// The fetch factory in the core module resolves @inrupt/universal-fetch to the environment-specific fetch
-
-jest.mock("@inrupt/universal-fetch", () => {
-  return {
-    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
-    default: jest.fn<typeof fetch>(),
-    fetch: jest.fn<typeof fetch>(),
-  };
-});
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -306,12 +292,10 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toBe("true");
 
       // Check that the returned fetch function is authenticated
-      const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch",
-      ) as jest.Mocked<typeof UniversalFetch>;
-      mockedFetch.mockResolvedValueOnce(new NodeResponse());
+      const mockedFetch = jest.spyOn(globalThis, "fetch");
+      mockedFetch.mockResolvedValueOnce(new Response());
       await result.fetch("https://some.url");
-      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
+      const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain("DPoP");
     });
 
@@ -361,12 +345,10 @@ describe("AuthCodeRedirectHandler", () => {
       );
 
       // Check that the returned fetch function is authenticated
-      const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch",
-      ) as jest.Mocked<typeof UniversalFetch>;
-      mockedFetch.mockResolvedValueOnce(new NodeResponse());
+      const mockedFetch = jest.spyOn(globalThis, "fetch");
+      mockedFetch.mockResolvedValueOnce(new Response());
       await result.fetch("https://some.url");
-      const headers = new NodeHeaders(mockedFetch.mock.calls[0][1]?.headers);
+      const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain("Bearer");
     });
 

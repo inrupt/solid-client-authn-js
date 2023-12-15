@@ -37,9 +37,6 @@ import {
   mockLogoutHandler,
 } from "@inrupt/solid-client-authn-core/mocks";
 
-import { fetch } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
-
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
 import {
   mockSessionInfoManager,
@@ -48,15 +45,7 @@ import {
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 
-jest.mock("@inrupt/universal-fetch", () => {
-  const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch",
-  ) as typeof UniversalFetch;
-  return {
-    ...fetchModule,
-    fetch: jest.fn<typeof fetch>(),
-  };
-});
+jest.spyOn(globalThis, "fetch").mockResolvedValue(new Response());
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(

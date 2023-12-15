@@ -329,14 +329,10 @@ test.describe("Using a Client ID", () => {
       page.click(`[data-testid=rpLogoutButton]`),
     ]);
 
-    await new Promise((res) => {
-      setTimeout(res, 5_000);
-    });
-
     // We should remain on the same origin as the end_session_endpoint if we do not provide
     // a URL to take us back to the original webpage
-    expect(new URL(page.url()).origin).toEqual(
-      new URL(configuration.end_session_endpoint).origin,
+    await expect(page).toHaveURL(
+      new RegExp(new URL(configuration.end_session_endpoint).origin),
     );
   });
 });

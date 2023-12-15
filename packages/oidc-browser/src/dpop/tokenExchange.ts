@@ -20,7 +20,6 @@
 //
 
 import { OidcClient } from "@inrupt/oidc-client";
-import { fetch } from "@inrupt/universal-fetch";
 import type {
   IClient,
   IIssuerConfig,

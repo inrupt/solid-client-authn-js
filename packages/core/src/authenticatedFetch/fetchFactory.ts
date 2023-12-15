@@ -20,8 +20,6 @@
 //
 
 // eslint-disable-next-line no-shadow
-import type { fetch } from "@inrupt/universal-fetch";
-import { Headers } from "@inrupt/universal-fetch";
 import type { EventEmitter } from "events";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import type { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
@@ -93,13 +91,12 @@ async function buildAuthenticatedHeaders(
 }
 
 async function makeAuthenticatedRequest(
-  unauthFetch: typeof fetch,
   accessToken: string,
   url: RequestInfo | URL,
   defaultRequestInit?: RequestInit,
   dpopKey?: KeyPair,
 ) {
-  return unauthFetch(
+  return fetch(
     url,
     await buildAuthenticatedHeaders(
       url.toString(),
@@ -159,7 +156,6 @@ const computeRefreshDelay = (expiresIn?: number): number => {
  * the provided token, and adds a DPoP header if applicable.
  */
 export async function buildAuthenticatedFetch(
-  unauthFetch: typeof fetch,
   accessToken: string,
   options?: {
     dpopKey?: KeyPair;
@@ -262,7 +258,6 @@ export async function buildAuthenticatedFetch(
   }
   return async (url, requestInit?): Promise<Response> => {
     let response = await makeAuthenticatedRequest(
-      unauthFetch,
       currentAccessToken,
       url,
       requestInit,
@@ -284,7 +279,6 @@ export async function buildAuthenticatedFetch(
       // to a given resource and method, while the DPoP header (associated to a
       // DPoP token) is.
       response = await makeAuthenticatedRequest(
-        unauthFetch,
         currentAccessToken,
         // Replace the original target IRI (`url`) by the redirection target
         response.url,

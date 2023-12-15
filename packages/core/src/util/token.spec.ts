@@ -22,17 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import type { JWTPayload, KeyLike } from "jose";
 import { SignJWT, generateKeyPair, exportJWK } from "jose";
-import { Response as NodeResponse } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { getWebidFromTokenPayload } from "./token";
-
-jest.mock("@inrupt/universal-fetch", () => {
-  return {
-    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
-    default: jest.fn<typeof fetch>(),
-    fetch: jest.fn<typeof fetch>(),
-  };
-});
 
 describe("getWebidFromTokenPayload", () => {
   // Singleton keys generated on the first call to mockJwk
@@ -82,12 +72,11 @@ describe("getWebidFromTokenPayload", () => {
     statusCode: number,
     statusText?: string,
   ): void => {
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
-    mockedFetch.mockResolvedValueOnce(
-      new NodeResponse(payload, { status: statusCode, statusText }),
-    );
+    jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(payload, { status: statusCode, statusText }),
+      );
   };
 
   it("throws if the JWKS cannot be fetched", async () => {

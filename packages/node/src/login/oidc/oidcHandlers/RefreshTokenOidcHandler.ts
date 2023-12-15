@@ -47,7 +47,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { JWK } from "jose";
 import { importJWK } from "jose";
-import { fetch as globalFetch } from "@inrupt/universal-fetch";
 import type { EventEmitter } from "events";
 import type { KeyObject } from "crypto";
 
@@ -74,7 +73,7 @@ async function refreshAccess(
   dpop: boolean,
   refreshBindingKey?: KeyPair,
   eventEmitter?: EventEmitter,
-): Promise<TokenEndpointResponse & { fetch: typeof globalFetch }> {
+): Promise<TokenEndpointResponse & { fetch: typeof fetch }> {
   try {
     let dpopKey: KeyPair | undefined;
     if (dpop) {
@@ -92,15 +91,11 @@ async function refreshAccess(
       ...refreshOptions,
       refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
     };
-    const authFetch = await buildAuthenticatedFetch(
-      globalFetch,
-      tokens.accessToken,
-      {
-        dpopKey,
-        refreshOptions: rotatedRefreshOptions,
-        eventEmitter,
-      },
-    );
+    const authFetch = await buildAuthenticatedFetch(tokens.accessToken, {
+      dpopKey,
+      refreshOptions: rotatedRefreshOptions,
+      eventEmitter,
+    });
     return Object.assign(tokens, {
       fetch: authFetch,
     });

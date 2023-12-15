@@ -20,8 +20,6 @@
 //
 
 import { jest } from "@jest/globals";
-import { Response } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import type { JWK } from "jose";
 import { importJWK, SignJWT } from "jose";
 import type {
@@ -31,13 +29,6 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import type { KeyObject } from "crypto";
 import type { TokenEndpointInput } from "../dpop/tokenExchange";
-
-jest.mock("@inrupt/universal-fetch", () => {
-  return {
-    ...(jest.requireActual("@inrupt/universal-fetch") as typeof UniversalFetch),
-    fetch: jest.fn<(typeof UniversalFetch)["fetch"]>(),
-  };
-});
 
 /* eslint-disable camelcase */
 
@@ -166,14 +157,8 @@ export const mockClient = (clientId = "some client"): IClient => {
   };
 };
 
-// Since this is only for tests, the ESLint warning may be disabled.
-// I'm not sure why, but the type definitions I would expect conflict either with
-// the object actually returned or with the .mock calls in the tests.
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const mockFetch = (payload: string, statusCode: number) => {
-  const { fetch } = jest.requireMock("@inrupt/universal-fetch") as jest.Mocked<
-    typeof UniversalFetch
-  >;
-  fetch.mockResolvedValue(new Response(payload, { status: statusCode }));
-  return fetch;
+  const mock = jest.spyOn(globalThis, "fetch");
+  mock.mockResolvedValue(new Response(payload, { status: statusCode }));
+  return mock;
 };

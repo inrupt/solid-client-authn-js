@@ -19,10 +19,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect } from "@jest/globals";
+import { it, describe, expect } from "@jest/globals";
 import { FallbackRedirectHandler } from "./FallbackRedirectHandler";
-
-jest.mock("@inrupt/universal-fetch");
 
 describe("FallbackRedirectHandler", () => {
   describe("canHandle", () => {

@@ -20,8 +20,6 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { Response as NodeResponse } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import type { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import {
@@ -30,8 +28,6 @@ import {
 } from "./__mocks__/IssuerConfigFetcher";
 import TokenRequester from "./TokenRequester";
 import { ClientRegistrarMock } from "./__mocks__/ClientRegistrar";
-
-jest.mock("@inrupt/universal-fetch");
 
 describe("TokenRequester", () => {
   const defaultMocks = {
@@ -68,7 +64,7 @@ describe("TokenRequester", () => {
 
   async function setUpMockedReturnValues(
     values: Partial<typeof defaultReturnValues>,
-  ): Promise<(typeof UniversalFetch)["fetch"]> {
+  ) {
     await defaultMocks.storageUtility.setForUser("global", {
       issuer: values.storageIdp ?? defaultReturnValues.storageIdp,
     });
@@ -79,11 +75,9 @@ describe("TokenRequester", () => {
       issuerConfig,
     );
 
-    const { fetch: mockedFetch } = jest.requireMock(
-      "@inrupt/universal-fetch",
-    ) as jest.Mocked<typeof UniversalFetch>;
+    const mockedFetch = jest.spyOn(globalThis, "fetch");
     mockedFetch.mockResolvedValueOnce(
-      new NodeResponse(values.responseBody ?? defaultReturnValues.responseBody),
+      new Response(values.responseBody ?? defaultReturnValues.responseBody),
     );
     return mockedFetch;
   }

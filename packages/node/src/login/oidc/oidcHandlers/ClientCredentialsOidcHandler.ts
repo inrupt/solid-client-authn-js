@@ -44,7 +44,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
-import { fetch as globalFetch } from "@inrupt/universal-fetch";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 /**
@@ -125,22 +124,18 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       );
     }
 
-    const authFetch = await buildAuthenticatedFetch(
-      globalFetch,
-      tokens.access_token,
-      {
-        dpopKey,
-        refreshOptions: tokens.refresh_token
-          ? {
-              refreshToken: tokens.refresh_token,
-              sessionId: oidcLoginOptions.sessionId,
-              tokenRefresher: this.tokenRefresher,
-            }
-          : undefined,
-        eventEmitter: oidcLoginOptions.eventEmitter,
-        expiresIn: tokens.expires_in,
-      },
-    );
+    const authFetch = await buildAuthenticatedFetch(tokens.access_token, {
+      dpopKey,
+      refreshOptions: tokens.refresh_token
+        ? {
+            refreshToken: tokens.refresh_token,
+            sessionId: oidcLoginOptions.sessionId,
+            tokenRefresher: this.tokenRefresher,
+          }
+        : undefined,
+      eventEmitter: oidcLoginOptions.eventEmitter,
+      expiresIn: tokens.expires_in,
+    });
 
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,

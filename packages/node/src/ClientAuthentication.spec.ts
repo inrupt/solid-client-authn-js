@@ -31,7 +31,6 @@ import {
   mockIncomingRedirectHandler,
   mockLogoutHandler,
 } from "@inrupt/solid-client-authn-core/mocks";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { Session } from "./Session";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
@@ -41,8 +40,6 @@ import {
 } from "./sessionInfo/__mocks__/SessionInfoManager";
 
 import ClientAuthentication from "./ClientAuthentication";
-
-jest.mock("@inrupt/universal-fetch");
 
 describe("ClientAuthentication", () => {
   const defaultMockStorage = mockStorageUtility({});
@@ -229,12 +226,10 @@ describe("ClientAuthentication", () => {
 
   describe("fetch", () => {
     it("calls fetch", async () => {
-      const { fetch: mockedFetch } = jest.requireMock(
-        "@inrupt/universal-fetch",
-      ) as jest.Mocked<typeof UniversalFetch>;
+      const fetchSpy = jest.spyOn(globalThis, "fetch");
       const clientAuthn = getClientAuthentication();
       await clientAuthn.fetch("https://html5zombo.com");
-      expect(mockedFetch).toHaveBeenCalledWith(
+      expect(fetchSpy).toHaveBeenCalledWith(
         "https://html5zombo.com",
         undefined,
       );

@@ -35,8 +35,6 @@ import {
 import { jest, it, describe, expect } from "@jest/globals";
 import { getBearerToken } from "@inrupt/oidc-client-ext";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
-import { fetch, Response, Headers } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import type { JWK } from "jose";
 import { importJWK } from "jose";
 import type { KeyObject } from "crypto";
@@ -48,15 +46,7 @@ import {
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
 
-jest.mock("@inrupt/universal-fetch", () => {
-  const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch",
-  ) as typeof UniversalFetch;
-  return {
-    ...fetchModule,
-    fetch: jest.fn<typeof fetch>(),
-  };
-});
+const mockedFetch = jest.spyOn(globalThis, "fetch");
 
 const mockJwk = (): JWK => {
   return {
@@ -202,9 +192,6 @@ function mockClientRegistrar(client: IClient): IClientRegistrar {
 }
 
 const mockFetch = (response: Response) => {
-  const { fetch: mockedFetch } = jest.requireMock(
-    "@inrupt/universal-fetch",
-  ) as jest.Mocked<typeof UniversalFetch>;
   mockedFetch.mockResolvedValueOnce(response);
   return mockedFetch;
 };
@@ -416,7 +403,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated bearer fetch if requested", async () => {
       mockOidcClient();
-      const mockedFetch = jest.mocked<typeof fetch>(fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
@@ -444,7 +430,6 @@ describe("AuthCodeRedirectHandler", () => {
 
     it("returns an authenticated DPoP fetch if requested", async () => {
       mockOidcClient();
-      const mockedFetch = jest.mocked<typeof fetch>(fetch);
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
@@ -598,7 +583,6 @@ describe("AuthCodeRedirectHandler", () => {
     await authCodeRedirectHandler.handle(mockRedirectUrl());
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
-      expect.anything(),
       expect.anything(),
       expect.objectContaining({
         refreshOptions: {

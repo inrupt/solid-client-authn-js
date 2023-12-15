@@ -80,11 +80,11 @@ const config: Config = {
       // JS files are transformed to CJS, and that the transform also applies to the
       // dependencies in the node_modules, so that ESM-only dependencies are supported.
       preset: "ts-jest/presets/js-with-ts",
+      displayName: "browser",
+      roots: ["<rootDir>/packages/browser"],
       // Deliberately allow including node_modules when transforming code. undici can
       // also be ignored, as it isn't necessary in the browser setting.
       transformIgnorePatterns: ["undici"],
-      displayName: "browser",
-      roots: ["<rootDir>/packages/browser"],
       // This test environment is an extension of jsdom. This module targets the
       // browser environment only, so tests only need to run in jsdom.
       // Currently, this is still required despite the polyfills in jest setup.
@@ -105,6 +105,7 @@ const config: Config = {
       displayName: "e2e-node-script",
       roots: ["<rootDir>/e2e/node/script"],
       setupFiles: ["<rootDir>/e2e/node/jest.setup.ts"],
+      setupFilesAfterEnv: [],
       slowTestThreshold: 30,
     },
     {
@@ -112,6 +113,7 @@ const config: Config = {
       displayName: "e2e-node-server",
       roots: ["<rootDir>/e2e/node/server"],
       setupFiles: ["<rootDir>/e2e/node/jest.setup.ts"],
+      setupFilesAfterEnv: [],
       slowTestThreshold: 30,
     },
   ],

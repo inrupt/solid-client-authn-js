@@ -23,7 +23,6 @@
  * @hidden
  * @packageDocumentation
  */
-import { fetch as uniFetch } from "@inrupt/universal-fetch";
 import type { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";
 import type { ILogoutOptions, IRpLogoutOptions } from "./logout/ILogoutHandler";
 import type ILogoutHandler from "./logout/ILogoutHandler";
@@ -35,11 +34,7 @@ import type {
   ISessionInternalInfo,
 } from "./sessionInfo/ISessionInfo";
 
-// By only referring to `window` at runtime, apps that do server-side rendering
-// won't run into errors when rendering code that instantiates a
-// ClientAuthentication:
-const globalFetch: typeof uniFetch = (request, init) =>
-  uniFetch.call(globalThis, request, init);
+const boundFetch: typeof fetch = (request, init) => fetch(request, init);
 
 /**
  * @hidden
@@ -62,7 +57,7 @@ export default class ClientAuthentication {
   }
 
   // By default, our fetch() resolves to the environment fetch() function.
-  fetch = globalFetch;
+  fetch = boundFetch;
 
   logout = async (
     sessionId: string,
@@ -84,7 +79,7 @@ export default class ClientAuthentication {
 
     // Restore our fetch() function back to the environment fetch(), effectively
     // leaving us with un-authenticated fetches from now on.
-    this.fetch = globalFetch;
+    this.fetch = boundFetch;
 
     // Delete the bound logout function, so that it can't be called after this.
     delete this.boundLogout;

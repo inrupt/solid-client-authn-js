@@ -27,8 +27,6 @@ import {
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
-import { fetch } from "@inrupt/universal-fetch";
-import type * as UniversalFetch from "@inrupt/universal-fetch";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import { Session } from "./Session";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
@@ -38,15 +36,7 @@ import type ClientAuthentication from "./ClientAuthentication";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-jest.mock("@inrupt/universal-fetch", () => {
-  const fetchModule = jest.requireActual(
-    "@inrupt/universal-fetch",
-  ) as typeof UniversalFetch;
-  return {
-    ...fetchModule,
-    fetch: jest.fn<typeof fetch>(),
-  };
-});
+jest.spyOn(globalThis, "fetch").mockResolvedValue(new Response());
 
 const mockLocalStorage = (stored: Record<string, string>) => {
   Object.defineProperty(window, "localStorage", {
