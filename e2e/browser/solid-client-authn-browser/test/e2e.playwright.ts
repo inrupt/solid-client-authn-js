@@ -331,6 +331,8 @@ test.describe("Using a Client ID", () => {
 
     // We should remain on the same origin as the end_session_endpoint if we do not provide
     // a URL to take us back to the original webpage
-    await page.waitForURL(new URL(configuration.end_session_endpoint).origin);
+    await expect(page).toHaveURL(
+      new RegExp(new URL(configuration.end_session_endpoint).origin),
+    );
   });
 });
