@@ -136,20 +136,6 @@ describe("Session", () => {
       expect(mySession.info.webId).toBe("https://some.webid");
     });
 
-    it("accepts legacy token rotation callback", () => {
-      const legacyTokenRotationCallback = jest.fn();
-      const mySession = new Session({
-        onNewRefreshToken: legacyTokenRotationCallback,
-      });
-      (mySession.events as EventEmitter).emit(
-        EVENTS.NEW_REFRESH_TOKEN,
-        "some refresh token",
-      );
-      expect(legacyTokenRotationCallback).toHaveBeenCalledWith(
-        "some refresh token",
-      );
-    });
-
     it("listens on the timeout event", () => {
       const mySession = new Session();
       (mySession.events as EventEmitter).emit(EVENTS.TIMEOUT_SET, 0);

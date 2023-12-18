@@ -19,6 +19,9 @@ The following changes have been implemented but not released yet:
 - `Session` methods `onLogin`, `onLogout`, `onError`, `onSessionRestore`,
   `onSessionExpiration`, `onNewRefreshToken` have been removed. They are replaced by calls to `session.events.on`,
   using the appropriate event name.
+- `onNewRefreshToken` is no longer supported as an option to the `Session` constructor. Its usage is replaced by
+  calling `session.events.on` using the `EVENTS.NEW_REFRESH_TOKEN` constant as a first parameter, and a callback
+  handling the token as a second parameter.
 - The UMD build of `@inrupt/oidc-client-ext` is no longer available. Since this is a package only intended to be
   consumed by `@inrupt/solid-client-authn-browser`, which doesn't have a UMD build, this change should have no
   impact.

@@ -74,11 +74,6 @@ export interface ISessionOptions {
    * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
    */
   clientAuthentication: ClientAuthentication;
-  /**
-   * A callback that gets invoked whenever a new refresh token is obtained.
-   * @deprecated Prefer calling Session::onNewRefreshToken instead.
-   */
-  onNewRefreshToken?: (newToken: string) => unknown;
 }
 
 /**
@@ -160,12 +155,6 @@ export class Session implements IHasSessionEventListener {
         sessionId: sessionId ?? v4(),
         isLoggedIn: false,
       };
-    }
-    if (sessionOptions.onNewRefreshToken !== undefined) {
-      this.events.on(
-        EVENTS.NEW_REFRESH_TOKEN,
-        sessionOptions.onNewRefreshToken,
-      );
     }
     // Keeps track of the latest timeout handle in order to clean up on logout
     // and not leave open timeouts.
