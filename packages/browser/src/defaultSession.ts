@@ -94,46 +94,6 @@ export const handleIncomingRedirect: Session["handleIncomingRedirect"] = (
 };
 
 /**
- * Register a callback function to be called when a user completes login.
- *
- * The callback is called when {@link handleIncomingRedirect} completes successfully.
- * @since 1.3.0
- *
- * @param callback The function called when a user completes login.
- * @deprecated Prefer events.on(EVENTS.LOGIN, callback)
-
- */
-export const onLogin: Session["onLogin"] = (...args) => {
-  const session = getDefaultSession();
-  return session.onLogin(...args);
-};
-
-/**
- * Register a callback function to be called when a user logs out:
- *
- * @param callback The function called when a user completes logout.
- * @since 1.3.0
- * @deprecated Prefer events.on(EVENTS.LOGOUT, callback)
- *
- */
-export const onLogout: Session["onLogout"] = (...args) => {
-  const session = getDefaultSession();
-  return session.onLogout(...args);
-};
-
-/**
- * Register a callback function to be called when a session is restored:
- *
- * @param callback The function called when a session is restored.
- * @since 1.3.0
- * @deprecated Prefer events.on(EVENTS.SESSION_RESTORED, callback)
- */
-export const onSessionRestore: Session["onSessionRestore"] = (...args) => {
-  const session = getDefaultSession();
-  return session.onSessionRestore(...args);
-};
-
-/**
  * {@link SessionEventEmitter} instance to subscribe to events by the default session.
  *
  * @since 1.14.0

@@ -27,9 +27,6 @@ import {
   handleIncomingRedirect,
   login,
   logout,
-  onLogin,
-  onSessionRestore,
-  onLogout,
   events,
 } from "./defaultSession";
 import * as SessionModule from "./Session";
@@ -72,9 +69,6 @@ it("all functions pass on their arguments to the default session", () => {
   const handleIncomingRedirectSpy = jest.fn();
   defaultSession.handleIncomingRedirect =
     handleIncomingRedirectSpy as typeof defaultSession.handleIncomingRedirect;
-  const onLoginSpy = jest.spyOn(defaultSession, "onLogin");
-  const onLogoutSpy = jest.spyOn(defaultSession, "onLogout");
-  const onSessionRestoreSpy = jest.spyOn(defaultSession, "onSessionRestore");
   const eventsOnSpy = jest.spyOn(defaultSession.events, "on");
 
   expect(fetchSpy).not.toHaveBeenCalled();
@@ -102,16 +96,4 @@ it("all functions pass on their arguments to the default session", () => {
   expect(eventsOnSpy).not.toHaveBeenCalled();
   events().on(EVENTS.LOGIN, jest.fn());
   expect(eventsOnSpy).toHaveBeenCalledTimes(1);
-
-  expect(onLoginSpy).not.toHaveBeenCalled();
-  onLogin(jest.fn());
-  expect(onLoginSpy).toHaveBeenCalledTimes(1);
-
-  expect(onSessionRestoreSpy).not.toHaveBeenCalled();
-  onSessionRestore(jest.fn());
-  expect(onSessionRestoreSpy).toHaveBeenCalledTimes(1);
-
-  expect(onLogoutSpy).not.toHaveBeenCalled();
-  onLogout(jest.fn());
-  expect(onLogoutSpy).toHaveBeenCalledTimes(1);
 });

@@ -135,7 +135,7 @@ function isLoggedIn(
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter implements IHasSessionEventListener {
+export class Session implements IHasSessionEventListener {
   /**
    * Information regarding the current session.
    */
@@ -171,18 +171,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId: string | undefined = undefined,
   ) {
-    super();
-    // Until Session no longer implements EventEmitter, this.events is just a proxy
-    // to this (with some interface filtering). When we make the breaking change,
-    // this.events will be a regular EventEmitter (implementing ISessionEventEmitter):
-    // this.events = new EventEmitter();
-    this.events = new Proxy(
-      this,
-      buildProxyHandler(
-        Session.prototype,
-        "events only implements ISessionEventListener",
-      ),
-    );
+    this.events = new EventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -382,68 +371,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.tokenRequestInProgress = false;
     return sessionInfo;
   };
-
-  /**
-   * Register a callback function to be called when a user completes login.
-   *
-   * The callback is called when {@link handleIncomingRedirect} completes successfully.
-   *
-   * @param callback The function called when a user completes login.
-   * @deprecated Prefer session.events.on(EVENTS.LOGIN, callback)
-   */
-  onLogin(callback: () => unknown): void {
-    this.events.on(EVENTS.LOGIN, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a user logs out:
-   *
-   * @param callback The function called when a user completes logout.
-   * @deprecated Prefer session.events.on(EVENTS.LOGOUT, callback)
-   */
-  onLogout(callback: () => unknown): void {
-    this.events.on(EVENTS.LOGOUT, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a user logs out:
-   *
-   * @param callback The function called when an error occurs.
-   * @since 1.11.0
-   * @deprecated Prefer session.events.on(EVENTS.ERROR, callback)
-   */
-  onError(
-    callback: (
-      error: string | null,
-      errorDescription?: string | null,
-    ) => unknown,
-  ): void {
-    this.events.on(EVENTS.ERROR, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a session is restored.
-   *
-   * Note: the callback will be called with the saved value of the 'current URL'
-   * at the time the session was restored.
-   *
-   * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
-   * @deprecated Prefer session.events.on(EVENTS.SESSION_RESTORED, callback)
-   */
-  onSessionRestore(callback: (currentUrl: string) => unknown): void {
-    this.events.on(EVENTS.SESSION_RESTORED, callback);
-  }
-
-  /**
-   * Register a callback that runs when the session expires and can no longer
-   * make authenticated requests, but following a user logout.
-   * @param callback The function that runs on session expiration.
-   * @since 1.11.0
-   * @deprecated Prefer session.events.on(EVENTS.SESSION_EXPIRED, callback)
-   */
-  onSessionExpiration(callback: () => unknown): void {
-    this.events.on(EVENTS.SESSION_EXPIRED, callback);
-  }
 
   private setSessionInfo(
     sessionInfo: ISessionInfo & { isLoggedIn: true },

@@ -474,28 +474,3 @@ export interface ISessionEventListener extends EventEmitter {
    */
   emit(eventName: never, ...args: never): boolean;
 }
-
-/**
- * Temporary internal builder for safe proxying.
- */
-export const buildProxyHandler = (
-  // The class to be excluded needs to be injected, because it is defined in a
-  // dependency.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  toExclude: any,
-  errorMessage: string,
-) => ({
-  // This proxy is only a temporary measure until Session no longer extends
-  // SessionEventEmitter, and the proxying is no longer necessary.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get(target: any, prop: any, receiver: any) {
-    // Reject any calls to the proxy that isn't specific to the EventEmitter API
-    if (
-      !Object.getOwnPropertyNames(EventEmitter).includes(prop) &&
-      Object.getOwnPropertyNames(toExclude).includes(prop)
-    ) {
-      throw new Error(`${errorMessage}: [${prop}] is not supported`);
-    }
-    return Reflect.get(target, prop, receiver);
-  },
-});
