@@ -102,7 +102,7 @@ export const buildRedirectHandler = (
 /**
  *
  * @param dependencies
- * @deprecated This function will be removed from the external API in an upcoming release.
+ * @hidden
  */
 export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;

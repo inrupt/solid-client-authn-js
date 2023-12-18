@@ -21,8 +21,6 @@
 
 export { Session, ISessionOptions } from "./Session";
 
-export { getClientAuthenticationWithDependencies } from "./dependencies";
-
 export * from "./defaultSession";
 
 // Re-export of types defined in the core module and produced/consumed by our API

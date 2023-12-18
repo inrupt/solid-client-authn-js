@@ -21,9 +21,8 @@
 
 import { it, expect } from "@jest/globals";
 
-import { Session, getClientAuthenticationWithDependencies } from "./index";
+import { Session } from "./index";
 
 it("exports the public API from the entrypoint", () => {
   expect(Session).toBeDefined();
-  expect(getClientAuthenticationWithDependencies).toBeDefined();
 });
