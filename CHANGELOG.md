@@ -5,20 +5,6 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Deprecation notice
-
-The following have been deprecated, and will be removed in future major releases.
-
-### browser and node
-
-- The `Session` class will no longer extend `EventEmitter`. Instead, it will expose
-  an `events` attribute implementing `EventEmitter`. We do not recommand to use
-  either a `Session` instance or its `events` attribute as an arbitrary events emitter,
-  and encourage users to only use the supported events and documented API.
-- `Session` methods `onLogin`, `onLogout`, `onError`, `onSessionRestore`,
-  `onSessionExpiration`, `onNewRefreshToken` are deprecated in favor of `session.events.on`
-  called with the appropriate event name.
-
 ## Unreleased
 
 The following changes have been implemented but not released yet:
@@ -27,6 +13,12 @@ The following changes have been implemented but not released yet:
 
 - Use the global `fetch` function instead of `@inrupt/universal-fetch`. This means this library now only works
   with Node 18 and higher.
+- The `Session` class no longer extends `EventEmitter`. Instead, it exposes an `events` attribute implementing
+  `EventEmitter`. We do not recommand to use `Session` instance's `events` attribute as an arbitrary events emitter,
+  and encourage users to only use the supported events and documented API.
+- `Session` methods `onLogin`, `onLogout`, `onError`, `onSessionRestore`,
+  `onSessionExpiration`, `onNewRefreshToken` have been removed. They are replaced by calls to `session.events.on`,
+  using the appropriate event name.
 - The UMD build of `@inrupt/oidc-client-ext` is no longer available. Since this is a package only intended to be
   consumed by `@inrupt/solid-client-authn-browser`, which doesn't have a UMD build, this change should have no
   impact.
