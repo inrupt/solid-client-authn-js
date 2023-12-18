@@ -3,3 +3,5 @@ docs
 coverage
 report
 .vscode
+.prettierignore
+sonar-project.properties
