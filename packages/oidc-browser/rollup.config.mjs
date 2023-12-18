@@ -34,11 +34,6 @@ export default {
       file: pkg.module,
       format: "esm",
     },
-    // {
-    //   dir: "umd",
-    //   format: "umd",
-    //   name: "OidcDpopClient",
-    // },
   ],
   ...createSharedConfig(pkg),
 };
