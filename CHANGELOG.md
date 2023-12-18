@@ -25,6 +25,7 @@ The following changes have been implemented but not released yet:
 - The UMD build of `@inrupt/oidc-client-ext` is no longer available. Since this is a package only intended to be
   consumed by `@inrupt/solid-client-authn-browser`, which doesn't have a UMD build, this change should have no
   impact.
+- The deprecated `useEssSession` parameter is no longer supported by the `Session` constructor.
 
 ### Build system changes
 
