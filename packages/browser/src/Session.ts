@@ -30,7 +30,7 @@ import type {
   ISessionEventListener,
   ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
-import { EVENTS, buildProxyHandler } from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import EventEmitter from "events";
 import type ClientAuthentication from "./ClientAuthentication";

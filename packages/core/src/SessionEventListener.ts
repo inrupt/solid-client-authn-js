@@ -18,7 +18,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-import { EventEmitter } from "events";
+import type { EventEmitter } from "events";
 import type { EVENTS } from "./constant";
 
 export interface IHasSessionEventListener {
