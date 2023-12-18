@@ -27,6 +27,14 @@ The following changes have been implemented but not released yet:
 
 - Use the global `fetch` function instead of `@inrupt/universal-fetch`. This means this library now only works
   with Node 18 and higher.
+- The UMD build of `@inrupt/oidc-client-ext` is no longer available. Since this is a package only intended to be
+  consumed by `@inrupt/solid-client-authn-browser`, which doesn't have a UMD build, this change should have no
+  impact.
+
+### Build system changes
+
+- Moved from `rollup-plugin-typescript2` to `@rollup/plugin-typescript`. Although this should not be a breaking change,
+upgrading may require extra attention.
 
 ## [1.17.5](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.5) - 2023-11-16
 
