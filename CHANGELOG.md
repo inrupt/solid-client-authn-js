@@ -34,7 +34,7 @@ The following changes have been implemented but not released yet:
 ### Build system changes
 
 - Moved from `rollup-plugin-typescript2` to `@rollup/plugin-typescript`. Although this should not be a breaking change,
-upgrading may require extra attention.
+  upgrading may require extra attention.
 
 ## [1.17.5](https://github.com/inrupt/solid-client-authn-js/releases/tag/v1.17.5) - 2023-11-16
 
