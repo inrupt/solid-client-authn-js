@@ -11,7 +11,7 @@
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^2.4.0",
     "@inrupt/solid-client-authn-browser": "^1.17.5",
-    "@inrupt/solid-ui-react": "^2.9.0",
+    "@inrupt/solid-ui-react": "^2.9.1",
     "next": "^14.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"

@@ -243,7 +243,7 @@ describe("ClientAuthentication", () => {
       const session = new Session();
       const url =
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
-      await clientAuthn.handleIncomingRedirect(url, session);
+      await clientAuthn.handleIncomingRedirect(url, session.events);
 
       // Calling the redirect handler should give us an authenticated fetch.
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
@@ -333,14 +333,14 @@ describe("ClientAuthentication", () => {
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
-        session,
+        session.events,
       );
       expect(redirectInfo).toEqual({
         ...SessionCreatorCreateResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        session,
+        session.events,
       );
 
       // Calling the redirect handler should have updated the fetch.
@@ -355,14 +355,14 @@ describe("ClientAuthentication", () => {
         "https://coolapp.com/redirect?state=userId&id_token=idToken&access_token=accessToken";
       const redirectInfo = await clientAuthn.handleIncomingRedirect(
         url,
-        session,
+        session.events,
       );
       expect(redirectInfo).toEqual({
         ...SessionCreatorCreateResponse,
       });
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
-        session,
+        session.events,
       );
 
       // Calling the redirect handler should have updated the fetch.

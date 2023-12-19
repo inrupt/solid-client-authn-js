@@ -48,9 +48,8 @@ import { ErrorOidcHandler } from "./login/oidc/incomingRedirectHandler/ErrorOidc
 import TokenRefresher from "./login/oidc/refresh/TokenRefresher";
 
 /**
- *
  * @param dependencies
- * @deprecated This function will be removed from the external API in an upcoming release.
+ * @hidden
  */
 export function getClientAuthenticationWithDependencies(dependencies: {
   secureStorage?: IStorage;
