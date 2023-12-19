@@ -19,7 +19,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-export { Session, ISessionOptions } from "./Session";
+export {
+  Session,
+  ISessionOptions,
+  IHandleIncomingRedirectOptions,
+} from "./Session";
 
 export * from "./defaultSession";
 
@@ -32,5 +36,6 @@ export {
   NotImplementedError,
   ConfigurationError,
   InMemoryStorage,
+  IHasSessionEventListener,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
