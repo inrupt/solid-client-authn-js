@@ -27,6 +27,7 @@ import {
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
+import { EventEmitter } from "stream";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import { Session } from "./Session";
 import { LocalStorageMock } from "./storage/__mocks__/LocalStorage";
@@ -154,7 +155,7 @@ describe("Session", () => {
         expect.objectContaining({
           tokenType: "Bearer",
         }),
-        mySession,
+        mySession.events,
       );
     });
 
@@ -244,7 +245,7 @@ describe("Session", () => {
       await mySession.handleIncomingRedirect();
       expect(incomingRedirectHandler).toHaveBeenCalledWith(
         "https://some.url",
-        mySession,
+        mySession.events,
       );
     });
 
@@ -334,7 +335,10 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect("https://some.url");
       expect(mySession.info.expirationDate).toBe(MOCK_TIMESTAMP + 1337);
-      mySession.emit(EVENTS.SESSION_EXTENDED, 1337 * 2);
+      (mySession.events as EventEmitter).emit(
+        EVENTS.SESSION_EXTENDED,
+        1337 * 2,
+      );
       expect(mySession.info.expirationDate).toBe(
         MOCK_TIMESTAMP + 1337 * 2 * 1000,
       );
@@ -568,10 +572,10 @@ describe("Session", () => {
         },
         expect.anything(),
       );
-      // Check that second parameter is of type session
+      // Check that second parameter is an event emitter
       expect(
         (clientAuthentication.login as any).mock.calls[0][1],
-      ).toBeInstanceOf(Session);
+      ).toBeInstanceOf(EventEmitter);
     });
 
     it("resolves handleIncomingRedirect if silent authentication could not be started", async () => {
@@ -753,151 +757,9 @@ describe("Session", () => {
       });
 
       const mySession = new Session({ clientAuthentication });
-      mySession.emit(EVENTS.SESSION_EXPIRED);
+      (mySession.events as EventEmitter).emit(EVENTS.SESSION_EXPIRED);
       // The local storage should have been cleared by the auth error
       expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
-    });
-  });
-
-  describe("legacy events handlers", () => {
-    describe("onError", () => {
-      it("calls the registered callback on error", async () => {
-        const onErrorCallback = jest.fn();
-        const mySession = new Session();
-        mySession.onError(onErrorCallback);
-        mySession.emit(EVENTS.ERROR, "error", "error_description");
-        expect(onErrorCallback).toHaveBeenCalledWith(
-          "error",
-          "error_description",
-        );
-      });
-    });
-
-    describe("onLogin", () => {
-      it("calls the registered callback on login", async () => {
-        const myCallback = jest.fn();
-        const clientAuthentication = mockClientAuthentication();
-        clientAuthentication.handleIncomingRedirect = (
-          jest.fn() as any
-        ).mockResolvedValue({
-          isLoggedIn: true,
-          sessionId: "a session ID",
-          webId: "https://some.webid#them",
-        });
-        mockLocalStorage({});
-        const mySession = new Session({ clientAuthentication });
-        mySession.onLogin(myCallback);
-        await mySession.handleIncomingRedirect("https://some.url");
-        expect(myCallback).toHaveBeenCalled();
-      });
-
-      it("does not call the registered callback if login isn't successful", async () => {
-        const failCallback = (): void => {
-          throw new Error(
-            "Should *NOT* call callback - this means test has failed!",
-          );
-        };
-        const clientAuthentication = mockClientAuthentication();
-        clientAuthentication.handleIncomingRedirect = jest.fn(
-          async (_url: string) => {
-            return {
-              isLoggedIn: false,
-              sessionId: "a session ID",
-              webId: "https://some.webid#them",
-            };
-          },
-        );
-        const mySession = new Session({ clientAuthentication });
-        mySession.onLogin(failCallback);
-        await expect(
-          mySession.handleIncomingRedirect("https://some.url"),
-        ).resolves.not.toThrow();
-      });
-
-      it("sets the appropriate information before calling the callback", async () => {
-        const clientAuthentication = mockClientAuthentication();
-        clientAuthentication.handleIncomingRedirect = jest.fn(
-          async (_url: string) => {
-            return {
-              isLoggedIn: true,
-              sessionId: "a session ID",
-              webId: "https://some.webid#them",
-            };
-          },
-        );
-        const mySession = new Session({ clientAuthentication });
-        const myCallback = jest.fn((): void => {
-          expect(mySession.info.webId).toBe("https://some.webid#them");
-        });
-        mySession.onLogin(myCallback);
-        await mySession.handleIncomingRedirect("https://some.url");
-        expect(myCallback).toHaveBeenCalled();
-        // Verify that the conditional assertion has been called
-        expect.assertions(2);
-      });
-    });
-
-    describe("onLogout", () => {
-      it("calls the registered callback on logout", async () => {
-        const myCallback = jest.fn();
-        const mySession = new Session({
-          clientAuthentication: mockClientAuthentication(),
-        });
-
-        mySession.onLogout(myCallback);
-        await mySession.logout();
-        expect(myCallback).toHaveBeenCalled();
-      });
-    });
-
-    describe("onSessionRestore", () => {
-      it("calls the registered callback on session restore", async () => {
-        // Set our window's location to our test value.
-        const defaultLocation = "https://coolSite.com/resource";
-        const currentLocation = "https://coolSite.com/redirect";
-
-        // This pretends we have previously triggered silent authentication and stored
-        // the location.
-        mockLocalStorage({
-          [KEY_CURRENT_URL]: defaultLocation,
-        });
-        // This acts as the URL the user has been redirected to.
-        mockLocation(currentLocation);
-        // This pretends the login is successful.
-        const clientAuthentication = mockClientAuthentication();
-        clientAuthentication.handleIncomingRedirect = (
-          jest.fn() as any
-        ).mockResolvedValue({
-          isLoggedIn: true,
-          sessionId: "a session ID",
-          webId: "https://some.webid#them",
-        });
-
-        const mySession = new Session({
-          clientAuthentication,
-        });
-        const myCallback = (urlBeforeRestore: string): void => {
-          expect(urlBeforeRestore).toEqual(defaultLocation);
-        };
-
-        mySession.onSessionRestore(myCallback);
-        await mySession.handleIncomingRedirect(currentLocation);
-
-        // This verifies that the callback has been called
-        expect.assertions(1);
-      });
-    });
-
-    describe("onSessionExpiration", () => {
-      it("calls the provided callback when receiving the appropriate event", async () => {
-        const myCallback = jest.fn();
-        const mySession = new Session({
-          clientAuthentication: mockClientAuthentication(),
-        });
-        mySession.onSessionExpiration(myCallback);
-        mySession.emit(EVENTS.SESSION_EXPIRED);
-        expect(myCallback).toHaveBeenCalled();
-      });
     });
   });
 
@@ -1005,25 +867,6 @@ describe("Session", () => {
         // This verifies that the callback has been called
         expect.assertions(1);
       });
-    });
-  });
-
-  describe("proxies events to the session", () => {
-    // This describe block is only required as long as Session extends the EventEmitter
-    // class.
-    it("proxies the EventEmitter calls from events to the session object", () => {
-      const mySession = new Session();
-      const spiedOn = jest.spyOn(mySession, "on");
-      mySession.events.on("login", jest.fn());
-      expect(spiedOn).toHaveBeenCalled();
-    });
-
-    it("throws on calls from events which aren't part of the EventEmitter interface", () => {
-      const mySession = new Session();
-      // @ts-expect-error onLogin is a function on Session, and not SessionEventEmitter
-      expect(() => mySession.events.onLogin(jest.fn())).toThrow(
-        "[onLogin] is not supported",
-      );
     });
   });
 });

@@ -26,7 +26,7 @@ jobs:
       # the browser so we only need to test in one.
       - uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version-file: ".nvmrc"
           cache: npm
       - run: npm ci
         if: github.actor != 'dependabot[bot]'

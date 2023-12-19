@@ -30,7 +30,7 @@ import type {
   ISessionEventListener,
   ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
-import { EVENTS, buildProxyHandler } from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import EventEmitter from "events";
 import type ClientAuthentication from "./ClientAuthentication";
@@ -65,29 +65,11 @@ export interface IHandleIncomingRedirectOptions {
    * If your app's access has not expired yet and re-activation completed
    * successfully, a `sessionRestore` event will be fired with the URL the user
    * was at before they were redirected to their Solid Identity Provider.
-   * {@see onSessionRestore}
+   * See {@link ISessionEventListener}: a callback can be registered to
+   * `session.events.on(EVENTS.SESSION_RESTORED, callback)`.
    */
   restorePreviousSession?: boolean;
 
-  /**
-   * Inrupt's Enterprise Solid Server can set a cookie to allow the browser to
-   * access private resources on a Pod. In order to mitigate the logout-on-refresh
-   * issue on the short term, the server also implemented a session endpoint
-   * enabling the client app to know whether the cookie is set. When a user
-   * logs in to a server that has that capability enabled, applications that set
-   * this option to `true` will be able to make use of it.
-   *
-   * If your app supports the newest session restore approach, and `restorePreviousSession`
-   * is set to true, this option is automatically set to false, but your app will
-   * not be logged out when reloaded.
-   *
-   * `useEssSession` defaults to false and will be removed in the future; to
-   * preserve sessions across page reloads, use of `restorePreviousSession` is
-   * recommended.
-   *
-   * @deprecated unreleased
-   */
-  useEssSession?: boolean;
   /**
    * The URL of the page handling the redirect, including the query
    * parameters — these contain the information to process the login.
@@ -135,7 +117,7 @@ function isLoggedIn(
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter implements IHasSessionEventListener {
+export class Session implements IHasSessionEventListener {
   /**
    * Information regarding the current session.
    */
@@ -171,18 +153,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId: string | undefined = undefined,
   ) {
-    super();
-    // Until Session no longer implements EventEmitter, this.events is just a proxy
-    // to this (with some interface filtering). When we make the breaking change,
-    // this.events will be a regular EventEmitter (implementing ISessionEventEmitter):
-    // this.events = new EventEmitter();
-    this.events = new Proxy(
-      this,
-      buildProxyHandler(
-        Session.prototype,
-        "events only implements ISessionEventListener",
-      ),
-    );
+    this.events = new EventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.secureStorage && sessionOptions.insecureStorage) {
@@ -320,7 +291,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
    * Completes the login process by processing the information provided by the
    * Solid identity provider through redirect.
    *
-   * @param options See {@see IHandleIncomingRedirectOptions}.
+   * @param options See {@link IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
     inputOptions: string | IHandleIncomingRedirectOptions = {},
@@ -382,68 +353,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.tokenRequestInProgress = false;
     return sessionInfo;
   };
-
-  /**
-   * Register a callback function to be called when a user completes login.
-   *
-   * The callback is called when {@link handleIncomingRedirect} completes successfully.
-   *
-   * @param callback The function called when a user completes login.
-   * @deprecated Prefer session.events.on(EVENTS.LOGIN, callback)
-   */
-  onLogin(callback: () => unknown): void {
-    this.events.on(EVENTS.LOGIN, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a user logs out:
-   *
-   * @param callback The function called when a user completes logout.
-   * @deprecated Prefer session.events.on(EVENTS.LOGOUT, callback)
-   */
-  onLogout(callback: () => unknown): void {
-    this.events.on(EVENTS.LOGOUT, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a user logs out:
-   *
-   * @param callback The function called when an error occurs.
-   * @since 1.11.0
-   * @deprecated Prefer session.events.on(EVENTS.ERROR, callback)
-   */
-  onError(
-    callback: (
-      error: string | null,
-      errorDescription?: string | null,
-    ) => unknown,
-  ): void {
-    this.events.on(EVENTS.ERROR, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a session is restored.
-   *
-   * Note: the callback will be called with the saved value of the 'current URL'
-   * at the time the session was restored.
-   *
-   * @param callback The function called when a user's already logged-in session is restored, e.g., after a silent authentication is completed after a page refresh.
-   * @deprecated Prefer session.events.on(EVENTS.SESSION_RESTORED, callback)
-   */
-  onSessionRestore(callback: (currentUrl: string) => unknown): void {
-    this.events.on(EVENTS.SESSION_RESTORED, callback);
-  }
-
-  /**
-   * Register a callback that runs when the session expires and can no longer
-   * make authenticated requests, but following a user logout.
-   * @param callback The function that runs on session expiration.
-   * @since 1.11.0
-   * @deprecated Prefer session.events.on(EVENTS.SESSION_EXPIRED, callback)
-   */
-  onSessionExpiration(callback: () => unknown): void {
-    this.events.on(EVENTS.SESSION_EXPIRED, callback);
-  }
 
   private setSessionInfo(
     sessionInfo: ISessionInfo & { isLoggedIn: true },

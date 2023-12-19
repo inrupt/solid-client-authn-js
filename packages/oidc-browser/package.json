@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.8",
     "@types/uuid": "^9.0.4",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@inrupt/oidc-client": "^1.11.6",

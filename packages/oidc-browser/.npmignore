@@ -1,8 +1,6 @@
-.git
-docs
 coverage
 report
 .vscode
-examples
 .prettierignore
+README.md
 sonar-project.properties
