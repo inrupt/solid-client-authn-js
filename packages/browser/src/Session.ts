@@ -65,7 +65,8 @@ export interface IHandleIncomingRedirectOptions {
    * If your app's access has not expired yet and re-activation completed
    * successfully, a `sessionRestore` event will be fired with the URL the user
    * was at before they were redirected to their Solid Identity Provider.
-   * {@see onSessionRestore}
+   * {@see ISessionEventListener}: a callback can be registered to
+   * `session.events.on(SESSION_RESTORED, callback).
    */
   restorePreviousSession?: boolean;
 
