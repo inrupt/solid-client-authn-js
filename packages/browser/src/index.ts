@@ -39,5 +39,6 @@ export {
   IHasSessionEventListener,
   ISessionEventListener,
   IEndSessionOptions,
+  ILogoutOptions,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
