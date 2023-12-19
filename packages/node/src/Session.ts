@@ -30,11 +30,7 @@ import type {
   IHasSessionEventListener,
   ILogoutOptions,
 } from "@inrupt/solid-client-authn-core";
-import {
-  InMemoryStorage,
-  EVENTS,
-  buildProxyHandler,
-} from "@inrupt/solid-client-authn-core";
+import { InMemoryStorage, EVENTS } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import EventEmitter from "events";
 import type ClientAuthentication from "./ClientAuthentication";
@@ -74,11 +70,6 @@ export interface ISessionOptions {
    * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
    */
   clientAuthentication: ClientAuthentication;
-  /**
-   * A callback that gets invoked whenever a new refresh token is obtained.
-   * @deprecated Prefer calling Session::onNewRefreshToken instead.
-   */
-  onNewRefreshToken?: (newToken: string) => unknown;
 }
 
 /**
@@ -89,7 +80,7 @@ export const defaultStorage = new InMemoryStorage();
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
  */
-export class Session extends EventEmitter implements IHasSessionEventListener {
+export class Session implements IHasSessionEventListener {
   /**
    * Information regarding the current session.
    */
@@ -129,18 +120,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     sessionOptions: Partial<ISessionOptions> = {},
     sessionId: string | undefined = undefined,
   ) {
-    super();
-    // Until Session no longer implements EventEmitter, this.events is just a proxy
-    // to this (with some interface filtering). When we make the breaking change,
-    // this.events will be a regular SessionEventsEmitter.
-    // this.events = new EventEmitter();
-    this.events = new Proxy(
-      this,
-      buildProxyHandler(
-        Session.prototype,
-        "events only implements ISessionEventListener",
-      ),
-    );
+    this.events = new EventEmitter();
     if (sessionOptions.clientAuthentication) {
       this.clientAuthentication = sessionOptions.clientAuthentication;
     } else if (sessionOptions.storage) {
@@ -171,12 +151,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
         sessionId: sessionId ?? v4(),
         isLoggedIn: false,
       };
-    }
-    if (sessionOptions.onNewRefreshToken !== undefined) {
-      this.events.on(
-        EVENTS.NEW_REFRESH_TOKEN,
-        sessionOptions.onNewRefreshToken,
-      );
     }
     // Keeps track of the latest timeout handle in order to clean up on logout
     // and not leave open timeouts.
@@ -323,37 +297,4 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     }
     return sessionInfo;
   };
-
-  /**
-   * Register a callback function to be called when a user completes login.
-   *
-   * The callback is called when {@link handleIncomingRedirect} completes successfully.
-   *
-   * @param callback The function called when a user completes login.
-   * @deprecated Prefer session.events.on(EVENTS.LOGIN, callback)
-   */
-  onLogin(callback: () => unknown): void {
-    this.events.on(EVENTS.LOGIN, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a user logs out:
-   *
-   * @param callback The function called when a user completes logout.
-   * @deprecated Prefer session.events.on(EVENTS.LOGOUT, callback)
-   */
-  onLogout(callback: () => unknown): void {
-    this.events.on(EVENTS.LOGOUT, callback);
-  }
-
-  /**
-   * Register a callback function to be called when a new Refresh Token is issued
-   * for the session. This helps keeping track of refresh token rotation.
-   *
-   * @param callback The function called when a new refresh token is issued.
-   * @deprecated Prefer session.events.on(EVENTS.NEW_REFRESH_TOKEN, callback)
-   */
-  onNewRefreshToken(callback: (newToken: string) => unknown): void {
-    this.events.on(EVENTS.NEW_REFRESH_TOKEN, callback);
-  }
 }

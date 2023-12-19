@@ -19,7 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type { IStorage } from "@inrupt/solid-client-authn-core";
+import { EVENTS, type IStorage } from "@inrupt/solid-client-authn-core";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
@@ -62,8 +62,10 @@ export async function getSessionFromStorage(
   const session = new Session({
     sessionInfo,
     clientAuthentication: clientAuth,
-    onNewRefreshToken,
   });
+  if (onNewRefreshToken !== undefined) {
+    session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
+  }
   if (sessionInfo.refreshToken) {
     await session.login({
       oidcIssuer: sessionInfo.issuer,

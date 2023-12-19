@@ -1,16 +1,30 @@
-// The following is only possible from Node 18 onwards
-// import pkg from "./package.json" assert { type: "json" };
+//
+// Copyright Inrupt Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+// Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
-// Until we only support Node 18+, this should be used instead
-// (see https://rollupjs.org/guide/en/#importing-packagejson)
-import { createRequire } from "node:module";
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import terser from '@rollup/plugin-terser';
-import createConfig, { createSharedConfig } from '@inrupt/base-rollup-config';
-
-const require = createRequire(import.meta.url);
-const pkg = require("./package.json");
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import terser from "@rollup/plugin-terser";
+import createConfig, { createSharedConfig } from "@inrupt/base-rollup-config";
+// eslint-disable-next-line import/extensions
+import pkg from "./package.json" assert { type: "json" };
 
 export default [
   ...createConfig(pkg),
@@ -35,12 +49,12 @@ export default [
         browser: true,
         // Bundles in the events library from the node_modules
         // rather than trying to use the node events library
-        preferBuiltins: false
+        preferBuiltins: false,
       }),
       // Adds support for importing cjs libraries such as the 'events' library
       commonjs(),
       // Minifies the browser bundle
       terser(),
-    ]
+    ],
   },
 ];

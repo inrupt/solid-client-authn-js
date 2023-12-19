@@ -42,11 +42,11 @@
     "build-demo-app": "npm run build; cd packages/browser/examples/demoClientApp/; npm ci; npm run build; mkdir -p ../../../../dist/website/demo/; cp -r dist/. ../../../../dist/website/demo/"
   },
   "devDependencies": {
-    "@inrupt/base-rollup-config": "^2.6.0",
-    "@inrupt/eslint-config-lib": "^2.5.0",
-    "@inrupt/internal-playwright-helpers": "^2.6.0",
-    "@inrupt/internal-test-env": "^2.6.0",
-    "@inrupt/jest-jsdom-polyfills": "^2.6.0",
+    "@inrupt/base-rollup-config": "^3.0.0",
+    "@inrupt/eslint-config-lib": "^3.0.0",
+    "@inrupt/internal-playwright-helpers": "^3.0.0",
+    "@inrupt/internal-test-env": "^3.0.0",
+    "@inrupt/jest-jsdom-polyfills": "^3.0.0",
     "@inrupt/solid-client": "^1.30.2",
     "@playwright/test": "^1.40.0",
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -73,7 +73,7 @@
     "rollup": "^3.29.2",
     "rollup-plugin-typescript2": "^0.36.0",
     "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typedoc": "^0.25.4",
     "typedoc-plugin-markdown": "^3.17.1",
     "typescript": "^5.3.3"
