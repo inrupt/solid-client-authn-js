@@ -37,5 +37,7 @@ export {
   ConfigurationError,
   InMemoryStorage,
   IHasSessionEventListener,
+  ISessionEventListener,
+  IEndSessionOptions,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
