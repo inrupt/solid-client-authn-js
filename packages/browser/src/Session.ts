@@ -66,7 +66,7 @@ export interface IHandleIncomingRedirectOptions {
    * successfully, a `sessionRestore` event will be fired with the URL the user
    * was at before they were redirected to their Solid Identity Provider.
    * See {@link ISessionEventListener}: a callback can be registered to
-   * `session.events.on(SESSION_RESTORED, callback)`.
+   * `session.events.on(EVENTS.SESSION_RESTORED, callback)`.
    */
   restorePreviousSession?: boolean;
 
