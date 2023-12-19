@@ -65,7 +65,7 @@ export interface IHandleIncomingRedirectOptions {
    * If your app's access has not expired yet and re-activation completed
    * successfully, a `sessionRestore` event will be fired with the URL the user
    * was at before they were redirected to their Solid Identity Provider.
-   * {@see ISessionEventListener}: a callback can be registered to
+   * See {@link ISessionEventListener}: a callback can be registered to
    * `session.events.on(SESSION_RESTORED, callback).
    */
   restorePreviousSession?: boolean;
@@ -291,7 +291,7 @@ export class Session implements IHasSessionEventListener {
    * Completes the login process by processing the information provided by the
    * Solid identity provider through redirect.
    *
-   * @param options See {@see IHandleIncomingRedirectOptions}.
+   * @param options See {@link IHandleIncomingRedirectOptions}.
    */
   handleIncomingRedirect = async (
     inputOptions: string | IHandleIncomingRedirectOptions = {},
