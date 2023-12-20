@@ -9,24 +9,26 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## [2.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.0.0) - 2023-12-20
+
 ### Breaking Changes
 
-- Use the global `fetch` function instead of `@inrupt/universal-fetch`. This means this library now only works
-  with Node 18 and higher.
+- Node 16 is no longer supported. The global `fetch` function is used instead of `@inrupt/universal-fetch`.
+  This means this library now only works with Node 18 and higher.
 - The `Session` class no longer extends `EventEmitter`. Instead, it exposes an `events` attribute implementing
-  `EventEmitter`. We do not recommand to use `Session` instance's `events` attribute as an arbitrary events emitter,
+  `EventEmitter`. We do not recommend to use `Session` instance's `events` attribute as an arbitrary events emitter,
   and encourage users to only use the supported events and documented API.
-- `Session` methods `onLogin`, `onLogout`, `onError`, `onSessionRestore`,
-  `onSessionExpiration`, `onNewRefreshToken` have been removed. They are replaced by calls to `session.events.on`,
-  using the appropriate event name.
-- `onNewRefreshToken` is no longer supported as an option to the `Session` constructor. Its usage is replaced by
-  calling `session.events.on` using the `EVENTS.NEW_REFRESH_TOKEN` constant as a first parameter, and a callback
-  handling the token as a second parameter.
+- `Session` methods `onLogin`, `onLogout`, `onError`, `onSessionRestore`, `onSessionExpiration` and `onNewRefreshToken`
+  have been removed. They are replaced by calls to `session.events.on`, using the appropriate event name.
+- `Session` constructor changes:
+  - the `onNewRefreshToken` parameter is no longer supported. Its usage is replaced by calling `session.events.on`
+    using the `EVENTS.NEW_REFRESH_TOKEN` constant as a first parameter, and a callback handling the token as a
+    second parameter.
+  - The `useEssSession` parameter is no longer supported.
+- The `getClientAuthenticationWithDependencies` is no longer exported as part of the public API, and is now internal-only.
 - The UMD build of `@inrupt/oidc-client-ext` is no longer available. Since this is a package only intended to be
   consumed by `@inrupt/solid-client-authn-browser`, which doesn't have a UMD build, this change should have no
   impact.
-- The `useEssSession` parameter is no longer supported by the `Session` constructor.
-- The `getClientAuthenticationWithDependencies` is no longer exported as part of the public API, and is now internal-only.
 
 ### Build system changes
 
