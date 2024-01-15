@@ -55,7 +55,7 @@
     "@types/dotenv-flow": "^3.3.3",
     "@types/http-link-header": "^1.0.3",
     "@types/jest": "^29.5.8",
-    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.6.0",
     "dotenv-flow": "^4.0.1",
     "eslint": "^8.55.0",
