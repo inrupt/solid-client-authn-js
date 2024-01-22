@@ -43,8 +43,7 @@ export {
 
 export { registerClient } from "./dcr/clientRegistrar";
 export {
-  getDpopToken,
-  getBearerToken,
+  getTokens,
   TokenEndpointInput,
   CodeExchangeResult,
 } from "./dpop/tokenExchange";

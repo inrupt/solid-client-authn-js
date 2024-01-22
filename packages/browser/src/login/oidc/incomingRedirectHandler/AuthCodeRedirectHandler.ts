@@ -40,7 +40,7 @@ import {
   maybeBuildRpInitiatedLogout,
 } from "@inrupt/solid-client-authn-core";
 import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
-import { getDpopToken, getBearerToken } from "@inrupt/oidc-client-ext";
+import { getTokens } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
 
 /**
@@ -132,26 +132,24 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       issuerConfig,
     );
 
-    let tokens: CodeExchangeResult;
     const tokenCreatedAt = Date.now();
-
-    if (isDpop) {
-      tokens = await getDpopToken(issuerConfig, client, {
+    const tokens = await getTokens(
+      issuerConfig,
+      client,
+      {
         grantType: "authorization_code",
         // We rely on our 'canHandle' function checking that the OAuth 'code'
         // parameter is present in our query string.
         code: url.searchParams.get("code") as string,
         codeVerifier,
         redirectUrl: storedRedirectIri,
-      });
+      },
+      isDpop,
+    );
 
-      // Delete oidc-client-specific session information from storage. This is
-      // done automatically when retrieving a bearer token, but since the DPoP
-      // binding uses our custom code, this needs to be done manually.
-      window.localStorage.removeItem(`oidc.${oauthState}`);
-    } else {
-      tokens = await getBearerToken(url.toString());
-    }
+    // Delete oidc-client-specific session information from storage. oidc-client
+    // is no longer used for the token exchange, so it doesn't perform this automatically.
+    window.localStorage.removeItem(`oidc.${oauthState}`);
 
     let refreshOptions: RefreshOptions | undefined;
     if (tokens.refreshToken !== undefined) {
