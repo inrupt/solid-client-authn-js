@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.3",
-    "@types/uuid": "^9.0.4"
+    "@types/uuid": "^9.0.7"
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^2.0.0",
