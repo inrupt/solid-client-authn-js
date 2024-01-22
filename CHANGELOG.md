@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### browser
+
+- Fix non-DPoP bound tokens support in browser: a bug in the handling of non-DPoP-bound tokens was
+  preventing the auth code grant to complete, with a 401 to the OpenId Provider Token Endpoint
+  observed on redirect after the user authenticated. It is now possible to do 
+  `session.login({/*...*/, tokenType: "Bearer"})` and get a successful result.
+
 ## [2.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.0.0) - 2023-12-20
 
 ### Breaking Changes
