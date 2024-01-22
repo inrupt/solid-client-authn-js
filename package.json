@@ -44,7 +44,7 @@
   "devDependencies": {
     "@inrupt/base-rollup-config": "^3.0.0",
     "@inrupt/eslint-config-lib": "^3.0.2",
-    "@inrupt/internal-playwright-helpers": "^3.0.0",
+    "@inrupt/internal-playwright-helpers": "^3.0.2",
     "@inrupt/internal-test-env": "^3.0.2",
     "@inrupt/jest-jsdom-polyfills": "^3.0.2",
     "@inrupt/solid-client": "^1.30.2",
