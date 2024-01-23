@@ -43,8 +43,6 @@ import {
   saveSolidDatasetAt,
   getThing,
   getUrlAll,
-  access_v1,
-  access_v2,
   deleteFile,
   createContainerInContainer,
   overwriteFile,
@@ -452,8 +450,7 @@ export const test = base.extend<Fixtures>({
       session,
     });
 
-    const { setPublicAccess, setAgentAccess } =
-      setupEnvironment.environment === "ESS PodSpaces" ? access_v1 : access_v2;
+    const { setPublicAccess, setAgentAccess } = universalAccess;
 
     await setPublicAccess(
       publicFileUrl,
