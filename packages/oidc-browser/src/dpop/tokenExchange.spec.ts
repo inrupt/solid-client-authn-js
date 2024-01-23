@@ -22,12 +22,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import type { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 
-import {
-  // getBearerToken,
-  // getDpopToken,
-  getTokens,
-  validateTokenEndpointResponse,
-} from "./tokenExchange";
+import { getTokens, validateTokenEndpointResponse } from "./tokenExchange";
 import {
   mockBearerAccessToken,
   mockBearerTokens,
