@@ -396,134 +396,24 @@ describe("getTokens", () => {
     );
     expect(result?.webId).toBe("https://some.webid#me");
   });
-});
 
-// describe("getDpopToken", () => {
-//   it("requests a key-bound token, and returns the appropriate key with the token", async () => {
-//     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
-//     /* eslint-disable @typescript-eslint/no-explicit-any */
-//     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
-//     core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
-//     core.generateDpopKeyPair = jest.fn(() => Promise.resolve("some DPoP keys"));
-//     const tokens = await getDpopToken(
-//       mockIssuer(),
-//       mockClient(),
-//       mockEndpointInput(),
-//     );
-//     expect(myFetch.mock.calls[0][0]).toBe(
-//       mockIssuer().tokenEndpoint.toString(),
-//     );
-//     const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-//     expect(headers.DPoP).toBe("some DPoP header");
-//     expect(tokens.dpopKey).toBe("some DPoP keys");
-//   });
-// });
-
-jest.mock("@inrupt/oidc-client");
-
-const defaultOidcClient = {
-  metadata: {
-    jwks_uri: "https://some.jwks",
-    issuer: "https://some.issuer",
-  },
-  client_id: "some client id",
-};
-const mockOidcClient = (clientSettings: any = defaultOidcClient) => {
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const { processSigninResponse } = jest.requireActual(
-    "@inrupt/oidc-client",
-  ) as any;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const oidcModule = jest.requireMock("@inrupt/oidc-client") as any;
-  oidcModule.OidcClient = jest.fn().mockImplementation(() => {
-    return {
-      processSigninResponse: async (
-        redirectUrl: string,
-      ): Promise<ReturnType<typeof processSigninResponse>> => {
-        if (redirectUrl === "https://invalid.url") {
-          throw new Error("Dummy error");
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore Ignore because we don't need to mock out all data fields.
-        return Promise.resolve({
-          access_token: mockBearerAccessToken(),
-          id_token: mockIdToken(),
-        });
-      },
-      settings: clientSettings,
-    };
+  it("requests a key-bound token, and returns the appropriate key with the token", async () => {
+    const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
+    core.generateDpopKeyPair = jest.fn(() => Promise.resolve("some DPoP keys"));
+    const tokens = await getTokens(
+      mockIssuer(),
+      mockClient(),
+      mockEndpointInput(),
+      true,
+    );
+    expect(myFetch.mock.calls[0][0]).toBe(
+      mockIssuer().tokenEndpoint.toString(),
+    );
+    const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
+    expect(headers.DPoP).toBe("some DPoP header");
+    expect(tokens.dpopKey).toBe("some DPoP keys");
   });
-};
-
-// describe("getBearerToken", () => {
-//   it("returns the tokens returned by the endpoint", async () => {
-//     mockOidcClient();
-//     mockFetch(JSON.stringify(mockBearerTokens()), 200);
-//     const tokens = await getBearerToken("https://my.app/redirect");
-//     expect(tokens.accessToken).toEqual(mockBearerAccessToken());
-//     expect(tokens.idToken).toEqual(mockIdToken());
-//     expect(tokens.dpopKey).toBeUndefined();
-//   });
-
-//   it("throws if client metadata are undefined", async () => {
-//     mockOidcClient({
-//       metadata: undefined,
-//       client_id: "some client id",
-//     });
-//     mockFetch(JSON.stringify(mockBearerTokens()), 200);
-//     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-//       "Cannot retrieve issuer metadata from client information in storage.",
-//     );
-//   });
-
-//   it("throws if client metadata don't include a JWKS URI", async () => {
-//     mockOidcClient({
-//       metadata: {
-//         jwks_uri: undefined,
-//         issuer: "https://some.issuer",
-//       },
-//       client_id: "some client id",
-//     });
-//     mockFetch(JSON.stringify(mockBearerTokens()), 200);
-//     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-//       "Missing some issuer metadata from client information in storage: 'jwks_uri' is undefined",
-//     );
-//   });
-
-//   it("throws if client metadata don't include an issuer URI", async () => {
-//     mockOidcClient({
-//       metadata: {
-//         jwks_uri: "https://some.jwks",
-//         issuer: undefined,
-//       },
-//       client_id: "some client id",
-//     });
-//     mockFetch(JSON.stringify(mockBearerTokens()), 200);
-//     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-//       "Missing some issuer metadata from client information in storage: 'issuer' is undefined",
-//     );
-//   });
-
-//   it("throws if client metadata don't include a client ID", async () => {
-//     mockOidcClient({
-//       metadata: {
-//         jwks_uri: "https://some.jwks",
-//         issuer: "https://some.jwks",
-//       },
-//       client_id: undefined,
-//     });
-//     mockFetch(JSON.stringify(mockBearerTokens()), 200);
-//     await expect(getBearerToken("https://my.app/redirect")).rejects.toThrow(
-//       "Missing some client information in storage: 'client_id' is undefined",
-//     );
-//   });
-
-//   it("wraps oidc-client errors", async () => {
-//     mockOidcClient();
-//     mockFetch("", 200);
-//     const tokenRequest = getBearerToken("https://invalid.url");
-//     await expect(tokenRequest).rejects.toThrow(
-//       `Problem handling Auth Code Grant (Flow) redirect - URL [https://invalid.url]: Error: Dummy error`,
-//     );
-//   });
-// });
+});

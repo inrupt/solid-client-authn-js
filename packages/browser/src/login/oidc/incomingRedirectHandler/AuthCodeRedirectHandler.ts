@@ -39,7 +39,6 @@ import {
   loadOidcContextFromStorage,
   maybeBuildRpInitiatedLogout,
 } from "@inrupt/solid-client-authn-core";
-import type { CodeExchangeResult } from "@inrupt/oidc-client-ext";
 import { getTokens } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
 
