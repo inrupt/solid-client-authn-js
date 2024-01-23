@@ -19,7 +19,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { OidcClient } from "@inrupt/oidc-client";
 import type {
   IClient,
   IIssuerConfig,
@@ -204,7 +203,9 @@ export async function getTokens(
     );
   }
 
-  // TODO: Find out where this is specified.
+  // Note: this defaults to client_secret_basic. client_secret_post
+  // is currently not supported. See https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication
+  // for details.
   if (client.clientSecret) {
     headers.Authorization = `Basic ${btoa(
       `${client.clientId}:${client.clientSecret}`,
