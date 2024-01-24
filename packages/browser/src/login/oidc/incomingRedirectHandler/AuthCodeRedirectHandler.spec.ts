@@ -33,7 +33,6 @@ import {
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
-import { getBearerToken } from "@inrupt/oidc-client-ext";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
 import type { JWK } from "jose";
 import { importJWK } from "jose";
@@ -150,16 +149,22 @@ jest.mock("@inrupt/oidc-client-ext");
 
 jest.useFakeTimers();
 
-function mockOidcClient(): typeof OidcClientExt {
+function mockOidcClient(
+  tokenType: "dpop" | "bearer" = "dpop",
+): typeof OidcClientExt {
   const mockedOidcClient = jest.requireMock<typeof OidcClientExt>(
     "@inrupt/oidc-client-ext",
   );
-  mockedOidcClient.getDpopToken = jest
-    .fn<typeof mockedOidcClient.getDpopToken>()
-    .mockImplementationOnce(mockTokenEndpointDpopResponse);
-  mockedOidcClient.getBearerToken = jest
-    .fn<typeof mockedOidcClient.getBearerToken>()
-    .mockResolvedValue(mockTokenEndpointBearerResponse());
+  mockedOidcClient.getTokens = jest
+    .fn<typeof mockedOidcClient.getTokens>()
+    .mockImplementationOnce(
+      tokenType === "dpop"
+        ? mockTokenEndpointDpopResponse
+        : () =>
+            new Promise<OidcClientExt.CodeExchangeResult>((resolve) => {
+              resolve(mockTokenEndpointBearerResponse());
+            }),
+    );
   mockedOidcClient.refresh = jest
     .fn<typeof mockedOidcClient.refresh>()
     .mockResolvedValueOnce({
@@ -318,13 +323,14 @@ describe("AuthCodeRedirectHandler", () => {
 
       await authCodeRedirectHandler.handle(mockRedirectUrl());
 
-      expect(mockedOidcClient.getDpopToken).toHaveBeenCalledWith(
+      expect(mockedOidcClient.getTokens).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
           codeVerifier: DEFAULT_CODE_VERIFIER,
           redirectUrl: DEFAULT_REDIRECT_URL,
         }),
+        expect.anything(),
       );
     });
 
@@ -402,7 +408,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns an authenticated bearer fetch if requested", async () => {
-      mockOidcClient();
+      mockOidcClient("bearer");
       mockedFetch.mockResolvedValueOnce(
         new Response("", {
           status: 200,
@@ -517,10 +523,10 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("returns null for the expiration time if none was provided", async () => {
-      const mockedOidcClient = mockOidcClient();
+      const mockedOidcClient = mockOidcClient("bearer");
       mockFetch(new Response());
-      mockedOidcClient.getBearerToken = jest
-        .fn(getBearerToken)
+      mockedOidcClient.getTokens = jest
+        .fn<(typeof OidcClientExt)["getTokens"]>()
         .mockResolvedValueOnce({
           accessToken: mockAccessTokenBearer(),
           idToken: mockIdToken(),
