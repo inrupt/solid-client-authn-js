@@ -154,9 +154,8 @@ export default class StorageUtility implements IStorageUtility {
     userId: string,
     secure?: boolean,
   ): Promise<Record<string, string>> {
-    const stored = await (secure
-      ? this.secureStorage
-      : this.insecureStorage
+    const stored = await (
+      secure ? this.secureStorage : this.insecureStorage
     ).get(this.getKey(userId));
 
     if (stored === undefined) {
@@ -189,9 +188,8 @@ export default class StorageUtility implements IStorageUtility {
     key: string,
     options?: { errorIfNull?: boolean; secure?: boolean },
   ): Promise<string | undefined> {
-    const value = await (options?.secure
-      ? this.secureStorage
-      : this.insecureStorage
+    const value = await (
+      options?.secure ? this.secureStorage : this.insecureStorage
     ).get(key);
     if (value === undefined && options?.errorIfNull) {
       throw new Error(`[${key}] is not stored`);
