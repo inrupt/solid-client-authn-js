@@ -1007,8 +1007,22 @@ describe("Session", () => {
         await mySession.logout();
         expect(myCallback).toHaveBeenCalled();
 
-        // expect(myCallback).toHaveBeenCalledTimes(2);
       })
+
+      it("does not call the registered callback if login isn't successful", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        const mySession = new Session({ clientAuthentication });
+        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
+        expect(myCallback).not.toHaveBeenCalled();
+      });
     })
 
     describe("sessionRestore", () => {
