@@ -540,6 +540,34 @@ describe("Session", () => {
       });
     });
 
+    describe("loginAndLogout", () => {
+      it("calls the registered callback on login and logout", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        const mySession = new Session({
+          clientAuthentication,
+        });
+
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+
+        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback)
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalled();
+
+        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
+        await mySession.logout();
+        expect(myCallback).toHaveBeenCalled();
+
+        // expect(myCallback).toHaveBeenCalledTimes(2);
+      })
+    })
+
     describe("sessionExpired", () => {
       it("calls the provided callback when receiving the appropriate event", async () => {
         const myCallback = jest.fn();

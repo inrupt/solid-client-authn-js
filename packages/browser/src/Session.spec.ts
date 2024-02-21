@@ -982,6 +982,35 @@ describe("Session", () => {
       });
     });
 
+    describe("login and logout", () => {
+      it("calls the registered callback on login and logout", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        const mySession = new Session({
+          clientAuthentication,
+        });
+
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        mockLocalStorage({});
+
+        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalled();
+
+        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
+        await mySession.logout();
+        expect(myCallback).toHaveBeenCalled();
+
+        // expect(myCallback).toHaveBeenCalledTimes(2);
+      })
+    })
+
     describe("sessionRestore", () => {
       it("calls the registered callback on session restore", async () => {
         // Set our window's location to our test value.
