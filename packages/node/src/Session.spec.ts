@@ -576,7 +576,7 @@ describe("Session", () => {
               webId: "https://some.webid#them",
             });
           const mySession = new Session({ clientAuthentication });
-          mySession.events.on(EVENTS.LOGIN, myCallback);
+          mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
           expect(myCallback).not.toHaveBeenCalled();
       });
     })
