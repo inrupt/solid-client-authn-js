@@ -425,7 +425,7 @@ export class Session implements IHasSessionEventListener {
     if (loginInfo?.isLoggedIn) {
       // Send a signal on successful client credentials login.
       (this.events as EventEmitter).emit(EVENTS.LOGIN);
-      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
+      // (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
@@ -492,11 +492,7 @@ export class Session implements IHasSessionEventListener {
     this.info.isLoggedIn = false;
     if (emitEvent) {
       (this.events as EventEmitter).emit(EVENTS.LOGOUT);
-      // I can't think of a better way to do this without reworking the events library
-      // I'm not sure how to emit partial events in Typescript the proper way
-      // eg -> login raises 0x10 and logout raises 0x01, LOGIN_AND_LOGOUT listens for both, while
-      // LOGIN listens for 0x10 and LOGOUT listens for 0x01
-      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
+      // (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
