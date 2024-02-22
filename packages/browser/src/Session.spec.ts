@@ -999,13 +999,11 @@ describe("Session", () => {
           });
         mockLocalStorage({});
 
-        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
+        mySession.events.on(EVENTS.LOGIN_AND_LOGOUT, myCallback);
         await mySession.handleIncomingRedirect("https://some.url");
-        expect(myCallback).toHaveBeenCalled();
-
-        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
+        expect(myCallback).toHaveBeenCalledTimes(1);
         await mySession.logout();
-        expect(myCallback).toHaveBeenCalled();
+        expect(myCallback).toHaveBeenCalledTimes(2);
 
       })
 
@@ -1020,7 +1018,7 @@ describe("Session", () => {
             webId: "https://some.webid#them",
           });
         const mySession = new Session({ clientAuthentication });
-        mySession.events.on(EVENTS.LOGIN || EVENTS.LOGOUT, myCallback);
+        mySession.events.on(EVENTS.LOGIN_AND_LOGOUT, myCallback);
         expect(myCallback).not.toHaveBeenCalled();
       });
     })

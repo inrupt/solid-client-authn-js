@@ -274,6 +274,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.info.isLoggedIn = false;
     if (emitSignal) {
       (this.events as EventEmitter).emit(EVENTS.LOGOUT);
+      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
@@ -349,6 +350,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
         // The login event can only be triggered **after** the user has been
         // redirected from the IdP with access and ID tokens.
         (this.events as EventEmitter).emit(EVENTS.LOGIN);
+        (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
       } else {
         // If an URL is stored in local storage, we are being logged in after a
         // silent authentication, so remove our currently stored URL location

@@ -216,7 +216,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     if (loginInfo?.isLoggedIn) {
       // Send a signal on successful client credentials login.
       (this.events as EventEmitter).emit(EVENTS.LOGIN);
-      // (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
+      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
@@ -286,7 +286,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.info.isLoggedIn = false;
     if (emitEvent) {
       (this.events as EventEmitter).emit(EVENTS.LOGOUT);
-      // (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
+      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
@@ -323,6 +323,7 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
             // The login event can only be triggered **after** the user has been
             // redirected from the IdP with access and ID tokens.
             (this.events as EventEmitter).emit(EVENTS.LOGIN);
+            (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
           }
         }
       } finally {
