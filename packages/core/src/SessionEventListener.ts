@@ -146,7 +146,7 @@ type FALLBACK_ARGS = {
   listener: never;
 };
 type LOGIN_AND_LOGOUT_ARGS = {
-  eventName: typeof EVENTS.LOGIN | typeof EVENTS.LOGOUT;
+  eventName: typeof EVENTS.LOGIN_AND_LOGOUT;
   listener: () => void;
 }
 export interface ISessionEventListener extends EventEmitter {
@@ -174,8 +174,8 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback called on a successful login and logout.
    */
   on(
-    eventName: LOGIN_ARGS["eventName"] | LOGOUT_ARGS["eventName"],
-    listener: LOGIN_ARGS["listener"] & LOGOUT_ARGS["listener"]
+    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
+    listener: LOGIN_AND_LOGOUT_ARGS["listener"]
   ): this;
   /**
    * Register a listener called on session expiration.
@@ -284,7 +284,7 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback called on a successful login or logout.
    */
   addListener(
-    eventName: LOGIN_ARGS["eventName"] | LOGOUT_ARGS["eventName"],
+    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
     listener: LOGIN_AND_LOGOUT_ARGS["listener"]
   ): this;
   /**
@@ -394,7 +394,7 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback called on the next successful login or logout.
    */
   once(
-    eventName: LOGIN_ARGS["eventName"] | LOGOUT_ARGS["eventName"],
+    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
     listener: LOGIN_AND_LOGOUT_ARGS["listener"]
   ): this;
   /**
@@ -507,7 +507,7 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback to unregister.
    */
   off(
-    eventName: LOGIN_ARGS["eventName"] | LOGOUT_ARGS["eventName"],
+    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
     listener: LOGIN_AND_LOGOUT_ARGS["listener"]
   ): this;
   /**
@@ -616,7 +616,7 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback to unregister
    */
   removeListener(
-    eventName: LOGIN_ARGS["eventName"] | LOGOUT_ARGS["eventName"],
+    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
     listener: LOGIN_AND_LOGOUT_ARGS["listener"]
   ): this;
   /**

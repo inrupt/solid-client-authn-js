@@ -35,6 +35,7 @@ export const EVENTS = {
   ERROR: "error",
   LOGIN: "login",
   LOGOUT: "logout",
+  LOGIN_AND_LOGOUT: "loginAndLogout",
   NEW_REFRESH_TOKEN: "newRefreshToken",
   NEW_TOKENS: "newTokens",
   AUTHORIZATION_REQUEST: "authorizationRequest",
