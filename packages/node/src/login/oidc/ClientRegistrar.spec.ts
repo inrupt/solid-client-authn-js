@@ -363,7 +363,8 @@ describe("ClientRegistrar", () => {
       // Check that the returned algorithm value is what we expect
       expect(client.idTokenSignedResponseAlg).toBe(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0],
+        IssuerConfigFetcherFetchConfigResponse
+          .idTokenSigningAlgValuesSupported![0],
       );
 
       // Check that the expected algorithm information have been saved in storage
@@ -371,7 +372,8 @@ describe("ClientRegistrar", () => {
         mockStorage.getForUser("mySession", "idTokenSignedResponseAlg"),
       ).resolves.toBe(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported![0],
+        IssuerConfigFetcherFetchConfigResponse
+          .idTokenSigningAlgValuesSupported![0],
       );
     });
   });
