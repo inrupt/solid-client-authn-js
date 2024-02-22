@@ -76,6 +76,9 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
   // eslint-disable-next-line jest/expect-expect
   it("test", async () => {
     let headerResolver: (p: Headers) => void;
+    const headersPromise: Promise<Headers> = new Promise((resolve) => {
+      headerResolver = resolve;
+    });
     await getSolidDataset("https://id.inrupt.com/zwifi", {
       fetch: (info, init) =>
         fetch(info, {
@@ -88,6 +91,9 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
           return response;
         }),
     });
+    const headers = await headersPromise;
+    // eslint-disable-next-line no-console
+    console.log(headers.get("Content-Type"));
   });
 
   describe("Authenticated fetch", () => {
