@@ -145,8 +145,8 @@ type FALLBACK_ARGS = {
   // Prevents from using a SessionEventEmitter as an arbitrary EventEmitter.
   listener: never;
 };
-type LOGIN_AND_LOGOUT_ARGS = {
-  eventName: typeof EVENTS.LOGIN_AND_LOGOUT;
+type SESSION_STATUS_CHANGE_ARGS = {
+  eventName: typeof EVENTS.SESSION_STATUS_CHANGE;
   listener: () => void;
 }
 export interface ISessionEventListener extends EventEmitter {
@@ -174,8 +174,8 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback called on a successful login and logout.
    */
   on(
-    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
-    listener: LOGIN_AND_LOGOUT_ARGS["listener"]
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"]
   ): this;
   /**
    * Register a listener called on session expiration.
@@ -284,8 +284,8 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback called on a successful login or logout.
    */
   addListener(
-    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
-    listener: LOGIN_AND_LOGOUT_ARGS["listener"]
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"]
   ): this;
   /**
    * Register a listener called on session expiration.
@@ -394,8 +394,8 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback called on the next successful login or logout.
    */
   once(
-    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
-    listener: LOGIN_AND_LOGOUT_ARGS["listener"]
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"]
   ): this;
   /**
    * Register a listener called on the next session expiration.
@@ -507,8 +507,8 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback to unregister.
    */
   off(
-    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
-    listener: LOGIN_AND_LOGOUT_ARGS["listener"]
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"]
   ): this;
   /**
    * Unegister a listener called on session expiration.
@@ -616,8 +616,8 @@ export interface ISessionEventListener extends EventEmitter {
    * @param listener The callback to unregister
    */
   removeListener(
-    eventName: LOGIN_AND_LOGOUT_ARGS["eventName"],
-    listener: LOGIN_AND_LOGOUT_ARGS["listener"]
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"]
   ): this;
   /**
    * Unegister a listener called on session expiration.

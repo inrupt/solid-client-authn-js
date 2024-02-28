@@ -447,7 +447,7 @@ describe("Session", () => {
             webId: "https://some.webid#them",
           });
 
-        mySession.events.on(EVENTS.LOGIN_AND_LOGOUT, myCallback)
+        mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, myCallback)
         await mySession.handleIncomingRedirect("https://some.url");
         expect(myCallback).toHaveBeenCalledTimes(1);
         
@@ -466,7 +466,7 @@ describe("Session", () => {
               webId: "https://some.webid#them",
             });
           const mySession = new Session({ clientAuthentication });
-          mySession.events.on(EVENTS.LOGIN_AND_LOGOUT, myCallback);
+          mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, myCallback);
           
           expect(myCallback).not.toHaveBeenCalled();
       });
