@@ -36,7 +36,7 @@ export const EVENTS = {
   ERROR: "error",
   LOGIN: "login",
   LOGOUT: "logout",
-  LOGIN_AND_LOGOUT: "loginAndLogout",
+  SESSION_STATUS_CHANGE: "sessionStatusChange",
   NEW_REFRESH_TOKEN: "newRefreshToken",
   SESSION_EXPIRED: "sessionExpired",
   SESSION_EXTENDED: "sessionExtended",

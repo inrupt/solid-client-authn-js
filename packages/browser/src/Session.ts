@@ -212,13 +212,28 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     // enable silent refresh. The current session ID specifically stored in 'localStorage'
     // (as opposed to using our storage abstraction layer) because it is only
     // used in a browser-specific mechanism.
-    this.events.on(EVENTS.LOGIN, () =>
-      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId),
-    );
+    this.events.on(EVENTS.LOGIN, () => {
+      // You have to use the semicolon on this next line
+      // Because the underlying JS interpreter cannot interpret whether
+      // the EventEmitter cast is an IIFE or different token.
+      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId);
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE)
+    });
 
-    this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
+    this.events.on(EVENTS.LOGOUT, () => {
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
+    })
 
-    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.SESSION_EXPIRED, () => {
+      this.internalLogout(false);
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
+    });
+
+    this.events.on(EVENTS.ERROR, () => {
+      this.internalLogout(false);
+    });
+
+
   }
 
   /**
@@ -274,7 +289,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
     this.info.isLoggedIn = false;
     if (emitSignal) {
       (this.events as EventEmitter).emit(EVENTS.LOGOUT);
-      (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
     }
   };
 
@@ -350,7 +364,6 @@ export class Session extends EventEmitter implements IHasSessionEventListener {
         // The login event can only be triggered **after** the user has been
         // redirected from the IdP with access and ID tokens.
         (this.events as EventEmitter).emit(EVENTS.LOGIN);
-        (this.events as EventEmitter).emit(EVENTS.LOGIN_AND_LOGOUT);
       } else {
         // If an URL is stored in local storage, we are being logged in after a
         // silent authentication, so remove our currently stored URL location
