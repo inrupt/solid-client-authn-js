@@ -24,17 +24,21 @@
  * @packageDocumentation
  */
 
-export type ClientType = "static" | "dynamic" | "solid-oidc";
-
 type ISolidOidcClient = {
   clientId: string;
   clientType: "solid-oidc";
 };
 
-type IOpenIdClient = {
+type IOpenIdConfidentialClient = {
   clientId: string;
   clientSecret: string;
-  clientType: "static" | "dynamic";
+  clientType: "static";
+};
+
+type IOpenIdPublicClient = {
+  clientId: string;
+  clientSecret?: string;
+  clientType: "dynamic";
 };
 
 /**
@@ -43,4 +47,4 @@ type IOpenIdClient = {
 export type IClient = {
   clientName?: string;
   idTokenSignedResponseAlg?: string;
-} & (ISolidOidcClient | IOpenIdClient);
+} & (ISolidOidcClient | IOpenIdConfidentialClient | IOpenIdPublicClient);
