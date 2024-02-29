@@ -62,21 +62,15 @@ export async function loadOidcContextFromStorage(
   configFetcher: IIssuerConfigFetcher,
 ): Promise<OidcContext> {
   try {
-    const [
-      issuerIri,
-      codeVerifier,
-      storedRedirectIri,
-      dpop,
-      clientId,
-      clientSecret,
-    ] = await Promise.all([
-      storageUtility.getForUser(sessionId, "issuer", {
-        errorIfNull: true,
-      }),
-      storageUtility.getForUser(sessionId, "codeVerifier"),
-      storageUtility.getForUser(sessionId, "redirectUrl"),
-      storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
-    ]);
+    const [issuerIri, codeVerifier, storedRedirectIri, dpop] =
+      await Promise.all([
+        storageUtility.getForUser(sessionId, "issuer", {
+          errorIfNull: true,
+        }),
+        storageUtility.getForUser(sessionId, "codeVerifier"),
+        storageUtility.getForUser(sessionId, "redirectUrl"),
+        storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
+      ]);
     // Clear the code verifier, which is one-time use.
     await storageUtility.deleteForUser(sessionId, "codeVerifier");
 
@@ -244,15 +238,13 @@ export default class StorageUtility implements IStorageUtility {
   ): Promise<void> {
     let userData: Record<string, string>;
     try {
-      await this.getUserData(userId, options?.secure).then((userData) =>
-        this.setUserData(userId, { ...userData, ...values }, options?.secure),
-      );
+      userData = await this.getUserData(userId, options?.secure);
     } catch {
       // if reading the user data throws, the data is corrupted, and we want to write over it
       userData = {};
     }
 
-    // await ;
+    await this.setUserData(userId, { ...userData, ...values }, options?.secure);
   }
 
   async deleteForUser(
