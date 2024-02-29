@@ -95,7 +95,7 @@ export default class ClientRegistrar implements IClientRegistrar {
         "idTokenSignedResponseAlg",
       ),
     ]);
-    if (storedClientId !== undefined && storedClientSecret !== undefined) {
+    if (storedClientId !== undefined) {
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
