@@ -262,6 +262,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
         ...standardOidcOptions,
         client: {
           ...standardOidcOptions.client,
+          clientType: "dynamic",
           clientSecret: "I can't cook because I only drink Soylent",
         },
         issuerConfiguration: {

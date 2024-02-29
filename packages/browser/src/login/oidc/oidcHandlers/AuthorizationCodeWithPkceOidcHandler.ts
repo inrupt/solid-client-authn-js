@@ -53,8 +53,9 @@ export default class AuthorizationCodeWithPkceOidcHandler
       authority: oidcLoginOptions.issuer.toString(),
       client_id: oidcLoginOptions.client.clientId,
       client_secret: oidcLoginOptions.client.clientSecret,
-      redirect_uri: oidcLoginOptions.redirectUrl.toString(),
-      post_logout_redirect_uri: oidcLoginOptions.redirectUrl.toString(),
+      redirect_uri: oidcLoginOptions.redirectUrl,
+      // FIXME Do not forget to fix this as part of this PR (reviewer, if you see this request changes).
+      post_logout_redirect_uri: oidcLoginOptions.redirectUrl,
       response_type: "code",
       scope: DEFAULT_SCOPES,
       filterProtocolClaims: true,
