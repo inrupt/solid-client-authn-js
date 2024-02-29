@@ -140,7 +140,7 @@ describe("OidcLoginHandler", () => {
       const { oidcHandler } = defaultMocks;
       const mockedStorage = mockStorageUtility({});
       const clientRegistrar = mockDefaultClientRegistrar();
-      clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
+      clientRegistrar.getClient = jest.fn<ClientRegistrar["getClient"]>().mockResolvedValueOnce(
         mockDefaultClient(),
       );
       const handler = getInitialisedHandler({

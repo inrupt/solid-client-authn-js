@@ -162,7 +162,9 @@ describe("ClientCredentialsOidcHandler", () => {
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
           client: {
-            clientId: undefined as unknown as string,
+            // @ts-expect-error The client ID is undefined for test purposes.
+            clientId: undefined,
+            clientSecret: undefined,
             clientType: "static",
           },
         }),
@@ -178,7 +180,7 @@ describe("ClientCredentialsOidcHandler", () => {
           ...standardOidcOptions,
           client: {
             clientId: "some client ID",
-            clientSecret: undefined,
+            clientSecret: "some client secret",
             clientType: "static",
           },
         }),
@@ -213,6 +215,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientSecret: "some client secret",
             clientType: "static",
           },
+          redirectUrl: undefined
         }),
       ).resolves.toBe(true);
     });

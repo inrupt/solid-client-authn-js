@@ -58,7 +58,9 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     return (
       typeof oidcLoginOptions.client.clientId === "string" &&
       typeof oidcLoginOptions.client.clientSecret === "string" &&
-      oidcLoginOptions.client.clientType === "static"
+      // If a redirect URL is present, the static client should use the
+      // authorization code flow.
+      typeof oidcLoginOptions.redirectUrl !== "string"
     );
   }
 
