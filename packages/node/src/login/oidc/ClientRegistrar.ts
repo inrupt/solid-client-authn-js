@@ -95,11 +95,11 @@ export default class ClientRegistrar implements IClientRegistrar {
         "idTokenSignedResponseAlg",
       ),
     ]);
-    if (storedClientId) {
+    if (storedClientId !== undefined && storedClientSecret !== undefined) {
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
-        clientName: storedClientName as string | undefined,
+        clientName: storedClientName,
         idTokenSignedResponseAlg:
           storedIdTokenSignedResponseAlg ??
           negotiateClientSigningAlg(issuerConfig, PREFERRED_SIGNING_ALG),
@@ -122,7 +122,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       issuerConfig,
       PREFERRED_SIGNING_ALG,
     );
-
+    
     // The following is compliant with the example code, but seems to mismatch the
     // type annotations.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -135,15 +135,21 @@ export default class ClientRegistrar implements IClientRegistrar {
       grant_types: ["authorization_code", "refresh_token"],
     });
 
+    if (registeredClient.metadata.client_secret === undefined) {
+      throw new Error("Client registration did not provide a Client Secret, which was expected.");
+    }
+
     const infoToSave: Record<string, string> = {
+     
+    };
+
+    infoToSave.clientSecret = registeredClient.metadata.client_secret;
+    await this.storageUtility.setForUser(options.sessionId, {
       clientId: registeredClient.metadata.client_id,
+      clientSecret: registeredClient.metadata.client_secret,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
-    };
-    if (registeredClient.metadata.client_secret) {
-      infoToSave.clientSecret = registeredClient.metadata.client_secret;
-    }
-    await this.storageUtility.setForUser(options.sessionId, infoToSave);
+    });
     return {
       clientId: registeredClient.metadata.client_id,
       clientSecret: registeredClient.metadata.client_secret,

@@ -295,9 +295,7 @@ describe("ClientRegistrar", () => {
     it("saves the registered client information for a public client in storage", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client") as any;
-      const mockedClientConfig = mockClientConfig({
-        client_secret: undefined,
-      });
+      const mockedClientConfig = mockClientConfig({});
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
@@ -327,7 +325,39 @@ describe("ClientRegistrar", () => {
       ).resolves.toEqual(mockDefaultClientConfig().client_id);
       await expect(
         mockStorage.getForUser("mySession", "clientSecret"),
-      ).resolves.toBeUndefined();
+      ).resolves.toEqual(mockDefaultClientConfig().client_secret);
+    });
+
+    it("throws if client registration doesn't provide a client secret", async () => {
+      // Sets up the mock-up for DCR
+      const { Issuer } = jest.requireMock("openid-client") as any;
+      const mockedClientConfig = mockClientConfig({
+        client_secret: undefined,
+      });
+      const mockedIssuer = {
+        metadata: mockDefaultIssuerMetadata(),
+        Client: {
+          register: (jest.fn() as any).mockResolvedValueOnce({
+            metadata: mockedClientConfig,
+          }),
+        },
+      };
+      Issuer.mockReturnValue(mockedIssuer);
+      const mockStorage = mockStorageUtility({});
+
+      // Run the test
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorage,
+      });
+      await expect(clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        },
+      )).rejects.toThrow();
     });
 
     it("uses stores the signing algorithm preferred by the client when the registration didn't return the used algorithm", async () => {
