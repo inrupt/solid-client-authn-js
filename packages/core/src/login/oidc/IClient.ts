@@ -26,13 +26,21 @@
 
 export type ClientType = "static" | "dynamic" | "solid-oidc";
 
+type ISolidOidcClient = {
+  clientId: string;
+  clientType: "solid-oidc";
+};
+
+type IOpenIdClient = {
+  clientId: string;
+  clientSecret: string;
+  clientType: "static" | "dynamic";
+}
+
 /**
  * @hidden
  */
-export interface IClient {
-  clientId: string;
-  clientSecret?: string;
+export type IClient = {
   clientName?: string;
   idTokenSignedResponseAlg?: string;
-  clientType: ClientType;
-}
+} & (ISolidOidcClient | IOpenIdClient);

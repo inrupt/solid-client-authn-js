@@ -62,7 +62,7 @@ export async function loadOidcContextFromStorage(
   configFetcher: IIssuerConfigFetcher,
 ): Promise<OidcContext> {
   try {
-    const [issuerIri, codeVerifier, storedRedirectIri, dpop] =
+    const [issuerIri, codeVerifier, storedRedirectIri, dpop, clientId, clientSecret] =
       await Promise.all([
         storageUtility.getForUser(sessionId, "issuer", {
           errorIfNull: true,
