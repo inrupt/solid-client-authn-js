@@ -41,7 +41,6 @@ export const standardOidcOptions: IOidcOptions = {
   },
   client: {
     clientId: "coolApp",
-    clientSecret: "some ephemeral client secret",
     clientType: "dynamic",
   },
 };

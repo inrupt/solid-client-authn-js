@@ -78,6 +78,19 @@ const canHandleTests: {
         },
       },
     },
+    {
+      message:
+        "should accept a configuration with a static client",
+      shouldPass: true,
+      oidcOptions: {
+        ...standardOidcOptions,
+        client: {
+          clientId: "some-client-id",
+          clientSecret: "some-client-secret",
+          clientType: "static"
+        }
+      },
+    },
   ],
 };
 

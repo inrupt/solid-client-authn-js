@@ -219,6 +219,22 @@ describe("ClientCredentialsOidcHandler", () => {
         }),
       ).resolves.toBe(true);
     });
+
+    it("cannot handle if a redirectUrl has been specified (for auth code flow)", async () => {
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+      );
+      await expect(
+        clientCredentialsOidcHandler.canHandle({
+          ...standardOidcOptions,
+          client: {
+            clientId: "some client ID",
+            clientSecret: "some client secret",
+            clientType: "static",
+          },
+        }),
+      ).resolves.toBe(false);
+    });
   });
 });
 
