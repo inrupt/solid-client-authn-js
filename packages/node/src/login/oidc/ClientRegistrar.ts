@@ -135,27 +135,20 @@ export default class ClientRegistrar implements IClientRegistrar {
       grant_types: ["authorization_code", "refresh_token"],
     });
 
-    if (registeredClient.metadata.client_secret === undefined) {
-      throw new Error(
-        "Client registration did not provide a Client Secret, which was expected.",
-      );
+    const persistedClientMetadata: Record<string, string> = { 
+      clientId: registeredClient.metadata.client_id,
+      idTokenSignedResponseAlg: registeredClient.metadata.id_token_signed_response_alg ?? signingAlg
+    };
+    if (registeredClient.metadata.client_secret !== undefined) {
+      persistedClientMetadata.clientSecret = registeredClient.metadata.client_secret;
     }
-
-    const infoToSave: Record<string, string> = {};
-
-    infoToSave.clientSecret = registeredClient.metadata.client_secret;
-    await this.storageUtility.setForUser(options.sessionId, {
-      clientId: registeredClient.metadata.client_id,
-      clientSecret: registeredClient.metadata.client_secret,
-      idTokenSignedResponseAlg:
-        registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
-    });
+    
+    await this.storageUtility.setForUser(options.sessionId, persistedClientMetadata);
     return {
-      clientId: registeredClient.metadata.client_id,
-      clientSecret: registeredClient.metadata.client_secret,
+      clientId: persistedClientMetadata.clientId,
+      clientSecret: persistedClientMetadata.clientSecret,
+      idTokenSignedResponseAlg: persistedClientMetadata.idTokenSignedResponseAlg,
       clientName: registeredClient.metadata.client_name as string | undefined,
-      idTokenSignedResponseAlg:
-        registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
       clientType: "dynamic",
     };
   }
