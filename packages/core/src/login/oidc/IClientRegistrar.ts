@@ -131,25 +131,16 @@ export async function handleRegistration(
   // or it is not compliant but the client_id isn't an IRI (we assume it has already
   // been registered with the IdP), then the client registration information needs
   // to be stored so that it can be retrieved later after redirect.
-  const storagePromises = [
-    storageUtility.setForUser(options.sessionId, {
-      clientId: clientInfo.clientId,
-    }),
-  ];
+  const infoToSave: Record<string, string> = { clientId: clientInfo.clientId };
   if (clientInfo.clientType === "static") {
-    storagePromises.push(
-      storageUtility.setForUser(options.sessionId, {
-        clientSecret: clientInfo.clientSecret,
-      }),
-    );
+    infoToSave.clientSecret = clientInfo.clientSecret;
   }
   if (clientInfo.clientName) {
-    storagePromises.push(
-      storageUtility.setForUser(options.sessionId, {
-        clientName: clientInfo.clientName,
-      }),
-    );
+    infoToSave.clientName = clientInfo.clientName;
   }
-  await Promise.all(storagePromises);
+  // Note that due to the underlying implementation, doing a `Promise.all`
+  // on multiple `storageUtility.setForUser` results in the last one
+  // overriding the previous calls.
+  await storageUtility.setForUser(options.sessionId, infoToSave);
   return clientInfo;
 }
