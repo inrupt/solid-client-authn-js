@@ -215,7 +215,7 @@ describe("ClientCredentialsOidcHandler", () => {
             clientSecret: "some client secret",
             clientType: "static",
           },
-          redirectUrl: undefined
+          redirectUrl: undefined,
         }),
       ).resolves.toBe(true);
     });

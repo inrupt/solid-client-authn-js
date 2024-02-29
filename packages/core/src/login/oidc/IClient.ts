@@ -35,7 +35,7 @@ type IOpenIdClient = {
   clientId: string;
   clientSecret: string;
   clientType: "static" | "dynamic";
-}
+};
 
 /**
  * @hidden

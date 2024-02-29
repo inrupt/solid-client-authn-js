@@ -26,7 +26,7 @@
 
 import type IStorageUtility from "../../storage/IStorageUtility";
 import type ILoginOptions from "../ILoginOptions";
-import type { ClientType, IClient } from "./IClient";
+import type { IClient } from "./IClient";
 import type { IIssuerConfig } from "./IIssuerConfig";
 
 export interface IClientRegistrarOptions {

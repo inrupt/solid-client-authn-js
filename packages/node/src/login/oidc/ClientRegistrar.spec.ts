@@ -349,15 +349,17 @@ describe("ClientRegistrar", () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorage,
       });
-      await expect(clientRegistrar.getClient(
-        {
-          sessionId: "mySession",
-          redirectUrl: "https://example.com",
-        },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
-      )).rejects.toThrow();
+      await expect(
+        clientRegistrar.getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          {
+            ...IssuerConfigFetcherFetchConfigResponse,
+          },
+        ),
+      ).rejects.toThrow();
     });
 
     it("uses stores the signing algorithm preferred by the client when the registration didn't return the used algorithm", async () => {

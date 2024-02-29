@@ -37,7 +37,7 @@ export const standardOidcOptions: IOidcOptions = {
     subjectTypesSupported: [],
     claimsSupported: [],
     scopesSupported: ["openid"],
-    grantTypesSupported: ["authorization_code"]
+    grantTypesSupported: ["authorization_code"],
   },
   client: {
     clientId: "coolApp",

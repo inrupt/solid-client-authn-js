@@ -206,7 +206,7 @@ describe("resolution order", () => {
         clientId: "some client ID",
         oidcIssuer: "https://some.issuer",
         handleRedirect: jest.fn(),
-        redirectUrl: "https://example.org/some-redirect-url"
+        redirectUrl: "https://example.org/some-redirect-url",
       },
       new EventEmitter(),
     );

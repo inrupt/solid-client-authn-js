@@ -122,7 +122,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       issuerConfig,
       PREFERRED_SIGNING_ALG,
     );
-    
+
     // The following is compliant with the example code, but seems to mismatch the
     // type annotations.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -136,12 +136,12 @@ export default class ClientRegistrar implements IClientRegistrar {
     });
 
     if (registeredClient.metadata.client_secret === undefined) {
-      throw new Error("Client registration did not provide a Client Secret, which was expected.");
+      throw new Error(
+        "Client registration did not provide a Client Secret, which was expected.",
+      );
     }
 
-    const infoToSave: Record<string, string> = {
-     
-    };
+    const infoToSave: Record<string, string> = {};
 
     infoToSave.clientSecret = registeredClient.metadata.client_secret;
     await this.storageUtility.setForUser(options.sessionId, {
