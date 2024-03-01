@@ -20,18 +20,26 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import type { JWTPayload, KeyLike } from "jose";
+import type * as Jose from "jose";
 import { SignJWT, generateKeyPair, exportJWK } from "jose";
 import { getWebidFromTokenPayload } from "./token";
 
+jest.mock("jose", () => {
+  const actualJose = jest.requireActual("jose") as typeof Jose;
+  return {
+    ...actualJose,
+    createRemoteJWKSet: jest.fn(),
+  };
+});
+
 describe("getWebidFromTokenPayload", () => {
   // Singleton keys generated on the first call to mockJwk
-  let publicKey: KeyLike | undefined;
-  let privateKey: KeyLike | undefined;
+  let publicKey: Jose.KeyLike | undefined;
+  let privateKey: Jose.KeyLike | undefined;
 
   const mockJwk = async (): Promise<{
-    publicKey: KeyLike;
-    privateKey: KeyLike;
+    publicKey: Jose.KeyLike;
+    privateKey: Jose.KeyLike;
   }> => {
     if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
       const generatedPair = await generateKeyPair("ES256");
@@ -53,10 +61,10 @@ describe("getWebidFromTokenPayload", () => {
   };
 
   const mockJwt = async (
-    claims: JWTPayload,
+    claims: Jose.JWTPayload,
     issuer: string,
     audience: string,
-    signingKey?: KeyLike,
+    signingKey?: Jose.KeyLike,
   ): Promise<string> => {
     return new SignJWT(claims)
       .setProtectedHeader({ alg: "ES256" })
@@ -67,20 +75,13 @@ describe("getWebidFromTokenPayload", () => {
       .sign(signingKey ?? (await mockJwk()).privateKey);
   };
 
-  const mockFetch = (
-    payload: string,
-    statusCode: number,
-    statusText?: string,
-  ): void => {
-    jest
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(
-        new Response(payload, { status: statusCode, statusText }),
-      );
-  };
-
-  it("throws if the JWKS cannot be fetched", async () => {
-    mockFetch("", 404, "Not Found");
+  it("throws if the JWKS retrieval fails", async () => {
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockRejectedValue("Maformed JWKS"),
+    );
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
@@ -93,33 +94,16 @@ describe("getWebidFromTokenPayload", () => {
         "https://some.issuer",
         "https://some.clientId",
       ),
-    ).rejects.toThrow(
-      "Could not fetch JWKS for [https://some.issuer] at [https://some.jwks]: 404 Not Found",
-    );
-  });
-
-  it("throws if the JWKS is malformed", async () => {
-    // Invalid JSON.
-    mockFetch("", 200);
-    const jwt = await mockJwt(
-      { someClaim: true },
-      "https://some.issuer",
-      "https://some.clientId",
-    );
-    await expect(
-      getWebidFromTokenPayload(
-        jwt,
-        "https://some.jwks",
-        "https://some.issuer",
-        "https://some.clientId",
-      ),
-    ).rejects.toThrow(
-      "Malformed JWKS for [https://some.issuer] at [https://some.jwks]:",
-    );
+    ).rejects.toThrow("Token verification failed");
   });
 
   it("throws if the ID token signature verification fails", async () => {
-    mockFetch(await mockJwks(), 200);
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue((await mockJwk()).publicKey),
+    );
     const { privateKey: anotherKey } = await generateKeyPair("ES256");
     // Sign the returned JWT with a private key unrelated to the public key in the JWKS
     const jwt = await mockJwt(
@@ -141,7 +125,12 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("throws if the ID token issuer verification fails", async () => {
-    mockFetch(await mockJwks(), 200);
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue((await mockJwk()).publicKey),
+    );
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.other.issuer",
@@ -160,7 +149,12 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("throws if the ID token audience verification fails", async () => {
-    mockFetch(await mockJwks(), 200);
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue((await mockJwk()).publicKey),
+    );
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
@@ -179,7 +173,12 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("throws if the 'webid' and the 'sub' claims are missing", async () => {
-    mockFetch(await mockJwks(), 200);
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue((await mockJwk()).publicKey),
+    );
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
@@ -196,12 +195,18 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("throws if the 'webid' claims is missing and the 'sub' claim is not an IRI", async () => {
-    mockFetch(await mockJwks(), 200);
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue((await mockJwk()).publicKey),
+    );
     const jwt = await mockJwt(
       { sub: "some user ID" },
       "https://some.issuer",
       "https://some.clientId",
     );
+
     await expect(
       getWebidFromTokenPayload(
         jwt,
@@ -215,7 +220,12 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("returns the WebID it the 'webid' claim exists", async () => {
-    mockFetch(await mockJwks(), 200);
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue((await mockJwk()).publicKey),
+    );
     const jwt = await mockJwt(
       { webid: "https://some.webid#me" },
       "https://some.issuer",
@@ -232,7 +242,12 @@ describe("getWebidFromTokenPayload", () => {
   });
 
   it("returns the WebID it the 'sub' claim exists and it is IRI-like", async () => {
-    mockFetch(await mockJwks(), 200);
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue((await mockJwk()).publicKey),
+    );
     const jwt = await mockJwt(
       { sub: "https://some.webid#me" },
       "https://some.issuer",
