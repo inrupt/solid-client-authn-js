@@ -21,7 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import type * as Jose from "jose";
-import { SignJWT, generateKeyPair, exportJWK } from "jose";
+import { SignJWT, generateKeyPair } from "jose";
 import { getWebidFromTokenPayload } from "./token";
 
 jest.mock("jose", () => {
@@ -50,14 +50,6 @@ describe("getWebidFromTokenPayload", () => {
       publicKey,
       privateKey,
     };
-  };
-
-  const mockJwks = async (): Promise<string> => {
-    const { publicKey: issuerPubKey } = await mockJwk();
-    const jwk = await exportJWK(issuerPubKey);
-    // This is not set by 'exportJWK'
-    jwk.alg = "ES256";
-    return JSON.stringify({ keys: [jwk] });
   };
 
   const mockJwt = async (
