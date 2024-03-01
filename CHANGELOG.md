@@ -9,6 +9,11 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### New Feature
+
+- OpenID Providers with multiple JWK in their JWKS are now supported. Thanks to
+  @pavol-brunclik-compote for the original contribution.
+
 ### Bugfix
 
 #### browser
