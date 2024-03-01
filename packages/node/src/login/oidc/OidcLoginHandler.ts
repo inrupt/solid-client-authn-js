@@ -124,6 +124,7 @@ export default class OidcLoginHandler implements ILoginHandler {
         )),
       handleRedirect: options.handleRedirect,
       eventEmitter: options.eventEmitter,
+      prompt: options.prompt
     };
     // Call proper OIDC Handler
     return this.oidcHandler.handle(oidcOptions);

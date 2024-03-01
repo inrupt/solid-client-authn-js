@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ## Unreleased
 
 The following changes have been implemented but not released yet:
+ - Added `prompt` as a login option.
 
 ### Bugfix
 
