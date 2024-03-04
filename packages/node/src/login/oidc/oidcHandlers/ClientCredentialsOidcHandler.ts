@@ -56,11 +56,11 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
 
   async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
     return (
-      typeof oidcLoginOptions.client.clientId === "string" &&
-      typeof oidcLoginOptions.client.clientSecret === "string" &&
       // If a redirect URL is present, the static client should use the
       // authorization code flow.
-      typeof oidcLoginOptions.redirectUrl !== "string"
+      typeof oidcLoginOptions.redirectUrl !== "string" &&
+      typeof oidcLoginOptions.client.clientId === "string" &&
+      typeof oidcLoginOptions.client.clientSecret === "string"
     );
   }
 
