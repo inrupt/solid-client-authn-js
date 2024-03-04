@@ -114,7 +114,10 @@ export default class TokenRefresher implements ITokenRefresher {
     }
     const client = new issuer.Client({
       client_id: clientInfo.clientId,
-      client_secret: clientInfo.clientSecret,
+      client_secret:
+        clientInfo.clientType === "solid-oidc"
+          ? undefined
+          : clientInfo.clientSecret,
       token_endpoint_auth_method:
         clientInfo.clientType === "solid-oidc" ? "none" : "client_secret_basic",
       id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
