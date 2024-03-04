@@ -135,19 +135,25 @@ export default class ClientRegistrar implements IClientRegistrar {
       grant_types: ["authorization_code", "refresh_token"],
     });
 
-    const persistedClientMetadata: Record<string, string> = { 
+    const persistedClientMetadata: Record<string, string> = {
       clientId: registeredClient.metadata.client_id,
-      idTokenSignedResponseAlg: registeredClient.metadata.id_token_signed_response_alg ?? signingAlg
+      idTokenSignedResponseAlg:
+        registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
     };
     if (registeredClient.metadata.client_secret !== undefined) {
-      persistedClientMetadata.clientSecret = registeredClient.metadata.client_secret;
+      persistedClientMetadata.clientSecret =
+        registeredClient.metadata.client_secret;
     }
-    
-    await this.storageUtility.setForUser(options.sessionId, persistedClientMetadata);
+
+    await this.storageUtility.setForUser(
+      options.sessionId,
+      persistedClientMetadata,
+    );
     return {
       clientId: persistedClientMetadata.clientId,
       clientSecret: persistedClientMetadata.clientSecret,
-      idTokenSignedResponseAlg: persistedClientMetadata.idTokenSignedResponseAlg,
+      idTokenSignedResponseAlg:
+        persistedClientMetadata.idTokenSignedResponseAlg,
       clientName: registeredClient.metadata.client_name as string | undefined,
       clientType: "dynamic",
     };
