@@ -141,8 +141,6 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       issuer: oidcLoginOptions.issuer,
       dpop: oidcLoginOptions.dpop ? "true" : "false",
       clientId: oidcLoginOptions.client.clientId,
-      // Note: We assume here that a client secret is present, which is checked for when validating the options.
-      clientSecret: oidcLoginOptions.client.clientSecret as string,
     });
 
     // In the case when the refresh token is bound to a DPoP key, said key must
@@ -205,11 +203,6 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       clientId: oidcLoginOptions.client.clientId,
     });
 
-    if (oidcLoginOptions.client.clientSecret) {
-      await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-        clientSecret: oidcLoginOptions.client.clientSecret,
-      });
-    }
     if (oidcLoginOptions.client.clientName) {
       await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
         clientName: oidcLoginOptions.client.clientName,
