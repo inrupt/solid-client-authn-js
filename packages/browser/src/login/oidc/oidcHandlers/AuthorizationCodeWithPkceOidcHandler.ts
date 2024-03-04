@@ -52,7 +52,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
     const oidcOptions = {
       authority: oidcLoginOptions.issuer.toString(),
       client_id: oidcLoginOptions.client.clientId,
-      client_secret: oidcLoginOptions.client.clientSecret,
       redirect_uri: oidcLoginOptions.redirectUrl,
       response_type: "code",
       scope: DEFAULT_SCOPES,
