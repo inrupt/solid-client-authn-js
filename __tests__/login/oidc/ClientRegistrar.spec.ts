@@ -25,7 +25,7 @@ import "reflect-metadata";
 import { FetcherMock } from "../../../src/util/__mocks__/Fetcher";
 import ClientRegistrar from "../../../src/login/oidc/ClientRegistrar";
 import { IssuerConfigFetcherFetchConfigResponse } from "../../../src/login/oidc/__mocks__/IssuerConfigFetcher";
-import { Response as NodeResponse } from "node-fetch";
+import { Response as NodeResponse } from "cross-fetch";
 import URL from "url-parse";
 
 /**

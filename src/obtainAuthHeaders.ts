@@ -22,7 +22,7 @@
  */
 
 import { customAuthFetcher } from "./index";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 import AuthFetcher from "./AuthFetcher";
 import Debug from "debug";
 

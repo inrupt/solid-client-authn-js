@@ -22,14 +22,14 @@
  */
 
 import { flattenHeaders } from "../../../src/authenticatedFetch/headers/HeadersUtils";
-import { Headers as NodeHeaders } from "node-fetch";
+import { Headers as NodeHeaders } from "cross-fetch";
 
 describe("Headers interoperability function", () => {
   it("transforms an incoming Headers object into a flat headers structure", () => {
     const myHeaders = new NodeHeaders();
     myHeaders.append("accept", "application/json");
     myHeaders.append("content-type", "text/turtle");
-    // The following needs to be ignored because `node-fetch::Headers` and
+    // The following needs to be ignored because `cross-fetch::Headers` and
     // `lib.dom.d.ts::Headers` don't align. It doesn't break the way we
     // use them currently, but it's something that must be cleaned up
     // at some point.

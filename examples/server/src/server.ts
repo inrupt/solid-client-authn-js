@@ -26,7 +26,7 @@ import {
   getAuthHeaders,
   getNodeSolidServerCookie
 } from "solid-auth-fetcher";
-import fetch, { Response } from "node-fetch";
+import fetch, { Response } from "cross-fetch";
 
 async function run(): Promise<void> {
   const serverRoot = "https://localhost:8443";

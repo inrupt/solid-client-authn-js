@@ -22,7 +22,7 @@
  */
 
 import { IFetcher } from "../Fetcher";
-import { Response as NodeResponse } from "node-fetch";
+import { Response as NodeResponse } from "cross-fetch";
 
 export const FetcherMockResponse: Response = (new NodeResponse(
   JSON.stringify({ arbitrary: "response" })

@@ -32,7 +32,7 @@ import {
   DpopHeaderCreatorMock,
   DpopHeaderCreatorResponse
 } from "../../../src/dpop/__mocks__/DpopHeaderCreator";
-import { Response as NodeResponse } from "node-fetch";
+import { Response as NodeResponse } from "cross-fetch";
 import TokenRequester from "../../../src/login/oidc/TokenRequester";
 import { JoseUtilityMock } from "../../../src/jose/__mocks__/JoseUtility";
 import IIssuerConfig from "../../../src/login/oidc/IIssuerConfig";

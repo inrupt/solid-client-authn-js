@@ -30,7 +30,7 @@ import {
 import { StorageUtilityMock } from "../../../src/localStorage/__mocks__/StorageUtility";
 import IssuerConfigFetcher from "../../../src/login/oidc/IssuerConfigFetcher";
 import { IFetcher } from "../../../src/util/Fetcher";
-import { Response as NodeResponse } from "node-fetch";
+import { Response as NodeResponse } from "cross-fetch";
 
 /**
  * Test for IssuerConfigFetcher
