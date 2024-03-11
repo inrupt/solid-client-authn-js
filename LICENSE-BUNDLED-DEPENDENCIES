@@ -49,7 +49,7 @@
 "compare-versions@3.6.0","MIT","https://github.com/omichelsen/compare-versions"
 "concat-map@0.0.1","MIT","https://github.com/substack/node-concat-map"
 "cosmiconfig@6.0.0","MIT","https://github.com/davidtheclark/cosmiconfig"
-"cross-fetch@3.1.8","MIT","https://github.com/lquixada/cross-fetch"
+"cross-fetch@4.0.0","MIT","https://github.com/lquixada/cross-fetch"
 "cross-spawn@7.0.3","MIT","https://github.com/moxystudio/node-cross-spawn"
 "crypto-random-string@3.3.0","MIT","https://github.com/sindresorhus/crypto-random-string"
 "debug@3.2.7","MIT","https://github.com/visionmedia/debug"

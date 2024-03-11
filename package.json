@@ -76,7 +76,7 @@
     "@types/uuid": "^8.0.0",
     "ajv": "^6.12.6",
     "build-module": "^1.0.7",
-    "cross-fetch": "^3.1.8",
+    "cross-fetch": "^4.0.0",
     "crypto-random-string": "^3.3.0",
     "debug": "^4.3.1",
     "eslint-plugin-license-header": "^0.2.0",
