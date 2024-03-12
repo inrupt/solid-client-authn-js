@@ -141,7 +141,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       clientId: oidcLoginOptions.client.clientId,
     };
 
-    if (oidcLoginOptions.client.clientType !== "solid-oidc" && typeof oidcLoginOptions.client.clientSecret === "string") {
+    if (typeof oidcLoginOptions.client.clientSecret === "string") {
       dataToStore.clientSecret = oidcLoginOptions.client.clientSecret
     }
 

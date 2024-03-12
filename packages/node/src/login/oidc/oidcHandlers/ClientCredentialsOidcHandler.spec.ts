@@ -164,7 +164,6 @@ describe("ClientCredentialsOidcHandler", () => {
           client: {
             // @ts-expect-error The client ID is undefined for test purposes.
             clientId: undefined,
-            // @ts-expect-error The client secret is undefined for test purposes.
             clientSecret: undefined,
             clientType: "static",
           },

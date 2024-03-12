@@ -27,6 +27,9 @@
 type ISolidOidcClient = {
   clientId: string;
   clientType: "solid-oidc";
+  // A solid-oidc client has no concept of client secret,
+  // but this makes type checking easier in the codebase.
+  clientSecret?: undefined;
 };
 
 type IOpenIdConfidentialClient = {
