@@ -122,7 +122,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    if (!(await this.canHandle(oidcLoginOptions))) {
+    if (!validateOptions(oidcLoginOptions)) {
       throw new Error(
         `RefreshTokenOidcHandler cannot handle the provided options, missing one of 'refreshToken', 'clientId' in: ${JSON.stringify(
           oidcLoginOptions,
@@ -130,8 +130,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       );
     }
     const refreshOptions: RefreshOptions = {
-      // The type assertion is okay, because it is tested for in canHandle.
-      refreshToken: oidcLoginOptions.refreshToken as string,
+      refreshToken: oidcLoginOptions.refreshToken,
       sessionId: oidcLoginOptions.sessionId,
       tokenRefresher: this.tokenRefresher,
     };
