@@ -146,7 +146,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
-      clientType: "dynamic"
+      clientType: "dynamic",
     };
     if (registeredClient.metadata.client_secret !== undefined) {
       persistedClientMetadata.clientSecret =

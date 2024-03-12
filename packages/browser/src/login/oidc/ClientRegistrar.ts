@@ -31,9 +31,7 @@ import type {
   IClient,
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
-import {
-  isKnownClientType
-} from "@inrupt/solid-client-authn-core";
+import { isKnownClientType } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "@inrupt/oidc-client-ext";
 
 /**

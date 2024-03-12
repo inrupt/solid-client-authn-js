@@ -85,7 +85,7 @@ describe("ClientRegistrar", () => {
               clientSecret: "a secret",
               clientName: "my client name",
               idTokenSignedResponseAlg: "ES256",
-              clientType: "static"
+              clientType: "static",
             },
           },
           false,
@@ -114,7 +114,7 @@ describe("ClientRegistrar", () => {
               clientId: "an id",
               clientSecret: "a secret",
               clientName: "my client name",
-              clientType: "dynamic"
+              clientType: "dynamic",
             },
           },
           false,
