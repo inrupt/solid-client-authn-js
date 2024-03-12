@@ -135,22 +135,25 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       tokenRefresher: this.tokenRefresher,
     };
 
-    let dataToStore : Record<string, string> = {
+    const dataToStore: Record<string, string> = {
       issuer: oidcLoginOptions.issuer,
       dpop: oidcLoginOptions.dpop ? "true" : "false",
       clientId: oidcLoginOptions.client.clientId,
     };
 
     if (typeof oidcLoginOptions.client.clientSecret === "string") {
-      dataToStore.clientSecret = oidcLoginOptions.client.clientSecret
+      dataToStore.clientSecret = oidcLoginOptions.client.clientSecret;
     }
 
     if (typeof oidcLoginOptions.client.clientName === "string") {
-      dataToStore.clientName = oidcLoginOptions.client.clientName
+      dataToStore.clientName = oidcLoginOptions.client.clientName;
     }
 
     // This information must be in storage for the refresh flow to succeed.
-    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, dataToStore);
+    await this.storageUtility.setForUser(
+      oidcLoginOptions.sessionId,
+      dataToStore,
+    );
 
     // In the case when the refresh token is bound to a DPoP key, said key must
     // be used during the refresh grant.

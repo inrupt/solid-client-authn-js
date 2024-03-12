@@ -127,7 +127,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       client_id: clientInfo.clientId,
       client_secret: clientInfo.clientSecret,
       token_endpoint_auth_method:
-        clientInfo.clientType === "solid-oidc" ? "none" : "client_secret_basic",
+        typeof clientInfo.clientSecret === "undefined" ? "none" : "client_secret_basic",
       id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
     });
 

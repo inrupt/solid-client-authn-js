@@ -35,6 +35,7 @@ import {
   ConfigurationError,
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
+  isKnownClientType,
 } from "@inrupt/solid-client-authn-core";
 import type { Client } from "openid-client";
 import { Issuer } from "openid-client";
@@ -86,6 +87,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       storedClientSecret,
       storedClientName,
       storedIdTokenSignedResponseAlg,
+      storedClientType,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId"),
       this.storageUtility.getForUser(options.sessionId, "clientSecret"),
@@ -94,8 +96,13 @@ export default class ClientRegistrar implements IClientRegistrar {
         options.sessionId,
         "idTokenSignedResponseAlg",
       ),
+      this.storageUtility.getForUser(options.sessionId, "clientType"),
     ]);
-    if (storedClientId !== undefined) {
+
+    if (storedClientId !== undefined && isKnownClientType(storedClientType)) {
+      if (storedClientType === "static" && storedClientSecret === undefined) {
+        throw new Error("Missing static client secret in storage.");
+      }
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
@@ -103,8 +110,8 @@ export default class ClientRegistrar implements IClientRegistrar {
         idTokenSignedResponseAlg:
           storedIdTokenSignedResponseAlg ??
           negotiateClientSigningAlg(issuerConfig, PREFERRED_SIGNING_ALG),
-        clientType: "dynamic",
-      };
+        clientType: storedClientType,
+      } as IClient;
     }
 
     // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
@@ -139,6 +146,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
+      clientType: "dynamic"
     };
     if (registeredClient.metadata.client_secret !== undefined) {
       persistedClientMetadata.clientSecret =

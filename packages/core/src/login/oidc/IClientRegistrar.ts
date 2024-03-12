@@ -95,6 +95,15 @@ function isSolidOidcClient(
   );
 }
 
+export function isKnownClientType(
+  clientType: string | undefined,
+): clientType is "dynamic" | "static" | "solid-oidc" {
+  return (
+    typeof clientType === "string" &&
+    ["dynamic", "static", "solid-oidc"].includes(clientType)
+  );
+}
+
 export async function handleRegistration(
   options: ILoginOptions,
   issuerConfig: IIssuerConfig,
@@ -131,7 +140,10 @@ export async function handleRegistration(
   // or it is not compliant but the client_id isn't an IRI (we assume it has already
   // been registered with the IdP), then the client registration information needs
   // to be stored so that it can be retrieved later after redirect.
-  const infoToSave: Record<string, string> = { clientId: clientInfo.clientId };
+  const infoToSave: Record<string, string> = {
+    clientId: clientInfo.clientId,
+    clientType: clientInfo.clientType,
+  };
   if (clientInfo.clientType === "static") {
     infoToSave.clientSecret = clientInfo.clientSecret;
   }

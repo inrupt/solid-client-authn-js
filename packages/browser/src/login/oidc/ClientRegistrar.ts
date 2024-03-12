@@ -31,6 +31,9 @@ import type {
   IClient,
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
+import {
+  isKnownClientType
+} from "@inrupt/solid-client-authn-core";
 import { registerClient } from "@inrupt/oidc-client-ext";
 
 /**
@@ -49,7 +52,8 @@ export default class ClientRegistrar implements IClientRegistrar {
     const [
       storedClientId,
       storedClientSecret,
-      // storedClientName,
+      storedClientName,
+      storedClientType,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId", {
         secure: false,
@@ -57,17 +61,21 @@ export default class ClientRegistrar implements IClientRegistrar {
       this.storageUtility.getForUser(options.sessionId, "clientSecret", {
         secure: false,
       }),
-      // this.storageUtility.getForUser(options.sessionId, "clientName", {
-      //   // FIXME: figure out how to persist secure storage at reload
-      //   secure: false,
-      // }),
+      this.storageUtility.getForUser(options.sessionId, "clientName", {
+        secure: false,
+      }),
+      this.storageUtility.getForUser(options.sessionId, "clientType", {
+        secure: false,
+      }),
     ]);
-    if (storedClientId) {
+    if (storedClientId && isKnownClientType(storedClientType)) {
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
-        clientType: "dynamic",
-      };
+        clientName: storedClientName,
+        // Note: static clients are not applicable in a browser context.
+        clientType: storedClientType,
+      } as IClient;
     }
 
     try {
@@ -75,6 +83,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       // Save info
       const infoToSave: Record<string, string> = {
         clientId: registeredClient.clientId,
+        clientType: "dynamic",
       };
       if (registeredClient.clientSecret) {
         infoToSave.clientSecret = registeredClient.clientSecret;

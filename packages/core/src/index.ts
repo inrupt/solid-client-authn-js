@@ -90,6 +90,7 @@ export {
   IClientRegistrarOptions,
   handleRegistration,
   determineSigningAlg,
+  isKnownClientType,
 } from "./login/oidc/IClientRegistrar";
 export { default as ClientAuthentication } from "./ClientAuthentication";
 export { IClient } from "./login/oidc/IClient";
