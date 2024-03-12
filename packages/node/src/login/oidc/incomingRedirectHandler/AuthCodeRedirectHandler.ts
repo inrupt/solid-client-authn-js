@@ -129,13 +129,16 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         clientInfo.clientType === "solid-oidc"
           ? undefined
           : clientInfo.clientSecret,
-      // token_endpoint_auth_method:
-      //   clientInfo.clientType === "solid-oidc" ? "none" : "client_secret_basic",
-      token_endpoint_auth_method: clientInfo.clientSecret
-        ? "client_secret_basic"
-        : "none",
+      token_endpoint_auth_method:
+        clientInfo.clientType === "solid-oidc" ? "none" : "client_secret_basic",
+      // token_endpoint_auth_method: clientInfo.clientSecret
+      //   ? "client_secret_basic"
+      //   : "none",
       id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
     });
+
+    console.log("See " + clientInfo.clientType === "solid-oidc");
+    console.log("client_secret " + client.client_secret);
 
     const params = client.callbackParams(inputRedirectUrl);
     let dpopKey: KeyPair | undefined;
