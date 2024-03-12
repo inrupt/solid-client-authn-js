@@ -17,13 +17,13 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@inrupt/eslint-config-lib": "^3.1.0",
-    "@playwright/test": "^1.41.1",
+    "@inrupt/eslint-config-lib": "^3.2.1",
+    "@playwright/test": "^1.41.2",
     "@types/node": "^20.11.10",
-    "@types/react": "^18.2.53",
-    "@types/react-dom": "^18.2.18",
-    "esbuild": "^0.19.11",
-    "eslint": "^8.56.0",
+    "@types/react": "^18.2.61",
+    "@types/react-dom": "^18.2.19",
+    "esbuild": "^0.20.1",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^13.5.6"
   }
 }
