@@ -162,7 +162,9 @@ describe("ClientCredentialsOidcHandler", () => {
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
           client: {
-            clientId: undefined as unknown as string,
+            // @ts-expect-error The client ID is undefined for test purposes.
+            clientId: undefined,
+            clientSecret: undefined,
             clientType: "static",
           },
         }),
@@ -178,7 +180,7 @@ describe("ClientCredentialsOidcHandler", () => {
           ...standardOidcOptions,
           client: {
             clientId: "some client ID",
-            clientSecret: undefined,
+            clientSecret: "some client secret",
             clientType: "static",
           },
         }),
@@ -213,8 +215,25 @@ describe("ClientCredentialsOidcHandler", () => {
             clientSecret: "some client secret",
             clientType: "static",
           },
+          redirectUrl: undefined,
         }),
       ).resolves.toBe(true);
+    });
+
+    it("cannot handle if a redirectUrl has been specified (for auth code flow)", async () => {
+      const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+        mockDefaultTokenRefresher(),
+      );
+      await expect(
+        clientCredentialsOidcHandler.canHandle({
+          ...standardOidcOptions,
+          client: {
+            clientId: "some client ID",
+            clientSecret: "some client secret",
+            clientType: "static",
+          },
+        }),
+      ).resolves.toBe(false);
     });
   });
 });

@@ -110,8 +110,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       issuer: issuerConfig.issuer,
       // TODO: differentiate if DPoP should be true
       dpop: options.tokenType.toLowerCase() === "dpop",
-      // TODO Cleanup to remove the type assertion
-      redirectUrl: options.redirectUrl as string,
+      redirectUrl: options.redirectUrl,
       issuerConfiguration: issuerConfig,
       client: clientInfo,
       sessionId: options.sessionId,

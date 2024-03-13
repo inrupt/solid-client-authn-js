@@ -11,8 +11,15 @@ The following changes have been implemented but not released yet:
 
 ### New Feature
 
+#### node and browser
+
 - OpenID Providers with multiple JWK in their JWKS are now supported. Thanks to
   @pavol-brunclik-compote for the original contribution.
+
+#### node
+
+- Authorization code flow for statically registered clients is now supported. Statically registered
+  clients previously defaulted to the Client Credentials flow, it is no longer an assumption.
 
 ### Bugfix
 

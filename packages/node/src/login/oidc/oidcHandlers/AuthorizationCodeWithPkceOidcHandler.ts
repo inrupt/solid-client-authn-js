@@ -54,7 +54,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
     );
     const client = new issuer.Client({
       client_id: oidcLoginOptions.client.clientId,
-      client_secret: oidcLoginOptions.client.clientSecret,
     });
     const codeVerifier = generators.codeVerifier();
     const state = generators.state();

@@ -312,7 +312,6 @@ describe("RefreshTokenOidcHandler", () => {
         refreshToken: "some refresh token",
         client: {
           clientId: "some client id",
-          clientSecret: undefined,
           clientName: "some client name",
           clientType: "dynamic",
         },

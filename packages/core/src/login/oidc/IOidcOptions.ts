@@ -60,8 +60,9 @@ export interface IOidcOptions {
   /**
    * The URL to which the user should be redirected after logging in the Solid
    * Identity Provider and authorizing the app to access data in their stead.
+   * The client credentials grant doesn't require a redirect.
    */
-  redirectUrl: string;
+  redirectUrl?: string;
   handleRedirect?: (url: string) => unknown;
   eventEmitter?: EventEmitter;
 }

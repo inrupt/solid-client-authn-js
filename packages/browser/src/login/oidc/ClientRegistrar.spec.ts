@@ -176,6 +176,7 @@ describe("ClientRegistrar", () => {
             "solidClientAuthenticationUser:mySession": {
               clientId: "an id",
               clientSecret: "a secret",
+              clientType: "dynamic",
             },
           },
           false,

@@ -41,13 +41,20 @@ export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
     this.redirector = redirector;
   }
 
-  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
-    return !!(
-      oidcLoginOptions.issuerConfiguration.grantTypesSupported &&
+  parametersGuard = (
+    oidcLoginOptions: IOidcOptions,
+  ): oidcLoginOptions is IOidcOptions & { redirectUrl: string } => {
+    return (
+      oidcLoginOptions.issuerConfiguration.grantTypesSupported !== undefined &&
       oidcLoginOptions.issuerConfiguration.grantTypesSupported.indexOf(
         "authorization_code",
-      ) > -1
+      ) > -1 &&
+      oidcLoginOptions.redirectUrl !== undefined
     );
+  };
+
+  async canHandle(oidcLoginOptions: IOidcOptions): Promise<boolean> {
+    return this.parametersGuard(oidcLoginOptions);
   }
 
   async handleRedirect({
@@ -61,6 +68,9 @@ export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
     codeVerifier: string;
     targetUrl: string;
   }) {
+    if (!this.parametersGuard(oidcLoginOptions)) {
+      throw new Error("The authorization code grant requires a redirectUrl.");
+    }
     await Promise.all([
       // We use the OAuth 'state' value (which should be crypto-random) as
       // the key in our storage to store our actual SessionID. We do this
@@ -71,7 +81,6 @@ export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
       // that session ID can be any developer-specified value, and therefore
       // may not be appropriate (since the OAuth 'state' value should really
       // be an unguessable crypto-random value).
-      // eslint-disable-next-line no-underscore-dangle
       this.storageUtility.setForUser(state, {
         sessionId: oidcLoginOptions.sessionId,
       }),
@@ -81,7 +90,6 @@ export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
       // our session ID is unnecessary, but it provides a slightly cleaner
       // separation of concerns.
       this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-        // eslint-disable-next-line no-underscore-dangle
         codeVerifier,
         issuer: oidcLoginOptions.issuer.toString(),
         // The redirect URL is read after redirect, so it must be stored now.

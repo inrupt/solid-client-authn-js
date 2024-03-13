@@ -24,15 +24,30 @@
  * @packageDocumentation
  */
 
-export type ClientType = "static" | "dynamic" | "solid-oidc";
+type ISolidOidcClient = {
+  clientId: string;
+  clientType: "solid-oidc";
+  // A solid-oidc client has no concept of client secret,
+  // but this makes type checking easier in the codebase.
+  clientSecret?: undefined;
+};
+
+type IOpenIdConfidentialClient = {
+  clientId: string;
+  clientSecret: string;
+  clientType: "static";
+};
+
+type IOpenIdPublicClient = {
+  clientId: string;
+  clientSecret?: string;
+  clientType: "dynamic";
+};
 
 /**
  * @hidden
  */
-export interface IClient {
-  clientId: string;
-  clientSecret?: string;
+export type IClient = {
   clientName?: string;
   idTokenSignedResponseAlg?: string;
-  clientType: ClientType;
-}
+} & (ISolidOidcClient | IOpenIdConfidentialClient | IOpenIdPublicClient);

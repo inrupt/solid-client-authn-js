@@ -77,9 +77,10 @@ describe("OidcLoginHandler", () => {
       mockStorage({}),
       mockStorage({
         "solidClientAuthenticationUser:mySession": {
-          // The value of the client ID doesn't matter here, and it could be a WebID.
+          // The value of the client ID doesn't matter.
           // This checks it gets passed through from storage to the handler.
-          clientId: "some client ID",
+          clientId: "https://example.org/some-client-id",
+          clientType: "solid-oidc",
         },
       }),
     );
@@ -99,7 +100,9 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle.mock.calls).toHaveLength(1);
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
-    expect(calledWith.client.clientId).toBe("some client ID");
+    expect(calledWith.client.clientId).toBe(
+      "https://example.org/some-client-id",
+    );
   });
 
   it("should lookup client ID if not provided, if not found do DCR", async () => {
