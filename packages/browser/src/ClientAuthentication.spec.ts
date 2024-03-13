@@ -53,7 +53,6 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   ) as typeof SolidClientAuthnCore;
   return {
     ...actualCoreModule,
-    fetchJwks: jest.fn(),
   };
 });
 

@@ -20,39 +20,10 @@
 //
 
 // eslint-disable-next-line no-shadow
-import type { JWK, JWTPayload } from "jose";
-import { jwtVerify, importJWK } from "jose";
+import type { JWTPayload } from "jose";
+import { jwtVerify, createRemoteJWKSet } from "jose";
 
-type WithMessage = { message: string };
 type WithStack = { stack: string };
-
-export async function fetchJwks(
-  jwksIri: string,
-  issuerIri: string,
-): Promise<JWK> {
-  // FIXME: the following line works, but the underlying network calls don't seem
-  // to be mocked properly by our test code. It would be nicer to replace calls to this
-  // function by the following line and to fix the mocks.
-  // const jwks = createRemoteJWKSet(new URL(jwksIri));
-  const jwksResponse = await fetch(jwksIri);
-  if (jwksResponse.status !== 200) {
-    throw new Error(
-      `Could not fetch JWKS for [${issuerIri}] at [${jwksIri}]: ${jwksResponse.status} ${jwksResponse.statusText}`,
-    );
-  }
-  // The JWKS should only contain the current key for the issuer.
-  let jwk: JWK;
-  try {
-    jwk = (await jwksResponse.json()).keys[0] as JWK;
-  } catch (e) {
-    throw new Error(
-      `Malformed JWKS for [${issuerIri}] at [${jwksIri}]: ${
-        (e as WithMessage).message
-      }`,
-    );
-  }
-  return jwk;
-}
 
 /**
  * Extract a WebID from an ID token payload based on https://github.com/solid/webid-oidc-spec.
@@ -69,12 +40,11 @@ export async function getWebidFromTokenPayload(
   issuerIri: string,
   clientId: string,
 ): Promise<string> {
-  const jwk = await fetchJwks(jwksIri, issuerIri);
   let payload: JWTPayload;
   try {
     const { payload: verifiedPayload } = await jwtVerify(
       idToken,
-      await importJWK(jwk),
+      createRemoteJWKSet(new URL(jwksIri)),
       {
         issuer: issuerIri,
         audience: clientId,
