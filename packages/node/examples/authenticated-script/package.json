@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "description": "Demo for script authentication in NodeJS",
     "type": "module",
-    "main": "src/index.js",
+    "main": "./index.mjs",
     "author": "Inrupt, Inc.",
     "license": "MIT",
     "dependencies": {
