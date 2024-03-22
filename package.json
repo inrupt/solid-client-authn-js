@@ -47,7 +47,7 @@
     "@inrupt/internal-playwright-helpers": "^3.2.1",
     "@inrupt/internal-test-env": "^3.1.0",
     "@inrupt/jest-jsdom-polyfills": "^3.2.1",
-    "@inrupt/solid-client": "^2.0.0",
+    "@inrupt/solid-client": "^2.0.1",
     "@playwright/test": "^1.42.1",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
