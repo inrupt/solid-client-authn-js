@@ -20,7 +20,7 @@
   "homepage": "https://github.com/inrupt/solid-client-authn#readme",
   "dependencies": {
     "@inrupt/solid-client-authn-node": "../../",
-    "express": "^4.18.3",
+    "express": "^4.19.2",
     "loglevel": "^1.9.1"
   },
   "devDependencies": {
