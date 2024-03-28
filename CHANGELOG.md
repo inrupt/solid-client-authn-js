@@ -9,6 +9,20 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## [2.1.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.1.0) - 2024-03-13
+
+### New Feature
+
+#### node and browser
+
+- OpenID Providers with multiple JWK in their JWKS are now supported. Thanks to
+  @pavol-brunclik-compote for the original contribution.
+
+#### node
+
+- Authorization code flow for statically registered clients is now supported. Statically registered
+  clients previously defaulted to the Client Credentials flow, it is no longer an assumption.
+
 ### Bugfix
 
 #### browser

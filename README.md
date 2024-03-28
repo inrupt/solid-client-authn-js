@@ -124,7 +124,7 @@ Go to http://localhost:3001/.
 
 #### Running an authenticated script
 
-See [the dedicated documentation](/packages/node/examples/bootstrappedApp/README.md).
+See [the dedicated example](/packages/node/examples/authenticated-script/README.md).
 
 ## Using with jest
 

@@ -122,7 +122,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    if (!(await this.canHandle(oidcLoginOptions))) {
+    if (!validateOptions(oidcLoginOptions)) {
       throw new Error(
         `RefreshTokenOidcHandler cannot handle the provided options, missing one of 'refreshToken', 'clientId' in: ${JSON.stringify(
           oidcLoginOptions,
@@ -130,20 +130,30 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       );
     }
     const refreshOptions: RefreshOptions = {
-      // The type assertion is okay, because it is tested for in canHandle.
-      refreshToken: oidcLoginOptions.refreshToken as string,
+      refreshToken: oidcLoginOptions.refreshToken,
       sessionId: oidcLoginOptions.sessionId,
       tokenRefresher: this.tokenRefresher,
     };
 
-    // This information must be in storage for the refresh flow to succeed.
-    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
+    const dataToStore: Record<string, string> = {
       issuer: oidcLoginOptions.issuer,
       dpop: oidcLoginOptions.dpop ? "true" : "false",
       clientId: oidcLoginOptions.client.clientId,
-      // Note: We assume here that a client secret is present, which is checked for when validating the options.
-      clientSecret: oidcLoginOptions.client.clientSecret as string,
-    });
+    };
+
+    if (typeof oidcLoginOptions.client.clientSecret === "string") {
+      dataToStore.clientSecret = oidcLoginOptions.client.clientSecret;
+    }
+
+    if (typeof oidcLoginOptions.client.clientName === "string") {
+      dataToStore.clientName = oidcLoginOptions.client.clientName;
+    }
+
+    // This information must be in storage for the refresh flow to succeed.
+    await this.storageUtility.setForUser(
+      oidcLoginOptions.sessionId,
+      dataToStore,
+    );
 
     // In the case when the refresh token is bound to a DPoP key, said key must
     // be used during the refresh grant.
@@ -199,22 +209,6 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       keyPair,
     );
 
-    await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-      issuer: oidcLoginOptions.issuer,
-      dpop: oidcLoginOptions.dpop ? "true" : "false",
-      clientId: oidcLoginOptions.client.clientId,
-    });
-
-    if (oidcLoginOptions.client.clientSecret) {
-      await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-        clientSecret: oidcLoginOptions.client.clientSecret,
-      });
-    }
-    if (oidcLoginOptions.client.clientName) {
-      await this.storageUtility.setForUser(oidcLoginOptions.sessionId, {
-        clientName: oidcLoginOptions.client.clientName,
-      });
-    }
     let expirationDate: number | undefined;
     expirationDate = accessInfo.expiresAt;
     if (expirationDate === undefined && accessInfo.expiresIn !== undefined) {

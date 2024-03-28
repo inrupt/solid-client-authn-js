@@ -85,6 +85,7 @@ describe("ClientRegistrar", () => {
               clientSecret: "a secret",
               clientName: "my client name",
               idTokenSignedResponseAlg: "ES256",
+              clientType: "static",
             },
           },
           false,
@@ -113,6 +114,7 @@ describe("ClientRegistrar", () => {
               clientId: "an id",
               clientSecret: "a secret",
               clientName: "my client name",
+              clientType: "dynamic",
             },
           },
           false,
@@ -295,9 +297,7 @@ describe("ClientRegistrar", () => {
     it("saves the registered client information for a public client in storage", async () => {
       // Sets up the mock-up for DCR
       const { Issuer } = jest.requireMock("openid-client") as any;
-      const mockedClientConfig = mockClientConfig({
-        client_secret: undefined,
-      });
+      const mockedClientConfig = mockClientConfig({});
       const mockedIssuer = {
         metadata: mockDefaultIssuerMetadata(),
         Client: {
@@ -327,7 +327,7 @@ describe("ClientRegistrar", () => {
       ).resolves.toEqual(mockDefaultClientConfig().client_id);
       await expect(
         mockStorage.getForUser("mySession", "clientSecret"),
-      ).resolves.toBeUndefined();
+      ).resolves.toEqual(mockDefaultClientConfig().client_secret);
     });
 
     it("uses stores the signing algorithm preferred by the client when the registration didn't return the used algorithm", async () => {

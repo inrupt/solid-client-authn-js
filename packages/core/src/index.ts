@@ -41,7 +41,7 @@ export {
 export { default as IHandleable } from "./util/handlerPattern/IHandleable";
 export { default as AggregateHandler } from "./util/handlerPattern/AggregateHandler";
 
-export { getWebidFromTokenPayload, fetchJwks } from "./util/token";
+export { getWebidFromTokenPayload } from "./util/token";
 
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
 export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
@@ -90,6 +90,7 @@ export {
   IClientRegistrarOptions,
   handleRegistration,
   determineSigningAlg,
+  isKnownClientType,
 } from "./login/oidc/IClientRegistrar";
 export { default as ClientAuthentication } from "./ClientAuthentication";
 export { IClient } from "./login/oidc/IClient";
