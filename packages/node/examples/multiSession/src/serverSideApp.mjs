@@ -70,7 +70,7 @@ app.get("/", async (req, res, next) => {
 
 app.get("/login", async (req, res, next) => {
   const session = new Session();
-  req.session!.sessionId = session.info.sessionId;
+  req.session.sessionId = session.info.sessionId;
   await session.login({
     redirectUrl: REDIRECT_URL,
     oidcIssuer: DEFAULT_OIDC_ISSUER,
@@ -85,11 +85,11 @@ app.get("/login", async (req, res, next) => {
 });
 
 app.get("/redirect", async (req, res) => {
-  const session = await getSessionFromStorage(req.session!.sessionId);
+  const session = await getSessionFromStorage(req.session.sessionId);
   if (session === undefined) {
     res
       .status(400)
-      .send(`<p>No session stored for ID [${req.session!.sessionId}]</p>`);
+      .send(`<p>No session stored for ID [${req.session.sessionId}]</p>`);
   } else {
     await session.handleIncomingRedirect(getRequestFullUrl(req));
     if (session.info.isLoggedIn) {
@@ -104,7 +104,7 @@ app.get("/redirect", async (req, res) => {
 });
 
 app.get("/fetch", async (req, res, next) => {
-  const session = await getSessionFromStorage(req.session!.sessionId);
+  const session = await getSessionFromStorage(req.session.sessionId);
   if (!req.query.resource) {
     res
       .status(400)
@@ -115,14 +115,14 @@ app.get("/fetch", async (req, res, next) => {
     const { fetch } = session ?? new Session();
     res.send(
       `<pre>${(
-        await (await fetch(req.query.resource as string)).text()
+        await (await fetch(req.query.resource)).text()
       ).replace(/</g, "&lt;")}</pre>`,
     );
   }
 });
 
 app.get("/logout", async (req, res, next) => {
-  const session = await getSessionFromStorage(req.session!.sessionId);
+  const session = await getSessionFromStorage(req.session.sessionId);
   if (session) {
     const { webId } = session.info;
     session.logout();
@@ -136,6 +136,6 @@ app.listen(PORT, async () => {
   console.log(`Listening on [${PORT}]...`);
 });
 
-function getRequestFullUrl(request: express.Request) {
+function getRequestFullUrl(request) {
   return `${request.protocol}://${request.get("host")}${request.originalUrl}`;
 }

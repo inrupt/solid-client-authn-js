@@ -4,9 +4,6 @@
   "version": "2.1.0",
   "description": "Demo for session management in NodeJS",
   "main": "src/index.js",
-  "scripts": {
-    "build": "tsc -p tsconfig.json"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inrupt/solid-client-authn-js.git"
