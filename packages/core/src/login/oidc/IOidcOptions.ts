@@ -65,6 +65,11 @@ export interface IOidcOptions {
   redirectUrl?: string;
   handleRedirect?: (url: string) => unknown;
   eventEmitter?: EventEmitter;
+  /**
+   * Should the resulting session be refreshed in the background? This is persisted prior redirection.
+   * Defaults to true.
+   */
+  keepAlive?: boolean;
 }
 
 export default IOidcOptions;

@@ -62,6 +62,7 @@ export async function getSessionFromStorage(
   const session = new Session({
     sessionInfo,
     clientAuthentication: clientAuth,
+    keepAlive: sessionInfo.keepAlive,
   });
   if (onNewRefreshToken !== undefined) {
     session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);

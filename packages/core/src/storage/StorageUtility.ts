@@ -39,6 +39,7 @@ export type OidcContext = {
   codeVerifier?: string;
   redirectUrl?: string;
   dpop: boolean;
+  keepAlive: boolean;
 };
 
 export async function getSessionIdFromOauthState(
@@ -62,7 +63,7 @@ export async function loadOidcContextFromStorage(
   configFetcher: IIssuerConfigFetcher,
 ): Promise<OidcContext> {
   try {
-    const [issuerIri, codeVerifier, storedRedirectIri, dpop] =
+    const [issuerIri, codeVerifier, storedRedirectIri, dpop, keepAlive] =
       await Promise.all([
         storageUtility.getForUser(sessionId, "issuer", {
           errorIfNull: true,
@@ -70,10 +71,10 @@ export async function loadOidcContextFromStorage(
         storageUtility.getForUser(sessionId, "codeVerifier"),
         storageUtility.getForUser(sessionId, "redirectUrl"),
         storageUtility.getForUser(sessionId, "dpop", { errorIfNull: true }),
+        storageUtility.getForUser(sessionId, "keepAlive"),
       ]);
     // Clear the code verifier, which is one-time use.
     await storageUtility.deleteForUser(sessionId, "codeVerifier");
-
     // Unlike openid-client, this looks up the configuration from storage
     const issuerConfig = await configFetcher.fetchConfig(issuerIri as string);
     return {
@@ -81,6 +82,8 @@ export async function loadOidcContextFromStorage(
       redirectUrl: storedRedirectIri,
       issuerConfig,
       dpop: dpop === "true",
+      // Default keepAlive to true if not found in storage.
+      keepAlive: typeof keepAlive === "string" ? keepAlive === "true" : true,
     };
   } catch (e) {
     throw new Error(

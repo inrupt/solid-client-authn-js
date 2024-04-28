@@ -53,4 +53,6 @@ export default interface ILoginOptions extends ILoginInputOptions {
    * Event emitter enabling calling user-specified callbacks.
    */
   eventEmitter?: EventEmitter;
+
+  keepAlive?: boolean;
 }

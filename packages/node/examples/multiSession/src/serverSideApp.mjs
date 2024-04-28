@@ -69,7 +69,7 @@ app.get("/", async (req, res, next) => {
 });
 
 app.get("/login", async (req, res, next) => {
-  const session = new Session();
+  const session = new Session({ keepAlive: false });
   req.session.sessionId = session.info.sessionId;
   await session.login({
     redirectUrl: REDIRECT_URL,
@@ -93,6 +93,7 @@ app.get("/redirect", async (req, res) => {
   } else {
     await session.handleIncomingRedirect(getRequestFullUrl(req));
     if (session.info.isLoggedIn) {
+      session.events.on("sessionExtended", () => { console.log("Extended session.")})
       res.send(
         `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`,
       );

@@ -35,6 +35,7 @@ import type {
   RefreshOptions,
   ITokenRefresher,
   IncomingRedirectResult,
+  SessionConfig,
 } from "@inrupt/solid-client-authn-core";
 import {
   loadOidcContextFromStorage,
@@ -169,7 +170,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     }
     const authFetch = await buildAuthenticatedFetch(tokenSet.access_token, {
       dpopKey,
-      refreshOptions,
+      refreshOptions: oidcContext.keepAlive ? refreshOptions : undefined,
       eventEmitter,
       expiresIn: tokenSet.expires_in,
     });
