@@ -1,7 +1,7 @@
 # pip install -r requirements.txt
 
 pydata-sphinx-theme==0.15.2
-myst-parser==2.0.0
+myst-parser==3.0.1
 # Currently myst-parse is incompatible with sphinx v7
 Sphinx==7.2.6
 # urllib3 v2.0 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled
