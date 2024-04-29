@@ -83,7 +83,7 @@ export interface ISessionOptions {
 export const defaultStorage = new InMemoryStorage();
 
 /**
- * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
+ * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling access to private resources after login for instance.
  */
 export class Session implements IHasSessionEventListener {
   /**
