@@ -45,7 +45,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     sessionId: string,
     options: ILoginInputOptions,
     eventEmitter: EventEmitter,
-    config: SessionConfig,
+    config: SessionConfig = { keepAlive: true },
   ): Promise<ISessionInfo | undefined> => {
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
@@ -97,7 +97,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   handleIncomingRedirect = async (
     url: string,
     eventEmitter: EventEmitter,
-    config: SessionConfig,
+    config: SessionConfig = { keepAlive: true },
   ): Promise<ISessionInfo | undefined> => {
     const redirectInfo = await this.redirectHandler.handle(
       url,

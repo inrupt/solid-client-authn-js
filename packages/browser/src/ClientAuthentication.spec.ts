@@ -424,6 +424,7 @@ describe("ClientAuthentication", () => {
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
         mockEmitter,
+        undefined,
       );
 
       // Calling the redirect handler should have updated the fetch.

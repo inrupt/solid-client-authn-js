@@ -29,7 +29,7 @@
  */
 import type {
   IIncomingRedirectHandler,
-  ISessionInfo,
+  ISessionInfo, SessionConfig,
 } from "@inrupt/solid-client-authn-core";
 import { AggregateHandler } from "@inrupt/solid-client-authn-core";
 import type { EventEmitter } from "events";
@@ -39,7 +39,7 @@ import type { EventEmitter } from "events";
  */
 export default class AggregateIncomingRedirectHandler
   extends AggregateHandler<
-    [string, EventEmitter],
+    [string, EventEmitter, SessionConfig],
     ISessionInfo & { fetch: typeof fetch }
   >
   implements IIncomingRedirectHandler
