@@ -29,7 +29,8 @@
  */
 import type {
   IIncomingRedirectHandler,
-  ISessionInfo, SessionConfig,
+  ISessionInfo,
+  SessionConfig,
 } from "@inrupt/solid-client-authn-core";
 import { AggregateHandler } from "@inrupt/solid-client-authn-core";
 import type { EventEmitter } from "events";

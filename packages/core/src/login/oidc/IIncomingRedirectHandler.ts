@@ -29,12 +29,16 @@ import type { EventEmitter } from "events";
 import type IHandleable from "../../util/handlerPattern/IHandleable";
 import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
 import type { IRpLogoutOptions } from "../../logout/ILogoutHandler";
-import {SessionConfig} from "../../Session";
+import type { SessionConfig } from "../../Session";
 
 export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch } & {
   getLogoutUrl?: (options: IRpLogoutOptions) => string;
 };
-export type IncomingRedirectInput = [string, EventEmitter | undefined, SessionConfig | undefined];
+export type IncomingRedirectInput = [
+  string,
+  EventEmitter | undefined,
+  SessionConfig | undefined,
+];
 
 /**
  * @hidden

@@ -17,7 +17,7 @@ The following changes have been implemented but not released yet:
   parameter is added to the constructor: `Session({ keepAlive: false })`. This prevents
   the `Session` setting a callback to refresh the Access Token before it expires, which
   could cause a memory leak in the case of a server-side application with many users, in
-  addition to unnecessary requests sent to the OpenID Provider. 
+  addition to unnecessary requests sent to the OpenID Provider.
 
 ## [2.1.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.1.0) - 2024-03-13
 

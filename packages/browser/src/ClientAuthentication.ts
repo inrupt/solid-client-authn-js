@@ -101,7 +101,11 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     eventEmitter: EventEmitter,
   ): Promise<ISessionInfo | undefined> => {
     try {
-      const redirectInfo = await this.redirectHandler.handle(url, eventEmitter, undefined);
+      const redirectInfo = await this.redirectHandler.handle(
+        url,
+        eventEmitter,
+        undefined,
+      );
       // The `FallbackRedirectHandler` directly returns the global `fetch` for
       // his value, so we should ensure it's bound to `window` rather than to
       // ClientAuthentication, to avoid the following error:

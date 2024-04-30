@@ -35,7 +35,6 @@ import type {
   RefreshOptions,
   ITokenRefresher,
   IncomingRedirectResult,
-  SessionConfig,
 } from "@inrupt/solid-client-authn-core";
 import {
   loadOidcContextFromStorage,
