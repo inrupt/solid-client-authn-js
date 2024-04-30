@@ -436,6 +436,7 @@ describe("loadOidcContextFromStorage", () => {
       codeVerifier: "some code verifier",
       redirectUrl: "https://my.app/redirect",
       dpop: true,
+      keepAlive: true,
     });
   });
 
