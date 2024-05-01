@@ -191,7 +191,7 @@ export async function buildAuthenticatedFetch(
         if (refreshToken !== undefined) {
           currentRefreshOptions.refreshToken = refreshToken;
         }
-        // Each time the access token is refreshed, we must plan fo the next
+        // Each time the access token is refreshed, we must plan for the next
         // refresh iteration.
         clearTimeout(latestTimeout);
         latestTimeout = setTimeout(

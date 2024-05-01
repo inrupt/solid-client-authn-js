@@ -22,14 +22,14 @@ import log from "loglevel";
 import express from "express";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
-import { Session } from "../../../packages/node/src/index";
+import {ISessionOptions, Session} from "../../../packages/node/src/index";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
 log.setLevel("TRACE");
 
-export function createApp(onStart: () => void) {
+export function createApp(sessionOptions: Partial<ISessionOptions> = {}, onStart: (value: (PromiseLike<void> | void)) => void) {
   const app = express();
 
   // Initialised when the server comes up and is running...
@@ -111,7 +111,7 @@ export function createApp(onStart: () => void) {
   });
 
   return app.listen(CONSTANTS.CLIENT_AUTHN_TEST_PORT, async () => {
-    session = new Session();
+    session = new Session(sessionOptions);
 
     onStart();
   });

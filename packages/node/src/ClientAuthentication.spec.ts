@@ -63,7 +63,7 @@ describe("ClientAuthentication", () => {
 
   describe("login", () => {
     const mockEmitter = new EventEmitter();
-    it("calls login, and defaults to a DPoP token", async () => {
+    it("calls login, and defaults to a DPoP token and keep session alive on", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(
         "mySession",
@@ -222,6 +222,33 @@ describe("ClientAuthentication", () => {
         tokenType: "Bearer",
         eventEmitter: mockEmitter,
         keepAlive: true,
+      });
+    });
+
+    it("turn off keeping the session alive", async () => {
+      const clientAuthn = getClientAuthentication();
+      await clientAuthn.login(
+          "mySession",
+          {
+            clientId: "coolApp",
+            redirectUrl: "https://coolapp.com/redirect",
+            oidcIssuer: "https://idp.com",
+          },
+          mockEmitter,
+          { keepAlive: false },
+      );
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
+        sessionId: "mySession",
+        clientId: "coolApp",
+        redirectUrl: "https://coolapp.com/redirect",
+        oidcIssuer: "https://idp.com",
+        clientName: "coolApp",
+        clientSecret: undefined,
+        handleRedirect: undefined,
+        tokenType: "DPoP",
+        eventEmitter: mockEmitter,
+        refreshToken: undefined,
+        keepAlive: false,
       });
     });
   });
