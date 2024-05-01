@@ -228,14 +228,14 @@ describe("ClientAuthentication", () => {
     it("turn off keeping the session alive", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(
-          "mySession",
-          {
-            clientId: "coolApp",
-            redirectUrl: "https://coolapp.com/redirect",
-            oidcIssuer: "https://idp.com",
-          },
-          mockEmitter,
-          { keepAlive: false },
+        "mySession",
+        {
+          clientId: "coolApp",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+        },
+        mockEmitter,
+        { keepAlive: false },
       );
       expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
         sessionId: "mySession",
