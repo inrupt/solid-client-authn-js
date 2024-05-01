@@ -137,7 +137,7 @@ describe("Testing against express app with default session", () => {
   beforeEach(async () => {
     seedInfo = await seedPod(ENV);
     await new Promise<void>((res) => {
-      app = createApp({}, res);
+      app = createApp(res, {});
     });
   }, 30_000);
 
