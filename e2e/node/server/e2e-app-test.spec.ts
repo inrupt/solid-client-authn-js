@@ -56,14 +56,14 @@ if (process.env.CI === "true") {
 const ENV = getNodeTestingEnvironment();
 const BROWSER_ENV = getBrowserTestingEnvironment();
 
-async function performTest(clientId: string, clientResourceUrl: string, clientResourceContent: string) {
+async function performTest(seedInfo: ISeedPodResponse) {
     const browser = await firefox.launch();
     const page = await browser.newPage();
     const url = new URL(
         `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/login`,
     );
     url.searchParams.append("oidcIssuer", ENV.idp);
-    url.searchParams.append("clientId", clientId);
+    url.searchParams.append("clientId", seedInfo.clientId);
 
     await page.goto(url.toString());
 
@@ -91,10 +91,10 @@ async function performTest(clientId: string, clientResourceUrl: string, clientRe
     const resourceUrl = new URL(
         `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetch`,
     );
-    resourceUrl.searchParams.append("resource", clientResourceUrl);
+    resourceUrl.searchParams.append("resource", seedInfo.clientResourceUrl);
     await page.goto(resourceUrl.toString());
     await expect(page.content()).resolves.toBe(
-        `<html><head></head><body>${clientResourceContent}</body></html>`,
+        `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
     );
 
     // Performing idp logout and being redirected to the postLogoutUrl after doing so
@@ -133,15 +133,9 @@ async function performTest(clientId: string, clientResourceUrl: string, clientRe
 describe("Testing against express app with default session", () => {
     let app: Server;
     let seedInfo: ISeedPodResponse;
-    let clientId: string;
-    let clientResourceUrl: string;
-    let clientResourceContent: string;
 
     beforeEach(async () => {
         seedInfo = await seedPod(ENV);
-        clientId = seedInfo.clientId;
-        clientResourceUrl = seedInfo.clientResourceUrl;
-        clientResourceContent = seedInfo.clientResourceContent;
         await new Promise<void>((res) => {
             app = createApp({}, res);
         });
@@ -155,22 +149,16 @@ describe("Testing against express app with default session", () => {
     }, 30_000);
 
     it("Should be able to properly login and out with idp logout", async () => {
-        await performTest(clientId, clientResourceUrl, clientResourceContent);
+        await performTest(seedInfo);
     }, 120_000);
 });
 
 describe("Testing against express app with session keep alive off", () => {
     let app: Server;
     let seedInfo: ISeedPodResponse;
-    let clientId: string;
-    let clientResourceUrl: string;
-    let clientResourceContent: string;
 
     beforeEach(async () => {
         seedInfo = await seedPod(ENV);
-        clientId = seedInfo.clientId;
-        clientResourceUrl = seedInfo.clientResourceUrl;
-        clientResourceContent = seedInfo.clientResourceContent;
         await new Promise<void>((res) => {
             app = createApp({ keepAlive: false }, res);
         });
@@ -184,6 +172,6 @@ describe("Testing against express app with session keep alive off", () => {
     }, 30_000);
 
     it("Should be able to properly login and out with idp logout", async () => {
-        await performTest(clientId, clientResourceUrl, clientResourceContent);
+        await performTest(seedInfo);
     }, 120_000);
 });
