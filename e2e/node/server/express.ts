@@ -31,8 +31,8 @@ import CONSTANTS from "../../../playwright.client-authn.constants.json";
 log.setLevel("TRACE");
 
 export function createApp(
-  sessionOptions: Partial<ISessionOptions> = {},
   onStart: (value: PromiseLike<void> | void) => void,
+  sessionOptions: Partial<ISessionOptions> = {},
 ) {
   const app = express();
 

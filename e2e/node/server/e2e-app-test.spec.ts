@@ -160,7 +160,7 @@ describe("Testing against express app with session keep alive off", () => {
   beforeEach(async () => {
     seedInfo = await seedPod(ENV);
     await new Promise<void>((res) => {
-      app = createApp({ keepAlive: false }, res);
+      app = createApp(res, { keepAlive: false });
     });
   }, 30_000);
 
