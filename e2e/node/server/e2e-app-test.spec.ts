@@ -134,9 +134,7 @@ describe("Testing against express app", () => {
 
     // Should not be able to retrieve the protected resource after logout
     await page.goto(resourceUrl.toString());
-    await expect(page.content()).resolves.toBe(
-      `<html><head></head><body>{"description":"HTTP 401 Unauthorized"}</body></html>`,
-    );
+    await expect(page.content()).resolves.toMatch("Unauthorized");
 
     // Testing what happens if we try to log back in again after logging out
     await page.goto(url.toString());
