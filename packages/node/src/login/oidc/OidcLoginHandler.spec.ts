@@ -348,5 +348,34 @@ describe("OidcLoginHandler", () => {
         }),
       );
     });
+
+    it("passes keep alive session through to OIDC Handler", async () => {
+      const { oidcHandler } = defaultMocks;
+      const mockedStorage = mockStorageUtility({});
+      await mockedStorage.setForUser("mySession", {
+        refreshToken: "some token",
+      });
+      const clientRegistrar = mockDefaultClientRegistrar();
+      clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
+        mockDefaultClient(),
+      );
+      const handler = getInitialisedHandler({
+        oidcHandler,
+        clientRegistrar,
+        storageUtility: mockedStorage,
+      });
+      await handler.handle({
+        sessionId: "mySession",
+        oidcIssuer: "https://arbitrary.url",
+        redirectUrl: "https://app.com/redirect",
+        tokenType: "DPoP",
+        keepAlive: false,
+      });
+      expect(oidcHandler.handle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          keepAlive: false,
+        }),
+      );
+    });
   });
 });

@@ -27,6 +27,16 @@ import type { IRedirector } from "../IRedirector";
  * @packageDocumentation
  */
 
+function booleanWithFallback(
+  value: boolean | undefined,
+  fallback: boolean,
+): boolean {
+  if (typeof value === "boolean") {
+    return Boolean(value);
+  }
+  return Boolean(fallback);
+}
+
 /**
  * @hidden
  * Authorization code flow spec: https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
@@ -94,7 +104,11 @@ export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
         issuer: oidcLoginOptions.issuer.toString(),
         // The redirect URL is read after redirect, so it must be stored now.
         redirectUrl: oidcLoginOptions.redirectUrl,
-        dpop: oidcLoginOptions.dpop ? "true" : "false",
+        dpop: Boolean(oidcLoginOptions.dpop).toString(),
+        keepAlive: booleanWithFallback(
+          oidcLoginOptions.keepAlive,
+          true,
+        ).toString(),
       }),
     ]);
 

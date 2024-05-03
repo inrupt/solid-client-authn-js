@@ -56,20 +56,88 @@ if (process.env.CI === "true") {
 const ENV = getNodeTestingEnvironment();
 const BROWSER_ENV = getBrowserTestingEnvironment();
 
-describe("Testing against express app", () => {
+async function performTest(seedInfo: ISeedPodResponse) {
+  const browser = await firefox.launch();
+  const page = await browser.newPage();
+  const url = new URL(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/login`,
+  );
+  url.searchParams.append("oidcIssuer", ENV.idp);
+  url.searchParams.append("clientId", seedInfo.clientId);
+
+  await page.goto(url.toString());
+
+  // Wait for navigation outside the localhost session
+  await page.waitForURL(/^https/);
+  const cognitoPageUrl = page.url();
+
+  const cognitoPage = new CognitoPage(page);
+  await cognitoPage.login(
+    BROWSER_ENV.clientCredentials.owner.login,
+    BROWSER_ENV.clientCredentials.owner.password,
+  );
+  const openidPage = new OpenIdPage(page);
+  try {
+    await openidPage.allow();
+  } catch (e) {
+    // Ignore allow error for now
+  }
+
+  await page.waitForURL(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
+  );
+
+  // Fetching a protected resource once logged in
+  const resourceUrl = new URL(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetch`,
+  );
+  resourceUrl.searchParams.append("resource", seedInfo.clientResourceUrl);
+  await page.goto(resourceUrl.toString());
+  await expect(page.content()).resolves.toBe(
+    `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
+  );
+
+  // Performing idp logout and being redirected to the postLogoutUrl after doing so
+  await page.goto(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/idplogout`,
+  );
+  await page.waitForURL(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+  );
+  await expect(page.content()).resolves.toBe(
+    `<html><head></head><body>successfully at post logout</body></html>`,
+  );
+
+  // Should not be able to retrieve the protected resource after logout
+  await page.goto(resourceUrl.toString());
+  await expect(page.content()).resolves.toMatch("Unauthorized");
+
+  // Testing what happens if we try to log back in again after logging out
+  await page.goto(url.toString());
+
+  // It should go back to the cognito page when we try to log back in
+  // rather than skipping straight to the consent page
+  await page.waitForURL((navigationUrl) => {
+    const u1 = new URL(navigationUrl);
+    u1.searchParams.delete("state");
+
+    const u2 = new URL(cognitoPageUrl);
+    u2.searchParams.delete("state");
+
+    return u1.toString() === u2.toString();
+  });
+
+  await browser.close();
+}
+
+describe("Testing against express app with default session", () => {
   let app: Server;
   let seedInfo: ISeedPodResponse;
-  let clientId: string;
-  let clientResourceUrl: string;
-  let clientResourceContent: string;
 
   beforeEach(async () => {
     seedInfo = await seedPod(ENV);
-    clientId = seedInfo.clientId;
-    clientResourceUrl = seedInfo.clientResourceUrl;
-    clientResourceContent = seedInfo.clientResourceContent;
     await new Promise<void>((res) => {
-      app = createApp(res);
+      app = createApp(res, { keepAlive: true });
     });
   }, 30_000);
 
@@ -81,76 +149,29 @@ describe("Testing against express app", () => {
   }, 30_000);
 
   it("Should be able to properly login and out with idp logout", async () => {
-    const browser = await firefox.launch();
-    const page = await browser.newPage();
-    const url = new URL(
-      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/login`,
-    );
-    url.searchParams.append("oidcIssuer", ENV.idp);
-    url.searchParams.append("clientId", clientId);
+    await performTest(seedInfo);
+  }, 120_000);
+});
 
-    await page.goto(url.toString());
+describe("Testing against express app with session keep alive off", () => {
+  let app: Server;
+  let seedInfo: ISeedPodResponse;
 
-    // Wait for navigation outside the localhost session
-    await page.waitForURL(/^https/);
-    const cognitoPageUrl = page.url();
-
-    const cognitoPage = new CognitoPage(page);
-    await cognitoPage.login(
-      BROWSER_ENV.clientCredentials.owner.login,
-      BROWSER_ENV.clientCredentials.owner.password,
-    );
-    const openidPage = new OpenIdPage(page);
-    try {
-      await openidPage.allow();
-    } catch (e) {
-      // Ignore allow error for now
-    }
-
-    await page.waitForURL(
-      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
-    );
-
-    // Fetching a protected resource once logged in
-    const resourceUrl = new URL(
-      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetch`,
-    );
-    resourceUrl.searchParams.append("resource", clientResourceUrl);
-    await page.goto(resourceUrl.toString());
-    await expect(page.content()).resolves.toBe(
-      `<html><head></head><body>${clientResourceContent}</body></html>`,
-    );
-
-    // Performing idp logout and being redirected to the postLogoutUrl after doing so
-    await page.goto(
-      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/idplogout`,
-    );
-    await page.waitForURL(
-      `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
-    );
-    await expect(page.content()).resolves.toBe(
-      `<html><head></head><body>successfully at post logout</body></html>`,
-    );
-
-    // Should not be able to retrieve the protected resource after logout
-    await page.goto(resourceUrl.toString());
-    await expect(page.content()).resolves.toMatch("Unauthorized");
-
-    // Testing what happens if we try to log back in again after logging out
-    await page.goto(url.toString());
-
-    // It should go back to the cognito page when we try to log back in
-    // rather than skipping straight to the consent page
-    await page.waitForURL((navigationUrl) => {
-      const u1 = new URL(navigationUrl);
-      u1.searchParams.delete("state");
-
-      const u2 = new URL(cognitoPageUrl);
-      u2.searchParams.delete("state");
-
-      return u1.toString() === u2.toString();
+  beforeEach(async () => {
+    seedInfo = await seedPod(ENV);
+    await new Promise<void>((res) => {
+      app = createApp(res, { keepAlive: false });
     });
+  }, 30_000);
 
-    await browser.close();
+  afterEach(async () => {
+    await tearDownPod(seedInfo);
+    await new Promise<void>((res) => {
+      app.close(() => res());
+    });
+  }, 30_000);
+
+  it("Should be able to properly login and out with idp logout", async () => {
+    await performTest(seedInfo);
   }, 120_000);
 });

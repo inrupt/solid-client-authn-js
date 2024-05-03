@@ -131,6 +131,8 @@ export {
   TokenEndpointResponse,
 } from "./login/oidc/refresh/ITokenRefresher";
 
+export type { SessionConfig } from "./Session";
+
 // Mocks.
 /**
  * @deprecated

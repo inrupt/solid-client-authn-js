@@ -63,7 +63,7 @@ describe("ClientAuthentication", () => {
 
   describe("login", () => {
     const mockEmitter = new EventEmitter();
-    it("calls login, and defaults to a DPoP token", async () => {
+    it("calls login, and defaults to a DPoP token and keep session alive on", async () => {
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(
         "mySession",
@@ -86,6 +86,7 @@ describe("ClientAuthentication", () => {
         tokenType: "DPoP",
         eventEmitter: mockEmitter,
         refreshToken: undefined,
+        keepAlive: true,
       });
     });
 
@@ -220,6 +221,34 @@ describe("ClientAuthentication", () => {
         handleRedirect: undefined,
         tokenType: "Bearer",
         eventEmitter: mockEmitter,
+        keepAlive: true,
+      });
+    });
+
+    it("turn off keeping the session alive", async () => {
+      const clientAuthn = getClientAuthentication();
+      await clientAuthn.login(
+        "mySession",
+        {
+          clientId: "coolApp",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+        },
+        mockEmitter,
+        { keepAlive: false },
+      );
+      expect(defaultMocks.loginHandler.handle).toHaveBeenCalledWith({
+        sessionId: "mySession",
+        clientId: "coolApp",
+        redirectUrl: "https://coolapp.com/redirect",
+        oidcIssuer: "https://idp.com",
+        clientName: "coolApp",
+        clientSecret: undefined,
+        handleRedirect: undefined,
+        tokenType: "DPoP",
+        eventEmitter: mockEmitter,
+        refreshToken: undefined,
+        keepAlive: false,
       });
     });
   });
@@ -262,6 +291,7 @@ describe("ClientAuthentication", () => {
         sessionId: "mySession",
         webId: "https://pod.com/profile/card#me",
         issuer: "https://some.idp",
+        keepAlive: "true",
       };
       const clientAuthn = getClientAuthentication({
         sessionInfoManager: mockSessionInfoManager(
@@ -272,7 +302,11 @@ describe("ClientAuthentication", () => {
       });
       const session = await clientAuthn.getSessionInfo("mySession");
       // isLoggedIn is stored as a string under the hood, but deserialized as a boolean
-      expect(session).toEqual({ ...sessionInfo, isLoggedIn: true });
+      expect(session).toEqual({
+        ...sessionInfo,
+        isLoggedIn: true,
+        keepAlive: true,
+      });
     });
   });
 
@@ -341,6 +375,7 @@ describe("ClientAuthentication", () => {
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
         session.events,
+        { keepAlive: true },
       );
 
       // Calling the redirect handler should have updated the fetch.
@@ -363,6 +398,7 @@ describe("ClientAuthentication", () => {
       expect(defaultMocks.redirectHandler.handle).toHaveBeenCalledWith(
         url,
         session.events,
+        { keepAlive: true },
       );
 
       // Calling the redirect handler should have updated the fetch.

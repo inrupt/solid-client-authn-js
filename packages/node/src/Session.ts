@@ -29,6 +29,7 @@ import type {
   ISessionEventListener,
   IHasSessionEventListener,
   ILogoutOptions,
+  SessionConfig,
 } from "@inrupt/solid-client-authn-core";
 import { InMemoryStorage, EVENTS } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
@@ -70,6 +71,10 @@ export interface ISessionOptions {
    * An instance of the library core. Typically obtained using `getClientAuthenticationWithDependencies`.
    */
   clientAuthentication: ClientAuthentication;
+  /**
+   * A boolean flag indicating whether a session should be constantly kept alive in the background.
+   */
+  keepAlive: boolean;
 }
 
 /**
@@ -78,7 +83,7 @@ export interface ISessionOptions {
 export const defaultStorage = new InMemoryStorage();
 
 /**
- * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling acces to private resources after login for instance.
+ * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling access to private resources after login for instance.
  */
 export class Session implements IHasSessionEventListener {
   /**
@@ -98,6 +103,8 @@ export class Session implements IHasSessionEventListener {
   private tokenRequestInProgress = false;
 
   private lastTimeoutHandle = 0;
+
+  private config: SessionConfig;
 
   /**
    * Session object constructor. Typically called as follows:
@@ -152,6 +159,10 @@ export class Session implements IHasSessionEventListener {
         isLoggedIn: false,
       };
     }
+    this.config = {
+      // Default to true for backwards compatibility.
+      keepAlive: sessionOptions.keepAlive ?? true,
+    };
     // Keeps track of the latest timeout handle in order to clean up on logout
     // and not leave open timeouts.
     this.events.on(EVENTS.TIMEOUT_SET, (timeoutHandle: number) => {
@@ -177,6 +188,7 @@ export class Session implements IHasSessionEventListener {
         ...options,
       },
       this.events,
+      this.config,
     );
     if (loginInfo !== undefined) {
       this.info.isLoggedIn = loginInfo.isLoggedIn;
@@ -279,6 +291,7 @@ export class Session implements IHasSessionEventListener {
         sessionInfo = await this.clientAuthentication.handleIncomingRedirect(
           url,
           this.events,
+          this.config,
         );
 
         if (sessionInfo) {
