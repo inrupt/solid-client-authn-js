@@ -88,6 +88,7 @@ export interface ISessionInternalInfo {
 
   /**
    * Whether the session is refreshed in the background or not.
+   * @since 2.2.0
    */
   keepAlive?: boolean;
 }
