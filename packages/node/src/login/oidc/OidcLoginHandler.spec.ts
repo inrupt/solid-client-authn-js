@@ -357,7 +357,7 @@ describe("OidcLoginHandler", () => {
       });
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce(
-          mockDefaultClient(),
+        mockDefaultClient(),
       );
       const handler = getInitialisedHandler({
         oidcHandler,
@@ -372,9 +372,9 @@ describe("OidcLoginHandler", () => {
         keepAlive: false,
       });
       expect(oidcHandler.handle).toHaveBeenCalledWith(
-          expect.objectContaining({
-            keepAlive: false,
-          }),
+        expect.objectContaining({
+          keepAlive: false,
+        }),
       );
     });
   });
