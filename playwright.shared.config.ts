@@ -55,7 +55,8 @@ export const baseConfig: PlaywrightTestConfig = {
         userAgent: `Browser-based solid-client-authn-browser end-to-end tests running ${env()}. Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36`,
       },
     },
-    // FIXME Logging in with Webkit fails with cognito.
+    // WebKit is very flaky on playwright. This is disabled for the time being, and
+    // we will experiment with BrowserStack as an alternative.
     // {
     //   name: "WebKit",
     //   use: {

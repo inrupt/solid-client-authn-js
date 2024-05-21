@@ -47,7 +47,7 @@ export type KeyPair = {
  *
  * @param audience Target URL.
  * @param method HTTP method allowed.
- * @param key Key used to sign the token.
+ * @param dpopKey Key used to sign the token.
  * @returns A JWT that can be used as a DPoP Authorization header.
  */
 export async function createDpopHeader(

@@ -31,6 +31,7 @@ import {
 import type {
   ILoginInputOptions,
   ISessionInfo,
+  SessionConfig,
 } from "@inrupt/solid-client-authn-core";
 import type { EventEmitter } from "events";
 
@@ -44,6 +45,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     sessionId: string,
     options: ILoginInputOptions,
     eventEmitter: EventEmitter,
+    config: SessionConfig = { keepAlive: true },
   ): Promise<ISessionInfo | undefined> => {
     // Keep track of the session ID
     await this.sessionInfoManager.register(sessionId);
@@ -67,6 +69,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       // Defaults to DPoP
       tokenType: options.tokenType ?? "DPoP",
       eventEmitter,
+      keepAlive: config.keepAlive,
     });
 
     if (loginReturn !== undefined) {
@@ -94,8 +97,13 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   handleIncomingRedirect = async (
     url: string,
     eventEmitter: EventEmitter,
+    config: SessionConfig = { keepAlive: true },
   ): Promise<ISessionInfo | undefined> => {
-    const redirectInfo = await this.redirectHandler.handle(url, eventEmitter);
+    const redirectInfo = await this.redirectHandler.handle(
+      url,
+      eventEmitter,
+      config,
+    );
 
     this.fetch = redirectInfo.fetch;
     this.boundLogout = redirectInfo.getLogoutUrl;

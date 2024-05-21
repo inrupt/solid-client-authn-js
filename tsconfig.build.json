@@ -26,16 +26,15 @@
   // We don't provide an 'out' value here, each sub-package should provide its
   // own.
   "typedocOptions": {
-    "mode": "modules",
     "exclude": [
       // Re-exported functions are already documented in their own modules:
       "./packages/*/src/index.ts",
       "./packages/*/src/index.browser.ts",
       "./e2e/**/*.ts"
     ],
-    "excludeNotExported": true,
+    "excludeNotDocumented": true,
     "excludePrivate": true,
-    "stripInternal": true,
+    "excludeInternal": true,
     "theme": "markdown",
     "readme": "none"
   }

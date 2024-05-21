@@ -47,16 +47,14 @@ export class SessionInfoManager
   async get(
     sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
-    const webId = await this.storageUtility.getForUser(sessionId, "webId");
-    const isLoggedIn = await this.storageUtility.getForUser(
-      sessionId,
-      "isLoggedIn",
-    );
-    const refreshToken = await this.storageUtility.getForUser(
-      sessionId,
-      "refreshToken",
-    );
-    const issuer = await this.storageUtility.getForUser(sessionId, "issuer");
+    const [webId, isLoggedIn, refreshToken, issuer, keepAlive] =
+      await Promise.all([
+        this.storageUtility.getForUser(sessionId, "webId"),
+        this.storageUtility.getForUser(sessionId, "isLoggedIn"),
+        this.storageUtility.getForUser(sessionId, "refreshToken"),
+        this.storageUtility.getForUser(sessionId, "issuer"),
+        this.storageUtility.getForUser(sessionId, "keepAlive"),
+      ]);
 
     if (issuer !== undefined) {
       return {
@@ -65,6 +63,7 @@ export class SessionInfoManager
         isLoggedIn: isLoggedIn === "true",
         refreshToken,
         issuer,
+        keepAlive: keepAlive === "true",
       };
     }
 

@@ -147,10 +147,9 @@ const computeRefreshDelay = (expiresIn?: number): number => {
 };
 
 /**
- * @param unauthFetch a regular fetch function, compliant with the WHATWG spec.
- * @param authToken an access token, either a Bearer token or a DPoP one.
+ * @param accessToken an access token, either a Bearer token or a DPoP one.
  * @param options The option object may contain two objects: the DPoP key token
- * is bound to if applicable, and options to customise token renewal behaviour.
+ * is bound to if applicable, and options to customize token renewal behavior.
  *
  * @returns A fetch function that adds an appropriate Authorization header with
  * the provided token, and adds a DPoP header if applicable.
@@ -191,7 +190,7 @@ export async function buildAuthenticatedFetch(
         if (refreshToken !== undefined) {
           currentRefreshOptions.refreshToken = refreshToken;
         }
-        // Each time the access token is refreshed, we must plan fo the next
+        // Each time the access token is refreshed, we must plan for the next
         // refresh iteration.
         clearTimeout(latestTimeout);
         latestTimeout = setTimeout(

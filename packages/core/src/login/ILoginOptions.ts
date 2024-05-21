@@ -53,4 +53,9 @@ export default interface ILoginOptions extends ILoginInputOptions {
    * Event emitter enabling calling user-specified callbacks.
    */
   eventEmitter?: EventEmitter;
+
+  /**
+   * Whether the session is refreshed in the background or not.
+   */
+  keepAlive?: boolean;
 }

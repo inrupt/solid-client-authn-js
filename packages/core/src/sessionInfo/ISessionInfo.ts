@@ -85,6 +85,12 @@ export interface ISessionInternalInfo {
    * The token type used by the session
    */
   tokenType?: "DPoP" | "Bearer";
+
+  /**
+   * Whether the session is refreshed in the background or not.
+   * @since 2.2.0
+   */
+  keepAlive?: boolean;
 }
 
 export function isSupportedTokenType(

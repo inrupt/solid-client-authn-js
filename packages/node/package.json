@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-node",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,13 +23,13 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/node": "^20.11.27",
+    "@types/node": "^20.12.12",
     "@types/uuid": "^9.0.8"
   },
   "dependencies": {
-    "@inrupt/solid-client-authn-core": "^2.1.0",
+    "@inrupt/solid-client-authn-core": "^2.2.0",
     "jose": "^5.1.3",
-    "openid-client": "^5.6.4",
+    "openid-client": "^5.6.5",
     "uuid": "^9.0.1"
   },
   "publishConfig": {

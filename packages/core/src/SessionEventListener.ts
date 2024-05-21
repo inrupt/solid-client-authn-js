@@ -54,7 +54,7 @@ type NEW_REFRESH_TOKEN_ARGS = {
 };
 type FALLBACK_ARGS = {
   eventName: Parameters<InstanceType<typeof EventEmitter>["on"]>[0];
-  // Prevents from using a SessionEventEmitter as an aritrary EventEmitter.
+  // Prevents from using a SessionEventEmitter as an arbitrary EventEmitter.
   listener: never;
 };
 

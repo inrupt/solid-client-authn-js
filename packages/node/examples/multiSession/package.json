@@ -1,12 +1,9 @@
 {
   "name": "@inrupt/demo-authn-node-script-multisession",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Demo for session management in NodeJS",
   "main": "src/index.js",
-  "scripts": {
-    "build": "tsc -p tsconfig.json"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inrupt/solid-client-authn-js.git"
@@ -18,12 +15,12 @@
   },
   "homepage": "https://github.com/inrupt/solid-client-authn-js#readme",
   "dependencies": {
-    "@inrupt/solid-client-authn-node": "^2.1.0",
+    "@inrupt/solid-client-authn-node": "^2.2.0",
     "cookie-session": "^2.1.0",
-    "express": "^4.18.3"
+    "express": "^4.19.2"
   },
   "devDependencies": {
-    "@types/cookie-session": "^2.0.48",
+    "@types/cookie-session": "^2.0.49",
     "@types/express": "^4.17.21"
   }
 }

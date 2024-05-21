@@ -19,34 +19,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/**
- * @hidden
- * @packageDocumentation
- */
-
-// eslint-disable-next-line no-shadow
-import type { EventEmitter } from "events";
-import type IHandleable from "../../util/handlerPattern/IHandleable";
-import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
-import type { IRpLogoutOptions } from "../../logout/ILogoutHandler";
-import type { SessionConfig } from "../../Session";
-
-export type IncomingRedirectResult = ISessionInfo & { fetch: typeof fetch } & {
-  getLogoutUrl?: (options: IRpLogoutOptions) => string;
+export type SessionConfig = {
+  keepAlive: boolean;
 };
-export type IncomingRedirectInput = [
-  string,
-  EventEmitter | undefined,
-  SessionConfig | undefined,
-];
-
-/**
- * @hidden
- */
-type IIncomingRedirectHandler = IHandleable<
-  // Tuple of the URL to redirect to, an optional event listener for when
-  // we receive a new refresh token, and, an optional onError function:
-  IncomingRedirectInput,
-  IncomingRedirectResult
->;
-export default IIncomingRedirectHandler;

@@ -71,6 +71,7 @@ function validateOptions(
 async function refreshAccess(
   refreshOptions: RefreshOptions,
   dpop: boolean,
+  keepAlive: boolean,
   refreshBindingKey?: KeyPair,
   eventEmitter?: EventEmitter,
 ): Promise<TokenEndpointResponse & { fetch: typeof fetch }> {
@@ -93,7 +94,7 @@ async function refreshAccess(
     };
     const authFetch = await buildAuthenticatedFetch(tokens.accessToken, {
       dpopKey,
-      refreshOptions: rotatedRefreshOptions,
+      refreshOptions: keepAlive ? rotatedRefreshOptions : undefined,
       eventEmitter,
     });
     return Object.assign(tokens, {
@@ -179,6 +180,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     const accessInfo = await refreshAccess(
       refreshOptions,
       oidcLoginOptions.dpop,
+      oidcLoginOptions.keepAlive ?? true,
       keyPair,
     );
 

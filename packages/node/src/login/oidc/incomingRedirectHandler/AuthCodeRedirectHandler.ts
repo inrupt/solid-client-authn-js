@@ -169,7 +169,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     }
     const authFetch = await buildAuthenticatedFetch(tokenSet.access_token, {
       dpopKey,
-      refreshOptions,
+      refreshOptions: oidcContext.keepAlive ? refreshOptions : undefined,
       eventEmitter,
       expiresIn: tokenSet.expires_in,
     });
