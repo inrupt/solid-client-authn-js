@@ -26,7 +26,7 @@ To build:
 1. Install the docs requirements (different from library docs requirements):
 
    ```sh
-   pip install -r requirements.txt
+   pip install -r https://raw.githubusercontent.com/inrupt/docs-assets/main/requirements/api/requirements.txt
    ```
 
 1. Make the API docs:
