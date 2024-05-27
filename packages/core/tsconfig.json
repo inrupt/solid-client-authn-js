@@ -9,9 +9,10 @@
   "typedocOptions": {
     "out": "website/docs/api/core",
     "entryPoints": ["./src/index.ts"],
-    "entryDocument": "index.rst",
-    "hideInPageTOC": true,
-    "plugin": ["typedoc-plugin-markdown"]
+    "entryFileName": "index.rst",
+    "plugin": ["typedoc-plugin-markdown"],
+    // FIXME: This gets set to "markdown" somewhere.
+    "theme": "default"
   },
 
   "include": ["src/**/*"],
