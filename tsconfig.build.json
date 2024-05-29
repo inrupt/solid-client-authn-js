@@ -32,7 +32,7 @@
       "./packages/*/src/index.browser.ts",
       "./e2e/**/*.ts"
     ],
-    "excludeNotDocumented": true,
+    "excludeNotDocumented": false,
     "excludePrivate": true,
     "excludeInternal": true,
     "theme": "markdown",
