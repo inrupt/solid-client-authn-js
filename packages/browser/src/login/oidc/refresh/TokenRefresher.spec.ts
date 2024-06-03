@@ -272,5 +272,26 @@ describe("TokenRefresher", () => {
       );
       expect(result.refreshToken).toBe("Some rotated refresh token");
     });
+
+    it("does not store the rotated refresh token", async () => {
+      const mockedStorage = mockRefresherDefaultStorageUtility();
+      await mockOidcModule({
+        ...mockDpopTokens(),
+        refreshToken: "Some rotated refresh token",
+        dpopKey: await mockKeyPair(),
+        webId: mockWebId(),
+      });
+      const refresher = getTokenRefresher({
+        storageUtility: mockedStorage,
+      });
+      await refresher.refresh(
+        "mySession",
+        "some refresh token",
+        await mockKeyPair(),
+      );
+      await expect(
+        mockedStorage.getForUser("mySession", "refreshToken"),
+      ).resolves.toBeUndefined();
+    });
   });
 });
