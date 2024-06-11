@@ -145,11 +145,11 @@ const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
   Issuer.mockReturnValueOnce(mockedIssuer);
 };
 
-const setupGetWebidMock = (webid: string) => {
+const setupGetWebidMock = (webid: string, clientid: string) => {
   const { getWebidFromTokenPayload } = jest.requireMock(
     "@inrupt/solid-client-authn-core",
   ) as jest.Mocked<typeof SolidClientAuthnCore>;
-  getWebidFromTokenPayload.mockResolvedValueOnce(webid);
+  getWebidFromTokenPayload.mockResolvedValueOnce({webId: webid, clientId: clientid});
 };
 
 describe("ClientCredentialsOidcHandler", () => {
@@ -267,7 +267,7 @@ describe("handle", () => {
     const tokens = mockDpopTokens();
     tokens.id_token = undefined;
     setupOidcClientMock(tokens);
-    setupGetWebidMock("https://my.webid/");
+    setupGetWebidMock("https://my.webid/", "some client ID");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
     );
@@ -319,6 +319,7 @@ describe("handle", () => {
   it("builds a fetch authenticated with a DPoP token if appropriate", async () => {
     const tokens = mockDpopTokens();
     setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/", "some client ID");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
     );
@@ -347,6 +348,7 @@ describe("handle", () => {
   it("builds a fetch authenticated with a Bearer token if appropriate", async () => {
     const tokens = mockBearerTokens();
     setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/", "some client ID");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
     );
@@ -376,6 +378,7 @@ describe("handle", () => {
     const tokens = mockDpopTokens();
     tokens.refresh_token = "some refresh token";
     setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/", "some client ID");
     const coreModule = jest.requireMock(
       "@inrupt/solid-client-authn-core",
     ) as typeof SolidClientAuthnCore;
@@ -412,6 +415,7 @@ describe("handle", () => {
   it("builds a fetch authenticated including the expiration value if present", async () => {
     const tokens = mockDpopTokens();
     setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/", "some client ID");
     const coreModule = jest.requireMock(
       "@inrupt/solid-client-authn-core",
     ) as typeof SolidClientAuthnCore;
@@ -444,7 +448,7 @@ describe("handle", () => {
   it("returns session info with the built fetch", async () => {
     const tokens = mockDpopTokens();
     setupOidcClientMock(tokens);
-    setupGetWebidMock("https://my.webid/");
+    setupGetWebidMock("https://my.webid/", "some client ID");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
     );

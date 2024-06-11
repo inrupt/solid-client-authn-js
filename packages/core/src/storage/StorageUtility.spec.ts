@@ -468,6 +468,7 @@ describe("saveSessionInfoToStorage", () => {
       mockedStorage,
       "some session",
       "https://my.webid",
+      "some client",
       "true",
       "a refresh token",
       true,
@@ -486,6 +487,7 @@ describe("saveSessionInfoToStorage", () => {
       mockedStorage,
       "some session",
       "https://my.webid",
+      "some client",
       undefined,
       undefined,
       true,
@@ -496,12 +498,30 @@ describe("saveSessionInfoToStorage", () => {
     ).resolves.toBe("https://my.webid");
   });
 
+  it("saves the clientId if provided in the given storage", async () => {
+    const mockedStorage = mockStorageUtility({});
+    await saveSessionInfoToStorage(
+      mockedStorage,
+      "some session",
+      "https://my.webid",
+      "some client",
+      undefined,
+      undefined,
+      true,
+    );
+
+    await expect(
+      mockedStorage.getForUser("some session", "clientId", { secure: true }),
+    ).resolves.toBe("some client");
+  });
+
   it("saves the logged in status if provided in the given storage", async () => {
     const mockedStorage = mockStorageUtility({});
     await saveSessionInfoToStorage(
       mockedStorage,
       "some session",
       undefined,
+      "some client",
       "true",
       undefined,
       true,
@@ -548,6 +568,7 @@ describe("saveSessionInfoToStorage", () => {
       mockedStorage,
       "some session",
       "https://my.webid",
+      "some client",
       "true",
       "a refresh token",
       true,

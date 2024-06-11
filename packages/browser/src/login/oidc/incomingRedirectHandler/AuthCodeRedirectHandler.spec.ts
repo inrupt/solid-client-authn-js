@@ -112,6 +112,7 @@ const mockTokenEndpointBearerResponse =
       accessToken: mockAccessTokenBearer(),
       idToken: mockIdToken(),
       webId: mockWebId(),
+      clientId: "some client",
       expiresIn: MOCK_EXPIRE_TIME,
       refreshToken: "some refresh token",
     };
@@ -123,6 +124,7 @@ const mockTokenEndpointDpopResponse =
       accessToken: JSON.stringify(mockAccessTokenDpop()),
       idToken: mockIdToken(),
       webId: mockWebId(),
+      clientId: "some client",
       dpopKey: {
         privateKey: (await importJWK(mockJwk())) as KeyObject,
         // Note that here for convenience the private key is also used as public key.
@@ -531,6 +533,7 @@ describe("AuthCodeRedirectHandler", () => {
           accessToken: mockAccessTokenBearer(),
           idToken: mockIdToken(),
           webId: mockWebId(),
+          clientId: "some client",
           // no expiresIn
         });
 

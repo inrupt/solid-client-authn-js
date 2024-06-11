@@ -46,7 +46,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/"),
+      Promise.resolve({ webId: "https://my.webid/", clientId: "some client" }),
     ),
   };
 });
@@ -375,12 +375,15 @@ describe("getTokens", () => {
     expect(result?.dpopKey).toBeUndefined();
   });
 
-  it("derives a WebId from the ID token", async () => {
+  it("derives a WebId and clientId from the ID token", async () => {
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
     core.getWebidFromTokenPayload = jest.fn(() =>
-      Promise.resolve("https://some.webid#me"),
+      Promise.resolve({
+        webId: "https://some.webid#me",
+        clientId: "some client",
+      }),
     );
 
     const result = await getTokens(
@@ -390,6 +393,7 @@ describe("getTokens", () => {
       false,
     );
     expect(result?.webId).toBe("https://some.webid#me");
+    expect(result?.clientId).toBe("some client");
   });
 
   it("requests a key-bound token, and returns the appropriate key with the token", async () => {
