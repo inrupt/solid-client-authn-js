@@ -110,7 +110,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       // as eventually we want to move away from the Identity Provider issuing
       // Access Tokens, but by then panel work for the bot use case support will
       // have moved forward.
-      ({webId: webId} = await getWebidFromTokenPayload(
+      ({ webId } = await getWebidFromTokenPayload(
         tokens.access_token,
         oidcLoginOptions.issuerConfiguration.jwksUri,
         oidcLoginOptions.issuer,
@@ -118,7 +118,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
         "solid",
       ));
     } else {
-      ({webId: webId} = await getWebidFromTokenPayload(
+      ({ webId } = await getWebidFromTokenPayload(
         tokens.id_token,
         oidcLoginOptions.issuerConfiguration.jwksUri,
         oidcLoginOptions.issuer,

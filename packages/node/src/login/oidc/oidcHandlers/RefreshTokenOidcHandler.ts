@@ -194,7 +194,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         `The Identity Provider [${oidcLoginOptions.issuer}] did not return an ID token on refresh, which prevents us from getting the user's WebID.`,
       );
     }
-    ({webId: sessionInfo.webId} = await getWebidFromTokenPayload(
+    ({ webId: sessionInfo.webId } = await getWebidFromTokenPayload(
       accessInfo.idToken,
       oidcLoginOptions.issuerConfiguration.jwksUri,
       oidcLoginOptions.issuer,

@@ -149,7 +149,10 @@ const setupGetWebidMock = (webid: string, clientid: string) => {
   const { getWebidFromTokenPayload } = jest.requireMock(
     "@inrupt/solid-client-authn-core",
   ) as jest.Mocked<typeof SolidClientAuthnCore>;
-  getWebidFromTokenPayload.mockResolvedValueOnce({webId: webid, clientId: clientid});
+  getWebidFromTokenPayload.mockResolvedValueOnce({
+    webId: webid,
+    clientId: clientid,
+  });
 };
 
 describe("ClientCredentialsOidcHandler", () => {

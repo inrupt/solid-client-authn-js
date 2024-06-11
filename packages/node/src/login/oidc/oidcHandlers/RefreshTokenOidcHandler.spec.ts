@@ -56,7 +56,7 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve({webId: "https://my.webid/", clientId: "some client"}),
+      Promise.resolve({ webId: "https://my.webid/", clientId: "some client" }),
     ),
   };
 });
