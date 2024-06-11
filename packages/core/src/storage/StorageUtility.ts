@@ -100,6 +100,7 @@ export async function loadOidcContextFromStorage(
  * @param storageUtility
  * @param sessionId
  * @param webId
+ * @param clientId
  * @param isLoggedIn
  * @param refreshToken
  * @param secure
@@ -109,6 +110,7 @@ export async function saveSessionInfoToStorage(
   storageUtility: IStorageUtility,
   sessionId: string,
   webId?: string,
+  clientId?: string,
   isLoggedIn?: string,
   refreshToken?: string,
   secure?: boolean,
@@ -120,6 +122,9 @@ export async function saveSessionInfoToStorage(
   }
   if (webId !== undefined) {
     await storageUtility.setForUser(sessionId, { webId }, { secure });
+  }
+  if (clientId !== undefined) {
+    await storageUtility.setForUser(sessionId, { clientId }, { secure });
   }
   if (isLoggedIn !== undefined) {
     await storageUtility.setForUser(sessionId, { isLoggedIn }, { secure });

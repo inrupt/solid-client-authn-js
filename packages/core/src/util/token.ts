@@ -26,12 +26,12 @@ import { jwtVerify, createRemoteJWKSet } from "jose";
 type WithStack = { stack: string };
 
 /**
- * Extract a WebID from an ID token payload based on https://github.com/solid/webid-oidc-spec.
+ * Extract a WebID and the clientID from an ID token payload based on https://github.com/solid/webid-oidc-spec.
  * Note that this does not yet implement the user endpoint lookup, and only checks
- * for `webid` or IRI-like `sub` claims.
+ * for `webid`, `azp` or IRI-like `sub` claims.
  *
  * @param idToken the payload of the ID token from which the WebID can be extracted.
- * @returns a WebID extracted from the ID token.
+ * @returns an object with entries webId and clientId extracted from the ID token.
  * @internal
  */
 export async function getWebidFromTokenPayload(
@@ -39,7 +39,7 @@ export async function getWebidFromTokenPayload(
   jwksIri: string,
   issuerIri: string,
   clientId: string,
-): Promise<string> {
+): Promise<{ webId: string; clientId: string }> {
   let payload: JWTPayload;
   try {
     const { payload: verifiedPayload } = await jwtVerify(
@@ -56,7 +56,12 @@ export async function getWebidFromTokenPayload(
   }
 
   if (typeof payload.webid === "string") {
-    return payload.webid;
+    if (typeof payload.azp === "string") {
+      return { webId: payload.webid, clientId: payload.azp };
+    }
+    throw new Error(
+      `The token ${JSON.stringify(payload)} is invalid: it has no 'azp' claim.`,
+    );
   }
   if (typeof payload.sub !== "string") {
     throw new Error(
@@ -71,10 +76,16 @@ export async function getWebidFromTokenPayload(
     // as specified by the Identity Provider.
     // eslint-disable-next-line no-new
     new URL(payload.sub);
-    return payload.sub;
   } catch (e) {
     throw new Error(
       `The token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`,
     );
   }
+  // The 'sub' claim is a well-formed IRI, hence a valid webId
+  if (typeof payload.azp === "string") {
+    return { webId: payload.sub, clientId: payload.azp };
+  }
+  throw new Error(
+    `The token ${JSON.stringify(payload)} is invalid: it has no 'azp' claim.`,
+  );
 }

@@ -176,7 +176,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns
     // its payload as a JSON object.
-    const webid = await getWebidFromTokenPayload(
+    const { webId, clientId } = await getWebidFromTokenPayload(
       tokenSet.id_token,
       // The JWKS URI is mandatory in the spec, so the non-null assertion is valid.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -188,7 +188,8 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     await saveSessionInfoToStorage(
       this.storageUtility,
       sessionId,
-      webid,
+      webId,
+      clientId,
       "true",
       tokenSet.refresh_token,
       undefined,
