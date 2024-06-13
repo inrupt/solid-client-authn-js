@@ -19,7 +19,8 @@ The following changes have been implemented but not released yet:
 
   Note that there still is a timeout being set to notify of session expiration, causing
   NodeJS to wait for the end of the session before closing a terminal. This can be avoided
-  by logging the session out explicitly: 
+  by logging the session out explicitly:
+
   ```javascript
     const session = new Session();
     await session.login({
@@ -28,7 +29,9 @@ The following changes have been implemented but not released yet:
       clientSecret: ...,
     });
   ```
+
   will hang until the session expires, while
+
   ```javascript
     const session = new Session();
     await session.login({
@@ -38,6 +41,7 @@ The following changes have been implemented but not released yet:
     });
     await session.logout();
   ```
+
   will close when logout is complete.
 
 ## [2.2.3](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.3) - 2024-06-20

@@ -507,7 +507,7 @@ describe("handle", () => {
     setupOidcClientMock(tokens);
     const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
-      mockedRefresher
+      mockedRefresher,
     );
     await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
