@@ -43,6 +43,7 @@ export const standardOidcOptions: IOidcOptions = {
     clientId: "coolApp",
     clientType: "dynamic",
   },
+  keepAlive: true,
 };
 
 export const mockDefaultOidcOptions = (): IOidcOptions => {
