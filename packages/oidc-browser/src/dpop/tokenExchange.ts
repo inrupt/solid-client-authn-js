@@ -95,7 +95,7 @@ export type CodeExchangeResult = TokenEndpointResponse & {
   // The idToken must not be undefined after the auth code exchange
   idToken: string;
   webId: string;
-  clientId: string;
+  clientId?: string;
   dpopKey?: KeyPair;
 };
 
