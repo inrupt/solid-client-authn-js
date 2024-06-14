@@ -96,6 +96,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     );
 
     let webId: string;
+    let clientId: string | undefined;
     if (tokens.access_token === undefined) {
       throw new Error(
         `Invalid response from Solid Identity Provider [${
@@ -110,7 +111,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       // as eventually we want to move away from the Identity Provider issuing
       // Access Tokens, but by then panel work for the bot use case support will
       // have moved forward.
-      ({ webId } = await getWebidFromTokenPayload(
+      ({ webId, clientId } = await getWebidFromTokenPayload(
         tokens.access_token,
         oidcLoginOptions.issuerConfiguration.jwksUri,
         oidcLoginOptions.issuer,
@@ -118,7 +119,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
         "solid",
       ));
     } else {
-      ({ webId } = await getWebidFromTokenPayload(
+      ({ webId, clientId } = await getWebidFromTokenPayload(
         tokens.id_token,
         oidcLoginOptions.issuerConfiguration.jwksUri,
         oidcLoginOptions.issuer,
@@ -143,6 +144,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
       webId,
+      clientAppId: clientId,
       expirationDate:
         tokens.expires_in !== undefined
           ? Date.now() + tokens.expires_in * 1000

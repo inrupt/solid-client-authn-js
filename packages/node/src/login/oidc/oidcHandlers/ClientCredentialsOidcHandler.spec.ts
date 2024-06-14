@@ -145,7 +145,7 @@ const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
   Issuer.mockReturnValueOnce(mockedIssuer);
 };
 
-const setupGetWebidMock = (webid: string, clientid: string) => {
+const setupGetWebidMock = (webid: string, clientid?: string) => {
   const { getWebidFromTokenPayload } = jest.requireMock(
     "@inrupt/solid-client-authn-core",
   ) as jest.Mocked<typeof SolidClientAuthnCore>;
@@ -270,7 +270,7 @@ describe("handle", () => {
     const tokens = mockDpopTokens();
     tokens.id_token = undefined;
     setupOidcClientMock(tokens);
-    setupGetWebidMock("https://my.webid/", "some client ID");
+    setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
     );
@@ -451,6 +451,31 @@ describe("handle", () => {
   it("returns session info with the built fetch", async () => {
     const tokens = mockDpopTokens();
     setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/");
+    const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+      mockDefaultTokenRefresher(),
+    );
+    const result = await clientCredentialsOidcHandler.handle({
+      ...standardOidcOptions,
+      dpop: true,
+      client: {
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        clientType: "static",
+      },
+    });
+
+    expect(result?.isLoggedIn).toBe(true);
+    expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
+    expect(result?.webId).toBe("https://my.webid/");
+    expect(result?.expirationDate).toBe(
+      Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
+    );
+  });
+
+  it("returns session info, including clientAppId, with the built fetch", async () => {
+    const tokens = mockDpopTokens();
+    setupOidcClientMock(tokens);
     setupGetWebidMock("https://my.webid/", "some client ID");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
@@ -468,6 +493,7 @@ describe("handle", () => {
     expect(result?.isLoggedIn).toBe(true);
     expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
     expect(result?.webId).toBe("https://my.webid/");
+    expect(result?.clientAppId).toBe("some client ID");
     expect(result?.expirationDate).toBe(
       Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
     );

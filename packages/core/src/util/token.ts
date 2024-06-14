@@ -39,8 +39,10 @@ export async function getWebidFromTokenPayload(
   jwksIri: string,
   issuerIri: string,
   clientId: string,
-): Promise<{ webId: string; clientId: string }> {
+): Promise<{ webId: string; clientId?: string }> {
   let payload: JWTPayload;
+  let webIdInPayload: string;
+  let clientIdInPayload: string | undefined;
   try {
     const { payload: verifiedPayload } = await jwtVerify(
       idToken,
@@ -56,14 +58,12 @@ export async function getWebidFromTokenPayload(
   }
 
   if (typeof payload.webid === "string") {
-    if (typeof payload.azp === "string") {
-      return { webId: payload.webid, clientId: payload.azp };
-    }
-    throw new Error(
-      `The token ${JSON.stringify(payload)} is invalid: it has no 'azp' claim.`,
-    );
+    webIdInPayload = payload.webid;
   }
-  if (typeof payload.sub !== "string") {
+  if (typeof payload.azp === "string") {
+    clientIdInPayload = payload.azp;
+  }
+  if (typeof payload.sub !== "string" && typeof payload.webid !== "string") {
     throw new Error(
       `The token ${JSON.stringify(
         payload,
@@ -74,18 +74,24 @@ export async function getWebidFromTokenPayload(
     // This parses the 'sub' claim to check if it is a well-formed IRI.
     // However, the normalized value isn't returned to make sure the WebID is returned
     // as specified by the Identity Provider.
-    // eslint-disable-next-line no-new
-    new URL(payload.sub);
+    if (payload.sub !== undefined) {
+      // eslint-disable-next-line no-new
+      new URL(payload.sub);
+      webIdInPayload = payload.sub;
+    }
   } catch (e) {
     throw new Error(
       `The token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`,
     );
   }
-  // The 'sub' claim is a well-formed IRI, hence a valid webId
-  if (typeof payload.azp === "string") {
-    return { webId: payload.sub, clientId: payload.azp };
-  }
-  throw new Error(
-    `The token ${JSON.stringify(payload)} is invalid: it has no 'azp' claim.`,
-  );
+
+  return {
+    // If the execution reaches this point, webIdInPayload is always going to have a value:
+    // if both 'sub' and 'webid' claims do not exist, an error is raised. If the 'webid' claim
+    // exists but the 'sub' claim is an invalid URL, an error is raised as well.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    webId: webIdInPayload,
+    clientId: clientIdInPayload,
+  };
 }
