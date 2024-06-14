@@ -74,7 +74,7 @@ export async function getWebidFromTokenPayload(
     // This parses the 'sub' claim to check if it is a well-formed IRI.
     // However, the normalized value isn't returned to make sure the WebID is returned
     // as specified by the Identity Provider.
-    if (payload.sub !== undefined) {
+    if (payload.sub !== undefined && typeof payload.webid !== "string") {
       // eslint-disable-next-line no-new
       new URL(payload.sub);
       webIdInPayload = payload.sub;
