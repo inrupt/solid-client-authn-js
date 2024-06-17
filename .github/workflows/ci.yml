@@ -62,7 +62,7 @@ jobs:
           name: code-coverage-ubuntu-latest-20.x
           path: coverage/
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2.2.0
+        uses: SonarSource/sonarcloud-github-action@v2
         if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           projectBaseDir: ${{ matrix.project-root }}
