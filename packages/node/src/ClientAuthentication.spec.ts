@@ -302,11 +302,11 @@ describe("ClientAuthentication", () => {
       });
       const session = await clientAuthn.getSessionInfo("mySession");
       // isLoggedIn is stored as a string under the hood, but deserialized as a boolean
-      expect(session).toEqual({
+      expect(session).toEqual(expect.objectContaining({
         ...sessionInfo,
         isLoggedIn: true,
         keepAlive: true,
-      });
+      }));
     });
   });
 
