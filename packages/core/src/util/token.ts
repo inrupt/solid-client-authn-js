@@ -41,7 +41,6 @@ export async function getWebidFromTokenPayload(
   clientId: string,
 ): Promise<{ webId: string; clientId?: string }> {
   let payload: JWTPayload;
-  let webIdInPayload: string;
   let clientIdInPayload: string | undefined;
   try {
     const { payload: verifiedPayload } = await jwtVerify(
@@ -57,13 +56,16 @@ export async function getWebidFromTokenPayload(
     throw new Error(`Token verification failed: ${(e as WithStack).stack}`);
   }
 
-  if (typeof payload.webid === "string") {
-    webIdInPayload = payload.webid;
-  }
   if (typeof payload.azp === "string") {
     clientIdInPayload = payload.azp;
   }
-  if (typeof payload.sub !== "string" && typeof payload.webid !== "string") {
+  if (typeof payload.webid === "string") {
+    return {
+      webId: payload.webid,
+      clientId: clientIdInPayload,
+    };
+  }
+  if (typeof payload.sub !== "string") {
     throw new Error(
       `The token ${JSON.stringify(
         payload,
@@ -74,24 +76,15 @@ export async function getWebidFromTokenPayload(
     // This parses the 'sub' claim to check if it is a well-formed IRI.
     // However, the normalized value isn't returned to make sure the WebID is returned
     // as specified by the Identity Provider.
-    if (payload.sub !== undefined && typeof payload.webid !== "string") {
-      // eslint-disable-next-line no-new
-      new URL(payload.sub);
-      webIdInPayload = payload.sub;
-    }
+    // eslint-disable-next-line no-new
+    new URL(payload.sub);
+    return {
+      webId: payload.sub,
+      clientId: clientIdInPayload,
+    };
   } catch (e) {
     throw new Error(
       `The token has no 'webid' claim, and its 'sub' claim of [${payload.sub}] is invalid as a URL - error [${e}].`,
     );
   }
-
-  return {
-    // If the execution reaches this point, webIdInPayload is always going to have a value:
-    // if both 'sub' and 'webid' claims do not exist, an error is raised. If the 'webid' claim
-    // exists but the 'sub' claim is an invalid URL, an error is raised as well.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    webId: webIdInPayload,
-    clientId: clientIdInPayload,
-  };
 }

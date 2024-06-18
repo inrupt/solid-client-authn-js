@@ -274,27 +274,6 @@ describe("getWebidFromTokenPayload", () => {
     expect(webId).toBe("https://some.webid#me");
   });
 
-  it("returns the clientID if the 'sub' and 'azp' claims exist and 'sub' is IRI-like", async () => {
-    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
-    mockJose.createRemoteJWKSet.mockReturnValue(
-      jest
-        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
-        .mockResolvedValue((await mockJwk()).publicKey),
-    );
-    const jwt = await mockJwt(
-      { sub: "https://some.webid#me", azp: "some client" },
-      "https://some.issuer",
-      "https://some.clientId",
-    );
-    const { clientId } = await getWebidFromTokenPayload(
-      jwt,
-      "https://some.jwks",
-      "https://some.issuer",
-      "https://some.clientId",
-    );
-    expect(clientId).toBe("some client");
-  });
-
   it("returns the webID if the 'sub' claim exists and it is IRI-like but 'azp' does not exist", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
@@ -316,7 +295,7 @@ describe("getWebidFromTokenPayload", () => {
     expect(result.webId).toBe("https://some.webid#me");
   });
 
-  it("clientID is undefined if the 'sub' claim exists and it is IRI-like but 'azp' does not exist", async () => {
+  it("clientID is undefined if the 'azp' claim does not exist", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
       jest
@@ -325,48 +304,6 @@ describe("getWebidFromTokenPayload", () => {
     );
     const jwt = await mockJwt(
       { sub: "https://some.webid#me" },
-      "https://some.issuer",
-      "https://some.clientId",
-    );
-    const result = await getWebidFromTokenPayload(
-      jwt,
-      "https://some.jwks",
-      "https://some.issuer",
-      "https://some.clientId",
-    );
-    expect(result.clientId).toBeUndefined();
-  });
-
-  it("returns the webID if the 'webid' claim exists but 'azp' does not exist", async () => {
-    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
-    mockJose.createRemoteJWKSet.mockReturnValue(
-      jest
-        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
-        .mockResolvedValue((await mockJwk()).publicKey),
-    );
-    const jwt = await mockJwt(
-      { webid: "https://some.webid#me" },
-      "https://some.issuer",
-      "https://some.clientId",
-    );
-    const result = await getWebidFromTokenPayload(
-      jwt,
-      "https://some.jwks",
-      "https://some.issuer",
-      "https://some.clientId",
-    );
-    expect(result.webId).toBe("https://some.webid#me");
-  });
-
-  it("clientID is undefined if the 'webid' claim exists but 'azp' does not exist", async () => {
-    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
-    mockJose.createRemoteJWKSet.mockReturnValue(
-      jest
-        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
-        .mockResolvedValue((await mockJwk()).publicKey),
-    );
-    const jwt = await mockJwt(
-      { webid: "https://some.webid#me" },
       "https://some.issuer",
       "https://some.clientId",
     );
