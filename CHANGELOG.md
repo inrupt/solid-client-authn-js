@@ -9,6 +9,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### node
+
+- Maintain token type in `getSessionIdFromStorage`: When loading a session from storage on the server
+  (using `getSessionIdFromStorage`), the token type (i.e. DPoP-bound or not, referred to as Bearer) is
+  now consistent with the token type initially associated with the session. Previously, regardless of
+  the token type requested when logging the session in, the token type defaulted to `DPoP` when logging
+  the session back in on load from storage, causing authentication issues.
+
 ## [2.2.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.1) - 2024-06-04
 
 ### Bugfix
