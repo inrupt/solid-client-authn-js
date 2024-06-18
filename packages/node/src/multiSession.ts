@@ -70,6 +70,7 @@ export async function getSessionFromStorage(
   if (sessionInfo.refreshToken) {
     await session.login({
       oidcIssuer: sessionInfo.issuer,
+      tokenType: sessionInfo.tokenType,
     });
   }
   return session;

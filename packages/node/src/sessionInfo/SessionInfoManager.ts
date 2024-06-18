@@ -47,22 +47,48 @@ export class SessionInfoManager
   async get(
     sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
-    const [webId, isLoggedIn, refreshToken, issuer, keepAlive] =
-      await Promise.all([
-        this.storageUtility.getForUser(sessionId, "webId"),
-        this.storageUtility.getForUser(sessionId, "isLoggedIn"),
-        this.storageUtility.getForUser(sessionId, "refreshToken"),
-        this.storageUtility.getForUser(sessionId, "issuer"),
-        this.storageUtility.getForUser(sessionId, "keepAlive"),
-      ]);
+    const [
+      webId,
+      isLoggedIn,
+      clientAppId,
+      expirationDate,
+      refreshToken,
+      issuer,
+      redirectUrl,
+      clientAppSecret,
+      dpop,
+      keepAlive,
+    ] = await Promise.all([
+      // ISessionInfo
+      this.storageUtility.getForUser(sessionId, "webId"),
+      this.storageUtility.getForUser(sessionId, "isLoggedIn"),
+      this.storageUtility.getForUser(sessionId, "clientAppId"),
+      this.storageUtility.getForUser(sessionId, "expirationDate"),
+      // ISessionInternalInfo
+      this.storageUtility.getForUser(sessionId, "refreshToken"),
+      this.storageUtility.getForUser(sessionId, "issuer"),
+      this.storageUtility.getForUser(sessionId, "redirectUrl"),
+      this.storageUtility.getForUser(sessionId, "clientAppSecret"),
+      this.storageUtility.getForUser(sessionId, "dpop"),
+      this.storageUtility.getForUser(sessionId, "keepAlive"),
+    ]);
 
     if (issuer !== undefined) {
       return {
+        // ISessionInfo
         sessionId,
         webId,
         isLoggedIn: isLoggedIn === "true",
+        clientAppId,
+        expirationDate: expirationDate
+          ? Number.parseInt(expirationDate, 10)
+          : undefined,
+        // ISessionInternalInfo
         refreshToken,
         issuer,
+        clientAppSecret,
+        redirectUrl,
+        tokenType: dpop === "true" ? "DPoP" : "Bearer",
         keepAlive: keepAlive === "true",
       };
     }
