@@ -122,7 +122,7 @@ export async function refresh(
     response,
     dpopKey !== undefined,
   );
-  const webId = await getWebidFromTokenPayload(
+  const { webId } = await getWebidFromTokenPayload(
     validatedResponse.id_token,
     issuer.jwksUri,
     issuer.issuer,

@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### node and browser
+
+- Fix parsing `clientId` from ID Token `azp` claim: the parsing of the ID Token payload was not
+  correctly extracting the `clientId` from the `azp` claim. As a result, `session.info.clientAppId`
+  was not being initialized upon successful login, which prevented the `idp` logout of the session
+  from working as expected.
+
 ## [2.2.2](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.2) - 2024-06-18
 
 ### Bugfix

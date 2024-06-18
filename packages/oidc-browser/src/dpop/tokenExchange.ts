@@ -95,6 +95,7 @@ export type CodeExchangeResult = TokenEndpointResponse & {
   // The idToken must not be undefined after the auth code exchange
   idToken: string;
   webId: string;
+  clientId?: string;
   dpopKey?: KeyPair;
 };
 
@@ -239,7 +240,7 @@ export async function getTokens(
 
   const tokenResponse = validateTokenEndpointResponse(jsonTokenResponse, dpop);
 
-  const webId = await getWebidFromTokenPayload(
+  const { webId, clientId } = await getWebidFromTokenPayload(
     tokenResponse.id_token,
     issuer.jwksUri,
     issuer.issuer,
@@ -253,6 +254,7 @@ export async function getTokens(
       ? tokenResponse.refresh_token
       : undefined,
     webId,
+    clientId,
     dpopKey,
     expiresIn: tokenResponse.expires_in,
   };

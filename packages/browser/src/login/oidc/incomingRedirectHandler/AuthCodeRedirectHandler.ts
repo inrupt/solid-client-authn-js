@@ -38,6 +38,7 @@ import {
   buildAuthenticatedFetch,
   loadOidcContextFromStorage,
   maybeBuildRpInitiatedLogout,
+  saveSessionInfoToStorage,
 } from "@inrupt/solid-client-authn-core";
 import { getTokens } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "events";
@@ -166,13 +167,14 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       expiresIn: tokens.expiresIn,
     });
 
-    await this.storageUtility.setForUser(
+    await saveSessionInfoToStorage(
+      this.storageUtility,
       storedSessionId,
-      {
-        webId: tokens.webId,
-        isLoggedIn: "true",
-      },
-      { secure: true },
+      tokens.webId,
+      tokens.clientId,
+      "true",
+      undefined,
+      true,
     );
 
     const sessionInfo = await this.sessionInfoManager.get(storedSessionId);
