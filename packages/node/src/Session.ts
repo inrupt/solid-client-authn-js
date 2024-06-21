@@ -297,6 +297,7 @@ export class Session implements IHasSessionEventListener {
         if (sessionInfo) {
           this.info.isLoggedIn = sessionInfo.isLoggedIn;
           this.info.webId = sessionInfo.webId;
+          this.info.clientAppId = sessionInfo.clientAppId;
           this.info.sessionId = sessionInfo.sessionId;
           if (sessionInfo.isLoggedIn) {
             // The login event can only be triggered **after** the user has been

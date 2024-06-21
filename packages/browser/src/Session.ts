@@ -360,6 +360,7 @@ export class Session implements IHasSessionEventListener {
     this.info.isLoggedIn = sessionInfo.isLoggedIn;
     this.info.webId = sessionInfo.webId;
     this.info.sessionId = sessionInfo.sessionId;
+    this.info.clientAppId = sessionInfo.clientAppId;
     this.info.expirationDate = sessionInfo.expirationDate;
     this.events.on(EVENTS.SESSION_EXTENDED, (expiresIn: number) => {
       this.info.expirationDate = Date.now() + expiresIn * 1000;

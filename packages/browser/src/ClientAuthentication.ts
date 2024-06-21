@@ -121,6 +121,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
         webId: redirectInfo.webId,
         sessionId: redirectInfo.sessionId,
         expirationDate: redirectInfo.expirationDate,
+        clientAppId: redirectInfo.clientAppId,
       };
     } catch (err) {
       // Strip the oauth params:
