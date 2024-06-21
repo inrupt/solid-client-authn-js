@@ -489,7 +489,6 @@ describe("handle", () => {
         clientType: "static",
       },
     });
-
     expect(result?.isLoggedIn).toBe(true);
     expect(result?.sessionId).toBe(standardOidcOptions.sessionId);
     expect(result?.webId).toBe("https://my.webid/");
@@ -497,5 +496,32 @@ describe("handle", () => {
     expect(result?.expirationDate).toBe(
       Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
     );
+  });
+
+  // The next test is skipped because the fake timers currently don't work
+  // with the background refresh.
+  it.skip("does not setup session refresh if keepAlive is false", async () => {
+    // Mock timers to trigger token refresh.
+    jest.useFakeTimers();
+    const tokens = mockDpopTokens();
+    setupOidcClientMock(tokens);
+    const mockedRefresher = mockDefaultTokenRefresher();
+    const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+      mockedRefresher,
+    );
+    await clientCredentialsOidcHandler.handle({
+      ...standardOidcOptions,
+      dpop: true,
+      keepAlive: false,
+      client: {
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        clientType: "static",
+      },
+    });
+    jest.advanceTimersByTime(500000);
+    // This would pass, but simply because the timers don't work
+    // properly, so it is NOT a functional test.
+    expect(mockedRefresher.refresh).not.toHaveBeenCalled();
   });
 });

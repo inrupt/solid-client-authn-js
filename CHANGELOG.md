@@ -9,6 +9,41 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### node
+
+- The `keepAlive` option (introduced in v2.2.0) is now correctly observed in a script using
+  the Client Credentials flow (i.e. using a `clientId` and a `clientSecret` to log in). It
+  previously was disregarded, and the `Session` always self-refreshed in the background.
+
+  Note that there still is a timeout being set to notify of session expiration, causing
+  NodeJS to wait for the end of the session before closing a terminal. This can be avoided
+  by logging the session out explicitly:
+
+  ```javascript
+    const session = new Session();
+    await session.login({
+      oidcIssuer: ...,
+      clientId: ...,
+      clientSecret: ...,
+    });
+  ```
+
+  will hang until the session expires, while
+
+  ```javascript
+    const session = new Session();
+    await session.login({
+      oidcIssuer: ...,
+      clientId: ...,
+      clientSecret: ...,
+    });
+    await session.logout();
+  ```
+
+  will close when logout is complete.
+
 ## [2.2.3](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.3) - 2024-06-20
 
 ### Bugfix
