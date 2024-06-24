@@ -152,6 +152,7 @@ export class Session implements IHasSessionEventListener {
         sessionId: sessionOptions.sessionInfo.sessionId,
         isLoggedIn: false,
         webId: sessionOptions.sessionInfo.webId,
+        clientAppId: sessionOptions.sessionInfo.clientAppId,
       };
     } else {
       this.info = {
