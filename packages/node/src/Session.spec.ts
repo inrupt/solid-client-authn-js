@@ -503,6 +503,7 @@ describe("getSessionFromStorage", () => {
         isLoggedIn: true,
         issuer: "https://my.idp",
         sessionId: "mySession",
+        clientAppId: undefined,
       });
     clientAuthentication.logout = jest
       .fn<typeof clientAuthentication.logout>()
@@ -518,6 +519,7 @@ describe("getSessionFromStorage", () => {
       isLoggedIn: false,
       sessionId: "mySession",
       webId: "https://my.webid",
+      clientAppId: undefined,
     });
   });
 
