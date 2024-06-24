@@ -11,6 +11,13 @@ The following changes have been implemented but not released yet:
 
 ### Bugfix
 
+#### node and browser
+
+- Fix the initialization of `clientAppId` in `ISessionInfo` objects: `clientAppId` property of the `ISessionInfo` interface, although present, was not being set either in the `ISessionInfo` objects returned by
+  the `handleIncomingRedirect` function in `ClientAuthentication`, or in the `Session` class.
+
+### Bugfix
+
 #### node
 
 - The `keepAlive` option (introduced in v2.2.0) is now correctly observed in a script using

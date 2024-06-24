@@ -112,6 +112,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       isLoggedIn: redirectInfo.isLoggedIn,
       webId: redirectInfo.webId,
       sessionId: redirectInfo.sessionId,
+      clientAppId: redirectInfo.clientAppId,
     };
   };
 }

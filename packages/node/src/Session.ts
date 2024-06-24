@@ -152,6 +152,7 @@ export class Session implements IHasSessionEventListener {
         sessionId: sessionOptions.sessionInfo.sessionId,
         isLoggedIn: false,
         webId: sessionOptions.sessionInfo.webId,
+        clientAppId: sessionOptions.sessionInfo.clientAppId,
       };
     } else {
       this.info = {
@@ -297,6 +298,7 @@ export class Session implements IHasSessionEventListener {
         if (sessionInfo) {
           this.info.isLoggedIn = sessionInfo.isLoggedIn;
           this.info.webId = sessionInfo.webId;
+          this.info.clientAppId = sessionInfo.clientAppId;
           this.info.sessionId = sessionInfo.sessionId;
           if (sessionInfo.isLoggedIn) {
             // The login event can only be triggered **after** the user has been
