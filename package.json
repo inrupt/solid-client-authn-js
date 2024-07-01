@@ -53,7 +53,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/dotenv-flow": "^3.3.3",
-    "@types/http-link-header": "^1.0.6",
+    "@types/http-link-header": "^1.0.7",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.13.1",
