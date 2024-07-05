@@ -162,10 +162,7 @@ function mockOidcClient(
     .mockImplementationOnce(
       tokenType === "dpop"
         ? mockTokenEndpointDpopResponse
-        : () =>
-            new Promise<OidcClientExt.CodeExchangeResult>((resolve) => {
-              resolve(mockTokenEndpointBearerResponse());
-            }),
+        : () => Promise.resolve(mockTokenEndpointBearerResponse()),
     );
   mockedOidcClient.refresh = jest
     .fn<typeof mockedOidcClient.refresh>()
