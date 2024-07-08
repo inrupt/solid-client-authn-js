@@ -3,7 +3,6 @@
   "client_id": "https://example.org/your-client-id",
   "client_name": "solid-client-authn-browser demo",
   "redirect_uris": ["http://localhost:3113/"],
-  "scope" : "openid offline_access webid",
   "grant_types" : ["refresh_token","authorization_code"],
   "token_endpoint_auth_method": "none"
 }
