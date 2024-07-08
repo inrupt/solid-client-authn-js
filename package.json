@@ -69,7 +69,7 @@
     "lerna-audit": "^1.3.3",
     "license-checker": "^25.0.1",
     "prettier": "^3.3.2",
-    "rimraf": "^5.0.7",
+    "rimraf": "^5.0.8",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
     "typedoc": "^0.26.3",
