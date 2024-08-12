@@ -14,10 +14,20 @@ updates:
     open-pull-requests-limit: 10
     # The following is required for workspaces to be updated: see https://github.com/dependabot/dependabot-core/issues/5226.
     versioning-strategy: increase
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@typescript-eslint/eslint-plugin"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typedoc-plugin-markdown"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: npm
-    directory: "/e2e/browser/test-app"
+    directory: "/e2e/browser/solid-client-authn-browser/test-app"
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 10
   - package-ecosystem: npm
     directory: "/packages/browser/examples/single/native"
