@@ -26,6 +26,7 @@ import {
   StorageUtilityMock,
   mockStorage,
 } from "@inrupt/solid-client-authn-core/mocks";
+import { randomUUID } from "crypto";
 
 import { OidcHandlerMock } from "./__mocks__/IOidcHandler";
 import {
@@ -108,8 +109,8 @@ describe("OidcLoginHandler", () => {
   it("should lookup client ID if not provided, if not found do DCR", async () => {
     const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
     mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
-      clientId: "some dynamically registered ID",
-      clientSecret: "some dynamically registered secret",
+      clientId: randomUUID(),
+      clientSecret: randomUUID(),
     });
 
     const mockedEmptyStorage = new StorageUtility(
@@ -135,10 +136,11 @@ describe("OidcLoginHandler", () => {
   });
 
   it("should perform DCR if a client WebID is provided, but the target IdP does not support Solid-OIDC", async () => {
+    const clientId = randomUUID();
     const mockedOidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
     mockedOidcModule.registerClient = (jest.fn() as any).mockResolvedValue({
-      clientId: "some dynamically registered ID",
-      clientSecret: "some dynamically registered secret",
+      clientId,
+      clientSecret: randomUUID(),
     });
 
     const mockedEmptyStorage = new StorageUtility(
@@ -165,7 +167,7 @@ describe("OidcLoginHandler", () => {
     });
 
     const calledWith = actualHandler.handle.mock.calls[0][0];
-    expect(calledWith.client.clientId).toBe("some dynamically registered ID");
+    expect(calledWith.client.clientId).toBe(clientId);
   });
 
   it("should save statically registered client ID if given one as an input option", async () => {

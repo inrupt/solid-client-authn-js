@@ -26,6 +26,7 @@ import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
 import type * as OpenidClient from "openid-client";
 import type { JWK } from "jose";
+import { randomUUID } from "crypto";
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
@@ -182,8 +183,8 @@ describe("ClientCredentialsOidcHandler", () => {
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
           client: {
-            clientId: "some client ID",
-            clientSecret: "some client secret",
+            clientId: randomUUID(),
+            clientSecret: randomUUID(),
             clientType: "static",
           },
         }),
@@ -198,8 +199,8 @@ describe("ClientCredentialsOidcHandler", () => {
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
           client: {
-            clientId: "some client ID",
-            clientSecret: "some secret",
+            clientId: randomUUID(),
+            clientSecret: randomUUID(),
             clientType: "dynamic",
           },
         }),
@@ -214,8 +215,8 @@ describe("ClientCredentialsOidcHandler", () => {
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
           client: {
-            clientId: "some client ID",
-            clientSecret: "some client secret",
+            clientId: randomUUID(),
+            clientSecret: randomUUID(),
             clientType: "static",
           },
           redirectUrl: undefined,
@@ -231,8 +232,8 @@ describe("ClientCredentialsOidcHandler", () => {
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
           client: {
-            clientId: "some client ID",
-            clientSecret: "some client secret",
+            clientId: randomUUID(),
+            clientSecret: randomUUID(),
             clientType: "static",
           },
         }),
@@ -253,8 +254,8 @@ describe("handle", () => {
       clientCredentialsOidcHandler.handle({
         ...standardOidcOptions,
         client: {
-          clientId: "some client ID",
-          clientSecret: "some client secret",
+          clientId: randomUUID(),
+          clientSecret: randomUUID(),
           clientType: "static",
         },
       }),
@@ -278,8 +279,8 @@ describe("handle", () => {
     const sessionInfo = await clientCredentialsOidcHandler.handle({
       ...standardOidcOptions,
       client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });
@@ -311,8 +312,8 @@ describe("handle", () => {
       clientCredentialsOidcHandler.handle({
         ...standardOidcOptions,
         client: {
-          clientId: "some client ID",
-          clientSecret: "some client secret",
+          clientId: randomUUID(),
+          clientSecret: randomUUID(),
           clientType: "static",
         },
       }),
@@ -330,8 +331,8 @@ describe("handle", () => {
       ...standardOidcOptions,
       dpop: true,
       client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });
@@ -359,8 +360,8 @@ describe("handle", () => {
       ...standardOidcOptions,
       dpop: false,
       client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });
@@ -397,8 +398,8 @@ describe("handle", () => {
       ...standardOidcOptions,
       dpop: true,
       client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });
@@ -434,8 +435,8 @@ describe("handle", () => {
       ...standardOidcOptions,
       dpop: true,
       client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });
@@ -459,8 +460,8 @@ describe("handle", () => {
       ...standardOidcOptions,
       dpop: true,
       client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });
@@ -484,8 +485,8 @@ describe("handle", () => {
       ...standardOidcOptions,
       dpop: true,
       client: {
-        clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });
