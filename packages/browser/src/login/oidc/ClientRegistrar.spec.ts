@@ -24,6 +24,7 @@ import {
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
+import { randomUUID } from "crypto";
 import ClientRegistrar from "./ClientRegistrar";
 import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfigFetcher";
 
@@ -42,14 +43,16 @@ describe("ClientRegistrar", () => {
 
   describe("getClient", () => {
     it("properly performs dynamic registration", async () => {
+      const clientId = randomUUID();
+      const clientSecret = randomUUID();
       // FIXME: this should mock out oidc-client-ext, instead of mimicking the
       // actual OIDC provider response.
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new Response(
           JSON.stringify({
-            client_id: "abcd",
-            client_secret: "1234",
+            client_id: clientId,
+            client_secret: clientSecret,
             redirect_uris: ["https://example.com"],
             id_token_signed_response_alg: "RS256",
           }),
@@ -73,8 +76,8 @@ describe("ClientRegistrar", () => {
           },
         ),
       ).toMatchObject({
-        clientId: "abcd",
-        clientSecret: "1234",
+        clientId,
+        clientSecret,
       });
       expect(mockFetch).toHaveBeenCalledWith(registrationUrl.toString(), {
         method: "POST",
@@ -170,12 +173,14 @@ describe("ClientRegistrar", () => {
     });
 
     it("retrieves client id and secret from storage if they are present", async () => {
+      const clientId = randomUUID();
+      const clientSecret = randomUUID();
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
             "solidClientAuthenticationUser:mySession": {
-              clientId: "an id",
-              clientSecret: "a secret",
+              clientId,
+              clientSecret,
               clientType: "dynamic",
             },
           },
@@ -191,17 +196,19 @@ describe("ClientRegistrar", () => {
           ...IssuerConfigFetcherFetchConfigResponse,
         },
       );
-      expect(client.clientId).toBe("an id");
-      expect(client.clientSecret).toBe("a secret");
+      expect(client.clientId).toBe(clientId);
+      expect(client.clientSecret).toBe(clientSecret);
     });
 
     it("saves dynamic registration information", async () => {
+      const clientId = randomUUID();
+      const clientSecret = randomUUID();
       const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
         /* eslint-disable camelcase */
         new Response(
           JSON.stringify({
-            client_id: "some id",
-            client_secret: "some secret",
+            client_id: clientId,
+            client_secret: clientSecret,
             redirect_uris: ["https://example.com"],
           }),
         ),
@@ -227,10 +234,10 @@ describe("ClientRegistrar", () => {
 
       await expect(
         myStorage.getForUser("mySession", "clientId", { secure: false }),
-      ).resolves.toBe("some id");
+      ).resolves.toBe(clientId);
       await expect(
         myStorage.getForUser("mySession", "clientSecret", { secure: false }),
-      ).resolves.toBe("some secret");
+      ).resolves.toBe(clientSecret);
     });
   });
 });
