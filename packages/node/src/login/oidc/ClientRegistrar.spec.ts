@@ -19,6 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { randomUUID } from "crypto";
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import ClientRegistrar from "./ClientRegistrar";
@@ -77,12 +78,14 @@ describe("ClientRegistrar", () => {
     });
 
     it("retrieves client information from storage if they are present", async () => {
+      const exampleSecret = crypto.randomUUID();
+      const exampleClient = crypto.randomUUID();
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
             "solidClientAuthenticationUser:mySession": {
-              clientId: "an id",
-              clientSecret: "a secret",
+              clientId: exampleClient,
+              clientSecret: exampleSecret,
               clientName: "my client name",
               idTokenSignedResponseAlg: "ES256",
               clientType: "static",
@@ -100,8 +103,8 @@ describe("ClientRegistrar", () => {
           ...IssuerConfigFetcherFetchConfigResponse,
         },
       );
-      expect(client.clientId).toBe("an id");
-      expect(client.clientSecret).toBe("a secret");
+      expect(client.clientId).toBe(exampleClient);
+      expect(client.clientSecret).toBe(exampleSecret);
       expect(client.clientName).toBe("my client name");
       expect(client.idTokenSignedResponseAlg).toBe("ES256");
     });
@@ -111,8 +114,8 @@ describe("ClientRegistrar", () => {
         storage: mockStorageUtility(
           {
             "solidClientAuthenticationUser:mySession": {
-              clientId: "an id",
-              clientSecret: "a secret",
+              clientId: randomUUID(),
+              clientSecret: randomUUID(),
               clientName: "my client name",
               clientType: "dynamic",
             },
