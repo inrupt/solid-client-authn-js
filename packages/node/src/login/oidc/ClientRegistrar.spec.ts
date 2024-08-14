@@ -78,8 +78,8 @@ describe("ClientRegistrar", () => {
     });
 
     it("retrieves client information from storage if they are present", async () => {
-      const exampleSecret = crypto.randomUUID();
-      const exampleClient = crypto.randomUUID();
+      const exampleSecret = randomUUID();
+      const exampleClient = randomUUID();
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
