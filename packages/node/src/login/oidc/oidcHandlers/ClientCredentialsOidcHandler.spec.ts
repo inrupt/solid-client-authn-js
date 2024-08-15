@@ -485,7 +485,7 @@ describe("handle", () => {
       ...standardOidcOptions,
       dpop: true,
       client: {
-        clientId: randomUUID(),
+        clientId: "some client ID",
         clientSecret: randomUUID(),
         clientType: "static",
       },
@@ -516,7 +516,7 @@ describe("handle", () => {
       keepAlive: false,
       client: {
         clientId: "some client ID",
-        clientSecret: "some client secret",
+        clientSecret: randomUUID(),
         clientType: "static",
       },
     });

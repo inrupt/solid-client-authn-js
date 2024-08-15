@@ -21,6 +21,7 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import type { IIssuerConfigFetcher } from "@inrupt/solid-client-authn-core";
+import { randomUUID } from "crypto";
 import {
   mockStorage,
   mockStorageUtility,
@@ -138,6 +139,7 @@ describe("OidcLoginHandler", () => {
 
     it("does not perform DCR if client ID and secret are specified, but stores client credentials", async () => {
       const { oidcHandler } = defaultMocks;
+      const exampleSecret = randomUUID();
       const mockedStorage = mockStorageUtility({});
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = jest
@@ -153,7 +155,7 @@ describe("OidcLoginHandler", () => {
         oidcIssuer: "https://arbitrary.url",
         redirectUrl: "https://app.com/redirect",
         clientId: "some pre-registered client id",
-        clientSecret: "some pre-registered client secret",
+        clientSecret: exampleSecret,
         clientName: "My App",
         tokenType: "DPoP",
       });
@@ -163,7 +165,7 @@ describe("OidcLoginHandler", () => {
       ).resolves.toBe("some pre-registered client id");
       await expect(
         mockedStorage.getForUser("mySession", "clientSecret"),
-      ).resolves.toBe("some pre-registered client secret");
+      ).resolves.toBe(exampleSecret);
       await expect(
         mockedStorage.getForUser("mySession", "clientName"),
       ).resolves.toBe("My App");
@@ -211,7 +213,7 @@ describe("OidcLoginHandler", () => {
       const clientRegistrar = mockDefaultClientRegistrar();
       clientRegistrar.getClient = (jest.fn() as any).mockResolvedValueOnce({
         clientId: "a dynamically registered client id",
-        clientSecret: "a dynamically registered client secret",
+        clientSecret: randomUUID(),
       });
 
       const mockedEmptyStorage = new StorageUtility(

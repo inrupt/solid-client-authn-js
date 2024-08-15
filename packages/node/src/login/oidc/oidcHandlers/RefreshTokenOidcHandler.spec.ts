@@ -332,7 +332,7 @@ describe("RefreshTokenOidcHandler", () => {
     // This builds the fetch function holding the refresh token...
     const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
       mockTokenRefresher({
-        accessToken: "some access token",
+        accessToken: randomUUID(),
       }),
       mockStorageUtility({}),
     );
@@ -425,7 +425,7 @@ describe("RefreshTokenOidcHandler", () => {
 
   it("throws if the credentials are incorrect", async () => {
     const tokenRefresher = mockTokenRefresher({
-      accessToken: "some access token",
+      accessToken: randomUUID(),
     });
     tokenRefresher.refresh = jest
       .fn<typeof tokenRefresher.refresh>()
