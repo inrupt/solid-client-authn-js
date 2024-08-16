@@ -19,7 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import pkg from "./package.json" assert { type: "json" };
+import pkg from "./package.json" with { type: "json" };
 import createConfig from '@inrupt/base-rollup-config';
 
 export default createConfig(pkg);
