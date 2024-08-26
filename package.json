@@ -46,7 +46,7 @@
     "@inrupt/eslint-config-lib": "^3.2.1",
     "@inrupt/internal-playwright-helpers": "^3.2.3",
     "@inrupt/internal-test-env": "^3.2.3",
-    "@inrupt/jest-jsdom-polyfills": "^3.2.1",
+    "@inrupt/jest-jsdom-polyfills": "^3.2.3",
     "@inrupt/solid-client": "^2.0.1",
     "@playwright/test": "~1.46.1",
     "@rollup/plugin-commonjs": "^26.0.1",
