@@ -42,7 +42,7 @@
     "build-demo-app": "npm run build; cd packages/browser/examples/demoClientApp/; npm ci; npm run build; mkdir -p ../../../../dist/website/demo/; cp -r dist/. ../../../../dist/website/demo/"
   },
   "devDependencies": {
-    "@inrupt/base-rollup-config": "^3.1.0",
+    "@inrupt/base-rollup-config": "^3.2.3",
     "@inrupt/eslint-config-lib": "^3.2.1",
     "@inrupt/internal-playwright-helpers": "^3.2.1",
     "@inrupt/internal-test-env": "^3.2.3",
