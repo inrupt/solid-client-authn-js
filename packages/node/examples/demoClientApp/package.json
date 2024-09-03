@@ -24,7 +24,7 @@
     "loglevel": "^1.9.1"
   },
   "devDependencies": {
-    "@inrupt/eslint-config-base": "3.2.1",
+    "@inrupt/eslint-config-base": "3.2.3",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.10.0",
