@@ -21,6 +21,16 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "typedoc-plugin-markdown"
         update-types: ["version-update:semver-major"]
+    groups:
+      internal-tooling:
+        patterns:
+          - "@inrupt/internal-*"
+          - "@inrupt/base-*"
+          - "@inrupt/jest-*"
+          - "@inrupt/eslint-*"
+      external-types:
+        patterns:
+          - "@types/*"
   - package-ecosystem: npm
     directory: "/e2e/browser/solid-client-authn-browser/test-app"
     schedule:
