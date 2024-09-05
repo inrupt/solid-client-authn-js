@@ -12,13 +12,13 @@
     "@inrupt/internal-playwright-testids": "^3.0.2",
     "@inrupt/solid-client-authn-browser": "^2.2.4",
     "@inrupt/solid-ui-react": "^3.0.0",
-    "next": "^14.2.5",
+    "next": "^14.2.7",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@types/node": "22.2.0",
-    "@types/react": "18.3.3",
+    "@types/node": "22.5.2",
+    "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "typescript": "5.5.4"
   }

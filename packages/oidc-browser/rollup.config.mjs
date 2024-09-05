@@ -21,7 +21,7 @@
 
 import { createSharedConfig } from "@inrupt/base-rollup-config";
 // eslint-disable-next-line import/extensions
-import pkg from "./package.json" assert { type: "json" };
+import pkg from "./package.json" with { type: "json" };
 
 export default {
   input: "./src/index.ts",
