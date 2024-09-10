@@ -21,7 +21,7 @@
   "dependencies": {
     "@inrupt/solid-client-authn-node": "../../",
     "express": "^4.19.2",
-    "loglevel": "^1.9.1"
+    "loglevel": "^1.9.2"
   },
   "devDependencies": {
     "@inrupt/eslint-config-base": "3.2.3",
