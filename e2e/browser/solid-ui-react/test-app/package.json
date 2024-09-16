@@ -12,7 +12,7 @@
     "@inrupt/internal-playwright-testids": "^3.0.2",
     "@inrupt/solid-client-authn-browser": "^2.2.5",
     "@inrupt/solid-ui-react": "^3.0.0",
-    "next": "^14.2.8",
+    "next": "^14.2.11",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
