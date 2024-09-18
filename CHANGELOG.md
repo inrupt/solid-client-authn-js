@@ -9,6 +9,16 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## [2.2.6](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.6) - 2024-09-18
+
+### Bugfix
+
+#### node and browser
+
+- Repository URL in `package.json` updated to set the `repository.type` property to `git`. This intends at
+  restoring the previous behavior of `npm view @inrupt/solid-client-authn repository.url`, expected to return
+  `git+https://github.com/inrupt/solid-client-authn-js.git`.
+
 ## [2.2.5](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.5) - 2024-09-16
 
 ### New Features
