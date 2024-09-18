@@ -10,7 +10,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/inrupt/solid-client-authn.git"
+    "url": "https://github.com/inrupt/solid-client-authn-js.git"
   },
   "scripts": {
     "prepublishOnly": "npm run build",

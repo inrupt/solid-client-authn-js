@@ -9,7 +9,7 @@
   "bundle": "dist/solid-client-authn.bundle.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inrupt/solid-client-authn.git"
+    "url": "https://github.com/inrupt/solid-client-authn-js.git"
   },
   "exports": {
     ".": {
