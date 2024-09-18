@@ -8,6 +8,10 @@
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inrupt/solid-client-authn-js.git"
+  },
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "rollup --config rollup.config.mjs",

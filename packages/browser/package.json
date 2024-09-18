@@ -8,7 +8,8 @@
   "module": "dist/index.mjs",
   "bundle": "dist/solid-client-authn.bundle.js",
   "repository": {
-    "url": "https://github.com/inrupt/solid-client-authn"
+    "type": "git",
+    "url": "https://github.com/inrupt/solid-client-authn-js.git"
   },
   "exports": {
     ".": {

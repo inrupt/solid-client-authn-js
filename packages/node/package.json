@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "module": "dist/index.mjs",
   "repository": {
-    "url": "https://github.com/inrupt/solid-client-authn"
+    "type": "git",
+    "url": "https://github.com/inrupt/solid-client-authn-js.git"
   },
   "exports": {
     ".": {
