@@ -50,7 +50,7 @@
     "@inrupt/solid-client": "^2.1.0",
     "@playwright/test": "^1.47.1",
     "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-node-resolve": "^15.2.4",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/dotenv-flow": "^3.3.3",
     "@types/http-link-header": "^1.0.7",
