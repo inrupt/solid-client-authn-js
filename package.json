@@ -58,7 +58,7 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "dotenv-flow": "^4.0.1",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-config-next": "^13.5.7",
     "express": "^4.20.0",
     "http-link-header": "^1.1.3",
