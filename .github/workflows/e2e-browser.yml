@@ -1,6 +1,6 @@
 name: End-to-end browser tests
 
-on: 
+on:
   push:
   workflow_dispatch:
 concurrency:
