@@ -34,7 +34,7 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   globals: {
     "ts-jest": {
-      tsConfig: "<rootDir>/tsconfig.test.json",
+      tsconfig: "<rootDir>/tsconfig.test.json",
     },
   },
 };
