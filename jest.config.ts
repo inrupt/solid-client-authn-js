@@ -32,11 +32,6 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   clearMocks: true,
   injectGlobals: false,
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  globals: {
-    "ts-jest": {
-      tsconfig: "<rootDir>/tsconfig.test.json",
-    },
-  },
 };
 
 // Required by @peculiar/webcrypto, which comes from the polyfills
