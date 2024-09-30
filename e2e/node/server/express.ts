@@ -67,6 +67,7 @@ export function createApp(
 
     if (info?.isLoggedIn) {
       res.redirect("/");
+      return;
     }
 
     res.status(400).send("could not log in").end();
