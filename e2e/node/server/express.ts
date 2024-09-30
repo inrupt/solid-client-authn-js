@@ -49,6 +49,7 @@ export function createApp(
 
     if (typeof oidcIssuer !== "string") {
       res.status(400).send("oidcIssuer is required").end();
+      return;
     }
 
     await session.login({
@@ -76,6 +77,7 @@ export function createApp(
 
     if (typeof resource !== "string") {
       res.status(400).send("resource must be provided as a string").end();
+      return;
     }
 
     const response = await session.fetch(resource);
