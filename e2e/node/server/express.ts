@@ -40,18 +40,18 @@ export function createApp(
   // Initialised when the server comes up and is running...
   let session: Session;
 
-  app.get("/", async (req, res) => {
-    return res.status(200).end();
+  app.get("/", (_req, res) => {
+    res.status(200).end();
   });
 
   app.get("/login", async (req, res) => {
     const { oidcIssuer, clientId } = req.query;
 
     if (typeof oidcIssuer !== "string") {
-      return res.status(400).send("oidcIssuer is required").end();
+      res.status(400).send("oidcIssuer is required").end();
     }
 
-    return session.login({
+    await session.login({
       redirectUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/redirect`,
       oidcIssuer,
       clientId: typeof clientId === "string" ? clientId : undefined,
@@ -65,24 +65,21 @@ export function createApp(
     );
 
     if (info?.isLoggedIn) {
-      return res.redirect("/");
+      res.redirect("/");
     }
 
-    return res.status(400).send("could not log in").end();
+    res.status(400).send("could not log in").end();
   });
 
   app.get("/fetch", async (req, res) => {
     const { resource } = req.query;
 
     if (typeof resource !== "string") {
-      return res
-        .status(400)
-        .send("resource must be provided as a string")
-        .end();
+      res.status(400).send("resource must be provided as a string").end();
     }
 
     const response = await session.fetch(resource);
-    return res
+    res
       .status(response.status)
       .send(await response.text())
       .end();
@@ -91,19 +88,19 @@ export function createApp(
   app.get("/logout", async (_req, res) => {
     try {
       await session.logout();
-      return res.status(200).send("successful logout").end();
+      res.status(200).send("successful logout").end();
     } catch (error) {
-      return res.status(400).send(`Logout processing failed: [${error}]`).end();
+      res.status(400).send(`Logout processing failed: [${error}]`).end();
     }
   });
 
   app.get("/postLogoutUrl", async (_req, res) => {
-    return res.status(200).send("successfully at post logout").end();
+    res.status(200).send("successfully at post logout").end();
   });
 
   app.get("/idplogout", async (_req, res) => {
     try {
-      return await session.logout({
+      await session.logout({
         logoutType: "idp",
         postLogoutUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
         handleRedirect: (url) => {
@@ -111,7 +108,7 @@ export function createApp(
         },
       });
     } catch (error) {
-      return res.status(400).send(`Logout processing failed: [${error}]`).end();
+      res.status(400).send(`Logout processing failed: [${error}]`).end();
     }
   });
 
