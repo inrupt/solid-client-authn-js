@@ -26,7 +26,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import type { Request } from "@playwright/test";
 import { firefox } from "@playwright/test";
-import type { ILogoutOptions } from "core";
+import type { ILogoutOptions } from "@inrupt/solid-client-authn-core";
 import { custom } from "openid-client";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
