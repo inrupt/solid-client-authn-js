@@ -38,7 +38,7 @@ export const standardOidcOptions: IOidcOptions = {
     claimsSupported: [],
     scopesSupported: ["openid"],
     grantTypesSupported: ["authorization_code"],
-    endSessionEndpoint: "https://example.com/end-session"
+    endSessionEndpoint: "https://example.com/end-session",
   },
   client: {
     clientId: "coolApp",

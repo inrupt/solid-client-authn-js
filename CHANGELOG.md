@@ -17,7 +17,6 @@ The following changes have been implemented but not released yet:
   storage (using `getSessionFromStorage`), which is the typical way server-side
   sessions are retrieved.
 
-
 ## [2.2.6](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.6) - 2024-09-18
 
 ### Bugfix
