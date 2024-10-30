@@ -66,7 +66,6 @@ export function maybeBuildRpInitiatedLogout({
   endSessionEndpoint,
   idTokenHint,
 }: Partial<Omit<IEndSessionOptions, keyof IRpLogoutOptions>>) {
-  console.log(`EndSessionEndpoint: ${endSessionEndpoint}`);
   if (endSessionEndpoint === undefined) return undefined;
 
   return function logout({ state, postLogoutUrl }: IRpLogoutOptions) {
