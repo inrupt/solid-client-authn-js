@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### node
+
+- The IdP logout no longer fails in Node if the session was restored from
+  storage (using `getSessionFromStorage`), which is the typical way server-side
+  sessions are retrieved.
+
+
 ## [2.2.6](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.6) - 2024-09-18
 
 ### Bugfix
