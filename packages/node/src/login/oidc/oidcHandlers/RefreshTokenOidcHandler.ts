@@ -44,6 +44,7 @@ import {
   generateDpopKeyPair,
   PREFERRED_SIGNING_ALG,
   buildAuthenticatedFetch,
+  maybeBuildRpInitiatedLogout,
 } from "@inrupt/solid-client-authn-core";
 import type { JWK } from "jose";
 import { importJWK } from "jose";
@@ -222,6 +223,11 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
 
     return Object.assign(sessionInfo, {
       fetch: accessInfo.fetch,
+      getLogoutUrl: maybeBuildRpInitiatedLogout({
+        idTokenHint: accessInfo.idToken,
+        endSessionEndpoint:
+          oidcLoginOptions.issuerConfiguration.endSessionEndpoint,
+      }),
     });
   }
 }

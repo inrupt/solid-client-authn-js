@@ -126,8 +126,10 @@ app.get("/logout", async (req, res, next) => {
   const session = await getSessionFromStorage(req.session.sessionId);
   if (session) {
     const { webId } = session.info;
-    session.logout();
-    res.send(`<p>Logged out of session with WebID [${webId}]</p>`);
+    await session.logout({
+      logoutType: "idp",
+      handleRedirect: (redirectUrl) => { res.redirect(redirectUrl) }
+    });
   } else {
     res.status(400).send(`<p>No active session to log out</p>`);
   }
