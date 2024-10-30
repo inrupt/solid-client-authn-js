@@ -181,6 +181,7 @@ describe("RefreshTokenOidcHandler", () => {
         }),
       )) as SolidClientAuthnCore.LoginResult;
       expect(result).toBeDefined();
+      expect(result?.getLogoutUrl).toBeDefined();
       expect(result?.webId).toBe("https://my.webid/");
       expect(result?.expirationDate).toBeGreaterThan(Date.now());
 

@@ -74,6 +74,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
 
     if (loginReturn !== undefined) {
       this.fetch = loginReturn.fetch;
+      this.boundLogout = loginReturn.getLogoutUrl;
       return loginReturn;
     }
 
