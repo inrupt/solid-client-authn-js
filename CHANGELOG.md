@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## [2.2.7](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.7) - 2024-10-30
+
 ### Bugfix
 
 #### node
