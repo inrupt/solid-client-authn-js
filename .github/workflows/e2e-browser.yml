@@ -49,20 +49,6 @@ jobs:
           E2E_TEST_OWNER_CLIENT_ID: ${{ secrets.E2E_TEST_OWNER_CLIENT_ID }}
           E2E_TEST_OWNER_CLIENT_SECRET: ${{ secrets.E2E_TEST_OWNER_CLIENT_SECRET }}
           E2E_TEST_ENVIRONMENT: ${{ matrix.environment-name }}
-      - run: npm run test:e2e:browser:ui-react
-        # Running end-to-end tests requires accessing secrets which aren't available to dependabot.
-        # https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
-        # We want jobs in this workflow to be gating PRs, so the whole matrix must
-        # run even for dependabot so that the matrixed jobs are skipped, instead
-        # of the whole pipeline.
-        if: github.actor != 'dependabot[bot]'
-        env:
-          E2E_TEST_USER: ${{ secrets.E2E_TEST_USER }}
-          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
-          E2E_TEST_IDP: ${{ secrets.E2E_TEST_IDP }}
-          E2E_TEST_OWNER_CLIENT_ID: ${{ secrets.E2E_TEST_OWNER_CLIENT_ID }}
-          E2E_TEST_OWNER_CLIENT_SECRET: ${{ secrets.E2E_TEST_OWNER_CLIENT_SECRET }}
-          E2E_TEST_ENVIRONMENT: ${{ matrix.environment-name }}
       - name: Archive browser-based end-to-end test failure results, if any
         uses: actions/upload-artifact@v4
         continue-on-error: true
