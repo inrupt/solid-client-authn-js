@@ -124,7 +124,7 @@ async function internalGetSessionFromStorage(
   sessionId: string,
   options?: GetSessionOptions,
 ): Promise<Session | undefined> {
-  const { storage, onNewRefreshToken, refreshSession } = options ?? {};
+  const { storage, onNewRefreshToken } = options ?? {};
   const clientAuth: ClientAuthentication = storage
   ? getClientAuthenticationWithDependencies({
       secureStorage: storage,
@@ -134,25 +134,41 @@ async function internalGetSessionFromStorage(
       secureStorage: defaultStorage,
       insecureStorage: defaultStorage,
     });
-const sessionInfo = await clientAuth.getSessionInfo(sessionId);
-if (sessionInfo === undefined) {
-  return undefined;
-}
-const session = new Session({
-  sessionInfo,
-  clientAuthentication: clientAuth,
-  keepAlive: sessionInfo.keepAlive,
-});
-if (onNewRefreshToken !== undefined) {
-  session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
-}
-if (sessionInfo.refreshToken && refreshSession) {
-  await session.login({
-    oidcIssuer: sessionInfo.issuer,
-    tokenType: sessionInfo.tokenType,
+  const sessionInfo = await clientAuth.getSessionInfo(sessionId);
+  if (sessionInfo === undefined) {
+    return undefined;
+  }
+  const session = new Session({
+    sessionInfo,
+    clientAuthentication: clientAuth,
+    keepAlive: sessionInfo.keepAlive,
   });
+  if (onNewRefreshToken !== undefined) {
+    session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
+  }
+  if (options?.refreshSession) {
+    await refreshSession(session, {storage: storage ?? defaultStorage });
+  }
+  return session;
 }
-return session;
+
+export async function refreshSession(session: Session, options?: { storage?: IStorage }): Promise<void> {
+  const clientAuth: ClientAuthentication = options?.storage !== undefined
+  ? getClientAuthenticationWithDependencies({
+      secureStorage: options.storage,
+      insecureStorage: options.storage,
+    })
+  : getClientAuthenticationWithDependencies({
+      secureStorage: defaultStorage,
+      insecureStorage: defaultStorage,
+    });
+  const sessionInfo = await clientAuth.getSessionInfo(session.info.sessionId);
+  if (sessionInfo !== undefined && sessionInfo.refreshToken) {
+    await session.login({
+      oidcIssuer: sessionInfo.issuer,
+      tokenType: sessionInfo.tokenType,
+    });
+  }
 }
 
 /**
