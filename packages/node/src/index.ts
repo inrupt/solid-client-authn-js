@@ -25,6 +25,7 @@ export {
   getSessionFromStorage,
   getSessionIdFromStorageAll,
   clearSessionFromStorageAll,
+  refreshSession
 } from "./multiSession";
 
 // Re-export of types defined in the core module and produced/consumed by our API

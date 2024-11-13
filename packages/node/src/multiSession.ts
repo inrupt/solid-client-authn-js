@@ -31,11 +31,13 @@ export type GetSessionOptions = Partial<{
 }>
 
 function isSessionOptions(input: unknown): input is GetSessionOptions {
+  if (typeof input !== "object" || input === null) {
+    return false;
+  }
   const storageType = typeof (input as GetSessionOptions).storage;
   const callbackType = typeof (input as GetSessionOptions).onNewRefreshToken;
   const refreshType = typeof (input as GetSessionOptions).refreshSession;
-  return (typeof input === "object" && input !== null)
-    && (storageType === "undefined" || storageType === "object")
+  return (storageType === "undefined" || storageType === "object")
     && (callbackType === "undefined" || callbackType === "function")
     && (refreshType === "undefined" || refreshType === "boolean")
 }
