@@ -35,8 +35,7 @@ const clientApplicationName = "solid-client-authn-node multi session demo";
 const app = express();
 const PORT = 3001;
 
-// const DEFAULT_OIDC_ISSUER = "https://login.inrupt.com/";
-const DEFAULT_OIDC_ISSUER = "http://localhost:8076/"
+const DEFAULT_OIDC_ISSUER = "https://login.inrupt.com/";
 // This is the endpoint our NodeJS demo app listens on to receive incoming login
 const REDIRECT_URL = "http://localhost:3001/redirect";
 
@@ -59,11 +58,6 @@ app.get("/", async (req, res, next) => {
       return getSessionFromStorage(sessionId);
     }),
   );
-  sessions.forEach((session) => {
-    session.events.on("sessionExpired", async () => {
-      await refreshSession(session);
-    });
-  })
   const htmlSessions = `${sessions.reduce((sessionList, session) => {
     if (session?.info.isLoggedIn) {
       return `${sessionList}<li><strong>${session?.info.webId}</strong></li>`;
