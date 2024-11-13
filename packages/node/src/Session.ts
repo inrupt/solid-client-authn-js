@@ -172,10 +172,13 @@ export class Session implements IHasSessionEventListener {
 
     this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
     this.events.on(EVENTS.SESSION_EXPIRED, () => {
-      if (this.info.expirationDate !== undefined && Date.now() - this.info.expirationDate < 10) {
+      if (
+        this.info.expirationDate !== undefined &&
+        Date.now() - this.info.expirationDate < 10
+      ) {
         // There is a race condition on the expiration event. If another callback was called first
         // and refreshed the session, we do not want to override the logged in status.
-        this.expire()
+        this.expire();
       }
     });
   }
@@ -277,7 +280,7 @@ export class Session implements IHasSessionEventListener {
 
   private expire = () => {
     this.info.isLoggedIn = false;
-  }
+  };
 
   /**
    * Completes the login process by processing the information provided by the identity provider through redirect.

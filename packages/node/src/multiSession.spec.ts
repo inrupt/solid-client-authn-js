@@ -38,7 +38,7 @@ import {
   refreshSession,
 } from "./multiSession";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
-import type * as Dependencies from "./dependencies"
+import type * as Dependencies from "./dependencies";
 
 jest.mock("./dependencies");
 
@@ -62,9 +62,11 @@ describe("getSessionFromStorage", () => {
         sessionId: "mySession",
         expirationDate: Date.now() + 3600,
       });
-    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<typeof Dependencies>;
+    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<
+      typeof Dependencies
+    >;
     dependencies.getClientAuthenticationWithDependencies = jest
-      .fn<typeof Dependencies["getClientAuthenticationWithDependencies"]>()
+      .fn<(typeof Dependencies)["getClientAuthenticationWithDependencies"]>()
       .mockReturnValue(clientAuthentication);
     const mySession = await getSessionFromStorage("mySession", mockStorage({}));
     expect(mySession?.info).toStrictEqual(
@@ -97,11 +99,16 @@ describe("getSessionFromStorage", () => {
         sessionId: "mySession",
         expirationDate: Date.now() + 3600,
       });
-    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<typeof Dependencies>;;
+    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<
+      typeof Dependencies
+    >;
     dependencies.getClientAuthenticationWithDependencies = jest
-      .fn<typeof Dependencies["getClientAuthenticationWithDependencies"]>()
+      .fn<(typeof Dependencies)["getClientAuthenticationWithDependencies"]>()
       .mockReturnValue(clientAuthentication);
-    const mySession = await getSessionFromStorage("mySession", { storage: mockStorage({}), refreshSession: false });
+    const mySession = await getSessionFromStorage("mySession", {
+      storage: mockStorage({}),
+      refreshSession: false,
+    });
     expect(mySession?.info).toStrictEqual(
       expect.objectContaining({
         isLoggedIn: false,
@@ -293,12 +300,17 @@ describe("refreshSession", () => {
         sessionId: "mySession",
         expirationDate: Date.now() + 3600,
       });
-    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<typeof Dependencies>;;
+    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<
+      typeof Dependencies
+    >;
     dependencies.getClientAuthenticationWithDependencies = jest
-      .fn<typeof Dependencies["getClientAuthenticationWithDependencies"]>()
+      .fn<(typeof Dependencies)["getClientAuthenticationWithDependencies"]>()
       .mockReturnValue(clientAuthentication);
     const storage = mockStorage({});
-    const mySession = await getSessionFromStorage("mySession", { storage, refreshSession: false });
+    const mySession = await getSessionFromStorage("mySession", {
+      storage,
+      refreshSession: false,
+    });
     // Check that the session is logged out.
     expect(mySession?.info).toStrictEqual(
       expect.objectContaining({
@@ -314,4 +326,4 @@ describe("refreshSession", () => {
     );
     expect(mySession?.info.expirationDate).toBeGreaterThan(Date.now());
   });
-})
+});

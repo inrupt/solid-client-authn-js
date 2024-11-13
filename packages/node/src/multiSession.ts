@@ -25,10 +25,10 @@ import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
 
 export type GetSessionOptions = Partial<{
-  storage: IStorage,
-  onNewRefreshToken: (newToken: string) => unknown,
-  refreshSession: boolean
-}>
+  storage: IStorage;
+  onNewRefreshToken: (newToken: string) => unknown;
+  refreshSession: boolean;
+}>;
 
 function isSessionOptions(input: unknown): input is GetSessionOptions {
   if (typeof input !== "object" || input === null) {
@@ -37,9 +37,70 @@ function isSessionOptions(input: unknown): input is GetSessionOptions {
   const storageType = typeof (input as GetSessionOptions).storage;
   const callbackType = typeof (input as GetSessionOptions).onNewRefreshToken;
   const refreshType = typeof (input as GetSessionOptions).refreshSession;
-  return (storageType === "undefined" || storageType === "object")
-    && (callbackType === "undefined" || callbackType === "function")
-    && (refreshType === "undefined" || refreshType === "boolean")
+  return (
+    (storageType === "undefined" || storageType === "object") &&
+    (callbackType === "undefined" || callbackType === "function") &&
+    (refreshType === "undefined" || refreshType === "boolean")
+  );
+}
+
+export async function refreshSession(
+  session: Session,
+  options?: { storage?: IStorage },
+): Promise<void> {
+  const clientAuth: ClientAuthentication =
+    options?.storage !== undefined
+      ? getClientAuthenticationWithDependencies({
+          secureStorage: options.storage,
+          insecureStorage: options.storage,
+        })
+      : getClientAuthenticationWithDependencies({
+          secureStorage: defaultStorage,
+          insecureStorage: defaultStorage,
+        });
+  const sessionInfo = await clientAuth.getSessionInfo(session.info.sessionId);
+  if (sessionInfo !== undefined && sessionInfo.refreshToken) {
+    await session.login({
+      oidcIssuer: sessionInfo.issuer,
+      tokenType: sessionInfo.tokenType,
+    });
+  }
+}
+
+async function internalGetSessionFromStorage(
+  sessionId: string,
+  options?: GetSessionOptions,
+): Promise<Session | undefined> {
+  const {
+    storage,
+    onNewRefreshToken,
+    refreshSession: refresh,
+  } = options ?? { refreshSession: true };
+  const clientAuth: ClientAuthentication = storage
+    ? getClientAuthenticationWithDependencies({
+        secureStorage: storage,
+        insecureStorage: storage,
+      })
+    : getClientAuthenticationWithDependencies({
+        secureStorage: defaultStorage,
+        insecureStorage: defaultStorage,
+      });
+  const sessionInfo = await clientAuth.getSessionInfo(sessionId);
+  if (sessionInfo === undefined) {
+    return undefined;
+  }
+  const session = new Session({
+    sessionInfo,
+    clientAuthentication: clientAuth,
+    keepAlive: sessionInfo.keepAlive,
+  });
+  if (onNewRefreshToken !== undefined) {
+    session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
+  }
+  if (refresh ?? true) {
+    await refreshSession(session, { storage: storage ?? defaultStorage });
+  }
+  return session;
 }
 
 /**
@@ -64,7 +125,7 @@ export async function getSessionFromStorage(
   sessionId: string,
   storage?: IStorage,
   onNewRefreshToken?: (newToken: string) => unknown,
-  refreshSession?: boolean
+  refresh?: boolean,
 ): Promise<Session | undefined>;
 /**
  * Retrieve a Session from the given storage based on its session ID. If possible,
@@ -109,7 +170,7 @@ export async function getSessionFromStorage(
   sessionId: string,
   storageOrOptions?: IStorage | GetSessionOptions,
   onNewRefreshToken?: (newToken: string) => unknown,
-  refreshSession: boolean = true
+  refresh: boolean = true,
 ): Promise<Session | undefined> {
   if (isSessionOptions(storageOrOptions)) {
     return internalGetSessionFromStorage(sessionId, storageOrOptions);
@@ -118,59 +179,8 @@ export async function getSessionFromStorage(
   return internalGetSessionFromStorage(sessionId, {
     storage: storageOrOptions,
     onNewRefreshToken,
-    refreshSession
+    refreshSession: refresh,
   });
-}
-
-async function internalGetSessionFromStorage(
-  sessionId: string,
-  options?: GetSessionOptions,
-): Promise<Session | undefined> {
-  const { storage, onNewRefreshToken, refreshSession: refresh } = options ?? { refreshSession: true };
-  const clientAuth: ClientAuthentication = storage
-  ? getClientAuthenticationWithDependencies({
-      secureStorage: storage,
-      insecureStorage: storage,
-    })
-  : getClientAuthenticationWithDependencies({
-      secureStorage: defaultStorage,
-      insecureStorage: defaultStorage,
-    });
-  const sessionInfo = await clientAuth.getSessionInfo(sessionId);
-  if (sessionInfo === undefined) {
-    return undefined;
-  }
-  const session = new Session({
-    sessionInfo,
-    clientAuthentication: clientAuth,
-    keepAlive: sessionInfo.keepAlive,
-  });
-  if (onNewRefreshToken !== undefined) {
-    session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
-  }
-  if (refresh ?? true) {
-    await refreshSession(session, {storage: storage ?? defaultStorage });
-  }
-  return session;
-}
-
-export async function refreshSession(session: Session, options?: { storage?: IStorage }): Promise<void> {
-  const clientAuth: ClientAuthentication = options?.storage !== undefined
-  ? getClientAuthenticationWithDependencies({
-      secureStorage: options.storage,
-      insecureStorage: options.storage,
-    })
-  : getClientAuthenticationWithDependencies({
-      secureStorage: defaultStorage,
-      insecureStorage: defaultStorage,
-    });
-  const sessionInfo = await clientAuth.getSessionInfo(session.info.sessionId);
-  if (sessionInfo !== undefined && sessionInfo.refreshToken) {
-    await session.login({
-      oidcIssuer: sessionInfo.issuer,
-      tokenType: sessionInfo.tokenType,
-    });
-  }
 }
 
 /**

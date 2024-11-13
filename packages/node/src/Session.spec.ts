@@ -21,25 +21,12 @@
 
 import { jest, it, describe, expect } from "@jest/globals";
 import type { ISessionInfo } from "@inrupt/solid-client-authn-core";
-import { InMemoryStorage, EVENTS } from "@inrupt/solid-client-authn-core";
-import {
-  mockStorage,
-  mockStorageUtility,
-} from "@inrupt/solid-client-authn-core/mocks";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
+import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import type EventEmitter from "events";
-import {
-  mockClientAuthentication,
-  mockCustomClientAuthentication,
-} from "./__mocks__/ClientAuthentication";
+import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import type ClientAuthentication from "./ClientAuthentication";
 import { Session } from "./Session";
-import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
-import { KEY_REGISTERED_SESSIONS } from "./constant";
-import {
-  clearSessionFromStorageAll,
-  getSessionFromStorage,
-  getSessionIdFromStorageAll,
-} from "./multiSession";
 
 jest.mock("./dependencies");
 
