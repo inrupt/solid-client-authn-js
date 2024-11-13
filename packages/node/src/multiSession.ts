@@ -126,7 +126,7 @@ async function internalGetSessionFromStorage(
   sessionId: string,
   options?: GetSessionOptions,
 ): Promise<Session | undefined> {
-  const { storage, onNewRefreshToken } = options ?? {};
+  const { storage, onNewRefreshToken, refreshSession: refresh } = options ?? { refreshSession: true };
   const clientAuth: ClientAuthentication = storage
   ? getClientAuthenticationWithDependencies({
       secureStorage: storage,
@@ -148,7 +148,7 @@ async function internalGetSessionFromStorage(
   if (onNewRefreshToken !== undefined) {
     session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
   }
-  if (options?.refreshSession) {
+  if (refresh ?? true) {
     await refreshSession(session, {storage: storage ?? defaultStorage });
   }
   return session;
