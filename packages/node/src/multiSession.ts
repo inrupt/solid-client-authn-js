@@ -24,6 +24,68 @@ import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
 
+export type GetSessionOptions = Partial<{
+  storage: IStorage,
+  onNewRefreshToken: (newToken: string) => unknown,
+  refreshSession: boolean
+}>
+
+function isSessionOptions(input: unknown): input is GetSessionOptions {
+  const storageType = typeof (input as GetSessionOptions).storage;
+  const callbackType = typeof (input as GetSessionOptions).onNewRefreshToken;
+  const refreshType = typeof (input as GetSessionOptions).refreshSession;
+  return (typeof input === "object" && input !== null)
+    && (storageType === "undefined" || storageType === "object")
+    && (callbackType === "undefined" || callbackType === "function")
+    && (refreshType === "undefined" || refreshType === "boolean")
+}
+
+/**
+ * Retrieve a Session from the given storage based on its session ID. If possible,
+ * the Session is logged in before it is returned, so that `session.fetch` may
+ * access private Resource without any additional interaction.
+ *
+ * If no storage is provided, a default in-memory storage will be used. It is
+ * instanciated once on load, and is shared across all the sessions. Since it
+ * is only available in memory, the storage is lost when the code stops running.
+ *
+ * A Session is available in storage as soon as it logged in once, and it is removed
+ * from storage on logout.
+ *
+ * @param sessionId The ID of the Session to retrieve
+ * @param storage The storage where the Session can be found
+ * @param onNewRefreshToken A callback to call on refresh token rotation
+ * @returns A session object, authenticated if possible, or undefined if no Session
+ * in storage matches the given ID.
+ */
+export async function getSessionFromStorage(
+  sessionId: string,
+  storage?: IStorage,
+  onNewRefreshToken?: (newToken: string) => unknown,
+  refreshSession?: boolean
+): Promise<Session | undefined>;
+/**
+ * Retrieve a Session from the given storage based on its session ID. If possible,
+ * the Session is logged in before it is returned, so that `session.fetch` may
+ * access private Resource without any additional interaction.
+ *
+ * If no storage is provided, a default in-memory storage will be used. It is
+ * instanciated once on load, and is shared across all the sessions. Since it
+ * is only available in memory, the storage is lost when the code stops running.
+ *
+ * A Session is available in storage as soon as it logged in once, and it is removed
+ * from storage on logout.
+ *
+ * @param sessionId The ID of the Session to retrieve
+ * @param storage The storage where the Session can be found
+ * @param onNewRefreshToken A callback to call on refresh token rotation
+ * @returns A session object, authenticated if possible, or undefined if no Session
+ * in storage matches the given ID.
+ */
+export async function getSessionFromStorage(
+  sessionId: string,
+  options?: GetSessionOptions,
+): Promise<Session | undefined>;
 /**
  * Retrieve a Session from the given storage based on its session ID. If possible,
  * the Session is logged in before it is returned, so that `session.fetch` may
@@ -43,37 +105,54 @@ import { defaultStorage, Session } from "./Session";
  */
 export async function getSessionFromStorage(
   sessionId: string,
-  storage?: IStorage,
+  storageOrOptions?: IStorage | GetSessionOptions,
   onNewRefreshToken?: (newToken: string) => unknown,
+  refreshSession: boolean = true
 ): Promise<Session | undefined> {
-  const clientAuth: ClientAuthentication = storage
-    ? getClientAuthenticationWithDependencies({
-        secureStorage: storage,
-        insecureStorage: storage,
-      })
-    : getClientAuthenticationWithDependencies({
-        secureStorage: defaultStorage,
-        insecureStorage: defaultStorage,
-      });
-  const sessionInfo = await clientAuth.getSessionInfo(sessionId);
-  if (sessionInfo === undefined) {
-    return undefined;
+  if (isSessionOptions(storageOrOptions)) {
+    return internalGetSessionFromStorage(sessionId, storageOrOptions);
   }
-  const session = new Session({
-    sessionInfo,
-    clientAuthentication: clientAuth,
-    keepAlive: sessionInfo.keepAlive,
+  // Support the legacy signature.
+  return internalGetSessionFromStorage(sessionId, {
+    storage: storageOrOptions,
+    onNewRefreshToken,
+    refreshSession
   });
-  if (onNewRefreshToken !== undefined) {
-    session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
-  }
-  if (sessionInfo.refreshToken) {
-    await session.login({
-      oidcIssuer: sessionInfo.issuer,
-      tokenType: sessionInfo.tokenType,
+}
+
+async function internalGetSessionFromStorage(
+  sessionId: string,
+  options?: GetSessionOptions,
+): Promise<Session | undefined> {
+  const { storage, onNewRefreshToken, refreshSession } = options ?? {};
+  const clientAuth: ClientAuthentication = storage
+  ? getClientAuthenticationWithDependencies({
+      secureStorage: storage,
+      insecureStorage: storage,
+    })
+  : getClientAuthenticationWithDependencies({
+      secureStorage: defaultStorage,
+      insecureStorage: defaultStorage,
     });
-  }
-  return session;
+const sessionInfo = await clientAuth.getSessionInfo(sessionId);
+if (sessionInfo === undefined) {
+  return undefined;
+}
+const session = new Session({
+  sessionInfo,
+  clientAuthentication: clientAuth,
+  keepAlive: sessionInfo.keepAlive,
+});
+if (onNewRefreshToken !== undefined) {
+  session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
+}
+if (sessionInfo.refreshToken && refreshSession) {
+  await session.login({
+    oidcIssuer: sessionInfo.issuer,
+    tokenType: sessionInfo.tokenType,
+  });
+}
+return session;
 }
 
 /**
