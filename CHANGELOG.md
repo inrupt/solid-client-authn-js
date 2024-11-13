@@ -9,6 +9,29 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### node
+
+- The session expiration date (`session.info.expirationDate`) is now correct when loading a `Session` from storage.
+
+### Feature
+
+#### node
+
+- It is now possible to use load a function using `getSessionFromStorage` and not log it in
+  using its refresh token. To do so, a new `refresh` optional flag has been introduced.
+  It defaults to `true`, which makes this a non-breaking change. In addition, a new signature
+  is introduced to make it easier to provide the optional arguments:
+
+```
+// Legacy signature only specifying one optional argument
+const session = await getSessionFromStorage(sessionId, undefined, undefined, false);
+
+// New signature
+const session = await getSessionFromStorage(sessionId, { refresh: false });
+```
+
 ## [2.2.7](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.2.7) - 2024-10-30
 
 ### Bugfix

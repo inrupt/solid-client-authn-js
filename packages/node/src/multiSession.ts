@@ -25,8 +25,18 @@ import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
 
 export type GetSessionOptions = Partial<{
+  /**
+   * The storage where the Session can be found.
+   */
   storage: IStorage;
+  /**
+   * A callback called when a new refresh token is issued.
+   */
   onNewRefreshToken: (newToken: string) => unknown;
+  /**
+   * A flag controlling whether the session found in storage
+   * should be logged in using a refresh token before being returned.
+   */
   refreshSession: boolean;
 }>;
 
@@ -44,6 +54,21 @@ function isSessionOptions(input: unknown): input is GetSessionOptions {
   );
 }
 
+/**
+ * Log a session in using a refresh token from storage.
+ * The provided session is mutated so that `session.info`
+ * is accurate if the login is successful.
+ *
+ * @param session the session to log in.
+ * @param options optional arguments to control the session refresh.
+ * @returns Promise<void>
+ *
+ * @example
+ * ```
+ * const session = await getSessionFromStorage(sessionId, { refresh: false });
+ * await refreshSession(session);
+ * ```
+ */
 export async function refreshSession(
   session: Session,
   options?: { storage?: IStorage },
@@ -120,6 +145,7 @@ async function internalGetSessionFromStorage(
  * @param onNewRefreshToken A callback to call on refresh token rotation
  * @returns A session object, authenticated if possible, or undefined if no Session
  * in storage matches the given ID.
+ * @deprecated use the `options` object argument instead.
  */
 export async function getSessionFromStorage(
   sessionId: string,
@@ -140,10 +166,10 @@ export async function getSessionFromStorage(
  * from storage on logout.
  *
  * @param sessionId The ID of the Session to retrieve
- * @param storage The storage where the Session can be found
- * @param onNewRefreshToken A callback to call on refresh token rotation
- * @returns A session object, authenticated if possible, or undefined if no Session
+ * @param options Options to control the session loading behavior.
+ * @returns A Session object, potentially authenticated, or undefined if no Session
  * in storage matches the given ID.
+ * @since unreleased
  */
 export async function getSessionFromStorage(
   sessionId: string,
