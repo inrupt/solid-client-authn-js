@@ -35,8 +35,10 @@ import {
   clearSessionFromStorageAll,
   getSessionFromStorage,
   getSessionIdFromStorageAll,
+  refreshSession,
 } from "./multiSession";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
+import type * as Dependencies from "./dependencies"
 
 jest.mock("./dependencies");
 
@@ -60,11 +62,9 @@ describe("getSessionFromStorage", () => {
         sessionId: "mySession",
         expirationDate: Date.now() + 3600,
       });
-    // Mocking the type definitions of the entire DI framework is a bit too
-    // involved at this time, so settling for `any`:
-    const dependencies = jest.requireMock("./dependencies") as any;
+    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<typeof Dependencies>;
     dependencies.getClientAuthenticationWithDependencies = jest
-      .fn()
+      .fn<typeof Dependencies["getClientAuthenticationWithDependencies"]>()
       .mockReturnValue(clientAuthentication);
     const mySession = await getSessionFromStorage("mySession", mockStorage({}));
     expect(mySession?.info).toStrictEqual(
@@ -75,6 +75,38 @@ describe("getSessionFromStorage", () => {
       }),
     );
     expect(mySession?.info.expirationDate).toBeGreaterThan(Date.now());
+  });
+
+  it("returns a logged out Session if the `refreshSession` option is false", async () => {
+    const clientAuthentication = mockClientAuthentication();
+    clientAuthentication.getSessionInfo = jest
+      .fn<typeof clientAuthentication.getSessionInfo>()
+      .mockResolvedValue({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        refreshToken: "some token",
+        issuer: "https://my.idp",
+        sessionId: "mySession",
+      });
+    // If we attempt to log the session in, it will succeed, thus failing the test.
+    clientAuthentication.login = jest
+      .fn<typeof clientAuthentication.login>()
+      .mockResolvedValue({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        sessionId: "mySession",
+        expirationDate: Date.now() + 3600,
+      });
+    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<typeof Dependencies>;;
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn<typeof Dependencies["getClientAuthenticationWithDependencies"]>()
+      .mockReturnValue(clientAuthentication);
+    const mySession = await getSessionFromStorage("mySession", { storage: mockStorage({}), refreshSession: false });
+    expect(mySession?.info).toStrictEqual(
+      expect.objectContaining({
+        isLoggedIn: false,
+      }),
+    );
   });
 
   it("returns a logged out Session if no refresh token is available", async () => {
@@ -239,3 +271,47 @@ describe("clearSessionAll", () => {
     });
   });
 });
+
+describe("refreshSession", () => {
+  it("refreshes a session if it has a stored refresh token", async () => {
+    const clientAuthentication = mockClientAuthentication();
+    clientAuthentication.getSessionInfo = jest
+      .fn<typeof clientAuthentication.getSessionInfo>()
+      .mockResolvedValue({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        refreshToken: "some token",
+        issuer: "https://my.idp",
+        sessionId: "mySession",
+      });
+    // If we attempt to log the session in, it will succeed, thus failing the test.
+    clientAuthentication.login = jest
+      .fn<typeof clientAuthentication.login>()
+      .mockResolvedValue({
+        webId: "https://my.webid",
+        isLoggedIn: true,
+        sessionId: "mySession",
+        expirationDate: Date.now() + 3600,
+      });
+    const dependencies = jest.requireMock("./dependencies") as jest.Mocked<typeof Dependencies>;;
+    dependencies.getClientAuthenticationWithDependencies = jest
+      .fn<typeof Dependencies["getClientAuthenticationWithDependencies"]>()
+      .mockReturnValue(clientAuthentication);
+    const storage = mockStorage({});
+    const mySession = await getSessionFromStorage("mySession", { storage, refreshSession: false });
+    // Check that the session is logged out.
+    expect(mySession?.info).toStrictEqual(
+      expect.objectContaining({
+        isLoggedIn: false,
+      }),
+    );
+    await refreshSession(mySession!, { storage });
+    // The session should now be logged in.
+    expect(mySession?.info).toStrictEqual(
+      expect.objectContaining({
+        isLoggedIn: true,
+      }),
+    );
+    expect(mySession?.info.expirationDate).toBeGreaterThan(Date.now());
+  });
+})
