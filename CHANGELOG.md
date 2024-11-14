@@ -9,6 +9,29 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## Deprecation notice
+
+- A new signature was introduced for `getSessionFromStorage` in release 2.3.0. The legacy signature is
+  deprecated, and could be removed with the next major release.
+
+```javascript
+// Deprecated signature
+const session = await getSessionFromStorage(
+  sessionId,
+  storage,
+  onNewRefreshToken,
+  refresh,
+);
+// Replacement signature
+const session = await getSessionFromStorage(sessionId, {
+  storage,
+  onNewRefreshToken,
+  refresh,
+});
+```
+
+## [2.3.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.3.0) - 2024-11-14
+
 ### Bugfix
 
 #### node
@@ -24,9 +47,14 @@ The following changes have been implemented but not released yet:
   It defaults to `true`, which makes this a non-breaking change. In addition, a new signature
   is introduced to make it easier to provide the optional arguments:
 
-```
+```javascript
 // Legacy signature only specifying one optional argument
-const session = await getSessionFromStorage(sessionId, undefined, undefined, false);
+const session = await getSessionFromStorage(
+  sessionId,
+  undefined,
+  undefined,
+  false,
+);
 
 // New signature
 const session = await getSessionFromStorage(sessionId, { refresh: false });
