@@ -207,7 +207,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       fetch: authFetch,
       expirationDate:
         typeof tokenSet.expires_in === "number"
-          ? (tokenSet.expires_in as number) * 1000 + Date.now()
+          ? tokenSet.expires_in * 1000 + Date.now()
           : undefined,
       getLogoutUrl: maybeBuildRpInitiatedLogout({
         idTokenHint: tokenSet.id_token,

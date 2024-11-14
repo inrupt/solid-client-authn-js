@@ -24,28 +24,83 @@ import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
 
+export type GetSessionOptions = Partial<{
+  /**
+   * The storage where the Session can be found.
+   */
+  storage: IStorage;
+  /**
+   * A callback called when a new refresh token is issued.
+   */
+  onNewRefreshToken: (newToken: string) => unknown;
+  /**
+   * A flag controlling whether the session found in storage
+   * should be logged in using a refresh token before being returned.
+   */
+  refreshSession: boolean;
+}>;
+
+function isSessionOptions(input: unknown): input is GetSessionOptions {
+  if (typeof input !== "object" || input === null) {
+    return false;
+  }
+  const storageType = typeof (input as GetSessionOptions).storage;
+  const callbackType = typeof (input as GetSessionOptions).onNewRefreshToken;
+  const refreshType = typeof (input as GetSessionOptions).refreshSession;
+  return (
+    (storageType === "undefined" || storageType === "object") &&
+    (callbackType === "undefined" || callbackType === "function") &&
+    (refreshType === "undefined" || refreshType === "boolean")
+  );
+}
+
 /**
- * Retrieve a Session from the given storage based on its session ID. If possible,
- * the Session is logged in before it is returned, so that `session.fetch` may
- * access private Resource without any additional interaction.
+ * Log a session in using a refresh token from storage.
+ * The provided session is mutated so that `session.info`
+ * is accurate if the login is successful.
  *
- * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
- * is only available in memory, the storage is lost when the code stops running.
+ * @param session the session to log in.
+ * @param options optional arguments to control the session refresh.
+ * @returns Promise<void>
  *
- * A Session is available in storage as soon as it logged in once, and it is removed
- * from storage on logout.
- *
- * @param sessionId The ID of the Session to retrieve
- * @param storage The storage where the Session can be found
- * @returns A session object, authenticated if possible, or undefined if no Session
- * in storage matches the given ID.
+ * @example
+ * ```
+ * const session = await getSessionFromStorage(sessionId, { refresh: false });
+ * await refreshSession(session);
+ * ```
  */
-export async function getSessionFromStorage(
+export async function refreshSession(
+  session: Session,
+  options?: { storage?: IStorage },
+): Promise<void> {
+  const clientAuth: ClientAuthentication =
+    options?.storage !== undefined
+      ? getClientAuthenticationWithDependencies({
+          secureStorage: options.storage,
+          insecureStorage: options.storage,
+        })
+      : getClientAuthenticationWithDependencies({
+          secureStorage: defaultStorage,
+          insecureStorage: defaultStorage,
+        });
+  const sessionInfo = await clientAuth.getSessionInfo(session.info.sessionId);
+  if (sessionInfo !== undefined && sessionInfo.refreshToken) {
+    await session.login({
+      oidcIssuer: sessionInfo.issuer,
+      tokenType: sessionInfo.tokenType,
+    });
+  }
+}
+
+async function internalGetSessionFromStorage(
   sessionId: string,
-  storage?: IStorage,
-  onNewRefreshToken?: (newToken: string) => unknown,
+  options?: GetSessionOptions,
 ): Promise<Session | undefined> {
+  const {
+    storage,
+    onNewRefreshToken,
+    refreshSession: refresh,
+  } = options ?? { refreshSession: true };
   const clientAuth: ClientAuthentication = storage
     ? getClientAuthenticationWithDependencies({
         secureStorage: storage,
@@ -67,13 +122,91 @@ export async function getSessionFromStorage(
   if (onNewRefreshToken !== undefined) {
     session.events.on(EVENTS.NEW_REFRESH_TOKEN, onNewRefreshToken);
   }
-  if (sessionInfo.refreshToken) {
-    await session.login({
-      oidcIssuer: sessionInfo.issuer,
-      tokenType: sessionInfo.tokenType,
-    });
+  if (refresh ?? true) {
+    await refreshSession(session, { storage: storage ?? defaultStorage });
   }
   return session;
+}
+
+/**
+ * Retrieve a Session from the given storage based on its session ID. If possible,
+ * the Session is logged in before it is returned, so that `session.fetch` may
+ * access private Resources without any additional interaction.
+ *
+ * If no storage is provided, a default in-memory storage will be used. It is
+ * instantiated once on load, and is shared across all the sessions. Since it
+ * is only available in memory, the storage is lost when the code stops running.
+ *
+ * A Session is available in storage as soon as it logged in once, and it is removed
+ * from storage on logout.
+ *
+ * @param sessionId The ID of the Session to retrieve.
+ * @param storage The storage where the Session can be found.
+ * @param onNewRefreshToken A callback to call on refresh token rotation.
+ * @returns A session object, authenticated if possible, or undefined if no Session
+ * in storage matches the given ID.
+ * @deprecated use the `options` object argument instead.
+ */
+export async function getSessionFromStorage(
+  sessionId: string,
+  storage?: IStorage,
+  onNewRefreshToken?: (newToken: string) => unknown,
+  refresh?: boolean,
+): Promise<Session | undefined>;
+/**
+ * Retrieve a Session from the given storage based on its session ID. If possible,
+ * the Session is logged in before it is returned, so that `session.fetch` may
+ * access private Resources without any additional interaction.
+ *
+ * If no storage is provided, a default in-memory storage will be used. It is
+ * instantiated once on load, and is shared across all the sessions. Since it
+ * is only available in memory, the storage is lost when the code stops running.
+ *
+ * A Session is available in storage as soon as it logged in once, and it is removed
+ * from storage on logout.
+ *
+ * @param sessionId The ID of the Session to retrieve.
+ * @param options Options to control the session loading behavior.
+ * @returns A Session object, potentially authenticated, or undefined if no Session
+ * in storage matches the given ID.
+ * @since unreleased
+ */
+export async function getSessionFromStorage(
+  sessionId: string,
+  options?: GetSessionOptions,
+): Promise<Session | undefined>;
+/**
+ * Retrieve a Session from the given storage based on its session ID. If possible,
+ * the Session is logged in before it is returned, so that `session.fetch` may
+ * access private Resources without any additional interaction.
+ *
+ * If no storage is provided, a default in-memory storage will be used. It is
+ * instantiated once on load, and is shared across all the sessions. Since it
+ * is only available in memory, the storage is lost when the code stops running.
+ *
+ * A Session is available in storage as soon as it logged in once, and it is removed
+ * from storage on logout.
+ *
+ * @param sessionId The ID of the Session to retrieve.
+ * @param storage The storage where the Session can be found.
+ * @returns A session object, authenticated if possible, or undefined if no Session
+ * in storage matches the given ID.
+ */
+export async function getSessionFromStorage(
+  sessionId: string,
+  storageOrOptions?: IStorage | GetSessionOptions,
+  onNewRefreshToken?: (newToken: string) => unknown,
+  refresh: boolean = true,
+): Promise<Session | undefined> {
+  if (isSessionOptions(storageOrOptions)) {
+    return internalGetSessionFromStorage(sessionId, storageOrOptions);
+  }
+  // Support the legacy signature.
+  return internalGetSessionFromStorage(sessionId, {
+    storage: storageOrOptions,
+    onNewRefreshToken,
+    refreshSession: refresh,
+  });
 }
 
 /**
@@ -85,7 +218,7 @@ export async function getSessionFromStorage(
  * in performance issues.
  *
  * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
+ * instantiated once on load, and is shared across all the sessions. Since it
  * is only available in memory, the storage is lost when the code stops running.
  *
  * A Session is available in storage as soon as it logged in once, and it is removed
@@ -115,7 +248,7 @@ export async function getSessionIdFromStorageAll(
  * one may simply log the Session out calling `session.logout`.
  *
  * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
+ * instantiated once on load, and is shared across all the sessions. Since it
  * is only available in memory, the storage is lost when the code stops running.
  *
  * A Session is available in storage as soon as it logged in once, and it is removed

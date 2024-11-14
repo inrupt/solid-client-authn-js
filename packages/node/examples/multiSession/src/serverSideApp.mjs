@@ -23,6 +23,7 @@ import {
   Session,
   getSessionFromStorage,
   getSessionIdFromStorageAll,
+  refreshSession
 } from "@inrupt/solid-client-authn-node";
 
 import cookieSession from "cookie-session";

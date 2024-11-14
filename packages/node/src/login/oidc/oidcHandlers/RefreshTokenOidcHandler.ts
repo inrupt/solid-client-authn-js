@@ -93,10 +93,14 @@ async function refreshAccess(
       ...refreshOptions,
       refreshToken: tokens.refreshToken ?? refreshOptions.refreshToken,
     };
+    const expiresInS =
+      tokens.expiresIn ??
+      (tokens.expiresAt ?? 0) - Math.trunc(Date.now() / 1000);
     const authFetch = await buildAuthenticatedFetch(tokens.accessToken, {
       dpopKey,
       refreshOptions: keepAlive ? rotatedRefreshOptions : undefined,
       eventEmitter,
+      expiresIn: expiresInS > 0 ? expiresInS : undefined,
     });
     return Object.assign(tokens, {
       fetch: authFetch,
@@ -183,6 +187,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       oidcLoginOptions.dpop,
       oidcLoginOptions.keepAlive ?? true,
       keyPair,
+      oidcLoginOptions.eventEmitter,
     );
 
     const sessionInfo: ISessionInfo = {
@@ -215,9 +220,10 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
     );
 
     let expirationDate: number | undefined;
-    expirationDate = accessInfo.expiresAt;
-    if (expirationDate === undefined && accessInfo.expiresIn !== undefined) {
-      expirationDate = accessInfo.expiresIn + Date.now();
+    if (accessInfo.expiresAt !== undefined) {
+      expirationDate = accessInfo.expiresAt * 1000;
+    } else if (accessInfo.expiresIn !== undefined) {
+      expirationDate = accessInfo.expiresIn * 1000 + Date.now();
     }
     sessionInfo.expirationDate = expirationDate;
 
