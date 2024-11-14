@@ -19,7 +19,7 @@ The following changes have been implemented but not released yet:
 
 #### node
 
-- It is now possible to use load a function using `getSessionFromStorage` and not log it in
+- It is now possible to build a `Session` using `getSessionFromStorage` and not log it in
   using its refresh token. To do so, a new `refresh` optional flag has been introduced.
   It defaults to `true`, which makes this a non-breaking change. In addition, a new signature
   is introduced to make it easier to provide the optional arguments:
