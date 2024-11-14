@@ -131,18 +131,18 @@ async function internalGetSessionFromStorage(
 /**
  * Retrieve a Session from the given storage based on its session ID. If possible,
  * the Session is logged in before it is returned, so that `session.fetch` may
- * access private Resource without any additional interaction.
+ * access private Resources without any additional interaction.
  *
  * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
+ * instantiated once on load, and is shared across all the sessions. Since it
  * is only available in memory, the storage is lost when the code stops running.
  *
  * A Session is available in storage as soon as it logged in once, and it is removed
  * from storage on logout.
  *
- * @param sessionId The ID of the Session to retrieve
- * @param storage The storage where the Session can be found
- * @param onNewRefreshToken A callback to call on refresh token rotation
+ * @param sessionId The ID of the Session to retrieve.
+ * @param storage The storage where the Session can be found.
+ * @param onNewRefreshToken A callback to call on refresh token rotation.
  * @returns A session object, authenticated if possible, or undefined if no Session
  * in storage matches the given ID.
  * @deprecated use the `options` object argument instead.
@@ -156,16 +156,16 @@ export async function getSessionFromStorage(
 /**
  * Retrieve a Session from the given storage based on its session ID. If possible,
  * the Session is logged in before it is returned, so that `session.fetch` may
- * access private Resource without any additional interaction.
+ * access private Resources without any additional interaction.
  *
  * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
+ * instantiated once on load, and is shared across all the sessions. Since it
  * is only available in memory, the storage is lost when the code stops running.
  *
  * A Session is available in storage as soon as it logged in once, and it is removed
  * from storage on logout.
  *
- * @param sessionId The ID of the Session to retrieve
+ * @param sessionId The ID of the Session to retrieve.
  * @param options Options to control the session loading behavior.
  * @returns A Session object, potentially authenticated, or undefined if no Session
  * in storage matches the given ID.
@@ -178,17 +178,17 @@ export async function getSessionFromStorage(
 /**
  * Retrieve a Session from the given storage based on its session ID. If possible,
  * the Session is logged in before it is returned, so that `session.fetch` may
- * access private Resource without any additional interaction.
+ * access private Resources without any additional interaction.
  *
  * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
+ * instantiated once on load, and is shared across all the sessions. Since it
  * is only available in memory, the storage is lost when the code stops running.
  *
  * A Session is available in storage as soon as it logged in once, and it is removed
  * from storage on logout.
  *
- * @param sessionId The ID of the Session to retrieve
- * @param storage The storage where the Session can be found
+ * @param sessionId The ID of the Session to retrieve.
+ * @param storage The storage where the Session can be found.
  * @returns A session object, authenticated if possible, or undefined if no Session
  * in storage matches the given ID.
  */
