@@ -218,7 +218,7 @@ export async function getSessionFromStorage(
  * in performance issues.
  *
  * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
+ * instantiated once on load, and is shared across all the sessions. Since it
  * is only available in memory, the storage is lost when the code stops running.
  *
  * A Session is available in storage as soon as it logged in once, and it is removed
@@ -248,7 +248,7 @@ export async function getSessionIdFromStorageAll(
  * one may simply log the Session out calling `session.logout`.
  *
  * If no storage is provided, a default in-memory storage will be used. It is
- * instanciated once on load, and is shared across all the sessions. Since it
+ * instantiated once on load, and is shared across all the sessions. Since it
  * is only available in memory, the storage is lost when the code stops running.
  *
  * A Session is available in storage as soon as it logged in once, and it is removed
