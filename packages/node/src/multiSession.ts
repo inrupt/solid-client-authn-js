@@ -141,17 +141,14 @@ async function internalGetSessionFromStorage(
  * from storage on logout.
  *
  * @param sessionId The ID of the Session to retrieve.
- * @param storage The storage where the Session can be found.
- * @param onNewRefreshToken A callback to call on refresh token rotation.
- * @returns A session object, authenticated if possible, or undefined if no Session
+ * @param options Options to control the session loading behavior.
+ * @returns A Session object, potentially authenticated, or undefined if no Session
  * in storage matches the given ID.
- * @deprecated use the `options` object argument instead.
+ * @since 2.3.0
  */
 export async function getSessionFromStorage(
   sessionId: string,
-  storage?: IStorage,
-  onNewRefreshToken?: (newToken: string) => unknown,
-  refresh?: boolean,
+  options?: GetSessionOptions,
 ): Promise<Session | undefined>;
 /**
  * Retrieve a Session from the given storage based on its session ID. If possible,
@@ -166,14 +163,17 @@ export async function getSessionFromStorage(
  * from storage on logout.
  *
  * @param sessionId The ID of the Session to retrieve.
- * @param options Options to control the session loading behavior.
- * @returns A Session object, potentially authenticated, or undefined if no Session
+ * @param storage The storage where the Session can be found.
+ * @param onNewRefreshToken A callback to call on refresh token rotation.
+ * @returns A session object, authenticated if possible, or undefined if no Session
  * in storage matches the given ID.
- * @since unreleased
+ * @deprecated use the `options` object argument instead.
  */
 export async function getSessionFromStorage(
   sessionId: string,
-  options?: GetSessionOptions,
+  storage?: IStorage,
+  onNewRefreshToken?: (newToken: string) => unknown,
+  refresh?: boolean,
 ): Promise<Session | undefined>;
 /**
  * Retrieve a Session from the given storage based on its session ID. If possible,
