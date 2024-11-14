@@ -15,10 +15,19 @@ The following changes have been implemented but not released yet:
   deprecated, and could be removed with the next major release.
 
 ```javascript
-  // Deprecated signature
-  const session = await getSessionFromStorage(sessionId, storage, onNewRefreshToken, refresh);
-  // Replacement signature
-  const session = await getSessionFromStorage(sessionId, { storage, onNewRefreshToken, refresh });
+// Deprecated signature
+const session = await getSessionFromStorage(
+  sessionId,
+  storage,
+  onNewRefreshToken,
+  refresh,
+);
+// Replacement signature
+const session = await getSessionFromStorage(sessionId, {
+  storage,
+  onNewRefreshToken,
+  refresh,
+});
 ```
 
 ## [2.3.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.3.0) - 2024-11-14
@@ -40,7 +49,12 @@ The following changes have been implemented but not released yet:
 
 ```javascript
 // Legacy signature only specifying one optional argument
-const session = await getSessionFromStorage(sessionId, undefined, undefined, false);
+const session = await getSessionFromStorage(
+  sessionId,
+  undefined,
+  undefined,
+  false,
+);
 
 // New signature
 const session = await getSessionFromStorage(sessionId, { refresh: false });
