@@ -19,6 +19,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+"use client";
+
 import React, { useState, useEffect } from "react";
 import {
   TESTID_OPENID_PROVIDER_INPUT,
