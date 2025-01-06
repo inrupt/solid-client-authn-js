@@ -5,10 +5,6 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
-
-The following changes have been implemented but not released yet:
-
 ## Deprecation notice
 
 - A new signature was introduced for `getSessionFromStorage` in release 2.3.0. The legacy signature is
@@ -29,6 +25,17 @@ const session = await getSessionFromStorage(sessionId, {
   refresh,
 });
 ```
+
+## Unreleased
+
+The following changes have been implemented but not released yet:
+
+### Bugfix
+
+#### browser and node
+
+- Fix the `Session` error listener typing by adding `Error` to the `errorDescription` type so that it reflects the actual behavior.
+  Thanks to @NoelDeMartin for fixing this issue.
 
 ## [2.3.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.3.0) - 2024-11-14
 

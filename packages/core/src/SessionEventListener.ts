@@ -38,7 +38,10 @@ type SESSION_RESTORED_ARGS = {
 };
 type ERROR_ARGS = {
   eventName: typeof EVENTS.ERROR;
-  listener: (error: string | null, errorDescription?: string | null) => unknown;
+  listener: (
+    error: string | null,
+    errorDescription?: string | Error | null,
+  ) => unknown;
 };
 type SESSION_EXTENDED_ARGS = {
   eventName: typeof EVENTS.SESSION_EXTENDED;
