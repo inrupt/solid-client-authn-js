@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:esbuild": "esbuild components/appContainer/index.tsx --bundle"
+    "test:esbuild": "esbuild app/page.tsx --bundle"
   },
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^3.0.2",
