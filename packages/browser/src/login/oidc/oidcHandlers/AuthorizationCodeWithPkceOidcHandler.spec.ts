@@ -264,6 +264,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           ...standardOidcOptions.client,
           clientType: "dynamic",
           clientSecret: "I can't cook because I only drink Soylent",
+          expiresAt: 95618140501,
         },
         issuerConfiguration: {
           ...standardOidcOptions.issuerConfiguration,

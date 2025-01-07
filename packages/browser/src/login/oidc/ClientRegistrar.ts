@@ -50,6 +50,7 @@ export default class ClientRegistrar implements IClientRegistrar {
     const [
       storedClientId,
       storedClientSecret,
+      expiresAt,
       storedClientName,
       storedClientType,
     ] = await Promise.all([
@@ -59,6 +60,9 @@ export default class ClientRegistrar implements IClientRegistrar {
       this.storageUtility.getForUser(options.sessionId, "clientSecret", {
         secure: false,
       }),
+      this.storageUtility.getForUser(options.sessionId, "expiresAt", {
+        secure: false,
+      }),
       this.storageUtility.getForUser(options.sessionId, "clientName", {
         secure: false,
       }),
@@ -66,14 +70,30 @@ export default class ClientRegistrar implements IClientRegistrar {
         secure: false,
       }),
     ]);
-    if (storedClientId && isKnownClientType(storedClientType)) {
-      return {
-        clientId: storedClientId,
-        clientSecret: storedClientSecret,
-        clientName: storedClientName,
-        // Note: static clients are not applicable in a browser context.
-        clientType: storedClientType,
-      } as IClient;
+    // -1 is used as a default to identify legacy cases when a value should
+    // have been stored, but wasn't. It will be treated as an expired client.
+    const expirationDate =
+      expiresAt !== undefined ? Number.parseInt(expiresAt, 10) : -1;
+    // Expiration is only applicable to confidential clients.
+    const expired =
+      storedClientSecret !== undefined && Date.now() > expirationDate;
+    if (storedClientId && isKnownClientType(storedClientType) && !expired) {
+      return storedClientSecret !== undefined
+        ? {
+            clientId: storedClientId,
+            clientSecret: storedClientSecret,
+            clientName: storedClientName,
+            // Note: static clients are not applicable in a browser context.
+            clientType: "dynamic",
+            expiresAt: expirationDate,
+          }
+        : ({
+            clientId: storedClientId,
+            clientName: storedClientName,
+            // Note: static clients are not applicable in a browser context.
+            clientType: storedClientType,
+            // The type assertion is required even though the type should match the declaration.
+          } as IClient);
     }
 
     try {
@@ -83,8 +103,9 @@ export default class ClientRegistrar implements IClientRegistrar {
         clientId: registeredClient.clientId,
         clientType: "dynamic",
       };
-      if (registeredClient.clientSecret) {
+      if (registeredClient.clientSecret !== undefined) {
         infoToSave.clientSecret = registeredClient.clientSecret;
+        infoToSave.expiresAt = String(registeredClient.expiresAt);
       }
       if (registeredClient.idTokenSignedResponseAlg) {
         infoToSave.idTokenSignedResponseAlg =
@@ -98,7 +119,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       });
       return registeredClient;
     } catch (error) {
-      throw new Error(`Client registration failed: [${error}]`);
+      throw new Error(`Client registration failed.`, { cause: error });
     }
   }
 }

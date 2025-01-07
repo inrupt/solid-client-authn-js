@@ -31,6 +31,8 @@ export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",
   clientSecret: "12345",
   clientType: "dynamic",
+  // This date is set 3000 years from now, so it expiring unexpectedly should not be a problem for us.
+  expiresAt: 95618140501,
 };
 
 export const PublicClientRegistrarResponse: IClient = {
