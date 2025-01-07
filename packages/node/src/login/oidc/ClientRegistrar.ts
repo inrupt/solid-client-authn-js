@@ -30,6 +30,7 @@ import type {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
+  IOpenIdDynamicClient,
 } from "@inrupt/solid-client-authn-core";
 import {
   ConfigurationError,
@@ -142,28 +143,33 @@ export default class ClientRegistrar implements IClientRegistrar {
       grant_types: ["authorization_code", "refresh_token"],
     });
 
-    const persistedClientMetadata: Record<string, string> = {
+    let persistedClientMetadata: IOpenIdDynamicClient = {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
       clientType: "dynamic",
     };
-    if (registeredClient.metadata.client_secret !== undefined) {
-      persistedClientMetadata.clientSecret =
-        registeredClient.metadata.client_secret;
-    }
-
     await this.storageUtility.setForUser(
-      options.sessionId,
-      persistedClientMetadata,
+      options.sessionId, {
+        clientId: persistedClientMetadata.clientId,
+        idTokenSignedResponseAlg: persistedClientMetadata.idTokenSignedResponseAlg!,
+        clientType: "dynamic",
+      }
     );
-    return {
-      clientId: persistedClientMetadata.clientId,
-      clientSecret: persistedClientMetadata.clientSecret,
-      idTokenSignedResponseAlg:
-        persistedClientMetadata.idTokenSignedResponseAlg,
-      clientName: registeredClient.metadata.client_name as string | undefined,
-      clientType: "dynamic",
-    };
+    if (registeredClient.metadata.client_secret !== undefined) {
+      persistedClientMetadata = {
+        ...persistedClientMetadata,
+        clientSecret: registeredClient.metadata.client_secret,
+        // If a client secret is present, it has an expiration date.
+        expiresAt: registeredClient.metadata.client_secret_expires_at as number
+      }
+      await this.storageUtility.setForUser(
+        options.sessionId, {
+          clientSecret: persistedClientMetadata.clientSecret,
+          expiresAt: String(persistedClientMetadata.expiresAt),
+        }
+      );
+    }
+    return persistedClientMetadata;
   }
 }

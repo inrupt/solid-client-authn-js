@@ -28,11 +28,17 @@ import type {
 import { jest } from "@jest/globals";
 import type { ClientMetadata } from "openid-client";
 
-export const ClientRegistrarResponse: IClient = {
-  clientId: "abcde",
-  clientSecret: "12345",
-  clientType: "dynamic",
+export const mockDefaultClient = (): IClient => {
+  return {
+    clientId: "a client id",
+    clientSecret: "a client secret",
+    clientType: "dynamic",
+    // 5000-01-07
+    expiresAt: 95618140501,
+  };
 };
+
+export const ClientRegistrarResponse: IClient = mockDefaultClient();
 
 export const PublicClientRegistrarResponse: IClient = {
   clientId: "abcde",
@@ -73,14 +79,6 @@ export const mockClientConfig = (
   return {
     ...mockDefaultClientConfig(),
     ...config,
-  };
-};
-
-export const mockDefaultClient = (): IClient => {
-  return {
-    clientId: "a client id",
-    clientSecret: "a client secret",
-    clientType: "dynamic",
   };
 };
 
