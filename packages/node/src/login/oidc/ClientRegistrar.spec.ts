@@ -242,6 +242,42 @@ describe("ClientRegistrar", () => {
         mockDefaultClientConfig().client_secret_expires_at,
       );
     });
+    
+    it("performs dynamic client registration if client information from storage is missing expiration date (legacy)", async () => {
+      mockClientRegistration({}, mockDefaultClientConfig());
+      const expiredSecret = randomUUID();
+      const expiredClient = randomUUID();
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: expiredClient,
+              clientSecret: expiredSecret,
+              clientName: "my client name",
+              idTokenSignedResponseAlg: "ES256",
+              clientType: "dynamic",
+              // The expiration date is missing.
+            },
+          },
+          false,
+        ),
+      });
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        },
+      );
+      // The expired client should have been re-registered.
+      expect(client.clientId).toBe(mockDefaultClientConfig().client_id);
+      expect(client.clientSecret).toBe(mockDefaultClientConfig().client_secret);
+      expect((client as IOpenIdDynamicClient).expiresAt).toBe(
+        mockDefaultClientConfig().client_secret_expires_at,
+      );
+    });
 
     it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {
       mockClientRegistration({}, mockDefaultClientConfig());
