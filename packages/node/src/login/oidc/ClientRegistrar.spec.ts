@@ -22,25 +22,25 @@
 import { randomUUID } from "crypto";
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import type * as OpenIdClient from "openid-client";
+import type { IOpenIdDynamicClient } from "core";
 import ClientRegistrar from "./ClientRegistrar";
 import {
   IssuerConfigFetcherFetchConfigResponse,
   mockIssuerMetadata,
 } from "./__mocks__/IssuerConfigFetcher";
-import {
-  mockDefaultClientConfig,
-} from "./__mocks__/ClientRegistrar";
-import type * as OpenIdClient from "openid-client";
-import { IOpenIdDynamicClient } from "core";
+import { mockDefaultClientConfig } from "./__mocks__/ClientRegistrar";
 
 jest.mock("openid-client");
 
 const mockClientRegistration = (
   issuerMetadata: Record<string, string | undefined>,
-  clientMetadata: OpenIdClient.ClientMetadata
+  clientMetadata: OpenIdClient.ClientMetadata,
 ) => {
   // Sets up the mock-up for DCR
-  const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<typeof OpenIdClient>;
+  const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
+    typeof OpenIdClient
+  >;
   const mockedIssuerConfig = mockIssuerMetadata(issuerMetadata);
   const mockedIssuer: OpenIdClient.Issuer<OpenIdClient.BaseClient> = {
     metadata: mockedIssuerConfig,
@@ -52,8 +52,12 @@ const mockClientRegistration = (
     } as any,
   } as any;
 
-  Issuer.mockReturnValue(mockedIssuer as jest.MockedObject<OpenIdClient.Issuer<OpenIdClient.BaseClient>>);
-}
+  Issuer.mockReturnValue(
+    mockedIssuer as jest.MockedObject<
+      OpenIdClient.Issuer<OpenIdClient.BaseClient>
+    >,
+  );
+};
 
 /**
  * Test for ClientRegistrar
@@ -70,9 +74,12 @@ describe("ClientRegistrar", () => {
 
   describe("getClient", () => {
     it("fails if there is not registration endpoint", async () => {
-      mockClientRegistration({
-        registration_endpoint: undefined,
-      }, mockDefaultClientConfig());
+      mockClientRegistration(
+        {
+          registration_endpoint: undefined,
+        },
+        mockDefaultClientConfig(),
+      );
 
       // Run the test
       const clientRegistrar = getClientRegistrar({
@@ -189,7 +196,9 @@ describe("ClientRegistrar", () => {
       ).resolves.toEqual(mockDefaultClientConfig().client_secret);
       await expect(
         mockStorage.getForUser("mySession", "expiresAt"),
-      ).resolves.toEqual(String(mockDefaultClientConfig().client_secret_expires_at));
+      ).resolves.toEqual(
+        String(mockDefaultClientConfig().client_secret_expires_at),
+      );
       await expect(
         mockStorage.getForUser("mySession", "idTokenSignedResponseAlg"),
       ).resolves.toEqual(
@@ -229,7 +238,9 @@ describe("ClientRegistrar", () => {
       // The expired client should have been re-registered.
       expect(client.clientId).toBe(mockDefaultClientConfig().client_id);
       expect(client.clientSecret).toBe(mockDefaultClientConfig().client_secret);
-      expect((client as IOpenIdDynamicClient).expiresAt).toBe(mockDefaultClientConfig().client_secret_expires_at);
+      expect((client as IOpenIdDynamicClient).expiresAt).toBe(
+        mockDefaultClientConfig().client_secret_expires_at,
+      );
     });
 
     it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {

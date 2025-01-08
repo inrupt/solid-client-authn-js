@@ -38,9 +38,7 @@ import {
   mockDefaultOidcOptions,
   mockOidcOptions,
 } from "../__mocks__/IOidcOptions";
-import {
-  mockDefaultClient
-} from "../__mocks__/ClientRegistrar";
+import { mockDefaultClient } from "../__mocks__/ClientRegistrar";
 import RefreshTokenOidcHandler from "./RefreshTokenOidcHandler";
 import {
   mockDefaultTokenRefresher,

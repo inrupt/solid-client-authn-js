@@ -105,11 +105,17 @@ export default class ClientRegistrar implements IClientRegistrar {
     // It will be treated as an expired client for dynamic clients (legacy case),
     // and it will not impact static clients.
     const expirationDate =
-    storedExpiresAt !== undefined ? Number.parseInt(storedExpiresAt, 10) : -1;
+      storedExpiresAt !== undefined ? Number.parseInt(storedExpiresAt, 10) : -1;
     // Expiration is only applicable to confidential dynamic clients.
     const expired =
-      storedClientSecret !== undefined && storedClientType === "dynamic" && Date.now() > expirationDate;
-    if (storedClientId !== undefined && isKnownClientType(storedClientType) && !expired) {
+      storedClientSecret !== undefined &&
+      storedClientType === "dynamic" &&
+      Date.now() > expirationDate;
+    if (
+      storedClientId !== undefined &&
+      isKnownClientType(storedClientType) &&
+      !expired
+    ) {
       if (storedClientType === "static" && storedClientSecret === undefined) {
         throw new Error("Missing static client secret in storage.");
       }
@@ -159,26 +165,23 @@ export default class ClientRegistrar implements IClientRegistrar {
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
       clientType: "dynamic",
     };
-    await this.storageUtility.setForUser(
-      options.sessionId, {
-        clientId: persistedClientMetadata.clientId,
-        idTokenSignedResponseAlg: persistedClientMetadata.idTokenSignedResponseAlg!,
-        clientType: "dynamic",
-      }
-    );
+    await this.storageUtility.setForUser(options.sessionId, {
+      clientId: persistedClientMetadata.clientId,
+      idTokenSignedResponseAlg:
+        persistedClientMetadata.idTokenSignedResponseAlg!,
+      clientType: "dynamic",
+    });
     if (registeredClient.metadata.client_secret !== undefined) {
       persistedClientMetadata = {
         ...persistedClientMetadata,
         clientSecret: registeredClient.metadata.client_secret,
         // If a client secret is present, it has an expiration date.
-        expiresAt: registeredClient.metadata.client_secret_expires_at as number
-      }
-      await this.storageUtility.setForUser(
-        options.sessionId, {
-          clientSecret: persistedClientMetadata.clientSecret,
-          expiresAt: String(persistedClientMetadata.expiresAt),
-        }
-      );
+        expiresAt: registeredClient.metadata.client_secret_expires_at as number,
+      };
+      await this.storageUtility.setForUser(options.sessionId, {
+        clientSecret: persistedClientMetadata.clientSecret,
+        expiresAt: String(persistedClientMetadata.expiresAt),
+      });
     }
     return persistedClientMetadata;
   }
