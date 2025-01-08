@@ -242,7 +242,7 @@ describe("ClientRegistrar", () => {
         mockDefaultClientConfig().client_secret_expires_at,
       );
     });
-    
+
     it("performs dynamic client registration if client information from storage is missing expiration date (legacy)", async () => {
       mockClientRegistration({}, mockDefaultClientConfig());
       const expiredSecret = randomUUID();
