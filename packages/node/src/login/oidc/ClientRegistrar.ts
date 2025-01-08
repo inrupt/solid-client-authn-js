@@ -86,12 +86,14 @@ export default class ClientRegistrar implements IClientRegistrar {
     const [
       storedClientId,
       storedClientSecret,
+      storedExpiresAt,
       storedClientName,
       storedIdTokenSignedResponseAlg,
       storedClientType,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId"),
       this.storageUtility.getForUser(options.sessionId, "clientSecret"),
+      this.storageUtility.getForUser(options.sessionId, "expiresAt"),
       this.storageUtility.getForUser(options.sessionId, "clientName"),
       this.storageUtility.getForUser(
         options.sessionId,
@@ -99,14 +101,22 @@ export default class ClientRegistrar implements IClientRegistrar {
       ),
       this.storageUtility.getForUser(options.sessionId, "clientType"),
     ]);
-
-    if (storedClientId !== undefined && isKnownClientType(storedClientType)) {
+    // -1 is used as a default to identify cases when no value has been stored.
+    // It will be treated as an expired client for dynamic clients (legacy case),
+    // and it will not impact static clients.
+    const expirationDate =
+    storedExpiresAt !== undefined ? Number.parseInt(storedExpiresAt, 10) : -1;
+    // Expiration is only applicable to confidential dynamic clients.
+    const expired =
+      storedClientSecret !== undefined && storedClientType === "dynamic" && Date.now() > expirationDate;
+    if (storedClientId !== undefined && isKnownClientType(storedClientType) && !expired) {
       if (storedClientType === "static" && storedClientSecret === undefined) {
         throw new Error("Missing static client secret in storage.");
       }
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
+        expiresAt: expirationDate !== -1 ? undefined : expirationDate,
         clientName: storedClientName,
         idTokenSignedResponseAlg:
           storedIdTokenSignedResponseAlg ??

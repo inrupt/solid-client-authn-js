@@ -34,7 +34,7 @@ export const mockDefaultClient = (): IClient => {
     clientSecret: "a client secret",
     clientType: "dynamic",
     // 5000-01-07
-    expiresAt: 95618140501,
+    expiresAt: 95618140501000,
   };
 };
 
