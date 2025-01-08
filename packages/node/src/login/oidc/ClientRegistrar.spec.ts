@@ -48,7 +48,7 @@ const mockClientRegistration = (
       register: (jest.fn() as any).mockResolvedValueOnce({
         metadata: clientMetadata,
       }),
-      // The assertions are required because we only mock we is strictly necessary for our tests.
+      // The assertions are required because we only mock what is strictly necessary for our tests.
     } as any,
   } as any;
 
@@ -73,7 +73,7 @@ describe("ClientRegistrar", () => {
   }
 
   describe("getClient", () => {
-    it("fails if there is not registration endpoint", async () => {
+    it("fails if there is no registration endpoint", async () => {
       mockClientRegistration(
         {
           registration_endpoint: undefined,
