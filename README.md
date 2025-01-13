@@ -93,6 +93,7 @@ If you have questions about working with Solid or just want to share what you’
 - [Security policy and vulnerability reporting](./SECURITY.md)
 
 ## How to run test apps?
+Make sure you use Node version 22.
 
 ### Browser
 
