@@ -75,8 +75,9 @@ export default class ClientRegistrar implements IClientRegistrar {
     const expirationDate =
       expiresAt !== undefined ? Number.parseInt(expiresAt, 10) : -1;
     // Expiration is only applicable to confidential clients.
+    // Note that Date.now() is in milliseconds, and expirationDate in seconds.
     const expired =
-      storedClientSecret !== undefined && Date.now() > expirationDate;
+      storedClientSecret !== undefined && Math.floor(Date.now() / 1000) > expirationDate;
     if (storedClientId && isKnownClientType(storedClientType) && !expired) {
       return storedClientSecret !== undefined
         ? {
@@ -97,6 +98,7 @@ export default class ClientRegistrar implements IClientRegistrar {
     }
 
     try {
+      console.log(`Registering a new client`);
       const registeredClient = await registerClient(options, issuerConfig);
       // Save info
       const infoToSave: Record<string, string> = {

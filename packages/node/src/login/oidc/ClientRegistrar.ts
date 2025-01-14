@@ -110,7 +110,8 @@ export default class ClientRegistrar implements IClientRegistrar {
     const expired =
       storedClientSecret !== undefined &&
       storedClientType === "dynamic" &&
-      Date.now() > expirationDate;
+      // Note that Date.now() is in milliseconds, and expirationDate in seconds.
+      Math.floor(Date.now() / 1000) > expirationDate; 
     if (
       storedClientId !== undefined &&
       isKnownClientType(storedClientType) &&
