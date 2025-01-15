@@ -98,7 +98,6 @@ export default class ClientRegistrar implements IClientRegistrar {
     }
 
     try {
-      console.log(`Registering a new client`);
       const registeredClient = await registerClient(options, issuerConfig);
       // Save info
       const infoToSave: Record<string, string> = {

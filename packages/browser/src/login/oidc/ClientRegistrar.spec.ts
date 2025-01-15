@@ -154,7 +154,7 @@ describe("ClientRegistrar", () => {
     it("retrieves client id and secret from storage if they are present", async () => {
       const clientId = randomUUID();
       const clientSecret = randomUUID();
-      const expiresAt = Date.now() + 1000;
+      const expiresAt = Math.ceil((Date.now() + 100_000) / 1000);
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
@@ -188,7 +188,8 @@ describe("ClientRegistrar", () => {
       const renewedClient: IOpenIdDynamicClient = {
         clientId: randomUUID(),
         clientSecret: randomUUID(),
-        expiresAt: Date.now() + 1000,
+        // Date.now is in ms, and the expiration date is in seconds.
+        expiresAt: Math.ceil((Date.now() + 100_000) / 1000),
         clientType: "dynamic",
       };
       const { registerClient: mockedRegisterClient } = jest.requireMock(
@@ -198,7 +199,8 @@ describe("ClientRegistrar", () => {
       const expiredClient: IOpenIdDynamicClient = {
         clientId: randomUUID(),
         clientSecret: randomUUID(),
-        expiresAt: Date.now() - 1000,
+        // Date.now is in ms, and the expiration date is in seconds.
+        expiresAt: Math.ceil((Date.now() - 100_000) / 1000),
         clientType: "dynamic",
       };
 
@@ -278,7 +280,7 @@ describe("ClientRegistrar", () => {
       const client: IOpenIdDynamicClient = {
         clientId: randomUUID(),
         clientSecret: randomUUID(),
-        expiresAt: Date.now() + 1000,
+        expiresAt: Math.ceil((Date.now() + 10_000) / 1000),
         clientType: "dynamic",
       };
       const { registerClient: mockedRegisterClient } = jest.requireMock(
