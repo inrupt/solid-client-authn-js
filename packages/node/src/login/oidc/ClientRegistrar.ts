@@ -30,6 +30,7 @@ import type {
   IIssuerConfig,
   IClient,
   IClientRegistrarOptions,
+  IOpenIdDynamicClient,
 } from "@inrupt/solid-client-authn-core";
 import {
   ConfigurationError,
@@ -85,12 +86,14 @@ export default class ClientRegistrar implements IClientRegistrar {
     const [
       storedClientId,
       storedClientSecret,
+      storedExpiresAt,
       storedClientName,
       storedIdTokenSignedResponseAlg,
       storedClientType,
     ] = await Promise.all([
       this.storageUtility.getForUser(options.sessionId, "clientId"),
       this.storageUtility.getForUser(options.sessionId, "clientSecret"),
+      this.storageUtility.getForUser(options.sessionId, "expiresAt"),
       this.storageUtility.getForUser(options.sessionId, "clientName"),
       this.storageUtility.getForUser(
         options.sessionId,
@@ -98,14 +101,29 @@ export default class ClientRegistrar implements IClientRegistrar {
       ),
       this.storageUtility.getForUser(options.sessionId, "clientType"),
     ]);
-
-    if (storedClientId !== undefined && isKnownClientType(storedClientType)) {
+    // -1 is used as a default to identify cases when no value has been stored.
+    // It will be treated as an expired client for dynamic clients (legacy case),
+    // and it will not impact static clients.
+    const expirationDate =
+      storedExpiresAt !== undefined ? Number.parseInt(storedExpiresAt, 10) : -1;
+    // Expiration is only applicable to confidential dynamic clients.
+    const expired =
+      storedClientSecret !== undefined &&
+      storedClientType === "dynamic" &&
+      // Note that Date.now() is in milliseconds, and expirationDate in seconds.
+      Math.floor(Date.now() / 1000) > expirationDate;
+    if (
+      storedClientId !== undefined &&
+      isKnownClientType(storedClientType) &&
+      !expired
+    ) {
       if (storedClientType === "static" && storedClientSecret === undefined) {
         throw new Error("Missing static client secret in storage.");
       }
       return {
         clientId: storedClientId,
         clientSecret: storedClientSecret,
+        expiresAt: expirationDate !== -1 ? undefined : expirationDate,
         clientName: storedClientName,
         idTokenSignedResponseAlg:
           storedIdTokenSignedResponseAlg ??
@@ -142,28 +160,30 @@ export default class ClientRegistrar implements IClientRegistrar {
       grant_types: ["authorization_code", "refresh_token"],
     });
 
-    const persistedClientMetadata: Record<string, string> = {
+    let persistedClientMetadata: IOpenIdDynamicClient = {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
       clientType: "dynamic",
     };
-    if (registeredClient.metadata.client_secret !== undefined) {
-      persistedClientMetadata.clientSecret =
-        registeredClient.metadata.client_secret;
-    }
-
-    await this.storageUtility.setForUser(
-      options.sessionId,
-      persistedClientMetadata,
-    );
-    return {
+    await this.storageUtility.setForUser(options.sessionId, {
       clientId: persistedClientMetadata.clientId,
-      clientSecret: persistedClientMetadata.clientSecret,
       idTokenSignedResponseAlg:
-        persistedClientMetadata.idTokenSignedResponseAlg,
-      clientName: registeredClient.metadata.client_name as string | undefined,
+        persistedClientMetadata.idTokenSignedResponseAlg!,
       clientType: "dynamic",
-    };
+    });
+    if (registeredClient.metadata.client_secret !== undefined) {
+      persistedClientMetadata = {
+        ...persistedClientMetadata,
+        clientSecret: registeredClient.metadata.client_secret,
+        // If a client secret is present, it has an expiration date.
+        expiresAt: registeredClient.metadata.client_secret_expires_at as number,
+      };
+      await this.storageUtility.setForUser(options.sessionId, {
+        clientSecret: persistedClientMetadata.clientSecret,
+        expiresAt: String(persistedClientMetadata.expiresAt),
+      });
+    }
+    return persistedClientMetadata;
   }
 }

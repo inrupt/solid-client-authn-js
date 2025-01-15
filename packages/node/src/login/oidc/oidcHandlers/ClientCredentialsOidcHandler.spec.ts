@@ -32,6 +32,7 @@ import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
 
 import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
+import { mockDefaultClient } from "../__mocks__/ClientRegistrar";
 
 jest.mock("openid-client");
 
@@ -198,11 +199,7 @@ describe("ClientCredentialsOidcHandler", () => {
       await expect(
         clientCredentialsOidcHandler.canHandle({
           ...standardOidcOptions,
-          client: {
-            clientId: randomUUID(),
-            clientSecret: randomUUID(),
-            clientType: "dynamic",
-          },
+          client: mockDefaultClient(),
         }),
       ).resolves.toBe(false);
     });

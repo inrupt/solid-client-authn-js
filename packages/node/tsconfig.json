@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.build.json",
 
   "compilerOptions": {
-    "lib": ["es2018"],
+    "lib": ["es2022"],
     "outDir": "./dist"
   },
 

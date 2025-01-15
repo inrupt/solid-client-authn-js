@@ -38,6 +38,7 @@ import {
   mockDefaultOidcOptions,
   mockOidcOptions,
 } from "../__mocks__/IOidcOptions";
+import { mockDefaultClient } from "../__mocks__/ClientRegistrar";
 import RefreshTokenOidcHandler from "./RefreshTokenOidcHandler";
 import {
   mockDefaultTokenRefresher,
@@ -79,11 +80,7 @@ describe("RefreshTokenOidcHandler", () => {
         refreshTokenOidcHandler.canHandle(
           mockOidcOptions({
             refreshToken: undefined,
-            client: {
-              clientId: randomUUID(),
-              clientSecret: randomUUID(),
-              clientType: "dynamic",
-            },
+            client: mockDefaultClient(),
           }),
         ),
       ).resolves.toBe(false);
@@ -122,11 +119,7 @@ describe("RefreshTokenOidcHandler", () => {
         refreshTokenOidcHandler.handle(
           mockOidcOptions({
             refreshToken: undefined,
-            client: {
-              clientId: randomUUID(),
-              clientSecret: randomUUID(),
-              clientType: "dynamic",
-            },
+            client: mockDefaultClient(),
           }),
         ),
       ).rejects.toThrow("missing one of 'refreshToken', 'clientId'");
@@ -144,11 +137,7 @@ describe("RefreshTokenOidcHandler", () => {
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
           refreshToken: "some refresh token",
-          client: {
-            clientId: randomUUID(),
-            clientSecret: randomUUID(),
-            clientType: "dynamic",
-          },
+          client: mockDefaultClient(),
         }),
       );
       expect(result?.webId).toBe("https://my.webid/");
@@ -173,11 +162,7 @@ describe("RefreshTokenOidcHandler", () => {
       const result = (await refreshTokenOidcHandler.handle(
         mockOidcOptions({
           refreshToken: "some refresh token",
-          client: {
-            clientId: randomUUID(),
-            clientSecret: randomUUID(),
-            clientType: "dynamic",
-          },
+          client: mockDefaultClient(),
         }),
       )) as SolidClientAuthnCore.LoginResult;
       expect(result).toBeDefined();
@@ -213,11 +198,7 @@ describe("RefreshTokenOidcHandler", () => {
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
           refreshToken: "some refresh token",
-          client: {
-            clientId: randomUUID(),
-            clientSecret: randomUUID(),
-            clientType: "dynamic",
-          },
+          client: mockDefaultClient(),
         }),
       );
 
@@ -245,11 +226,7 @@ describe("RefreshTokenOidcHandler", () => {
       const result = await refreshTokenOidcHandler.handle(
         mockOidcOptions({
           refreshToken: "some refresh token",
-          client: {
-            clientId: randomUUID(),
-            clientSecret: randomUUID(),
-            clientType: "dynamic",
-          },
+          client: mockDefaultClient(),
           dpop: false,
         }),
       );
@@ -268,7 +245,9 @@ describe("RefreshTokenOidcHandler", () => {
     });
 
     it("stores OIDC context in storage so that refreshing the token succeeds later", async () => {
-      const exampleClientSecret = randomUUID();
+      const mockedClient = mockDefaultClient();
+      mockedClient.clientId = EXAMPLE_CLIENT_ID;
+      mockedClient.clientName = "some client name";
 
       const mockedStorage = mockStorageUtility({});
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(
@@ -278,12 +257,7 @@ describe("RefreshTokenOidcHandler", () => {
       await refreshTokenOidcHandler.handle(
         mockOidcOptions({
           refreshToken: "some refresh token",
-          client: {
-            clientId: EXAMPLE_CLIENT_ID,
-            clientSecret: exampleClientSecret,
-            clientName: "some client name",
-            clientType: "dynamic",
-          },
+          client: mockedClient,
         }),
       );
       await expect(
@@ -297,7 +271,7 @@ describe("RefreshTokenOidcHandler", () => {
           mockDefaultOidcOptions().sessionId,
           "clientSecret",
         ),
-      ).resolves.toBe(exampleClientSecret);
+      ).resolves.toBe(mockedClient.clientSecret);
       await expect(
         mockedStorage.getForUser(
           mockDefaultOidcOptions().sessionId,
@@ -340,11 +314,7 @@ describe("RefreshTokenOidcHandler", () => {
     const result = refreshTokenOidcHandler.handle(
       mockOidcOptions({
         refreshToken: "some refresh token",
-        client: {
-          clientId: randomUUID(),
-          clientSecret: randomUUID(),
-          clientType: "dynamic",
-        },
+        client: mockDefaultClient(),
       }),
     );
     await expect(result).rejects.toThrow(
@@ -372,11 +342,7 @@ describe("RefreshTokenOidcHandler", () => {
     const result = await refreshTokenOidcHandler.handle(
       mockOidcOptions({
         refreshToken: "some refresh token",
-        client: {
-          clientId: EXAMPLE_CLIENT_ID,
-          clientSecret: randomUUID(),
-          clientType: "dynamic",
-        },
+        client: mockDefaultClient(),
       }),
     );
     expect(result?.webId).toBe("https://my.webid/");
@@ -408,11 +374,7 @@ describe("RefreshTokenOidcHandler", () => {
     await refreshTokenOidcHandler.handle(
       mockOidcOptions({
         refreshToken: "some refresh token",
-        client: {
-          clientId: randomUUID(),
-          clientSecret: randomUUID(),
-          clientType: "dynamic",
-        },
+        client: mockDefaultClient(),
         eventEmitter: mockEmitter,
       }),
     );
@@ -438,11 +400,7 @@ describe("RefreshTokenOidcHandler", () => {
     const result = refreshTokenOidcHandler.handle(
       mockOidcOptions({
         refreshToken: "some refresh token",
-        client: {
-          clientId: randomUUID(),
-          clientSecret: randomUUID(),
-          clientType: "dynamic",
-        },
+        client: mockDefaultClient(),
       }),
     );
     await expect(result).rejects.toThrow("Invalid credentials");

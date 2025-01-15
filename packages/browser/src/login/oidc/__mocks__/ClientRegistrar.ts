@@ -31,6 +31,8 @@ export const ClientRegistrarResponse: IClient = {
   clientId: "abcde",
   clientSecret: "12345",
   clientType: "dynamic",
+  // 5000-01-07
+  expiresAt: 95618140501000,
 };
 
 export const PublicClientRegistrarResponse: IClient = {

@@ -93,7 +93,12 @@ export {
   isKnownClientType,
 } from "./login/oidc/IClientRegistrar";
 export { default as ClientAuthentication } from "./ClientAuthentication";
-export { IClient } from "./login/oidc/IClient";
+export {
+  IClient,
+  IOpenIdDynamicClient,
+  IOpenIdStaticClient,
+  ISolidOidcClient,
+} from "./login/oidc/IClient";
 
 // Storage.
 export { default as IStorage } from "./storage/IStorage";

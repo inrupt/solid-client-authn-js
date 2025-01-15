@@ -26,7 +26,7 @@
 
 import type {
   IIssuerConfig,
-  IClient,
+  IOpenIdDynamicClient,
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
 import {
@@ -65,13 +65,24 @@ function processErrorResponse(
   );
 }
 
+function hasClientId(body: unknown): body is { client_id: string } {
+  return typeof (body as Record<string, string>).client_id === "string";
+}
+
+function hasRedirectUri(body: unknown): body is { redirect_uris: string[] } {
+  return (
+    Array.isArray((body as Record<string, string[]>).redirect_uris) &&
+    (body as Record<string, string[]>).redirect_uris.every(
+      (uri) => typeof uri === "string",
+    )
+  );
+}
+
 function validateRegistrationResponse(
-  // The type is any here because the object is parsed from a JSON response
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  responseBody: any,
+  responseBody: unknown,
   options: IClientRegistrarOptions,
-): void {
-  if (responseBody.client_id === undefined) {
+): responseBody is { client_id: string; redirect_uris: string[] } {
+  if (!hasClientId(responseBody)) {
     throw new Error(
       `Dynamic client registration failed: no client_id has been found on ${JSON.stringify(
         responseBody,
@@ -80,8 +91,8 @@ function validateRegistrationResponse(
   }
   if (
     options.redirectUrl &&
-    (responseBody.redirect_uris === undefined ||
-      responseBody.redirect_uris[0] !== options.redirectUrl.toString())
+    hasRedirectUri(responseBody) &&
+    responseBody.redirect_uris[0] !== options.redirectUrl.toString()
   ) {
     throw new Error(
       `Dynamic client registration failed: the returned redirect URIs ${JSON.stringify(
@@ -91,12 +102,13 @@ function validateRegistrationResponse(
       ])}`,
     );
   }
+  return true;
 }
 
 export async function registerClient(
   options: IClientRegistrarOptions,
   issuerConfig: IIssuerConfig,
-): Promise<IClient> {
+): Promise<IOpenIdDynamicClient> {
   if (!issuerConfig.registrationEndpoint) {
     throw new Error(
       "Dynamic Registration could not be completed because the issuer has no registration endpoint.",
@@ -144,6 +156,7 @@ export async function registerClient(
     return {
       clientId: responseBody.client_id,
       clientSecret: responseBody.client_secret,
+      expiresAt: responseBody.client_secret_expires_at,
       idTokenSignedResponseAlg: responseBody.id_token_signed_response_alg,
       clientType: "dynamic",
     };

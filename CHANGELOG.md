@@ -36,6 +36,11 @@ The following changes have been implemented but not released yet:
 
 - Fix the `Session` error listener typing by adding `Error` to the `errorDescription` type so that it reflects the actual behavior.
   Thanks to @NoelDeMartin for fixing this issue.
+- Previously, an application could end up in a bad state when using a dynamically registered
+  client identity beyond its expiration date. A user would be redirected to the OpenID Provider,
+  and end up on an error page unrelated to the application they were trying to log into. Now,
+  expired dynamic clients go through registration again: the user will need to authorize the client
+  after expiration, but will not experience further inconveniences.
 
 ## [2.3.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.3.0) - 2024-11-14
 
