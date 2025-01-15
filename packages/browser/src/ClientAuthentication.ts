@@ -48,13 +48,13 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     options: ILoginOptions,
     eventEmitter: EventEmitter,
   ): Promise<void> => {
+
     // In order to get a clean start, make sure that the session is logged out
-    // on login.
-    // But we may want to preserve our client application info, particularly if
-    // we used Dynamic Client Registration to register (since we don't
-    // necessarily want the user to have to register this app each time they
-    // login).
-    await this.sessionInfoManager.clear(options.sessionId);
+    // on login, except when doing a silent login so that Dynamic Client information
+    // is preserved.
+    if (options.prompt !== "none") {
+      await this.sessionInfoManager.clear(options.sessionId);
+    }
 
     // In the case of the user hitting the 'back' button in their browser, they
     // could return to a previous redirect URL that contains OIDC params that
