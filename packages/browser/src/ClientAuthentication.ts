@@ -48,7 +48,6 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     options: ILoginOptions,
     eventEmitter: EventEmitter,
   ): Promise<void> => {
-
     // In order to get a clean start, make sure that the session is logged out
     // on login, except when doing a silent login so that Dynamic Client information
     // is preserved.
