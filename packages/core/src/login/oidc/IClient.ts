@@ -24,7 +24,15 @@
  * @packageDocumentation
  */
 
-type ISolidOidcClient = {
+type IClientBase = {
+  clientName?: string;
+  idTokenSignedResponseAlg?: string;
+};
+
+/**
+ * @hidden
+ */
+export type ISolidOidcClient = IClientBase & {
   clientId: string;
   clientType: "solid-oidc";
   // A solid-oidc client has no concept of client secret,
@@ -32,22 +40,30 @@ type ISolidOidcClient = {
   clientSecret?: undefined;
 };
 
-type IOpenIdConfidentialClient = {
+/**
+ * @hidden
+ */
+export type IOpenIdStaticClient = IClientBase & {
   clientId: string;
   clientSecret: string;
   clientType: "static";
 };
 
-type IOpenIdPublicClient = {
+/**
+ * @hidden
+ */
+export type IOpenIdDynamicClient = IClientBase & {
   clientId: string;
-  clientSecret?: string;
   clientType: "dynamic";
-};
+} & ( // The expiration date is required if a secret is present.
+    | { clientSecret: string; expiresAt: number }
+    | { clientSecret?: undefined; expiresAt?: undefined }
+  );
 
 /**
  * @hidden
  */
-export type IClient = {
-  clientName?: string;
-  idTokenSignedResponseAlg?: string;
-} & (ISolidOidcClient | IOpenIdConfidentialClient | IOpenIdPublicClient);
+export type IClient =
+  | ISolidOidcClient
+  | IOpenIdStaticClient
+  | IOpenIdDynamicClient;

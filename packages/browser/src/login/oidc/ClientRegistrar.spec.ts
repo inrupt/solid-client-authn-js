@@ -25,8 +25,16 @@ import {
 } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
 import { randomUUID } from "crypto";
+import type * as OidcClientExt from "@inrupt/oidc-client-ext";
+import type { IOpenIdDynamicClient } from "core";
 import ClientRegistrar from "./ClientRegistrar";
 import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfigFetcher";
+
+jest.mock("@inrupt/oidc-client-ext", () => {
+  return {
+    registerClient: jest.fn(),
+  };
+});
 
 /**
  * Test for ClientRegistrar
@@ -42,24 +50,19 @@ describe("ClientRegistrar", () => {
   }
 
   describe("getClient", () => {
-    it("properly performs dynamic registration", async () => {
-      const clientId = randomUUID();
-      const clientSecret = randomUUID();
-      // FIXME: this should mock out oidc-client-ext, instead of mimicking the
-      // actual OIDC provider response.
-      const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
-        /* eslint-disable camelcase */
-        new Response(
-          JSON.stringify({
-            client_id: clientId,
-            client_secret: clientSecret,
-            redirect_uris: ["https://example.com"],
-            id_token_signed_response_alg: "RS256",
-          }),
-        ),
-        /* eslint-enable camelcase */
-      );
-      global.fetch = mockFetch;
+    it("performs dynamic registration if no client is in storage", async () => {
+      // Setup registration mock.
+      const client: IOpenIdDynamicClient = {
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
+        expiresAt: Date.now() + 1000,
+        clientType: "dynamic",
+      };
+      const { registerClient: mockedRegisterClient } = jest.requireMock(
+        "@inrupt/oidc-client-ext",
+      ) as jest.Mocked<typeof OidcClientExt>;
+      mockedRegisterClient.mockResolvedValueOnce(client);
+
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
@@ -75,40 +78,20 @@ describe("ClientRegistrar", () => {
             registrationEndpoint: registrationUrl,
           },
         ),
-      ).toMatchObject({
-        clientId,
-        clientSecret,
-      });
-      expect(mockFetch).toHaveBeenCalledWith(registrationUrl.toString(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          /* eslint-disable camelcase */
-          application_type: "web",
-          redirect_uris: ["https://example.com"],
-          subject_type: "public",
-          token_endpoint_auth_method: "client_secret_basic",
-          id_token_signed_response_alg: "RS256",
-          grant_types: ["authorization_code", "refresh_token"],
-          /* eslint-enable camelcase */
-        }),
-      });
+      ).toMatchObject(client);
     });
 
     it("can register a public client without secret", async () => {
-      const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
-        /* eslint-disable camelcase */
-        new Response(
-          JSON.stringify({
-            client_id: "abcd",
-            redirect_uris: ["https://example.com"],
-          }),
-        ),
-        /* eslint-enable camelcase */
-      );
-      global.fetch = mockFetch;
+      // Setup registration mock.
+      const client: IOpenIdDynamicClient = {
+        clientId: randomUUID(),
+        clientType: "dynamic",
+      };
+      const { registerClient: mockedRegisterClient } = jest.requireMock(
+        "@inrupt/oidc-client-ext",
+      ) as jest.Mocked<typeof OidcClientExt>;
+      mockedRegisterClient.mockResolvedValueOnce(client);
+
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
@@ -138,20 +121,18 @@ describe("ClientRegistrar", () => {
           },
           IssuerConfigFetcherFetchConfigResponse,
         ),
-      ).rejects.toThrow(
-        "Dynamic Registration could not be completed because the issuer has no registration endpoint.",
-      );
+      ).rejects.toThrow();
     });
 
     it("handles a failure to dynamically register elegantly", async () => {
-      const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
-        /* eslint-disable camelcase */
-        new Response('{"error":"bad stuff that\'s an error"}', {
-          status: 400,
-        }),
-        /* eslint-enable camelcase */
+      // Setup registration mock.
+      const { registerClient: mockedRegisterClient } = jest.requireMock(
+        "@inrupt/oidc-client-ext",
+      ) as jest.Mocked<typeof OidcClientExt>;
+      mockedRegisterClient.mockRejectedValueOnce(
+        new Error("Dynamic client registration failed"),
       );
-      global.fetch = mockFetch;
+
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
       });
@@ -167,20 +148,20 @@ describe("ClientRegistrar", () => {
             registrationEndpoint: registrationUrl,
           },
         ),
-      ).rejects.toThrow(
-        "Client registration failed: [Error: Dynamic client registration failed: bad stuff that's an error - ]",
-      );
+      ).rejects.toThrow("Client registration failed");
     });
 
     it("retrieves client id and secret from storage if they are present", async () => {
       const clientId = randomUUID();
       const clientSecret = randomUUID();
+      const expiresAt = Math.ceil((Date.now() + 100_000) / 1000);
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
           {
             "solidClientAuthenticationUser:mySession": {
               clientId,
               clientSecret,
+              expiresAt: String(expiresAt),
               clientType: "dynamic",
             },
           },
@@ -198,23 +179,115 @@ describe("ClientRegistrar", () => {
       );
       expect(client.clientId).toBe(clientId);
       expect(client.clientSecret).toBe(clientSecret);
+      expect(client.clientType).toBe("dynamic");
+      expect((client as IOpenIdDynamicClient).expiresAt).toBe(expiresAt);
+    });
+
+    it("performs dynamic registration if an expired client is present in storage", async () => {
+      // Setup the registration mock.
+      const renewedClient: IOpenIdDynamicClient = {
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
+        // Date.now is in ms, and the expiration date is in seconds.
+        expiresAt: Math.ceil((Date.now() + 100_000) / 1000),
+        clientType: "dynamic",
+      };
+      const { registerClient: mockedRegisterClient } = jest.requireMock(
+        "@inrupt/oidc-client-ext",
+      ) as jest.Mocked<typeof OidcClientExt>;
+      mockedRegisterClient.mockResolvedValueOnce(renewedClient);
+      const expiredClient: IOpenIdDynamicClient = {
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
+        // Date.now is in ms, and the expiration date is in seconds.
+        expiresAt: Math.ceil((Date.now() - 100_000) / 1000),
+        clientType: "dynamic",
+      };
+
+      // Setup the expired client in storage mock.
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: expiredClient.clientId,
+              clientSecret: expiredClient.clientSecret,
+              expiresAt: String(expiredClient.expiresAt),
+              clientType: expiredClient.clientType,
+            },
+          },
+          false,
+        ),
+      });
+      const registrationUrl = "https://idp.com/register";
+      expect(
+        await clientRegistrar.getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          {
+            ...IssuerConfigFetcherFetchConfigResponse,
+            registrationEndpoint: registrationUrl,
+          },
+        ),
+      ).toMatchObject(renewedClient);
+    });
+
+    it("performs dynamic registration if a confidential client is missing an expiration date (legacy case)", async () => {
+      // Setup the registration mock.
+      const renewedClient: IOpenIdDynamicClient = {
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
+        expiresAt: Date.now() + 1000,
+        clientType: "dynamic",
+      };
+      const { registerClient: mockedRegisterClient } = jest.requireMock(
+        "@inrupt/oidc-client-ext",
+      ) as jest.Mocked<typeof OidcClientExt>;
+      mockedRegisterClient.mockResolvedValueOnce(renewedClient);
+
+      // Setup the legacy client in storage mock.
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: randomUUID(),
+              clientSecret: randomUUID(),
+              clientType: "dynamic",
+              // The expiration date is missing.
+            },
+          },
+          false,
+        ),
+      });
+      const registrationUrl = "https://idp.com/register";
+      expect(
+        await clientRegistrar.getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          {
+            ...IssuerConfigFetcherFetchConfigResponse,
+            registrationEndpoint: registrationUrl,
+          },
+        ),
+      ).toMatchObject(renewedClient);
     });
 
     it("saves dynamic registration information", async () => {
-      const clientId = randomUUID();
-      const clientSecret = randomUUID();
-      const mockFetch = (jest.fn() as any).mockResolvedValueOnce(
-        /* eslint-disable camelcase */
-        new Response(
-          JSON.stringify({
-            client_id: clientId,
-            client_secret: clientSecret,
-            redirect_uris: ["https://example.com"],
-          }),
-        ),
-        /* eslint-enable camelcase */
-      );
-      global.fetch = mockFetch;
+      // Setup registration mock.
+      const client: IOpenIdDynamicClient = {
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
+        expiresAt: Math.ceil((Date.now() + 10_000) / 1000),
+        clientType: "dynamic",
+      };
+      const { registerClient: mockedRegisterClient } = jest.requireMock(
+        "@inrupt/oidc-client-ext",
+      ) as jest.Mocked<typeof OidcClientExt>;
+      mockedRegisterClient.mockResolvedValueOnce(client);
+
       const myStorage = mockStorageUtility({});
       const clientRegistrar = getClientRegistrar({
         storage: myStorage,
@@ -234,10 +307,13 @@ describe("ClientRegistrar", () => {
 
       await expect(
         myStorage.getForUser("mySession", "clientId", { secure: false }),
-      ).resolves.toBe(clientId);
+      ).resolves.toBe(client.clientId);
       await expect(
         myStorage.getForUser("mySession", "clientSecret", { secure: false }),
-      ).resolves.toBe(clientSecret);
+      ).resolves.toBe(client.clientSecret);
+      await expect(
+        myStorage.getForUser("mySession", "expiresAt", { secure: false }),
+      ).resolves.toBe(String(client.expiresAt));
     });
   });
 });

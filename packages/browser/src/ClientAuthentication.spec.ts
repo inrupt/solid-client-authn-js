@@ -230,6 +230,35 @@ describe("ClientAuthentication", () => {
       ).resolves.toBeUndefined();
     });
 
+    it("should not clear the local storage when logging in with prompt set to none", async () => {
+      const nonEmptyStorage = mockStorageUtility({
+        someUser: { someKey: "someValue" },
+      });
+      await nonEmptyStorage.setForUser(
+        "someUser",
+        { someKey: "someValue" },
+        { secure: false },
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(nonEmptyStorage),
+      });
+      await clientAuthn.login(
+        {
+          sessionId: "someUser",
+          tokenType: "DPoP",
+          clientId: "coolApp",
+          clientName: "coolApp Name",
+          redirectUrl: "https://coolapp.com/redirect",
+          oidcIssuer: "https://idp.com",
+          prompt: "none",
+        },
+        mockEmitter,
+      );
+      await expect(
+        nonEmptyStorage.getForUser("someUser", "someKey", { secure: false }),
+      ).resolves.toBe("someValue");
+    });
+
     it("throws if the redirect IRI is a malformed URL", async () => {
       const clientAuthn = getClientAuthentication();
       await expect(() =>
