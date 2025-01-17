@@ -20,6 +20,7 @@
 //
 
 import type { Config } from "jest";
+import { createJsWithTsPreset, type JestConfigWithTsJest } from "ts-jest";
 
 type ArrayElement<MyArray> = MyArray extends Array<infer T> ? T : never;
 
@@ -32,13 +33,19 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   clearMocks: true,
   injectGlobals: false,
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  moduleNameMapper: {
+    "^jose": require.resolve("jose"),
+  },
 };
 
 // Required by @peculiar/webcrypto, which comes from the polyfills
 // loaded in the setup file.
 process.env.OPENSSL_CONF = "/dev/null";
 
-const config: Config = {
+const presetConfig = createJsWithTsPreset({});
+
+const config: JestConfigWithTsJest = {
+  ...presetConfig,
   reporters: ["default", "github-actions"],
   collectCoverage: true,
   coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
