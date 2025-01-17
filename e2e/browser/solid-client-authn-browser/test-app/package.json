@@ -20,8 +20,8 @@
     "@inrupt/eslint-config-lib": "^3.2.4",
     "@playwright/test": "^1.49.1",
     "@types/node": "^22.10.7",
-    "@types/react": "^19.0.1",
-    "@types/react-dom": "^19.0.2",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
     "esbuild": "^0.24.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.1.4"
