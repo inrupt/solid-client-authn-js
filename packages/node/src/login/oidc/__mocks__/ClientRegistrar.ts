@@ -24,11 +24,12 @@ import type {
   IClientRegistrar,
   IClientRegistrarOptions,
   IIssuerConfig,
+  IOpenIdDynamicClient,
 } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
 import type { ClientMetadata } from "openid-client";
 
-export const mockDefaultClient = (): IClient => {
+export const mockDefaultClient = (): IOpenIdDynamicClient => {
   return {
     clientId: "a client id",
     clientSecret: "a client secret",
