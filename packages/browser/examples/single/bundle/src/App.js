@@ -90,36 +90,34 @@ export default function App() {
   };
 
   return (
-    <div>
-      <main>
-        <h1>Sandbox app</h1>
-        <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
-        <div>
-          <form>
-            <input
-              type="text"
-              value={issuer}
-              onChange={(e) => {
-                setIssuer(e.target.value);
-              }}
-            />
-            <button onClick={(e) => handleLogin(e)}>Log In</button>
-            <button onClick={(e) => handleLogout(e)}>Log Out</button>
-          </form>
-        </div>
-        <hr />
-        <div>
+    <main>
+      <h1>Sandbox app</h1>
+      <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
+      <div>
+        <form>
           <input
             type="text"
-            value={resource}
+            value={issuer}
             onChange={(e) => {
-              setResource(e.target.value);
+              setIssuer(e.target.value);
             }}
           />
-          <button onClick={(e) => handleFetch(e)}>Fetch</button>
-        </div>
-        <pre>{data}</pre>
-      </main>
-    </div>
+          <button onClick={(e) => handleLogin(e)}>Log In</button>
+          <button onClick={(e) => handleLogout(e)}>Log Out</button>
+        </form>
+      </div>
+      <hr />
+      <div>
+        <input
+          type="text"
+          value={resource}
+          onChange={(e) => {
+            setResource(e.target.value);
+          }}
+        />
+        <button onClick={(e) => handleFetch(e)}>Fetch</button>
+      </div>
+      <pre>{data}</pre>
+    </main>
   );
 }
