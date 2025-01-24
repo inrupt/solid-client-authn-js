@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Inrupt Inc.
+// Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal in
@@ -29,7 +29,7 @@ import {
   fetch,
   getDefaultSession,
   events,
-  EVENTS
+  EVENTS,
 } from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = "http://localhost:3113/";
@@ -99,8 +99,12 @@ export default function App() {
             setIssuer(e.target.value);
           }}
         />
-        <button type="button" onClick={() => handleLogin()}>Log In</button>
-        <button type="button" onClick={() => handleLogout()}>Log Out</button>
+        <button type="button" onClick={handleLogin}>
+          Log In
+        </button>
+        <button type="button" onClick={handleLogout}>
+          Log Out
+        </button>
       </form>
       <hr />
       <input
@@ -110,7 +114,9 @@ export default function App() {
           setIssuer(e.target.value);
         }}
       />
-      <button type="button" onClick={() => handleFetch()}>Fetch</button>
+      <button type="button" onClick={handleFetch}>
+        Fetch
+      </button>
       <pre>{data}</pre>
     </main>
   );
