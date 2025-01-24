@@ -28,6 +28,8 @@ import {
   handleIncomingRedirect,
   fetch,
   getDefaultSession,
+  events,
+  EVENTS
 } from "@inrupt/solid-client-authn-browser";
 
 const REDIRECT_URL = "http://localhost:3113/";
@@ -48,7 +50,6 @@ export default function App() {
     // After redirect, the current URL contains login information.
     handleIncomingRedirect({
       restorePreviousSession: true,
-      onError: errorHandle,
     }).then((info) => {
       setWebId(info.webId);
       setResource(webId);
@@ -59,10 +60,9 @@ export default function App() {
     console.log(`${error} has occured: `, errorDescription);
   };
 
-  const handleLogin = (e) => {
-    // The default behaviour of the button is to resubmit.
-    // This prevents the page from reloading.
-    e.preventDefault();
+  events().on(EVENTS.ERROR, errorHandle);
+
+  const handleLogin = () => {
     // Login will redirect the user away so that they can log in the OIDC issuer,
     // and back to the provided redirect URL (which should be controlled by your app).
     login({
@@ -73,8 +73,7 @@ export default function App() {
     });
   };
 
-  const handleLogout = (e) => {
-    e.preventDefault();
+  const handleLogout = () => {
     logout();
     // The following has no impact on the logout, it just resets the UI.
     setWebId(undefined);
@@ -82,42 +81,43 @@ export default function App() {
     setResource("");
   };
 
-  const handleFetch = (e) => {
-    e.preventDefault();
+  const handleFetch = () => {
     fetch(resource, { headers: new Headers({ Accept: "text/turtle" }) })
       .then((response) => response.text())
       .then(setData);
   };
 
   return (
-    <main>
-      <h1>Sandbox app</h1>
-      <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
-      <div>
-        <form>
+    <div>
+      <main>
+        <h1>Sandbox app</h1>
+        <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
+        <div>
+          <form>
+            <input
+              type="text"
+              value={issuer}
+              onChange={(e) => {
+                setIssuer(e.target.value);
+              }}
+            />
+            <button type="button" onClick={() => handleLogin()}>Log In</button>
+            <button type="button" onClick={() => handleLogout()}>Log Out</button>
+          </form>
+        </div>
+        <hr />
+        <div>
           <input
             type="text"
-            value={issuer}
+            value={resource}
             onChange={(e) => {
               setIssuer(e.target.value);
             }}
           />
-          <button onClick={(e) => handleLogin(e)}>Log In</button>
-          <button onClick={(e) => handleLogout(e)}>Log Out</button>
-        </form>
-      </div>
-      <hr />
-      <div>
-        <input
-          type="text"
-          value={resource}
-          onChange={(e) => {
-            setResource(e.target.value);
-          }}
-        />
-        <button onClick={(e) => handleFetch(e)}>Fetch</button>
-      </div>
-      <pre>{data}</pre>
-    </main>
+          <button type="button" onClick={() => handleFetch()}>Fetch</button>
+        </div>
+        <pre>{data}</pre>
+      </main>
+    </div>
   );
 }
