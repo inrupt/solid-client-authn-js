@@ -88,36 +88,30 @@ export default function App() {
   };
 
   return (
-    <div>
-      <main>
-        <h1>Sandbox app</h1>
-        <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
-        <div>
-          <form>
-            <input
-              type="text"
-              value={issuer}
-              onChange={(e) => {
-                setIssuer(e.target.value);
-              }}
-            />
-            <button type="button" onClick={() => handleLogin()}>Log In</button>
-            <button type="button" onClick={() => handleLogout()}>Log Out</button>
-          </form>
-        </div>
-        <hr />
-        <div>
-          <input
-            type="text"
-            value={resource}
-            onChange={(e) => {
-              setIssuer(e.target.value);
-            }}
-          />
-          <button type="button" onClick={() => handleFetch()}>Fetch</button>
-        </div>
-        <pre>{data}</pre>
-      </main>
-    </div>
+    <main>
+      <h1>Sandbox app</h1>
+      <p>{webId ? `Logged in as ${webId}` : "Not logged in yet"}</p>
+      <form>
+        <input
+          type="text"
+          value={issuer}
+          onChange={(e) => {
+            setIssuer(e.target.value);
+          }}
+        />
+        <button type="button" onClick={() => handleLogin()}>Log In</button>
+        <button type="button" onClick={() => handleLogout()}>Log Out</button>
+      </form>
+      <hr />
+      <input
+        type="text"
+        value={resource}
+        onChange={(e) => {
+          setIssuer(e.target.value);
+        }}
+      />
+      <button type="button" onClick={() => handleFetch()}>Fetch</button>
+      <pre>{data}</pre>
+    </main>
   );
 }
