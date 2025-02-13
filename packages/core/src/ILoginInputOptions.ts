@@ -55,4 +55,11 @@ export default interface ILoginInputOptions {
    * secret to authenticate.
    */
   refreshToken?: string;
+  /**
+   * Specify whether the Solid Identity Provider may, or may not, interact with the user (for example,
+   * the normal login process **_requires_** human interaction for them to enter their credentials,
+   * but if a user simply refreshes the current page in their browser, we'll want to log them in again
+   * automatically, i.e., without prompting them to manually provide their credentials again).
+   */
+  prompt?: string;
 }
