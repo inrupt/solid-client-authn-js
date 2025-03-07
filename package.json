@@ -40,8 +40,10 @@
     "build-docs-preview-site": "lerna run build-docs-preview-site; rm -r dist/website || true; lerna exec -- mkdir -p ../../dist/website/\\${PWD##*/}; lerna exec -- \"cp -r docs/api/build/html/. ../../dist/website/\\${PWD##*/}/ || true\"; echo 'API documentation: <a href=\"./browser/\">solid-client-authn-browser</a>, <a href=\"./node/\">solid-client-authn-node</a>, <a href=\"./core/\">solid-client-authn-core</a>, <a href=\"./demo/\">demo app</a>.' >> dist/website/index.html",
     "build-demo-app": "npm run build; cd packages/browser/examples/demoClientApp/; npm ci; npm run build; mkdir -p ../../../../dist/website/demo/; cp -r dist/. ../../../../dist/website/demo/"
   },
+  "dependencies": {
+    "@inrupt/base-rollup-config": "^3.2.4"
+  },
   "devDependencies": {
-    "@inrupt/base-rollup-config": "^3.2.4",
     "@inrupt/eslint-config-lib": "^3.2.4",
     "@inrupt/internal-playwright-helpers": "^3.2.4",
     "@inrupt/internal-test-env": "^3.2.3",

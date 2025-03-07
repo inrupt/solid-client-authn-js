@@ -30,6 +30,10 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+## DENO.js support
+A "mod.ts" as been added for the esm formatted bundle: packages/browser/dist/deno-solid-client-authn.bundle.js
+
+
 ### Bugfix
 
 #### browser and node
