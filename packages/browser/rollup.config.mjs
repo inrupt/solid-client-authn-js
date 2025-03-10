@@ -37,6 +37,12 @@ export default [
         name: "solidClientAuthentication",
         sourcemap: true,
       },
+      {
+        file: pkg["deno-bundle"],
+        format: "esm",
+        name: "solidClientAuthentication",
+        sourcemap: true,
+      }
     ],
     ...createSharedConfig(pkg),
     external: [],
