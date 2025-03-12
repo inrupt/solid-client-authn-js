@@ -3,6 +3,9 @@
 `solid-client-authn-browser` is a library designed to authenticate web apps (in the browser) with Solid identity servers.
 The main documentation is at the [root of the repository](https://github.com/inrupt/solid-client-authn-js).
 
+## DENO use
+A "mod.ts" as been added for the esm formatted bundle: packages/browser/dist/deno-solid-client-authn.bundle.js
+
 ## Required polyfills
 
 Our JavaScript Client Libraries use relatively modern JavaScript features that
