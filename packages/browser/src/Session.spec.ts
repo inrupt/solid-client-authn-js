@@ -63,7 +63,7 @@ const mockLocation = (mockedLocation: string) => {
   delete (window as any).history.replaceState;
 
   // Set our window's location to our test value.
-  window.location = {
+  (window as any).location = {
     href: mockedLocation,
   } as Location;
   window.history.replaceState = jest.fn();
