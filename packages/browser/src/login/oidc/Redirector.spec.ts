@@ -49,14 +49,14 @@ describe("Redirector", () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       delete window.history.replaceState;
-      window.location = {
+      (window as any).location = {
         href: "https://coolSite.com",
       } as Location;
       window.history.replaceState = jest.fn();
     });
 
     afterEach(() => {
-      window.location = location;
+      (window as any).location = location;
       window.history.replaceState = replaceState;
     });
 
