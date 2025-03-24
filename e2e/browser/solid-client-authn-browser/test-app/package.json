@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^3.2.6",
-    "@playwright/test": "^1.50.1",
+    "@playwright/test": "^1.51.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
