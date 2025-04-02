@@ -22,7 +22,7 @@
     "@types/node": "^22.13.13",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
-    "esbuild": "^0.25.1",
+    "esbuild": "^0.25.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.2.3"
   }
