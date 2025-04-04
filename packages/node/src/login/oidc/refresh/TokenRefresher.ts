@@ -152,6 +152,16 @@ export default class TokenRefresher implements ITokenRefresher {
         refreshToken: tokenSet.refreshToken,
       });
     }
+
+    eventEmitter?.emit(EVENTS.NEW_TOKENS, {
+      access_token: tokenSet.accessToken,
+      id_token: tokenSet.idToken,
+      refresh_token: tokenSet.refreshToken,
+      webId: tokenSet.webId,
+      expiresAt: tokenSet.expiresAt,
+      dpopKey,
+    });
+
     return tokenSet;
   }
 }
