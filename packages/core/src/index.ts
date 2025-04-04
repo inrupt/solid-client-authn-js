@@ -24,6 +24,7 @@ export * from "./constant";
 export {
   IHasSessionEventListener,
   ISessionEventListener,
+  type SessionTokenSet,
 } from "./SessionEventListener";
 
 export { default as ILoginInputOptions } from "./ILoginInputOptions";

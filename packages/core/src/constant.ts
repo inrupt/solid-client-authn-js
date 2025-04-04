@@ -37,6 +37,7 @@ export const EVENTS = {
   LOGIN: "login",
   LOGOUT: "logout",
   NEW_REFRESH_TOKEN: "newRefreshToken",
+  NEW_TOKENS: "newTokens",
   SESSION_EXPIRED: "sessionExpired",
   SESSION_EXTENDED: "sessionExtended",
   SESSION_RESTORED: "sessionRestore",

@@ -185,6 +185,15 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       client.metadata.client_id,
     );
 
+    eventEmitter?.emit(EVENTS.NEW_TOKENS, {
+      access_token: tokenSet.access_token,
+      id_token: tokenSet.id_token,
+      refresh_token: tokenSet.refresh_token,
+      webId,
+      expiresAt: tokenSet.expires_at,
+      dpopKey,
+    });
+
     await saveSessionInfoToStorage(
       this.storageUtility,
       sessionId,

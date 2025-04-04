@@ -450,6 +450,37 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
+    it("calls the token set handler if one is provided", async () => {
+      const mockedTokens = mockDpopTokens();
+      mockedTokens.refresh_token = "some refresh token";
+      setupOidcClientMock(mockedTokens);
+      const mockedStorage = mockDefaultRedirectStorage();
+      const mockEmitter = new EventEmitter();
+      const mockEmit = jest.spyOn(mockEmitter, "emit");
+
+      // Run the test
+      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
+        storageUtility: mockedStorage,
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await authCodeRedirectHandler.handle(
+        "https://my.app/redirect?code=someCode&state=someState",
+        mockEmitter,
+      );
+
+      expect(mockEmit).toHaveBeenCalledWith(
+        EVENTS.NEW_TOKENS,
+        expect.objectContaining({
+          access_token: mockedTokens.access_token,
+          id_token: mockedTokens.id_token,
+          refresh_token: mockedTokens.refresh_token,
+          webId: "https://my.webid/",
+          dpopKey: expect.anything(),
+        }),
+      );
+    });
+
     it("throws if the iss parameter does not match stored issuer", async () => {
       const mockedStorage = mockDefaultRedirectStorage();
       const mockedTokens = mockDpopTokens();
