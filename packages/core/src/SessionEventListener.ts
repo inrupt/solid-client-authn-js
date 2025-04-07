@@ -37,7 +37,7 @@ export type SessionTokenSet = {
   /**
    * JWT-serialized ID token
    */
-  id_token?: string;
+  idToken?: string;
   /**
    * URL identifying the subject of the ID token.
    */
@@ -45,7 +45,7 @@ export type SessionTokenSet = {
   /**
    * Refresh token (not necessarily a JWT)
    */
-  refresh_token?: string;
+  refreshToken?: string;
   /**
    * Expiration of the access token.
    */

@@ -472,9 +472,9 @@ describe("AuthCodeRedirectHandler", () => {
       expect(mockEmit).toHaveBeenCalledWith(
         EVENTS.NEW_TOKENS,
         expect.objectContaining({
-          access_token: mockedTokens.access_token,
-          id_token: mockedTokens.id_token,
-          refresh_token: mockedTokens.refresh_token,
+          accessToken: mockedTokens.access_token,
+          idToken: mockedTokens.id_token,
+          refreshToken: mockedTokens.refresh_token,
           webId: "https://my.webid/",
           dpopKey: expect.anything(),
         }),

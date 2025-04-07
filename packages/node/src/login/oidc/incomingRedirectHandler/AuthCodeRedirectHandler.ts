@@ -186,9 +186,9 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     );
 
     eventEmitter?.emit(EVENTS.NEW_TOKENS, {
-      access_token: tokenSet.access_token,
-      id_token: tokenSet.id_token,
-      refresh_token: tokenSet.refresh_token,
+      accessToken: tokenSet.access_token,
+      idToken: tokenSet.id_token,
+      refreshToken: tokenSet.refresh_token,
       webId,
       expiresAt: tokenSet.expires_at,
       dpopKey,

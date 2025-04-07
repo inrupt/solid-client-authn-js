@@ -142,9 +142,9 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     });
 
     oidcLoginOptions.eventEmitter?.emit(EVENTS.NEW_TOKENS, {
-      access_token: tokens.access_token,
-      id_token: tokens.id_token,
-      refresh_token: tokens.refresh_token,
+      accessToken: tokens.access_token,
+      idToken: tokens.id_token,
+      refreshToken: tokens.refresh_token,
       webId,
       expiresAt: tokens.expires_at,
       dpopKey,
