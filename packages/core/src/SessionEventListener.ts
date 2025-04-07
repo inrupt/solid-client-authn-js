@@ -33,7 +33,7 @@ export type SessionTokenSet = {
   /**
    * JWT-serialized access token
    */
-  access_token: string;
+  accessToken: string;
   /**
    * JWT-serialized ID token
    */
@@ -83,7 +83,7 @@ type TIMEOUT_SET_ARGS = {
   listener: (timeoutId: number) => void;
 };
 /**
- * @deprecated
+ * @deprecated Use NEW_TOKENS_ARGS instead
  */
 type NEW_REFRESH_TOKEN_ARGS = {
   eventName: typeof EVENTS.NEW_REFRESH_TOKEN;
