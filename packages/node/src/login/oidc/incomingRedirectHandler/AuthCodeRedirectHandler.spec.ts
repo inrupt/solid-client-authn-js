@@ -519,7 +519,7 @@ describe("AuthCodeRedirectHandler", () => {
       ).rejects.toThrow(
         `The Identity Provider [${
           mockDefaultIssuerConfig().issuer
-        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`,
+        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
       );
     });
 
@@ -542,7 +542,7 @@ describe("AuthCodeRedirectHandler", () => {
       ).rejects.toThrow(
         `The Identity Provider [${
           mockDefaultIssuerConfig().issuer
-        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`,
+        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
       );
     });
 

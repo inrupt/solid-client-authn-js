@@ -35,6 +35,7 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import {
   loadOidcContextFromStorage,
+  getWebidFromTokenPayload,
   PREFERRED_SIGNING_ALG,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
@@ -49,10 +50,11 @@ import { negotiateClientSigningAlg } from "../ClientRegistrar";
 // official names from the OIDC/OAuth2 specifications.
 /* eslint-disable camelcase */
 
-const tokenSetToTokenEndpointResponse = (
+const tokenSetToTokenEndpointResponse = async (
   tokenSet: TokenSet,
   issuerMetadata: IssuerMetadata,
-): TokenEndpointResponse => {
+  clientInfo: IClient,
+): Promise<TokenEndpointResponse> => {
   if (tokenSet.access_token === undefined) {
     // The error message is left minimal on purpose not to leak the tokens.
     throw new Error(
@@ -65,11 +67,26 @@ const tokenSetToTokenEndpointResponse = (
       `The Identity Provider [${issuerMetadata.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
     );
   }
+
+  if (tokenSet.id_token === undefined) {
+    throw new Error(
+      `The Identity Provider [${issuerMetadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
+    );
+  }
+
+  const { webId } = await getWebidFromTokenPayload(
+    tokenSet.id_token,
+    issuerMetadata.jwks_uri!,
+    issuerMetadata.issuer,
+    clientInfo.clientId,
+  );
+
   return {
     accessToken: tokenSet.access_token,
     tokenType: tokenSet.token_type,
     idToken: tokenSet.id_token,
     refreshToken: tokenSet.refresh_token,
+    webId,
     expiresAt: tokenSet.expires_at,
   };
 };
@@ -123,7 +140,6 @@ export default class TokenRefresher implements ITokenRefresher {
     });
 
     if (refreshToken === undefined) {
-      // TODO: in a next PR, look up storage for a refresh token
       throw new Error(
         `Session [${sessionId}] has no refresh token to allow it to refresh its access token.`,
       );
@@ -135,7 +151,7 @@ export default class TokenRefresher implements ITokenRefresher {
       );
     }
 
-    const tokenSet = tokenSetToTokenEndpointResponse(
+    const tokenSet = await tokenSetToTokenEndpointResponse(
       await client.refresh(refreshToken, {
         // openid-client does not support yet jose@3.x, and expects
         // type definitions that are no longer present. However, the JWK
@@ -144,6 +160,7 @@ export default class TokenRefresher implements ITokenRefresher {
         DPoP: dpopKey ? (dpopKey.privateKey as KeyObject) : undefined,
       }),
       issuer.metadata,
+      clientInfo,
     );
 
     if (tokenSet.refreshToken !== undefined) {
