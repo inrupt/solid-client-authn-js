@@ -141,12 +141,17 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       expiresIn: tokens.expires_in,
     });
 
+    const expiresAt =
+      tokens.expires_in !== undefined
+        ? Date.now() + tokens.expires_in * 1000
+        : undefined;
+
     oidcLoginOptions.eventEmitter?.emit(EVENTS.NEW_TOKENS, {
       accessToken: tokens.access_token,
       idToken: tokens.id_token,
       refreshToken: tokens.refresh_token,
       webId,
-      expiresAt: tokens.expires_at,
+      expiresAt,
       dpopKey,
     });
 
@@ -155,10 +160,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       sessionId: oidcLoginOptions.sessionId,
       webId,
       clientAppId: clientId,
-      expirationDate:
-        tokens.expires_in !== undefined
-          ? Date.now() + tokens.expires_in * 1000
-          : undefined,
+      expirationDate: expiresAt,
     };
     return Object.assign(sessionInfo, {
       fetch: authFetch,
