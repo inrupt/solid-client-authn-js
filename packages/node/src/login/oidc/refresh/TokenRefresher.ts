@@ -55,22 +55,16 @@ const tokenSetToTokenEndpointResponse = async (
   issuerMetadata: IssuerMetadata,
   clientInfo: IClient,
 ): Promise<TokenEndpointResponse> => {
-  if (tokenSet.access_token === undefined) {
+  if (tokenSet.access_token === undefined || tokenSet.id_token === undefined) {
     // The error message is left minimal on purpose not to leak the tokens.
     throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] did not return an access token on refresh.`,
+      `The Identity Provider [${issuerMetadata.issuer}] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
     );
   }
 
   if (tokenSet.token_type !== "Bearer" && tokenSet.token_type !== "DPoP") {
     throw new Error(
       `The Identity Provider [${issuerMetadata.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
-    );
-  }
-
-  if (tokenSet.id_token === undefined) {
-    throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
     );
   }
 
