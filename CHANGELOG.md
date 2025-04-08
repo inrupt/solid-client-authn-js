@@ -26,6 +26,9 @@ const session = await getSessionFromStorage(sessionId, {
 });
 ```
 
+- The event `EVENTS.NEW_REFRESH_TOKEN` is being replaced by `EVENTS.NEW_TOKENS` which returns all the tokens a client
+  can store for refreshing a session.
+
 ## Unreleased
 
 The following changes have been implemented but not released yet:
@@ -41,6 +44,13 @@ The following changes have been implemented but not released yet:
   and end up on an error page unrelated to the application they were trying to log into. Now,
   expired dynamic clients go through registration again: the user will need to authorize the client
   after expiration, but will not experience further inconveniences.
+
+### Feature
+
+#### node
+
+- Added a `EVENTS.NEW_TOKENS` event to be emitted by the `Session` when it receives new tokens when a session is initially 
+  logged in or refreshed. This event is more useful than `EVENTS.NEW_REFRESH_TOKEN` which is being deprecated. 
 
 ## [2.3.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.3.0) - 2024-11-14
 
