@@ -20,13 +20,11 @@
 //
 import log from "loglevel";
 import express from "express";
-// Here we want to test how the local code behaves, not the already published one.
-// eslint-disable-next-line import/no-relative-packages
-import type { SessionTokenSet } from "../../../packages/core/src/index";
-// eslint-disable-next-line import/no-relative-packages
-import type { ISessionOptions } from "../../../packages/node/src/index";
-// eslint-disable-next-line import/no-relative-packages
-import { Session, EVENTS } from "../../../packages/node/src/index";
+import type {
+  ISessionOptions,
+  SessionTokenSet,
+} from "@inrupt/solid-client-authn-node";
+import { Session, EVENTS } from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
 import CONSTANTS from "../../../playwright.client-authn.constants.json";

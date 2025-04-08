@@ -27,14 +27,11 @@ import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import type { Request } from "@playwright/test";
 import { firefox } from "@playwright/test";
 import { custom } from "openid-client";
-// Here we want to test how the local code behaves, not the already published one.
 import type {
   ILogoutOptions,
   SessionTokenSet,
-  // eslint-disable-next-line import/no-relative-packages
-} from "../../../packages/core/src/index";
-// eslint-disable-next-line import/no-relative-packages
-import { Session, EVENTS } from "../../../packages/node/src/index";
+} from "@inrupt/solid-client-authn-node";
+import { Session, EVENTS } from "@inrupt/solid-client-authn-node";
 import type { ISeedPodResponse } from "../../browser/solid-client-authn-browser/test/fixtures";
 import {
   seedPod,

@@ -32,10 +32,12 @@ export {
 
 export {
   ILoginInputOptions,
+  ILogoutOptions,
   ISessionInfo,
   IStorage,
   NotImplementedError,
   ConfigurationError,
   InMemoryStorage,
   EVENTS,
+  type SessionTokenSet,
 } from "@inrupt/solid-client-authn-core";

@@ -33,14 +33,9 @@ import {
   jest,
 } from "@jest/globals";
 import { custom } from "openid-client";
-// Here we want to test how the local code behaves, not the already published one.
-// eslint-disable-next-line import/no-relative-packages
 import { getSolidDataset } from "@inrupt/solid-client";
-// The relative import is used to run on latest library, rather than latest published.
-// eslint-disable-next-line import/no-relative-packages
-import { EVENTS, Session } from "../../../packages/node/src/index";
-// eslint-disable-next-line import/no-relative-packages
-import type { SessionTokenSet } from "../../../packages/core/src/index";
+import { EVENTS, Session } from "@inrupt/solid-client-authn-node";
+import type { SessionTokenSet } from "@inrupt/solid-client-authn-node";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
