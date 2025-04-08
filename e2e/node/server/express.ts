@@ -22,9 +22,11 @@ import log from "loglevel";
 import express from "express";
 // Here we want to test how the local code behaves, not the already published one.
 // eslint-disable-next-line import/no-relative-packages
+import type { SessionTokenSet } from "../../../packages/core/src/index";
+// eslint-disable-next-line import/no-relative-packages
 import type { ISessionOptions } from "../../../packages/node/src/index";
 // eslint-disable-next-line import/no-relative-packages
-import { Session } from "../../../packages/node/src/index";
+import { Session, EVENTS } from "../../../packages/node/src/index";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
@@ -39,6 +41,7 @@ export function createApp(
 
   // Initialised when the server comes up and is running...
   let session: Session;
+  let sessionTokenSet: SessionTokenSet;
 
   app.get("/", (_req, res) => {
     res.status(200).end();
@@ -88,6 +91,10 @@ export function createApp(
       .end();
   });
 
+  app.get("/tokens", async (req, res) => {
+    res.json(sessionTokenSet);
+  });
+
   app.get("/logout", async (_req, res) => {
     try {
       await session.logout();
@@ -117,6 +124,9 @@ export function createApp(
 
   return app.listen(CONSTANTS.CLIENT_AUTHN_TEST_PORT, async () => {
     session = new Session(sessionOptions);
+    session.events.on(EVENTS.NEW_TOKENS, (tokenSet) => {
+      sessionTokenSet = tokenSet;
+    });
 
     onStart();
   });
