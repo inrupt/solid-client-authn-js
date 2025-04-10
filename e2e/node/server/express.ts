@@ -19,12 +19,17 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 import log from "loglevel";
+import cookieSession from "cookie-session";
 import express from "express";
 import type {
   ISessionOptions,
   SessionTokenSet,
 } from "@inrupt/solid-client-authn-node";
-import { Session, EVENTS } from "@inrupt/solid-client-authn-node";
+import {
+  Session,
+  getSessionFromStorage,
+  EVENTS,
+} from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
@@ -37,9 +42,19 @@ export function createApp(
 ) {
   const app = express();
 
-  // Initialised when the server comes up and is running...
-  let session: Session;
-  let sessionTokenSet: SessionTokenSet;
+  const sessionTokenSets = new Map<string, SessionTokenSet>();
+
+  app.use(
+    cookieSession({
+      name: "session",
+      // These keys are required by cookie-session to sign the cookies.
+      keys: [
+        "Required, but value not relevant for this demo - key1",
+        "Required, but value not relevant for this demo - key2",
+      ],
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    }),
+  );
 
   app.get("/", (_req, res) => {
     res.status(200).end();
@@ -53,6 +68,9 @@ export function createApp(
       return;
     }
 
+    const session = new Session(sessionOptions);
+
+    req.session!.sessionId = session.info.sessionId;
     await session.login({
       redirectUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/redirect`,
       oidcIssuer,
@@ -62,6 +80,13 @@ export function createApp(
   });
 
   app.get("/redirect", async (req, res) => {
+    const session = await getSessionFromStorage(req.session!.sessionId);
+    if (!session) return;
+
+    session.events.on(EVENTS.NEW_TOKENS, (tokenSet) => {
+      sessionTokenSets.set(session.info.sessionId, tokenSet);
+    });
+
     const info = await session.handleIncomingRedirect(
       `${req.protocol}://${req.get("host")}${req.originalUrl}`,
     );
@@ -82,7 +107,12 @@ export function createApp(
       return;
     }
 
-    const response = await session.fetch(resource);
+    const session = await getSessionFromStorage(req.session!.sessionId, {
+      refreshSession: true,
+    });
+
+    const { fetch } = session ?? new Session();
+    const response = await fetch(resource);
     res
       .status(response.status)
       .send(await response.text())
@@ -90,12 +120,17 @@ export function createApp(
   });
 
   app.get("/tokens", async (req, res) => {
-    res.json(sessionTokenSet);
+    const tokenSet = sessionTokenSets.get(req.session!.sessionId);
+    res.json(tokenSet);
   });
 
-  app.get("/logout", async (_req, res) => {
+  app.get("/logout", async (req, res) => {
+    const session = await getSessionFromStorage(req.session!.sessionId);
+    if (!session) return;
+
     try {
       await session.logout();
+      sessionTokenSets.delete(req.session!.sessionId);
       res.status(200).send("successful logout").end();
     } catch (error) {
       res.status(400).send(`Logout processing failed: [${error}]`).end();
@@ -106,7 +141,10 @@ export function createApp(
     res.status(200).send("successfully at post logout").end();
   });
 
-  app.get("/idplogout", async (_req, res) => {
+  app.get("/idplogout", async (req, res) => {
+    const session = await getSessionFromStorage(req.session!.sessionId);
+    if (!session) return;
+
     try {
       await session.logout({
         logoutType: "idp",
@@ -115,17 +153,13 @@ export function createApp(
           res.redirect(url);
         },
       });
+      sessionTokenSets.delete(req.session!.sessionId);
     } catch (error) {
       res.status(400).send(`Logout processing failed: [${error}]`).end();
     }
   });
 
   return app.listen(CONSTANTS.CLIENT_AUTHN_TEST_PORT, async () => {
-    session = new Session(sessionOptions);
-    session.events.on(EVENTS.NEW_TOKENS, (tokenSet) => {
-      sessionTokenSet = tokenSet;
-    });
-
     onStart();
   });
 }

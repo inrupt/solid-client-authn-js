@@ -130,6 +130,7 @@ const createClientIdDoc = async (
     clientName: string;
     redirectUrl: string;
     scope?: string;
+    grantTypes?: string[];
   },
   container: string,
   session: Session,
@@ -153,7 +154,7 @@ const createClientIdDoc = async (
     // should be updated so that it has the offline_access scope and supports the
     // refresh_token grant type.
     scope: clientInfo.scope ?? "openid webid",
-    grant_types: ["authorization_code"],
+    grant_types: clientInfo.grantTypes ?? ["authorization_code"],
     response_types: ["code"],
     post_logout_redirect_uris: [
       `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
@@ -275,6 +276,7 @@ export interface ISeedPodResponse {
 
 export async function seedPod(
   setupEnvironment: TestingEnvironmentNode,
+  enableRefresh?: boolean,
 ): Promise<ISeedPodResponse> {
   if (
     setupEnvironment.clientCredentials.owner.type !== "ESS Client Credentials"
@@ -315,6 +317,10 @@ export async function seedPod(
       redirectUrl: new URL(
         `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}`,
       ).href,
+      scope: enableRefresh ? "openid webid offline_access" : undefined,
+      grantTypes: enableRefresh
+        ? ["authorization_code", "refresh_token"]
+        : undefined,
     },
     podRoot,
     session,

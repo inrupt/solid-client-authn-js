@@ -159,7 +159,8 @@ describe("Testing against express app with default session", () => {
   let seedInfo: ISeedPodResponse;
 
   beforeEach(async () => {
-    seedInfo = await seedPod(ENV);
+    // Enable refresh in clientId document
+    seedInfo = await seedPod(ENV, true);
     await new Promise<void>((res) => {
       app = createApp(res, { keepAlive: true });
     });
@@ -182,7 +183,8 @@ describe("Testing against express app with session keep alive off", () => {
   let seedInfo: ISeedPodResponse;
 
   beforeEach(async () => {
-    seedInfo = await seedPod(ENV);
+    // Enable refresh in clientId document
+    seedInfo = await seedPod(ENV, true);
     await new Promise<void>((res) => {
       app = createApp(res, { keepAlive: false });
     });
