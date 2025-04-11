@@ -168,6 +168,7 @@ export interface ISessionEventListener extends EventEmitter {
    * Register a listener called when a new refresh token is issued for the session.
    * @param eventName The new refresh token issued event name.
    * @param listener The callback called when a new refresh token is issued.
+   * @deprecated Use NEW_TOKENS event listeners instead
    */
   on(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
@@ -259,6 +260,7 @@ export interface ISessionEventListener extends EventEmitter {
    * Register a listener called when a new refresh token is issued for the session.
    * @param eventName The new refresh token issued event name.
    * @param listener The callback called when a new refresh token is issued.
+   * @deprecated Use NEW_TOKENS event listeners instead
    */
   addListener(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
@@ -351,6 +353,7 @@ export interface ISessionEventListener extends EventEmitter {
    * the session.
    * @param eventName The new refresh token issued event name.
    * @param listener The callback called next time a new refresh token is issued.
+   * @deprecated Use NEW_TOKENS event listeners instead
    */
   once(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
@@ -442,6 +445,7 @@ export interface ISessionEventListener extends EventEmitter {
    * Unegister a listener called when a new refresh token is issued.
    * @param eventName The new refresh token issued event name.
    * @param listener The callback called next time a new refresh token is issued.
+   * @deprecated Use NEW_TOKENS event listeners instead
    */
   off(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
@@ -532,6 +536,7 @@ export interface ISessionEventListener extends EventEmitter {
    * Unegister a listener called when a new refresh token is issued.
    * @param eventName The new refresh token issued event name.
    * @param listener The callback called next time a new refresh token is issued.
+   * @deprecated Use NEW_TOKENS event listeners instead
    */
   removeListener(
     eventName: NEW_REFRESH_TOKEN_ARGS["eventName"],
