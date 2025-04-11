@@ -33,12 +33,9 @@ import {
   jest,
 } from "@jest/globals";
 import { custom } from "openid-client";
-// Here we want to test how the local code behaves, not the already published one.
-// eslint-disable-next-line import/no-relative-packages
 import { getSolidDataset } from "@inrupt/solid-client";
-// The relative import is used to run on latest library, rather than latest published.
-// eslint-disable-next-line import/no-relative-packages
-import { EVENTS, Session } from "../../../packages/node/src/index";
+import { EVENTS, Session } from "@inrupt/solid-client-authn-node";
+import type { SessionTokenSet } from "@inrupt/solid-client-authn-node";
 
 custom.setHttpOptionsDefaults({
   timeout: 15000,
@@ -59,6 +56,8 @@ function getCredentials() {
     oidcIssuer: ENV.idp,
   };
 }
+
+// Testing the Client Credentials authorization flow from a command-line application.
 
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
   const authenticatedSession = new Session();
@@ -226,16 +225,18 @@ describe("Session events", () => {
   let loginFunc: () => void;
   let logoutFunc: () => void;
   let expiredFunc: () => void;
+  let newTokensFunc: jest.Mock;
 
   beforeEach(async () => {
     session = new Session();
     loginFunc = jest.fn();
     logoutFunc = jest.fn();
     expiredFunc = jest.fn();
+    newTokensFunc = jest.fn();
     session.events.on(EVENTS.LOGIN, loginFunc);
     session.events.on(EVENTS.LOGOUT, logoutFunc);
     session.events.on(EVENTS.SESSION_EXPIRED, expiredFunc);
-
+    session.events.on(EVENTS.NEW_TOKENS, newTokensFunc);
     await session.login(getCredentials());
   });
 
@@ -246,6 +247,14 @@ describe("Session events", () => {
     expect(loginFunc).toHaveBeenCalledTimes(1);
     expect(logoutFunc).toHaveBeenCalledTimes(1);
     expect(expiredFunc).toHaveBeenCalledTimes(0);
+    expect(newTokensFunc).toHaveBeenCalledTimes(1);
+    const tokenArgument: SessionTokenSet = newTokensFunc.mock
+      .calls[0][0] as SessionTokenSet;
+    expect(tokenArgument.accessToken).toBeDefined();
+    expect(tokenArgument.idToken).toBeDefined();
+    expect(tokenArgument.webId).toBeDefined();
+    expect(tokenArgument.expiresAt).toBeDefined();
+    expect(tokenArgument.dpopKey).toBeDefined();
   });
 
   it("sends an event on session expiration", async () => {

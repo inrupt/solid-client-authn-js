@@ -56,6 +56,8 @@ if (process.env.CI === "true") {
 const ENV = getNodeTestingEnvironment();
 const BROWSER_ENV = getBrowserTestingEnvironment();
 
+// Testing the OIDC Authorization Code flow in an express-based web application.
+
 async function performTest(seedInfo: ISeedPodResponse) {
   const browser = await firefox.launch();
   const page = await browser.newPage();
@@ -97,6 +99,28 @@ async function performTest(seedInfo: ISeedPodResponse) {
     `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
   );
 
+  // Fetching the token set returned after login
+  const tokensUrl = new URL(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens`,
+  );
+
+  // Use page.evaluate to fetch JSON response
+  await page.goto(tokensUrl.toString());
+  const tokenSet = await page.evaluate(() => {
+    try {
+      return JSON.parse(document.body.textContent || "{}");
+    } catch (e) {
+      return null;
+    }
+  });
+
+  expect(tokenSet).toBeDefined();
+  expect(tokenSet.accessToken).toBeDefined();
+  expect(tokenSet.idToken).toBeDefined();
+  expect(tokenSet.expiresAt).toBeDefined();
+  expect(tokenSet.dpopKey).toBeDefined();
+  expect(tokenSet.webId).toBeDefined();
+
   // Performing idp logout and being redirected to the postLogoutUrl after doing so
   await page.goto(
     `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/idplogout`,
@@ -135,7 +159,8 @@ describe("Testing against express app with default session", () => {
   let seedInfo: ISeedPodResponse;
 
   beforeEach(async () => {
-    seedInfo = await seedPod(ENV);
+    // Enable refresh in clientId document
+    seedInfo = await seedPod(ENV, true);
     await new Promise<void>((res) => {
       app = createApp(res, { keepAlive: true });
     });
@@ -158,7 +183,8 @@ describe("Testing against express app with session keep alive off", () => {
   let seedInfo: ISeedPodResponse;
 
   beforeEach(async () => {
-    seedInfo = await seedPod(ENV);
+    // Enable refresh in clientId document
+    seedInfo = await seedPod(ENV, true);
     await new Promise<void>((res) => {
       app = createApp(res, { keepAlive: false });
     });

@@ -27,6 +27,8 @@ import { jest, it, describe, expect } from "@jest/globals";
 import type * as OpenidClient from "openid-client";
 import type { JWK } from "jose";
 import { randomUUID } from "crypto";
+import { EventEmitter } from "events";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
@@ -468,6 +470,40 @@ describe("handle", () => {
     expect(result?.webId).toBe("https://my.webid/");
     expect(result?.expirationDate).toBe(
       Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
+    );
+  });
+
+  it("calls the token set handler if one is provided", async () => {
+    const tokens = mockDpopTokens();
+    setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/");
+    const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+      mockDefaultTokenRefresher(),
+    );
+    const mockEmitter = new EventEmitter();
+    const mockEmit = jest.spyOn(mockEmitter, "emit");
+
+    await clientCredentialsOidcHandler.handle({
+      ...standardOidcOptions,
+      dpop: true,
+      client: {
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
+        clientType: "static",
+      },
+      eventEmitter: mockEmitter,
+    });
+
+    expect(mockEmit).toHaveBeenCalledWith(
+      EVENTS.NEW_TOKENS,
+      expect.objectContaining({
+        accessToken: tokens.access_token,
+        idToken: tokens.id_token,
+        refreshToken: tokens.refresh_token,
+        webId: "https://my.webid/",
+        expiresAt: Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
+        dpopKey: expect.anything(),
+      }),
     );
   });
 

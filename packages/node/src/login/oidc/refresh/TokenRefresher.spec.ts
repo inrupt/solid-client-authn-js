@@ -20,7 +20,7 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import type { KeyPair } from "@inrupt/solid-client-authn-core";
+import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import {
   mockStorageUtility,
   StorageUtilityMock,
@@ -41,9 +41,23 @@ import {
   mockIssuerConfigFetcher,
 } from "../__mocks__/IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
+import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 jest.mock("openid-client");
 jest.mock("../ClientRegistrar");
+
+jest.mock("@inrupt/solid-client-authn-core", () => {
+  const actualCoreModule = jest.requireActual(
+    "@inrupt/solid-client-authn-core",
+  ) as typeof SolidClientAuthnCore;
+  return {
+    ...actualCoreModule,
+    // This works around the network lookup to the JWKS in order to validate the ID token.
+    getWebidFromTokenPayload: jest.fn(() =>
+      Promise.resolve("https://my.webid/"),
+    ),
+  };
+});
 
 const mockJwk = (): JWK => {
   return {
@@ -57,7 +71,7 @@ const mockJwk = (): JWK => {
   };
 };
 
-const mockKeyPair = async (): Promise<KeyPair> => {
+const mockKeyPair = async (): Promise<SolidClientAuthnCore.KeyPair> => {
   return {
     privateKey: (await importJWK(mockJwk())) as KeyObject,
     // Use the same JWK for public and private key out of convenience, don't do
@@ -119,7 +133,7 @@ const setupOidcClientMock = (tokenSet: TokenSet) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as any;
   const mockedIssuer = {
-    metadata: mockDefaultIssuerConfig(),
+    metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
     Client: jest.fn().mockReturnValue({
       refresh: jest.fn().mockResolvedValueOnce(tokenSet as never),
     }),
@@ -398,7 +412,31 @@ describe("TokenRefresher", () => {
     ).rejects.toThrow(
       `The Identity Provider [${
         mockDefaultIssuerConfig().issuer
-      }] did not return an access token on refresh`,
+      }] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
+    );
+  });
+
+  it("throws if the IdP does not return an id token", async () => {
+    const mockedTokens = mockDpopTokens();
+    mockedTokens.id_token = undefined;
+    setupOidcClientMock(mockedTokens);
+
+    const mockedStorage = mockRefresherDefaultStorageUtility();
+
+    const refresher = getTokenRefresher({
+      storageUtility: mockedStorage,
+    });
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some old refresh token",
+        await mockKeyPair(),
+      ),
+    ).rejects.toThrow(
+      `The Identity Provider [${
+        mockDefaultIssuerConfig().issuer
+      }] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
     );
   });
 

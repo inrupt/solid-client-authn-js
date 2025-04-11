@@ -24,6 +24,7 @@ import type { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import type EventEmitter from "events";
+import type { SessionTokenSet } from "core";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import type ClientAuthentication from "./ClientAuthentication";
 import { Session } from "./Session";
@@ -434,6 +435,17 @@ describe("Session", () => {
           "some new refresh token",
         );
         expect(myCallback).toHaveBeenCalledWith("some new refresh token");
+      });
+    });
+
+    describe("newTokens", () => {
+      it("calls the registered callback on the newTokens event", async () => {
+        const myCallback = jest.fn();
+        const mySession = new Session();
+        const tokenSet: SessionTokenSet = { accessToken: "an access token" };
+        mySession.events.on(EVENTS.NEW_TOKENS, myCallback);
+        (mySession.events as EventEmitter).emit("newTokens", tokenSet);
+        expect(myCallback).toHaveBeenCalledWith(tokenSet);
       });
     });
   });

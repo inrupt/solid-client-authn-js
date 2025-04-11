@@ -155,7 +155,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     ) {
       // The error message is left minimal on purpose not to leak the tokens.
       throw new Error(
-        `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token.`,
+        `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
       );
     }
     let refreshOptions: RefreshOptions | undefined;
@@ -184,6 +184,15 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       issuer.metadata.issuer,
       client.metadata.client_id,
     );
+
+    eventEmitter?.emit(EVENTS.NEW_TOKENS, {
+      accessToken: tokenSet.access_token,
+      idToken: tokenSet.id_token,
+      refreshToken: tokenSet.refresh_token,
+      webId,
+      expiresAt: tokenSet.expires_at,
+      dpopKey,
+    });
 
     await saveSessionInfoToStorage(
       this.storageUtility,

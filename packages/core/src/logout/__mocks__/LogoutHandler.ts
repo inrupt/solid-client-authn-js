@@ -19,12 +19,9 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type {
-  ILogoutHandler,
-  IStorageUtility,
-} from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
 import { clear } from "../../sessionInfo/SessionInfoManager";
+import type { ILogoutHandler, IStorageUtility } from "../../index";
 
 export const mockLogoutHandler = (
   storageUtility: IStorageUtility,

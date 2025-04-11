@@ -26,17 +26,18 @@ import {
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import type { Request } from "@playwright/test";
 import { firefox } from "@playwright/test";
-import type { ILogoutOptions } from "@inrupt/solid-client-authn-core";
 import { custom } from "openid-client";
-// Here we want to test how the local code behaves, not the already published one.
-// eslint-disable-next-line import/no-relative-packages
-import { Session } from "../../../packages/node/src/index";
+import type {
+  ILogoutOptions,
+  SessionTokenSet,
+} from "@inrupt/solid-client-authn-node";
+import { Session, EVENTS } from "@inrupt/solid-client-authn-node";
 import type { ISeedPodResponse } from "../../browser/solid-client-authn-browser/test/fixtures";
 import {
   seedPod,
   tearDownPod,
 } from "../../browser/solid-client-authn-browser/test/fixtures";
-// Extesion is required for JSON imports.
+// Extension is required for JSON imports.
 // eslint-disable-next-line import/extensions
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
@@ -51,6 +52,9 @@ if (process.env.CI === "true") {
 
 const ENV = getNodeTestingEnvironment();
 const BROWSER_ENV = getBrowserTestingEnvironment();
+
+// Testing the OIDC Authorization Code flow from a command-line application where
+// a browser is used to support the login.
 
 describe("RP initiated login/out using playwright", () => {
   let seedInfo: ISeedPodResponse;
@@ -81,6 +85,10 @@ describe("RP initiated login/out using playwright", () => {
 
   it("Should be able to login and out using oidc", async () => {
     const session = new Session();
+    let sessionTokenSet: SessionTokenSet | undefined;
+    session.events.on(EVENTS.NEW_TOKENS, (tokenSet) => {
+      sessionTokenSet = tokenSet;
+    });
 
     let rpLogoutUrl: string | undefined;
     const redirectUrl = await new Promise<string>((res) => {
@@ -127,6 +135,14 @@ describe("RP initiated login/out using playwright", () => {
       })().catch(console.error);
     });
     await session.handleIncomingRedirect(redirectUrl);
+
+    expect(sessionTokenSet).toBeDefined();
+    expect(sessionTokenSet?.accessToken).toBeDefined();
+    expect(sessionTokenSet?.idToken).toBeDefined();
+    expect(sessionTokenSet?.expiresAt).toBeDefined();
+    expect(sessionTokenSet?.dpopKey).toBeDefined();
+    expect(sessionTokenSet?.webId).toBeDefined();
+
     const res = await session.fetch(clientResourceUrl);
     expect(res.status).toBe(200);
     let resolveFunc: (str: string) => void;

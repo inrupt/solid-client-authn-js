@@ -41,6 +41,7 @@ import {
   getWebidFromTokenPayload,
   buildAuthenticatedFetch,
   DEFAULT_SCOPES,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import type { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
@@ -59,7 +60,6 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       // If a redirect URL is present, the static client should use the
       // authorization code flow.
       typeof oidcLoginOptions.redirectUrl !== "string" &&
-      typeof oidcLoginOptions.client.clientId === "string" &&
       typeof oidcLoginOptions.client.clientSecret === "string"
     );
   }
@@ -141,15 +141,26 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       expiresIn: tokens.expires_in,
     });
 
+    const expiresAt =
+      tokens.expires_in !== undefined
+        ? Date.now() + tokens.expires_in * 1000
+        : undefined;
+
+    oidcLoginOptions.eventEmitter?.emit(EVENTS.NEW_TOKENS, {
+      accessToken: tokens.access_token,
+      idToken: tokens.id_token,
+      refreshToken: tokens.refresh_token,
+      webId,
+      expiresAt,
+      dpopKey,
+    });
+
     const sessionInfo: ISessionInfo = {
       isLoggedIn: true,
       sessionId: oidcLoginOptions.sessionId,
       webId,
       clientAppId: clientId,
-      expirationDate:
-        tokens.expires_in !== undefined
-          ? Date.now() + tokens.expires_in * 1000
-          : undefined,
+      expirationDate: expiresAt,
     };
     return Object.assign(sessionInfo, {
       fetch: authFetch,
