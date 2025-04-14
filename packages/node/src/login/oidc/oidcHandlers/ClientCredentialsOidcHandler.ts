@@ -153,6 +153,8 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       webId,
       expiresAt,
       dpopKey,
+      clientId: oidcLoginOptions.client.clientId,
+      issuer: oidcLoginOptions.issuer,
     });
 
     const sessionInfo: ISessionInfo = {

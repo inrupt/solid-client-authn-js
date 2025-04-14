@@ -121,17 +121,6 @@ async function refreshAccessToken(
     EVENTS.SESSION_EXTENDED,
     tokenSet.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS,
   );
-  if (typeof tokenSet.refreshToken === "string") {
-    eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
-  }
-  eventEmitter?.emit(EVENTS.NEW_TOKENS, {
-    accessToken: tokenSet.accessToken,
-    idToken: tokenSet.idToken,
-    refreshToken: tokenSet.refreshToken,
-    webId: tokenSet.webId,
-    expiresAt: tokenSet.expiresAt,
-    dpopKey,
-  });
   return {
     accessToken: tokenSet.accessToken,
     refreshToken: tokenSet.refreshToken,

@@ -192,6 +192,8 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       webId,
       expiresAt: tokenSet.expires_at,
       dpopKey,
+      clientId: client.metadata.client_id,
+      issuer: issuer.metadata.issuer,
     });
 
     await saveSessionInfoToStorage(

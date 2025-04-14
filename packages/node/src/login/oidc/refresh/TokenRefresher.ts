@@ -171,6 +171,8 @@ export default class TokenRefresher implements ITokenRefresher {
       webId: tokenSet.webId,
       expiresAt: tokenSet.expiresAt,
       dpopKey,
+      clientId: clientInfo.clientId,
+      issuer: issuer.metadata.issuer,
     });
 
     return tokenSet;

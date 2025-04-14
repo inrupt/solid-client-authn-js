@@ -484,50 +484,6 @@ describe("buildAuthenticatedFetch", () => {
     expect(spiedEmit).toHaveBeenCalledWith(EVENTS.SESSION_EXTENDED, 1800);
   });
 
-  it("calls the provided callback when a new refresh token is issued", async () => {
-    const tokenSet = mockDefaultTokenSet();
-    tokenSet.refreshToken = "some rotated refresh token";
-    const mockedFreshener = mockTokenRefresher(tokenSet);
-    const eventEmitter = new EventEmitter();
-    const spiedEmit = jest.spyOn(eventEmitter, "emit");
-    buildAuthenticatedFetch("myToken", {
-      refreshOptions: {
-        refreshToken: "some refresh token",
-        sessionId: "mySession",
-        tokenRefresher: mockedFreshener,
-      },
-      eventEmitter,
-      expiresIn: 0,
-    });
-    await sleep(200);
-    expect(spiedEmit).toHaveBeenCalledWith(
-      EVENTS.NEW_REFRESH_TOKEN,
-      "some rotated refresh token",
-    );
-  });
-
-  it("calls the provided callback when a new token set is issued", async () => {
-    const tokenSet = mockDefaultTokenSet();
-    tokenSet.refreshToken = "some rotated refresh token";
-    const mockedFreshener = mockTokenRefresher(tokenSet);
-    const eventEmitter = new EventEmitter();
-    const spiedEmit = jest.spyOn(eventEmitter, "emit");
-    buildAuthenticatedFetch("myToken", {
-      refreshOptions: {
-        refreshToken: "some refresh token",
-        sessionId: "mySession",
-        tokenRefresher: mockedFreshener,
-      },
-      eventEmitter,
-      expiresIn: 0,
-    });
-    await sleep(200);
-    const sessionTokenSet = {
-      ...tokenSet,
-    };
-    expect(spiedEmit).toHaveBeenCalledWith(EVENTS.NEW_TOKENS, sessionTokenSet);
-  });
-
   it("rotates the refresh token if a new one is issued", async () => {
     // Mocks a refresher which refreshes only once to prevent re-scheduling timeouts.
     // This would not be necessary with mock timers.

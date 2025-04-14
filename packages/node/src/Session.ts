@@ -124,20 +124,12 @@ export class Session implements IHasSessionEventListener {
    * and want to create an authenticated session directly.
    *
    * @param sessionTokenSet The token set to use for authentication
-   * @param sessionOptions Optional session configuration options
    * @param sessionId Optional ID for the session, if not provided a random UUID will be generated
    * @returns A new authenticated Session instance
    *
    * @example
    * ```typescript
-   * const session = Session.fromTokens(mySessionTokenSet);
-   *
-   * // With custom storage and session ID
-   * const sessionWithOptions = Session.fromTokens(
-   *   mySessionTokenSet,
-   *   { storage: myCustomStorage },
-   *   "my-session-id"
-   * );
+   * const session = Session.fromTokens(mySessionTokenSet, "my-session-id");
    *
    * // Use the authenticated session
    * const response = await session.fetch("https://pod.example.com/private-resource");
