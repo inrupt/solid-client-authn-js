@@ -127,7 +127,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       ));
     }
 
-    const authFetch = await buildAuthenticatedFetch(tokens.access_token, {
+    const authFetch = buildAuthenticatedFetch(tokens.access_token, {
       dpopKey,
       refreshOptions:
         oidcLoginOptions.keepAlive && tokens.refresh_token

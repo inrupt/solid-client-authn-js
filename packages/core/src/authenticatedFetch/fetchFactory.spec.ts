@@ -114,7 +114,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/resource",
     );
     const keylikePair = await mockJwk();
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = buildAuthenticatedFetch("myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
         publicKey: await exportJWK(keylikePair.publicKey),
@@ -150,7 +150,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/resource",
     );
 
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     await myFetch("http://some.url", {
@@ -171,7 +171,7 @@ describe("buildAuthenticatedFetch", () => {
       new Response(undefined, { status: 401 }),
       "https://my.pod/resource",
     );
-    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
+    const myFetch = buildAuthenticatedFetch("myToken", undefined);
     await myFetch("https://my.pod/resource");
     expect(mockedFetch.mock.calls[0][0]).toBe("https://my.pod/resource");
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
@@ -190,7 +190,7 @@ describe("buildAuthenticatedFetch", () => {
       status: 200,
     } as Response);
 
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     await myFetch("https://my.pod/container");
@@ -210,7 +210,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
 
-    const myFetch = await buildAuthenticatedFetch("myToken");
+    const myFetch = buildAuthenticatedFetch("myToken");
     const response = await myFetch("https://my.pod/container");
 
     expect(response.status).toBe(403);
@@ -222,7 +222,7 @@ describe("buildAuthenticatedFetch", () => {
       mockNotRedirectedResponse(),
       "https://my.pod/container/",
     );
-    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
+    const myFetch = buildAuthenticatedFetch("myToken", undefined);
     await myFetch("someUrl", { headers: { someHeader: "SomeValue" } });
 
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
@@ -236,7 +236,7 @@ describe("buildAuthenticatedFetch", () => {
       mockNotRedirectedResponse(),
       "https://my.pod/container/",
     );
-    const myFetch = await buildAuthenticatedFetch("myToken", undefined);
+    const myFetch = buildAuthenticatedFetch("myToken", undefined);
     await myFetch("someUrl", {
       headers: new Headers({ someHeader: "SomeValue" }),
     });
@@ -253,7 +253,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
 
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     await myFetch("http://some.url", {
@@ -273,7 +273,7 @@ describe("buildAuthenticatedFetch", () => {
       "https://my.pod/container/",
     );
 
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = buildAuthenticatedFetch("myToken", {
       dpopKey: await mockKeyPair(),
     });
     const response = await myFetch("https://my.pod/container");
@@ -287,7 +287,7 @@ describe("buildAuthenticatedFetch", () => {
       new Response(undefined, { status: 401 }),
       "https://my.pod/container/",
     );
-    const myFetch = await buildAuthenticatedFetch("myToken", {
+    const myFetch = buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -316,7 +316,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("refreshes the token before it expires", async () => {
     const mockRefresher = mockDefaultTokenRefresher();
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -340,7 +340,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("sets a default timeout if the OIDC provider did not return one", async () => {
     const mockRefresher = mockDefaultTokenRefresher();
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -373,7 +373,7 @@ describe("buildAuthenticatedFetch", () => {
         })
         .mockResolvedValue({ ...mockDefaultTokenSet(), expiresIn: 1000 }),
     };
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       dpopKey: {
         privateKey: keylikePair.privateKey,
         publicKey: await exportJWK(keylikePair.publicKey),
@@ -410,7 +410,7 @@ describe("buildAuthenticatedFetch", () => {
     // const handles: ReturnType<typeof setTimeout>[] = [];
     // mockedEmitter.on(EVENTS.TIMEOUT_SET, (handle) => {handles.push(handle); console.log("timeout set")});
     const spiedEmit = jest.spyOn(mockedEmitter, "emit");
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -444,7 +444,7 @@ describe("buildAuthenticatedFetch", () => {
       expiresIn: undefined,
     });
     const spyTimeout = jest.spyOn(global, "setTimeout");
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -471,7 +471,7 @@ describe("buildAuthenticatedFetch", () => {
     });
     const eventEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(eventEmitter, "emit");
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -490,7 +490,7 @@ describe("buildAuthenticatedFetch", () => {
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const eventEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(eventEmitter, "emit");
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -512,7 +512,7 @@ describe("buildAuthenticatedFetch", () => {
     const mockedFreshener = mockTokenRefresher(tokenSet);
     const eventEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(eventEmitter, "emit");
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -547,7 +547,7 @@ describe("buildAuthenticatedFetch", () => {
     };
     const refreshCall = jest.spyOn(mockedTokenRefresher, "refresh");
 
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -579,7 +579,7 @@ describe("buildAuthenticatedFetch", () => {
     mockEmitter.on(EVENTS.ERROR, jest.fn());
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -614,7 +614,7 @@ describe("buildAuthenticatedFetch", () => {
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       refreshOptions: {
         refreshToken: "some refresh token",
         sessionId: "mySession",
@@ -645,7 +645,7 @@ describe("buildAuthenticatedFetch", () => {
     const mockEmitter = new EventEmitter();
     const spiedEmit = jest.spyOn(mockEmitter, "emit");
 
-    await buildAuthenticatedFetch("myToken", {
+    buildAuthenticatedFetch("myToken", {
       expiresIn: 0,
       eventEmitter: mockEmitter,
     });
@@ -660,7 +660,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("does not schedule any callback to be called if no event can be fired", async () => {
     const spyTimeout = jest.spyOn(global, "setTimeout");
-    await buildAuthenticatedFetch("myToken");
+    buildAuthenticatedFetch("myToken");
     await sleep(100);
     // The only call to setTimeout should come from the `sleep` function
     expect(spyTimeout).toHaveBeenCalledTimes(1);

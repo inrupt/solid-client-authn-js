@@ -96,7 +96,7 @@ async function refreshAccess(
     const expiresInS =
       tokens.expiresIn ??
       (tokens.expiresAt ?? 0) - Math.trunc(Date.now() / 1000);
-    const authFetch = await buildAuthenticatedFetch(tokens.accessToken, {
+    const authFetch = buildAuthenticatedFetch(tokens.accessToken, {
       dpopKey,
       refreshOptions: keepAlive ? rotatedRefreshOptions : undefined,
       eventEmitter,

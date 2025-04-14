@@ -162,7 +162,7 @@ const computeRefreshDelay = (expiresIn?: number): number => {
  * @returns A fetch function that adds an appropriate Authorization header with
  * the provided token, and adds a DPoP header if applicable.
  */
-export async function buildAuthenticatedFetch(
+export function buildAuthenticatedFetch(
   accessToken: string,
   options?: {
     dpopKey?: KeyPair;
@@ -170,7 +170,7 @@ export async function buildAuthenticatedFetch(
     expiresIn?: number;
     eventEmitter?: EventEmitter;
   },
-): Promise<typeof fetch> {
+): typeof fetch {
   let currentAccessToken = accessToken;
   let latestTimeout: Parameters<typeof clearTimeout>[0];
   const currentRefreshOptions: RefreshOptions | undefined =
