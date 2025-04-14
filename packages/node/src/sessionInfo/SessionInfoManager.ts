@@ -53,8 +53,7 @@ export class SessionInfoManager
     sessionId: string,
     sessionInfo: Partial<ISessionInfo & ISessionInternalInfo>,
   ): Promise<void> {
-    const fieldsToStore =
-    {
+    const fieldsToStore = {
       // ISessionInfo fields
       webId: sessionInfo.webId,
       isLoggedIn: sessionInfo.isLoggedIn,
@@ -70,8 +69,14 @@ export class SessionInfoManager
     };
 
     const definedFields: Record<string, string> = Object.entries(fieldsToStore)
-      .filter((entry): entry is [string, string | boolean | number] => entry[1] !== undefined)
-      .reduce((prev, cur) => ({ ...prev, [`${cur[0]}`]: cur[1].toString()}), {})
+      .filter(
+        (entry): entry is [string, string | boolean | number] =>
+          entry[1] !== undefined,
+      )
+      .reduce(
+        (prev, cur) => ({ ...prev, [`${cur[0]}`]: cur[1].toString() }),
+        {},
+      );
     await this.storageUtility.setForUser(sessionId, definedFields);
   }
 

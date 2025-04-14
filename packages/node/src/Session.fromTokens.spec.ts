@@ -22,10 +22,9 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import { type SessionTokenSet } from "core";
 import { SignJWT, generateKeyPair, exportJWK } from "jose";
-import { Session } from "./Session";
-import { JWTPayload } from "jose";
 import type * as Jose from "jose";
 import type * as OpenIdClient from "openid-client";
+import { Session } from "./Session";
 
 jest.mock("jose", () => {
   const actualJose = jest.requireActual("jose") as typeof Jose;
@@ -37,7 +36,9 @@ jest.mock("jose", () => {
 
 // Mock the OP configuration discovery.
 jest.mock("openid-client", () => {
-  const actualOpenidClient = jest.requireActual("openid-client") as typeof OpenIdClient;
+  const actualOpenidClient = jest.requireActual(
+    "openid-client",
+  ) as typeof OpenIdClient;
   return {
     ...actualOpenidClient,
     Issuer: {
@@ -58,35 +59,35 @@ jest.mock("openid-client", () => {
           ],
           end_session_endpoint: "https://my.idp/endSessionEndpoint",
         },
-      } as never)
+      } as never),
     },
   };
-})
+});
 
-  describe("Session.fromTokens", () => {
-    const mockWebid = "https://example.com/profile#me";
-    const mockClientId = "client123";
-    const mockIssuer = "https://example.com";
-    const mockIdToken = async (payload: JWTPayload) => {
-      const issuerKeyPair = await generateKeyPair("ES256");
-      // Mock the issuer JWKS.
-      const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
-          mockJose.createRemoteJWKSet.mockReturnValue(
-            jest
-              .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
-              .mockResolvedValue(issuerKeyPair.publicKey),
-          );
-      return new SignJWT({
+describe("Session.fromTokens", () => {
+  const mockWebid = "https://example.com/profile#me";
+  const mockClientId = "client123";
+  const mockIssuer = "https://example.com";
+  const mockIdToken = async (payload: Jose.JWTPayload) => {
+    const issuerKeyPair = await generateKeyPair("ES256");
+    // Mock the issuer JWKS.
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      jest
+        .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
+        .mockResolvedValue(issuerKeyPair.publicKey),
+    );
+    return new SignJWT({
       sub: "user123",
       webid: payload.webid ?? mockWebid,
       iss: mockIssuer,
       aud: mockClientId,
       exp: payload.exp ?? Math.floor(Date.now() / 1000) + 3600,
-      iat: Math.floor(Date.now() / 1000)
+      iat: Math.floor(Date.now() / 1000),
     })
       .setProtectedHeader({ alg: "ES256", kid: "test-key" })
       .sign(issuerKeyPair.privateKey);
-  }
+  };
 
   it("creates a session with the provided tokens", async () => {
     const mockedIdToken = await mockIdToken({});
@@ -101,7 +102,7 @@ jest.mock("openid-client", () => {
     };
 
     const session = await Session.fromTokens(tokenSet, "custom-session-id");
-    
+
     expect(session).toBeInstanceOf(Session);
     expect(session.info.sessionId).toBe("custom-session-id");
     expect(session.info.isLoggedIn).toBe(true);
@@ -111,23 +112,23 @@ jest.mock("openid-client", () => {
     // will be used to make authenticated fetches.
     const globalFetch = globalThis.fetch;
     let headers: Headers;
-    globalThis.fetch = (async (input, init) => { 
+    globalThis.fetch = (async (input, init) => {
       // Capture the fetch headers.
-      headers = new Headers(init?.headers)
+      headers = new Headers(init?.headers);
       return new Response();
     }) as typeof fetch;
     await session.fetch("https://some.resource");
-    // @ts-ignore We know headers is initialized.
+    // @ts-expect-error We know headers is initialized.
     expect(headers.get("Authorization")).toBe(`Bearer ${mockedIdToken}`);
     globalThis.fetch = globalFetch;
   });
 
   it("creates a session with DPoP token if dpopKey is provided", async () => {
     const dpopKeyPair = await generateKeyPair("ES256");
-    
+
     const dpopKey = {
       privateKey: dpopKeyPair.privateKey,
-      publicKey: await exportJWK(dpopKeyPair.publicKey)
+      publicKey: await exportJWK(dpopKeyPair.publicKey),
     };
 
     const mockedIdToken = await mockIdToken({});
@@ -137,25 +138,24 @@ jest.mock("openid-client", () => {
       clientId: mockClientId,
       issuer: mockIssuer,
       webId: mockWebid,
-      dpopKey: dpopKey
-
+      dpopKey,
     };
 
     const session = await Session.fromTokens(tokenSet);
-    
+
     // Check that the fetch is authenticated with
     // a DPoP header.
     const globalFetch = globalThis.fetch;
     let headers: Headers;
-    globalThis.fetch = (async (input, init) => { 
+    globalThis.fetch = (async (input, init) => {
       // Capture the fetch headers.
-      headers = new Headers(init?.headers)
+      headers = new Headers(init?.headers);
       return new Response();
     }) as typeof fetch;
     await session.fetch("https://some.resource");
-    // @ts-ignore We know headers is initialized.
+    // @ts-expect-error We know headers is initialized.
     expect(headers.get("Authorization")).toBe(`DPoP ${mockedIdToken}`);
-    // @ts-ignore We know headers is initialized.
+    // @ts-expect-error We know headers is initialized.
     expect(headers.get("dpop")).not.toBeNull();
     globalThis.fetch = globalFetch;
   });
@@ -170,7 +170,7 @@ jest.mock("openid-client", () => {
     };
 
     const session = await Session.fromTokens(tokenSet);
-    
+
     expect(session.info.sessionId).toBeDefined();
     expect(typeof session.info.sessionId).toBe("string");
     expect(session.info.sessionId.length).toBeGreaterThan(0);
@@ -188,19 +188,19 @@ jest.mock("openid-client", () => {
     };
 
     const session = await Session.fromTokens(tokenSet);
-    
+
     expect(session.info.isLoggedIn).toBe(false);
     // The session being logged out means no authentication
     // header will be added.
     const globalFetch = globalThis.fetch;
     let headers: Headers;
-    globalThis.fetch = (async (input, init) => { 
+    globalThis.fetch = (async (input, init) => {
       // Capture the fetch headers.
-      headers = new Headers(init?.headers)
+      headers = new Headers(init?.headers);
       return new Response();
     }) as typeof fetch;
     await session.fetch("https://some.resource");
-    // @ts-ignore We know headers is initialized.
+    // @ts-expect-error We know headers is initialized.
     expect(headers.get("Authorization")).toBeNull();
     globalThis.fetch = globalFetch;
   });
@@ -214,7 +214,7 @@ jest.mock("openid-client", () => {
     };
 
     const session = await Session.fromTokens(tokenSet);
-    
+
     expect(session.info.isLoggedIn).toBe(false);
   });
 });

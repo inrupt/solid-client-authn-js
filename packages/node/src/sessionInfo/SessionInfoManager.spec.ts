@@ -23,7 +23,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import {
   mockStorageUtility,
   type ISessionInfo,
-  type ISessionInternalInfo
+  type ISessionInternalInfo,
 } from "@inrupt/solid-client-authn-core";
 import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/mocks";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
