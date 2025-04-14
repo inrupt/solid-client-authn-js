@@ -33,7 +33,7 @@ export type SessionTokenSet = {
   /**
    * JWT-serialized access token
    */
-  accessToken: string;
+  accessToken?: string;
   /**
    * JWT-serialized ID token
    */
