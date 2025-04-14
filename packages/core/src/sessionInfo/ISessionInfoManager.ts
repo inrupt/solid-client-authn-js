@@ -40,6 +40,15 @@ export interface ISessionInfoManagerOptions {
 export interface ISessionInfoManager {
   update(sessionId: string, options: ISessionInfoManagerOptions): Promise<void>;
   /**
+   * Sets complete session information in storage.
+   * @param sessionId The ID of the session to update
+   * @param sessionInfo The session information to store
+   */
+  set(
+    sessionId: string,
+    sessionInfo: Partial<ISessionInfo & ISessionInternalInfo>,
+  ): Promise<void>;
+  /**
    * Returns all information about a registered session
    * @param sessionId
    */

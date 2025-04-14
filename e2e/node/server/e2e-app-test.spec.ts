@@ -99,6 +99,16 @@ async function performTest(seedInfo: ISeedPodResponse) {
     `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
   );
 
+  // Fetching a protected resource once logged in, rebuilding the session from saved tokens
+  const resourceUrl2 = new URL(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetchSessionFromTokens`,
+  );
+  resourceUrl2.searchParams.append("resource", seedInfo.clientResourceUrl);
+  await page.goto(resourceUrl.toString());
+  await expect(page.content()).resolves.toBe(
+    `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
+  );
+
   // Fetching the token set returned after login
   const tokensUrl = new URL(
     `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens`,

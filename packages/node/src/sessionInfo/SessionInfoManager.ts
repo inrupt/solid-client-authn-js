@@ -44,6 +44,52 @@ export class SessionInfoManager
   extends SessionInfoManagerBase
   implements ISessionInfoManager
 {
+  /**
+   * Sets session information in storage.
+   * @param sessionId The ID of the session to update
+   * @param sessionInfo The session information to store
+   */
+  async set(
+    sessionId: string,
+    sessionInfo: Partial<ISessionInfo & ISessionInternalInfo>,
+  ): Promise<void> {
+    // TODO: Record
+    const fieldsToStore: Array<
+      [string, string | boolean | number | undefined]
+    > = [
+      // ISessionInfo fields
+      ["webId", sessionInfo.webId],
+      ["isLoggedIn", sessionInfo.isLoggedIn],
+      ["clientAppId", sessionInfo.clientAppId],
+      ["expirationDate", sessionInfo.expirationDate],
+      // ISessionInternalInfo fields
+      ["refreshToken", sessionInfo.refreshToken],
+      ["issuer", sessionInfo.issuer],
+      ["redirectUrl", sessionInfo.redirectUrl],
+      ["clientAppSecret", sessionInfo.clientAppSecret],
+      ["dpop", sessionInfo.tokenType === "DPoP"],
+      ["keepAlive", sessionInfo.keepAlive],
+    ];
+    // TODO: throw if clientAppSecret or keepAlive are set
+    await Promise.all(
+      fieldsToStore
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => {
+          let stringValue: string;
+          if (typeof value === "boolean") {
+            stringValue = value.toString();
+          } else if (typeof value === "number") {
+            stringValue = value.toString();
+          } else {
+            stringValue = value as string;
+          }
+          return this.storageUtility.setForUser(sessionId, {
+            [key]: stringValue,
+          });
+        }),
+    );
+  }
+
   async get(
     sessionId: string,
   ): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {

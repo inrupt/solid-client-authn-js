@@ -73,6 +73,13 @@ export abstract class SessionInfoManagerBase implements ISessionInfoManager {
     throw new Error("Not Implemented");
   }
 
+  set(
+    _sessionId: string,
+    _sessionInfo: Partial<ISessionInfo & ISessionInternalInfo>,
+  ): Promise<void> {
+    throw new Error("Not Implemented");
+  }
+
   get(_: string): Promise<(ISessionInfo & ISessionInternalInfo) | undefined> {
     throw new Error("Not implemented");
   }

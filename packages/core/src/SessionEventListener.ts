@@ -54,6 +54,14 @@ export type SessionTokenSet = {
    * DPoP key to which the access token, and potentially the refresh token, are bound.
    */
   dpopKey?: KeyPair;
+  /**
+   * The user's identity provider.
+   */
+  issuer: string;
+  /**
+   * The ID of your application.
+   */
+  clientId: string;
 };
 
 // These types help preventing inconsistencies between on, once and off.
