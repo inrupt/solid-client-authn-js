@@ -53,39 +53,26 @@ export class SessionInfoManager
     sessionId: string,
     sessionInfo: Partial<ISessionInfo & ISessionInternalInfo>,
   ): Promise<void> {
-    const fieldsToStore: Record<string, string | boolean | number | undefined> =
-      {
-        // ISessionInfo fields
-        webId: sessionInfo.webId,
-        isLoggedIn: sessionInfo.isLoggedIn,
-        clientAppId: sessionInfo.clientAppId,
-        expirationDate: sessionInfo.expirationDate,
-        // ISessionInternalInfo fields
-        refreshToken: sessionInfo.refreshToken,
-        issuer: sessionInfo.issuer,
-        redirectUrl: sessionInfo.redirectUrl,
-        clientAppSecret: sessionInfo.clientAppSecret,
-        dpop: sessionInfo.tokenType === "DPoP",
-        keepAlive: sessionInfo.keepAlive,
-      };
+    const fieldsToStore =
+    {
+      // ISessionInfo fields
+      webId: sessionInfo.webId,
+      isLoggedIn: sessionInfo.isLoggedIn,
+      clientAppId: sessionInfo.clientAppId,
+      expirationDate: sessionInfo.expirationDate,
+      // ISessionInternalInfo fields
+      refreshToken: sessionInfo.refreshToken,
+      issuer: sessionInfo.issuer,
+      redirectUrl: sessionInfo.redirectUrl,
+      clientAppSecret: sessionInfo.clientAppSecret,
+      dpop: sessionInfo.tokenType === "DPoP",
+      keepAlive: sessionInfo.keepAlive,
+    };
 
-    await Promise.all(
-      Object.entries(fieldsToStore)
-        .filter(([_, value]) => value !== undefined)
-        .map(([key, value]) => {
-          let stringValue: string;
-          if (typeof value === "boolean") {
-            stringValue = value.toString();
-          } else if (typeof value === "number") {
-            stringValue = value.toString();
-          } else {
-            stringValue = value as string;
-          }
-          return this.storageUtility.setForUser(sessionId, {
-            [key]: stringValue,
-          });
-        }),
-    );
+    const definedFields: Record<string, string> = Object.entries(fieldsToStore)
+      .filter((entry): entry is [string, string | boolean | number] => entry[1] !== undefined)
+      .reduce((prev, cur) => ({ ...prev, [`${cur[0]}`]: cur[1].toString()}), {})
+    await this.storageUtility.setForUser(sessionId, definedFields);
   }
 
   async get(
