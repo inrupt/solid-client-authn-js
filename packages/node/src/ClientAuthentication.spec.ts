@@ -407,4 +407,22 @@ describe("ClientAuthentication", () => {
       expect(clientAuthn.fetch).not.toBe(unauthFetch);
     });
   });
+
+  describe("setSession", () => {
+    it("sets a session in the session manager", async () => {
+      const sessionInfoManager = mockSessionInfoManager(mockStorageUtility({}));
+      const sessionManagerSet = jest.spyOn(sessionInfoManager, "set");
+      const sessionInfo = {
+        isLoggedIn: true,
+        sessionId: "mySession",
+        webId: "https://pod.com/profile/card#me",
+        issuer: "https://some.idp",
+      };
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager,
+      });
+      await clientAuthn.setSession("some session", sessionInfo);
+      expect(sessionManagerSet).toHaveBeenCalled();
+    });
+  });
 });

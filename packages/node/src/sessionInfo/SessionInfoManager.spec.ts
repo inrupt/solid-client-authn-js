@@ -20,7 +20,11 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
+import {
+  mockStorageUtility,
+  type ISessionInfo,
+  type ISessionInternalInfo
+} from "@inrupt/solid-client-authn-core";
 import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/mocks";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { SessionInfoManager } from "./SessionInfoManager";
@@ -185,6 +189,126 @@ describe("SessionInfoManager", () => {
         storageUtility: mockStorageUtility({}),
       });
       await expect(sessionManager.getAll).rejects.toThrow("Not implemented");
+    });
+  });
+
+  describe("set", () => {
+    it("stores session info in storage", async () => {
+      const sessionId = "commanderCool";
+      const webId = "https://zoomies.com/commanderCool#me";
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+
+      await sessionManager.set(sessionId, {
+        webId,
+        isLoggedIn: true,
+        clientAppId: "client123",
+        tokenType: "DPoP",
+        refreshToken: "refreshTokenABC",
+        issuer: "https://my.idp/",
+      });
+
+      // Verify data was stored correctly
+      await expect(storage.getForUser(sessionId, "webId")).resolves.toBe(webId);
+      await expect(storage.getForUser(sessionId, "isLoggedIn")).resolves.toBe(
+        "true",
+      );
+      await expect(storage.getForUser(sessionId, "clientAppId")).resolves.toBe(
+        "client123",
+      );
+      await expect(storage.getForUser(sessionId, "refreshToken")).resolves.toBe(
+        "refreshTokenABC",
+      );
+      await expect(storage.getForUser(sessionId, "issuer")).resolves.toBe(
+        "https://my.idp/",
+      );
+      await expect(storage.getForUser(sessionId, "dpop")).resolves.toBe("true");
+    });
+
+    it("handles numeric values correctly", async () => {
+      const sessionId = "commanderCool";
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+      const expirationDate = Date.now() + 3600 * 1000;
+
+      await sessionManager.set(sessionId, {
+        expirationDate,
+      });
+
+      // Verify numeric data was stored as string
+      await expect(
+        storage.getForUser(sessionId, "expirationDate"),
+      ).resolves.toBe(expirationDate.toString());
+    });
+
+    it("only stores defined values", async () => {
+      const sessionId = "commanderCool";
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+
+      // Set with some fields undefined
+      await sessionManager.set(sessionId, {
+        webId: "https://example.com/profile#me",
+        isLoggedIn: true,
+        // Other fields not provided
+      });
+
+      // Test fields that were provided
+      await expect(storage.getForUser(sessionId, "webId")).resolves.toBe(
+        "https://example.com/profile#me",
+      );
+      await expect(storage.getForUser(sessionId, "isLoggedIn")).resolves.toBe(
+        "true",
+      );
+
+      // Test fields that were not provided
+      await expect(
+        storage.getForUser(sessionId, "refreshToken"),
+      ).resolves.toBeUndefined();
+      await expect(
+        storage.getForUser(sessionId, "clientAppId"),
+      ).resolves.toBeUndefined();
+    });
+
+    it("can be used with get to store and retrieve sessions", async () => {
+      const sessionId = "commanderCool";
+      const webId = "https://example.com/profile#me";
+      const storage = mockStorageUtility({});
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storage,
+      });
+
+      const sessionInfo: Partial<ISessionInfo & ISessionInternalInfo> = {
+        webId,
+        isLoggedIn: true,
+        clientAppId: "client123",
+        refreshToken: "refreshTokenABC",
+        tokenType: "DPoP",
+        issuer: "https://my.idp/",
+      };
+
+      // First store the session
+      await sessionManager.set(sessionId, sessionInfo);
+
+      // Then retrieve it
+      const retrievedSession = await sessionManager.get(sessionId);
+
+      // Verify the retrieved session matches what we stored
+      expect(retrievedSession).toMatchObject({
+        sessionId,
+        webId,
+        isLoggedIn: true,
+        clientAppId: "client123",
+        refreshToken: "refreshTokenABC",
+        tokenType: "DPoP",
+        issuer: "https://my.idp/",
+      });
     });
   });
 
