@@ -53,26 +53,24 @@ export class SessionInfoManager
     sessionId: string,
     sessionInfo: Partial<ISessionInfo & ISessionInternalInfo>,
   ): Promise<void> {
-    // TODO: Record
-    const fieldsToStore: Array<
-      [string, string | boolean | number | undefined]
-    > = [
-      // ISessionInfo fields
-      ["webId", sessionInfo.webId],
-      ["isLoggedIn", sessionInfo.isLoggedIn],
-      ["clientAppId", sessionInfo.clientAppId],
-      ["expirationDate", sessionInfo.expirationDate],
-      // ISessionInternalInfo fields
-      ["refreshToken", sessionInfo.refreshToken],
-      ["issuer", sessionInfo.issuer],
-      ["redirectUrl", sessionInfo.redirectUrl],
-      ["clientAppSecret", sessionInfo.clientAppSecret],
-      ["dpop", sessionInfo.tokenType === "DPoP"],
-      ["keepAlive", sessionInfo.keepAlive],
-    ];
-    // TODO: throw if clientAppSecret or keepAlive are set
+    const fieldsToStore: Record<string, string | boolean | number | undefined> =
+      {
+        // ISessionInfo fields
+        webId: sessionInfo.webId,
+        isLoggedIn: sessionInfo.isLoggedIn,
+        clientAppId: sessionInfo.clientAppId,
+        expirationDate: sessionInfo.expirationDate,
+        // ISessionInternalInfo fields
+        refreshToken: sessionInfo.refreshToken,
+        issuer: sessionInfo.issuer,
+        redirectUrl: sessionInfo.redirectUrl,
+        clientAppSecret: sessionInfo.clientAppSecret,
+        dpop: sessionInfo.tokenType === "DPoP",
+        keepAlive: sessionInfo.keepAlive,
+      };
+
     await Promise.all(
-      fieldsToStore
+      Object.entries(fieldsToStore)
         .filter(([_, value]) => value !== undefined)
         .map(([key, value]) => {
           let stringValue: string;
