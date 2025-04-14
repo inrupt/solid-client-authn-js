@@ -125,7 +125,7 @@ export class Session implements IHasSessionEventListener {
    *
    * @param sessionTokenSet The token set to use for authentication
    * @param sessionId Optional ID for the session, if not provided a random UUID will be generated
-   * @returns A new authenticated Session instance
+   * @returns A Session instance
    *
    * @example
    * ```typescript
@@ -142,7 +142,7 @@ export class Session implements IHasSessionEventListener {
     const finalSessionId = sessionId ?? v4();
     const isExpired =
       sessionTokenSet.expiresAt !== undefined &&
-      sessionTokenSet.expiresAt > Date.now();
+      sessionTokenSet.expiresAt < Date.now();
     let webId;
 
     if (!isExpired && sessionTokenSet.idToken) {
@@ -254,7 +254,7 @@ export class Session implements IHasSessionEventListener {
     if (sessionOptions.sessionInfo) {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,
-        isLoggedIn: false,
+        isLoggedIn: sessionOptions.sessionInfo.isLoggedIn,
         webId: sessionOptions.sessionInfo.webId,
         clientAppId: sessionOptions.sessionInfo.clientAppId,
       };
