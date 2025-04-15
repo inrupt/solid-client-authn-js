@@ -121,17 +121,6 @@ async function refreshAccessToken(
     EVENTS.SESSION_EXTENDED,
     tokenSet.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS,
   );
-  if (typeof tokenSet.refreshToken === "string") {
-    eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refreshToken);
-  }
-  eventEmitter?.emit(EVENTS.NEW_TOKENS, {
-    accessToken: tokenSet.accessToken,
-    idToken: tokenSet.idToken,
-    refreshToken: tokenSet.refreshToken,
-    webId: tokenSet.webId,
-    expiresAt: tokenSet.expiresAt,
-    dpopKey,
-  });
   return {
     accessToken: tokenSet.accessToken,
     refreshToken: tokenSet.refreshToken,
@@ -162,7 +151,7 @@ const computeRefreshDelay = (expiresIn?: number): number => {
  * @returns A fetch function that adds an appropriate Authorization header with
  * the provided token, and adds a DPoP header if applicable.
  */
-export async function buildAuthenticatedFetch(
+export function buildAuthenticatedFetch(
   accessToken: string,
   options?: {
     dpopKey?: KeyPair;
@@ -170,7 +159,7 @@ export async function buildAuthenticatedFetch(
     expiresIn?: number;
     eventEmitter?: EventEmitter;
   },
-): Promise<typeof fetch> {
+): typeof fetch {
   let currentAccessToken = accessToken;
   let latestTimeout: Parameters<typeof clearTimeout>[0];
   const currentRefreshOptions: RefreshOptions | undefined =

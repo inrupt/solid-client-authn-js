@@ -30,12 +30,20 @@ import type {
   IHasSessionEventListener,
   ILogoutOptions,
   SessionConfig,
+  SessionTokenSet,
 } from "@inrupt/solid-client-authn-core";
-import { InMemoryStorage, EVENTS } from "@inrupt/solid-client-authn-core";
+import {
+  InMemoryStorage,
+  EVENTS,
+  buildAuthenticatedFetch,
+  getWebidFromTokenPayload,
+} from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import EventEmitter from "events";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
+import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
+import StorageUtilityNode from "./storage/StorageUtility";
 
 export interface ISessionOptions {
   /**
@@ -59,7 +67,7 @@ export interface ISessionOptions {
   /**
    * A private storage where sensitive information may be stored, such as refresh
    * tokens. The `storage` option aims at eventually replacing the legacy `secureStorage`
-   * and `insecureStorage`, which
+   * and `insecureStorage`, which are named inaccurately and will be eventually deprecated.
    * @since X.Y.Z
    */
   storage: IStorage;
@@ -81,6 +89,10 @@ export interface ISessionOptions {
  * If no external storage is provided, this storage gets used.
  */
 export const defaultStorage = new InMemoryStorage();
+
+const storageUtility = new StorageUtilityNode(defaultStorage, defaultStorage);
+
+const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
 
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling access to private resources after login for instance.
@@ -105,6 +117,97 @@ export class Session implements IHasSessionEventListener {
   private lastTimeoutHandle = 0;
 
   private config: SessionConfig;
+
+  /**
+   * Creates a session from a set of tokens without requiring a full login flow.
+   * This is useful for scenarios where you already have tokens from another source
+   * and want to create an authenticated session directly.
+   *
+   * @param sessionTokenSet The token set to use for authentication
+   * @param sessionId Optional ID for the session, if not provided a random UUID will be generated
+   * @returns A Session instance
+   *
+   * @example
+   * ```typescript
+   * const session = Session.fromTokens(mySessionTokenSet, "my-session-id");
+   *
+   * // Use the authenticated session
+   * const response = await session.fetch("https://pod.example.com/private-resource");
+   * ```
+   */
+  public static async fromTokens(
+    sessionTokenSet: SessionTokenSet,
+    sessionId: string | undefined = undefined,
+  ): Promise<Session> {
+    const finalSessionId = sessionId ?? v4();
+    const isExpired =
+      sessionTokenSet.expiresAt !== undefined &&
+      sessionTokenSet.expiresAt * 1000 < Date.now();
+    let webId;
+    if (!isExpired && sessionTokenSet.idToken) {
+      const issuerConfig = await issuerConfigFetcher.fetchConfig(
+        sessionTokenSet.issuer,
+      );
+      try {
+        const payload = await getWebidFromTokenPayload(
+          sessionTokenSet.idToken,
+          // The JWKS URI is mandatory in the spec, so the non-null assertion is valid.
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          issuerConfig.jwksUri,
+          sessionTokenSet.issuer,
+          sessionTokenSet.clientId,
+        );
+        webId = payload.webId;
+      } catch {
+        // ignore this and just return an unauthenticated session
+      }
+    }
+
+    // Create a temporary storage so we can construct a SessionInfo including internal details using the
+    // existing code pending a simplification of Session management.
+    const tempStorage = new InMemoryStorage();
+    const clientAuth = getClientAuthenticationWithDependencies({
+      secureStorage: tempStorage,
+      insecureStorage: tempStorage,
+    });
+    await clientAuth.setSession(finalSessionId, {
+      // ISessionInfo fields
+      webId: sessionTokenSet.webId ?? webId,
+      isLoggedIn: !isExpired && webId !== undefined,
+      clientAppId: sessionTokenSet.clientId,
+      expirationDate: sessionTokenSet.expiresAt,
+      // ISessionInternalInfo fields
+      refreshToken: sessionTokenSet.refreshToken,
+      issuer: sessionTokenSet.issuer,
+      tokenType: sessionTokenSet.dpopKey === undefined ? "Bearer" : "DPoP",
+    });
+
+    const sessionInfo = await clientAuth.getSessionInfo(finalSessionId);
+
+    // Create a session with the token information
+    const session = new Session({
+      sessionInfo,
+      clientAuthentication: clientAuth,
+    });
+
+    if (
+      isExpired ||
+      webId === undefined ||
+      sessionTokenSet.idToken === undefined
+    ) {
+      return session;
+    }
+
+    const fetch = buildAuthenticatedFetch(sessionTokenSet.idToken, {
+      dpopKey: sessionTokenSet.dpopKey,
+      expiresIn: sessionTokenSet.expiresAt
+        ? sessionTokenSet.expiresAt - Date.now()
+        : undefined,
+      eventEmitter: session.events,
+    });
+
+    return Object.assign(session, { fetch });
+  }
 
   /**
    * Session object constructor. Typically called as follows:
@@ -150,7 +253,7 @@ export class Session implements IHasSessionEventListener {
     if (sessionOptions.sessionInfo) {
       this.info = {
         sessionId: sessionOptions.sessionInfo.sessionId,
-        isLoggedIn: false,
+        isLoggedIn: sessionOptions.sessionInfo.isLoggedIn,
         webId: sessionOptions.sessionInfo.webId,
         clientAppId: sessionOptions.sessionInfo.clientAppId,
       };

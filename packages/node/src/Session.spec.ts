@@ -442,7 +442,11 @@ describe("Session", () => {
       it("calls the registered callback on the newTokens event", async () => {
         const myCallback = jest.fn();
         const mySession = new Session();
-        const tokenSet: SessionTokenSet = { accessToken: "an access token" };
+        const tokenSet: SessionTokenSet = {
+          accessToken: "an access token",
+          clientId: "client-id",
+          issuer: "https://idp.com",
+        };
         mySession.events.on(EVENTS.NEW_TOKENS, myCallback);
         (mySession.events as EventEmitter).emit("newTokens", tokenSet);
         expect(myCallback).toHaveBeenCalledWith(tokenSet);

@@ -32,6 +32,7 @@ import type {
   ILoginInputOptions,
   ISessionInfo,
   SessionConfig,
+  ISessionInternalInfo,
 } from "@inrupt/solid-client-authn-core";
 import type { EventEmitter } from "events";
 
@@ -115,5 +116,12 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       sessionId: redirectInfo.sessionId,
       clientAppId: redirectInfo.clientAppId,
     };
+  };
+
+  setSession = async (
+    sessionId: string,
+    sessionInfo: Partial<ISessionInfo & ISessionInternalInfo>,
+  ): Promise<void> => {
+    await this.sessionInfoManager.set(sessionId, sessionInfo);
   };
 }

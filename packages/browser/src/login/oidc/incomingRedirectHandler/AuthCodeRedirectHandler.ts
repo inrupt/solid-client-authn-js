@@ -160,7 +160,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       };
     }
 
-    const authFetch = await buildAuthenticatedFetch(tokens.accessToken, {
+    const authFetch = buildAuthenticatedFetch(tokens.accessToken, {
       dpopKey: tokens.dpopKey,
       refreshOptions,
       eventEmitter,

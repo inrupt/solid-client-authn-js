@@ -107,11 +107,35 @@ export function createApp(
       return;
     }
 
-    const session = await getSessionFromStorage(req.session!.sessionId, {
-      refreshSession: true,
-    });
+    const session = await getSessionFromStorage(req.session!.sessionId);
 
     const { fetch } = session ?? new Session();
+    const response = await fetch(resource);
+    res
+      .status(response.status)
+      .send(await response.text())
+      .end();
+  });
+
+  app.get("/fetchSessionFromTokens", async (req, res) => {
+    const { resource } = req.query;
+
+    if (typeof resource !== "string") {
+      res.status(400).send("resource must be provided as a string").end();
+      return;
+    }
+
+    let session;
+    const sessionTokenSet = sessionTokenSets.get(req.session!.sessionId);
+    if (sessionTokenSet) {
+      session = await Session.fromTokens(
+        sessionTokenSet,
+        req.session!.sessionId,
+      );
+    }
+
+    const { fetch } = session ?? new Session();
+
     const response = await fetch(resource);
     res
       .status(response.status)

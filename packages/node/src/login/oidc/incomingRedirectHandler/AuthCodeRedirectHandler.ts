@@ -167,7 +167,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         tokenRefresher: this.tokenRefresher,
       };
     }
-    const authFetch = await buildAuthenticatedFetch(tokenSet.access_token, {
+    const authFetch = buildAuthenticatedFetch(tokenSet.access_token, {
       dpopKey,
       refreshOptions: oidcContext.keepAlive ? refreshOptions : undefined,
       eventEmitter,
@@ -192,6 +192,8 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       webId,
       expiresAt: tokenSet.expires_at,
       dpopKey,
+      clientId: client.metadata.client_id,
+      issuer: issuer.metadata.issuer,
     });
 
     await saveSessionInfoToStorage(
