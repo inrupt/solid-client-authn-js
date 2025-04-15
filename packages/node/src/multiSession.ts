@@ -115,7 +115,7 @@ async function internalGetSessionFromStorage(
     return undefined;
   }
   const session = new Session({
-    sessionInfo,
+    sessionInfo: { ...sessionInfo, isLoggedIn: false },
     clientAuthentication: clientAuth,
     keepAlive: sessionInfo.keepAlive,
   });
