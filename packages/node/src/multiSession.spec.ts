@@ -26,6 +26,7 @@ import {
   mockStorage,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
+import type { SessionTokenSet } from "core";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
@@ -36,12 +37,11 @@ import {
   getSessionFromStorage,
   getSessionIdFromStorageAll,
   refreshSession,
-  refreshTokens
+  refreshTokens,
 } from "./multiSession";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import type * as Dependencies from "./dependencies";
 import { Session } from "./Session";
-import { SessionTokenSet } from "core";
 
 jest.mock("./dependencies");
 
@@ -351,7 +351,13 @@ describe("refreshTokens", () => {
       },
       login: jest.fn<Session["login"]>().mockResolvedValue(),
       events: {
-        on: jest.fn<(event: "newTokens", callback: (tokens: SessionTokenSet) => {}) => void>()
+        on: jest
+          .fn<
+            (
+              event: "newTokens",
+              callback: (tokens: SessionTokenSet) => void,
+            ) => void
+          >()
           .mockImplementation((_, callback) => {
             // Simulate token refresh by calling the callback with new tokens
             callback(newTokens);
@@ -361,7 +367,9 @@ describe("refreshTokens", () => {
 
     // Mock the static method
     const originalFromTokens = Session.fromTokens;
-    Session.fromTokens = jest.fn<typeof Session.fromTokens>().mockResolvedValue(mockSession as unknown as Session);
+    Session.fromTokens = jest
+      .fn<typeof Session.fromTokens>()
+      .mockResolvedValue(mockSession as unknown as Session);
     const tokenSet = {
       accessToken: "old-access-token",
       refreshToken: "old-refresh-token",
@@ -392,7 +400,9 @@ describe("refreshTokens", () => {
 
     // Mock the static method
     const originalFromTokens = Session.fromTokens;
-    Session.fromTokens = jest.fn<typeof Session.fromTokens>().mockResolvedValue(mockSession as unknown as Session);
+    Session.fromTokens = jest
+      .fn<typeof Session.fromTokens>()
+      .mockResolvedValue(mockSession as unknown as Session);
 
     const tokenSet = {
       accessToken: "old-access-token",
@@ -403,7 +413,7 @@ describe("refreshTokens", () => {
 
     // The function should reject with an error
     await expect(refreshTokens(tokenSet)).rejects.toThrow(
-      "Could not refresh the session."
+      "Could not refresh the session.",
     );
 
     // Restore the original method

@@ -113,7 +113,7 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
   const session = await Session.fromTokens(tokenSet);
   // Replace with Promise.withResolvers when minimal node is 22.
   let tokenResolve: (tokens: SessionTokenSet) => void;
-  let tokenReject: (reason?: any) => void = () => {};
+  let tokenReject: (reason?: Error) => void = () => {};
   const tokenPromise = new Promise<SessionTokenSet>((resolve, reject) => {
     tokenResolve = resolve;
     tokenReject = reject;
