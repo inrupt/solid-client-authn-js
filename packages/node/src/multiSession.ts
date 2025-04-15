@@ -21,9 +21,9 @@
 
 import type {
   SessionTokenSet,
-  EVENTS,
-  type IStorage,
+  IStorage,
 } from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
