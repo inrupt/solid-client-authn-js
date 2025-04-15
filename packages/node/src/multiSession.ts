@@ -19,7 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import {
+import type {
   SessionTokenSet,
   EVENTS,
   type IStorage,
@@ -99,12 +99,12 @@ export async function refreshSession(
 export async function refreshTokens(tokenSet: SessionTokenSet) {
   const session = await Session.fromTokens(tokenSet);
   // Replace with Promise.withResolvers when minimal node is 22.
-  let tokenResolve: (tokenSet: SessionTokenSet) => void;
+  let tokenResolve: (tokens: SessionTokenSet) => void;
   const tokenPromise = new Promise<SessionTokenSet>((resolve) => {
     tokenResolve = resolve;
   });
-  session.events.on("newTokens", (tokenSet) => {
-    tokenResolve(tokenSet);
+  session.events.on("newTokens", (tokens) => {
+    tokenResolve(tokens);
   });
   await session.login({
     oidcIssuer: tokenSet.issuer,

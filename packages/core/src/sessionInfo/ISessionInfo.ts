@@ -98,7 +98,7 @@ export interface ISessionInternalInfo {
    */
   privateKey?: string;
 
-    /**
+  /**
    * Public part of the DPoP key.
    * @since unreleased
    */
