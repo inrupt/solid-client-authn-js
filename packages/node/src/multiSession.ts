@@ -102,7 +102,7 @@ export async function refreshSession(
  *
  * @param tokenSet the tokens to refresh
  * @returns a new set of tokens
- * @since unreleased
+ * @since 2.4.0
  * @example
  * ```
  * const refreshedTokens = await refreshTokens(previousTokenSet);

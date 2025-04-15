@@ -127,7 +127,7 @@ export class Session implements IHasSessionEventListener {
    * @param sessionTokenSet The token set to use for authentication
    * @param sessionId Optional ID for the session, if not provided a random UUID will be generated
    * @returns A Session instance
-   *
+   * @since 2.4.0
    * @example
    * ```typescript
    * const session = Session.fromTokens(mySessionTokenSet, "my-session-id");
