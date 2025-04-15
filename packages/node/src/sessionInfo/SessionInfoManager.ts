@@ -66,6 +66,8 @@ export class SessionInfoManager
       clientAppSecret: sessionInfo.clientAppSecret,
       dpop: sessionInfo.tokenType === "DPoP",
       keepAlive: sessionInfo.keepAlive,
+      privateKey: sessionInfo.privateKey,
+      publicKey: sessionInfo.publicKey,
     };
 
     const definedFields: Record<string, string> = Object.entries(fieldsToStore)
@@ -94,6 +96,8 @@ export class SessionInfoManager
       clientAppSecret,
       dpop,
       keepAlive,
+      publicKey,
+      privateKey,
     ] = await Promise.all([
       // ISessionInfo
       this.storageUtility.getForUser(sessionId, "webId"),
@@ -107,6 +111,8 @@ export class SessionInfoManager
       this.storageUtility.getForUser(sessionId, "clientAppSecret"),
       this.storageUtility.getForUser(sessionId, "dpop"),
       this.storageUtility.getForUser(sessionId, "keepAlive"),
+      this.storageUtility.getForUser(sessionId, "publicKey"),
+      this.storageUtility.getForUser(sessionId, "privateKey"),
     ]);
 
     if (issuer !== undefined) {
@@ -126,6 +132,8 @@ export class SessionInfoManager
         redirectUrl,
         tokenType: dpop === "true" ? "DPoP" : "Bearer",
         keepAlive: keepAlive === "true",
+        publicKey,
+        privateKey,
       };
     }
 

@@ -19,7 +19,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { EVENTS, type IStorage } from "@inrupt/solid-client-authn-core";
+import type {
+  SessionTokenSet,
+  IStorage,
+} from "@inrupt/solid-client-authn-core";
+import { EVENTS } from "@inrupt/solid-client-authn-core";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
@@ -90,6 +94,38 @@ export async function refreshSession(
       tokenType: sessionInfo.tokenType,
     });
   }
+}
+
+/**
+ * Refresh the Access Token and ID Token using the Refresh Token.
+ * The tokens may not be expired in order to be refreshed.
+ *
+ * @param tokenSet the tokens to refresh
+ * @returns a new set of tokens
+ * @since unreleased
+ * @example
+ * ```
+ * const refreshedTokens = await refreshTokens(previousTokenSet);
+ * const session = await Session.fromTokens(refreshedTokens, sessionId);
+ * ```
+ */
+export async function refreshTokens(tokenSet: SessionTokenSet) {
+  const session = await Session.fromTokens(tokenSet);
+  // Replace with Promise.withResolvers when minimal node is 22.
+  let tokenResolve: (tokens: SessionTokenSet) => void;
+  const tokenPromise = new Promise<SessionTokenSet>((resolve) => {
+    tokenResolve = resolve;
+  });
+  // FIXME: if the refresh flow fails, the promise should reject.
+  session.events.on("newTokens", (tokens) => {
+    tokenResolve(tokens);
+  });
+  await session.login({
+    oidcIssuer: tokenSet.issuer,
+    clientId: tokenSet.clientId,
+    refreshToken: tokenSet.refreshToken,
+  });
+  return tokenPromise;
 }
 
 async function internalGetSessionFromStorage(

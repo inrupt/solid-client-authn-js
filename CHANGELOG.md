@@ -49,9 +49,10 @@ The following changes have been implemented but not released yet:
 
 #### node
 
-- Added a `EVENTS.NEW_TOKENS` event to be emitted by the `Session` when it receives new tokens when a session is initially
+- Added a `EVENTS.NEW_TOKENS` (`newTokens`) event to be emitted by the `Session` when it receives new tokens when a session is initially
   logged in or refreshed. This event is more useful than `EVENTS.NEW_REFRESH_TOKEN` which is being deprecated.
 - Added a static `Session.fromTokens(tokens, sessionId)` method that creates a new authenticated session directly from a token set, without requiring a full login flow.
+- Added a new function `refreshTokens` to refresh tokens obtained via the `newTokens` event after the Access Token expired.
 
 ## [2.3.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.3.0) - 2024-11-14
 
