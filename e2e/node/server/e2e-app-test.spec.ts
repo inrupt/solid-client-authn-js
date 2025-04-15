@@ -34,6 +34,7 @@ import {
 import { firefox } from "@playwright/test";
 import { custom } from "openid-client";
 import type { Server } from "http";
+import type { SessionTokenSet } from "node";
 import {
   type ISeedPodResponse,
   seedPod,
@@ -116,7 +117,7 @@ async function performTest(seedInfo: ISeedPodResponse) {
 
   // Use page.evaluate to fetch JSON response
   await page.goto(tokensUrl.toString());
-  const tokenSet = await page.evaluate(() => {
+  const tokenSet: SessionTokenSet = await page.evaluate(() => {
     try {
       return JSON.parse(document.body.textContent || "{}");
     } catch (e) {
@@ -130,6 +131,30 @@ async function performTest(seedInfo: ISeedPodResponse) {
   expect(tokenSet.expiresAt).toBeDefined();
   expect(tokenSet.dpopKey).toBeDefined();
   expect(tokenSet.webId).toBeDefined();
+
+  const refreshUrl = new URL(
+    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/refresh`,
+  );
+
+  // Use page.evaluate to fetch JSON response
+  await page.goto(refreshUrl.toString());
+  const refreshedTokens: SessionTokenSet = await page.evaluate(() => {
+    try {
+      return JSON.parse(document.body.textContent || "{}");
+    } catch (e) {
+      return null;
+    }
+  });
+
+  expect(refreshedTokens).toBeDefined();
+  // The ID Token should have been refreshed.
+  expect(refreshedTokens.idToken).not.toBe(tokenSet.idToken);
+  // The Refresh Token should have been rotated.
+  expect(refreshedTokens.refreshToken).not.toBe(tokenSet.refreshToken);
+  // The DPoP key should be unchanged.
+  expect(refreshedTokens.dpopKey?.publicKey).toStrictEqual(
+    tokenSet.dpopKey?.publicKey,
+  );
 
   // Performing idp logout and being redirected to the postLogoutUrl after doing so
   await page.goto(

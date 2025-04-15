@@ -28,6 +28,7 @@ import {
   Session,
   getSessionFromStorage,
   EVENTS,
+  refreshTokens,
 } from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
@@ -43,13 +44,7 @@ export function createApp(
 
   app.use(
     cookieSession({
-      name: "session",
-      // These keys are required by cookie-session to sign the cookies.
-      keys: [
-        "Required, but value not relevant for this demo - key1",
-        "Required, but value not relevant for this demo - key2",
-      ],
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      keys: [`${Math.random()}`],
     }),
   );
 
@@ -143,6 +138,17 @@ export function createApp(
   app.get("/tokens", async (req, res) => {
     const tokenSet = sessionTokenSets.get(req.session!.sessionId);
     res.json(tokenSet);
+  });
+
+  app.get("/refresh", async (req, res) => {
+    const previousTokens = sessionTokenSets.get(req.session!.sessionId);
+    if (previousTokens === undefined) {
+      res.status(401).send("No session found");
+      return;
+    }
+    const refreshedTokens = await refreshTokens(previousTokens);
+    sessionTokenSets.set(req.session!.sessionId, refreshedTokens);
+    res.json(refreshedTokens);
   });
 
   app.get("/logout", async (req, res) => {

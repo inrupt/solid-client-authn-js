@@ -61,6 +61,10 @@ function getCredentials() {
 
 describe(`End-to-end authentication tests for environment [${ENV.environment}}]`, () => {
   const authenticatedSession = new Session();
+  let tokens: SessionTokenSet;
+  authenticatedSession.events.on("newTokens", (tokenSet) => {
+    tokens = tokenSet;
+  });
 
   // Log back in on session expiration
   authenticatedSession.events.on("sessionExpired", () =>
@@ -96,6 +100,13 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
   });
 
   describe("Authenticated fetch", () => {
+    it("sets the session tokens", async () => {
+      expect(tokens.idToken).toBeDefined();
+      expect(tokens.clientId).toEqual(getCredentials().clientId);
+      // The client credentials flow should not issue a Refresh Token.
+      expect(tokens.refreshToken).toBeUndefined();
+    });
+
     it("properly sets up session information", async () => {
       expect(authenticatedSession.info.isLoggedIn).toBe(true);
       expect(authenticatedSession.info.sessionId).toBeDefined();
