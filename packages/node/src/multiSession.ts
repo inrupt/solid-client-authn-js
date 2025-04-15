@@ -113,10 +113,11 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
   const session = await Session.fromTokens(tokenSet);
   // Replace with Promise.withResolvers when minimal node is 22.
   let tokenResolve: (tokens: SessionTokenSet) => void;
-  const tokenPromise = new Promise<SessionTokenSet>((resolve) => {
+  let tokenReject: (reason?: any) => void = () => {};
+  const tokenPromise = new Promise<SessionTokenSet>((resolve, reject) => {
     tokenResolve = resolve;
+    tokenReject = reject;
   });
-  // FIXME: if the refresh flow fails, the promise should reject.
   session.events.on("newTokens", (tokens) => {
     tokenResolve(tokens);
   });
@@ -125,6 +126,9 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
     clientId: tokenSet.clientId,
     refreshToken: tokenSet.refreshToken,
   });
+  if (!session.info.isLoggedIn) {
+    tokenReject(new Error("Could not refresh the session."));
+  }
   return tokenPromise;
 }
 
