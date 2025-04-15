@@ -19,7 +19,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { EVENTS, type IStorage } from "@inrupt/solid-client-authn-core";
+import {
+  SessionTokenSet,
+  EVENTS,
+  type IStorage,
+} from "@inrupt/solid-client-authn-core";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import { defaultStorage, Session } from "./Session";
@@ -90,6 +94,24 @@ export async function refreshSession(
       tokenType: sessionInfo.tokenType,
     });
   }
+}
+
+export async function refreshTokens(tokenSet: SessionTokenSet) {
+  const session = await Session.fromTokens(tokenSet);
+  // Replace with Promise.withResolvers when minimal node is 22.
+  let tokenResolve: (tokenSet: SessionTokenSet) => void;
+  const tokenPromise = new Promise<SessionTokenSet>((resolve) => {
+    tokenResolve = resolve;
+  });
+  session.events.on("newTokens", (tokenSet) => {
+    tokenResolve(tokenSet);
+  });
+  await session.login({
+    oidcIssuer: tokenSet.issuer,
+    clientId: tokenSet.clientId,
+    refreshToken: tokenSet.refreshToken,
+  });
+  return tokenPromise;
 }
 
 async function internalGetSessionFromStorage(

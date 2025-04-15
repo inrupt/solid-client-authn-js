@@ -91,6 +91,18 @@ export interface ISessionInternalInfo {
    * @since 2.2.0
    */
   keepAlive?: boolean;
+
+  /**
+   * Private part of the DPoP key.
+   * @since unreleased
+   */
+  privateKey?: string;
+
+    /**
+   * Public part of the DPoP key.
+   * @since unreleased
+   */
+  publicKey?: string;
 }
 
 export function isSupportedTokenType(

@@ -40,11 +40,11 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
 import EventEmitter from "events";
+import { exportJWK } from "jose";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import StorageUtilityNode from "./storage/StorageUtility";
-
 export interface ISessionOptions {
   /**
    * A private storage, unreachable to other scripts on the page. Typically in-memory.
@@ -180,6 +180,14 @@ export class Session implements IHasSessionEventListener {
       refreshToken: sessionTokenSet.refreshToken,
       issuer: sessionTokenSet.issuer,
       tokenType: sessionTokenSet.dpopKey === undefined ? "Bearer" : "DPoP",
+      publicKey: sessionTokenSet.dpopKey?.publicKey === undefined 
+        ? JSON.stringify(sessionTokenSet.dpopKey?.publicKey)
+        : undefined,
+      privateKey: sessionTokenSet.dpopKey?.privateKey !== undefined 
+        ? JSON.stringify(
+            await exportJWK(sessionTokenSet.dpopKey?.privateKey),
+          )
+        : undefined,
     });
 
     const sessionInfo = await clientAuth.getSessionInfo(finalSessionId);
