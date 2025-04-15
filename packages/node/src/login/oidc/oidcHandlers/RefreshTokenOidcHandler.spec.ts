@@ -383,6 +383,7 @@ describe("RefreshTokenOidcHandler", () => {
       expect.anything(),
       expect.anything(),
       expect.anything(),
+      expect.anything(),
     );
   });
 

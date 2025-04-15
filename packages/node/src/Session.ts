@@ -142,9 +142,8 @@ export class Session implements IHasSessionEventListener {
     const finalSessionId = sessionId ?? v4();
     const isExpired =
       sessionTokenSet.expiresAt !== undefined &&
-      sessionTokenSet.expiresAt < Date.now();
+      sessionTokenSet.expiresAt * 1000 < Date.now();
     let webId;
-
     if (!isExpired && sessionTokenSet.idToken) {
       const issuerConfig = await issuerConfigFetcher.fetchConfig(
         sessionTokenSet.issuer,

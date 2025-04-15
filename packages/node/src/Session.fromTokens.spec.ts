@@ -97,7 +97,7 @@ describe("Session.fromTokens", () => {
       clientId: mockClientId,
       issuer: mockIssuer,
       // Expiration date is in the future.
-      expiresAt: Date.now() + 3600,
+      expiresAt: (Date.now() / 1000) + 3600,
       webId: mockWebid,
     };
 
@@ -184,7 +184,7 @@ describe("Session.fromTokens", () => {
       issuer: mockIssuer,
       webId: mockWebid,
       // The expiration date is set in the past
-      expiresAt: Date.now() - 3600,
+      expiresAt: (Date.now() / 1000) - 3600,
     };
 
     const session = await Session.fromTokens(tokenSet);
