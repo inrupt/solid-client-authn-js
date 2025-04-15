@@ -99,7 +99,7 @@ export async function refreshSession(
 /**
  * Refresh the Access Token and ID Token using the Refresh Token.
  * The tokens may not be expired in order to be refreshed.
- * 
+ *
  * @param tokenSet the tokens to refresh
  * @returns a new set of tokens
  * @since unreleased
