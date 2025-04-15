@@ -372,6 +372,7 @@ export interface ISessionEventListener extends EventEmitter {
    * the session.
    * @param eventName The new tokens issued event name.
    * @param listener The callback called next time new tokens are issued.
+   * @since 2.4.0
    */
   once(
     eventName: NEW_TOKENS_ARGS["eventName"],

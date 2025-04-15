@@ -94,13 +94,13 @@ export interface ISessionInternalInfo {
 
   /**
    * Private part of the DPoP key.
-   * @since unreleased
+   * @since 2.4.0
    */
   privateKey?: string;
 
   /**
    * Public part of the DPoP key.
-   * @since unreleased
+   * @since 2.4.0
    */
   publicKey?: string;
 }

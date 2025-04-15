@@ -33,6 +33,8 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+## [2.4.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.4.0) - 2025-04-15
+
 ### Bugfix
 
 #### browser and node
