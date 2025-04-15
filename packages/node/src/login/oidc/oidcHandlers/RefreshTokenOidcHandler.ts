@@ -79,7 +79,7 @@ async function refreshAccess(
   try {
     let dpopKey: KeyPair | undefined;
     if (dpop) {
-      dpopKey = refreshBindingKey || (await generateDpopKeyPair());
+      dpopKey = refreshBindingKey ?? (await generateDpopKeyPair());
       // The alg property isn't set by exportJWK, so set it manually.
       [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
     }

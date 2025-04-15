@@ -180,7 +180,7 @@ export class Session implements IHasSessionEventListener {
       refreshToken: sessionTokenSet.refreshToken,
       issuer: sessionTokenSet.issuer,
       tokenType: sessionTokenSet.dpopKey === undefined ? "Bearer" : "DPoP",
-      publicKey: sessionTokenSet.dpopKey?.publicKey === undefined 
+      publicKey: sessionTokenSet.dpopKey?.publicKey !== undefined 
         ? JSON.stringify(sessionTokenSet.dpopKey?.publicKey)
         : undefined,
       privateKey: sessionTokenSet.dpopKey?.privateKey !== undefined 

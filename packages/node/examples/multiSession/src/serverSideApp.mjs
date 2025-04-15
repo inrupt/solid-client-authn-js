@@ -22,60 +22,51 @@
 import {
   Session,
   getSessionFromStorage,
-  getSessionIdFromStorageAll,
-  refreshSession
+  refreshTokens
 } from "@inrupt/solid-client-authn-node";
+import { getPodUrlAll } from "@inrupt/solid-client";
+import { setGlobalDispatcher, ProxyAgent } from "undici";
+if (typeof process.env.DEBUG_PROXY === "string") {
+  const proxyAgent = new ProxyAgent({ uri: process.env.DEBUG_PROXY });
+  setGlobalDispatcher(proxyAgent)
+}
 
 import cookieSession from "cookie-session";
 
 import express from "express";
 
-const clientApplicationName = "solid-client-authn-node multi session demo";
-
 const app = express();
-const PORT = 3001;
 
-const DEFAULT_OIDC_ISSUER = "https://login.inrupt.com/";
-// This is the endpoint our NodeJS demo app listens on to receive incoming login
-const REDIRECT_URL = "http://localhost:3001/redirect";
+app.use(cookieSession({
+  keys: [`${Math.random()}`]
+}));
 
-app.use(
-  cookieSession({
-    name: "session",
-    // These keys are required by cookie-session to sign the cookies.
-    keys: [
-      "Required, but value not relevant for this demo - key1",
-      "Required, but value not relevant for this demo - key2",
-    ],
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  }),
-);
+// For simplicity, the cache is here an in-memory map. In a real application,
+// refresh tokens would be stored in a persistent storage.
+const sessionCache = {};
+const updateSessionCache = (sessionId, tokenSet) => {
+  sessionCache[sessionId] = tokenSet;
+};
 
-app.get("/", async (req, res, next) => {
-  const sessionIds = await getSessionIdFromStorageAll();
-  const sessions = await Promise.all(
-    sessionIds.map(async (sessionId) => {
-      return getSessionFromStorage(sessionId);
-    }),
-  );
-  const htmlSessions = `${sessions.reduce((sessionList, session) => {
-    if (session?.info.isLoggedIn) {
-      return `${sessionList}<li><strong>${session?.info.webId}</strong></li>`;
-    }
-    return `${sessionList}<li>Logging in process</li>`;
-  }, "<ul>")}</ul>`;
+app.get("/", async (_, res) => {
+  const htmlSessions = `${Object.values(sessionCache)
+    .reduce((sessionList, sessionTokens) => (
+      `${sessionList}<li><strong>${sessionTokens.webId}</strong></li>`
+      ),
+      "<ul>")}</ul>`;
   res.send(
-    `<p>There are currently [${sessionIds.length}] visitors: ${htmlSessions}</p>`,
+    `<p>There are currently [${Object.values(sessionCache).length}] visitors: ${htmlSessions}</p>`,
   );
 });
 
-app.get("/login", async (req, res, next) => {
+app.get("/login", async (req, res) => {
   const session = new Session({ keepAlive: false });
+  // Set a cookie with the session ID.
   req.session.sessionId = session.info.sessionId;
   await session.login({
-    redirectUrl: REDIRECT_URL,
-    oidcIssuer: DEFAULT_OIDC_ISSUER,
-    clientName: clientApplicationName,
+    clientId: process.env.CLIENT_ID,
+    redirectUrl: process.env.REDIRECT_URL,
+    oidcIssuer: process.env.OPENID_PROVIDER,
     handleRedirect: (redirectUrl) => res.redirect(redirectUrl),
   });
   if (session.info.isLoggedIn) {
@@ -87,57 +78,75 @@ app.get("/login", async (req, res, next) => {
 
 app.get("/redirect", async (req, res) => {
   const session = await getSessionFromStorage(req.session.sessionId);
+  session.events.on(
+    "newTokens",
+    (tokenSet) => updateSessionCache(req.session.sessionId, tokenSet)
+  );
   if (session === undefined) {
     res
       .status(400)
       .send(`<p>No session stored for ID [${req.session.sessionId}]</p>`);
+    return;
+  }
+  await session.handleIncomingRedirect(getRequestFullUrl(req));
+  if (session.info.isLoggedIn) {
+    const storageUrl = await getPodUrlAll(session.info.webId); 
+    res.send(
+      `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect.</p>
+      <p><a href="/fetch/time?resource=${storageUrl}">Fetch my Pod root (latest)</a></p>`,
+    );
   } else {
-    await session.handleIncomingRedirect(getRequestFullUrl(req));
-    if (session.info.isLoggedIn) {
-      session.events.on("sessionExtended", () => { console.log("Extended session.")})
-      res.send(
-        `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect</p>`,
-      );
-    } else {
-      res.status(400).send(`<p>Not logged in after redirect</p>`);
-    }
+    res.status(400).send(`<p>Not logged in after redirect</p>`);
   }
   res.end();
 });
 
-app.get("/fetch", async (req, res, next) => {
-  const session = await getSessionFromStorage(req.session.sessionId);
+app.get("/refresh", async (req, res) => {
+  const refreshedTokens = await refreshTokens(sessionCache[req.session.sessionId]);
+  updateSessionCache(req.session.sessionId, refreshedTokens);
+  const session = await Session.fromTokens(refreshedTokens, req.session.sessionId);
+  if (session.info.isLoggedIn) {
+    const storageUrl = await getPodUrlAll(session.info.webId); 
+    res.send(
+      `<p>Refreshed session for [<strong>${session.info.webId}</strong>].</p>
+      <p><a href="/fetch/time?resource=${storageUrl}">Fetch my Pod root (latest)</a></p>`,
+    );
+    return;
+  }
+  res.status(400).send(`<p>Could not refresh the session</p>`);
+});
+
+app.get("/fetch", async (req, res) => {
+  const session = await Session.fromTokens(sessionCache[req.session.sessionId], req.session.sessionId);
   if (!req.query.resource) {
     res
       .status(400)
       .send(
         "<p>Expected a 'resource' query param, for example <strong>http://localhost:3001/fetch?resource=https://pod.inrupt.com/MY_USERNAME/</strong> to fetch the resource at the root of your Pod (which, by default, only <strong>you</strong> will have access to).</p>",
       );
-  } else {
-    const { fetch } = session ?? new Session();
-    res.send(
-      `<pre>${(
-        await (await fetch(req.query.resource)).text()
-      ).replace(/</g, "&lt;")}</pre>`,
-    );
+    return;
   }
+  res.send(
+    `<pre>${(
+      await session.fetch(req.query.resource).then(r => r.text())
+    ).replace(/</g, "&lt;")}</pre>`,
+  );
 });
 
-app.get("/logout", async (req, res, next) => {
-  const session = await getSessionFromStorage(req.session.sessionId);
+app.get("/logout", async (req, res) => {
+  const session = await Session.fromTokens(sessionCache[req.session.sessionId], req.session.sessionId);
   if (session) {
-    const { webId } = session.info;
     await session.logout({
       logoutType: "idp",
       handleRedirect: (redirectUrl) => { res.redirect(redirectUrl) }
     });
-  } else {
-    res.status(400).send(`<p>No active session to log out</p>`);
+    return;
   }
+  res.status(400).send(`<p>No active session to log out</p>`);
 });
 
-app.listen(PORT, async () => {
-  console.log(`Listening on [${PORT}]...`);
+app.listen(process.env.PORT, async () => {
+  console.log(`Listening on [${process.env.PORT}]...`);
 });
 
 function getRequestFullUrl(request) {
