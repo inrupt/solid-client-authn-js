@@ -87,7 +87,7 @@ async function refreshAccess(
       refreshOptions.sessionId,
       refreshOptions.refreshToken,
       dpopKey,
-      eventEmitter
+      eventEmitter,
     );
     // Rotate the refresh token if applicable
     const rotatedRefreshOptions = {
