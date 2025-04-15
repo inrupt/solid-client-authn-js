@@ -96,6 +96,19 @@ export async function refreshSession(
   }
 }
 
+/**
+ * Refresh the Access Token and ID Token using the Refresh Token.
+ * The tokens may not be expired in order to be refreshed.
+ * 
+ * @param tokenSet the tokens to refresh
+ * @returns a new set of tokens
+ * @since unreleased
+ * @example
+ * ```
+ * const refreshedTokens = await refreshTokens(previousTokenSet);
+ * const session = await Session.fromTokens(refreshedTokens, sessionId);
+ * ```
+ */
 export async function refreshTokens(tokenSet: SessionTokenSet) {
   const session = await Session.fromTokens(tokenSet);
   // Replace with Promise.withResolvers when minimal node is 22.
@@ -103,6 +116,7 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
   const tokenPromise = new Promise<SessionTokenSet>((resolve) => {
     tokenResolve = resolve;
   });
+  // FIXME: if the refresh flow fails, the promise should reject.
   session.events.on("newTokens", (tokens) => {
     tokenResolve(tokens);
   });
