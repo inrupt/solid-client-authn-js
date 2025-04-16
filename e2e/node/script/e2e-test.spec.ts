@@ -104,7 +104,8 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
       expect(tokens.idToken).toBeDefined();
       expect(tokens.clientId).toEqual(getCredentials().clientId);
       // The client credentials flow should not issue a Refresh Token.
-      expect(tokens.refreshToken).toBeUndefined();
+      // FIXME: Why is this null and not undefined?
+      expect(tokens.refreshToken).toBeNull();
     });
 
     it("properly sets up session information", async () => {

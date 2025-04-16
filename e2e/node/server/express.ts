@@ -29,6 +29,7 @@ import {
   getSessionFromStorage,
   EVENTS,
   refreshTokens,
+  refreshSession,
 } from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
@@ -99,7 +100,17 @@ export function createApp(
       return;
     }
 
-    const session = await getSessionFromStorage(req.session!.sessionId);
+    const session = await getSessionFromStorage(req.session!.sessionId, {
+      refreshSession: false,
+    });
+    if (session === undefined) {
+      res.status(401).send().end();
+      return;
+    }
+    session.events.on(EVENTS.NEW_TOKENS, (tokenSet) => {
+      sessionTokenSets.set(session.info.sessionId, tokenSet);
+    });
+    await refreshSession(session);
 
     const { fetch } = session ?? new Session();
     const response = await fetch(resource);
@@ -152,7 +163,14 @@ export function createApp(
   });
 
   app.get("/logout", async (req, res) => {
-    const session = await getSessionFromStorage(req.session!.sessionId);
+    let session;
+    const sessionTokenSet = sessionTokenSets.get(req.session!.sessionId);
+    if (sessionTokenSet) {
+      session = await Session.fromTokens(
+        sessionTokenSet,
+        req.session!.sessionId,
+      );
+    }
     if (!session) return;
 
     try {
@@ -169,7 +187,14 @@ export function createApp(
   });
 
   app.get("/idplogout", async (req, res) => {
-    const session = await getSessionFromStorage(req.session!.sessionId);
+    let session;
+    const sessionTokenSet = sessionTokenSets.get(req.session!.sessionId);
+    if (sessionTokenSet) {
+      session = await Session.fromTokens(
+        sessionTokenSet,
+        req.session!.sessionId,
+      );
+    }
     if (!session) return;
 
     try {
