@@ -18,7 +18,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-import log from "loglevel";
 import cookieSession from "cookie-session";
 import express from "express";
 import type {
@@ -33,8 +32,6 @@ import {
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
-
-log.setLevel("TRACE");
 
 export function createApp(
   onStart: (value: PromiseLike<void> | void) => void,
