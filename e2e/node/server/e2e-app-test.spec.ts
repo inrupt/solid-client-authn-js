@@ -31,7 +31,7 @@ import {
   it,
   jest,
 } from "@jest/globals";
-import { Browser, firefox, Page } from "@playwright/test";
+import { firefox } from "@playwright/test";
 import { custom } from "openid-client";
 import type { Server } from "http";
 import type { SessionTokenSet } from "node";
@@ -58,10 +58,6 @@ const ENV = getNodeTestingEnvironment();
 const BROWSER_ENV = getBrowserTestingEnvironment();
 
 // Testing the OIDC Authorization Code flow in an express-based web application.
-
-async function authenticate(browser: Browser, page: Page) {
-  
-}
 
 async function performTest(seedInfo: ISeedPodResponse) {
   const browser = await firefox.launch();
@@ -136,12 +132,12 @@ async function performTest(seedInfo: ISeedPodResponse) {
   expect(tokenSet.dpopKey).toBeDefined();
   expect(tokenSet.webId).toBeDefined();
 
-  const refreshUrl = new URL(
-    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/refresh`,
-  );
-
   // FIXME: Uncomment when the issue with external token management
   // and IDP logout is resolved.
+  // const refreshUrl = new URL(
+  //   `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/refresh`,
+  // );
+
   // Use page.evaluate to fetch JSON response
   // await page.goto(refreshUrl.toString());
   // const refreshedTokens: SessionTokenSet = await page.evaluate(() => {

@@ -148,7 +148,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
     oidcLoginOptions.eventEmitter?.emit(EVENTS.NEW_TOKENS, {
       accessToken: tokens.access_token,
       idToken: tokens.id_token,
-      // Unlike what its type declaration says, the refresh token may be null 
+      // Unlike what its type declaration says, the refresh token may be null
       refreshToken: tokens.refresh_token ?? undefined,
       webId,
       expiresAt,
