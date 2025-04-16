@@ -145,11 +145,11 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       tokens.expires_in !== undefined
         ? Date.now() + tokens.expires_in * 1000
         : undefined;
-
     oidcLoginOptions.eventEmitter?.emit(EVENTS.NEW_TOKENS, {
       accessToken: tokens.access_token,
       idToken: tokens.id_token,
-      refreshToken: tokens.refresh_token,
+      // Unlike what its type declaration says, the refresh token may be null 
+      refreshToken: tokens.refresh_token ?? undefined,
       webId,
       expiresAt,
       dpopKey,
