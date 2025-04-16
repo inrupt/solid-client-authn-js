@@ -1,9 +1,7 @@
 import { Session } from "@inrupt/solid-client-authn-node";
-import { config } from "dotenv";
-
-config({ path: ".env.local" });
 
 const session = new Session();
+session.events.on("newTokens", (o) => { console.log(JSON.stringify(o))})
 await session.login({
   oidcIssuer: process.env.OPENID_PROVIDER,
   clientId: process.env.CLIENT_ID,
