@@ -12,7 +12,7 @@ against a compliant OIDC implementation, such as Inrupt's ESS (e.g., deployed at
 
 To install this demo app, first run `npm ci` at the root of the repository, which
 will trigger the build of the libraries our app depends on. Then, run `npm ci`
-again, this time in `packages/node/example/multiSession/`.
+again, this time in `packages/node/example/server/`.
 
 ## Running the app
 

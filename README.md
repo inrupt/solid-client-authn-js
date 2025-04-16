@@ -111,20 +111,11 @@ Go to http://localhost:3001/.
 
 #### Running a server-side app
 
-```shell
-git clone https://github.com/inrupt/solid-client-authn-js
-cd solid-client-authn-js
-npm ci
-cd packages/node/example/demoClientApp/
-npm ci
-npm run start
-```
-
-Go to http://localhost:3001/.
+See [the dedicated example](/packages/node/examples/server/README.md).
 
 #### Running an authenticated script
 
-See [the dedicated example](/packages/node/examples/authenticated-script/README.md).
+See [the dedicated example](/packages/node/examples/script/README.md).
 
 ## Using with jest
 
