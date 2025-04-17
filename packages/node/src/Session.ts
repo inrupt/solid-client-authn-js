@@ -197,6 +197,7 @@ export class Session implements IHasSessionEventListener {
     const session = new Session({
       sessionInfo,
       clientAuthentication: clientAuth,
+      keepAlive: false,
     });
 
     if (
