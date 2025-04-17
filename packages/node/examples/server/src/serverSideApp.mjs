@@ -25,14 +25,7 @@ import {
   refreshTokens
 } from "@inrupt/solid-client-authn-node";
 import { getPodUrlAll } from "@inrupt/solid-client";
-import { setGlobalDispatcher, ProxyAgent } from "undici";
-if (typeof process.env.DEBUG_PROXY === "string") {
-  const proxyAgent = new ProxyAgent({ uri: process.env.DEBUG_PROXY });
-  setGlobalDispatcher(proxyAgent)
-}
-
 import cookieSession from "cookie-session";
-
 import express from "express";
 
 const app = express();
@@ -93,7 +86,7 @@ app.get("/redirect", async (req, res) => {
     const storageUrl = await getPodUrlAll(session.info.webId); 
     res.send(
       `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect.</p>
-      <p><a href="/fetch/time?resource=${storageUrl}">Fetch my Pod root (latest)</a></p>`,
+      <p><a href="/fetch?resource=${storageUrl}">Fetch my Pod root</a></p>`,
     );
   } else {
     res.status(400).send(`<p>Not logged in after redirect</p>`);
