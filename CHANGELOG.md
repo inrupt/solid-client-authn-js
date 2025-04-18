@@ -33,6 +33,15 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+## [2.4.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.4.1) - 2025-04-18
+
+### Bugfix
+
+#### node
+
+- `refreshTokens` had a bug causing an unexpected refresh token rotation if the ID token expired,
+  resulting in the stored token being stale.
+
 ## [2.4.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.4.0) - 2025-04-15
 
 ### Bugfix
