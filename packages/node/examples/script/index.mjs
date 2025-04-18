@@ -1,7 +1,4 @@
 import { Session } from "@inrupt/solid-client-authn-node";
-import { config } from "dotenv";
-
-config({ path: ".env.local" });
 
 const session = new Session();
 await session.login({
