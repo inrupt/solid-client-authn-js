@@ -48,7 +48,7 @@ app.get("/", async (_, res) => {
       ),
       "<ul>")}</ul>`;
   res.send(
-    `<p>There are currently [${Object.values(sessionCache).length}] visitors: ${htmlSessions}</p>`,
+    `<p>There are currently [${Object.values(sessionCache).length}] visitors: ${htmlSessions}</p><p><a href="/login">Log in</a>`,
   );
 });
 
@@ -139,7 +139,7 @@ app.get("/logout", async (req, res) => {
 });
 
 app.listen(process.env.PORT, async () => {
-  console.log(`Listening on [${process.env.PORT}]...`);
+  console.log(`Listening on http://localhost:${process.env.PORT}...`);
 });
 
 function getRequestFullUrl(request) {
