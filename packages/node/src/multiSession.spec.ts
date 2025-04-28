@@ -26,7 +26,6 @@ import {
   mockStorage,
   mockStorageUtility,
 } from "@inrupt/solid-client-authn-core";
-import type { SessionTokenSet } from "core";
 import {
   mockClientAuthentication,
   mockCustomClientAuthentication,
@@ -40,7 +39,6 @@ import {
 } from "./multiSession";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import type * as Dependencies from "./dependencies";
-import { Session } from "./Session";
 
 jest.mock("./dependencies");
 

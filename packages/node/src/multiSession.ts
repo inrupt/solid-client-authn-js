@@ -19,10 +19,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type {
-  SessionTokenSet,
-  IStorage,
-} from "@inrupt/solid-client-authn-core";
+import type { IStorage } from "@inrupt/solid-client-authn-core";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
