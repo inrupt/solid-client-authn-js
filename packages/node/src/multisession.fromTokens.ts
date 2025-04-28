@@ -22,6 +22,19 @@
 import type { SessionTokenSet } from "@inrupt/solid-client-authn-core";
 import { Session } from "./Session";
 
+/**
+ * Refresh the Access Token and ID Token using the Refresh Token.
+ * The tokens may not be expired in order to be refreshed.
+ *
+ * @param tokenSet the tokens to refresh
+ * @returns a new set of tokens
+ * @since 2.4.0
+ * @example
+ * ```
+ * const refreshedTokens = await refreshTokens(previousTokenSet);
+ * const session = await Session.fromTokens(refreshedTokens, sessionId);
+ * ```
+ */
 export async function refreshTokens(tokenSet: SessionTokenSet) {
   const session = await Session.fromTokens(tokenSet);
   // Replace with Promise.withResolvers when minimal node is 22.
