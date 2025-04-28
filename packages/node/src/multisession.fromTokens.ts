@@ -19,26 +19,28 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-export { Session, ISessionOptions } from "./Session";
+import type { SessionTokenSet } from "@inrupt/solid-client-authn-core";
+import { Session } from "./Session";
 
-export {
-  getSessionFromStorage,
-  getSessionIdFromStorageAll,
-  clearSessionFromStorageAll,
-  refreshSession,
-} from "./multiSession";
-
-export { refreshTokens } from "./multisession.fromTokens";
-
-// Re-export of types defined in the core module and produced/consumed by our API
-export {
-  ILoginInputOptions,
-  ILogoutOptions,
-  ISessionInfo,
-  IStorage,
-  NotImplementedError,
-  ConfigurationError,
-  InMemoryStorage,
-  EVENTS,
-  type SessionTokenSet,
-} from "@inrupt/solid-client-authn-core";
+export async function refreshTokens(tokenSet: SessionTokenSet) {
+  const session = await Session.fromTokens(tokenSet);
+  // Replace with Promise.withResolvers when minimal node is 22.
+  let tokenResolve: (tokens: SessionTokenSet) => void;
+  let tokenReject: (reason?: Error) => void = () => {};
+  const tokenPromise = new Promise<SessionTokenSet>((resolve, reject) => {
+    tokenResolve = resolve;
+    tokenReject = reject;
+  });
+  session.events.on("newTokens", (tokens) => {
+    tokenResolve(tokens);
+  });
+  await session.login({
+    oidcIssuer: tokenSet.issuer,
+    clientId: tokenSet.clientId,
+    refreshToken: tokenSet.refreshToken,
+  });
+  if (!session.info.isLoggedIn) {
+    tokenReject(new Error("Could not refresh the session."));
+  }
+  return tokenPromise;
+}

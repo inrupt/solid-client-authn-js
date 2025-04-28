@@ -96,42 +96,6 @@ export async function refreshSession(
   }
 }
 
-/**
- * Refresh the Access Token and ID Token using the Refresh Token.
- * The tokens may not be expired in order to be refreshed.
- *
- * @param tokenSet the tokens to refresh
- * @returns a new set of tokens
- * @since 2.4.0
- * @example
- * ```
- * const refreshedTokens = await refreshTokens(previousTokenSet);
- * const session = await Session.fromTokens(refreshedTokens, sessionId);
- * ```
- */
-export async function refreshTokens(tokenSet: SessionTokenSet) {
-  const session = await Session.fromTokens(tokenSet);
-  // Replace with Promise.withResolvers when minimal node is 22.
-  let tokenResolve: (tokens: SessionTokenSet) => void;
-  let tokenReject: (reason?: Error) => void = () => {};
-  const tokenPromise = new Promise<SessionTokenSet>((resolve, reject) => {
-    tokenResolve = resolve;
-    tokenReject = reject;
-  });
-  session.events.on("newTokens", (tokens) => {
-    tokenResolve(tokens);
-  });
-  await session.login({
-    oidcIssuer: tokenSet.issuer,
-    clientId: tokenSet.clientId,
-    refreshToken: tokenSet.refreshToken,
-  });
-  if (!session.info.isLoggedIn) {
-    tokenReject(new Error("Could not refresh the session."));
-  }
-  return tokenPromise;
-}
-
 async function internalGetSessionFromStorage(
   sessionId: string,
   options?: GetSessionOptions,

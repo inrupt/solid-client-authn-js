@@ -37,7 +37,6 @@ import {
   getSessionFromStorage,
   getSessionIdFromStorageAll,
   refreshSession,
-  refreshTokens,
 } from "./multiSession";
 import { mockSessionInfoManager } from "./sessionInfo/__mocks__/SessionInfoManager";
 import type * as Dependencies from "./dependencies";
@@ -328,95 +327,5 @@ describe("refreshSession", () => {
       }),
     );
     expect(mySession?.info.expirationDate).toBeGreaterThan(Date.now());
-  });
-});
-
-describe("refreshTokens", () => {
-  it("returns refreshed tokens when refresh is successful", async () => {
-    const newTokens = {
-      accessToken: "new-access-token",
-      refreshToken: "new-refresh-token",
-      idToken: "new-id-token",
-      clientId: "client-id",
-      issuer: "https://my.idp",
-      webId: "https://my.webid",
-      expiresAt: Date.now() / 1000 + 3600,
-    };
-    // Mock Session.fromTokens static method
-    const mockSession = {
-      info: {
-        isLoggedIn: true,
-        sessionId: "test-session-id",
-        webId: "https://my.webid",
-      },
-      login: jest.fn<Session["login"]>().mockResolvedValue(),
-      events: {
-        on: jest
-          .fn<
-            (
-              event: "newTokens",
-              callback: (tokens: SessionTokenSet) => void,
-            ) => void
-          >()
-          .mockImplementation((_, callback) => {
-            // Simulate token refresh by calling the callback with new tokens
-            callback(newTokens);
-          }),
-      },
-    };
-
-    // Mock the static method
-    const originalFromTokens = Session.fromTokens;
-    Session.fromTokens = jest
-      .fn<typeof Session.fromTokens>()
-      .mockResolvedValue(mockSession as unknown as Session);
-    const tokenSet = {
-      accessToken: "old-access-token",
-      refreshToken: "old-refresh-token",
-      clientId: "client-id",
-      issuer: "https://my.idp",
-    };
-
-    const refreshedTokens = await refreshTokens(tokenSet);
-
-    // Verify we got the refreshed tokens
-    expect(refreshedTokens).toEqual(newTokens);
-    // Restore the original method
-    Session.fromTokens = originalFromTokens;
-  });
-
-  it("throws an error when refresh fails", async () => {
-    // Mock Session.fromTokens static method with a session that fails to log in
-    const mockSession = {
-      info: {
-        isLoggedIn: false, // Session failed to log in
-        sessionId: "test-session-id",
-      },
-      login: jest.fn<Session["login"]>().mockResolvedValue(),
-      events: {
-        on: jest.fn(),
-      },
-    };
-
-    // Mock the static method
-    const originalFromTokens = Session.fromTokens;
-    Session.fromTokens = jest
-      .fn<typeof Session.fromTokens>()
-      .mockResolvedValue(mockSession as unknown as Session);
-
-    const tokenSet = {
-      accessToken: "old-access-token",
-      refreshToken: "old-refresh-token",
-      clientId: "client-id",
-      issuer: "https://my.idp",
-    };
-
-    // The function should reject with an error
-    await expect(refreshTokens(tokenSet)).rejects.toThrow(
-      "Could not refresh the session.",
-    );
-
-    // Restore the original method
-    Session.fromTokens = originalFromTokens;
   });
 });
