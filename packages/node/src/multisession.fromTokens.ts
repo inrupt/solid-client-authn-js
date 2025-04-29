@@ -20,7 +20,9 @@
 //
 
 import type { SessionTokenSet } from "@inrupt/solid-client-authn-core";
-import { Session } from "./Session";
+import { createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
+import { Session, issuerConfigFetcher } from "./Session";
+import { KeyLike } from "crypto";
 
 /**
  * Refresh the Access Token and ID Token using the Refresh Token.
@@ -56,4 +58,26 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
     tokenReject(new Error("Could not refresh the session."));
   }
   return tokenPromise;
+}
+
+export async function logout(
+  tokenSet: SessionTokenSet,
+  redirectHandler: (url: string) => void,
+  postLogoutUrl?: string,
+) {
+  const { idToken } = tokenSet;
+  if (idToken === undefined) {
+    throw new Error(
+      "Logging out of the Identity Provider requires a valid ID token.",
+    );
+  }
+  const opConfig = await issuerConfigFetcher.fetchConfig(tokenSet.issuer);
+  await jwtVerify(
+    idToken,
+    // TODO The JKWS should be cached.
+    createRemoteJWKSet(new URL(opConfig.jwksUri)),
+    {
+      issuer: tokenSet.issuer,
+    },
+  );
 }

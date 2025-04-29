@@ -88,12 +88,17 @@ export interface ISessionOptions {
 
 /**
  * If no external storage is provided, this storage gets used.
+ * @hidden This is for internal use only.
  */
 export const defaultStorage = new InMemoryStorage();
 
 const storageUtility = new StorageUtilityNode(defaultStorage, defaultStorage);
 
-const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
+/**
+ * Default cache for OpenID Providers configurations.
+ * @hidden this is for internal use only.
+ */
+export const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
 
 /**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling access to private resources after login for instance.
