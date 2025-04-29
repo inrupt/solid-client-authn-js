@@ -267,7 +267,7 @@ describe("logout", () => {
   it("throws an error if the identity provider does not support RP-initiated logout", async () => {
     // Mock the issuerConfigFetcher _without_ an end_session_endpoint, causing a failure.
     const mockFetchConfig = jest.spyOn(issuerConfigFetcher, "fetchConfig");
-    mockFetchConfig.mockResolvedValue(mockIssuer("https://my.idp/logout"));
+    mockFetchConfig.mockResolvedValue(mockIssuer(undefined)); // No end_session_endpoint
 
     // Create a valid ID token
     const idToken = await createMockIdToken("https://my.idp", "client-id");

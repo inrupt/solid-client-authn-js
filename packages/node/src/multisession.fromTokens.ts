@@ -20,9 +20,8 @@
 //
 
 import type { SessionTokenSet } from "@inrupt/solid-client-authn-core";
-import { createRemoteJWKSet, decodeJwt, jwtVerify } from "jose";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { Session, issuerConfigFetcher } from "./Session";
-import { KeyLike } from "crypto";
 
 /**
  * Refresh the Access Token and ID Token using the Refresh Token.
@@ -60,24 +59,65 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
   return tokenPromise;
 }
 
+/**
+ * Performs an RP-initiated logout at the identity provider using the provided token set.
+ *
+ * @param tokenSet The set of tokens containing the ID token for logout
+ * @param redirectHandler Function to handle the logout URL (typically redirecting the user)
+ * @param postLogoutUrl An optional URL to redirect to after logout has completed
+ * @returns A Promise that resolves once the logout process is initiated
+ * @since 2.4.0
+ * @example
+ * ```typescript
+ * // Logout with redirect
+ * await logout(tokenSet, (url) => window.location.href = url);
+ *
+ * // Logout with redirect and post-logout redirect URL
+ * await logout(
+ *   tokenSet,
+ *   (url) => window.location.href = url,
+ *   "https://my-app.com/logged-out"
+ * );
+ * ```
+ */
 export async function logout(
   tokenSet: SessionTokenSet,
   redirectHandler: (url: string) => void,
   postLogoutUrl?: string,
-) {
+): Promise<void> {
   const { idToken } = tokenSet;
   if (idToken === undefined) {
     throw new Error(
       "Logging out of the Identity Provider requires a valid ID token.",
     );
   }
+
+  // Fetch the OpenID Provider configuration
   const opConfig = await issuerConfigFetcher.fetchConfig(tokenSet.issuer);
-  await jwtVerify(
-    idToken,
-    // TODO The JKWS should be cached.
-    createRemoteJWKSet(new URL(opConfig.jwksUri)),
-    {
-      issuer: tokenSet.issuer,
-    },
-  );
+
+  // Verify that the ID token is valid before proceeding
+  await jwtVerify(idToken, createRemoteJWKSet(new URL(opConfig.jwksUri)), {
+    issuer: tokenSet.issuer,
+  });
+
+  // Check if the IdP supports RP-initiated logout
+  if (!opConfig.endSessionEndpoint) {
+    throw new Error(
+      "The Identity Provider does not support RP-initiated logout.",
+    );
+  }
+
+  // Construct the logout URL
+  const logoutUrl = new URL(opConfig.endSessionEndpoint);
+
+  // Add the ID token as a hint
+  logoutUrl.searchParams.set("id_token_hint", idToken);
+
+  // Add post-logout redirect URL if provided
+  if (postLogoutUrl) {
+    logoutUrl.searchParams.set("post_logout_redirect_uri", postLogoutUrl);
+  }
+
+  // Call the redirect handler with the constructed URL
+  redirectHandler(logoutUrl.toString());
 }
