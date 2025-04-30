@@ -132,7 +132,7 @@ describe.each([[true], [false]])(
         try {
           // Fetching a protected resource once logged in
           const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetch`,
+            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/fetch`,
           );
           resourceUrl.searchParams.append(
             "resource",
@@ -152,7 +152,7 @@ describe.each([[true], [false]])(
         try {
           // Performing idp logout and being redirected to the postLogoutUrl after doing so
           await testFixture.page.goto(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/idplogout`,
+            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/logout/idp`,
           );
           await page.waitForURL(
             `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
@@ -164,7 +164,7 @@ describe.each([[true], [false]])(
           // Should not be able to retrieve the protected resource after logout
           // Fetching a protected resource once logged in
           const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetch`,
+            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/fetch`,
           );
           resourceUrl.searchParams.append(
             "resource",
@@ -199,7 +199,7 @@ describe.each([[true], [false]])(
         try {
           // Fetching a protected resource once logged in, rebuilding the session from saved tokens
           const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetchSessionFromTokens`,
+            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens/fetch`,
           );
           resourceUrl.searchParams.append(
             "resource",
@@ -248,7 +248,7 @@ describe.each([[true], [false]])(
         try {
           // Performing idp logout and being redirected to the postLogoutUrl after doing so
           await testFixture.page.goto(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokenlogout`,
+            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens/logout`,
           );
           await page.waitForURL(
             `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
@@ -260,7 +260,7 @@ describe.each([[true], [false]])(
           // Should not be able to retrieve the protected resource after logout
           // Fetching a protected resource once logged in
           const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/fetch`,
+            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens/fetch`,
           );
           resourceUrl.searchParams.append(
             "resource",
