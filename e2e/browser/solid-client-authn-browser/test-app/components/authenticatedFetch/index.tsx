@@ -28,7 +28,7 @@ const DataDisplay = ({ data }: { data?: string }) => {
     return <pre data-testid="fetchResponseTextbox">{data}</pre>;
   }
   return undefined;
-}
+};
 
 export default function AuthenticatedFetch({
   onError,
