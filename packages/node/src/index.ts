@@ -26,11 +26,11 @@ export {
   getSessionIdFromStorageAll,
   clearSessionFromStorageAll,
   refreshSession,
-  refreshTokens,
 } from "./multiSession";
 
-// Re-export of types defined in the core module and produced/consumed by our API
+export { refreshTokens } from "./multisession.fromTokens";
 
+// Re-export of types defined in the core module and produced/consumed by our API
 export {
   ILoginInputOptions,
   ILogoutOptions,
