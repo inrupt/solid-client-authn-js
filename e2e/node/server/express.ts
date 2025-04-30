@@ -29,6 +29,7 @@ import {
   getSessionFromStorage,
   EVENTS,
   refreshTokens,
+  logout,
 } from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
@@ -183,6 +184,28 @@ export function createApp(
       sessionTokenSets.delete(req.session!.sessionId);
     } catch (error) {
       res.status(400).send(`Logout processing failed: [${error}]`).end();
+    }
+  });
+  
+  app.get("/tokenlogout", async (req, res) => {
+    const tokenSet = sessionTokenSets.get(req.session!.sessionId);
+    if (!tokenSet) {
+      res.status(401).send("No session tokens found").end();
+      return;
+    }
+
+    try {
+      await logout(
+        tokenSet,
+        (url) => {
+          res.redirect(url);
+        },
+        `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`
+      );
+      // Remove tokens after logout
+      sessionTokenSets.delete(req.session!.sessionId);
+    } catch (error) {
+      res.status(400).send(`Token-based logout failed: [${error}]`).end();
     }
   });
 
