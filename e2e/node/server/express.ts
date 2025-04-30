@@ -186,7 +186,7 @@ export function createApp(
       res.status(400).send(`Logout processing failed: [${error}]`).end();
     }
   });
-  
+
   app.get("/tokenlogout", async (req, res) => {
     const tokenSet = sessionTokenSets.get(req.session!.sessionId);
     if (!tokenSet) {
@@ -200,7 +200,7 @@ export function createApp(
         (url) => {
           res.redirect(url);
         },
-        `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`
+        `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
       );
       // Remove tokens after logout
       sessionTokenSets.delete(req.session!.sessionId);
