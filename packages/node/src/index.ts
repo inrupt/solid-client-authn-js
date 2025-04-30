@@ -28,7 +28,7 @@ export {
   refreshSession,
 } from "./multiSession";
 
-export { refreshTokens } from "./multisession.fromTokens";
+export { refreshTokens, logout } from "./multisession.fromTokens";
 
 // Re-export of types defined in the core module and produced/consumed by our API
 export {
