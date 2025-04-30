@@ -100,6 +100,7 @@ export async function logout(
   const opConfig = await issuerConfigFetcher.fetchConfig(tokenSet.issuer);
 
   // Verify that the ID token is valid before proceeding
+  // TODO the JWK could be cached for efficiency.
   await jwtVerify(idToken, createRemoteJWKSet(new URL(opConfig.jwksUri)), {
     issuer: tokenSet.issuer,
   });
