@@ -60,24 +60,28 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
 }
 
 /**
- * Performs an RP-initiated logout at the identity provider using the provided token set.
+ * Performs an RP-initiated logout at the OpenID Provider associated to a user session using the provided token set.
+ * After this has completed, the user will be logged out of their OpenID Provider. This terminates their current browsing
+ * session on any active Solid application.
  *
- * @param tokenSet The set of tokens containing the ID token for logout
- * @param redirectHandler Function to handle the logout URL (typically redirecting the user)
- * @param postLogoutUrl An optional URL to redirect to after logout has completed
+ * @param tokenSet The set of tokens associated to the session being logged out. This must contain a valid ID token.
+ * @param redirectHandler Function to redirect the user to the logout URL
+ * @param postLogoutUrl An optional URL to be redirected to by the OpenID Provider after logout has been completed
  * @returns A Promise that resolves once the logout process is initiated
- * @since 2.4.0
+ * @since unreleased
  * @example
  * ```typescript
- * // Logout with redirect
- * await logout(tokenSet, (url) => window.location.href = url);
- *
- * // Logout with redirect and post-logout redirect URL
- * await logout(
- *   tokenSet,
- *   (url) => window.location.href = url,
- *   "https://my-app.com/logged-out"
- * );
+ * // Express.js logout endpoint
+ * app.get("/logout", async (req, res) => {
+ *   const tokenSet = ...;
+ *   await logout(
+ *     tokenSet,
+ *     // Provide an express.js-specific redirect handler
+ *     (url) => {
+ *       res.redirect(url);
+ *     }
+ *   );
+ * });
  * ```
  */
 export async function logout(
