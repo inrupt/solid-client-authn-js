@@ -23,6 +23,13 @@ import { useState } from "react";
 import type { ISessionInfo } from "@inrupt/solid-client-authn-browser";
 import { fetch as authenticatedFetch } from "@inrupt/solid-client-authn-browser";
 
+const DataDisplay = ({ data }: { data?: string }) => {
+  if (data !== undefined) {
+    return <pre data-testid="fetchResponseTextbox">{data}</pre>;
+  }
+  return undefined;
+}
+
 export default function AuthenticatedFetch({
   onError,
   sessionInfo,
@@ -31,10 +38,12 @@ export default function AuthenticatedFetch({
   onError: (err: string) => void;
 }) {
   const [resource, setResource] = useState<string>();
-  const [data, setData] = useState<string>("not fetched");
+  const [data, setData] = useState<string | undefined>("not fetched");
 
   const handleFetch = () => {
     if (resource !== undefined) {
+      // Remove the fetchResponseTextbox test-id from the DOM while fetching.
+      setData(undefined);
       authenticatedFetch(resource)
         .then((response) => response.text())
         .then(setData)
@@ -69,7 +78,7 @@ export default function AuthenticatedFetch({
           Fetch
         </button>
       </div>
-      <pre data-testid="fetchResponseTextbox">{data}</pre>
+      <DataDisplay data={data} />
     </>
   );
 }
