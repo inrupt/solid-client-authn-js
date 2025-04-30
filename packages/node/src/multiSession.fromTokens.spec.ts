@@ -30,7 +30,6 @@ jest.mock("jose", () => {
   return {
     ...actualJose,
     createRemoteJWKSet: jest.fn(),
-    // jwtVerify: jest.fn(),
   };
 });
 
@@ -175,20 +174,6 @@ describe("logout", () => {
 
     // Setup the mocked jwtVerify to succeed by default
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
-    // mockJose.jwtVerify.mockImplementation(async (jwt, _keySource, options) => {
-    //   // Default successful verification
-    //   return {
-    //     payload: {
-    //       iss: options?.issuer,
-    //       sub: "test-user",
-    //       aud: "client-id",
-    //       exp: Math.floor(Date.now() / 1000) + 3600,
-    //       iat: Math.floor(Date.now() / 1000),
-    //     },
-    //     protectedHeader: { alg: "ES256" },
-    //   };
-    // });
-
     // Setup createRemoteJWKSet to return a key lookup function
     mockJose.createRemoteJWKSet.mockReturnValue(async () => mockPublicKey);
   });
