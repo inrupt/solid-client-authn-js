@@ -147,15 +147,7 @@ export class Session implements IHasSessionEventListener {
   ): Promise<Session> {
     const finalSessionId = sessionId ?? v4();
 
-    // Create a temporary storage so we can construct a SessionInfo including internal details using the
-    // existing code pending a simplification of Session management.
-    // const tempStorage = new InMemoryStorage();
-    // const clientAuth = getClientAuthenticationWithDependencies({
-    //   secureStorage: tempStorage,
-    //   insecureStorage: tempStorage,
-    // });
-
-    // Create a new storage utility
+    // Create a temporary storage utility
     const tempStorage = new InMemoryStorage();
     const tempStorageUtility = new StorageUtilityNode(tempStorage, tempStorage);
 

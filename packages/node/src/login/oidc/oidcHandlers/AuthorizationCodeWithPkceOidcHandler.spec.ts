@@ -22,13 +22,15 @@
 /**
  * Test for AuthorizationCodeWithPkceOidcHandler
  */
-import { it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect } from "@jest/globals";
 import {
   mockStorageUtility,
   StorageUtilityMock,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line no-shadow
 import { URL } from "url";
+import EventEmitter from "events";
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
 import canHandleTests from "./OidcHandlerCanHandleTests";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
@@ -146,6 +148,66 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       await expect(
         mockedStorage.getForUser(oidcOptions.sessionId, "dpop"),
       ).resolves.toBe("false");
+    });
+
+    it("emits AUTH_STATE event with codeVerifier and state when eventEmitter is provided", async () => {
+      const mockedStorage = mockStorageUtility({});
+      const eventEmitter = new EventEmitter();
+      const authStateSpy = jest.fn();
+      eventEmitter.on(EVENTS.AUTH_STATE, authStateSpy);
+
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler({
+          storageUtility: mockedStorage,
+        });
+      const oidcOptions = mockDefaultOidcOptions();
+      oidcOptions.eventEmitter = eventEmitter;
+
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+
+      expect(authStateSpy).toHaveBeenCalledTimes(1);
+      expect(authStateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          codeVerifier: expect.any(String),
+          state: expect.any(String),
+        }),
+      );
+
+      const authStateArg = authStateSpy.mock.calls[0][0] as {
+        state: string;
+        codeVerifier: string;
+      };
+
+      // The state isn't stored with the key "state" - it's used as the key itself
+      // to store the sessionId. We need to verify the state exists as a key in storage.
+      const sessionIdFromState = await mockedStorage.getForUser(
+        authStateArg.state,
+        "sessionId",
+      );
+      expect(sessionIdFromState).toBe(oidcOptions.sessionId);
+
+      // Verify the same codeVerifier is saved in storage and emitted in event
+      const codeVerifierFromStorage = await mockedStorage.getForUser(
+        oidcOptions.sessionId,
+        "codeVerifier",
+      );
+      expect(authStateArg.codeVerifier).toBe(codeVerifierFromStorage);
+    });
+
+    it("does not emit AUTH_STATE event when eventEmitter is not provided", async () => {
+      const eventEmitter = new EventEmitter();
+      const authStateSpy = jest.fn();
+      eventEmitter.on(EVENTS.AUTH_STATE, authStateSpy);
+
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
+
+      const oidcOptions = mockDefaultOidcOptions();
+      // Deliberately not setting eventEmitter
+
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+
+      expect(authStateSpy).not.toHaveBeenCalled();
     });
   });
 });
