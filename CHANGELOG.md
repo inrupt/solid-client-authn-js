@@ -41,7 +41,6 @@ The following changes have been implemented but not released yet:
 - Added a `EVENTS.AUTH_STATE` (`authState`) event that emits authentication state during login to support clustered deployments.
 - Added a static `Session.fromAuthState()` method that creates a new session from previously stored authentication state.
 
-
 ## [2.4.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.4.1) - 2025-04-18
 
 ### Bugfix
