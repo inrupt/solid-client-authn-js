@@ -125,6 +125,64 @@ export class Session implements IHasSessionEventListener {
   private config: SessionConfig;
 
   /**
+   * Creates a session from auth state information (code verifier and state)
+   * This is useful for continuing the auth code flow after storing the auth state
+   * in an external database in clustered deployments.
+   *
+   * @param authState Object containing codeVerifier and state needed to continue the auth flow
+   * @param sessionId Optional ID for the session, if not provided a random UUID will be generated
+   * @returns A Session instance with enough context to continue the auth code flow
+   * @since 2.5.0
+   * @example
+   * ```typescript
+   * const session = Session.fromAuthState(authState, "my-session-id");
+   *
+   * // Use the restored session
+   * const info = await session.handleIncomingRedirect(originalUrl);
+   * ```
+   */
+  public static async fromAuthState(
+    authState: { codeVerifier: string; state: string },
+    sessionId: string | undefined = undefined,
+  ): Promise<Session> {
+    const finalSessionId = sessionId ?? v4();
+
+    // Create a temporary storage so we can construct a SessionInfo including internal details using the
+    // existing code pending a simplification of Session management.
+    // const tempStorage = new InMemoryStorage();
+    // const clientAuth = getClientAuthenticationWithDependencies({
+    //   secureStorage: tempStorage,
+    //   insecureStorage: tempStorage,
+    // });
+
+    // Create a new storage utility
+    const tempStorage = new InMemoryStorage();
+    const tempStorageUtility = new StorageUtilityNode(tempStorage, tempStorage);
+
+    // Create a session with minimal info
+    const session = new Session({
+      sessionInfo: {
+        sessionId: finalSessionId,
+        isLoggedIn: false,
+      },
+    });
+
+    // Store the code verifier in the appropriate location for the redirect handler to access
+    const oidcContext = {
+      codeVerifier: authState.codeVerifier,
+      state: authState.state,
+    };
+
+    // Store in oidcContext storage - this must match the pattern used by loadOidcContextFromStorage
+    // Manually create the context here since we can't easily use the full storage utility pattern
+    await tempStorageUtility.setForUser(finalSessionId, {
+      oidcContext: JSON.stringify(oidcContext),
+    });
+
+    return session;
+  }
+
+  /**
    * Creates a session from a set of tokens without requiring a full login flow.
    * This is useful for scenarios where you already have tokens from another source
    * and want to create an authenticated session directly.

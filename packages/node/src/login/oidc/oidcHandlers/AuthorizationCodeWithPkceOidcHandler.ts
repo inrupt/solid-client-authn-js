@@ -35,6 +35,7 @@ import type {
 import {
   DEFAULT_SCOPES,
   AuthorizationCodeWithPkceOidcHandlerBase,
+  EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer, generators } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
@@ -67,6 +68,13 @@ export default class AuthorizationCodeWithPkceOidcHandler
       prompt: "consent",
       scope: DEFAULT_SCOPES,
     });
+
+    if (oidcLoginOptions.eventEmitter) {
+      oidcLoginOptions.eventEmitter.emit(EVENTS.AUTH_STATE, {
+        codeVerifier,
+        state,
+      });
+    }
 
     return this.handleRedirect({
       oidcLoginOptions,
