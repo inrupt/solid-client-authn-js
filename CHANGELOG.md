@@ -33,6 +33,12 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+### Feature
+
+#### node
+
+- Added a `logout` function in the token management API that enables RP-initiated logout for multi-user server-side applications. This complements the `refreshTokens` function introduced in 2.4.0, allowing applications that manage tokens in external storage to both refresh tokens and perform identity provider logout without requiring a Session object. Applications can now implement complete user authentication lifecycle management using token sets stored in their own database.
+
 ## [2.4.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v2.4.1) - 2025-04-18
 
 ### Bugfix

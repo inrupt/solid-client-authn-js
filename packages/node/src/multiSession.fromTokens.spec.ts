@@ -19,10 +19,19 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect } from "@jest/globals";
-import type { SessionTokenSet } from "core";
-import { refreshTokens } from "./multisession.fromTokens";
-import { Session } from "./Session";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import type { IIssuerConfig, SessionTokenSet } from "core";
+import * as Jose from "jose";
+import { refreshTokens, logout } from "./multisession.fromTokens";
+import { Session, issuerConfigFetcher } from "./Session";
+
+jest.mock("jose", () => {
+  const actualJose = jest.requireActual("jose") as typeof Jose;
+  return {
+    ...actualJose,
+    createRemoteJWKSet: jest.fn(),
+  };
+});
 
 describe("refreshTokens", () => {
   it("returns refreshed tokens when refresh is successful", async () => {
@@ -111,5 +120,187 @@ describe("refreshTokens", () => {
 
     // Restore the original method
     Session.fromTokens = originalFromTokens;
+  });
+});
+
+describe("logout", () => {
+  const mockIssuer = (endSessionEndpoint?: string): IIssuerConfig => {
+    return {
+      issuer: "https://some.issuer",
+      authorizationEndpoint: "https://some.issuer/autorization",
+      tokenEndpoint: "https://some.issuer/token",
+      jwksUri: "https://some.issuer/keys",
+      claimsSupported: ["code", "openid"],
+      subjectTypesSupported: ["public"],
+      registrationEndpoint: "https://some.issuer/registration",
+      grantTypesSupported: ["authorization_code"],
+      scopesSupported: ["openid"],
+      endSessionEndpoint,
+    };
+  };
+
+  // Singleton keys generated for tests
+  let mockPublicKey: Jose.KeyLike;
+  let mockPrivateKey: Jose.KeyLike;
+
+  // Generate a valid ID token
+  const createMockIdToken = async (
+    issuer: string,
+    audience: string,
+    useValidKey = true,
+  ): Promise<string> => {
+    const signingKey = useValidKey
+      ? mockPrivateKey
+      : (await Jose.generateKeyPair("ES256")).privateKey;
+
+    return new Jose.SignJWT({ sub: "test-user" })
+      .setProtectedHeader({ alg: "ES256" })
+      .setIssuedAt()
+      .setIssuer(issuer)
+      .setAudience(audience)
+      .setExpirationTime("2h")
+      .sign(signingKey);
+  };
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+
+    // Generate keys for each test
+    if (!mockPublicKey || !mockPrivateKey) {
+      const keyPair = await Jose.generateKeyPair("ES256");
+      mockPublicKey = keyPair.publicKey;
+      mockPrivateKey = keyPair.privateKey;
+    }
+
+    // Setup the mocked jwtVerify to succeed by default
+    const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
+    // Setup createRemoteJWKSet to return a key lookup function
+    mockJose.createRemoteJWKSet.mockReturnValue(async () => mockPublicKey);
+  });
+
+  it("throws an error if idToken is not provided", async () => {
+    const tokenSet: SessionTokenSet = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      clientId: "client-id",
+      issuer: "https://my.idp",
+      // No ID token provided
+    };
+
+    const redirectHandler = jest.fn();
+    await expect(logout(tokenSet, redirectHandler)).rejects.toThrow(
+      "Logging out of the Identity Provider requires a valid ID token.",
+    );
+    expect(redirectHandler).not.toHaveBeenCalled();
+  });
+
+  it("fetches config from the issuer and verifies the token", async () => {
+    // Mock the issuerConfigFetcher with an end_session_endpoint
+    const mockFetchConfig = jest.spyOn(issuerConfigFetcher, "fetchConfig");
+    mockFetchConfig.mockResolvedValue(mockIssuer("https://my.idp/logout"));
+
+    // Create a valid ID token
+    const idToken = await createMockIdToken("https://my.idp", "client-id");
+
+    // Setup token set with ID token
+    const tokenSet: SessionTokenSet = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      idToken,
+      clientId: "client-id",
+      issuer: "https://my.idp",
+    };
+
+    const redirectHandler = jest.fn<(url: string) => void>();
+
+    await logout(tokenSet, redirectHandler);
+
+    expect(redirectHandler).toHaveBeenCalledTimes(1);
+    const [redirectHandlerCall] = redirectHandler.mock.calls;
+    const logoutUrl = new URL(redirectHandlerCall[0]);
+    expect(logoutUrl.searchParams.get("id_token_hint")).toBe(idToken);
+    expect(logoutUrl.host).toBe("my.idp");
+    expect(logoutUrl.pathname).toBe("/logout");
+  });
+
+  it("throws an error if token verification fails", async () => {
+    // Mock the issuerConfigFetcher with an end_session_endpoint
+    const mockFetchConfig = jest.spyOn(issuerConfigFetcher, "fetchConfig");
+    mockFetchConfig.mockResolvedValue(mockIssuer("https://my.idp/logout"));
+
+    // Create an ID token with wrong key - will cause verification failure
+    const idToken = await createMockIdToken(
+      "https://my.idp",
+      "client-id",
+      false,
+    );
+
+    // Setup token set with invalid ID token
+    const tokenSet: SessionTokenSet = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      idToken,
+      clientId: "client-id",
+      issuer: "https://my.idp",
+    };
+
+    const redirectHandler = jest.fn();
+    await expect(logout(tokenSet, redirectHandler)).rejects.toThrow();
+    expect(redirectHandler).not.toHaveBeenCalled();
+  });
+
+  it("throws an error if the identity provider does not support RP-initiated logout", async () => {
+    // Mock the issuerConfigFetcher _without_ an end_session_endpoint, causing a failure.
+    const mockFetchConfig = jest.spyOn(issuerConfigFetcher, "fetchConfig");
+    mockFetchConfig.mockResolvedValue(mockIssuer(undefined)); // No end_session_endpoint
+
+    // Create a valid ID token
+    const idToken = await createMockIdToken("https://my.idp", "client-id");
+
+    // Setup token set with ID token
+    const tokenSet: SessionTokenSet = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      idToken,
+      clientId: "client-id",
+      issuer: "https://my.idp",
+    };
+    const redirectHandler = jest.fn();
+    await expect(logout(tokenSet, redirectHandler)).rejects.toThrow(
+      "The Identity Provider does not support RP-initiated logout.",
+    );
+    expect(redirectHandler).not.toHaveBeenCalled();
+  });
+
+  it("constructs correct logout URL with post_logout_redirect_uri if provided", async () => {
+    // Mock the issuerConfigFetcher with an end_session_endpoint
+    const mockFetchConfig = jest.spyOn(issuerConfigFetcher, "fetchConfig");
+    mockFetchConfig.mockResolvedValue(mockIssuer("https://my.idp/logout"));
+
+    // Create a valid ID token
+    const idToken = await createMockIdToken("https://my.idp", "client-id");
+
+    // Setup token set with ID token
+    const tokenSet: SessionTokenSet = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      idToken,
+      clientId: "client-id",
+      issuer: "https://my.idp",
+    };
+
+    const redirectHandler = jest.fn<(url: string) => void>();
+
+    // Provide post logout URL
+    const postLogoutUrl = "https://my-app.com/logged-out";
+
+    await logout(tokenSet, redirectHandler, postLogoutUrl);
+
+    expect(redirectHandler).toHaveBeenCalledTimes(1);
+    const [redirectHandlerCall] = redirectHandler.mock.calls;
+    const logoutUrl = new URL(redirectHandlerCall[0]);
+    expect(logoutUrl.searchParams.get("post_logout_redirect_uri")).toBe(
+      postLogoutUrl,
+    );
   });
 });

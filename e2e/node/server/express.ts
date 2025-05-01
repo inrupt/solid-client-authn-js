@@ -29,6 +29,7 @@ import {
   getSessionFromStorage,
   EVENTS,
   refreshTokens,
+  logout,
 } from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
 // eslint-disable-next-line import/extensions
@@ -91,7 +92,7 @@ export function createApp(
     res.status(400).send("could not log in").end();
   });
 
-  app.get("/fetch", async (req, res) => {
+  app.get("/legacy/fetch", async (req, res) => {
     const { resource } = req.query;
 
     if (typeof resource !== "string") {
@@ -109,7 +110,7 @@ export function createApp(
       .end();
   });
 
-  app.get("/fetchSessionFromTokens", async (req, res) => {
+  app.get("/tokens/fetch", async (req, res) => {
     const { resource } = req.query;
 
     if (typeof resource !== "string") {
@@ -140,7 +141,7 @@ export function createApp(
     res.json(tokenSet);
   });
 
-  app.get("/refresh", async (req, res) => {
+  app.get("/tokens/refresh", async (req, res) => {
     const previousTokens = sessionTokenSets.get(req.session!.sessionId);
     if (previousTokens === undefined) {
       res.status(401).send("No session found");
@@ -151,7 +152,7 @@ export function createApp(
     res.json(refreshedTokens);
   });
 
-  app.get("/logout", async (req, res) => {
+  app.get("/legacy/logout/app", async (req, res) => {
     const session = await getSessionFromStorage(req.session!.sessionId);
     if (!session) return;
 
@@ -168,7 +169,7 @@ export function createApp(
     res.status(200).send("successfully at post logout").end();
   });
 
-  app.get("/idplogout", async (req, res) => {
+  app.get("/legacy/logout/idp", async (req, res) => {
     const session = await getSessionFromStorage(req.session!.sessionId);
     if (!session) return;
 
@@ -183,6 +184,28 @@ export function createApp(
       sessionTokenSets.delete(req.session!.sessionId);
     } catch (error) {
       res.status(400).send(`Logout processing failed: [${error}]`).end();
+    }
+  });
+
+  app.get("/tokens/logout", async (req, res) => {
+    const tokenSet = sessionTokenSets.get(req.session!.sessionId);
+    if (!tokenSet) {
+      res.status(401).send("No session tokens found").end();
+      return;
+    }
+
+    try {
+      await logout(
+        tokenSet,
+        (url) => {
+          res.redirect(url);
+        },
+        `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
+      );
+      // Remove tokens after logout
+      sessionTokenSets.delete(req.session!.sessionId);
+    } catch (error) {
+      res.status(400).send(`Token-based logout failed: [${error}]`).end();
     }
   });
 
