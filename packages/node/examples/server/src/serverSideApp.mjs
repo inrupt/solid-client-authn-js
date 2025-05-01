@@ -22,7 +22,8 @@
 import {
   Session,
   getSessionFromStorage,
-  refreshTokens
+  refreshTokens,
+  EVENTS
 } from "@inrupt/solid-client-authn-node";
 import { getPodUrlAll } from "@inrupt/solid-client";
 import cookieSession from "cookie-session";
@@ -35,10 +36,14 @@ app.use(cookieSession({
 }));
 
 // For simplicity, the cache is here an in-memory map. In a real application,
-// refresh tokens would be stored in a persistent storage.
+// tokens and auth state would be stored in a persistent storage.
 const sessionCache = {};
+const authStateCache = {};
 const updateSessionCache = (sessionId, tokenSet) => {
   sessionCache[sessionId] = tokenSet;
+};
+const updateAuthStateCache = (sessionId, authState) => {
+  authStateCache[sessionId] = authState;
 };
 
 app.get("/", async (_, res) => {
@@ -56,6 +61,12 @@ app.get("/login", async (req, res) => {
   const session = new Session({ keepAlive: false });
   // Set a cookie with the session ID.
   req.session.sessionId = session.info.sessionId;
+
+  session.events.on(EVENTS.AUTH_STATE, (authState) => {
+    console.log("Auth state captured during login:", session.info.sessionId);
+    updateAuthStateCache(session.info.sessionId, authState);
+  });
+
   await session.login({
     clientId: process.env.CLIENT_ID,
     redirectUrl: process.env.REDIRECT_URL,
@@ -70,20 +81,34 @@ app.get("/login", async (req, res) => {
 });
 
 app.get("/redirect", async (req, res) => {
-  const session = await getSessionFromStorage(req.session.sessionId);
-  session.events.on(
-    "newTokens",
-    (tokenSet) => updateSessionCache(req.session.sessionId, tokenSet)
-  );
+  // First check if we have stored auth state for this session
+  const authState = authStateCache[req.session.sessionId];
+  if (authState === undefined) {
+    res
+        .status(400)
+        .send(`<p>No authState stored for ID [${req.session.sessionId}]</p>`);
+    return;
+  }
+
+  console.log("Using fromAuthState to restore session:", req.session.sessionId);
+  // Create session from stored auth state (supports clustered deployment)
+  const session = Session.fromAuthState(authState, req.session.sessionId);
+
   if (session === undefined) {
     res
       .status(400)
       .send(`<p>No session stored for ID [${req.session.sessionId}]</p>`);
     return;
   }
+
+  session.events.on(
+    EVENTS.NEW_TOKENS,
+    (tokenSet) => updateSessionCache(req.session.sessionId, tokenSet)
+  );
+
   await session.handleIncomingRedirect(getRequestFullUrl(req));
   if (session.info.isLoggedIn) {
-    const storageUrl = await getPodUrlAll(session.info.webId); 
+    const storageUrl = await getPodUrlAll(session.info.webId);
     res.send(
       `<p>Logged in as [<strong>${session.info.webId}</strong>] after redirect.</p>
       <p><a href="/fetch?resource=${storageUrl}">Fetch my Pod root</a></p>`,
@@ -99,7 +124,7 @@ app.get("/refresh", async (req, res) => {
   updateSessionCache(req.session.sessionId, refreshedTokens);
   const session = await Session.fromTokens(refreshedTokens, req.session.sessionId);
   if (session.info.isLoggedIn) {
-    const storageUrl = await getPodUrlAll(session.info.webId); 
+    const storageUrl = await getPodUrlAll(session.info.webId);
     res.send(
       `<p>Refreshed session for [<strong>${session.info.webId}</strong>].</p>
       <p><a href="/fetch/time?resource=${storageUrl}">Fetch my Pod root (latest)</a></p>`,
