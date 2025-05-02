@@ -70,13 +70,13 @@ export default class AuthorizationCodeWithPkceOidcHandler
     });
 
     if (oidcLoginOptions.eventEmitter) {
-      oidcLoginOptions.eventEmitter.emit(EVENTS.AUTH_STATE, {
+      oidcLoginOptions.eventEmitter.emit(EVENTS.AUTHORIZATION_REQUEST_STATE, {
         codeVerifier,
         state,
       });
     }
 
-    return this.handleRedirect({
+    return this.setupRedirectHandler({
       oidcLoginOptions,
       state,
       codeVerifier,

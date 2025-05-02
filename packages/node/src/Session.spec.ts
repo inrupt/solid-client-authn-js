@@ -454,27 +454,32 @@ describe("Session", () => {
     });
   });
 
-  describe("fromAuthState", () => {
+  describe("fromAuthorizationRequestState", () => {
     it("creates a session with provided sessionId", async () => {
-      const authState = {
+      const authorizationRequestState = {
         codeVerifier: "test-code-verifier",
         state: "test-state",
       };
       const sessionId = "test-session-id";
 
-      const session = await Session.fromAuthState(authState, sessionId);
+      const session = await Session.fromAuthorizationRequestState(
+        authorizationRequestState,
+        sessionId,
+      );
 
       expect(session.info.sessionId).toBe(sessionId);
       expect(session.info.isLoggedIn).toBe(false);
     });
 
     it("generates a UUID as sessionId if not provided", async () => {
-      const authState = {
+      const authorizationRequestState = {
         codeVerifier: "test-code-verifier",
         state: "test-state",
       };
 
-      const session = await Session.fromAuthState(authState);
+      const session = await Session.fromAuthorizationRequestState(
+        authorizationRequestState,
+      );
 
       expect(session.info.sessionId).toBeDefined();
       expect(typeof session.info.sessionId).toBe("string");

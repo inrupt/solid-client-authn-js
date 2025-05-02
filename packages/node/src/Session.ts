@@ -31,6 +31,7 @@ import type {
   ILogoutOptions,
   SessionConfig,
   SessionTokenSet,
+  AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
@@ -129,20 +130,20 @@ export class Session implements IHasSessionEventListener {
    * This is useful for continuing the auth code flow after storing the auth state
    * in an external database in clustered deployments.
    *
-   * @param authState Object containing codeVerifier and state needed to continue the auth flow
+   * @param authorizationRequestState Object containing codeVerifier and state needed to continue the auth flow
    * @param sessionId Optional ID for the session, if not provided a random UUID will be generated
    * @returns A Session instance with enough context to continue the auth code flow
    * @since 2.5.0
    * @example
    * ```typescript
-   * const session = Session.fromAuthState(authState, "my-session-id");
+   * const session = Session.fromAuthorizationRequestState(authorizationRequestState, "my-session-id");
    *
    * // Use the restored session
    * const info = await session.handleIncomingRedirect(originalUrl);
    * ```
    */
-  public static async fromAuthState(
-    authState: { codeVerifier: string; state: string },
+  public static async fromAuthorizationRequestState(
+    authorizationRequestState: AuthorizationRequestState,
     sessionId: string | undefined = undefined,
   ): Promise<Session> {
     const finalSessionId = sessionId ?? v4();
@@ -150,19 +151,31 @@ export class Session implements IHasSessionEventListener {
     // Create a temporary storage utility
     const tempStorage = new InMemoryStorage();
     const tempStorageUtility = new StorageUtilityNode(tempStorage, tempStorage);
+    // const clientAuth = getClientAuthenticationWithDependencies({
+    //   secureStorage: tempStorage,
+    //   insecureStorage: tempStorage,
+    // });
 
     // Create a session with minimal info
     const session = new Session({
       sessionInfo: {
         sessionId: finalSessionId,
+        // clientAuthentication: clientAuth,
         isLoggedIn: false,
       },
     });
 
     // Store the code verifier in the appropriate location for the redirect handler to access
     const oidcContext = {
-      codeVerifier: authState.codeVerifier,
-      state: authState.state,
+      codeVerifier: authorizationRequestState.codeVerifier,
+      state: authorizationRequestState.state,
+      //   issuer: oidcLoginOptions.issuer.toString(),
+      //   // The redirect URL is read after redirect, so it must be stored now.
+      //   redirectUrl: oidcLoginOptions.redirectUrl,
+      //   keepAlive: booleanWithFallback(
+      //     oidcLoginOptions.keepAlive,
+      //     true,
+      //   ).toString(),
     };
 
     // Store in oidcContext storage - this must match the pattern used by loadOidcContextFromStorage

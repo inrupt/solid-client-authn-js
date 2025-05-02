@@ -23,9 +23,11 @@ import express from "express";
 import type {
   ISessionOptions,
   SessionTokenSet,
+  AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-node";
 import {
   Session,
+  InMemoryStorage,
   getSessionFromStorage,
   EVENTS,
   refreshTokens,
@@ -42,7 +44,7 @@ export function createApp(
   const app = express();
 
   const sessionTokenSets = new Map<string, SessionTokenSet>();
-  const authStates = new Map<string, { codeVerifier: string; state: string }>();
+  const authStates = new Map<string, AuthorizationRequestState>();
 
   app.use(
     cookieSession({
@@ -62,10 +64,17 @@ export function createApp(
       return;
     }
 
-    const session = new Session(sessionOptions);
-    session.events.on(EVENTS.AUTH_STATE, (authState) => {
-      authStates.set(session.info.sessionId, authState);
+    const session = new Session({
+      ...sessionOptions,
+      // use temporary local storage to ensure the session has no in-memory state available during the redirect
+      storage: new InMemoryStorage(),
     });
+    session.events.on(
+      EVENTS.AUTHORIZATION_REQUEST_STATE,
+      (authorizationRequestState) => {
+        authStates.set(session.info.sessionId, authorizationRequestState);
+      },
+    );
 
     req.session!.sessionId = session.info.sessionId;
     await session.login({
@@ -97,10 +106,13 @@ export function createApp(
 
   app.get("/redirect", async (req, res) => {
     let session;
-    const authState = authStates.get(req.session!.sessionId);
-    if (authState) {
+    const authorizationRequestState = authStates.get(req.session!.sessionId);
+    if (authorizationRequestState) {
       // Create session from saved auth state (for cluster support)
-      session = await Session.fromAuthState(authState, req.session!.sessionId);
+      session = await Session.fromAuthorizationRequestState(
+        authorizationRequestState,
+        req.session!.sessionId,
+      );
     } else {
       // Fallback to creating session from in-memory storage
       session = await getSessionFromStorage(req.session!.sessionId);

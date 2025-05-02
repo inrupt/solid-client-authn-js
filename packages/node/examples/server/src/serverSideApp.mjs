@@ -42,8 +42,8 @@ const authStateCache = {};
 const updateSessionCache = (sessionId, tokenSet) => {
   sessionCache[sessionId] = tokenSet;
 };
-const updateAuthStateCache = (sessionId, authState) => {
-  authStateCache[sessionId] = authState;
+const updateAuthStateCache = (sessionId, authorizationRequestState) => {
+  authStateCache[sessionId] = authorizationRequestState;
 };
 
 app.get("/", async (_, res) => {
@@ -62,9 +62,9 @@ app.get("/login", async (req, res) => {
   // Set a cookie with the session ID.
   req.session.sessionId = session.info.sessionId;
 
-  session.events.on(EVENTS.AUTH_STATE, (authState) => {
+  session.events.on(EVENTS.AUTHORIZATION_REQUEST_STATE, (authorizationRequestState) => {
     console.log("Auth state captured during login:", session.info.sessionId);
-    updateAuthStateCache(session.info.sessionId, authState);
+    updateAuthStateCache(session.info.sessionId, authorizationRequestState);
   });
 
   await session.login({
@@ -82,17 +82,17 @@ app.get("/login", async (req, res) => {
 
 app.get("/redirect", async (req, res) => {
   // First check if we have stored auth state for this session
-  const authState = authStateCache[req.session.sessionId];
-  if (authState === undefined) {
+  const authorizationRequestState = authStateCache[req.session.sessionId];
+  if (authorizationRequestState === undefined) {
     res
         .status(400)
-        .send(`<p>No authState stored for ID [${req.session.sessionId}]</p>`);
+        .send(`<p>No authorizationRequestState stored for ID [${req.session.sessionId}]</p>`);
     return;
   }
 
-  console.log("Using fromAuthState to restore session:", req.session.sessionId);
+  console.log("Using fromAuthorizationRequestState to restore session:", req.session.sessionId);
   // Create session from stored auth state (supports clustered deployment)
-  const session = Session.fromAuthState(authState, req.session.sessionId);
+  const session = Session.fromAuthorizationRequestState(authorizationRequestState, req.session.sessionId);
 
   if (session === undefined) {
     res

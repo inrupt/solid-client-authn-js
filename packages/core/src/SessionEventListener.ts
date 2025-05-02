@@ -27,6 +27,36 @@ export interface IHasSessionEventListener {
 }
 
 /**
+ * The state preserved during an authorization request and sent to the client
+ */
+export type AuthorizationRequestState = {
+  /**
+   * The code verifier used to generate the authorization code.
+   */
+  codeVerifier: string;
+
+  /**
+   * The state parameter used to generate the authorization code.
+   */
+  state: string;
+
+  /**
+   * The user's identity provider.
+   */
+  issuer?: string;
+
+  /**
+   * The redirect URL to which the user will be redirected after the authorization code has been received.
+   */
+  redirectUrl?: string;
+
+  /**
+   * A boolean flag indicating whether a session should be constantly kept alive in the background.
+   */
+  keepAlive?: boolean;
+};
+
+/**
  * A set of tokens to be passed to the client
  */
 export type SessionTokenSet = {
@@ -102,8 +132,8 @@ type NEW_TOKENS_ARGS = {
   listener: (tokenSet: SessionTokenSet) => void;
 };
 type AUTH_STATE_ARGS = {
-  eventName: typeof EVENTS.AUTH_STATE;
-  listener: (authState: { codeVerifier: string; state: string }) => void;
+  eventName: typeof EVENTS.AUTHORIZATION_REQUEST_STATE;
+  listener: (authorizationRequestState: AuthorizationRequestState) => void;
 };
 type FALLBACK_ARGS = {
   eventName: Parameters<InstanceType<typeof EventEmitter>["on"]>[0];

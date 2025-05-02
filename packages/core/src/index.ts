@@ -25,6 +25,7 @@ export {
   IHasSessionEventListener,
   ISessionEventListener,
   type SessionTokenSet,
+  type AuthorizationRequestState,
 } from "./SessionEventListener";
 
 export { default as ILoginInputOptions } from "./ILoginInputOptions";

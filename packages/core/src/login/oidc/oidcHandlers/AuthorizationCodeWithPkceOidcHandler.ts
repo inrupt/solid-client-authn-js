@@ -67,7 +67,7 @@ export default abstract class AuthorizationCodeWithPkceOidcHandlerBase {
     return this.parametersGuard(oidcLoginOptions);
   }
 
-  async handleRedirect({
+  async setupRedirectHandler({
     oidcLoginOptions,
     state,
     codeVerifier,

@@ -150,11 +150,11 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       ).resolves.toBe("false");
     });
 
-    it("emits AUTH_STATE event with codeVerifier and state when eventEmitter is provided", async () => {
+    it("emits AUTHORIZATION_REQUEST_STATE event with codeVerifier and state when eventEmitter is provided", async () => {
       const mockedStorage = mockStorageUtility({});
       const eventEmitter = new EventEmitter();
       const authStateSpy = jest.fn();
-      eventEmitter.on(EVENTS.AUTH_STATE, authStateSpy);
+      eventEmitter.on(EVENTS.AUTHORIZATION_REQUEST_STATE, authStateSpy);
 
       const authorizationCodeWithPkceOidcHandler =
         getAuthorizationCodeWithPkceOidcHandler({
@@ -194,10 +194,10 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(authStateArg.codeVerifier).toBe(codeVerifierFromStorage);
     });
 
-    it("does not emit AUTH_STATE event when eventEmitter is not provided", async () => {
+    it("does not emit AUTHORIZATION_REQUEST_STATE event when eventEmitter is not provided", async () => {
       const eventEmitter = new EventEmitter();
       const authStateSpy = jest.fn();
-      eventEmitter.on(EVENTS.AUTH_STATE, authStateSpy);
+      eventEmitter.on(EVENTS.AUTHORIZATION_REQUEST_STATE, authStateSpy);
 
       const authorizationCodeWithPkceOidcHandler =
         getAuthorizationCodeWithPkceOidcHandler();
