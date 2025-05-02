@@ -213,7 +213,7 @@ export function createApp(
     res.status(200).send("successfully at post logout").end();
   });
 
-  app.get("/legacy/logout/idp", async (req, res) => {
+  app.get("/legacy/logout", async (req, res) => {
     const session = await getSessionFromStorage(req.session!.sessionId);
     if (!session) return;
 

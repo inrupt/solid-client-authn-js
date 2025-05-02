@@ -73,6 +73,11 @@ export default class AuthorizationCodeWithPkceOidcHandler
       oidcLoginOptions.eventEmitter.emit(EVENTS.AUTHORIZATION_REQUEST_STATE, {
         codeVerifier,
         state,
+        issuer: oidcLoginOptions.issuer,
+        redirectUrl: oidcLoginOptions.redirectUrl,
+        dpopBound: oidcLoginOptions.dpop,
+        keepAlive: oidcLoginOptions.keepAlive,
+        clientId: oidcLoginOptions.client.clientId,
       });
     }
 

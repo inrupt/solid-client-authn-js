@@ -459,6 +459,11 @@ describe("Session", () => {
       const authorizationRequestState = {
         codeVerifier: "test-code-verifier",
         state: "test-state",
+        issuer: "test-issuer",
+        redirectUrl: "test-redirect-url",
+        dpopBound: true,
+        keepAlive: true,
+        clientId: "test-client-id",
       };
       const sessionId = "test-session-id";
 
@@ -475,6 +480,11 @@ describe("Session", () => {
       const authorizationRequestState = {
         codeVerifier: "test-code-verifier",
         state: "test-state",
+        issuer: "test-issuer",
+        redirectUrl: "test-redirect-url",
+        dpopBound: true,
+        keepAlive: true,
+        clientId: "test-client-id",
       };
 
       const session = await Session.fromAuthorizationRequestState(

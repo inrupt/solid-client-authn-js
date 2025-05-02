@@ -28,6 +28,7 @@ import type {
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
+  AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManagerBase } from "@inrupt/solid-client-authn-core";
 import { KEY_REGISTERED_SESSIONS } from "../constant";
@@ -143,7 +144,6 @@ export class SessionInfoManager
   /**
    * This function removes all session-related information from storage.
    * @param sessionId the session identifier
-   * @param storage the storage where session info is stored
    * @hidden
    */
   async clear(sessionId: string): Promise<void> {
@@ -207,5 +207,33 @@ export class SessionInfoManager
     const sessions: string[] = JSON.parse(rawSessions);
     await Promise.all(sessions.map((sessionId) => this.clear(sessionId)));
     return this.storageUtility.set(KEY_REGISTERED_SESSIONS, JSON.stringify([]));
+  }
+
+  /**
+   * Sets authorization request state in storage for a given session ID.
+   */
+  async setOidcContext(
+    sessionId: string,
+    authorizationRequestState: AuthorizationRequestState,
+  ): Promise<void> {
+    // this.sessionInfoManager.setOidcContext
+    // First, store mapping from state to sessionId (for the IdP redirect back)
+    await this.storageUtility.setForUser(authorizationRequestState.state, {
+      sessionId,
+    });
+
+    // Then, store all the auth state information in the session storage
+    const infoToStore: Record<string, string> = {
+      codeVerifier: authorizationRequestState.codeVerifier,
+      issuer: authorizationRequestState.issuer,
+      redirectUrl: authorizationRequestState.redirectUrl,
+      dpop: authorizationRequestState.dpopBound.toString(),
+      keepAlive: authorizationRequestState.keepAlive.toString(),
+      clientId: authorizationRequestState.clientId,
+    };
+    if (authorizationRequestState.clientType) {
+      infoToStore.clientType = authorizationRequestState.clientType;
+    }
+    await this.storageUtility.setForUser(sessionId, infoToStore);
   }
 }

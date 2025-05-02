@@ -43,17 +43,32 @@ export type AuthorizationRequestState = {
   /**
    * The user's identity provider.
    */
-  issuer?: string;
+  issuer: string;
 
   /**
    * The redirect URL to which the user will be redirected after the authorization code has been received.
    */
-  redirectUrl?: string;
+  redirectUrl: string;
+
+  /**
+   * True if a DPoP compatible auth_token should be requested.
+   */
+  dpopBound: boolean;
 
   /**
    * A boolean flag indicating whether a session should be constantly kept alive in the background.
    */
-  keepAlive?: boolean;
+  keepAlive: boolean;
+
+  /**
+   * The ID of your application.
+   */
+  clientId: string;
+
+  /**
+   * The OIDC client type.
+   */
+  clientType?: string;
 };
 
 /**

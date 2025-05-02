@@ -102,6 +102,21 @@ const storageUtility = new StorageUtilityNode(defaultStorage, defaultStorage);
 export const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
 
 /**
+ * @hidden
+ */
+function isValidUrl(url: string): boolean {
+  try {
+    // Here, the URL constructor is just called to parse the given string and
+    // verify if it is a well-formed IRI.
+    // eslint-disable-next-line no-new
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling access to private resources after login for instance.
  */
 export class Session implements IHasSessionEventListener {
@@ -150,39 +165,34 @@ export class Session implements IHasSessionEventListener {
 
     // Create a temporary storage utility
     const tempStorage = new InMemoryStorage();
-    const tempStorageUtility = new StorageUtilityNode(tempStorage, tempStorage);
-    // const clientAuth = getClientAuthenticationWithDependencies({
-    //   secureStorage: tempStorage,
-    //   insecureStorage: tempStorage,
-    // });
+    const clientAuth = getClientAuthenticationWithDependencies({
+      secureStorage: tempStorage,
+      insecureStorage: tempStorage,
+    });
 
     // Create a session with minimal info
     const session = new Session({
       sessionInfo: {
         sessionId: finalSessionId,
-        // clientAuthentication: clientAuth,
         isLoggedIn: false,
       },
+      clientAuthentication: clientAuth,
     });
 
-    // Store the code verifier in the appropriate location for the redirect handler to access
-    const oidcContext = {
-      codeVerifier: authorizationRequestState.codeVerifier,
-      state: authorizationRequestState.state,
-      //   issuer: oidcLoginOptions.issuer.toString(),
-      //   // The redirect URL is read after redirect, so it must be stored now.
-      //   redirectUrl: oidcLoginOptions.redirectUrl,
-      //   keepAlive: booleanWithFallback(
-      //     oidcLoginOptions.keepAlive,
-      //     true,
-      //   ).toString(),
-    };
+    const state = { ...authorizationRequestState };
+    if (state.clientId !== undefined && state.clientType === undefined) {
+      const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
+      if (
+        issuerConfig.scopesSupported.includes("webid") &&
+        isValidUrl(state.clientId)
+      ) {
+        state.clientType = "solid-oidc";
+      } else if (!isValidUrl(state.clientId)) {
+        state.clientType = "static";
+      }
+    }
 
-    // Store in oidcContext storage - this must match the pattern used by loadOidcContextFromStorage
-    // Manually create the context here since we can't easily use the full storage utility pattern
-    await tempStorageUtility.setForUser(finalSessionId, {
-      oidcContext: JSON.stringify(oidcContext),
-    });
+    await clientAuth.setOidcContext(finalSessionId, state);
 
     return session;
   }

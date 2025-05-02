@@ -107,6 +107,8 @@ async function loginUser(
 
 // Testing the OIDC Authorization Code flow in an express-based web application.
 // The tests are configured to run with options for legacy/token mode and keepAlive.
+const SHORT_TIMEOUT = 30_000;
+
 describe.each([
   [true, true],
   [true, false],
@@ -126,14 +128,14 @@ describe.each([
         app = createApp(res, { keepAlive });
       });
       testFixture = await loginUser(seedInfo, legacyMode);
-    }, 30_000);
+    }, SHORT_TIMEOUT);
 
     afterEach(async () => {
       await tearDownPod(seedInfo);
       await new Promise<void>((res) => {
         app.close(() => res());
       });
-    }, 30_000);
+    }, SHORT_TIMEOUT);
 
     it("should be able to log in and perform an authenticated fetch", async () => {
       const { page, browser } = testFixture;
@@ -157,7 +159,7 @@ describe.each([
       try {
         // Performing idp logout and being redirected to the postLogoutUrl after doing so
         await testFixture.page.goto(
-          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/logout/idp`,
+          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/${legacyMode ? "legacy/" : "tokens/"}logout`,
         );
         await page.waitForURL(
           `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
@@ -169,7 +171,7 @@ describe.each([
         // Should not be able to retrieve the protected resource after logout
         // Fetching a protected resource once logged in
         const resourceUrl = new URL(
-          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/fetch`,
+          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/${legacyMode ? "legacy/" : "tokens/"}fetch`,
         );
         resourceUrl.searchParams.append("resource", seedInfo.clientResourceUrl);
         await page.goto(resourceUrl.toString());
@@ -211,14 +213,14 @@ describe.each([[true], [false]])(
         app = createApp(res, { keepAlive });
       });
       testFixture = await loginUser(seedInfo, false);
-    }, 30_000);
+    }, SHORT_TIMEOUT);
 
     afterEach(async () => {
       await tearDownPod(seedInfo);
       await new Promise<void>((res) => {
         app.close(() => res());
       });
-    }, 30_000);
+    }, SHORT_TIMEOUT);
 
     it("Should be able to manage the tokens explicitly", async () => {
       const { page, browser } = testFixture;
