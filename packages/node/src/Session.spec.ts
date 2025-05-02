@@ -464,6 +464,7 @@ describe("Session", () => {
         dpopBound: true,
         keepAlive: true,
         clientId: "test-client-id",
+        clientType: "test-client-type",
       };
       const sessionId = "test-session-id";
 
@@ -485,6 +486,7 @@ describe("Session", () => {
         dpopBound: true,
         keepAlive: true,
         clientId: "test-client-id",
+        clientType: "test-client-type",
       };
 
       const session = await Session.fromAuthorizationRequestState(
