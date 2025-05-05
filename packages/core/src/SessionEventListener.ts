@@ -64,11 +64,6 @@ export type AuthorizationRequestState = {
    * The ID of your application.
    */
   clientId: string;
-
-  /**
-   * The OIDC client type.
-   */
-  clientType?: string;
 };
 
 /**

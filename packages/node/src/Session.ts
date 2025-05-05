@@ -178,18 +178,18 @@ export class Session implements IHasSessionEventListener {
       },
       clientAuthentication: clientAuth,
     });
-
-    const state = { ...authorizationRequestState };
-    if (state.clientId !== undefined && state.clientType === undefined) {
-      const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
-      if (
-        issuerConfig.scopesSupported.includes("webid") &&
-        isValidUrl(state.clientId)
-      ) {
-        state.clientType = "solid-oidc";
-      } else if (!isValidUrl(state.clientId)) {
-        state.clientType = "static";
-      }
+    // Only Solid-OIDC clients are supported.
+    const state = { ...authorizationRequestState, clientType: "solid-oidc" };
+    const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
+    if (!issuerConfig.scopesSupported.includes("webid")) {
+      throw new Error(
+        `${state.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
+      );
+    }
+    if (!isValidUrl(state.clientId)) {
+      throw new Error(
+        `The client identifier ${state.clientId} is not a valid URL`,
+      );
     }
 
     await clientAuth.setOidcContext(finalSessionId, state);
