@@ -218,3 +218,49 @@ describe("Session.fromTokens", () => {
     expect(session.info.isLoggedIn).toBe(false);
   });
 });
+
+describe("Session.fromAuthorizationRequestState", () => {
+  it("creates a session with provided sessionId", async () => {
+    const authorizationRequestState = {
+      codeVerifier: "test-code-verifier",
+      state: "test-state",
+      issuer: "test-issuer",
+      redirectUrl: "test-redirect-url",
+      dpopBound: true,
+      keepAlive: true,
+      clientId: "test-client-id",
+      clientType: "test-client-type",
+    };
+    const sessionId = "test-session-id";
+
+    const session = await Session.fromAuthorizationRequestState(
+      authorizationRequestState,
+      sessionId,
+    );
+
+    expect(session.info.sessionId).toBe(sessionId);
+    expect(session.info.isLoggedIn).toBe(false);
+  });
+
+  it("generates a UUID as sessionId if not provided", async () => {
+    const authorizationRequestState = {
+      codeVerifier: "test-code-verifier",
+      state: "test-state",
+      issuer: "test-issuer",
+      redirectUrl: "test-redirect-url",
+      dpopBound: true,
+      keepAlive: true,
+      clientId: "test-client-id",
+      clientType: "test-client-type",
+    };
+
+    const session = await Session.fromAuthorizationRequestState(
+      authorizationRequestState,
+    );
+
+    expect(session.info.sessionId).toBeDefined();
+    expect(typeof session.info.sessionId).toBe("string");
+    // UUID typically has a specific format with hyphens and a specific length
+    expect(session.info.sessionId.length).toBeGreaterThan(30);
+  });
+});
