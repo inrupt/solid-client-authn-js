@@ -179,7 +179,10 @@ export class Session implements IHasSessionEventListener {
       clientAuthentication: clientAuth,
     });
     // Only Solid-OIDC clients are supported.
-    const state = { ...authorizationRequestState, clientType: "solid-oidc" as const };
+    const state = {
+      ...authorizationRequestState,
+      clientType: "solid-oidc" as const,
+    };
     const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
     if (!issuerConfig.scopesSupported.includes("webid")) {
       throw new Error(
