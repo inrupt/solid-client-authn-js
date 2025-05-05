@@ -128,7 +128,9 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
 
   setOidcContext = async (
     sessionId: string,
-    authorizationRequestState: AuthorizationRequestState,
+    authorizationRequestState: AuthorizationRequestState & {
+      clientType: "solid-oidc";
+    },
   ): Promise<void> => {
     await this.sessionInfoManager.setOidcContext(
       sessionId,
