@@ -23,9 +23,11 @@ import express from "express";
 import type {
   ISessionOptions,
   SessionTokenSet,
+  AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-node";
 import {
   Session,
+  InMemoryStorage,
   getSessionFromStorage,
   EVENTS,
   refreshTokens,
@@ -42,6 +44,7 @@ export function createApp(
   const app = express();
 
   const sessionTokenSets = new Map<string, SessionTokenSet>();
+  const authStates = new Map<string, AuthorizationRequestState>();
 
   app.use(
     cookieSession({
@@ -61,6 +64,35 @@ export function createApp(
       return;
     }
 
+    const session = new Session({
+      ...sessionOptions,
+      // use temporary local storage to ensure the session has no in-memory state available during the redirect
+      storage: new InMemoryStorage(),
+    });
+    session.events.on(
+      EVENTS.AUTHORIZATION_REQUEST,
+      (authorizationRequestState) => {
+        authStates.set(session.info.sessionId, authorizationRequestState);
+      },
+    );
+
+    req.session!.sessionId = session.info.sessionId;
+    await session.login({
+      redirectUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/redirect`,
+      oidcIssuer,
+      clientId: typeof clientId === "string" ? clientId : undefined,
+      handleRedirect: (url) => res.redirect(url),
+    });
+  });
+
+  app.get("/legacy/login", async (req, res) => {
+    const { oidcIssuer, clientId } = req.query;
+
+    if (typeof oidcIssuer !== "string") {
+      res.status(400).send("oidcIssuer is required").end();
+      return;
+    }
+
     const session = new Session(sessionOptions);
 
     req.session!.sessionId = session.info.sessionId;
@@ -73,7 +105,19 @@ export function createApp(
   });
 
   app.get("/redirect", async (req, res) => {
-    const session = await getSessionFromStorage(req.session!.sessionId);
+    let session;
+    const authorizationRequestState = authStates.get(req.session!.sessionId);
+    if (authorizationRequestState) {
+      // Create session from saved auth state (for cluster support)
+      session = await Session.fromAuthorizationRequestState(
+        authorizationRequestState,
+        req.session!.sessionId,
+      );
+    } else {
+      // Fallback to creating session from in-memory storage
+      session = await getSessionFromStorage(req.session!.sessionId);
+    }
+
     if (!session) return;
 
     session.events.on(EVENTS.NEW_TOKENS, (tokenSet) => {
@@ -169,7 +213,7 @@ export function createApp(
     res.status(200).send("successfully at post logout").end();
   });
 
-  app.get("/legacy/logout/idp", async (req, res) => {
+  app.get("/legacy/logout", async (req, res) => {
     const session = await getSessionFromStorage(req.session!.sessionId);
     if (!session) return;
 

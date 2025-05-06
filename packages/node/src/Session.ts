@@ -31,6 +31,7 @@ import type {
   ILogoutOptions,
   SessionConfig,
   SessionTokenSet,
+  AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
@@ -101,6 +102,21 @@ const storageUtility = new StorageUtilityNode(defaultStorage, defaultStorage);
 export const issuerConfigFetcher = new IssuerConfigFetcher(storageUtility);
 
 /**
+ * @hidden
+ */
+function isValidUrl(url: string): boolean {
+  try {
+    // Here, the URL constructor is just called to parse the given string and
+    // verify if it is a well-formed IRI.
+    // eslint-disable-next-line no-new
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * A {@link Session} object represents a user's session on an application. The session holds state, as it stores information enabling access to private resources after login for instance.
  */
 export class Session implements IHasSessionEventListener {
@@ -123,6 +139,67 @@ export class Session implements IHasSessionEventListener {
   private lastTimeoutHandle = 0;
 
   private config: SessionConfig;
+
+  /**
+   * Creates a session from auth state information (code verifier and state)
+   * This is useful for continuing the auth code flow after storing the auth state
+   * in an external database in clustered deployments.
+   *
+   * @param authorizationRequestState Object containing codeVerifier and state needed to continue the auth flow
+   * @param sessionId Optional ID for the session, if not provided a random UUID will be generated
+   * @returns A Session instance with enough context to continue the auth code flow
+   * @since 2.5.0
+   * @example
+   * ```typescript
+   * const session = Session.fromAuthorizationRequestState(authorizationRequestState, "my-session-id");
+   *
+   * // Use the restored session
+   * const info = await session.handleIncomingRedirect(originalUrl);
+   * ```
+   */
+  public static async fromAuthorizationRequestState(
+    authorizationRequestState: AuthorizationRequestState,
+    sessionId: string | undefined = undefined,
+  ): Promise<Session> {
+    const finalSessionId = sessionId ?? v4();
+
+    // Create a temporary storage utility
+    const tempStorage = new InMemoryStorage();
+    const clientAuth = getClientAuthenticationWithDependencies({
+      secureStorage: tempStorage,
+      insecureStorage: tempStorage,
+    });
+
+    // Create a session with minimal info
+    const session = new Session({
+      sessionInfo: {
+        sessionId: finalSessionId,
+        isLoggedIn: false,
+      },
+      clientAuthentication: clientAuth,
+    });
+    // Only Solid-OIDC clients are supported.
+    const state = {
+      ...authorizationRequestState,
+      keepAlive: false as const,
+      clientType: "solid-oidc" as const,
+    };
+    const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
+    if (!issuerConfig.scopesSupported.includes("webid")) {
+      throw new Error(
+        `${state.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
+      );
+    }
+    if (!isValidUrl(state.clientId)) {
+      throw new Error(
+        `The client identifier ${state.clientId} is not a valid URL`,
+      );
+    }
+
+    await clientAuth.setOidcContext(finalSessionId, state);
+
+    return session;
+  }
 
   /**
    * Creates a session from a set of tokens without requiring a full login flow.

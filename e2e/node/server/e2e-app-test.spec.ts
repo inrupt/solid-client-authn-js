@@ -68,12 +68,17 @@ type LoginFixture = {
 /**
  * Helper function to log in a user and return the browser, page, and login URLs
  */
-async function loginUser(seedInfo: ISeedPodResponse): Promise<LoginFixture> {
+async function loginUser(
+  seedInfo: ISeedPodResponse,
+  legacyMode: boolean,
+): Promise<LoginFixture> {
   const browser = await firefox.launch();
   const page = await browser.newPage();
   const url = new URL(
-    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/login`,
+    legacyMode ? "legacy/login" : "login",
+    "http://localhost/",
   );
+  url.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
   url.searchParams.append("oidcIssuer", ENV.idp);
   url.searchParams.append("clientId", seedInfo.clientId);
 
@@ -95,16 +100,113 @@ async function loginUser(seedInfo: ISeedPodResponse): Promise<LoginFixture> {
     // Ignore allow error for now
   }
 
-  await page.waitForURL(
-    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
-  );
+  await page.waitForURL(new URL("/", url).origin);
 
   return { browser, page, loginUrl: url.toString(), cognitoPageUrl };
 }
 
 // Testing the OIDC Authorization Code flow in an express-based web application.
+// The tests are configured to run with options for legacy/token mode and keepAlive.
+const SHORT_TIMEOUT = 30_000;
+
+describe.each([
+  [true, true],
+  [true, false],
+  [false, true],
+  [false, false],
+])(
+  "Testing against express app with legacyMode %s and keepAlive %s",
+  (legacyMode, keepAlive) => {
+    let app: Server;
+    let seedInfo: ISeedPodResponse;
+    let testFixture: LoginFixture;
+
+    beforeEach(async () => {
+      // Enable refresh in clientId document
+      seedInfo = await seedPod(ENV, true);
+      await new Promise<void>((res) => {
+        app = createApp(res, { keepAlive });
+      });
+      testFixture = await loginUser(seedInfo, legacyMode);
+    }, SHORT_TIMEOUT);
+
+    afterEach(async () => {
+      await tearDownPod(seedInfo);
+      await new Promise<void>((res) => {
+        app.close(() => res());
+      });
+    }, SHORT_TIMEOUT);
+
+    it("should be able to log in and perform an authenticated fetch", async () => {
+      const { page, browser } = testFixture;
+      try {
+        // Fetching a protected resource once logged in
+        const resourceUrl = new URL(
+          legacyMode ? "legacy/fetch" : "tokens/fetch",
+          "http://localhost/",
+        );
+        resourceUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
+        resourceUrl.searchParams.append("resource", seedInfo.clientResourceUrl);
+        await page.goto(resourceUrl.toString());
+        await expect(page.content()).resolves.toBe(
+          `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
+        );
+      } finally {
+        await browser.close();
+      }
+    }, 120_000);
+
+    it("should be able to perform RP-initiated logout", async () => {
+      const { page, browser, loginUrl, cognitoPageUrl } = testFixture;
+      try {
+        // Performing idp logout and being redirected to the postLogoutUrl after doing so
+        const logoutUrl = new URL(
+          legacyMode ? "legacy/logout" : "tokens/logout",
+          "http://localhost/",
+        );
+        logoutUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
+
+        await testFixture.page.goto(logoutUrl.toString());
+        await page.waitForURL(new URL("/postLogoutUrl", logoutUrl).toString());
+        await expect(page.content()).resolves.toBe(
+          `<html><head></head><body>successfully at post logout</body></html>`,
+        );
+
+        // Should not be able to retrieve the protected resource after logout
+        // Fetching a protected resource once logged in
+        const resourceUrl = new URL(
+          legacyMode ? "legacy/fetch" : "tokens/fetch",
+          "http://localhost/",
+        );
+        resourceUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
+        resourceUrl.searchParams.append("resource", seedInfo.clientResourceUrl);
+        await page.goto(resourceUrl.toString());
+        await expect(page.content()).resolves.toMatch("Unauthorized");
+
+        // Testing what happens if we try to log back in again after logging out
+        await page.goto(loginUrl);
+
+        // It should go back to the cognito page when we try to log back in
+        // rather than skipping straight to the consent page
+        await page.waitForURL((navigationUrl) => {
+          const u1 = new URL(navigationUrl);
+          u1.searchParams.delete("state");
+
+          const u2 = new URL(cognitoPageUrl);
+          u2.searchParams.delete("state");
+
+          return u1.toString() === u2.toString();
+        });
+      } finally {
+        await browser.close();
+      }
+    }, 120_000);
+  },
+);
+
+// Add a specific test for the token management functionality with only keepAlive being toggled
 describe.each([[true], [false]])(
-  "Testing against express app with keepAlive %s",
+  "Testing token management with keepAlive %s",
   (keepAlive) => {
     let app: Server;
     let seedInfo: ISeedPodResponse;
@@ -116,177 +218,42 @@ describe.each([[true], [false]])(
       await new Promise<void>((res) => {
         app = createApp(res, { keepAlive });
       });
-      testFixture = await loginUser(seedInfo);
-    }, 30_000);
+      testFixture = await loginUser(seedInfo, false);
+    }, SHORT_TIMEOUT);
 
     afterEach(async () => {
       await tearDownPod(seedInfo);
       await new Promise<void>((res) => {
         app.close(() => res());
       });
-    }, 30_000);
+    }, SHORT_TIMEOUT);
 
-    describe("using the legacy in-memory storage", () => {
-      it("should be able to log in and perform an authenticated fetch", async () => {
-        const { page, browser } = testFixture;
-        try {
-          // Fetching a protected resource once logged in
-          const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/fetch`,
-          );
-          resourceUrl.searchParams.append(
-            "resource",
-            seedInfo.clientResourceUrl,
-          );
-          await page.goto(resourceUrl.toString());
-          await expect(page.content()).resolves.toBe(
-            `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
-          );
-        } finally {
-          await browser.close();
-        }
-      }, 120_000);
+    it("Should be able to manage the tokens explicitly", async () => {
+      const { page, browser } = testFixture;
+      try {
+        // Fetching the token set returned after login
+        const tokensUrl = new URL("http://localhost/tokens");
+        tokensUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
 
-      it("should be able to perform RP-initiated logout", async () => {
-        const { page, browser, loginUrl, cognitoPageUrl } = testFixture;
-        try {
-          // Performing idp logout and being redirected to the postLogoutUrl after doing so
-          await testFixture.page.goto(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/logout/idp`,
-          );
-          await page.waitForURL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
-          );
-          await expect(page.content()).resolves.toBe(
-            `<html><head></head><body>successfully at post logout</body></html>`,
-          );
+        // Use page.evaluate to fetch JSON response
+        await page.goto(tokensUrl.toString());
+        const tokenSet: SessionTokenSet = await page.evaluate(() => {
+          try {
+            return JSON.parse(document.body.textContent || "{}");
+          } catch (e) {
+            return null;
+          }
+        });
 
-          // Should not be able to retrieve the protected resource after logout
-          // Fetching a protected resource once logged in
-          const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/legacy/fetch`,
-          );
-          resourceUrl.searchParams.append(
-            "resource",
-            seedInfo.clientResourceUrl,
-          );
-          await page.goto(resourceUrl.toString());
-          await expect(page.content()).resolves.toMatch("Unauthorized");
-
-          // Testing what happens if we try to log back in again after logging out
-          await page.goto(loginUrl);
-
-          // It should go back to the cognito page when we try to log back in
-          // rather than skipping straight to the consent page
-          await page.waitForURL((navigationUrl) => {
-            const u1 = new URL(navigationUrl);
-            u1.searchParams.delete("state");
-
-            const u2 = new URL(cognitoPageUrl);
-            u2.searchParams.delete("state");
-
-            return u1.toString() === u2.toString();
-          });
-        } finally {
-          await browser.close();
-        }
-      }, 120_000);
-    });
-
-    describe("storing token in an external storage", () => {
-      it("should be able to log in and perform an authenticated fetch", async () => {
-        const { page, browser } = testFixture;
-        try {
-          // Fetching a protected resource once logged in, rebuilding the session from saved tokens
-          const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens/fetch`,
-          );
-          resourceUrl.searchParams.append(
-            "resource",
-            seedInfo.clientResourceUrl,
-          );
-          await page.goto(resourceUrl.toString());
-          await expect(page.content()).resolves.toBe(
-            `<html><head></head><body>${seedInfo.clientResourceContent}</body></html>`,
-          );
-        } finally {
-          await browser.close();
-        }
-      }, 120_000);
-
-      it("Should be able to manage the tokens explicitly", async () => {
-        const { page, browser } = testFixture;
-        try {
-          // Fetching the token set returned after login
-          const tokensUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens`,
-          );
-
-          // Use page.evaluate to fetch JSON response
-          await page.goto(tokensUrl.toString());
-          const tokenSet: SessionTokenSet = await page.evaluate(() => {
-            try {
-              return JSON.parse(document.body.textContent || "{}");
-            } catch (e) {
-              return null;
-            }
-          });
-
-          expect(tokenSet).toBeDefined();
-          expect(tokenSet.accessToken).toBeDefined();
-          expect(tokenSet.idToken).toBeDefined();
-          expect(tokenSet.expiresAt).toBeDefined();
-          expect(tokenSet.dpopKey).toBeDefined();
-          expect(tokenSet.webId).toBeDefined();
-        } finally {
-          await browser.close();
-        }
-      }, 120_000);
-
-      it("should be able to perform RP-initiated logout", async () => {
-        const { page, browser, loginUrl, cognitoPageUrl } = testFixture;
-        try {
-          // Performing idp logout and being redirected to the postLogoutUrl after doing so
-          await testFixture.page.goto(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens/logout`,
-          );
-          await page.waitForURL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
-          );
-          await expect(page.content()).resolves.toBe(
-            `<html><head></head><body>successfully at post logout</body></html>`,
-          );
-
-          // Should not be able to retrieve the protected resource after logout
-          // Fetching a protected resource once logged in
-          const resourceUrl = new URL(
-            `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens/fetch`,
-          );
-          resourceUrl.searchParams.append(
-            "resource",
-            seedInfo.clientResourceUrl,
-          );
-          await page.goto(resourceUrl.toString());
-          await expect(page.content()).resolves.toMatch("Unauthorized");
-
-          // Testing what happens if we try to log back in again after logging out
-          await page.goto(loginUrl);
-
-          // It should go back to the cognito page when we try to log back in
-          // rather than skipping straight to the consent page
-          await page.waitForURL((navigationUrl) => {
-            const u1 = new URL(navigationUrl);
-            u1.searchParams.delete("state");
-
-            const u2 = new URL(cognitoPageUrl);
-            u2.searchParams.delete("state");
-
-            return u1.toString() === u2.toString();
-          });
-        } finally {
-          await browser.close();
-        }
-      }, 120_000);
-    });
+        expect(tokenSet).toBeDefined();
+        expect(tokenSet.accessToken).toBeDefined();
+        expect(tokenSet.idToken).toBeDefined();
+        expect(tokenSet.expiresAt).toBeDefined();
+        expect(tokenSet.dpopKey).toBeDefined();
+        expect(tokenSet.webId).toBeDefined();
+      } finally {
+        await browser.close();
+      }
+    }, 120_000);
   },
 );

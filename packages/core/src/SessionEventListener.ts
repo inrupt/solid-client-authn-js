@@ -27,6 +27,41 @@ export interface IHasSessionEventListener {
 }
 
 /**
+ * The state preserved during an authorization request and sent to the client
+ */
+export type AuthorizationRequestState = {
+  /**
+   * The code verifier used to generate the authorization code.
+   */
+  codeVerifier: string;
+
+  /**
+   * The state parameter used to generate the authorization code.
+   */
+  state: string;
+
+  /**
+   * The user's identity provider.
+   */
+  issuer: string;
+
+  /**
+   * The redirect URL to which the user will be redirected after the authorization code has been received.
+   */
+  redirectUrl: string;
+
+  /**
+   * True if a DPoP compatible auth_token should be requested.
+   */
+  dpopBound: boolean;
+
+  /**
+   * The ID of your application.
+   */
+  clientId: string;
+};
+
+/**
  * A set of tokens to be passed to the client
  */
 export type SessionTokenSet = {
@@ -100,6 +135,10 @@ type NEW_REFRESH_TOKEN_ARGS = {
 type NEW_TOKENS_ARGS = {
   eventName: typeof EVENTS.NEW_TOKENS;
   listener: (tokenSet: SessionTokenSet) => void;
+};
+type AUTH_STATE_ARGS = {
+  eventName: typeof EVENTS.AUTHORIZATION_REQUEST;
+  listener: (authorizationRequestState: AuthorizationRequestState) => void;
 };
 type FALLBACK_ARGS = {
   eventName: Parameters<InstanceType<typeof EventEmitter>["on"]>[0];
@@ -192,6 +231,15 @@ export interface ISessionEventListener extends EventEmitter {
     listener: NEW_TOKENS_ARGS["listener"],
   ): this;
   /**
+   * Register a listener called when auth state information is available during authentication.
+   * @param eventName The auth state event name.
+   * @param listener The callback called when auth state information is available.
+   */
+  on(
+    eventName: AUTH_STATE_ARGS["eventName"],
+    listener: AUTH_STATE_ARGS["listener"],
+  ): this;
+  /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
    *  It shouldn't be in the API docs.
    */
@@ -282,6 +330,15 @@ export interface ISessionEventListener extends EventEmitter {
   addListener(
     eventName: NEW_TOKENS_ARGS["eventName"],
     listener: NEW_TOKENS_ARGS["listener"],
+  ): this;
+  /**
+   * Register a listener called when auth state information is available during authentication.
+   * @param eventName The auth state event name.
+   * @param listener The callback called when auth state information is available.
+   */
+  addListener(
+    eventName: AUTH_STATE_ARGS["eventName"],
+    listener: AUTH_STATE_ARGS["listener"],
   ): this;
   /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
@@ -379,6 +436,15 @@ export interface ISessionEventListener extends EventEmitter {
     listener: NEW_TOKENS_ARGS["listener"],
   ): this;
   /**
+   * Register a listener called the next time auth state information is available during authentication.
+   * @param eventName The auth state event name.
+   * @param listener The callback called next time auth state information is available.
+   */
+  once(
+    eventName: AUTH_STATE_ARGS["eventName"],
+    listener: AUTH_STATE_ARGS["listener"],
+  ): this;
+  /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
    *  It shouldn't be in the API docs.
    */
@@ -470,6 +536,15 @@ export interface ISessionEventListener extends EventEmitter {
     listener: NEW_TOKENS_ARGS["listener"],
   ): this;
   /**
+   * Unregister a listener called when auth state information is available.
+   * @param eventName The auth state event name.
+   * @param listener The callback to unregister.
+   */
+  off(
+    eventName: AUTH_STATE_ARGS["eventName"],
+    listener: AUTH_STATE_ARGS["listener"],
+  ): this;
+  /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.
    *  It shouldn't be in the API docs.
    */
@@ -559,6 +634,15 @@ export interface ISessionEventListener extends EventEmitter {
   removeListener(
     eventName: NEW_TOKENS_ARGS["eventName"],
     listener: NEW_TOKENS_ARGS["listener"],
+  ): this;
+  /**
+   * Unregister a listener called when auth state information is available.
+   * @param eventName The auth state event name.
+   * @param listener The callback to unregister.
+   */
+  removeListener(
+    eventName: AUTH_STATE_ARGS["eventName"],
+    listener: AUTH_STATE_ARGS["listener"],
   ): this;
   /**
    * @hidden This is a fallback constructor overriding the EventEmitter behavior.

@@ -25,6 +25,7 @@
  */
 
 import type { ISessionInfo, ISessionInternalInfo } from "./ISessionInfo";
+import type { AuthorizationRequestState } from "../SessionEventListener";
 
 /**
  * @hidden
@@ -78,6 +79,17 @@ export interface ISessionInfoManager {
    * Deletes all information about all sessions, including their registrations.
    */
   clearAll(): Promise<void>;
+
+  /**
+   * Sets authorization request state in storage for a given session ID.
+   *
+   * @param {string} sessionId - The ID of the session to update
+   * @param {AuthorizationRequestState} authorizationRequestState - The state representing the authorization request context for OIDC
+   */
+  setOidcContext(
+    sessionId: string,
+    authorizationRequestState: AuthorizationRequestState,
+  ): Promise<void>;
 }
 
 export const USER_SESSION_PREFIX = "solidClientAuthenticationUser";

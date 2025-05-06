@@ -41,4 +41,5 @@ export {
   InMemoryStorage,
   EVENTS,
   type SessionTokenSet,
+  type AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-core";
