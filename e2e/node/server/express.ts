@@ -70,7 +70,7 @@ export function createApp(
       storage: new InMemoryStorage(),
     });
     session.events.on(
-      EVENTS.AUTHORIZATION_REQUEST_STATE,
+      EVENTS.AUTHORIZATION_REQUEST,
       (authorizationRequestState) => {
         authStates.set(session.info.sessionId, authorizationRequestState);
       },

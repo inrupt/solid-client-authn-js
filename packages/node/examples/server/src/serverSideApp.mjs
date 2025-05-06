@@ -38,12 +38,8 @@ app.use(cookieSession({
 // For simplicity, the cache is here an in-memory map. In a real application,
 // tokens and auth state would be stored in a persistent storage.
 const sessionCache = {};
-const authStateCache = {};
-const updateSessionCache = (sessionId, tokenSet) => {
-  sessionCache[sessionId] = tokenSet;
-};
-const updateAuthStateCache = (sessionId, authorizationRequestState) => {
-  authStateCache[sessionId] = authorizationRequestState;
+const updateSessionCache = (sessionId, data) => {
+  sessionCache[sessionId] = data;
 };
 
 app.get("/", async (_, res) => {
@@ -62,9 +58,9 @@ app.get("/login", async (req, res) => {
   // Set a cookie with the session ID.
   req.session.sessionId = session.info.sessionId;
 
-  session.events.on(EVENTS.AUTHORIZATION_REQUEST_STATE, (authorizationRequestState) => {
+  session.events.on(EVENTS.AUTHORIZATION_REQUEST, (authorizationRequestState) => {
     console.log("Auth state captured during login:", session.info.sessionId);
-    updateAuthStateCache(session.info.sessionId, authorizationRequestState);
+    updateSessionCache(session.info.sessionId, authorizationRequestState);
   });
 
   await session.login({
@@ -82,10 +78,10 @@ app.get("/login", async (req, res) => {
 
 app.get("/redirect", async (req, res) => {
   // First check if we have stored auth state for this session
-  const authorizationRequestState = authStateCache[req.session.sessionId];
+  const authorizationRequestState = sessionCache[req.session.sessionId];
   if (authorizationRequestState === undefined) {
     res
-        .status(400)
+        .status(401)
         .send(`<p>No authorizationRequestState stored for ID [${req.session.sessionId}]</p>`);
     return;
   }

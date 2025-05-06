@@ -215,10 +215,10 @@ export class SessionInfoManager
   async setOidcContext(
     sessionId: string,
     authorizationRequestState: AuthorizationRequestState & {
+      keepAlive: false;
       clientType: "solid-oidc";
     },
   ): Promise<void> {
-    // this.sessionInfoManager.setOidcContext
     // First, store mapping from state to sessionId (for the IdP redirect back)
     await this.storageUtility.setForUser(authorizationRequestState.state, {
       sessionId,
@@ -232,10 +232,8 @@ export class SessionInfoManager
       dpop: authorizationRequestState.dpopBound.toString(),
       keepAlive: authorizationRequestState.keepAlive.toString(),
       clientId: authorizationRequestState.clientId,
+      clientType: authorizationRequestState.clientType,
     };
-    if (authorizationRequestState.clientType) {
-      infoToStore.clientType = authorizationRequestState.clientType;
-    }
     await this.storageUtility.setForUser(sessionId, infoToStore);
   }
 }

@@ -181,6 +181,7 @@ export class Session implements IHasSessionEventListener {
     // Only Solid-OIDC clients are supported.
     const state = {
       ...authorizationRequestState,
+      keepAlive: false as const,
       clientType: "solid-oidc" as const,
     };
     const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);

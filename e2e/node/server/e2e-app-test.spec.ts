@@ -75,8 +75,10 @@ async function loginUser(
   const browser = await firefox.launch();
   const page = await browser.newPage();
   const url = new URL(
-    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/${legacyMode ? "legacy/" : ""}login`,
+    legacyMode ? "legacy/login" : "login",
+    "http://localhost/",
   );
+  url.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
   url.searchParams.append("oidcIssuer", ENV.idp);
   url.searchParams.append("clientId", seedInfo.clientId);
 
@@ -98,9 +100,7 @@ async function loginUser(
     // Ignore allow error for now
   }
 
-  await page.waitForURL(
-    `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/`,
-  );
+  await page.waitForURL(new URL("/", url).origin);
 
   return { browser, page, loginUrl: url.toString(), cognitoPageUrl };
 }
@@ -142,8 +142,10 @@ describe.each([
       try {
         // Fetching a protected resource once logged in
         const resourceUrl = new URL(
-          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/${legacyMode ? "legacy/" : "tokens/"}fetch`,
+          legacyMode ? "legacy/fetch" : "tokens/fetch",
+          "http://localhost/",
         );
+        resourceUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
         resourceUrl.searchParams.append("resource", seedInfo.clientResourceUrl);
         await page.goto(resourceUrl.toString());
         await expect(page.content()).resolves.toBe(
@@ -158,12 +160,14 @@ describe.each([
       const { page, browser, loginUrl, cognitoPageUrl } = testFixture;
       try {
         // Performing idp logout and being redirected to the postLogoutUrl after doing so
-        await testFixture.page.goto(
-          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/${legacyMode ? "legacy/" : "tokens/"}logout`,
+        const logoutUrl = new URL(
+          legacyMode ? "legacy/logout" : "tokens/logout",
+          "http://localhost/",
         );
-        await page.waitForURL(
-          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/postLogoutUrl`,
-        );
+        logoutUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
+
+        await testFixture.page.goto(logoutUrl.toString());
+        await page.waitForURL(new URL("/postLogoutUrl", logoutUrl).toString());
         await expect(page.content()).resolves.toBe(
           `<html><head></head><body>successfully at post logout</body></html>`,
         );
@@ -171,8 +175,10 @@ describe.each([
         // Should not be able to retrieve the protected resource after logout
         // Fetching a protected resource once logged in
         const resourceUrl = new URL(
-          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/${legacyMode ? "legacy/" : "tokens/"}fetch`,
+          legacyMode ? "legacy/fetch" : "tokens/fetch",
+          "http://localhost/",
         );
+        resourceUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
         resourceUrl.searchParams.append("resource", seedInfo.clientResourceUrl);
         await page.goto(resourceUrl.toString());
         await expect(page.content()).resolves.toMatch("Unauthorized");
@@ -226,9 +232,8 @@ describe.each([[true], [false]])(
       const { page, browser } = testFixture;
       try {
         // Fetching the token set returned after login
-        const tokensUrl = new URL(
-          `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/tokens`,
-        );
+        const tokensUrl = new URL("http://localhost/tokens");
+        tokensUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
 
         // Use page.evaluate to fetch JSON response
         await page.goto(tokensUrl.toString());

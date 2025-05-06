@@ -56,11 +56,6 @@ export type AuthorizationRequestState = {
   dpopBound: boolean;
 
   /**
-   * A boolean flag indicating whether a session should be constantly kept alive in the background.
-   */
-  keepAlive: boolean;
-
-  /**
    * The ID of your application.
    */
   clientId: string;
@@ -142,7 +137,7 @@ type NEW_TOKENS_ARGS = {
   listener: (tokenSet: SessionTokenSet) => void;
 };
 type AUTH_STATE_ARGS = {
-  eventName: typeof EVENTS.AUTHORIZATION_REQUEST_STATE;
+  eventName: typeof EVENTS.AUTHORIZATION_REQUEST;
   listener: (authorizationRequestState: AuthorizationRequestState) => void;
 };
 type FALLBACK_ARGS = {

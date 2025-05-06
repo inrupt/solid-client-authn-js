@@ -153,7 +153,6 @@ const mockAuthRequestState = (
   issuer: mockOpConfig().issuer,
   redirectUrl: "https://rp.example.org/callback/",
   dpopBound,
-  keepAlive: false,
   clientId,
 });
 
