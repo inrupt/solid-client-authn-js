@@ -88,7 +88,7 @@ app.get("/redirect", async (req, res) => {
 
   console.log("Using fromAuthorizationRequestState to restore session:", req.session.sessionId);
   // Create session from stored auth state (supports clustered deployment)
-  const session = Session.fromAuthorizationRequestState(authorizationRequestState, req.session.sessionId);
+  const session = await Session.fromAuthorizationRequestState(authorizationRequestState, req.session.sessionId);
 
   if (session === undefined) {
     res
