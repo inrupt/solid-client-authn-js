@@ -95,8 +95,9 @@ async function makeAuthenticatedRequest(
   url: RequestInfo | URL,
   defaultRequestInit?: RequestInit,
   dpopKey?: KeyPair,
+  unauthFetch = fetch,
 ) {
-  return fetch(
+  return unauthFetch(
     url,
     await buildAuthenticatedHeaders(
       url.toString(),
@@ -147,6 +148,7 @@ const computeRefreshDelay = (expiresIn?: number): number => {
  * @param accessToken an access token, either a Bearer token or a DPoP one.
  * @param options The option object may contain two objects: the DPoP key token
  * is bound to if applicable, and options to customize token renewal behavior.
+ * @param {typeof fetch} [options.fetch=fetch] A custom fetch function (defaults to the global fetch).
  *
  * @returns A fetch function that adds an appropriate Authorization header with
  * the provided token, and adds a DPoP header if applicable.
@@ -158,6 +160,7 @@ export function buildAuthenticatedFetch(
     refreshOptions?: RefreshOptions;
     expiresIn?: number;
     eventEmitter?: EventEmitter;
+    fetch?: typeof fetch; // optional custom fetch
   },
 ): typeof fetch {
   let currentAccessToken = accessToken;
@@ -258,6 +261,7 @@ export function buildAuthenticatedFetch(
       url,
       requestInit,
       options?.dpopKey,
+      options?.fetch,
     );
 
     const failedButNotExpectedAuthError =
@@ -280,6 +284,7 @@ export function buildAuthenticatedFetch(
         response.url,
         requestInit,
         options.dpopKey,
+        options.fetch,
       );
     }
     return response;
