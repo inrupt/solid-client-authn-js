@@ -57,8 +57,7 @@ Here is a list of terms having a specific meaning in the context of OIDC:
   Example: https://broker.pod.inrupt.com.
 - **Client**: the application the Resource Owner uses to access resources on
   a Resource Server. Technically, OAuth is a delegation protocol: the Resource Owner
-  allows the Client to interact with a Resource Server on its behalf. Example:
-  https://podbrowser.inrupt.com.
+  allows the Client to interact with a Resource Server on its behalf.
 
 ### Solid-OIDC
 
