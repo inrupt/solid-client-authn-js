@@ -10,17 +10,19 @@ of ESS is available on [PodSpaces](https://start.inrupt.com/).
 
 ## Installing the app
 
-To install this demo app, 
+To install this demo app,
+
 1. run `npm ci` and `npm run build` at the root of the repository,
-  which will trigger the build of the libraries our app depends on.
+   which will trigger the build of the libraries our app depends on.
 2. If you want to customize the Client ID or the OpenID Provider being
-  used, change the content of .env.example. 
+   used, change the content of .env.example.
 
 ## Running the app
 
 Run `node --env-file=.env.example src/serverSideApp.mjs`
 
 Four endpoints are available:
+
 - `/login`, to initiate the login process against a Solid Identity Provider
   (by default, `https://login.inrupt.com`)
 - `/redirect`, where the Solid Identity Provider will redirect users after login
