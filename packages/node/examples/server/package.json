@@ -18,7 +18,7 @@
     "@inrupt/solid-client": "^2.1.2",
     "@inrupt/solid-client-authn-node": "^2.5.0",
     "cookie-session": "^2.1.0",
-    "express": "^4.21.2"
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "@types/cookie-session": "^2.0.49",
