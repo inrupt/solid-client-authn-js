@@ -26,11 +26,11 @@ export {
   getSessionIdFromStorageAll,
   clearSessionFromStorageAll,
   refreshSession,
-  refreshTokens,
 } from "./multiSession";
 
-// Re-export of types defined in the core module and produced/consumed by our API
+export { refreshTokens, logout } from "./multisession.fromTokens";
 
+// Re-export of types defined in the core module and produced/consumed by our API
 export {
   ILoginInputOptions,
   ILogoutOptions,
@@ -41,4 +41,5 @@ export {
   InMemoryStorage,
   EVENTS,
   type SessionTokenSet,
+  type AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-core";

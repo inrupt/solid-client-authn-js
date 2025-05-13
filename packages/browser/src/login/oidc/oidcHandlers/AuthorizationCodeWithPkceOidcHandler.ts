@@ -71,7 +71,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
     try {
       const signingRequest = await oidcClientLibrary.createSigninRequest();
       // Make sure to await the promise before returning so that the error is caught.
-      return await this.handleRedirect({
+      return await this.setupRedirectHandler({
         oidcLoginOptions,
         // eslint-disable-next-line no-underscore-dangle
         state: signingRequest.state._id,

@@ -31,6 +31,7 @@ import type {
   ISessionInternalInfo,
   ISessionInfoManagerOptions,
   IStorageUtility,
+  AuthorizationRequestState,
 } from "..";
 
 export function getUnauthenticatedSession(): ISessionInfo & {
@@ -92,7 +93,6 @@ export abstract class SessionInfoManagerBase implements ISessionInfoManager {
   /**
    * This function removes all session-related information from storage.
    * @param sessionId the session identifier
-   * @param storage the storage where session info is stored
    * @hidden
    */
   async clear(sessionId: string): Promise<void> {
@@ -101,7 +101,6 @@ export abstract class SessionInfoManagerBase implements ISessionInfoManager {
 
   /**
    * Registers a new session, so that its ID can be retrieved.
-   * @param sessionId
    */
   async register(_sessionId: string): Promise<void> {
     throw new Error("Not implemented");
@@ -119,6 +118,16 @@ export abstract class SessionInfoManagerBase implements ISessionInfoManager {
    * Deletes all information about all sessions, including their registrations.
    */
   async clearAll(): Promise<void> {
+    throw new Error("Not implemented");
+  }
+
+  /**
+   * Sets authorization request state in storage for a given session ID.
+   */
+  async setOidcContext(
+    _sessionId: string,
+    _authorizationRequestState: AuthorizationRequestState,
+  ): Promise<void> {
     throw new Error("Not implemented");
   }
 }

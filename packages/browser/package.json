@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-browser",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "license": "MIT",
   "types": "dist/index.d.ts",
   "browser": "dist/index.js",
@@ -26,12 +26,12 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.17",
     "@types/uuid": "^10.0.0"
   },
   "dependencies": {
-    "@inrupt/oidc-client-ext": "^2.4.1",
-    "@inrupt/solid-client-authn-core": "^2.4.1",
+    "@inrupt/oidc-client-ext": "^2.5.0",
+    "@inrupt/solid-client-authn-core": "^2.5.0",
     "events": "^3.3.0",
     "jose": "^5.1.3",
     "uuid": "^11.1.0"
