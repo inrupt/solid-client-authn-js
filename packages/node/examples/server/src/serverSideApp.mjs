@@ -152,8 +152,10 @@ app.get("/logout", async (req, res) => {
     res.status(400).send(`<p>No active session to log out</p>`);
     return;
   }
+  const sessionTokens = sessionCache[req.session.sessionId];
+  delete sessionCache[req.session.sessionId];
   await logout(
-    sessionCache[req.session.sessionId],
+    sessionTokens,
     (url) => {
       res.redirect(url);
     },
