@@ -21,7 +21,7 @@
 
 import {
   Session,
-  getSessionFromStorage,
+  logout,
   refreshTokens,
   EVENTS
 } from "@inrupt/solid-client-authn-node";
@@ -148,15 +148,19 @@ app.get("/fetch", async (req, res) => {
 });
 
 app.get("/logout", async (req, res) => {
-  const session = await Session.fromTokens(sessionCache[req.session.sessionId], req.session.sessionId);
-  if (session) {
-    await session.logout({
-      logoutType: "idp",
-      handleRedirect: (redirectUrl) => { res.redirect(redirectUrl) }
-    });
+  if (sessionCache[req.session.sessionId] === undefined) {
+    res.status(400).send(`<p>No active session to log out</p>`);
     return;
   }
-  res.status(400).send(`<p>No active session to log out</p>`);
+  const sessionTokens = sessionCache[req.session.sessionId];
+  delete sessionCache[req.session.sessionId];
+  await logout(
+    sessionTokens,
+    (url) => {
+      res.redirect(url);
+    },
+    process.env.POST_LOGOUT_REDIRECT_URL,
+  );
 });
 
 app.listen(process.env.PORT, async () => {
