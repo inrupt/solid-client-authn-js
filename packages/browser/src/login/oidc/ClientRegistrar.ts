@@ -75,9 +75,11 @@ export default class ClientRegistrar implements IClientRegistrar {
     const expirationDate =
       expiresAt !== undefined ? Number.parseInt(expiresAt, 10) : -1;
     // Expiration is only applicable to confidential clients.
+    // If the client registration never expires, then the expirationDate is 0.
     // Note that Date.now() is in milliseconds, and expirationDate in seconds.
     const expired =
       storedClientSecret !== undefined &&
+      expirationDate !== 0 &&
       Math.floor(Date.now() / 1000) > expirationDate;
     if (storedClientId && isKnownClientType(storedClientType) && !expired) {
       return storedClientSecret !== undefined

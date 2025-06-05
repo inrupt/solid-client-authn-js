@@ -220,7 +220,7 @@ describe("ClientRegistrar", () => {
               idTokenSignedResponseAlg: "ES256",
               clientType: "dynamic",
               // This forces the client to be expired.
-              expiresAt: "0",
+              expiresAt: "-1",
             },
           },
           false,
@@ -277,6 +277,40 @@ describe("ClientRegistrar", () => {
       expect((client as IOpenIdDynamicClient).expiresAt).toBe(
         mockDefaultClientConfig().client_secret_expires_at,
       );
+    });
+
+    it("retrieves dynamic client information from storage if they are present and never expire", async () => {
+      const exampleSecret = randomUUID();
+      const exampleClient = randomUUID();
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: exampleClient,
+              clientSecret: exampleSecret,
+              clientName: "my client name",
+              idTokenSignedResponseAlg: "ES256",
+              clientType: "dynamic",
+              // The client registration never expires
+              expiresAt: "0",
+            },
+          },
+          false,
+        ),
+      });
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        },
+      );
+      expect(client.clientId).toBe(exampleClient);
+      expect(client.clientSecret).toBe(exampleSecret);
+      expect(client.clientName).toBe("my client name");
+      expect(client.idTokenSignedResponseAlg).toBe("ES256");
     });
 
     it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {
