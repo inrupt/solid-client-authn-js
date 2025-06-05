@@ -275,6 +275,38 @@ describe("ClientRegistrar", () => {
       ).toMatchObject(renewedClient);
     });
 
+    it("retrieves client information from storage if they are present and never expire", async () => {
+      const clientId = randomUUID();
+      const clientSecret = randomUUID();
+      const expiresAt = 0;
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId,
+              clientSecret,
+              expiresAt: String(expiresAt),
+              clientType: "dynamic",
+            },
+          },
+          false,
+        ),
+      });
+      const client = await clientRegistrar.getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        {
+          ...IssuerConfigFetcherFetchConfigResponse,
+        },
+      );
+      expect(client.clientId).toBe(clientId);
+      expect(client.clientSecret).toBe(clientSecret);
+      expect(client.clientType).toBe("dynamic");
+      expect((client as IOpenIdDynamicClient).expiresAt).toBe(expiresAt);
+    });
+
     it("saves dynamic registration information", async () => {
       // Setup registration mock.
       const client: IOpenIdDynamicClient = {
