@@ -33,6 +33,10 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+### Breaking Changes
+
+- Support for Node.js v18.x has been dropped as that version has reached end-of-life.
+
 ### Bugfix
 
 #### browser and node
