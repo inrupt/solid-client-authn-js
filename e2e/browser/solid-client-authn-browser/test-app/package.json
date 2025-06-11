@@ -12,18 +12,18 @@
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^3.2.6",
     "@inrupt/solid-client-authn-browser": "^2.5.0",
-    "next": "^15.3.2",
+    "next": "^15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^3.2.7",
     "@playwright/test": "^1.52.0",
-    "@types/node": "^22.15.21",
-    "@types/react": "^19.1.5",
-    "@types/react-dom": "^19.1.5",
-    "esbuild": "^0.25.4",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.6",
+    "esbuild": "^0.25.5",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^15.3.2"
+    "eslint-config-next": "^15.3.3"
   }
 }
