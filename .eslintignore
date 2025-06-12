@@ -1,5 +1,0 @@
-resources/
-node_modules/
-**/docs/**
-**/.eslintrc.js
-build/
