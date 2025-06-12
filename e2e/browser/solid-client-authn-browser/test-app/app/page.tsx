@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,7 +37,7 @@ import {
 } from "@inrupt/solid-client-authn-browser";
 import AuthenticatedFetch from "../components/authenticatedFetch";
 // The extension is required for JSON imports.
-// eslint-disable-next-line import/extensions, import/no-relative-packages
+
 import CONSTANTS from "../../../../../playwright.client-authn.constants.json";
 
 // Importing the playwright config file crashes the Next Web server.
@@ -53,7 +52,6 @@ const isValidUrl = (candidate?: string): boolean => {
     return false;
   }
   try {
-    // eslint-disable-next-line no-new
     new URL(candidate);
     return true;
   } catch (_e) {

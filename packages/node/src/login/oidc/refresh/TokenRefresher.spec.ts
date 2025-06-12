@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -130,7 +129,6 @@ const mockDpopTokens = (): TokenSet => {
 };
 
 const setupOidcClientMock = (tokenSet: TokenSet) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as any;
   const mockedIssuer = {
     metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),

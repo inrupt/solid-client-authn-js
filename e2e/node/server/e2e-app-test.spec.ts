@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +17,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 import { CognitoPage, OpenIdPage } from "@inrupt/internal-playwright-helpers";
 import {
   getBrowserTestingEnvironment,
@@ -43,7 +43,7 @@ import {
 } from "../../browser/solid-client-authn-browser/test/fixtures";
 import { createApp } from "./express";
 // Extensions are required for JSON-LD imports.
-// eslint-disable-next-line import/extensions
+
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
 custom.setHttpOptionsDefaults({
@@ -98,7 +98,7 @@ async function loginUser(
   const openidPage = new OpenIdPage(page);
   try {
     await openidPage.allow();
-  } catch (e) {
+  } catch (_e) {
     // Ignore allow error for now
   }
 
@@ -242,7 +242,7 @@ describe.each([[true], [false]])(
         const tokenSet: SessionTokenSet = await page.evaluate(() => {
           try {
             return JSON.parse(document.body.textContent || "{}");
-          } catch (e) {
+          } catch (_e) {
             return null;
           }
         });

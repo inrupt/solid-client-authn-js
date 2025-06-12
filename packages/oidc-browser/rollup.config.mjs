@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +19,6 @@
 //
 
 import { createSharedConfig } from "@inrupt/base-rollup-config";
-// eslint-disable-next-line import/extensions
 import pkg from "./package.json" with { type: "json" };
 
 export default {

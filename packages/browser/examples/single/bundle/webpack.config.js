@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +17,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 module.exports = {

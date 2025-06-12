@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +17,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 import { CognitoPage, OpenIdPage } from "@inrupt/internal-playwright-helpers";
 import {
   getBrowserTestingEnvironment,
@@ -38,7 +38,7 @@ import {
   tearDownPod,
 } from "../../browser/solid-client-authn-browser/test/fixtures";
 // Extension is required for JSON imports.
-// eslint-disable-next-line import/extensions
+
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
 custom.setHttpOptionsDefaults({
@@ -108,7 +108,7 @@ describe("RP initiated login/out using playwright", () => {
             const openidPage = new OpenIdPage(page);
             try {
               await openidPage.allow();
-            } catch (e) {
+            } catch (_e) {
               // Ignore allow error for now
             }
           },
@@ -131,7 +131,6 @@ describe("RP initiated login/out using playwright", () => {
 
         page.on("request", requestListener);
         // Printing the error into the console helps debugging the test.
-        // eslint-disable-next-line no-console
       })().catch(console.error);
     });
     await session.handleIncomingRedirect(redirectUrl);
@@ -174,7 +173,7 @@ describe("RP initiated login/out using playwright", () => {
         page.on("request", requestListener2);
         try {
           await page.goto(url);
-        } catch (e) {
+        } catch (_e) {
           // Suppress this goto error; it occurs because we redirect to http://localhost:3002/postLogoutUrl
           // which is not served
         }

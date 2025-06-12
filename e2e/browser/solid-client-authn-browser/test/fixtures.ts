@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +19,6 @@
 //
 
 // This file includes experimental API objects, which are camel cased.
-/* eslint-disable camelcase */
 
 import { test as base } from "@inrupt/internal-playwright-helpers";
 import { randomUUID } from "crypto";
@@ -52,7 +50,7 @@ import {
 } from "@inrupt/solid-client";
 import LinkHeaders from "http-link-header";
 // Extensions are required for JSON imports.
-// eslint-disable-next-line import/extensions
+
 import CONSTANTS from "../../../../playwright.client-authn.constants.json";
 import { AppPage } from "./pageModels/AppPage";
 
@@ -93,12 +91,12 @@ export async function retryAsync<T>(
     try {
       // The purpose here is to retry an async operation, not to parallelize.
       // Awaiting the callback will throw on error before returning.
-      // eslint-disable-next-line no-await-in-loop
+
       return await callback();
     } catch (e: unknown) {
       errors.push(e as Error);
       tries += 1;
-      // eslint-disable-next-line no-await-in-loop
+
       await new Promise((resolve) => {
         setTimeout(resolve, interval);
       });
@@ -375,7 +373,7 @@ export const test = base.extend<Fixtures>({
   },
 
   // playwright expects the first argument to be a destructuring pattern.
-  // eslint-disable-next-line no-empty-pattern
+
   environment: async ({}, use) => {
     await use(
       getBrowserTestingEnvironment({
@@ -391,7 +389,7 @@ export const test = base.extend<Fixtures>({
   },
 
   // playwright expects the first argument to be a destructuring pattern.
-  // eslint-disable-next-line no-empty-pattern
+
   setupEnvironment: async ({}, use) => {
     await use(getNodeTestingEnvironment());
   },

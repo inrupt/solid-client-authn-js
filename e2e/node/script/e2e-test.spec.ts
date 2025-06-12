@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -76,7 +75,6 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
   // to the callback refreshing the access token.
   afterAll(() => authenticatedSession.logout());
 
-  // eslint-disable-next-line jest/expect-expect
   it("test", async () => {
     let headerResolver: (p: Headers) => void;
     const headersPromise: Promise<Headers> = new Promise((resolve) => {
@@ -95,7 +93,7 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
         }),
     });
     const headers = await headersPromise;
-    // eslint-disable-next-line no-console
+
     console.log(headers.get("Content-Type"));
   });
 

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -40,7 +39,6 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
 };
 
 export const IssuerConfigFetcherMock = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchConfig: jest.fn((_issuer: string) =>
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse),
   ),

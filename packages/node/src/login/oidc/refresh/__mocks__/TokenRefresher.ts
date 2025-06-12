@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,7 +25,6 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 
 // Some identifiers are in camelcase on purpose.
-/* eslint-disable camelcase */
 
 export const mockTokenRefresher = (
   tokenSet: TokenEndpointResponse,

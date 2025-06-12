@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -126,7 +125,6 @@ export async function registerClient(
   );
 
   const config = {
-    /* eslint-disable camelcase */
     client_name: options.clientName,
     application_type: "web",
     redirect_uris: [options.redirectUrl?.toString()],
@@ -134,7 +132,6 @@ export async function registerClient(
     token_endpoint_auth_method: "client_secret_basic",
     id_token_signed_response_alg: signingAlg,
     grant_types: ["authorization_code", "refresh_token"],
-    /* eslint-enable camelcase */
   };
 
   const headers: Record<string, string> = {

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,7 +22,6 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import terser from "@rollup/plugin-terser";
 import createConfig, { createSharedConfig } from "@inrupt/base-rollup-config";
-// eslint-disable-next-line import/extensions
 import pkg from "./package.json" with { type: "json" };
 
 export default [

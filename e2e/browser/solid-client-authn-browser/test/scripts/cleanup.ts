@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +19,6 @@
 //
 
 // The following is a CLI script, so some regular linting rules don't apply.
-/* eslint-disable no-console, no-await-in-loop */
 
 import { Session } from "@inrupt/solid-client-authn-node";
 import { config } from "dotenv-flow";

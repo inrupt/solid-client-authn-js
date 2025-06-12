@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,6 +25,7 @@ import {
   StorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
+// eslint-disable-next-line import/no-unresolved
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import { EventEmitter } from "stream";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
@@ -57,9 +57,9 @@ const mockLocation = (mockedLocation: string) => {
 
   // (window as any) is used to override the window type definition and
   // allow location to be written.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   delete (window as any).location;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   delete (window as any).history.replaceState;
 
   // Set our window's location to our test value.
@@ -119,11 +119,10 @@ describe("Session", () => {
       // Let's make TypeScript and eslint angry! We'll set our window mock to
       // undefined so that any references to its properties or methods explode.
       // @ts-ignore-start
-      // eslint-disable-next-line no-global-assign
+
       window = undefined;
       // @ts-ignore-end
       expect(() => {
-        // eslint-disable-next-line no-new
         new Session({});
       }).not.toThrow();
     });
@@ -136,7 +135,7 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       // login never resolves if there are no errors,
       // because a login redirects the user away from the page:
-      // eslint-disable-next-line no-void
+
       void mySession.login({});
       expect(clientAuthnLogin).toHaveBeenCalled();
     });
@@ -147,7 +146,7 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       // login never resolves if there are no errors,
       // because a login redirects the user away from the page:
-      // eslint-disable-next-line no-void
+
       void mySession.login({
         tokenType: "Bearer",
       });
@@ -168,7 +167,7 @@ describe("Session", () => {
       };
       // login never resolves if there are no errors,
       // because a login redirects the user away from the page:
-      // eslint-disable-next-line no-void
+
       void objectWithLogin.login({});
       expect(clientAuthnLogin).toHaveBeenCalled();
     });
@@ -380,7 +379,7 @@ describe("Session", () => {
         "https://my.app/?code=someCode&state=arizona",
       );
       // We know that it has been set by the call to `blockingRequest`.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       continueAfterSecondRequest!();
       const tokenRequests = await Promise.all([
         firstTokenRequest,
@@ -425,7 +424,7 @@ describe("Session", () => {
           incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
       const mySession = new Session({ clientAuthentication });
-      // eslint-disable-next-line no-void
+
       void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
@@ -468,7 +467,7 @@ describe("Session", () => {
         ) as typeof clientAuthentication.validateCurrentSession;
 
       const mySession = new Session({ clientAuthentication });
-      // eslint-disable-next-line no-void
+
       void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
@@ -507,7 +506,7 @@ describe("Session", () => {
         undefined,
       ) as typeof clientAuthentication.handleIncomingRedirect;
       const mySession = new Session({ clientAuthentication });
-      // eslint-disable-next-line no-void
+
       void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
@@ -553,7 +552,7 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
-      // eslint-disable-next-line no-void
+
       void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: true,
@@ -652,7 +651,7 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
-      // eslint-disable-next-line no-void
+
       void mySession.handleIncomingRedirect("https://some.redirect/url");
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
       expect(clientAuthentication.login).not.toHaveBeenCalled();
@@ -689,7 +688,7 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
-      // eslint-disable-next-line no-void
+
       void mySession.handleIncomingRedirect({
         url: "https://some.redirect/url",
         restorePreviousSession: false,
@@ -728,7 +727,7 @@ describe("Session", () => {
       clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
 
       const mySession = new Session({ clientAuthentication });
-      // eslint-disable-next-line no-void
+
       void mySession.handleIncomingRedirect("https://some.redirect/url");
       expect(mySession.info.isLoggedIn).toBe(false);
       // The local storage should have been cleared by the auth error

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -89,7 +88,7 @@ describe("OidcLoginHandler", () => {
     });
 
     // TODO: Move this to appropriate handlers (auth code, implicit)
-    // eslint-disable-next-line jest/no-commented-out-tests
+
     // it("cannot handle options without an redirect url", async () => {
     //   const handler = getInitialisedHandler();
     //   await expect(
@@ -127,7 +126,7 @@ describe("OidcLoginHandler", () => {
     });
 
     // TODO: Move this to appropriate handlers (auth code, implicit)
-    // eslint-disable-next-line jest/no-commented-out-tests
+
     // it("throws if config misses a redirect URL", async () => {
     //   const handler = getInitialisedHandler();
     //   await expect(

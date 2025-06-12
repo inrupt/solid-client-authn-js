@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,8 +17,9 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 import type IStorageUtility from "../../../storage/IStorageUtility";
-import type IOidcOptions from "../IOidcOptions";
+import type { IOidcOptions } from "../IOidcOptions";
 import type { IRedirector } from "../IRedirector";
 
 /**

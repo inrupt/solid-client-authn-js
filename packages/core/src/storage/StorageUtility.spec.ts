@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -577,7 +576,6 @@ describe("saveSessionInfoToStorage", () => {
 
     expect(
       JSON.parse(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (await mockedStorage.getForUser("some session", "publicKey", {
           secure: true,
         }))!,
@@ -588,7 +586,7 @@ describe("saveSessionInfoToStorage", () => {
       "privateKey",
       { secure: true },
     );
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     expect(JSON.parse(privateJwk!)).toEqual(
       await exportJWK(dpopKey.privateKey),
     );
