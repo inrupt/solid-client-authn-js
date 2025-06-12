@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -47,7 +46,7 @@ import {
   maybeBuildRpInitiatedLogout,
   removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line no-shadow
+
 import { URL } from "url";
 import { Issuer } from "openid-client";
 import type { KeyObject } from "crypto";
@@ -179,7 +178,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     const { webId, clientId } = await getWebidFromTokenPayload(
       tokenSet.id_token,
       // The JWKS URI is mandatory in the spec, so the non-null assertion is valid.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       issuer.metadata.jwks_uri!,
       issuer.metadata.issuer,
       client.metadata.client_id,

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -50,7 +49,6 @@ describe("errors", () => {
   errors.forEach((err) => {
     it(`Should throw [${err.name}]`, () => {
       expect(() => {
-        // eslint-disable-next-line new-cap
         const error = new err.class(...err.params);
         throw error;
       }).toThrow(err.message);

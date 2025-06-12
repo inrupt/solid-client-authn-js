@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,9 +31,8 @@ export const OidcHandlerHandleResponse: ISessionInfo =
   SessionCreatorGetSessionResponse;
 
 export const OidcHandlerMock: jest.Mocked<IOidcHandler> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canHandle: jest.fn((_options: IOidcOptions) => Promise.resolve(true)),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   handle: jest.fn(async (_options: IOidcOptions) => Promise.resolve(undefined)),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;

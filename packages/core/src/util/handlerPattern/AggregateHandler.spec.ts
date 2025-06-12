@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,7 +34,6 @@ describe("AggregateHandler", () => {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function initMocks(
     configs: { canHandle: boolean; executeTime: number; toReturn: string }[],
   ) {

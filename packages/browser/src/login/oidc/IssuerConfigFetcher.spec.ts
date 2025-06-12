@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -58,7 +57,7 @@ describe("IssuerConfigFetcher", () => {
       new Response(
         JSON.stringify({
           issuer: "https://example.com",
-          // eslint-disable-next-line camelcase
+
           claim_types_supported: "oidc",
           bleepBloop: "Meep Moop",
           end_session_endpoint: "https://example.com/endSessionEndpoint",
@@ -92,7 +91,7 @@ describe("IssuerConfigFetcher", () => {
       new Response(
         JSON.stringify({
           issuer: "https://example.com",
-          // eslint-disable-next-line camelcase
+
           claim_types_supported: "oidc",
           scopes_supported: ["openid", "offline_access", "webid"],
         }),
@@ -114,7 +113,7 @@ describe("IssuerConfigFetcher", () => {
       new Response(
         JSON.stringify({
           issuer: "https://example.com",
-          // eslint-disable-next-line camelcase
+
           claim_types_supported: "oidc",
         }),
       ),
@@ -136,7 +135,7 @@ describe("IssuerConfigFetcher", () => {
         new Response(
           JSON.stringify({
             issuer: "https://example.com",
-            // eslint-disable-next-line camelcase
+
             claim_types_supported: "oidc",
             scopes_supported: ["openid", "offline_access", "webid"],
           }),

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -590,7 +589,7 @@ describe("buildAuthenticatedFetch", () => {
 
   it("emits the appropriate events when the access token expires and may not be refreshed", async () => {
     const mockedFreshener = mockTokenRefresher(mockDefaultTokenSet());
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     mockedFreshener.refresh = jest
       .fn<
         (

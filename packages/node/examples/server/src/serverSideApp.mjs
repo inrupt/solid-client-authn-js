@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,7 +22,7 @@ import {
   Session,
   logout,
   refreshTokens,
-  EVENTS
+  EVENTS,
 } from "@inrupt/solid-client-authn-node";
 import { getPodUrlAll } from "@inrupt/solid-client";
 import cookieSession from "cookie-session";
@@ -31,9 +30,11 @@ import express from "express";
 
 const app = express();
 
-app.use(cookieSession({
-  keys: [`${Math.random()}`]
-}));
+app.use(
+  cookieSession({
+    keys: [`${Math.random()}`],
+  }),
+);
 
 // For simplicity, the cache is here an in-memory map. In a real application,
 // tokens and auth state would be stored in a persistent storage.
@@ -43,11 +44,11 @@ const updateSessionCache = (sessionId, data) => {
 };
 
 app.get("/", async (_, res) => {
-  const htmlSessions = `${Object.values(sessionCache)
-    .reduce((sessionList, sessionTokens) => (
-      `${sessionList}<li><strong>${sessionTokens.webId}</strong></li>`
-      ),
-      "<ul>")}</ul>`;
+  const htmlSessions = `${Object.values(sessionCache).reduce(
+    (sessionList, sessionTokens) =>
+      `${sessionList}<li><strong>${sessionTokens.webId}</strong></li>`,
+    "<ul>",
+  )}</ul>`;
   res.send(
     `<p>There are currently [${Object.values(sessionCache).length}] visitors: ${htmlSessions}</p><p><a href="/login">Log in</a>`,
   );
@@ -58,10 +59,13 @@ app.get("/login", async (req, res) => {
   // Set a cookie with the session ID.
   req.session.sessionId = session.info.sessionId;
 
-  session.events.on(EVENTS.AUTHORIZATION_REQUEST, (authorizationRequestState) => {
-    console.log("Auth state captured during login:", session.info.sessionId);
-    updateSessionCache(session.info.sessionId, authorizationRequestState);
-  });
+  session.events.on(
+    EVENTS.AUTHORIZATION_REQUEST,
+    (authorizationRequestState) => {
+      console.log("Auth state captured during login:", session.info.sessionId);
+      updateSessionCache(session.info.sessionId, authorizationRequestState);
+    },
+  );
 
   await session.login({
     clientId: process.env.CLIENT_ID,
@@ -81,14 +85,22 @@ app.get("/redirect", async (req, res) => {
   const authorizationRequestState = sessionCache[req.session.sessionId];
   if (authorizationRequestState === undefined) {
     res
-        .status(401)
-        .send(`<p>No authorizationRequestState stored for ID [${req.session.sessionId}]</p>`);
+      .status(401)
+      .send(
+        `<p>No authorizationRequestState stored for ID [${req.session.sessionId}]</p>`,
+      );
     return;
   }
 
-  console.log("Using fromAuthorizationRequestState to restore session:", req.session.sessionId);
+  console.log(
+    "Using fromAuthorizationRequestState to restore session:",
+    req.session.sessionId,
+  );
   // Create session from stored auth state (supports clustered deployment)
-  const session = await Session.fromAuthorizationRequestState(authorizationRequestState, req.session.sessionId);
+  const session = await Session.fromAuthorizationRequestState(
+    authorizationRequestState,
+    req.session.sessionId,
+  );
 
   if (session === undefined) {
     res
@@ -97,9 +109,8 @@ app.get("/redirect", async (req, res) => {
     return;
   }
 
-  session.events.on(
-    EVENTS.NEW_TOKENS,
-    (tokenSet) => updateSessionCache(req.session.sessionId, tokenSet)
+  session.events.on(EVENTS.NEW_TOKENS, (tokenSet) =>
+    updateSessionCache(req.session.sessionId, tokenSet),
   );
 
   await session.handleIncomingRedirect(getRequestFullUrl(req));
@@ -116,9 +127,14 @@ app.get("/redirect", async (req, res) => {
 });
 
 app.get("/refresh", async (req, res) => {
-  const refreshedTokens = await refreshTokens(sessionCache[req.session.sessionId]);
+  const refreshedTokens = await refreshTokens(
+    sessionCache[req.session.sessionId],
+  );
   updateSessionCache(req.session.sessionId, refreshedTokens);
-  const session = await Session.fromTokens(refreshedTokens, req.session.sessionId);
+  const session = await Session.fromTokens(
+    refreshedTokens,
+    req.session.sessionId,
+  );
   if (session.info.isLoggedIn) {
     const storageUrl = await getPodUrlAll(session.info.webId);
     res.send(
@@ -131,7 +147,10 @@ app.get("/refresh", async (req, res) => {
 });
 
 app.get("/fetch", async (req, res) => {
-  const session = await Session.fromTokens(sessionCache[req.session.sessionId], req.session.sessionId);
+  const session = await Session.fromTokens(
+    sessionCache[req.session.sessionId],
+    req.session.sessionId,
+  );
   if (!req.query.resource) {
     res
       .status(400)
@@ -142,7 +161,7 @@ app.get("/fetch", async (req, res) => {
   }
   res.send(
     `<pre>${(
-      await session.fetch(req.query.resource).then(r => r.text())
+      await session.fetch(req.query.resource).then((r) => r.text())
     ).replace(/</g, "&lt;")}</pre>`,
   );
 });

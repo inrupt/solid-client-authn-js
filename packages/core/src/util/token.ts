@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +18,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// eslint-disable-next-line no-shadow
 import type { JWTPayload } from "jose";
 import { jwtVerify, createRemoteJWKSet } from "jose";
 
@@ -76,7 +74,7 @@ export async function getWebidFromTokenPayload(
     // This parses the 'sub' claim to check if it is a well-formed IRI.
     // However, the normalized value isn't returned to make sure the WebID is returned
     // as specified by the Identity Provider.
-    // eslint-disable-next-line no-new
+
     new URL(payload.sub);
     return {
       webId: payload.sub,

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +17,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 import type { ILogoutHandlerOptions } from "./ILogoutHandler";
 import type ILogoutHandler from "./ILogoutHandler";
 import GeneralLogoutHandler from "./GeneralLogoutHandler";
@@ -47,10 +47,8 @@ export default class IWaterfallLogoutHandler implements ILogoutHandler {
     options?: ILogoutHandlerOptions | undefined,
   ): Promise<void> {
     for (const handler of this.handlers) {
-      /* eslint-disable no-await-in-loop */
       if (await handler.canHandle(userId, options))
         await handler.handle(userId, options);
-      /* eslint-enable no-await-in-loop */
     }
   }
 }

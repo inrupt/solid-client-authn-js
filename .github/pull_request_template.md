@@ -8,9 +8,9 @@ This PR fixes bug #.
 
 <!-- When adding a new feature: -->
 
-# New feature description
+## New feature description
 
-# Checklist
+## Checklist
 
 - [ ] All acceptance criteria are met.
 - [ ] Relevant documentation, if any, has been written/updated.
@@ -22,7 +22,7 @@ This PR fixes bug #.
 
 This PR bumps the version to <version number>.
 
-# Release Steps
+## Release Steps
 
 1. Look at the [CHANGELOG.md](../CHANGELOG.md) to determine whether the release should be a major, minor, or patch release. Coordinate with the team to ensure the next version is agreed upon.
 2. Run `npm run lerna-version -- <major|minor|patch>` with the decided on version.

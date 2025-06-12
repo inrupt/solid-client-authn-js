@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -85,7 +84,6 @@ export abstract class SessionInfoManagerBase implements ISessionInfoManager {
     throw new Error("Not implemented");
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async getAll(): Promise<(ISessionInfo & ISessionInternalInfo)[]> {
     throw new Error("Not implemented");
   }

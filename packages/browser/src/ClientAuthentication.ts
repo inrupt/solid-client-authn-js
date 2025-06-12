@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -152,7 +151,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       // 'popstate' event which should be listened to is only sent on active
       // navigation, which we will not have here.
       // See https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event#when_popstate_is_sent
-      // eslint-disable-next-line no-await-in-loop
+
       await new Promise<void>((resolve) => {
         setTimeout(() => resolve(), 1);
       });
