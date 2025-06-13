@@ -25,7 +25,7 @@ we decided to apply the following rules:
   lower-level API where token and key management is left to the dependant, and no
   longer a concern of the library.
 
-# Reporting a vulnerability
+## Reporting a vulnerability
 
 If you discover a vulnerability in our code, or experience a bug related to security,
 please report it following the instructions provided on [Inrupt’s security page](https://inrupt.com/security/).

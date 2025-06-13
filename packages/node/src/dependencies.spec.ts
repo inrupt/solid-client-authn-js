@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -60,7 +59,6 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
 });
 
 const setupOidcClientMock = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as any;
   function clientConstructor() {
     // this is untyped, which makes TS complain

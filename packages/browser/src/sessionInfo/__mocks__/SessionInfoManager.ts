@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -46,7 +45,7 @@ export const SessionInfoManagerMock: jest.Mocked<ISessionInfoManager> = {
     Promise.resolve(SessionCreatorCreateResponse),
   ),
   getAll: jest.fn(async () => Promise.resolve([SessionCreatorCreateResponse])),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   clear: jest.fn(async (_sessionId: string) => Promise.resolve()),
   register: jest.fn(async (_sessionId: string) => Promise.resolve()),
   clearAll: jest.fn(async () => Promise.resolve()),

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,6 +29,7 @@ import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
   mockLogoutHandler,
+  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 import { Session } from "./Session";
 

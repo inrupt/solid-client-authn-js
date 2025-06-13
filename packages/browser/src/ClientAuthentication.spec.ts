@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,6 +34,7 @@ import {
   mockIncomingRedirectHandler,
   mockHandleIncomingRedirect,
   mockLogoutHandler,
+  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
@@ -472,7 +472,7 @@ describe("ClientAuthentication", () => {
       const url =
         "https://coolapp.com/redirect?state=someState&code=someAuthCode&iss=someIssuer";
       await clientAuthn.handleIncomingRedirect(url, mockEmitter);
-      // eslint-disable-next-line no-restricted-globals
+
       expect(history.replaceState).toHaveBeenCalledWith(
         null,
         "",

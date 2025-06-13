@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,7 +21,7 @@
 import type { PlaywrightTestConfig } from "@playwright/test";
 import { baseConfig } from "./playwright.shared.config";
 // The extension is necessary for JSON imports.
-// eslint-disable-next-line import/extensions
+
 import CONSTANTS from "./playwright.client-authn.constants.json";
 
 const config: PlaywrightTestConfig = {

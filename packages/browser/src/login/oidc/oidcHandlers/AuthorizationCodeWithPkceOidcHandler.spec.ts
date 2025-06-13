@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +32,7 @@ import { StorageUtility } from "@inrupt/solid-client-authn-core";
 import {
   StorageUtilityMock,
   mockStorage,
+  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
@@ -53,7 +53,6 @@ const mockOidcModule = (
   url: string = expectedSigninRedirectUrl,
   state = "test state",
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const oidcModule = jest.requireMock("@inrupt/oidc-client-ext") as any;
   oidcModule.OidcClient.mockReturnValue({
     createSigninRequest: jest
@@ -91,7 +90,6 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       getAuthorizationCodeWithPkceOidcHandler();
     canHandleTests.authorizationCodeWithPkceOidcHandler.forEach(
       (testConfig) => {
-        // eslint-disable-next-line jest/valid-title
         it(testConfig.message, async () => {
           const value = await authorizationCodeWithPkceOidcHandler.canHandle(
             testConfig.oidcOptions,
@@ -138,7 +136,6 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       // pretty nasty due to an Error instance being logged without being
       // converted to a string:
 
-      // eslint-disable-next-line no-console
       expect(console.error).toHaveBeenCalledTimes(1);
       expect(
         (console as jest.Mocked<Console>).error.mock.calls[0][0].toString(),

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,7 +27,7 @@ import type {
   IIncomingRedirectHandler,
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line no-shadow
+
 import { URL } from "url";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
@@ -43,7 +42,7 @@ export class FallbackRedirectHandler implements IIncomingRedirectHandler {
   async canHandle(redirectUrl: string): Promise<boolean> {
     try {
       // The next URL object is built for validating it.
-      // eslint-disable-next-line no-new
+
       new URL(redirectUrl);
       return true;
     } catch (e) {

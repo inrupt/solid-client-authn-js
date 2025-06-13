@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,6 +19,6 @@
 //
 
 import pkg from "./package.json" with { type: "json" };
-import createConfig from '@inrupt/base-rollup-config';
+import createConfig from "@inrupt/base-rollup-config";
 
 export default createConfig(pkg);

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -93,7 +92,7 @@ export default class AggregateHandler<P extends Array<unknown>, R>
         .map((param) => {
           try {
             return JSON.stringify(param);
-          } catch (err) {
+          } catch (_err) {
             /* eslint-disable  @typescript-eslint/no-explicit-any */
             return (param as any).toString();
           }

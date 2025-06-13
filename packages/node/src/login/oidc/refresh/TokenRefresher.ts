@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -48,7 +47,6 @@ import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.
-/* eslint-disable camelcase */
 
 const tokenSetToTokenEndpointResponse = async (
   tokenSet: TokenSet,

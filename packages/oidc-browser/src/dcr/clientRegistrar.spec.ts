@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,8 +24,6 @@ import type {
   IClientRegistrarOptions,
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "./clientRegistrar";
-
-/* eslint-disable camelcase */
 
 const getMockIssuer = (): IIssuerConfig => {
   return {

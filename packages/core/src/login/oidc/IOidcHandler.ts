@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,7 +28,7 @@
  */
 import type IHandleable from "../../util/handlerPattern/IHandleable";
 import type { IncomingRedirectResult } from "./IIncomingRedirectHandler";
-import type IOidcOptions from "./IOidcOptions";
+import type { IOidcOptions } from "./IOidcOptions";
 
 export type OidcHandlerResult = IncomingRedirectResult | undefined;
 

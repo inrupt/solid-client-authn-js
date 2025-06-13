@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,7 +41,6 @@ import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManag
 export class ErrorOidcHandler implements IIncomingRedirectHandler {
   async canHandle(redirectUrl: string): Promise<boolean> {
     try {
-      // eslint-disable-next-line no-new
       return new URL(redirectUrl).searchParams.has("error");
     } catch (e) {
       throw new Error(

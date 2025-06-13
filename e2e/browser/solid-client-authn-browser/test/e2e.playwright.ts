@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,7 +23,6 @@ import { v4 } from "uuid";
 import { getBrowserTestingEnvironment } from "@inrupt/internal-test-env";
 import { test, expect } from "./fixtures";
 // Extensions are required for JSON imports.
-// eslint-disable-next-line import/extensions
 import CONSTANTS from "../../../../playwright.client-authn.constants.json";
 
 const env = getBrowserTestingEnvironment();
@@ -33,7 +31,6 @@ const env = getBrowserTestingEnvironment();
 
 test.describe("Not Logged In", () => {
   // Skipping this for now, as it is currently failing. Will investigate separately.
-  // eslint-disable-next-line playwright/no-skipped-test
   test.skip("Public resource in my Pod", async ({ testContainer, app }) => {
     expect(await app.getFetchResponse()).toBe("not fetched");
 
@@ -112,7 +109,6 @@ test.describe("Logged In", () => {
     expect(response).toBe(testContainer.privateFileText);
   });
 
-  // eslint-disable-next-line playwright/expect-expect
   test.fixme("Non-existent resource in my Pod", async () => {});
 
   test("gets notified when session is extended", async ({ app }) => {
@@ -125,7 +121,6 @@ test.describe("Logged In", () => {
       .locator("span[data-testid=sessionExpiration]")
       .textContent();
     // This conditional doesn't impact test assertions.
-    // eslint-disable-next-line playwright/no-conditional-in-test
     if (expirationDateString === null) {
       throw new Error("Could not read expiration date.");
     }
@@ -197,7 +192,6 @@ test.describe("Using a Client ID", () => {
       .locator("span[data-testid=sessionExpiration]")
       .textContent();
     // This conditional doesn't impact test assertions.
-    // eslint-disable-next-line playwright/no-conditional-in-test
     if (expirationDateString === null) {
       throw new Error("Could not read expiration date.");
     }

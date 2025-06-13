@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -108,7 +107,7 @@ function isValidUrl(url: string): boolean {
   try {
     // Here, the URL constructor is just called to parse the given string and
     // verify if it is a well-formed IRI.
-    // eslint-disable-next-line no-new
+
     new URL(url);
     return true;
   } catch {
@@ -235,7 +234,7 @@ export class Session implements IHasSessionEventListener {
         const payload = await getWebidFromTokenPayload(
           sessionTokenSet.idToken,
           // The JWKS URI is mandatory in the spec, so the non-null assertion is valid.
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
           issuerConfig.jwksUri,
           sessionTokenSet.issuer,
           sessionTokenSet.clientId,

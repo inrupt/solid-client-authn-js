@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -172,7 +171,7 @@ export default class StorageUtility implements IStorageUtility {
 
     try {
       return JSON.parse(stored);
-    } catch (err) {
+    } catch (_err) {
       throw new Error(
         `Data for user [${userId}] in [${
           secure ? "secure" : "unsecure"

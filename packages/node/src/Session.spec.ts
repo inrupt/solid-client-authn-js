@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,6 +21,7 @@
 import { jest, it, describe, expect } from "@jest/globals";
 import type { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
+// eslint-disable-next-line import/no-unresolved
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import type EventEmitter from "events";
 import type { SessionTokenSet } from "core";
@@ -318,7 +318,6 @@ describe("Session", () => {
       let secondRequestIssued = false;
       const blockingRequest = async (): Promise<ISessionInfo> => {
         while (!secondRequestIssued) {
-          // eslint-disable-next-line no-await-in-loop
           await sleep(100);
         }
         return obtainedSession;

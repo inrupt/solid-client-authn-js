@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +29,7 @@ export function isValidRedirectUrl(redirectUrl: string): boolean {
     // must not include a hash fragment.
     const noHash = urlObject.hash === "";
     return noReservedQuery && noHash;
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
