@@ -62,7 +62,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       // profile referenced by the WebId.
       loadUserInfo: false,
       code_verifier: true,
-      prompt: oidcLoginOptions.prompt ?? "consent",
+      prompt: 'prompt' in oidcLoginOptions ? oidcLoginOptions.prompt : "consent",
     };
     /* eslint-enable camelcase */
 
