@@ -70,6 +70,10 @@ export interface IOidcOptions {
    * Defaults to true.
    */
   keepAlive?: boolean;
+  /**
+   * The Authorization Request OAuth scopes.
+   */
+  scopes: string[];
 }
 
 export default IOidcOptions;

@@ -40,7 +40,6 @@ import {
   PREFERRED_SIGNING_ALG,
   getWebidFromTokenPayload,
   buildAuthenticatedFetch,
-  DEFAULT_SCOPES,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import type { KeyObject } from "crypto";
@@ -85,7 +84,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       {
         grant_type: "client_credentials",
         token_endpoint_auth_method: "client_secret_basic",
-        scope: DEFAULT_SCOPES,
+        scope: oidcLoginOptions.scopes,
       },
       {
         DPoP:

@@ -45,6 +45,7 @@ export const standardOidcOptions: IOidcOptions = {
     clientType: "dynamic",
   },
   keepAlive: true,
+  scopes: ["openid", "webid", "offline_access"],
 };
 
 export const mockDefaultOidcOptions = (): IOidcOptions => {

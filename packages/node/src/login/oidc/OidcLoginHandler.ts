@@ -42,6 +42,7 @@ import type {
 import {
   ConfigurationError,
   handleRegistration,
+  DEFAULT_SCOPES,
 } from "@inrupt/solid-client-authn-core";
 
 function hasIssuer(
@@ -56,6 +57,15 @@ function hasIssuer(
 // ): options is ILoginOptions & { redirectUrl: string } {
 //   return typeof options.redirectUrl === "string";
 // }
+
+function normalizeScopes(scopes: string[] | undefined): string[] {
+  if (!Array.isArray(scopes)) {
+    return [];
+  }
+  return scopes.filter(
+    (scope) => typeof scope === "string" && !scope.includes(" "),
+  );
+}
 
 /**
  * @hidden
@@ -124,6 +134,10 @@ export default class OidcLoginHandler implements ILoginHandler {
       handleRedirect: options.handleRedirect,
       eventEmitter: options.eventEmitter,
       keepAlive: options.keepAlive,
+      scopes: Array.from(
+        // De-dupe potentia conflicts if any.
+        new Set([...DEFAULT_SCOPES, ...normalizeScopes(options.customScopes)]),
+      ),
     };
     // Call proper OIDC Handler
     return this.oidcHandler.handle(oidcOptions);

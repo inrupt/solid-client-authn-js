@@ -66,7 +66,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       redirect_uri: oidcLoginOptions.redirectUrl,
       code_challenge_method: "S256",
       prompt: "consent",
-      scope: DEFAULT_SCOPES,
+      scope: oidcLoginOptions.scopes.join(" "),
     });
 
     if (oidcLoginOptions.eventEmitter) {

@@ -55,7 +55,4 @@ const SCOPE_OPENID = "openid";
 const SCOPE_OFFLINE = "offline_access";
 // The webid scope is required as per https://solid.github.io/solid-oidc/#webid-scope
 const SCOPE_WEBID = "webid";
-// The scopes are expected as a space-separated list.
-export const DEFAULT_SCOPES = [SCOPE_OPENID, SCOPE_OFFLINE, SCOPE_WEBID].join(
-  " ",
-);
+export const DEFAULT_SCOPES = [SCOPE_OPENID, SCOPE_OFFLINE, SCOPE_WEBID];

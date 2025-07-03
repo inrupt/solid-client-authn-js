@@ -130,7 +130,9 @@ const mockBearerTokens = (): OpenidClient.TokenSet => {
 };
 
 const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const grantMock = jest
+    .fn<() => Promise<OpenidClient.TokenSet>>()
+    .mockResolvedValueOnce(tokenSet);
   const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
     typeof OpenidClient
   >;
@@ -138,7 +140,7 @@ const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
     // this is untyped, which makes TS complain
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    this.grant = jest.fn().mockResolvedValueOnce(tokenSet);
+    this.grant = grantMock;
   }
 
   const mockedIssuer = jest.mocked({
@@ -147,6 +149,7 @@ const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
     // Cast to unknown because only partially mocked
   } as unknown as OpenidClient.Issuer<OpenidClient.Client>);
   Issuer.mockReturnValueOnce(mockedIssuer);
+  return grantMock;
 };
 
 const setupGetWebidMock = (webid: string, clientid?: string) => {
@@ -529,6 +532,36 @@ describe("handle", () => {
     expect(result?.clientAppId).toBe("some client ID");
     expect(result?.expirationDate).toBe(
       Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
+    );
+  });
+
+  it("uses the provided scopes in the token request", async () => {
+    const tokens = mockDpopTokens();
+    const mockedGrant = setupOidcClientMock(tokens);
+    setupGetWebidMock("https://my.webid/");
+    const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+      mockDefaultTokenRefresher(),
+    );
+    await clientCredentialsOidcHandler.handle({
+      ...standardOidcOptions,
+      dpop: false,
+      client: {
+        clientId: randomUUID(),
+        clientSecret: randomUUID(),
+        clientType: "static",
+      },
+      scopes: ["openid", "webid", "custom_scope"],
+    });
+
+    expect(mockedGrant).toHaveBeenCalledWith(
+      {
+        grant_type: "client_credentials",
+        token_endpoint_auth_method: "client_secret_basic",
+        scope: ["openid", "webid", "custom_scope"],
+      },
+      {
+        DPoP: undefined,
+      },
     );
   });
 
