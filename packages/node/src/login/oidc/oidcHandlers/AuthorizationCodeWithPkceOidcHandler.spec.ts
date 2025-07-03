@@ -106,7 +106,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       expect(builtUrl.searchParams.get("code_challenge")).not.toBeNull();
       expect(builtUrl.searchParams.get("prompt")).toBe("consent");
       expect(builtUrl.searchParams.get("scope")).toBe(
-        "openid webid offline_access",
+        "openid offline_access webid",
       );
     });
 
@@ -120,7 +120,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
 
       const builtUrl = new URL(mockedRedirector.mock.calls[0][0]);
       expect(builtUrl.searchParams.get("scope")).toBe(
-        "openid webid offline_access custom_scope",
+        "openid offline_access webid custom_scope",
       );
     });
 

@@ -40,7 +40,7 @@ import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 type IRefreshRequestBody = {
   grant_type: "refresh_token";
   refresh_token: string;
-  scope: typeof DEFAULT_SCOPES;
+  scope?: string;
   client_id?: string;
 };
 
@@ -74,7 +74,6 @@ export async function refresh(
   const requestBody: IRefreshRequestBody = {
     grant_type: "refresh_token",
     refresh_token: refreshToken,
-    scope: DEFAULT_SCOPES,
   };
 
   let dpopHeader = {};
