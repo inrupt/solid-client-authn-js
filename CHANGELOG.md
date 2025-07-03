@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 ## Deprecation notice
 
 - A new signature was introduced for `getSessionFromStorage` in release 2.3.0. The legacy signature is
-  deprecated, and could be removed with the next major release.
+  deprecated, and will be removed with the 4.0.0 major release.
 
 ```javascript
 // Deprecated signature
@@ -32,6 +32,8 @@ const session = await getSessionFromStorage(sessionId, {
 ## Unreleased
 
 The following changes have been implemented but not released yet:
+
+## [3.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v3.0.0) - 2025-07-03
 
 ### Breaking Changes
 
