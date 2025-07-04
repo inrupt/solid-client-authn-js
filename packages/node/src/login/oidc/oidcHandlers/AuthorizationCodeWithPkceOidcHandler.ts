@@ -33,7 +33,6 @@ import type {
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
 import {
-  DEFAULT_SCOPES,
   AuthorizationCodeWithPkceOidcHandlerBase,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";

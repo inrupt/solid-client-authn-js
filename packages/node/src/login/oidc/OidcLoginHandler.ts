@@ -42,7 +42,6 @@ import type {
 import {
   ConfigurationError,
   handleRegistration,
-  DEFAULT_SCOPES,
   normalizeScopes,
 } from "@inrupt/solid-client-authn-core";
 
