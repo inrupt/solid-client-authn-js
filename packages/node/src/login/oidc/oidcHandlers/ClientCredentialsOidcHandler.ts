@@ -84,7 +84,9 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       {
         grant_type: "client_credentials",
         token_endpoint_auth_method: "client_secret_basic",
-        scope: oidcLoginOptions.scopes,
+        // Passing scopes as an array of strings results in them being
+        // comma-separated in the request, which is invalid.
+        scope: oidcLoginOptions.scopes.join(" "),
       },
       {
         DPoP:
