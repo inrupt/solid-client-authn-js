@@ -557,7 +557,7 @@ describe("handle", () => {
       {
         grant_type: "client_credentials",
         token_endpoint_auth_method: "client_secret_basic",
-        scope: ["openid", "webid", "custom_scope"],
+        scope: "openid webid custom_scope",
       },
       {
         DPoP: undefined,
