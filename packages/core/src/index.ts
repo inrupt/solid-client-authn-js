@@ -46,7 +46,10 @@ export { default as AggregateHandler } from "./util/handlerPattern/AggregateHand
 export { getWebidFromTokenPayload } from "./util/token";
 
 export { default as IOidcHandler } from "./login/oidc/IOidcHandler";
-export { default as IOidcOptions } from "./login/oidc/IOidcOptions";
+export {
+  default as IOidcOptions,
+  normalizeScopes,
+} from "./login/oidc/IOidcOptions";
 export {
   isValidRedirectUrl,
   removeOpenIdParams,

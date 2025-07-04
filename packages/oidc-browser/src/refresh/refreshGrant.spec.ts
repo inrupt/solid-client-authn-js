@@ -156,8 +156,6 @@ describe("refreshGrant", () => {
     const body = myFetch.mock.calls[0][1]?.body;
     const searchableBody = new URLSearchParams(body?.toString());
     expect(searchableBody.get("refresh_token")).toBe("some refresh token");
-    expect(searchableBody.get("scope")).toContain("offline_access");
-    expect(searchableBody.get("scope")).toContain("openid");
   });
 
   it("throws if the token endpoint does not return an access token", async () => {

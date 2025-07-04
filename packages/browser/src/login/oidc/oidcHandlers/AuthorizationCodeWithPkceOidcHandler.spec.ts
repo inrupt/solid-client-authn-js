@@ -235,7 +235,7 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       );
     });
 
-    it("requests both openid, offline_access and webid scopes", async () => {
+    it("includes the provided scopes in the authorization request", async () => {
       const oidcModule = mockOidcModule();
       const authorizationCodeWithPkceOidcHandler =
         getAuthorizationCodeWithPkceOidcHandler();
@@ -245,11 +245,12 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
           ...standardOidcOptions.issuerConfiguration,
           grantTypesSupported: ["authorization_code"],
         },
+        scopes: ["openid", "webid", "custom_scope"],
       };
       await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
       expect(oidcModule.OidcClient).toHaveBeenCalledWith(
         expect.objectContaining({
-          scope: "openid offline_access webid",
+          scope: "openid webid custom_scope",
         }),
       );
     });

@@ -30,6 +30,7 @@
 import type { EventEmitter } from "events";
 import type { IIssuerConfig } from "./IIssuerConfig";
 import type { IClient } from "./IClient";
+import { DEFAULT_SCOPES } from "../../constant";
 
 /**
  * @hidden
@@ -70,6 +71,27 @@ export interface IOidcOptions {
    * Defaults to true.
    */
   keepAlive?: boolean;
+  /**
+   * The Authorization Request OAuth scopes.
+   */
+  scopes: string[];
+}
+
+export function normalizeScopes(scopes: string[] | undefined): string[] {
+  if (!Array.isArray(scopes)) {
+    return DEFAULT_SCOPES;
+  }
+
+  return Array.from(
+    // De-dupe potentia conflicts if any.
+    new Set([
+      ...DEFAULT_SCOPES,
+      ...scopes.filter(
+        // Remove user-provided scopes that are not strings or include spaces.
+        (scope) => typeof scope === "string" && !scope.includes(" "),
+      ),
+    ]),
+  );
 }
 
 export default IOidcOptions;

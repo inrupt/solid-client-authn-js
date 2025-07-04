@@ -58,6 +58,18 @@ describe("OidcLoginHandler", () => {
     );
   }
 
+  const oidcHandlerWithMocks = () => {
+    const actualHandler = defaultMocks.oidcHandler;
+    const issuerConfig = IssuerConfigFetcherFetchConfigResponse;
+    const handler = getInitialisedHandler({
+      issuerConfigFetcher: mockIssuerConfigFetcher(
+        issuerConfig,
+      ) as jest.Mocked<IIssuerConfigFetcher>,
+      oidcHandler: actualHandler,
+    });
+    return { handler, mockOidcHandler: actualHandler };
+  };
+
   it("should call the actual handler when an Oidc Issuer is provided", async () => {
     const actualHandler = defaultMocks.oidcHandler;
     const handler = getInitialisedHandler({ oidcHandler: actualHandler });
@@ -319,6 +331,69 @@ describe("OidcLoginHandler", () => {
     expect(actualHandler.handle).toHaveBeenCalledWith(
       expect.objectContaining({
         issuer: "https://some.issuer/",
+      }),
+    );
+  });
+
+  it("ignores malformed scopes", async () => {
+    const { handler, mockOidcHandler } = oidcHandlerWithMocks();
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      tokenType: "DPoP",
+      keepAlive: false,
+      customScopes: [
+        // @ts-expect-error This tests misuse of the API.
+        { not: "a string" },
+        "some invalid scope including spaces",
+        "valid_scope",
+      ],
+    });
+    expect(mockOidcHandler.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopes: ["openid", "offline_access", "webid", "valid_scope"],
+      }),
+    );
+  });
+
+  it("adds provided scopes to default ones", async () => {
+    const { handler, mockOidcHandler } = oidcHandlerWithMocks();
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      tokenType: "DPoP",
+      keepAlive: false,
+      customScopes: ["scope_1", "scope_2", "scope_3"],
+    });
+    expect(mockOidcHandler.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopes: [
+          "openid",
+          "offline_access",
+          "webid",
+          "scope_1",
+          "scope_2",
+          "scope_3",
+        ],
+      }),
+    );
+  });
+
+  it("de-dupes scopes", async () => {
+    const { handler, mockOidcHandler } = oidcHandlerWithMocks();
+    await handler.handle({
+      sessionId: "mySession",
+      oidcIssuer: "https://arbitrary.url",
+      redirectUrl: "https://app.com/redirect",
+      tokenType: "DPoP",
+      keepAlive: false,
+      customScopes: ["webid", "custom_scope", "custom_scope"],
+    });
+    expect(mockOidcHandler.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopes: ["openid", "offline_access", "webid", "custom_scope"],
       }),
     );
   });

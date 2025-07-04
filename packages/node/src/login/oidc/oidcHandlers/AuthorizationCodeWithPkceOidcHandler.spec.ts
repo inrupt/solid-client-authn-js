@@ -110,6 +110,20 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       );
     });
 
+    it("puts the provided scopes in the authorization request", async () => {
+      const authorizationCodeWithPkceOidcHandler =
+        getAuthorizationCodeWithPkceOidcHandler();
+      const oidcOptions = mockDefaultOidcOptions();
+      oidcOptions.scopes.push("custom_scope");
+
+      await authorizationCodeWithPkceOidcHandler.handle(oidcOptions);
+
+      const builtUrl = new URL(mockedRedirector.mock.calls[0][0]);
+      expect(builtUrl.searchParams.get("scope")).toBe(
+        "openid offline_access webid custom_scope",
+      );
+    });
+
     it("saves relevant information in storage", async () => {
       const mockedStorage = mockStorageUtility({});
       const authorizationCodeWithPkceOidcHandler =

@@ -55,4 +55,9 @@ export default interface ILoginInputOptions {
    * secret to authenticate.
    */
   refreshToken?: string;
+  /**
+   * Custom scopes that will be sent to the OpenID Provider to request access to additional claims in the ID Token.
+   * These scopes are added to the default scopes supported by the library (webid, openid, offline_access).
+   */
+  customScopes?: string[];
 }

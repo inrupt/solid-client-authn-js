@@ -32,10 +32,7 @@ import type {
   IOidcOptions,
   LoginResult,
 } from "@inrupt/solid-client-authn-core";
-import {
-  DEFAULT_SCOPES,
-  AuthorizationCodeWithPkceOidcHandlerBase,
-} from "@inrupt/solid-client-authn-core";
+import { AuthorizationCodeWithPkceOidcHandlerBase } from "@inrupt/solid-client-authn-core";
 import { OidcClient } from "@inrupt/oidc-client-ext";
 
 /**
@@ -55,7 +52,7 @@ export default class AuthorizationCodeWithPkceOidcHandler
       client_secret: oidcLoginOptions.client.clientSecret,
       redirect_uri: oidcLoginOptions.redirectUrl,
       response_type: "code",
-      scope: DEFAULT_SCOPES,
+      scope: oidcLoginOptions.scopes.join(" "),
       filterProtocolClaims: true,
       // The userinfo endpoint on NSS fails, so disable this for now
       // Note that in Solid, information should be retrieved from the

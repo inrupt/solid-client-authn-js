@@ -19,7 +19,10 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type { IOidcOptions } from "@inrupt/solid-client-authn-core";
+import {
+  DEFAULT_SCOPES,
+  type IOidcOptions,
+} from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
 
 export const standardOidcOptions: IOidcOptions = {
@@ -45,6 +48,7 @@ export const standardOidcOptions: IOidcOptions = {
     clientType: "dynamic",
   },
   keepAlive: true,
+  scopes: DEFAULT_SCOPES,
 };
 
 export const mockDefaultOidcOptions = (): IOidcOptions => {
