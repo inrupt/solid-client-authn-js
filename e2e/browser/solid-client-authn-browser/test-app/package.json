@@ -18,12 +18,12 @@
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^3.2.7",
-    "@playwright/test": "^1.53.1",
+    "@playwright/test": "^1.53.2",
     "@types/node": "^24.0.7",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "esbuild": "^0.25.5",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^15.3.4"
+    "eslint-config-next": "^15.3.5"
   }
 }
