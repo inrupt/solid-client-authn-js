@@ -72,6 +72,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       tokenType: options.tokenType ?? "DPoP",
       eventEmitter,
       keepAlive: config.keepAlive,
+      customScopes: options.customScopes,
     });
 
     if (loginReturn !== undefined) {

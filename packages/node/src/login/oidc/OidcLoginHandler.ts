@@ -42,6 +42,7 @@ import type {
 import {
   ConfigurationError,
   handleRegistration,
+  normalizeScopes,
 } from "@inrupt/solid-client-authn-core";
 
 function hasIssuer(
@@ -124,6 +125,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       handleRedirect: options.handleRedirect,
       eventEmitter: options.eventEmitter,
       keepAlive: options.keepAlive,
+      scopes: normalizeScopes(options.customScopes),
     };
     // Call proper OIDC Handler
     return this.oidcHandler.handle(oidcOptions);

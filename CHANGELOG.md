@@ -33,6 +33,16 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+### New feature
+
+#### browser and node
+
+- `Session::login` now supports an additional `customScopes: string[]` option.
+  It allows developers to specify custom scopes to be added to the authorization request,
+  which will be presented to the user by their OpenID Provider on the consent
+  prompt. If they consent, the issued ID Token may include additional claims based
+  on the requested scopes.
+
 ## [3.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v3.0.0) - 2025-07-03
 
 ### Breaking Changes
