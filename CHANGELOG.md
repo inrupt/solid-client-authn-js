@@ -38,7 +38,7 @@ The following changes have been implemented but not released yet:
 #### browser and node
 
 - `Session::login` now supports an additional `customScopes: string[]` option.
-  It allows to specify custom scopes to be added to the authorization request,
+  It allows developers to specify custom scopes to be added to the authorization request,
   which will be presented to the user by their OpenID Provider on the consent
   prompt. If they consent, the issued ID Token may include additional claims based
   on the requested scopes.
