@@ -1,6 +1,6 @@
 {
   "name": "test-app",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^4.0.3",
+    "@inrupt/solid-client-authn-browser": "^3.1.0",
     "next": "^15.3.5",
-    "@inrupt/solid-client-authn-browser": "^3.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.1.0"
   },
