@@ -73,7 +73,7 @@
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.10",
     "typedoc-plugin-markdown": "^3.17.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "optionalDependencies": {
     "@nx/nx-win32-x64-msvc": "^21.4.1",
