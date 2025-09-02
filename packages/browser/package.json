@@ -33,7 +33,7 @@
     "@inrupt/oidc-client-ext": "^3.1.0",
     "@inrupt/solid-client-authn-core": "^3.1.0",
     "events": "^3.3.0",
-    "jose": "^5.1.3",
+    "jose": "^6.1.0",
     "uuid": "^11.1.0"
   },
   "publishConfig": {
