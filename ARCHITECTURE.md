@@ -141,7 +141,7 @@ Most of the code for these modules is internal and hidden from the developer. Th
 public API is located in `packages/*/src/Session.ts`. Developers are expected to
 instantiate a `Session` object, and to use it to interact with the session.
 Usage examples can be found in our
-[public documentation](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/).
+[public documentation](https://docs.inrupt.com/sdk/javascript-sdktutorial/authenticate/).
 
 ### The Handler pattern
 
