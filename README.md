@@ -16,7 +16,7 @@ The libraries share a common API and include different modules for different dep
 
 ## Data access and permissions management - solid-client
 
-[@inrupt/solid-client](https://docs.inrupt.com/client-libraries/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
+[@inrupt/solid-client](https://github.com/inrupt/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
 
 ## Authentication - solid-client-authn
 
