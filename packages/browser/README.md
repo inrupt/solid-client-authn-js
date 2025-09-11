@@ -53,5 +53,5 @@ The `solid-client-authn` libraries are compatible with [NSS](https://github.com/
 
 ## Documentation
 
-- [Using this library from within the browser](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate/)
+- [Using this library from within the browser](https://docs.inrupt.com/sdk/javascript-sdktutorial/authenticate/)
 - [Inrupt documentation Homepage](https://docs.inrupt.com/)

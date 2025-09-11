@@ -489,7 +489,7 @@ const session = await getSessionFromStorage(sessionId, { refresh: false });
   when performing the registration flow as this feature was never fully
   implemented. For Solid apps we recommend the use
   of a [Public Client Identifier
-  Document](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate-client/)
+  Document](https://docs.inrupt.com/sdk/javascript-sdktutorial/authenticate-client/)
 - We've also removed support for the iframe-based session renewal, which was
   never fully implemented.
 
@@ -758,9 +758,9 @@ No changes; fixed issue with npm publish.
   this means you should see no more (failed) calls to `/session` in your network
   console. If you want to make sure a session is preserved across page reloads,
   please see [the documentation on using the `restorePreviousSession`
-  option](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/restore-session-browser-refresh/).
+  option](https://docs.inrupt.com/sdk/javascript-sdktutorial/restore-session-browser-refresh/).
   If you are working with an instance of ESS that still has the dedicated `/session`
-  you can still [enable this workaround](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/restore-session-browser-refresh/#cookie-based-sessions-temporary-solution) to maintain the previous behaviour.
+  you can still [enable this workaround](https://docs.inrupt.com/sdk/javascript-sdktutorial/restore-session-browser-refresh/#cookie-based-sessions-temporary-solution) to maintain the previous behaviour.
 
 The following sections document changes that have been released already:
 
