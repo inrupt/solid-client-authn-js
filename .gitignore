@@ -86,6 +86,9 @@ packages/**/docs/prose/build/
 packages/**/docs/api/build/
 packages/**/docs/api/source/api/
 packages/**/docs/dist/
+docs/api/browser/
+docs/api/node/
+docs/api/core/
 
 # Examples
 build/
