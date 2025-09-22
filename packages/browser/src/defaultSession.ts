@@ -49,10 +49,12 @@ export function getDefaultSession(): Session {
  * @since 1.3.0
  */
 /* eslint-disable-next-line no-shadow */
-export const fetch: Session["fetch"] = (...args) => {
+export function fetch(
+  ...args: Parameters<Session["fetch"]>
+): ReturnType<Session["fetch"]> {
   const session = getDefaultSession();
   return session.fetch(...args);
-};
+}
 
 /**
  * Triggers the login process. Note that this method will redirect the user away from your app.
@@ -61,10 +63,12 @@ export const fetch: Session["fetch"] = (...args) => {
  * @returns This method should redirect the user away from the app: it does not return anything. The login process is completed by [[handleIncomingRedirect]].
  * @since 1.3.0
  */
-export const login: Session["login"] = (...args) => {
+export function login(
+  ...args: Parameters<Session["login"]>
+): ReturnType<Session["login"]> {
   const session = getDefaultSession();
   return session.login(...args);
-};
+}
 
 /**
  * Logs the user out of the application.
@@ -75,10 +79,12 @@ export const login: Session["login"] = (...args) => {
  *
  * @since 1.3.0
  */
-export const logout: Session["logout"] = (...args) => {
+export function logout(
+  ...args: Parameters<Session["logout"]>
+): ReturnType<Session["logout"]> {
   const session = getDefaultSession();
   return session.logout(...args);
-};
+}
 
 /**
  * Completes the login process by processing the information provided by the Solid identity provider through redirect.
@@ -86,18 +92,18 @@ export const logout: Session["logout"] = (...args) => {
  * @param url The URL of the page handling the redirect, including the query parameters — these contain the information to process the login.
  * @since 1.3.0
  */
-export const handleIncomingRedirect: Session["handleIncomingRedirect"] = (
-  ...args
-) => {
+export function handleIncomingRedirect(
+  ...args: Parameters<Session["handleIncomingRedirect"]>
+): ReturnType<Session["handleIncomingRedirect"]> {
   const session = getDefaultSession();
   return session.handleIncomingRedirect(...args);
-};
+}
 
 /**
  * {@link SessionEventEmitter} instance to subscribe to events by the default session.
  *
  * @since 1.14.0
  */
-export const events = (): Session["events"] => {
+export function events(): Session["events"] {
   return getDefaultSession().events;
-};
+}
