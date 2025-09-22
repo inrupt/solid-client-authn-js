@@ -34,7 +34,7 @@ jobs:
       - name: Generate API docs for core
         run: npx --workspace packages/core typedoc
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./docs/api
 
