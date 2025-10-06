@@ -49,7 +49,7 @@
     "@inrupt/solid-client": "^2.1.2",
     "@playwright/test": "^1.55.1",
     "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-node-resolve": "^16.0.2",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/dotenv-flow": "^3.3.3",
     "@types/http-link-header": "^1.0.7",
