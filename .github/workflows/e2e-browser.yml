@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v5
       # The Node version does not influence how well our tests run in
       # the browser so we only need to test in one.
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
           cache: npm
