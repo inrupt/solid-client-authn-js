@@ -14,14 +14,14 @@
     "@inrupt/solid-client-authn-browser": "^3.1.0",
     "next": "^15.5.4",
     "react": "^19.0.0",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^3.2.7",
     "@playwright/test": "^1.56.0",
     "@types/node": "^24.9.0",
     "@types/react": "^19.1.15",
-    "@types/react-dom": "^19.1.9",
+    "@types/react-dom": "^19.2.2",
     "esbuild": "^0.25.11",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.5.4"
