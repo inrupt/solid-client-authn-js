@@ -82,7 +82,7 @@ export function createApp(
       oidcIssuer,
       clientId: typeof clientId === "string" ? clientId : undefined,
       tokenType:
-        tokenType === "DPoP" || tokenType === "Brearer"
+        tokenType === "DPoP" || tokenType === "Bearer"
           ? (tokenType as "DPoP" | "Bearer")
           : "DPoP",
       handleRedirect: (url) => res.redirect(url),
