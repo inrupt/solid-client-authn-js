@@ -228,7 +228,7 @@ describe(`End-to-end authentication tests for environment [${ENV.environment}}]`
   });
 });
 
-describe.s("Session events", () => {
+describe("Session events", () => {
   // These tests will check for session expiration, so they'll need a longer timeout.
   jest.setTimeout(15 * 60 * 1000);
 
