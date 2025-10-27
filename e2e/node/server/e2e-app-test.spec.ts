@@ -71,6 +71,7 @@ type LoginFixture = {
 async function loginUser(
   seedInfo: ISeedPodResponse,
   legacyMode: boolean,
+  tokenType: "DPoP" | "Bearer" = "DPoP",
 ): Promise<LoginFixture> {
   const browser = await firefox.launch();
   const page = await browser.newPage();
@@ -81,6 +82,7 @@ async function loginUser(
   url.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
   url.searchParams.append("oidcIssuer", ENV.idp);
   url.searchParams.append("clientId", seedInfo.clientId);
+  url.searchParams.append("tokenType", tokenType);
 
   await page.goto(url.toString());
 
@@ -251,6 +253,75 @@ describe.each([[true], [false]])(
         expect(tokenSet.expiresAt).toBeDefined();
         expect(tokenSet.dpopKey).toBeDefined();
         expect(tokenSet.webId).toBeDefined();
+      } finally {
+        await browser.close();
+      }
+    }, 120_000);
+  },
+);
+
+describe.each([["DPoP"], ["Bearer"]])(
+  "Ensure token type %s remains consistent when refreshing",
+  (tokenType) => {
+    let app: Server;
+    let seedInfo: ISeedPodResponse;
+    let testFixture: LoginFixture;
+
+    beforeEach(async () => {
+      // Enable refresh in clientId document
+      seedInfo = await seedPod(ENV, true);
+      await new Promise<void>((res) => {
+        app = createApp(res);
+      });
+      testFixture = await loginUser(
+        seedInfo,
+        false,
+        tokenType as "DPoP" | "Bearer",
+      );
+    }, SHORT_TIMEOUT);
+
+    afterEach(async () => {
+      await tearDownPod(seedInfo);
+      await new Promise<void>((res) => {
+        app.close(() => res());
+      });
+    }, SHORT_TIMEOUT);
+
+    it("should keep the token type consistent when refreshing", async () => {
+      const { page, browser } = testFixture;
+      try {
+        // Fetching the token set returned after login
+        const tokensUrl = new URL("http://localhost/tokens");
+        tokensUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
+
+        // Use page.evaluate to fetch JSON response
+        await page.goto(tokensUrl.toString());
+        const tokenSet: SessionTokenSet = await page.evaluate(() => {
+          try {
+            return JSON.parse(document.body.textContent || "{}");
+          } catch (e) {
+            return null;
+          }
+        });
+        // The token type should be as configured.
+        expect(tokenSet.dpopKey === undefined).toEqual(tokenType === "Bearer");
+        // Refreshing the tokens
+        const refreshTokensUrl = new URL("http://localhost/tokens/refresh");
+        refreshTokensUrl.port = CONSTANTS.CLIENT_AUTHN_TEST_PORT.toString();
+
+        // Use page.evaluate to fetch JSON response
+        await page.goto(refreshTokensUrl.toString());
+        const refreshedTokenSet: SessionTokenSet = await page.evaluate(() => {
+          try {
+            return JSON.parse(document.body.textContent || "{}");
+          } catch (e) {
+            return null;
+          }
+        });
+        // If the tokens being refreshed are not DPoP-bound, the resulting refreshed tokens should not be either.
+        expect(refreshedTokenSet.dpopKey === undefined).toEqual(
+          tokenType === "Bearer",
+        );
       } finally {
         await browser.close();
       }

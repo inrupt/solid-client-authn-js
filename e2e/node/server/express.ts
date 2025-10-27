@@ -57,7 +57,7 @@ export function createApp(
   });
 
   app.get("/login", async (req, res) => {
-    const { oidcIssuer, clientId } = req.query;
+    const { oidcIssuer, clientId, tokenType } = req.query;
 
     if (typeof oidcIssuer !== "string") {
       res.status(400).send("oidcIssuer is required").end();
@@ -81,6 +81,10 @@ export function createApp(
       redirectUrl: `http://localhost:${CONSTANTS.CLIENT_AUTHN_TEST_PORT}/redirect`,
       oidcIssuer,
       clientId: typeof clientId === "string" ? clientId : undefined,
+      tokenType:
+        tokenType === "DPoP" || tokenType === "Brearer"
+          ? (tokenType as "DPoP" | "Bearer")
+          : "DPoP",
       handleRedirect: (url) => res.redirect(url),
     });
   });
