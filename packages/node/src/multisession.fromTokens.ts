@@ -52,6 +52,7 @@ export async function refreshTokens(tokenSet: SessionTokenSet) {
     oidcIssuer: tokenSet.issuer,
     clientId: tokenSet.clientId,
     refreshToken: tokenSet.refreshToken,
+    tokenType: tokenSet.dpopKey === undefined ? "Bearer" : "DPoP",
   });
   if (!session.info.isLoggedIn) {
     tokenReject(new Error("Could not refresh the session."));
