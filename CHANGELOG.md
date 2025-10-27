@@ -33,6 +33,13 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### node
+
+- The `refreshTokens` function no longer overrides the token type to default to `DPoP`, and keeps the token type consistent:
+  the resulting `SessionTokenSet` will be DPoP-bound or not depending on the input `SessionTokenSet`
+
 ## [3.1.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v3.1.0) - 2025-07-08
 
 ### New feature
