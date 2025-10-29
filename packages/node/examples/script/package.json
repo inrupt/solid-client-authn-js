@@ -1,13 +1,13 @@
 {
     "name": "@inrupt/demo-authn-node-script",
     "private": true,
-    "version": "3.1.0",
+    "version": "3.1.1",
     "description": "Demo for script authentication in NodeJS",
     "type": "module",
     "main": "./index.mjs",
     "author": "Inrupt, Inc.",
     "license": "MIT",
     "dependencies": {
-        "@inrupt/solid-client-authn-node": "^3.1.0"
+        "@inrupt/solid-client-authn-node": "^3.1.1"
     }
 }
