@@ -7,7 +7,7 @@ on:
 
 # Getting an ID token is required for NPMJS trusted publishers
 permissions:
-  id-token: write  # Required for OIDC
+  id-token: write # Required for OIDC
   contents: read
 
 env:
