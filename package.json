@@ -48,7 +48,7 @@
     "@inrupt/jest-jsdom-polyfills": "^4.0.5",
     "@inrupt/solid-client": "^2.1.2",
     "@playwright/test": "^1.56.0",
-    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/dotenv-flow": "^3.3.3",
