@@ -12,7 +12,7 @@
   },
   "author": "",
   "dependencies": {
-    "@types/express": "^5.0.4",
+    "@types/express": "^5.0.5",
     "express": "^5.1.0"
   }
 }
