@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +17,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 import cookieSession from "cookie-session";
 import express from "express";
 import type {
@@ -34,7 +34,10 @@ import {
   logout,
 } from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
-// eslint-disable-next-line import/extensions
+
+// This is fine in test code
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
 export function createApp(

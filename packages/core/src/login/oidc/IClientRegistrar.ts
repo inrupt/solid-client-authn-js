@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -49,7 +48,7 @@ function isValidUrl(url: string): boolean {
   try {
     // Here, the URL constructor is just called to parse the given string and
     // verify if it is a well-formed IRI.
-    // eslint-disable-next-line no-new
+
     new URL(url);
     return true;
   } catch {

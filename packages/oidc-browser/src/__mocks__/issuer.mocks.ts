@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +29,8 @@ import type {
 import type { KeyObject } from "crypto";
 import type { TokenEndpointInput } from "../dpop/tokenExchange";
 
-/* eslint-disable camelcase */
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 export const mockJwk = (): JWK => {
   return {
@@ -80,7 +80,7 @@ export const mockEndpointInput = (): TokenEndpointInput => {
 
 // The following function is only there to be used manually if
 // the JWT needed to be manually re-generated.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export async function generateMockJwt(): Promise<void> {
   const payload = {
     sub: "https://my.webid",
@@ -93,7 +93,7 @@ export async function generateMockJwt(): Promise<void> {
     .setExpirationTime("2h")
     .sign(await importJWK(mockJwk()));
   // This is for manual use.
-  // eslint-disable-next-line no-console
+
   console.log(jwt.toString());
 }
 

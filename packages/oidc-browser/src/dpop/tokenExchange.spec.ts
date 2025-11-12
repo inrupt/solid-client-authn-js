@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,8 +34,8 @@ import {
   mockKeyBoundToken,
 } from "../__mocks__/issuer.mocks";
 
-// Some spec-compliant claims are camel-cased.
-/* eslint-disable camelcase */
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -172,7 +171,7 @@ describe("getTokens", () => {
 
   it("can request a key-bound token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
-    /* eslint-disable @typescript-eslint/no-explicit-any */
+
     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
     core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
@@ -212,7 +211,7 @@ describe("getTokens", () => {
   // token_type: 'Bearer' even when returning a DPoP token.
   // https://github.com/solid/oidc-op/issues/26
   // Fixed, but unreleased for the ESS (current version: inrupt-oidc-server-0.5.2)
-  // eslint-disable-next-line jest/no-disabled-tests
+
   it.skip("throws if a key-bound token was requested, but a bearer token is returned", async () => {
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
     const request = getTokens(
@@ -268,7 +267,7 @@ describe("getTokens", () => {
 
   it("returns the generated key along with the tokens", async () => {
     mockFetch(JSON.stringify(mockDpopTokens()), 200);
-    /* eslint-disable @typescript-eslint/no-explicit-any */
+
     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
     core.generateDpopKeyPair = jest.fn(() =>
       Promise.resolve("some DPoP key pair"),
@@ -377,7 +376,7 @@ describe("getTokens", () => {
 
   it("derives a WebId and clientId from the ID token", async () => {
     mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    /* eslint-disable @typescript-eslint/no-explicit-any */
+
     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
     core.getWebidFromTokenPayload = jest.fn(() =>
       Promise.resolve({
@@ -398,7 +397,7 @@ describe("getTokens", () => {
 
   it("requests a key-bound token, and returns the appropriate key with the token", async () => {
     const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
-    /* eslint-disable @typescript-eslint/no-explicit-any */
+
     const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
     core.createDpopHeader = jest.fn(() => Promise.resolve("some DPoP header"));
     core.generateDpopKeyPair = jest.fn(() => Promise.resolve("some DPoP keys"));

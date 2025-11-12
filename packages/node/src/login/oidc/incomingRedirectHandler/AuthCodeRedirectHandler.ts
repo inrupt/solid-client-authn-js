@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -47,12 +46,15 @@ import {
   maybeBuildRpInitiatedLogout,
   removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line no-shadow
+
 import { URL } from "url";
 import { Issuer } from "openid-client";
 import type { KeyObject } from "crypto";
 import type { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 /**
  * @hidden
@@ -118,6 +120,12 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     );
 
     const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
+    // The JWKS URI is mandatory in the spec.
+    if (typeof issuer.metadata.jwks_uri !== "string") {
+      throw new Error(
+        `JWKS URI is missing from issuer configuration, cannot validate tokens. Expected jwks_uri in ${JSON.stringify(issuer.metadata)}`,
+      );
+    }
     // This should also retrieve the client from storage
     const clientInfo: IClient = await this.clientRegistrar.getClient(
       { sessionId },
@@ -178,9 +186,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     // its payload as a JSON object.
     const { webId, clientId } = await getWebidFromTokenPayload(
       tokenSet.id_token,
-      // The JWKS URI is mandatory in the spec, so the non-null assertion is valid.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      issuer.metadata.jwks_uri!,
+      issuer.metadata.jwks_uri,
       issuer.metadata.issuer,
       client.metadata.client_id,
     );

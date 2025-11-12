@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,6 +28,9 @@ import {
 import TokenRequester from "./TokenRequester";
 import { ClientRegistrarMock } from "./__mocks__/ClientRegistrar";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 describe("TokenRequester", () => {
   const defaultMocks = {
     storageUtility: mockStorageUtility({}),
@@ -50,11 +52,9 @@ describe("TokenRequester", () => {
     },
 
     responseBody: JSON.stringify({
-      /* eslint-disable camelcase */
       id_token: "abcd",
       access_token: "1234",
       refresh_token: "!@#$",
-      /* eslint-enable camelcase */
     }),
 
     jwt: {
@@ -85,13 +85,12 @@ describe("TokenRequester", () => {
   it("the refresh flow isn't implemented", async () => {
     await setUpMockedReturnValues({});
     const TokenRefresher = new TokenRequester();
-    /* eslint-disable camelcase */
+
     await expect(
       TokenRefresher.request("global", {
         grant_type: "refresh_token",
         refresh_token: "thisIsARefreshToken",
       }),
     ).rejects.toThrow("not implemented");
-    /* eslint-enable camelcase */
   });
 });

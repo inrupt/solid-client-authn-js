@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -45,6 +44,9 @@ import {
 import type { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 /**
  * @hidden

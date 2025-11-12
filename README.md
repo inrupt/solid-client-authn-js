@@ -12,21 +12,21 @@ The libraries share a common API and include different modules for different dep
 
 @inrupt/solid-client-authn libraries are part of a suite open source JavaScript libraries designed to support developers building Solid applications.
 
-# Inrupt Solid JavaScript Client Libraries
+## Inrupt Solid JavaScript Client Libraries
 
-## Data access and permissions management - solid-client
+### Data access and permissions management - solid-client
 
 [@inrupt/solid-client](https://github.com/inrupt/solid-client-js/) allows developers to access data and manage permissions on data stored in Solid Pods.
 
-## Authentication - solid-client-authn
+### Authentication - solid-client-authn
 
 [@inrupt/solid-client-authn](https://github.com/inrupt/solid-client-authn) allows developers to authenticate against a Solid server. This is necessary when the resources on your Pod are not public.
 
-## Vocabularies and interoperability - solid-common-vocab-rdf
+### Vocabularies and interoperability - solid-common-vocab-rdf
 
 [@inrupt/solid-common-vocab-rdf](https://github.com/inrupt/solid-common-vocab-rdf) allows developers to build interoperable apps by reusing well-known vocabularies. These libraries provide vocabulary terms as constants that you just have to import.
 
-# Supported environments
+## Supported environments
 
 Our JavaScript Client Libraries use relatively modern JavaScript, aligned with
 the [ES2022](https://262.ecma-international.org/13.0/) Specification features, we
@@ -45,12 +45,12 @@ through a tool like [Babel](https://babeljs.io), and to add polyfills for e.g.
 `Map`, `Set`, `Promise`, `Headers`, `Array.prototype.includes`, `Object.entries`
 and `String.prototype.endsWith`.
 
-## Node.js Support
+### Node.js Support
 
 See [Inrupt Solid Javascript Client
 Libraries](https://docs.inrupt.com/sdk/javascript-sdk#node-js-support).
 
-# Installation
+## Installation
 
 For the latest stable version of solid-client-authn-browser:
 
@@ -74,18 +74,18 @@ npm install @inrupt/solid-client @inrupt/solid-client-authn-browser @inrupt/voca
 npm install @inrupt/solid-client @inrupt/solid-client-authn-node @inrupt/vocab-common-rdf
 ```
 
-# Issues & Help
+## Issues & Help
 
-## Solid Community Forum
+### Solid Community Forum
 
 If you have questions about working with Solid or just want to share what you’re working on, visit the [Solid forum](https://forum.solidproject.org/). The Solid forum is a good place to meet the rest of the community.
 
-## Bugs and Feature Requests
+### Bugs and Feature Requests
 
 - For public feedback, bug reports, and feature requests please file an issue via [GitHub](https://github.com/inrupt/solid-client-authn/issues/).
 - For non-public feedback or support inquiries please use the [Inrupt Service Desk](https://inrupt.atlassian.net/servicedesk).
 
-## Documentation
+### Documentation
 
 - [Using Inrupt Solid JavaScript Client Libraries to authenticate](https://docs.inrupt.com/sdk/javascript-sdktutorial/authenticate/)
 - [Inrupt documentation Homepage](https://docs.inrupt.com/)

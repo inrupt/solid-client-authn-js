@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,6 +23,8 @@
  * @packageDocumentation
  */
 
+// This is fine in test code
+
 import { jest, it, describe, expect } from "@jest/globals";
 import {
   generateDpopKeyPair,
@@ -45,6 +46,9 @@ import {
   mockDefaultTokenSet,
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
+
+// Non-null assertions are fine in test code
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 const mockedFetch = jest
   .spyOn(globalThis, "fetch")
@@ -174,7 +178,6 @@ describe("RefreshTokenOidcHandler", () => {
         ...new Response(undefined, { status: 200 }),
         url: "https://my.pod/resource",
       });
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       await result!.fetch("https://some.pod/resource");
       const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(
@@ -206,13 +209,12 @@ describe("RefreshTokenOidcHandler", () => {
         ...new Response(undefined, { status: 200 }),
         url: "https://my.pod/resource",
       });
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       await result!.fetch("https://some.pod/resource");
       const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
       const dpopProof = headers.get("DPoP");
       // This checks that the refreshed access token is bound to the initial DPoP key.
       await expect(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         jwtVerify(dpopProof!, dpopKeyPair.privateKey),
       ).resolves.not.toThrow();
     });
@@ -236,7 +238,7 @@ describe("RefreshTokenOidcHandler", () => {
         ...new Response(undefined, { status: 200 }),
         url: "https://my.pod/resource",
       });
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       await result!.fetch("https://some.pod/resource");
       const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(

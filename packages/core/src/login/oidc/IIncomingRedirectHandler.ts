@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,7 +23,6 @@
  * @packageDocumentation
  */
 
-// eslint-disable-next-line no-shadow
 import type { EventEmitter } from "events";
 import type IHandleable from "../../util/handlerPattern/IHandleable";
 import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";

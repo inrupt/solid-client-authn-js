@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,6 +33,9 @@ import {
   mockWebId,
 } from "../__mocks__/issuer.mocks";
 import { refresh } from "./refreshGrant";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(

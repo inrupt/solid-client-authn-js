@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,7 +33,7 @@ import {
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 
 // Camelcase identifiers are required in the OIDC specification.
-/* eslint-disable camelcase */
+/* eslint-disable camelcase*/
 
 type IRefreshRequestBody = {
   grant_type: "refresh_token";
@@ -47,7 +46,7 @@ const isValidUrl = (url: string): boolean => {
   try {
     // Here, the URL constructor is just called to parse the given string and
     // verify if it is a well-formed IRI.
-    // eslint-disable-next-line no-new
+
     new URL(url);
     return true;
   } catch {
@@ -56,7 +55,6 @@ const isValidUrl = (url: string): boolean => {
 };
 
 // Identifiers in snake_case are mandated by the OAuth spec.
-/* eslint-disable camelcase */
 
 export async function refresh(
   refreshToken: string,
@@ -110,7 +108,7 @@ export async function refresh(
   let response;
   try {
     response = await rawResponse.json();
-  } catch (e) {
+  } catch (_e) {
     // The response is left out of the error on purpose not to leak any sensitive information.
     throw new Error(
       `The token endpoint of issuer ${issuer.issuer} returned a malformed response.`,

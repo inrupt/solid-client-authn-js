@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,8 +32,8 @@ import {
   InvalidResponseError,
 } from "@inrupt/solid-client-authn-core";
 
-// Identifiers in camelcase are mandated by the OAuth spec.
-/* eslint-disable camelcase */
+// Camelcase identifiers are required in the OAuth specification.
+/* eslint-disable camelcase*/
 
 function hasError(
   value: { error: string } | Record<string, unknown>,
@@ -214,13 +213,11 @@ export async function getTokens(
   }
 
   const requestBody = {
-    /* eslint-disable camelcase */
     grant_type: data.grantType,
     redirect_uri: data.redirectUrl,
     code: data.code,
     code_verifier: data.codeVerifier,
     client_id: client.clientId,
-    /* eslint-enable camelcase */
   };
 
   const tokenRequestInit: RequestInit & {

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,6 +27,9 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
 import type { ClientMetadata } from "openid-client";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 export const mockDefaultClient = (): IOpenIdDynamicClient => {
   return {

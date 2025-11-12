@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,7 +25,8 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "./clientRegistrar";
 
-/* eslint-disable camelcase */
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 const getMockIssuer = (): IIssuerConfig => {
   return {

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -45,6 +44,9 @@ import RefreshTokenOidcHandler from "./login/oidc/oidcHandlers/RefreshTokenOidcH
 import ClientCredentialsOidcHandler from "./login/oidc/oidcHandlers/ClientCredentialsOidcHandler";
 import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 jest.mock("openid-client");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -60,7 +62,6 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
 });
 
 const setupOidcClientMock = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as any;
   function clientConstructor() {
     // this is untyped, which makes TS complain

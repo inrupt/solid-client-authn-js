@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,6 +24,7 @@ import { StorageUtility } from "@inrupt/solid-client-authn-core";
 import {
   StorageUtilityMock,
   mockStorage,
+  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 import { randomUUID } from "crypto";
 

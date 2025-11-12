@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,6 +34,9 @@ import type {
 import { AuthorizationCodeWithPkceOidcHandlerBase } from "@inrupt/solid-client-authn-core";
 import { OidcClient } from "@inrupt/oidc-client-ext";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 /**
  * @hidden
  * Authorization code flow spec: https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
@@ -45,7 +47,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler
 {
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    /* eslint-disable camelcase */
     const oidcOptions = {
       authority: oidcLoginOptions.issuer.toString(),
       client_id: oidcLoginOptions.client.clientId,
@@ -61,7 +62,6 @@ export default class AuthorizationCodeWithPkceOidcHandler
       code_verifier: true,
       prompt: oidcLoginOptions.prompt ?? "consent",
     };
-    /* eslint-enable camelcase */
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
 
@@ -70,14 +70,13 @@ export default class AuthorizationCodeWithPkceOidcHandler
       // Make sure to await the promise before returning so that the error is caught.
       return await this.setupRedirectHandler({
         oidcLoginOptions,
-        // eslint-disable-next-line no-underscore-dangle
+
         state: signingRequest.state._id,
-        // eslint-disable-next-line no-underscore-dangle
+
         codeVerifier: signingRequest.state._code_verifier,
         targetUrl: signingRequest.url.toString(),
       });
     } catch (err: unknown) {
-      // eslint-disable-next-line no-console
       console.error(err);
     }
 

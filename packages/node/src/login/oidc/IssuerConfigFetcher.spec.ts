@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,6 +25,9 @@ import {
   mockDefaultIssuerMetadata,
   mockIssuerMetadata,
 } from "./__mocks__/IssuerConfigFetcher";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 jest.mock("openid-client");
 

@@ -408,9 +408,11 @@ const session = await getSessionFromStorage(sessionId, { refresh: false });
   with type hints for each supported event. This allows to write code such as the
   following:
 
-  ```
-    const mySession = new Session();
-    mySession.events.on(EVENTS.LOGIN, () => { console.log("Logged in!") });
+  ```js
+  const mySession = new Session();
+  mySession.events.on(EVENTS.LOGIN, () => {
+    console.log("Logged in!");
+  });
   ```
 
   This is closer to the EventEmitter API, so it should be familiar to more developers.
@@ -615,7 +617,7 @@ No changes; fixed issue with npm publish.
 
 ## 1.11.1 - 2021-08-20
 
-#### oidc
+### oidc
 
 - When dynamically registering a Client to a Solid Identity Provider, the subject
   type was incorrectly set to `pairwise`, instead of `public`. Only `public` makes
@@ -623,7 +625,7 @@ No changes; fixed issue with npm publish.
   identified by their WebID. This was disregarded by current Solid Identity Providers,
   so it should not have affected dependants, but it's technically more correct.
 
-#### node
+### node
 
 - The `prompt=consent` parameter was missing when redirecting the user to the Solid
   Identity Provider authorization endpoint. This prevented working with the Community
@@ -822,7 +824,7 @@ The following sections document changes that have been released already:
 
 ## 1.7.2 - 2021-03-10
 
-#### browser and node
+### browser and node
 
 - A client WebID can now be provided as part of the `login` options. The library will
   check for compliance of the chosen Solid Identity Provider, and go use the provided
@@ -1137,7 +1139,7 @@ we will bump the major version when we change our publicly documented interface.
 - If `handleLogin` is called twice, the token endpoint is only hit once, because it might reject replay of the authorization code.
 - A DPoP-authenticated request now follow redirects (in particular, forgetting the trailing `/` for a container no longer returns 401).
 
-## [0.2.2]
+## 0.2.2
 
 ### Automated test suite
 
@@ -1155,7 +1157,7 @@ we will bump the major version when we change our publicly documented interface.
 - The dynamic client registration could hang depending on the environment it was deployed in, this is now resolved.
 - The `login` event was never actually fired because of a bug which is now fixed.
 
-## [0.2.0]
+## 0.2.0
 
 ### Breaking changes
 
@@ -1171,7 +1173,7 @@ we will bump the major version when we change our publicly documented interface.
 - Source files are now also published to npm, so source maps should work from now on.
 - Fixed typo in `detachSession` function name for the browser `SessionManager`.
 
-## [0.1.4] - 2020-09-11
+## 0.1.4 - 2020-09-11
 
 ### NOTE: We skipped v0.1.3 due to testing the release process
 
@@ -1190,20 +1192,20 @@ we will bump the major version when we change our publicly documented interface.
   allow injection again).
 - Refactored the StorageUtility code to fix up mock usage.
 
-## [0.1.2] - 2020-09-07
+## 0.1.2 - 2020-09-07
 
 ### Internal refactor
 
 - Moved to Lerna (currently only the browser module is available).
 
-## [0.1.1] - 2020-08-14
+## 0.1.1 - 2020-08-14
 
 ### Bugfixes
 
 - Browser:
   - The code wasn't shipped properly when publishing a non-dev release to NPMJS.
 
-## [0.1.0] - 2020-08-10
+## 0.1.0 - 2020-08-10
 
 ### New features
 

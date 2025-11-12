@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +18,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// eslint-disable-next-line no-shadow
 import type { EventEmitter } from "events";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import type { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
@@ -167,10 +165,11 @@ export function buildAuthenticatedFetch(
   let latestTimeout: Parameters<typeof clearTimeout>[0];
   const currentRefreshOptions: RefreshOptions | undefined =
     options?.refreshOptions;
+  const emitter = options?.eventEmitter;
   // Setup the refresh timeout outside of the authenticated fetch, so that
   // an idle app will not get logged out if it doesn't issue a fetch before
   // the first expiration date.
-  if (currentRefreshOptions !== undefined) {
+  if (options !== undefined && currentRefreshOptions !== undefined) {
     const proactivelyRefreshToken = async () => {
       try {
         const {
@@ -179,11 +178,8 @@ export function buildAuthenticatedFetch(
           expiresIn,
         } = await refreshAccessToken(
           currentRefreshOptions,
-          // If currentRefreshOptions is defined, options is necessarily defined too.
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          options!.dpopKey,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          options!.eventEmitter,
+          options.dpopKey,
+          emitter,
         );
         // Update the tokens in the closure if appropriate.
         currentAccessToken = refreshedAccessToken;
@@ -198,8 +194,8 @@ export function buildAuthenticatedFetch(
           computeRefreshDelay(expiresIn) * 1000,
         );
         // If currentRefreshOptions is defined, options is necessarily defined too.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options!.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
+
+        options.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
       } catch (e) {
         // It is possible that an underlying library throws an error on refresh flow failure.
         // If we used a log framework, the error could be logged at the `debug` level,
@@ -210,15 +206,11 @@ export function buildAuthenticatedFetch(
           /* istanbul ignore next 100% coverage would require testing that nothing
               happens here if the emitter is undefined, which is more cumbersome
               than what it's worth. */
-          options?.eventEmitter?.emit(
-            EVENTS.ERROR,
-            e.error,
-            e.errorDescription,
-          );
+          emitter?.emit(EVENTS.ERROR, e.error, e.errorDescription);
           /* istanbul ignore next 100% coverage would require testing that nothing
             happens here if the emitter is undefined, which is more cumbersome
             than what it's worth. */
-          options?.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+          emitter?.emit(EVENTS.SESSION_EXPIRED);
         }
         if (
           e instanceof InvalidResponseError &&
@@ -229,31 +221,27 @@ export function buildAuthenticatedFetch(
           /* istanbul ignore next 100% coverage would require testing that nothing
             happens here if the emitter is undefined, which is more cumbersome
             than what it's worth. */
-          options?.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+          emitter?.emit(EVENTS.SESSION_EXPIRED);
         }
       }
     };
     latestTimeout = setTimeout(
       proactivelyRefreshToken,
       // If currentRefreshOptions is defined, options is necessarily defined too.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      computeRefreshDelay(options!.expiresIn) * 1000,
+
+      computeRefreshDelay(options.expiresIn) * 1000,
     );
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    options!.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
-  } else if (options !== undefined && options.eventEmitter !== undefined) {
+
+    emitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
+  } else if (emitter !== undefined) {
     // If no refresh options are provided, the session expires when the access token does.
     const expirationTimeout = setTimeout(
       () => {
-        // The event emitter is always defined in our code, and it would be tedious
-        // to test for conditions when it is not.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        options.eventEmitter!.emit(EVENTS.SESSION_EXPIRED);
+        emitter.emit(EVENTS.SESSION_EXPIRED);
       },
-      computeRefreshDelay(options.expiresIn) * 1000,
+      computeRefreshDelay(options?.expiresIn) * 1000,
     );
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    options.eventEmitter!.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
+    emitter.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
   }
   return async (url, requestInit?): Promise<Response> => {
     let response = await makeAuthenticatedRequest(

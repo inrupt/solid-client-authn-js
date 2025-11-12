@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,7 +28,7 @@ import {
   EVENTS,
   type AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line no-shadow
+
 import { URL } from "url";
 import EventEmitter from "events";
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
@@ -62,7 +61,6 @@ describe("AuthorizationCodeWithPkceOidcHandler", () => {
       getAuthorizationCodeWithPkceOidcHandler();
     canHandleTests.authorizationCodeWithPkceOidcHandler.forEach(
       (testConfig) => {
-        // eslint-disable-next-line jest/valid-title
         it(testConfig.message, async () => {
           const value = await authorizationCodeWithPkceOidcHandler.canHandle(
             testConfig.oidcOptions,

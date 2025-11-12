@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,9 +33,11 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
-/* eslint-disable camelcase */
 const issuerConfigKeyMap: Record<
   string,
   { toKey: string; convertToUrl?: boolean }
@@ -127,7 +128,6 @@ const issuerConfigKeyMap: Record<
     convertToUrl: true,
   },
 };
-/* eslint-enable camelcase */
 
 function processConfig(
   config: Record<string, string | string[]>,

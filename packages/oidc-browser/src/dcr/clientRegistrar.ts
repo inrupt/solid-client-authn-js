@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,6 +32,9 @@ import {
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 function processErrorResponse(
   // The type is any here because the object is parsed from a JSON response
@@ -126,7 +128,6 @@ export async function registerClient(
   );
 
   const config = {
-    /* eslint-disable camelcase */
     client_name: options.clientName,
     application_type: "web",
     redirect_uris: [options.redirectUrl?.toString()],
@@ -134,7 +135,6 @@ export async function registerClient(
     token_endpoint_auth_method: "client_secret_basic",
     id_token_signed_response_alg: signingAlg,
     grant_types: ["authorization_code", "refresh_token"],
-    /* eslint-enable camelcase */
   };
 
   const headers: Record<string, string> = {

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,6 +29,9 @@ import {
   mockIssuerMetadata,
 } from "./__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientConfig } from "./__mocks__/ClientRegistrar";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 jest.mock("openid-client");
 
@@ -414,6 +416,7 @@ describe("ClientRegistrar", () => {
 
       // Check that the returned algorithm value is what we expect
       expect(client.idTokenSignedResponseAlg).toBe(
+        // This non-null assertion is fine in test code
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         IssuerConfigFetcherFetchConfigResponse
           .idTokenSigningAlgValuesSupported![0],
@@ -423,6 +426,7 @@ describe("ClientRegistrar", () => {
       await expect(
         mockStorage.getForUser("mySession", "idTokenSignedResponseAlg"),
       ).resolves.toBe(
+        // This non-null assertion is fine in test code
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         IssuerConfigFetcherFetchConfigResponse
           .idTokenSigningAlgValuesSupported![0],

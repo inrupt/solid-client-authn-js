@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,6 +20,9 @@
 
 import { OidcClient, WebStorageStateStore } from "@inrupt/oidc-client";
 import { removeOpenIdParams } from "@inrupt/solid-client-authn-core";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 /**
  * Removes OIDC-specific query parameters from a given URL (state, code...), and
@@ -61,7 +63,7 @@ export async function clearOidcPersistentStorage(): Promise<void> {
     // We are instantiating a new instance here, so the only value we need to
     // explicitly provide is the response mode (default otherwise will look
     // for a hash '#' fragment!).
-    // eslint-disable-next-line camelcase
+
     response_mode: "query",
   });
   await client.clearStaleState(new WebStorageStateStore({}));

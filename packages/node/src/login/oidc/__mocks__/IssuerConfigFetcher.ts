@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,6 +26,9 @@ import { jest } from "@jest/globals";
 import type { IssuerMetadata } from "openid-client";
 import { configFromIssuerMetadata } from "../IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: "https://idp.com",
   authorizationEndpoint: "https://idp.com/auth",
@@ -40,7 +42,6 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
 };
 
 export const IssuerConfigFetcherMock = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fetchConfig: jest.fn((_issuer: string) =>
     Promise.resolve(IssuerConfigFetcherFetchConfigResponse),
   ),

@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,6 +25,9 @@ import { validate } from "uuid";
 import type * as Jose from "jose";
 import type * as OpenIdClient from "openid-client";
 import { Session } from "./Session";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 jest.mock("jose", () => {
   const actualJose = jest.requireActual("jose") as typeof Jose;
@@ -363,7 +365,7 @@ describe("Session static functions", () => {
 
         await session.handleIncomingRedirect(redirectUrl.href);
         // Only the dpop parameter is relevant to this test.
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         const [_0, _1, _2, dpop] = mockedCallback.mock.calls[0];
         expect(dpop).toStrictEqual(
           expect.objectContaining({ DPoP: undefined }),

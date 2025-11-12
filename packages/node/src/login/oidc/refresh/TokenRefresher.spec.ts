@@ -1,4 +1,3 @@
-//
 // Copyright Inrupt Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,6 +41,9 @@ import {
 } from "../__mocks__/IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 jest.mock("openid-client");
 jest.mock("../ClientRegistrar");
@@ -130,7 +132,6 @@ const mockDpopTokens = (): TokenSet => {
 };
 
 const setupOidcClientMock = (tokenSet: TokenSet) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { Issuer } = jest.requireMock("openid-client") as any;
   const mockedIssuer = {
     metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
