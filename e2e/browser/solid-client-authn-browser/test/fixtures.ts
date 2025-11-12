@@ -49,10 +49,13 @@ import {
   setThing,
 } from "@inrupt/solid-client";
 import LinkHeaders from "http-link-header";
-// Extensions are required for JSON imports.
 
+// Extensions are required for JSON imports.
 import CONSTANTS from "../../../../playwright.client-authn.constants.json";
 import { AppPage } from "./pageModels/AppPage";
+
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 export { expect } from "@inrupt/internal-playwright-helpers";
 

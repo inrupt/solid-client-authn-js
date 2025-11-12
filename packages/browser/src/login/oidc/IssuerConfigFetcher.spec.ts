@@ -22,6 +22,9 @@ import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
 import IssuerConfigFetcher from "./IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 /**
  * Test for IssuerConfigFetcher
  */

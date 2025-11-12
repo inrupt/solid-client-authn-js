@@ -26,6 +26,9 @@ import type * as Jose from "jose";
 import type * as OpenIdClient from "openid-client";
 import { Session } from "./Session";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 jest.mock("jose", () => {
   const actualJose = jest.requireActual("jose") as typeof Jose;
   return {

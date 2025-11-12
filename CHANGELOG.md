@@ -409,8 +409,10 @@ const session = await getSessionFromStorage(sessionId, { refresh: false });
   following:
 
   ```js
-    const mySession = new Session();
-    mySession.events.on(EVENTS.LOGIN, () => { console.log("Logged in!") });
+  const mySession = new Session();
+  mySession.events.on(EVENTS.LOGIN, () => {
+    console.log("Logged in!");
+  });
   ```
 
   This is closer to the EventEmitter API, so it should be familiar to more developers.

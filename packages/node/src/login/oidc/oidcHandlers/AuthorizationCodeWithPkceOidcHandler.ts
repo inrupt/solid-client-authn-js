@@ -38,6 +38,9 @@ import {
 import { Issuer, generators } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 /**
  * @hidden
  * Authorization code flow spec: https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth

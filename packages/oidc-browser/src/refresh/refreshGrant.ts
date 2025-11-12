@@ -33,6 +33,7 @@ import {
 import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
 
 // Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 type IRefreshRequestBody = {
   grant_type: "refresh_token";

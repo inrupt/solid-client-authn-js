@@ -299,7 +299,7 @@ describe.each([["DPoP"], ["Bearer"]])(
         const tokenSet: SessionTokenSet = await page.evaluate(() => {
           try {
             return JSON.parse(document.body.textContent || "{}");
-          } catch (e) {
+          } catch (_e) {
             return null;
           }
         });
@@ -314,7 +314,7 @@ describe.each([["DPoP"], ["Bearer"]])(
         const refreshedTokenSet: SessionTokenSet = await page.evaluate(() => {
           try {
             return JSON.parse(document.body.textContent || "{}");
-          } catch (e) {
+          } catch (_e) {
             return null;
           }
         });

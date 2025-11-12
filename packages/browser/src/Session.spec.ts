@@ -379,7 +379,8 @@ describe("Session", () => {
         "https://my.app/?code=someCode&state=arizona",
       );
       // We know that it has been set by the call to `blockingRequest`.
-
+      // FIXME: This can be fixed when we drop support for Node 20 by using Promise.withResolvers.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       continueAfterSecondRequest!();
       const tokenRequests = await Promise.all([
         firstTokenRequest,

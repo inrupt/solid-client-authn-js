@@ -316,6 +316,7 @@ describe("refreshSession", () => {
         isLoggedIn: false,
       }),
     );
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await refreshSession(mySession!, { storage });
     // The session should now be logged in.
     expect(mySession?.info).toStrictEqual(

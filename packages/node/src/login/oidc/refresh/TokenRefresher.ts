@@ -45,8 +45,8 @@ import type { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
-// Some identifiers are not in camelcase on purpose, as they are named using the
-// official names from the OIDC/OAuth2 specifications.
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 const tokenSetToTokenEndpointResponse = async (
   tokenSet: TokenSet,
@@ -66,9 +66,15 @@ const tokenSetToTokenEndpointResponse = async (
     );
   }
 
+  if (typeof issuerMetadata.jwks_uri != "string") {
+    throw new Error(
+      `Cannot verify ID Token: Issuer Metadata is missing a JWKS URI (${JSON.stringify(issuerMetadata)})`,
+    );
+  }
+
   const { webId } = await getWebidFromTokenPayload(
     tokenSet.id_token,
-    issuerMetadata.jwks_uri!,
+    issuerMetadata.jwks_uri,
     issuerMetadata.issuer,
     clientInfo.clientId,
   );

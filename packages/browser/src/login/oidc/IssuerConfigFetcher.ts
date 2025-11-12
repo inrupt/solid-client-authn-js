@@ -33,6 +33,9 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 export const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
 const issuerConfigKeyMap: Record<

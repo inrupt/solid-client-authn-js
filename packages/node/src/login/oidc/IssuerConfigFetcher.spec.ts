@@ -26,6 +26,9 @@ import {
   mockIssuerMetadata,
 } from "./__mocks__/IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 jest.mock("openid-client");
 
 /**

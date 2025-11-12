@@ -25,6 +25,9 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { registerClient } from "./clientRegistrar";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 const getMockIssuer = (): IIssuerConfig => {
   return {
     issuer: "https://some.issuer",

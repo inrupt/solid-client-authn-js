@@ -45,6 +45,9 @@ import type { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 /**
  * @hidden
  */

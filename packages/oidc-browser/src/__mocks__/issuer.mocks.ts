@@ -29,6 +29,9 @@ import type {
 import type { KeyObject } from "crypto";
 import type { TokenEndpointInput } from "../dpop/tokenExchange";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 export const mockJwk = (): JWK => {
   return {
     kty: "EC",

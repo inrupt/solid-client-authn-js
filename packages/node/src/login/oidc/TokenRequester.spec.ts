@@ -28,6 +28,9 @@ import {
 import TokenRequester from "./TokenRequester";
 import { ClientRegistrarMock } from "./__mocks__/ClientRegistrar";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 describe("TokenRequester", () => {
   const defaultMocks = {
     storageUtility: mockStorageUtility({}),

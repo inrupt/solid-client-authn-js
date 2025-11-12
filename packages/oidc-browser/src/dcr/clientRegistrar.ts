@@ -33,6 +33,9 @@ import {
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 function processErrorResponse(
   // The type is any here because the object is parsed from a JSON response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -35,6 +35,9 @@ import { ConfigurationError } from "@inrupt/solid-client-authn-core";
 import type { IssuerMetadata } from "openid-client";
 import { Issuer } from "openid-client";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 /**
  * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]
  * @param metadata the object to transform.

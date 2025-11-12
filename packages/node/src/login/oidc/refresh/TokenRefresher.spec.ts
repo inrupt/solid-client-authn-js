@@ -42,6 +42,9 @@ import {
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 jest.mock("openid-client");
 jest.mock("../ClientRegistrar");
 

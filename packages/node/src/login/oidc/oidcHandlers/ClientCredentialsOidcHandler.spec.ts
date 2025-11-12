@@ -35,6 +35,9 @@ import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
 import { mockDefaultIssuerConfig } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClient } from "../__mocks__/ClientRegistrar";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 jest.mock("openid-client");
 
 const mockedFetch = jest.spyOn(globalThis, "fetch");

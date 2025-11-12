@@ -23,6 +23,8 @@
  * @packageDocumentation
  */
 
+// This is fine in test code
+
 import { jest, it, describe, expect } from "@jest/globals";
 import {
   generateDpopKeyPair,
@@ -44,6 +46,9 @@ import {
   mockDefaultTokenSet,
   mockTokenRefresher,
 } from "../refresh/__mocks__/TokenRefresher";
+
+// Non-null assertions are fine in test code
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 const mockedFetch = jest
   .spyOn(globalThis, "fetch")
@@ -173,7 +178,6 @@ describe("RefreshTokenOidcHandler", () => {
         ...new Response(undefined, { status: 200 }),
         url: "https://my.pod/resource",
       });
-
       await result!.fetch("https://some.pod/resource");
       const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
       expect(headers.get("Authorization")).toContain(

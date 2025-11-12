@@ -165,10 +165,11 @@ export function buildAuthenticatedFetch(
   let latestTimeout: Parameters<typeof clearTimeout>[0];
   const currentRefreshOptions: RefreshOptions | undefined =
     options?.refreshOptions;
+  const emitter = options?.eventEmitter;
   // Setup the refresh timeout outside of the authenticated fetch, so that
   // an idle app will not get logged out if it doesn't issue a fetch before
   // the first expiration date.
-  if (currentRefreshOptions !== undefined) {
+  if (options !== undefined && currentRefreshOptions !== undefined) {
     const proactivelyRefreshToken = async () => {
       try {
         const {
@@ -177,11 +178,8 @@ export function buildAuthenticatedFetch(
           expiresIn,
         } = await refreshAccessToken(
           currentRefreshOptions,
-          // If currentRefreshOptions is defined, options is necessarily defined too.
-
-          options!.dpopKey,
-
-          options!.eventEmitter,
+          options.dpopKey,
+          emitter,
         );
         // Update the tokens in the closure if appropriate.
         currentAccessToken = refreshedAccessToken;
@@ -197,7 +195,7 @@ export function buildAuthenticatedFetch(
         );
         // If currentRefreshOptions is defined, options is necessarily defined too.
 
-        options!.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
+        options.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
       } catch (e) {
         // It is possible that an underlying library throws an error on refresh flow failure.
         // If we used a log framework, the error could be logged at the `debug` level,
@@ -208,15 +206,11 @@ export function buildAuthenticatedFetch(
           /* istanbul ignore next 100% coverage would require testing that nothing
               happens here if the emitter is undefined, which is more cumbersome
               than what it's worth. */
-          options?.eventEmitter?.emit(
-            EVENTS.ERROR,
-            e.error,
-            e.errorDescription,
-          );
+          emitter?.emit(EVENTS.ERROR, e.error, e.errorDescription);
           /* istanbul ignore next 100% coverage would require testing that nothing
             happens here if the emitter is undefined, which is more cumbersome
             than what it's worth. */
-          options?.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+          emitter?.emit(EVENTS.SESSION_EXPIRED);
         }
         if (
           e instanceof InvalidResponseError &&
@@ -227,7 +221,7 @@ export function buildAuthenticatedFetch(
           /* istanbul ignore next 100% coverage would require testing that nothing
             happens here if the emitter is undefined, which is more cumbersome
             than what it's worth. */
-          options?.eventEmitter?.emit(EVENTS.SESSION_EXPIRED);
+          emitter?.emit(EVENTS.SESSION_EXPIRED);
         }
       }
     };
@@ -235,23 +229,19 @@ export function buildAuthenticatedFetch(
       proactivelyRefreshToken,
       // If currentRefreshOptions is defined, options is necessarily defined too.
 
-      computeRefreshDelay(options!.expiresIn) * 1000,
-    );
-
-    options!.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
-  } else if (options !== undefined && options.eventEmitter !== undefined) {
-    // If no refresh options are provided, the session expires when the access token does.
-    const expirationTimeout = setTimeout(
-      () => {
-        // The event emitter is always defined in our code, and it would be tedious
-        // to test for conditions when it is not.
-
-        options.eventEmitter!.emit(EVENTS.SESSION_EXPIRED);
-      },
       computeRefreshDelay(options.expiresIn) * 1000,
     );
 
-    options.eventEmitter!.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
+    emitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
+  } else if (emitter !== undefined) {
+    // If no refresh options are provided, the session expires when the access token does.
+    const expirationTimeout = setTimeout(
+      () => {
+        emitter.emit(EVENTS.SESSION_EXPIRED);
+      },
+      computeRefreshDelay(options?.expiresIn) * 1000,
+    );
+    emitter.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
   }
   return async (url, requestInit?): Promise<Response> => {
     let response = await makeAuthenticatedRequest(

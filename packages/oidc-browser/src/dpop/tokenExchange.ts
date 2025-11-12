@@ -32,7 +32,8 @@ import {
   InvalidResponseError,
 } from "@inrupt/solid-client-authn-core";
 
-// Identifiers in camelcase are mandated by the OAuth spec.
+// Camelcase identifiers are required in the OAuth specification.
+/* eslint-disable camelcase*/
 
 function hasError(
   value: { error: string } | Record<string, unknown>,

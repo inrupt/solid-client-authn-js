@@ -34,6 +34,9 @@ import {
 } from "../__mocks__/issuer.mocks";
 import { refresh } from "./refreshGrant";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core",

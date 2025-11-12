@@ -28,6 +28,9 @@ import type {
 import { jest } from "@jest/globals";
 import type { ClientMetadata } from "openid-client";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 export const mockDefaultClient = (): IOpenIdDynamicClient => {
   return {
     clientId: "a client id",

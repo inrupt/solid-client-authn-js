@@ -26,6 +26,9 @@ import { jest } from "@jest/globals";
 import type { IssuerMetadata } from "openid-client";
 import { configFromIssuerMetadata } from "../IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: "https://idp.com",
   authorizationEndpoint: "https://idp.com/auth",

@@ -21,6 +21,9 @@
 import { OidcClient, WebStorageStateStore } from "@inrupt/oidc-client";
 import { removeOpenIdParams } from "@inrupt/solid-client-authn-core";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 /**
  * Removes OIDC-specific query parameters from a given URL (state, code...), and
  * sanitizes the URL (e.g. removes the hash fragment).

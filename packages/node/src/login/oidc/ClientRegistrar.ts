@@ -41,6 +41,9 @@ import type { Client } from "openid-client";
 import { Issuer } from "openid-client";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
+
 export function negotiateClientSigningAlg(
   issuerConfig: IIssuerConfig,
   clientPreference: string[],
@@ -161,7 +164,9 @@ export default class ClientRegistrar implements IClientRegistrar {
       grant_types: ["authorization_code", "refresh_token"],
     });
 
-    let persistedClientMetadata: IOpenIdDynamicClient = {
+    let persistedClientMetadata: IOpenIdDynamicClient & {
+      idTokenSignedResponseAlg: string;
+    } = {
       clientId: registeredClient.metadata.client_id,
       idTokenSignedResponseAlg:
         registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
@@ -170,7 +175,7 @@ export default class ClientRegistrar implements IClientRegistrar {
     await this.storageUtility.setForUser(options.sessionId, {
       clientId: persistedClientMetadata.clientId,
       idTokenSignedResponseAlg:
-        persistedClientMetadata.idTokenSignedResponseAlg!,
+        persistedClientMetadata.idTokenSignedResponseAlg,
       clientType: "dynamic",
     });
     if (registeredClient.metadata.client_secret !== undefined) {

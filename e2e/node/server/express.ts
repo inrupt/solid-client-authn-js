@@ -35,6 +35,9 @@ import {
 } from "@inrupt/solid-client-authn-node";
 // Extensions are required for JSON-LD imports.
 
+// This is fine in test code
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
 
 export function createApp(

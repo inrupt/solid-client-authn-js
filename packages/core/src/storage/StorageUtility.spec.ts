@@ -576,6 +576,8 @@ describe("saveSessionInfoToStorage", () => {
 
     expect(
       JSON.parse(
+        // This non-null assertion is fine in test code
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (await mockedStorage.getForUser("some session", "publicKey", {
           secure: true,
         }))!,
@@ -587,6 +589,8 @@ describe("saveSessionInfoToStorage", () => {
       { secure: true },
     );
 
+    // This non-null assertion is fine in test code
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(JSON.parse(privateJwk!)).toEqual(
       await exportJWK(dpopKey.privateKey),
     );

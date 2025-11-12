@@ -34,7 +34,8 @@ import {
   mockKeyBoundToken,
 } from "../__mocks__/issuer.mocks";
 
-// Some spec-compliant claims are camel-cased.
+// Camelcase identifiers are required in the OIDC specification.
+/* eslint-disable camelcase*/
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
