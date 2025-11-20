@@ -10,3 +10,5 @@ docs/**/*.md
 packages/*/docs/**/*.md
 **/.next/
 **/umd/
+
+/.nx/workspace-data
