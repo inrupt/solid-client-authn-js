@@ -4,7 +4,10 @@
   "private": true,
   "workspaces": [
     "e2e/**",
-    "packages/**"
+    "packages/core",
+    "packages/oidc-browser",
+    "packages/browser",
+    "packages/node"
   ],
   "scripts": {
     "test:dev": "lerna run dev --scope=test-app",
