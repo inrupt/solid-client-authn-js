@@ -59,7 +59,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v6
         with:
-          name: code-coverage-ubuntu-latest-22.x
+          name: code-coverage-ubuntu-latest-24.x
           path: coverage/
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v5
