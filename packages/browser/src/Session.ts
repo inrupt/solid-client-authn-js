@@ -86,6 +86,14 @@ export async function silentlyAuthenticate(
 ): Promise<boolean> {
   const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
   if (storedSessionInfo !== null) {
+    // Check if the client registration has expired before attempting silent auth
+    const clientExpired = await clientAuthn.isClientExpired(sessionId);
+    if (clientExpired) {
+      // Clear the stored session to prevent retry loops
+      window.localStorage.removeItem(KEY_CURRENT_SESSION);
+      return false;
+    }
+
     // It can be really useful to save the user's current browser location,
     // so that we can restore it after completing the silent authentication
     // on incoming redirect. This way, the user is eventually redirected back

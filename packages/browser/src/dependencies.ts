@@ -105,5 +105,6 @@ export function getClientAuthenticationWithDependencies(dependencies: {
     new IWaterfallLogoutHandler(sessionInfoManager, redirector),
     sessionInfoManager,
     issuerConfigFetcher,
+    storageUtility,
   );
 }

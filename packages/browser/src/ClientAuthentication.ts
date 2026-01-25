@@ -28,6 +28,12 @@ import type {
   ISessionInfo,
   ISessionInternalInfo,
   ILoginOptions,
+  IStorageUtility,
+  ILoginHandler,
+  IIncomingRedirectHandler,
+  ILogoutHandler,
+  ISessionInfoManager,
+  IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
 import {
   EVENTS,
@@ -42,6 +48,23 @@ import type { EventEmitter } from "events";
  * @hidden
  */
 export default class ClientAuthentication extends ClientAuthenticationBase {
+  constructor(
+    loginHandler: ILoginHandler,
+    redirectHandler: IIncomingRedirectHandler,
+    logoutHandler: ILogoutHandler,
+    sessionInfoManager: ISessionInfoManager,
+    issuerConfigFetcher: IIssuerConfigFetcher,
+    protected storageUtility: IStorageUtility,
+  ) {
+    super(
+      loginHandler,
+      redirectHandler,
+      logoutHandler,
+      sessionInfoManager,
+      issuerConfigFetcher,
+    );
+  }
+
   // Define these functions as properties so that they don't get accidentally re-bound.
   // Isn't Javascript fun?
   login = async (
@@ -93,6 +116,38 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       return null;
     }
     return sessionInfo;
+  };
+
+  /**
+   * Checks if the stored client registration has expired.
+   * Returns true if the client is a confidential client (has a secret) and has expired.
+   * Returns false for public clients or clients that haven't expired.
+   */
+  isClientExpired = async (sessionId: string): Promise<boolean> => {
+    const [clientSecret, expiresAt] = await Promise.all([
+      this.storageUtility.getForUser(sessionId, "clientSecret", {
+        secure: false,
+      }),
+      this.storageUtility.getForUser(sessionId, "expiresAt", { secure: false }),
+    ]);
+
+    // Expiration only applies to confidential clients (those with secrets)
+    if (clientSecret === undefined) {
+      return false;
+    }
+
+    // -1 identifies legacy cases when a value should have been stored but wasn't
+    // Treat as expired
+    const expirationDate =
+      expiresAt !== undefined ? Number.parseInt(expiresAt, 10) : -1;
+
+    // expirationDate === 0 means the client registration never expires
+    if (expirationDate === 0) {
+      return false;
+    }
+
+    // Check if current time (in seconds) is past the expiration date
+    return Math.floor(Date.now() / 1000) > expirationDate;
   };
 
   handleIncomingRedirect = async (

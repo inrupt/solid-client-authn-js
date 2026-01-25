@@ -92,17 +92,20 @@ describe("ClientAuthentication", () => {
     logoutHandler: mockLogoutHandler(defaultMockStorage),
     sessionInfoManager: mockSessionInfoManager(defaultMockStorage),
     issuerConfigFetcher: mockDefaultIssuerConfigFetcher(),
+    storage: defaultMockStorage,
   };
 
   function getClientAuthentication(
     mocks: Partial<typeof defaultMocks> = defaultMocks,
   ): ClientAuthentication {
+    const storage = mocks.storage ?? defaultMocks.storage;
     return new ClientAuthentication(
       mocks.loginHandler ?? defaultMocks.loginHandler,
       mocks.redirectHandler ?? defaultMocks.redirectHandler,
       mocks.logoutHandler ?? defaultMocks.logoutHandler,
       mocks.sessionInfoManager ?? defaultMocks.sessionInfoManager,
       mocks.issuerConfigFetcher ?? defaultMocks.issuerConfigFetcher,
+      storage,
     );
   }
 
@@ -599,6 +602,131 @@ describe("ClientAuthentication", () => {
           webId: "https://my.pod/profile#me",
         }),
       );
+    });
+  });
+
+  describe("isClientExpired", () => {
+    it("returns true when a confidential client has an expired timestamp", async () => {
+      const sessionId = "mySession";
+      const expiredTimestamp = Math.floor(Date.now() / 1000) - 1000; // 1000 seconds ago
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "some-client-id",
+            clientSecret: "some-secret",
+            expiresAt: String(expiredTimestamp),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+        storage: mockedStorage,
+      });
+
+      await expect(clientAuthn.isClientExpired(sessionId)).resolves.toBe(true);
+    });
+
+    it("returns false when a confidential client has a valid timestamp", async () => {
+      const sessionId = "mySession";
+      const futureTimestamp = Math.floor(Date.now() / 1000) + 10000; // 10000 seconds in future
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "some-client-id",
+            clientSecret: "some-secret",
+            expiresAt: String(futureTimestamp),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+        storage: mockedStorage,
+      });
+
+      await expect(clientAuthn.isClientExpired(sessionId)).resolves.toBe(false);
+    });
+
+    it("returns false when a confidential client never expires (expiresAt = 0)", async () => {
+      const sessionId = "mySession";
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "some-client-id",
+            clientSecret: "some-secret",
+            expiresAt: "0",
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+        storage: mockedStorage,
+      });
+
+      await expect(clientAuthn.isClientExpired(sessionId)).resolves.toBe(false);
+    });
+
+    it("returns false for public clients (no secret) regardless of expiration", async () => {
+      const sessionId = "mySession";
+      const expiredTimestamp = Math.floor(Date.now() / 1000) - 1000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "some-client-id",
+            // No clientSecret - public client
+            expiresAt: String(expiredTimestamp),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+        storage: mockedStorage,
+      });
+
+      await expect(clientAuthn.isClientExpired(sessionId)).resolves.toBe(false);
+    });
+
+    it("returns true for legacy clients with missing expiresAt (confidential)", async () => {
+      const sessionId = "mySession";
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "some-client-id",
+            clientSecret: "some-secret",
+            // No expiresAt - legacy case
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+        storage: mockedStorage,
+      });
+
+      await expect(clientAuthn.isClientExpired(sessionId)).resolves.toBe(true);
     });
   });
 });
