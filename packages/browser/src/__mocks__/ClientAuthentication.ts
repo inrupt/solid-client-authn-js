@@ -18,6 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { jest } from "@jest/globals";
 import type {
   IIssuerConfigFetcher,
   ILoginHandler,
@@ -51,11 +52,16 @@ export const mockClientAuthentication = (
   mocks?: Partial<ClientAuthnDependencies>,
 ): ClientAuthentication => {
   const storage = mocks?.storage ?? mockStorageUtility({});
-  return new ClientAuthentication(
+  const clientAuthn = new ClientAuthentication(
     mocks?.loginhandler ?? mockLoginHandler(),
     mocks?.redirectHandler ?? mockIncomingRedirectHandler(),
     mocks?.logoutHandler ?? mockLogoutHandler(storage),
     mocks?.sessionInfoManager ?? mockSessionInfoManager(storage),
     mocks?.issuerConfigFetcher ?? IssuerConfigFetcherMock,
+    storage,
   );
+  // Add default mock for isClientExpired
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  clientAuthn.isClientExpired = (jest.fn() as any).mockResolvedValue(false);
+  return clientAuthn;
 };
