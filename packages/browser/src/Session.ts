@@ -85,12 +85,16 @@ export async function silentlyAuthenticate(
 ): Promise<boolean> {
   const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
   if (storedSessionInfo !== null) {
-    // Check if the client registration has expired before attempting silent auth
-    const clientExpired = await clientAuthn.isClientExpired(sessionId);
-    if (clientExpired) {
-      // Clear the stored session to prevent retry loops
-      window.localStorage.removeItem(KEY_CURRENT_SESSION);
-      return false;
+    // Check if the client registration has expired before attempting silent auth.
+    // Expiration only applies to confidential clients (those with a secret).
+    // clientExpiresAt === 0 means the registration never expires.
+    // clientExpiresAt === undefined with a secret means legacy data — treat as expired.
+    if (storedSessionInfo.clientAppSecret !== undefined) {
+      const expiresAt = storedSessionInfo.clientExpiresAt ?? -1;
+      if (expiresAt !== 0 && Math.floor(Date.now() / 1000) > expiresAt) {
+        window.localStorage.removeItem(KEY_CURRENT_SESSION);
+        return false;
+      }
     }
 
     // It can be really useful to save the user's current browser location,

@@ -458,21 +458,17 @@ describe("Session", () => {
         .mockReturnValueOnce(
           incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
-      const validateCurrentSessionPromise = Promise.resolve(
-        "https://some.issuer/",
-      );
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer/",
+        clientAppId: "some client ID",
+        redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
+      });
       clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockReturnValue(
           validateCurrentSessionPromise,
         ) as typeof clientAuthentication.validateCurrentSession;
-      // Mock isClientExpired to return false (not expired)
-      const isClientExpiredPromise = Promise.resolve(false);
-      clientAuthentication.isClientExpired = jest
-        .fn()
-        .mockReturnValue(
-          isClientExpiredPromise,
-        ) as typeof clientAuthentication.isClientExpired;
 
       const mySession = new Session({ clientAuthentication });
 
@@ -482,7 +478,6 @@ describe("Session", () => {
       });
       await incomingRedirectPromise;
       await validateCurrentSessionPromise;
-      await isClientExpiredPromise;
       expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBe(
         "https://mock.current/location",
       );
@@ -544,6 +539,7 @@ describe("Session", () => {
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) + 10000,
         redirectUrl: "https://some.redirect/url",
         tokenType: "DPoP",
       });
@@ -552,13 +548,6 @@ describe("Session", () => {
         .mockReturnValue(
           validateCurrentSessionPromise,
         ) as typeof clientAuthentication.validateCurrentSession;
-      // Mock isClientExpired to return false (not expired)
-      const isClientExpiredPromise = Promise.resolve(false);
-      clientAuthentication.isClientExpired = jest
-        .fn()
-        .mockReturnValue(
-          isClientExpiredPromise,
-        ) as typeof clientAuthentication.isClientExpired;
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
         .fn()
@@ -575,7 +564,6 @@ describe("Session", () => {
       });
       await incomingRedirectPromise;
       await validateCurrentSessionPromise;
-      await isClientExpiredPromise;
       expect(clientAuthentication.login).toHaveBeenCalledWith(
         {
           sessionId: "mySession",
@@ -796,11 +784,12 @@ describe("Session", () => {
         sessionInfoManager: mockSessionInfoManager(mockedStorage),
       });
 
-      // Mock validateCurrentSession to return valid session info
+      // Mock validateCurrentSession to return session info with an expired client
       const validateCurrentSessionPromise = Promise.resolve({
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) - 1000,
         redirectUrl: "https://some.redirect/url",
         tokenType: "DPoP",
       });
@@ -809,11 +798,6 @@ describe("Session", () => {
         .mockReturnValue(
           validateCurrentSessionPromise,
         ) as typeof clientAuthentication.validateCurrentSession;
-
-      // Mock isClientExpired to return true (expired client)
-      clientAuthentication.isClientExpired = (
-        jest.fn() as any
-      ).mockResolvedValue(true);
 
       const incomingRedirectPromise = Promise.resolve();
       clientAuthentication.handleIncomingRedirect = jest
@@ -864,12 +848,9 @@ describe("Session", () => {
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) - 1000,
         redirectUrl: "https://some.redirect/url",
       });
-
-      clientAuthentication.isClientExpired = (
-        jest.fn() as any
-      ).mockResolvedValue(true);
 
       clientAuthentication.handleIncomingRedirect = (
         jest.fn() as any
