@@ -130,6 +130,7 @@ describe("SessionInfoManager", () => {
         refreshToken: "some refresh token",
         redirectUrl: "https://some.redirect/url",
         tokenType: "DPoP",
+        clientExpiresAt: undefined,
       });
     });
 
@@ -158,6 +159,7 @@ describe("SessionInfoManager", () => {
         refreshToken: undefined,
         redirectUrl: undefined,
         tokenType: "DPoP",
+        clientExpiresAt: undefined,
       });
     });
 
@@ -216,6 +218,65 @@ describe("SessionInfoManager", () => {
       });
       await expect(sessionManager.get(sessionId)).rejects.toThrow(
         "Tokens of type [Some arbitrary token type] are not supported.",
+      );
+    });
+
+    it("returns clientExpiresAt when expiresAt is in storage", async () => {
+      const sessionId = "commanderCool";
+      const expiresAt = 1700000000;
+
+      const storageMock = new StorageUtility(
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some client secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiresAt),
+          },
+        }),
+      );
+
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storageMock,
+      });
+      const session = await sessionManager.get(sessionId);
+      expect(session).toStrictEqual(
+        expect.objectContaining({
+          clientExpiresAt: expiresAt,
+        }),
+      );
+    });
+
+    it("returns undefined clientExpiresAt when expiresAt is not in storage", async () => {
+      const sessionId = "commanderCool";
+
+      const storageMock = new StorageUtility(
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({
+          [`solidClientAuthenticationUser:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            issuer: "https://some.issuer",
+          },
+        }),
+      );
+
+      const sessionManager = getSessionInfoManager({
+        storageUtility: storageMock,
+      });
+      const session = await sessionManager.get(sessionId);
+      expect(session).toStrictEqual(
+        expect.objectContaining({
+          clientExpiresAt: undefined,
+        }),
       );
     });
 

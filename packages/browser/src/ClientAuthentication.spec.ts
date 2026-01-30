@@ -601,4 +601,37 @@ describe("ClientAuthentication", () => {
       );
     });
   });
+
+  describe("validateCurrentSession", () => {
+    it("returns clientExpiresAt when expiresAt is in storage", async () => {
+      const sessionId = "mySession";
+      const expiresAt = Math.floor(Date.now() / 1000) + 10000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiresAt),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await clientAuthn.validateCurrentSession(sessionId);
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          clientExpiresAt: expiresAt,
+        }),
+      );
+    });
+  });
 });

@@ -458,9 +458,12 @@ describe("Session", () => {
         .mockReturnValueOnce(
           incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
-      const validateCurrentSessionPromise = Promise.resolve(
-        "https://some.issuer/",
-      );
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer/",
+        clientAppId: "some client ID",
+        redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
+      });
       clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockReturnValue(
@@ -536,6 +539,7 @@ describe("Session", () => {
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) + 10000,
         redirectUrl: "https://some.redirect/url",
         tokenType: "DPoP",
       });
@@ -759,6 +763,106 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       (mySession.events as EventEmitter).emit(EVENTS.SESSION_EXPIRED);
       // The local storage should have been cleared by the auth error
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
+    });
+
+    it("does not attempt silent authentication if the stored client has expired", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({}),
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      // Mock validateCurrentSession to return session info with an expired client
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer",
+        clientAppId: "some client ID",
+        clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) - 1000,
+        redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
+      });
+      clientAuthentication.validateCurrentSession = jest
+        .fn()
+        .mockReturnValue(
+          validateCurrentSessionPromise,
+        ) as typeof clientAuthentication.validateCurrentSession;
+
+      const incomingRedirectPromise = Promise.resolve();
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockReturnValueOnce(
+          incomingRedirectPromise,
+        ) as typeof clientAuthentication.handleIncomingRedirect;
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
+
+      const mySession = new Session({ clientAuthentication });
+      const result = await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
+
+      await incomingRedirectPromise;
+      await validateCurrentSessionPromise;
+
+      // Silent auth should NOT have been attempted
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
+      // The stored session should be cleared to prevent retry loops
+      expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
+      // The function should resolve (not hang)
+      expect(result).toBeUndefined();
+    });
+
+    it("clears stored session when client has expired during silent auth attempt", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+          },
+        }),
+        mockStorage({}),
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      clientAuthentication.validateCurrentSession = (
+        jest.fn() as any
+      ).mockResolvedValue({
+        issuer: "https://some.issuer",
+        clientAppId: "some client ID",
+        clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) - 1000,
+        redirectUrl: "https://some.redirect/url",
+      });
+
+      clientAuthentication.handleIncomingRedirect = (
+        jest.fn() as any
+      ).mockResolvedValue(undefined);
+
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
+
+      // The stored session ID should have been cleared
       expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
     });
   });
