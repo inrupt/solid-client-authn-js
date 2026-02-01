@@ -601,4 +601,130 @@ describe("ClientAuthentication", () => {
       );
     });
   });
+
+  describe("validateCurrentSession", () => {
+    it("returns clientExpiresAt when expiresAt is in storage", async () => {
+      const sessionId = "mySession";
+      const expiresAt = Math.floor(Date.now() / 1000) + 10000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiresAt),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await clientAuthn.validateCurrentSession(sessionId);
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          clientExpiresAt: expiresAt,
+        }),
+      );
+    });
+
+    it("returns null when client has expired", async () => {
+      const sessionId = "mySession";
+      const expiredAt = Math.floor(Date.now() / 1000) - 1000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiredAt),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(
+        clientAuthn.validateCurrentSession(sessionId),
+      ).resolves.toBeNull();
+    });
+
+    it("returns session when client has not expired", async () => {
+      const sessionId = "mySession";
+      const futureExpiry = Math.floor(Date.now() / 1000) + 10000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(futureExpiry),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await clientAuthn.validateCurrentSession(sessionId);
+      expect(result).not.toBeNull();
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          clientAppId: "https://some.app/registration",
+          issuer: "https://some.issuer",
+        }),
+      );
+    });
+
+    it("returns session when clientExpiresAt is 0 (never expires per OIDC DCR spec)", async () => {
+      const sessionId = "mySession";
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: "0",
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await clientAuthn.validateCurrentSession(sessionId);
+      expect(result).not.toBeNull();
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          clientAppId: "https://some.app/registration",
+          clientExpiresAt: 0,
+        }),
+      );
+    });
+  });
 });
