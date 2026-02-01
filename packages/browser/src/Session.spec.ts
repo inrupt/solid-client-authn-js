@@ -458,9 +458,12 @@ describe("Session", () => {
         .mockReturnValueOnce(
           incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
-      const validateCurrentSessionPromise = Promise.resolve(
-        "https://some.issuer/",
-      );
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer/",
+        clientAppId: "some client ID",
+        redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
+      });
       clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockReturnValue(
@@ -536,6 +539,7 @@ describe("Session", () => {
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) + 10000,
         redirectUrl: "https://some.redirect/url",
         tokenType: "DPoP",
       });
@@ -761,6 +765,54 @@ describe("Session", () => {
       // The local storage should have been cleared by the auth error
       expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
     });
+
+    it("does not attempt silent authentication if the stored client has expired", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+
+      // Set up storage with an expired client (expiresAt in the past)
+      const expiredAt = Math.floor(Date.now() / 1000) - 1000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiredAt),
+          },
+        }),
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      // Mock handleIncomingRedirect to return undefined (no OAuth params in URL)
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn<typeof clientAuthentication.handleIncomingRedirect>()
+        .mockResolvedValue(undefined);
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
+
+      const mySession = new Session({ clientAuthentication });
+      const result = await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
+
+      // Silent auth should NOT have been attempted because client is expired
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
+      // The function should resolve (not hang)
+      expect(result).toBeUndefined();
+    });
+
   });
 
   describe("events.on", () => {
