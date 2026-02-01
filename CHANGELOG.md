@@ -52,6 +52,10 @@ The following changes have been implemented but not released yet:
 
 - Sessions built from `Session.fromTokens` now have a correct expiration time triggering refresh in the fetch. Thanks to @NoelDeMartin for fixing this issue.
 
+#### browser
+
+- Fixed an issue where `handleIncomingRedirect({ restorePreviousSession: true })` would redirect to the OAuth provider with expired client credentials, causing users to be stuck on an error page. The library now validates client expiration before attempting silent authentication and gracefully falls back to a logged-out state when the client has expired.
+
 ## [3.1.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v3.1.1) - 2025-10-29
 
 ### Bugfix
