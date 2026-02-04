@@ -31,9 +31,10 @@ import type IHandleable from "./IHandleable";
 /**
  * @hidden
  */
-export default class AggregateHandler<P extends Array<unknown>, R>
-  implements IHandleable<P, R>
-{
+export default class AggregateHandler<
+  P extends Array<unknown>,
+  R,
+> implements IHandleable<P, R> {
   constructor(private handleables: IHandleable<P, R>[]) {
     this.handleables = handleables;
   }
