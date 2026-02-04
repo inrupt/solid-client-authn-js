@@ -49,18 +49,16 @@ test.describe("Not Logged In", () => {
   });
 
   // FIXME: This doesn't actually currently work as we don't know if the file exists or not as we get a 401:
-  test.fixme(
-    "Non-existent resource in my Pod",
-    async ({ testContainer, app }) => {
-      expect(await app.getFetchResponse()).toBe("not fetched");
+  test.fixme("Non-existent resource in my Pod", async ({
+    testContainer,
+    app,
+  }) => {
+    expect(await app.getFetchResponse()).toBe("not fetched");
 
-      const response = await app.fetchResource(
-        testContainer.nonExistentResource,
-      );
+    const response = await app.fetchResource(testContainer.nonExistentResource);
 
-      expect(response).toContain("Can't find file requested");
-    },
-  );
+    expect(response).toContain("Can't find file requested");
+  });
 });
 
 test.describe("Logged In", () => {
