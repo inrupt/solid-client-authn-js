@@ -13,14 +13,14 @@
     "@inrupt/internal-playwright-testids": "^4.0.8",
     "@inrupt/solid-client-authn-browser": "^3.1.1",
     "next": "^16.1.6",
-    "react": "^19.2.3",
+    "react": "^19.2.4",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^3.2.7",
     "@playwright/test": "^1.58.1",
     "@types/node": "^25.0.10",
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.11",
     "@types/react-dom": "^19.2.3",
     "esbuild": "^0.27.2",
     "eslint": "^8.57.1",
