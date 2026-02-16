@@ -25,6 +25,7 @@ import { validate } from "uuid";
 import type * as Jose from "jose";
 import type * as OpenIdClient from "openid-client";
 import { Session } from "./Session";
+import { randomUUID } from "crypto";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -166,9 +167,10 @@ describe("Session static functions", () => {
 
     describe("Session.fromTokens", () => {
       it("creates a session with the provided tokens", async () => {
+        const mockedAccessToken = randomUUID();
         const mockedIdToken = await mockIdToken({});
         const tokenSet: SessionTokenSet = {
-          accessToken: "access.token.jwt",
+          accessToken: mockedAccessToken,
           idToken: mockedIdToken,
           clientId: mockClientId,
           issuer: mockOpConfig().issuer,
@@ -195,7 +197,9 @@ describe("Session static functions", () => {
         }) as typeof fetch;
         await session.fetch("https://some.resource");
         // @ts-expect-error We know headers is initialized.
-        expect(headers.get("Authorization")).toBe(`Bearer ${mockedIdToken}`);
+        expect(headers.get("Authorization")).toBe(
+          `Bearer ${mockedAccessToken}`,
+        );
         globalThis.fetch = globalFetch;
       });
 
@@ -207,9 +211,10 @@ describe("Session static functions", () => {
           publicKey: await exportJWK(dpopKeyPair.publicKey),
         };
 
+        const mockedAccessToken = randomUUID();
         const mockedIdToken = await mockIdToken({});
         const tokenSet: SessionTokenSet = {
-          accessToken: "access.token.jwt",
+          accessToken: mockedAccessToken,
           idToken: mockedIdToken,
           clientId: mockClientId,
           issuer: mockOpConfig().issuer,
@@ -230,7 +235,7 @@ describe("Session static functions", () => {
         }) as typeof fetch;
         await session.fetch("https://some.resource");
         // @ts-expect-error We know headers is initialized.
-        expect(headers.get("Authorization")).toBe(`DPoP ${mockedIdToken}`);
+        expect(headers.get("Authorization")).toBe(`DPoP ${mockedAccessToken}`);
         // @ts-expect-error We know headers is initialized.
         expect(headers.get("dpop")).not.toBeNull();
         globalThis.fetch = globalFetch;

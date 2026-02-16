@@ -284,12 +284,12 @@ export class Session implements IHasSessionEventListener {
     if (
       isExpired ||
       webId === undefined ||
-      sessionTokenSet.idToken === undefined
+      sessionTokenSet.accessToken === undefined
     ) {
       return session;
     }
 
-    const fetch = buildAuthenticatedFetch(sessionTokenSet.idToken, {
+    const fetch = buildAuthenticatedFetch(sessionTokenSet.accessToken, {
       dpopKey: sessionTokenSet.dpopKey,
       expiresIn: sessionTokenSet.expiresAt
         ? sessionTokenSet.expiresAt - Date.now()
