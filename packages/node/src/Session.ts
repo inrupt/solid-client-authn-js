@@ -292,7 +292,7 @@ export class Session implements IHasSessionEventListener {
     const fetch = buildAuthenticatedFetch(sessionTokenSet.idToken, {
       dpopKey: sessionTokenSet.dpopKey,
       expiresIn: sessionTokenSet.expiresAt
-        ? sessionTokenSet.expiresAt - Date.now()
+        ? sessionTokenSet.expiresAt - Date.now() / 1000
         : undefined,
       eventEmitter: session.events,
     });
