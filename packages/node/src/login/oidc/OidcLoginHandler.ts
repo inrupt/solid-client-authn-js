@@ -125,6 +125,7 @@ export default class OidcLoginHandler implements ILoginHandler {
       eventEmitter: options.eventEmitter,
       keepAlive: options.keepAlive,
       scopes: normalizeScopes(options.customScopes),
+      customFetch: options.customFetch,
     };
     // Call proper OIDC Handler
     return this.oidcHandler.handle(oidcOptions);

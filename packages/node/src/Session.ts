@@ -45,6 +45,8 @@ import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
 import IssuerConfigFetcher from "./login/oidc/IssuerConfigFetcher";
 import StorageUtilityNode from "./storage/StorageUtility";
+import type { Http2Fetch } from "./http2Fetch";
+import { createHttp2Fetch } from "./http2Fetch";
 
 export interface ISessionOptions {
   /**
@@ -84,6 +86,40 @@ export interface ISessionOptions {
    * A boolean flag indicating whether a session should be constantly kept alive in the background.
    */
   keepAlive: boolean;
+  /**
+   * When `true`, the session uses HTTP/2 multiplexing for all requests.
+   *
+   * All requests to the same origin share a single TCP connection, enabling
+   * true parallel request execution. This can significantly reduce latency
+   * when issuing many concurrent requests to a Solid pod (fetching resources,
+   * ACLs, containers, profiles, etc.).
+   *
+   * HTTP/2 connections are automatically cleaned up when {@link Session.logout}
+   * is called. Both Bearer and DPoP authentication work transparently over
+   * the HTTP/2 transport.
+   *
+   * Browsers already negotiate HTTP/2 transparently, so this option only
+   * affects the Node.js environment.
+   *
+   * @default false
+   * @since 2.6.0
+   *
+   * @example
+   * ```typescript
+   * const session = new Session({ http2: true });
+   * await session.login({ ... });
+   *
+   * // Requests issued in parallel multiplex over a single connection
+   * const [a, b, c] = await Promise.all([
+   *   getSolidDataset(url1, { fetch: session.fetch }),
+   *   getSolidDataset(url2, { fetch: session.fetch }),
+   *   getSolidDataset(url3, { fetch: session.fetch }),
+   * ]);
+   *
+   * await session.logout(); // closes HTTP/2 connections
+   * ```
+   */
+  http2: boolean;
 }
 
 /**
@@ -132,6 +168,8 @@ export class Session implements IHasSessionEventListener {
   public readonly events: ISessionEventListener;
 
   private clientAuthentication: ClientAuthentication;
+
+  private http2Fetch: Http2Fetch | undefined;
 
   private tokenRequestInProgress = false;
 
@@ -354,9 +392,14 @@ export class Session implements IHasSessionEventListener {
         isLoggedIn: false,
       };
     }
+    if (sessionOptions.http2) {
+      this.http2Fetch = createHttp2Fetch();
+    }
+
     this.config = {
       // Default to true for backwards compatibility.
       keepAlive: sessionOptions.keepAlive ?? true,
+      customFetch: this.http2Fetch,
     };
     // Keeps track of the latest timeout handle in order to clean up on logout
     // and not leave open timeouts.
@@ -414,7 +457,7 @@ export class Session implements IHasSessionEventListener {
    */
   fetch: typeof fetch = async (url, init) => {
     if (!this.info.isLoggedIn) {
-      return fetch(url, init);
+      return (this.http2Fetch ?? fetch)(url, init);
     }
     return this.clientAuthentication.fetch(url, init);
   };
@@ -466,6 +509,10 @@ export class Session implements IHasSessionEventListener {
     await this.clientAuthentication.logout(this.info.sessionId, options);
     // Clears the timeouts on logout so that Node does not hang.
     clearTimeout(this.lastTimeoutHandle);
+    // Close HTTP/2 connections if active.
+    if (this.http2Fetch) {
+      this.http2Fetch.close();
+    }
     this.info.isLoggedIn = false;
     if (emitEvent) {
       (this.events as EventEmitter).emit(EVENTS.LOGOUT);

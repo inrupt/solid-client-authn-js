@@ -19,6 +19,8 @@
 //
 
 export { Session, ISessionOptions } from "./Session";
+export { createHttp2Fetch } from "./http2Fetch";
+export type { Http2Fetch } from "./http2Fetch";
 
 export {
   getSessionFromStorage,

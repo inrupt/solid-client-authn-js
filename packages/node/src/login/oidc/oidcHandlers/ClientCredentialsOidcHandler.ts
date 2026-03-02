@@ -142,6 +142,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
           : undefined,
       eventEmitter: oidcLoginOptions.eventEmitter,
       expiresIn: tokens.expires_in,
+      fetch: oidcLoginOptions.customFetch,
     });
 
     const expiresAt =

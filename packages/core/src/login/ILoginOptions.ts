@@ -57,4 +57,9 @@ export default interface ILoginOptions extends ILoginInputOptions {
    * Whether the session is refreshed in the background or not.
    */
   keepAlive?: boolean;
+
+  /**
+   * Custom fetch function used as the underlying HTTP transport (e.g., HTTP/2).
+   */
+  customFetch?: typeof fetch;
 }
