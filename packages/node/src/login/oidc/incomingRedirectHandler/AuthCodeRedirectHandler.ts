@@ -34,6 +34,7 @@ import type {
   RefreshOptions,
   ITokenRefresher,
   IncomingRedirectResult,
+  SessionConfig,
 } from "@inrupt/solid-client-authn-core";
 import {
   loadOidcContextFromStorage,
@@ -92,6 +93,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
   async handle(
     inputRedirectUrl: string,
     eventEmitter?: EventEmitter,
+    config?: SessionConfig,
   ): Promise<IncomingRedirectResult> {
     if (!(await this.canHandle(inputRedirectUrl))) {
       throw new Error(
@@ -180,6 +182,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       refreshOptions: oidcContext.keepAlive ? refreshOptions : undefined,
       eventEmitter,
       expiresIn: tokenSet.expires_in,
+      fetch: config?.customFetch,
     });
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns

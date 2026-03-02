@@ -74,6 +74,11 @@ export interface IOidcOptions {
    * The Authorization Request OAuth scopes.
    */
   scopes: string[];
+
+  /**
+   * Custom fetch function used as the underlying HTTP transport (e.g., HTTP/2).
+   */
+  customFetch?: typeof fetch;
 }
 
 export function normalizeScopes(scopes: string[] | undefined): string[] {

@@ -74,6 +74,7 @@ async function refreshAccess(
   keepAlive: boolean,
   refreshBindingKey?: KeyPair,
   eventEmitter?: EventEmitter,
+  customFetch?: typeof fetch,
 ): Promise<TokenEndpointResponse & { fetch: typeof fetch }> {
   try {
     let dpopKey: KeyPair | undefined;
@@ -101,6 +102,7 @@ async function refreshAccess(
       refreshOptions: keepAlive ? rotatedRefreshOptions : undefined,
       eventEmitter,
       expiresIn: expiresInS > 0 ? expiresInS : undefined,
+      fetch: customFetch,
     });
     return Object.assign(tokens, {
       fetch: authFetch,
@@ -188,6 +190,7 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
       oidcLoginOptions.keepAlive ?? true,
       keyPair,
       oidcLoginOptions.eventEmitter,
+      oidcLoginOptions.customFetch,
     );
 
     const sessionInfo: ISessionInfo = {

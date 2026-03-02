@@ -72,6 +72,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       eventEmitter,
       keepAlive: config.keepAlive,
       customScopes: options.customScopes,
+      customFetch: config.customFetch,
     });
 
     if (loginReturn !== undefined) {

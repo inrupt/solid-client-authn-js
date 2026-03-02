@@ -20,4 +20,6 @@
 
 export type SessionConfig = {
   keepAlive: boolean;
+  /** Custom fetch function used as the underlying HTTP transport (e.g., HTTP/2). */
+  customFetch?: typeof fetch;
 };
