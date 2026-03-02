@@ -83,6 +83,16 @@ describe("createHttp2Fetch", () => {
     expect(typeof h2fetch.close).toBe("function");
   });
 
+  it("rejects non-http(s) protocols", async () => {
+    h2fetch = createHttp2Fetch({ tlsOptions: testTlsOptions });
+    await expect(h2fetch("file:///etc/passwd")).rejects.toThrow(
+      /only supports https: and http: protocols/,
+    );
+    await expect(h2fetch("data:text/plain,hello")).rejects.toThrow(
+      /only supports https: and http: protocols/,
+    );
+  });
+
   it("makes a successful GET request over HTTP/2", async () => {
     serverPort = await createTestServer((stream, headers) => {
       stream.respond({

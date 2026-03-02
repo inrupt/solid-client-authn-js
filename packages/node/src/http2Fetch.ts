@@ -129,6 +129,8 @@ export function createHttp2Fetch(
     }
   }
 
+  const ALLOWED_PROTOCOLS = new Set(["https:", "http:"]);
+
   const h2fetch: typeof fetch = async (
     input: RequestInfo | URL,
     init?: RequestInit,
@@ -139,6 +141,12 @@ export function createHttp2Fetch(
         : input instanceof Request
           ? new URL(input.url)
           : new URL(input);
+
+    if (!ALLOWED_PROTOCOLS.has(url.protocol)) {
+      throw new TypeError(
+        `HTTP/2 fetch only supports https: and http: protocols, got ${url.protocol}`,
+      );
+    }
 
     const origin = url.origin;
     const path = url.pathname + url.search;
