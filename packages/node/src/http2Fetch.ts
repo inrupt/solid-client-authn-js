@@ -18,9 +18,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import http2 from "node:http2";
+import { Agent, fetch as undiciFetch } from "undici";
 import type tls from "node:tls";
-import { Readable } from "node:stream";
 
 const DEFAULT_IDLE_TIMEOUT_MS = 30_000;
 
@@ -41,11 +40,6 @@ export type Http2Fetch = typeof fetch & {
   close(): void;
 };
 
-interface SessionEntry {
-  session: http2.ClientHttp2Session;
-  idleTimer: ReturnType<typeof setTimeout> | null;
-}
-
 /**
  * Creates an HTTP/2-aware fetch function compatible with the standard
  * [fetch API](https://developer.mozilla.org/docs/Web/API/Fetch_API).
@@ -62,7 +56,7 @@ interface SessionEntry {
  * @param options Configuration for the HTTP/2 connection pool.
  * @param options.idleTimeout Milliseconds of inactivity before an HTTP/2
  *   session is closed. Defaults to 30 000 (30 seconds).
- * @param options.tlsOptions TLS options forwarded to `http2.connect()`.
+ * @param options.tlsOptions TLS options forwarded to the underlying connection.
  *   Useful for custom CA certificates or disabling certificate verification
  *   in development/testing.
  * @returns A fetch-compatible function with an additional `close()` method.
@@ -82,186 +76,31 @@ interface SessionEntry {
 export function createHttp2Fetch(
   options: { idleTimeout?: number; tlsOptions?: tls.ConnectionOptions } = {},
 ): Http2Fetch {
-  const idleTimeout = options.idleTimeout ?? DEFAULT_IDLE_TIMEOUT_MS;
-  const pool = new Map<string, SessionEntry>();
+  const keepAliveTimeout = options.idleTimeout ?? DEFAULT_IDLE_TIMEOUT_MS;
 
-  function getOrCreateSession(origin: string): http2.ClientHttp2Session {
-    const existing = pool.get(origin);
-    if (existing && !existing.session.closed && !existing.session.destroyed) {
-      resetIdleTimer(origin, existing);
-      return existing.session;
-    }
-
-    const session = http2.connect(origin, options.tlsOptions);
-
-    session.on("error", () => {
-      cleanupSession(origin);
+  function createAgent(): Agent {
+    return new Agent({
+      allowH2: true,
+      keepAliveTimeout,
+      connect: options.tlsOptions,
     });
-    session.on("close", () => {
-      pool.delete(origin);
-    });
-
-    const entry: SessionEntry = { session, idleTimer: null };
-    pool.set(origin, entry);
-    resetIdleTimer(origin, entry);
-    return session;
   }
 
-  function resetIdleTimer(origin: string, entry: SessionEntry): void {
-    if (entry.idleTimer !== null) {
-      clearTimeout(entry.idleTimer);
-    }
-    entry.idleTimer = setTimeout(() => {
-      cleanupSession(origin);
-    }, idleTimeout);
-  }
-
-  function cleanupSession(origin: string): void {
-    const entry = pool.get(origin);
-    if (entry) {
-      if (entry.idleTimer !== null) {
-        clearTimeout(entry.idleTimer);
-      }
-      if (!entry.session.closed && !entry.session.destroyed) {
-        entry.session.close();
-      }
-      pool.delete(origin);
-    }
-  }
-
-  const ALLOWED_PROTOCOLS = new Set(["https:", "http:"]);
+  let agent = createAgent();
 
   const h2fetch: typeof fetch = async (
     input: RequestInfo | URL,
     init?: RequestInit,
   ): Promise<Response> => {
-    const url =
-      input instanceof URL
-        ? input
-        : input instanceof Request
-          ? new URL(input.url)
-          : new URL(input);
-
-    if (!ALLOWED_PROTOCOLS.has(url.protocol)) {
-      throw new TypeError(
-        `HTTP/2 fetch only supports https: and http: protocols, got ${url.protocol}`,
-      );
-    }
-
-    const origin = url.origin;
-    const path = url.pathname + url.search;
-
-    const headers: Record<string, string> = {
-      ":method": init?.method?.toUpperCase() ?? "GET",
-      ":path": path,
-    };
-
-    // Copy headers from init
-    if (init?.headers) {
-      const entries =
-        init.headers instanceof Headers
-          ? Array.from(init.headers.entries())
-          : Array.isArray(init.headers)
-            ? init.headers
-            : Object.entries(init.headers);
-      for (const [key, value] of entries) {
-        headers[key.toLowerCase()] = value;
-      }
-    }
-
-    // Copy headers from Request object if input is a Request
-    if (input instanceof Request) {
-      for (const [key, value] of input.headers.entries()) {
-        // Don't override headers from init
-        if (!(key.toLowerCase() in headers)) {
-          headers[key.toLowerCase()] = value;
-        }
-      }
-    }
-
-    const session = getOrCreateSession(origin);
-
-    return new Promise<Response>((resolve, reject) => {
-      let req: http2.ClientHttp2Stream;
-      try {
-        req = session.request(headers);
-      } catch (err) {
-        // Session may have been destroyed between getOrCreate and request
-        cleanupSession(origin);
-        reject(err);
-        return;
-      }
-
-      let responseStatus = 200;
-      const responseHeaders = new Headers();
-      let responseUrl = url.href;
-
-      req.on("response", (hdrs) => {
-        responseStatus = (hdrs[":status"] as number) ?? 200;
-        for (const [key, value] of Object.entries(hdrs)) {
-          if (key.startsWith(":")) continue;
-          if (value === undefined) continue;
-          const values = Array.isArray(value) ? value : [value];
-          for (const v of values) {
-            responseHeaders.append(key, String(v));
-          }
-        }
-
-        // Track location for redirect detection
-        const location = responseHeaders.get("location");
-        if (location && responseStatus >= 300 && responseStatus < 400) {
-          responseUrl = new URL(location, url).href;
-        }
-      });
-
-      const chunks: Buffer[] = [];
-
-      req.on("data", (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-
-      req.on("end", () => {
-        const body = Buffer.concat(chunks);
-        const response = new Response(body.length > 0 ? body : null, {
-          status: responseStatus,
-          headers: responseHeaders,
-        });
-        // Set the url property to reflect the final URL (after any redirects)
-        Object.defineProperty(response, "url", {
-          value: responseUrl,
-          writable: false,
-        });
-        resolve(response);
-      });
-
-      req.on("error", (err) => {
-        cleanupSession(origin);
-        reject(err);
-      });
-
-      // Stream the request body if present
-      const body = init?.body ?? (input instanceof Request ? input.body : null);
-      if (body !== null && body !== undefined) {
-        if (body instanceof ReadableStream) {
-          Readable.fromWeb(body as any).pipe(req);
-        } else if (typeof body === "string") {
-          req.end(body);
-        } else if (body instanceof ArrayBuffer || ArrayBuffer.isView(body)) {
-          req.end(Buffer.from(body as ArrayBuffer));
-        } else {
-          // For other body types (Blob, FormData, URLSearchParams), fall back
-          req.end(String(body));
-        }
-      } else {
-        req.end();
-      }
-    });
+    return undiciFetch(
+      input as Parameters<typeof undiciFetch>[0],
+      { ...init, dispatcher: agent } as Parameters<typeof undiciFetch>[1],
+    ) as unknown as Promise<Response>;
   };
 
   function close(): void {
-    for (const [origin] of pool) {
-      cleanupSession(origin);
-    }
+    agent.close();
+    agent = createAgent();
   }
 
   return Object.assign(h2fetch, { close }) as Http2Fetch;
