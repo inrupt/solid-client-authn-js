@@ -33,6 +33,17 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+### Bugfix
+
+#### core
+
+- Fix issue using the library with Bun by adding missing `extractable` flag to the DPoP keys so that they can be serialized on the
+  appropriate events. Thanks to @NoelDeMartin for fixing this issue.
+
+#### node
+
+- Sessions built from `Session.fromTokens` now have a correct expiration time triggering refresh in the fetch. Thanks to @NoelDeMartin for fixing this issue.
+
 ## [3.1.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v3.1.1) - 2025-10-29
 
 ### Bugfix
