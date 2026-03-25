@@ -19,17 +19,16 @@
 //
 
 import { jest, it, describe, expect } from "@jest/globals";
-import OidcClient from "@inrupt/oidc-client";
+import { State } from "oidc-client-ts";
 import { normalizeCallbackUrl, clearOidcPersistentStorage } from "./cleanup";
 
-jest.mock("@inrupt/oidc-client", () => {
-  const mockClient = {
-    clearStaleState: jest.fn(),
-  };
+jest.mock("oidc-client-ts", () => {
   return {
-    OidcClient: jest.fn().mockImplementation(() => {
-      return mockClient;
-    }),
+    State: {
+      clearStaleState: jest
+        .fn<() => Promise<void>>()
+        .mockResolvedValue(undefined),
+    },
     WebStorageStateStore: jest.fn(),
   };
 });
@@ -88,14 +87,8 @@ describe("removeOidcQueryParam", () => {
 
 describe("clearOidcPersistentStorage", () => {
   it("clears oidc-client storage", async () => {
-    // This is a bad test, but we can only test for internal behaviour of oidc-client,
-    // or test that the 'clearStaleState' function is called, which is done here.
-    const clearSpy = jest.spyOn(
-      new OidcClient.OidcClient({}),
-      "clearStaleState",
-    );
     await clearOidcPersistentStorage();
-    expect(clearSpy).toHaveBeenCalled();
+    expect(State.clearStaleState).toHaveBeenCalled();
   });
 
   it("removes keys matching expected patterns as a stopgap solution", async () => {

@@ -18,11 +18,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { OidcClient, WebStorageStateStore } from "@inrupt/oidc-client";
+import { State, WebStorageStateStore } from "oidc-client-ts";
 import { removeOpenIdParams } from "@inrupt/solid-client-authn-core";
-
-// Camelcase identifiers are required in the OIDC specification.
-/* eslint-disable camelcase*/
 
 /**
  * Removes OIDC-specific query parameters from a given URL (state, code...), and
@@ -54,19 +51,8 @@ export function normalizeCallbackUrl(redirectUrl: string): string {
  * Clears any OIDC-related data lingering in the local storage.
  */
 export async function clearOidcPersistentStorage(): Promise<void> {
-  const client = new OidcClient({
-    // TODO: We should look at the various interfaces being used for storage,
-    //  i.e. between oidc-client-js (WebStorageStoreState), localStorage
-    //  (which has an interface Storage), and our own proprietary interface
-    //  IStorage - i.e. we should really just be using the browser Web Storage
-    //  API, e.g. "stateStore: window.localStorage,".
-    // We are instantiating a new instance here, so the only value we need to
-    // explicitly provide is the response mode (default otherwise will look
-    // for a hash '#' fragment!).
-
-    response_mode: "query",
-  });
-  await client.clearStaleState(new WebStorageStateStore({}));
+  const store = new WebStorageStateStore({});
+  await State.clearStaleState(store, 60 * 15);
   const myStorage = window.localStorage;
   const itemsToRemove = [];
   for (let i = 0; i <= myStorage.length; i += 1) {
