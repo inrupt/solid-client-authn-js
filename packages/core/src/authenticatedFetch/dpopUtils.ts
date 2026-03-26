@@ -71,6 +71,7 @@ export async function createDpopHeader(
 export async function generateDpopKeyPair(): Promise<KeyPair> {
   const { privateKey, publicKey } = await generateKeyPair(
     PREFERRED_SIGNING_ALG[0],
+    { extractable: true },
   );
   const dpopKeyPair = {
     privateKey,
