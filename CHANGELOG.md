@@ -54,7 +54,7 @@ The following changes have been implemented but not released yet:
 
 #### browser
 
-- Fixed an issue where `handleIncomingRedirect({ restorePreviousSession: true })` would redirect to the OAuth provider with expired client credentials, causing users to be stuck on an error page. The library now validates client expiration before attempting silent authentication and gracefully falls back to a logged-out state when the client has expired.
+- Fixed an issue where `handleIncomingRedirect({ restorePreviousSession: true })` would redirect to the OAuth provider with expired client credentials, causing users to be stuck on an error page. The library now validates client expiration before attempting silent authentication and gracefully falls back to a logged-out state when the client has expired. Thanks to @timgent for the contribution.
 
 ## [3.1.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v3.1.1) - 2025-10-29
 
