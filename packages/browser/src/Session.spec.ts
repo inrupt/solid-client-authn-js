@@ -812,7 +812,6 @@ describe("Session", () => {
       // The function should resolve (not hang)
       expect(result).toBeUndefined();
     });
-
   });
 
   describe("events.on", () => {
