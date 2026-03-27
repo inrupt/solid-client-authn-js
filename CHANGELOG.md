@@ -33,6 +33,14 @@ const session = await getSessionFromStorage(sessionId, {
 
 The following changes have been implemented but not released yet:
 
+### Breaking changes
+
+#### oidc-browser
+
+- Replaced `@inrupt/oidc-client` dependency with `oidc-client-ts` (`^3.5.0`), the actively maintained TypeScript successor.
+- Removed re-exports: `Version`, `CordovaPopupNavigator`, `CordovaIFrameNavigator` (no longer available upstream).
+- Changed `SigninRequest` and `OidcClientSettings` to type-only exports.
+
 ### Bugfix
 
 #### core
