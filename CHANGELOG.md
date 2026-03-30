@@ -5,10 +5,29 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Deprecation notice
+## Unreleased
+
+The following changes have been implemented but not released yet:
+
+## [4.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v4.0.0) - 2026-03-30
+
+### Breaking changes
+
+#### oidc-browser
+
+Note that these changes are unlikely to impact a client application.
+
+- Replaced `@inrupt/oidc-client` dependency with `oidc-client-ts` (`^3.5.0`), the actively maintained TypeScript successor.
+- Removed re-exports: `Version`, `CordovaPopupNavigator`, `CordovaIFrameNavigator` (no longer available upstream).
+- Changed `SigninRequest` and `OidcClientSettings` to type-only exports.
+
+#### node
 
 - A new signature was introduced for `getSessionFromStorage` in release 2.3.0. The legacy signature is
-  deprecated, and will be removed with the 4.0.0 major release.
+  deprecated, and will be removed with the 4.0.0 major release. Using the more recent API to manage Sessions
+  based on the associated tokens should be preferred, as it allows to not rely on in-memory scale, making it
+  easier to scale horizontally. Prefer using `session.events.on(EVENTS.NEW_TOKENS, ...)` to get the tokens, and
+  `Session.fromTokens` to build the `Session` object.
 
 ```javascript
 // Deprecated signature
@@ -28,18 +47,6 @@ const session = await getSessionFromStorage(sessionId, {
 
 - The event `EVENTS.NEW_REFRESH_TOKEN` is being replaced by `EVENTS.NEW_TOKENS` which returns all the tokens a client
   can store for refreshing a session.
-
-## Unreleased
-
-The following changes have been implemented but not released yet:
-
-### Breaking changes
-
-#### oidc-browser
-
-- Replaced `@inrupt/oidc-client` dependency with `oidc-client-ts` (`^3.5.0`), the actively maintained TypeScript successor.
-- Removed re-exports: `Version`, `CordovaPopupNavigator`, `CordovaIFrameNavigator` (no longer available upstream).
-- Changed `SigninRequest` and `OidcClientSettings` to type-only exports.
 
 ### Bugfix
 
