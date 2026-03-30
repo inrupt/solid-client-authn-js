@@ -24,7 +24,10 @@ Note that these changes are unlikely to impact a client application.
 #### node
 
 - A new signature was introduced for `getSessionFromStorage` in release 2.3.0. The legacy signature is
-  deprecated, and will be removed with the 4.0.0 major release.
+  deprecated, and will be removed with the 4.0.0 major release. Using the more recent API to manage Sessions
+  based on the associated tokens should be preferred, as it allows to not rely on in-memory scale, making it
+  easier to scale horizontally. Prefer using `session.events.on(EVENTS.NEW_TOKENS, ...)` to get the tokens, and
+  `Session.fromTokens` to build the `Session` object.
 
 ```javascript
 // Deprecated signature
