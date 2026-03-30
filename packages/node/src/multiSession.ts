@@ -92,7 +92,25 @@ export async function refreshSession(
   }
 }
 
-async function internalGetSessionFromStorage(
+/**
+ * Retrieve a Session from the given storage based on its session ID. If possible,
+ * the Session is logged in before it is returned, so that `session.fetch` may
+ * access private Resources without any additional interaction.
+ *
+ * If no storage is provided, a default in-memory storage will be used. It is
+ * instantiated once on load, and is shared across all the sessions. Since it
+ * is only available in memory, the storage is lost when the code stops running.
+ *
+ * A Session is available in storage as soon as it logged in once, and it is removed
+ * from storage on logout.
+ *
+ * @param sessionId The ID of the Session to retrieve.
+ * @param options Options to control the session loading behavior.
+ * @returns A Session object, potentially authenticated, or undefined if no Session
+ * in storage matches the given ID.
+ * @since 2.3.0
+ */
+export async function getSessionFromStorage(
   sessionId: string,
   options?: GetSessionOptions,
 ): Promise<Session | undefined> {
@@ -126,87 +144,6 @@ async function internalGetSessionFromStorage(
     await refreshSession(session, { storage: storage ?? defaultStorage });
   }
   return session;
-}
-
-/**
- * Retrieve a Session from the given storage based on its session ID. If possible,
- * the Session is logged in before it is returned, so that `session.fetch` may
- * access private Resources without any additional interaction.
- *
- * If no storage is provided, a default in-memory storage will be used. It is
- * instantiated once on load, and is shared across all the sessions. Since it
- * is only available in memory, the storage is lost when the code stops running.
- *
- * A Session is available in storage as soon as it logged in once, and it is removed
- * from storage on logout.
- *
- * @param sessionId The ID of the Session to retrieve.
- * @param options Options to control the session loading behavior.
- * @returns A Session object, potentially authenticated, or undefined if no Session
- * in storage matches the given ID.
- * @since 2.3.0
- */
-export async function getSessionFromStorage(
-  sessionId: string,
-  options?: GetSessionOptions,
-): Promise<Session | undefined>;
-/**
- * Retrieve a Session from the given storage based on its session ID. If possible,
- * the Session is logged in before it is returned, so that `session.fetch` may
- * access private Resources without any additional interaction.
- *
- * If no storage is provided, a default in-memory storage will be used. It is
- * instantiated once on load, and is shared across all the sessions. Since it
- * is only available in memory, the storage is lost when the code stops running.
- *
- * A Session is available in storage as soon as it logged in once, and it is removed
- * from storage on logout.
- *
- * @param sessionId The ID of the Session to retrieve.
- * @param storage The storage where the Session can be found.
- * @param onNewRefreshToken A callback to call on refresh token rotation.
- * @returns A session object, authenticated if possible, or undefined if no Session
- * in storage matches the given ID.
- * @deprecated use the `options` object argument instead.
- */
-export async function getSessionFromStorage(
-  sessionId: string,
-  storage?: IStorage,
-  onNewRefreshToken?: (newToken: string) => unknown,
-  refresh?: boolean,
-): Promise<Session | undefined>;
-/**
- * Retrieve a Session from the given storage based on its session ID. If possible,
- * the Session is logged in before it is returned, so that `session.fetch` may
- * access private Resources without any additional interaction.
- *
- * If no storage is provided, a default in-memory storage will be used. It is
- * instantiated once on load, and is shared across all the sessions. Since it
- * is only available in memory, the storage is lost when the code stops running.
- *
- * A Session is available in storage as soon as it logged in once, and it is removed
- * from storage on logout.
- *
- * @param sessionId The ID of the Session to retrieve.
- * @param storage The storage where the Session can be found.
- * @returns A session object, authenticated if possible, or undefined if no Session
- * in storage matches the given ID.
- */
-export async function getSessionFromStorage(
-  sessionId: string,
-  storageOrOptions?: IStorage | GetSessionOptions,
-  onNewRefreshToken?: (newToken: string) => unknown,
-  refresh: boolean = true,
-): Promise<Session | undefined> {
-  if (isSessionOptions(storageOrOptions)) {
-    return internalGetSessionFromStorage(sessionId, storageOrOptions);
-  }
-  // Support the legacy signature.
-  return internalGetSessionFromStorage(sessionId, {
-    storage: storageOrOptions,
-    onNewRefreshToken,
-    refreshSession: refresh,
-  });
 }
 
 /**
