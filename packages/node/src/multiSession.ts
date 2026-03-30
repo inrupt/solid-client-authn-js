@@ -40,20 +40,6 @@ export type GetSessionOptions = Partial<{
   refreshSession: boolean;
 }>;
 
-function isSessionOptions(input: unknown): input is GetSessionOptions {
-  if (typeof input !== "object" || input === null) {
-    return false;
-  }
-  const storageType = typeof (input as GetSessionOptions).storage;
-  const callbackType = typeof (input as GetSessionOptions).onNewRefreshToken;
-  const refreshType = typeof (input as GetSessionOptions).refreshSession;
-  return (
-    (storageType === "undefined" || storageType === "object") &&
-    (callbackType === "undefined" || callbackType === "function") &&
-    (refreshType === "undefined" || refreshType === "boolean")
-  );
-}
-
 /**
  * Log a session in using a refresh token from storage.
  * The provided session is mutated so that `session.info`
