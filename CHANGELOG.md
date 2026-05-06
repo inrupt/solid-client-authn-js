@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Breaking changes
+
+- Node 20 is no longer supported after it went end-of-life end of March 2026 (see https://nodejs.org/en/about/previous-releases).
+
 ## [4.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v4.0.0) - 2026-03-30
 
 ### Breaking changes
