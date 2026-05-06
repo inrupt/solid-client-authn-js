@@ -18,22 +18,35 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import { createRequire } from "node:module";
 import type { Config } from "jest";
-import { createJsWithTsPreset, type JestConfigWithTsJest } from "ts-jest";
+import {
+  createDefaultPreset,
+  createJsWithTsPreset,
+  type JestConfigWithTsJest,
+} from "ts-jest";
+
+// Jest 30 loads .ts config files as ESM via Node's native TypeScript support,
+// so `require` is not available. Use createRequire for require.resolve calls.
+// @ts-expect-error: import.meta.url is valid at runtime (ESM), but tsconfig targets CJS.
+const esmRequire = createRequire(import.meta.url);
 
 type ArrayElement<MyArray> = MyArray extends Array<infer T> ? T : never;
 
+const defaultPreset = createDefaultPreset();
+const jsWithTsPreset = createJsWithTsPreset();
+
 const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
+  ...defaultPreset,
   roots: ["<rootDir>"],
   testMatch: ["**/*.spec.ts"],
-  preset: "ts-jest",
   modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
   coveragePathIgnorePatterns: [".*.spec.ts", "dist/"],
   clearMocks: true,
   injectGlobals: false,
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
-    "^jose": require.resolve("jose"),
+    "^jose": esmRequire.resolve("jose"),
   },
 };
 
@@ -41,10 +54,7 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
 // loaded in the setup file.
 process.env.OPENSSL_CONF = "/dev/null";
 
-const presetConfig = createJsWithTsPreset({});
-
 const config: JestConfigWithTsJest = {
-  ...presetConfig,
   reporters: ["default", "github-actions"],
   collectCoverage: true,
   coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
@@ -66,11 +76,8 @@ const config: JestConfigWithTsJest = {
     },
     {
       ...baseConfig,
+      ...jsWithTsPreset,
       displayName: "oidc-browser",
-      // This combination of preset/transformIgnorePatterns enforces that both TS and
-      // JS files are transformed to CJS, and that the transform also applies to the
-      // dependencies in the node_modules, so that ESM-only dependencies are supported.
-      preset: "ts-jest/presets/js-with-ts",
       // Deliberately allow including node_modules when transforming code. undici can
       // also be ignored, as it isn't necessary in the browser setting.
       transformIgnorePatterns: ["undici"],
@@ -83,10 +90,7 @@ const config: JestConfigWithTsJest = {
     },
     {
       ...baseConfig,
-      // This combination of preset/transformIgnorePatterns enforces that both TS and
-      // JS files are transformed to CJS, and that the transform also applies to the
-      // dependencies in the node_modules, so that ESM-only dependencies are supported.
-      preset: "ts-jest/presets/js-with-ts",
+      ...jsWithTsPreset,
       displayName: "browser",
       roots: ["<rootDir>/packages/browser"],
       // Deliberately allow including node_modules when transforming code. undici can
