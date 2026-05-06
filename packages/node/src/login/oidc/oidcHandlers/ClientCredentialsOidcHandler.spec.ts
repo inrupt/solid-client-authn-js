@@ -133,7 +133,7 @@ const mockBearerTokens = (): OpenidClient.TokenSet => {
 
 const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
   const grantMock = jest
-    .fn<() => Promise<OpenidClient.TokenSet>>()
+    .fn<OpenidClient.Client["grant"]>()
     .mockResolvedValueOnce(tokenSet);
   const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
     typeof OpenidClient

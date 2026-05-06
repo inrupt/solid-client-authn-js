@@ -30,5 +30,12 @@ export default class CustomTestEnvironment extends Environment {
       // same constructor is referenced by both.
       this.global.Uint8Array = Uint8Array;
     }
+
+    // jsdom makes window.location non-configurable, so jest.spyOn cannot
+    // mock it. Expose reconfigure so tests can change the URL.
+    const { dom } = this;
+    this.global.__setTestUrl = (url: string) => {
+      dom?.reconfigure({ url });
+    };
   }
 }

@@ -46,27 +46,11 @@ const mockLocalStorage = (stored: Record<string, string>) => {
   });
 };
 
+declare const __setTestUrl: (url: string) => void;
+
 const mockLocation = (mockedLocation: string) => {
-  // We can't simply do 'window.location.href = defaultLocation;', as that
-  // causes our test environment to try to navigate to the new location (as
-  // a browser would do). So instead we need to reset 'window.location' as a
-  // whole, and reset it's value after our test. We also need to
-  // replace the 'history' object, otherwise this error happens: "SecurityError:
-  // replaceState cannot update history to a URL which differs in components other
-  // than in path, query, or fragment.""
-
-  // (window as any) is used to override the window type definition and
-  // allow location to be written.
-
-  delete (window as any).location;
-
-  delete (window as any).history.replaceState;
-
-  // Set our window's location to our test value.
-  (window as any).location = {
-    href: mockedLocation,
-  } as Location;
-  window.history.replaceState = jest.fn();
+  __setTestUrl(mockedLocation);
+  jest.spyOn(window.history, "replaceState").mockImplementation(() => {});
 };
 
 describe("Session", () => {
@@ -234,7 +218,7 @@ describe("Session", () => {
 
   describe("handleIncomingRedirect", () => {
     it("uses current window location as default redirect URL", async () => {
-      mockLocation("https://some.url");
+      mockLocation("https://some.url/");
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest
         .spyOn(clientAuthentication, "handleIncomingRedirect")
@@ -243,13 +227,13 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect();
       expect(incomingRedirectHandler).toHaveBeenCalledWith(
-        "https://some.url",
+        "https://some.url/",
         mySession.events,
       );
     });
 
     it("wraps ClientAuthentication handleIncomingRedirect", async () => {
-      mockLocation("https://some.url");
+      mockLocation("https://some.url/");
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest
         .spyOn(clientAuthentication, "handleIncomingRedirect")
