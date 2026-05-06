@@ -45,6 +45,14 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   clearMocks: true,
   injectGlobals: false,
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  transform: {
+    ...defaultPreset.transform,
+    "node_modules/jose.+\\.js$": [
+      "ts-jest",
+      { tsconfig: { allowJs: true } },
+    ],
+  },
+  transformIgnorePatterns: ["node_modules/(?!jose)"],
   moduleNameMapper: {
     "^jose": esmRequire.resolve("jose"),
   },
