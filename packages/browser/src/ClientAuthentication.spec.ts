@@ -22,6 +22,8 @@ import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import { EventEmitter } from "events";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 
+declare const __setTestUrl: (url: string) => void;
+
 import {
   StorageUtility,
   USER_SESSION_PREFIX,
@@ -108,11 +110,7 @@ describe("ClientAuthentication", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    Object.defineProperty(window, "location", {
-      writable: true,
-      value: { assign: jest.fn() },
-    });
+    __setTestUrl("http://localhost/");
   });
 
   describe("login", () => {
@@ -122,7 +120,7 @@ describe("ClientAuthentication", () => {
     it("calls login, and uses the window.location.href for the redirect if no redirectUrl is set", async () => {
       // Set a current window location which will be the expected URL to be
       // redirected back to, since we don't pass redirectUrl:
-      window.location.href = "https://coolapp.test/some/redirect";
+      __setTestUrl("https://coolapp.test/some/redirect");
 
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(
@@ -353,11 +351,11 @@ describe("ClientAuthentication", () => {
     // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const clientAuthn = getClientAuthentication();
 
@@ -423,11 +421,11 @@ describe("ClientAuthentication", () => {
     mockEmitter.emit = jest.fn<typeof mockEmitter.emit>();
 
     it("calls handle redirect", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const expectedResult = SessionCreatorCreateResponse;
       const clientAuthn = getClientAuthentication();
@@ -462,11 +460,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const clientAuthn = getClientAuthentication();
       const url =
@@ -482,11 +480,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters even if auth flow fails", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
 
       mockHandleIncomingRedirect.mockImplementationOnce(() =>
@@ -512,11 +510,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("preserves non-OAuth query strings", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const clientAuthn = getClientAuthentication();
       const url =
