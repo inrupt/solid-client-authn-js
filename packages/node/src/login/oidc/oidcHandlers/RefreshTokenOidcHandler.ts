@@ -45,10 +45,9 @@ import {
   buildAuthenticatedFetch,
   maybeBuildRpInitiatedLogout,
 } from "@inrupt/solid-client-authn-core";
-import type { JWK } from "jose";
+import type { JWK, CryptoKey as JoseCryptoKey } from "jose";
 import { importJWK } from "jose";
 import type { EventEmitter } from "events";
-import type { KeyObject } from "crypto";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions,
@@ -178,7 +177,8 @@ export default class RefreshTokenOidcHandler implements IOidcHandler {
         privateKey: (await importJWK(
           JSON.parse(privateKey),
           PREFERRED_SIGNING_ALG[0],
-        )) as KeyObject,
+          { extractable: true },
+        )) as JoseCryptoKey,
       };
     }
 

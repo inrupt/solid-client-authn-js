@@ -33,7 +33,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { randomUUID } from "crypto";
-import { jwtVerify, exportJWK } from "jose";
+import { jwtVerify, exportJWK, importJWK } from "jose";
 import { EventEmitter } from "events";
 import {
   mockDefaultOidcOptions,
@@ -215,7 +215,10 @@ describe("RefreshTokenOidcHandler", () => {
       const dpopProof = headers.get("DPoP");
       // This checks that the refreshed access token is bound to the initial DPoP key.
       await expect(
-        jwtVerify(dpopProof!, dpopKeyPair.privateKey),
+        jwtVerify(
+          dpopProof!,
+          await importJWK(dpopKeyPair.publicKey),
+        ),
       ).resolves.not.toThrow();
     });
 

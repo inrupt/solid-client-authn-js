@@ -102,9 +102,10 @@ const mockIdToken = async (payload: Jose.JWTPayload) => {
   // Mock the issuer JWKS.
   const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
   mockJose.createRemoteJWKSet.mockReturnValue(
-    jest
-      .fn<ReturnType<(typeof Jose)["createRemoteJWKSet"]>>()
-      .mockResolvedValue(issuerKeyPair.publicKey),
+    (async () =>
+      issuerKeyPair.publicKey) as unknown as ReturnType<
+      (typeof Jose)["createRemoteJWKSet"]
+    >,
   );
   return new SignJWT({
     sub: "user123",
@@ -200,7 +201,9 @@ describe("Session static functions", () => {
       });
 
       it("creates a session with DPoP token if dpopKey is provided", async () => {
-        const dpopKeyPair = await generateKeyPair("ES256");
+        const dpopKeyPair = await generateKeyPair("ES256", {
+          extractable: true,
+        });
 
         const dpopKey = {
           privateKey: dpopKeyPair.privateKey,

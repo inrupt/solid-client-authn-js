@@ -22,7 +22,7 @@
 /* eslint-disable no-shadow */
 
 import { jest, it, describe, expect, afterEach } from "@jest/globals";
-import type { KeyLike } from "jose";
+import type { CryptoKey } from "jose";
 import { jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
 import {
@@ -55,15 +55,17 @@ const mockNotRedirectedResponse = () => {
   return mockedResponse;
 };
 
-let publicKey: KeyLike | undefined;
-let privateKey: KeyLike | undefined;
+let publicKey: CryptoKey | undefined;
+let privateKey: CryptoKey | undefined;
 
 const mockJwk = async (): Promise<{
-  publicKey: KeyLike;
-  privateKey: KeyLike;
+  publicKey: CryptoKey;
+  privateKey: CryptoKey;
 }> => {
   if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
-    const generatedPair = await generateKeyPair("ES256");
+    const generatedPair = await generateKeyPair("ES256", {
+      extractable: true,
+    });
     publicKey = generatedPair.publicKey;
     privateKey = generatedPair.privateKey;
   }
@@ -159,7 +161,7 @@ describe("buildAuthenticatedFetch", () => {
     const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
     const { payload } = await jwtVerify(
       headers.get("DPoP") as string,
-      (await mockKeyPair()).privateKey,
+      (await mockJwk()).publicKey,
     );
     expect(payload.htu).toBe("http://some.url/");
     expect(payload.htm).toBe("POST");
@@ -198,7 +200,7 @@ describe("buildAuthenticatedFetch", () => {
     const headers = new Headers(mockedFetch.mock.calls[1][1]?.headers);
     const { payload } = await jwtVerify(
       headers.get("DPoP") as string,
-      (await mockKeyPair()).privateKey,
+      (await mockJwk()).publicKey,
     );
     expect(payload.htu).toBe("https://my.pod/container/");
   });

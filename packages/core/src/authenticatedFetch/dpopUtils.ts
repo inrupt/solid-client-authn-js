@@ -18,7 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type { JWK, KeyLike } from "jose";
+import type { JWK, CryptoKey } from "jose";
 import { SignJWT, generateKeyPair, exportJWK } from "jose";
 import { v4 } from "uuid";
 import { PREFERRED_SIGNING_ALG } from "../constant";
@@ -36,7 +36,7 @@ function normalizeHTU(audience: string): string {
 }
 
 export type KeyPair = {
-  privateKey: KeyLike;
+  privateKey: CryptoKey;
   publicKey: JWK;
 };
 

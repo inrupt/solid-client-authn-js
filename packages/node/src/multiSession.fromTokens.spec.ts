@@ -139,8 +139,8 @@ describe("logout", () => {
   };
 
   // Singleton keys generated for tests
-  let mockPublicKey: Jose.KeyLike;
-  let mockPrivateKey: Jose.KeyLike;
+  let mockPublicKey: Jose.CryptoKey;
+  let mockPrivateKey: Jose.CryptoKey;
 
   // Generate a valid ID token
   const createMockIdToken = async (
@@ -174,7 +174,12 @@ describe("logout", () => {
     // Setup the mocked jwtVerify to succeed by default
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     // Setup createRemoteJWKSet to return a key lookup function
-    mockJose.createRemoteJWKSet.mockReturnValue(async () => mockPublicKey);
+    mockJose.createRemoteJWKSet.mockReturnValue(
+      (async () =>
+        mockPublicKey) as unknown as ReturnType<
+        (typeof Jose)["createRemoteJWKSet"]
+      >,
+    );
   });
 
   it("throws an error if idToken is not provided", async () => {
