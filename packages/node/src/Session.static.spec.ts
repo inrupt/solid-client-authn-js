@@ -102,8 +102,7 @@ const mockIdToken = async (payload: Jose.JWTPayload) => {
   // Mock the issuer JWKS.
   const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
   mockJose.createRemoteJWKSet.mockReturnValue(
-    (async () =>
-      issuerKeyPair.publicKey) as unknown as ReturnType<
+    (async () => issuerKeyPair.publicKey) as unknown as ReturnType<
       (typeof Jose)["createRemoteJWKSet"]
     >,
   );

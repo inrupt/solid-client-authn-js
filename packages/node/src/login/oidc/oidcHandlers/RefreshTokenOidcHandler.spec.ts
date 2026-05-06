@@ -215,10 +215,7 @@ describe("RefreshTokenOidcHandler", () => {
       const dpopProof = headers.get("DPoP");
       // This checks that the refreshed access token is bound to the initial DPoP key.
       await expect(
-        jwtVerify(
-          dpopProof!,
-          await importJWK(dpopKeyPair.publicKey),
-        ),
+        jwtVerify(dpopProof!, await importJWK(dpopKeyPair.publicKey)),
       ).resolves.not.toThrow();
     });
 

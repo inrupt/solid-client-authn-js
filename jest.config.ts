@@ -47,10 +47,7 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   transform: {
     ...defaultPreset.transform,
-    "node_modules/jose.+\\.js$": [
-      "ts-jest",
-      { tsconfig: { allowJs: true } },
-    ],
+    "node_modules/jose.+\\.js$": ["ts-jest", { tsconfig: { allowJs: true } }],
   },
   transformIgnorePatterns: ["node_modules/(?!jose)"],
   moduleNameMapper: {

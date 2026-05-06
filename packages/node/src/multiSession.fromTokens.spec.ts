@@ -175,8 +175,7 @@ describe("logout", () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     // Setup createRemoteJWKSet to return a key lookup function
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        mockPublicKey) as unknown as ReturnType<
+      (async () => mockPublicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
