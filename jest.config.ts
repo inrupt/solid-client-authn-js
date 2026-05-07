@@ -48,12 +48,13 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   setupFilesAfterEnv: [join("<rootDir>", "jest.setup.ts")],
   transform: {
     ...defaultPreset.transform,
-    [join("node_modules", "jose.+\\.js$")]: [
+    // [\\\\/] expands to [\\/], which makes the regex Windows-compatible.
+    "node_modules[\\\\/]jose.+\\.js$": [
       "ts-jest",
       { tsconfig: { allowJs: true } },
     ],
   },
-  transformIgnorePatterns: [join("node_modules", "(?!jose)")],
+  transformIgnorePatterns: ["node_modules[\\\\/](?!jose)"],
   moduleNameMapper: {
     "^jose": esmRequire.resolve("jose"),
   },
