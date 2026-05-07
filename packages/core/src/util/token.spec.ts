@@ -68,11 +68,9 @@ describe("getWebidFromTokenPayload", () => {
 
   it("throws if the JWKS retrieval fails", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
-    mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () => {
-        throw new Error("Maformed JWKS");
-      }) as unknown as ReturnType<(typeof Jose)["createRemoteJWKSet"]>,
-    );
+    mockJose.createRemoteJWKSet.mockReturnValue((async () => {
+      throw new Error("Maformed JWKS");
+    }) as unknown as ReturnType<(typeof Jose)["createRemoteJWKSet"]>);
     const jwt = await mockJwt(
       { someClaim: true },
       "https://some.issuer",
@@ -91,8 +89,7 @@ describe("getWebidFromTokenPayload", () => {
   it("throws if the ID token signature verification fails", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -119,8 +116,7 @@ describe("getWebidFromTokenPayload", () => {
   it("throws if the ID token issuer verification fails", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -144,8 +140,7 @@ describe("getWebidFromTokenPayload", () => {
   it("throws if the ID token audience verification fails", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -169,8 +164,7 @@ describe("getWebidFromTokenPayload", () => {
   it("throws if the 'webid' and the 'sub' claims are missing", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -192,8 +186,7 @@ describe("getWebidFromTokenPayload", () => {
   it("throws if the 'webid' claims is missing and the 'sub' claim is not an IRI", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -218,8 +211,7 @@ describe("getWebidFromTokenPayload", () => {
   it("returns the WebID if the 'webid' and 'azp' claims exist", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -240,8 +232,7 @@ describe("getWebidFromTokenPayload", () => {
   it("returns the clientID if the 'webid' and 'azp' claims exist", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -262,8 +253,7 @@ describe("getWebidFromTokenPayload", () => {
   it("returns the WebID if the 'sub' and 'azp' claims exist and 'sub' is IRI-like", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -284,8 +274,7 @@ describe("getWebidFromTokenPayload", () => {
   it("returns the webID if the 'sub' claim exists and it is IRI-like but 'azp' does not exist", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );
@@ -306,8 +295,7 @@ describe("getWebidFromTokenPayload", () => {
   it("clientID is undefined if the 'azp' claim does not exist", async () => {
     const mockJose = jest.requireMock("jose") as jest.Mocked<typeof Jose>;
     mockJose.createRemoteJWKSet.mockReturnValue(
-      (async () =>
-        (await mockJwk()).publicKey) as unknown as ReturnType<
+      (async () => (await mockJwk()).publicKey) as unknown as ReturnType<
         (typeof Jose)["createRemoteJWKSet"]
       >,
     );

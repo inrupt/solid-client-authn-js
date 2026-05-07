@@ -29,11 +29,10 @@ import {
   mockStorageUtility,
   // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
-import type { JWK } from "jose";
+import type { JWK, CryptoKey } from "jose";
 import { importJWK } from "jose";
 import type { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
-import type { CryptoKey } from "jose";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockDefaultIssuerConfigFetcher,

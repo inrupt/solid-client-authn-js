@@ -25,11 +25,10 @@ import {
   StorageUtilityMock,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import type { JWK } from "jose";
+import type { JWK, CryptoKey } from "jose";
 import { importJWK } from "jose";
 import type { IdTokenClaims, TokenSet } from "openid-client";
 import { EventEmitter } from "events";
-import type { CryptoKey } from "jose";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockClientRegistrar,

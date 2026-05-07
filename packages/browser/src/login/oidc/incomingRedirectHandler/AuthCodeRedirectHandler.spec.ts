@@ -34,9 +34,8 @@ import {
 } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
-import type { JWK } from "jose";
+import type { JWK, CryptoKey } from "jose";
 import { importJWK } from "jose";
-import type { CryptoKey } from "jose";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
