@@ -36,7 +36,7 @@ import { jest, it, describe, expect } from "@jest/globals";
 import type * as OidcClientExt from "@inrupt/oidc-client-ext";
 import type { JWK } from "jose";
 import { importJWK } from "jose";
-import type { KeyObject } from "crypto";
+import type { CryptoKey } from "jose";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { SessionInfoManagerMock } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import { LocalStorageMock } from "../../../storage/__mocks__/LocalStorage";
@@ -126,7 +126,7 @@ const mockTokenEndpointDpopResponse =
       webId: mockWebId(),
       clientId: "some client",
       dpopKey: {
-        privateKey: (await importJWK(mockJwk())) as KeyObject,
+        privateKey: (await importJWK(mockJwk())) as CryptoKey,
         // Note that here for convenience the private key is also used as public key.
         // Obviously, this should never be done in non-test code.
         publicKey: mockJwk(),

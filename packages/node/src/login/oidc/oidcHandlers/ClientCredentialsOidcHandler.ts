@@ -41,9 +41,9 @@ import {
   buildAuthenticatedFetch,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import type { KeyObject } from "crypto";
 import { Issuer } from "openid-client";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+import { asDPoPInput } from "../../../util/dpopInput";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -93,7 +93,7 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       {
         DPoP:
           oidcLoginOptions.dpop && dpopKey !== undefined
-            ? (dpopKey.privateKey as KeyObject)
+            ? asDPoPInput(dpopKey.privateKey)
             : undefined,
       },
     );

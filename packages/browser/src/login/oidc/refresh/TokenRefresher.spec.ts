@@ -33,7 +33,7 @@ import type { JWK } from "jose";
 import { importJWK } from "jose";
 import type { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
-import type { KeyObject } from "crypto";
+import type { CryptoKey } from "jose";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockDefaultIssuerConfigFetcher,
@@ -70,7 +70,7 @@ const mockJwk = (): JWK => {
 
 const mockKeyPair = async (): Promise<KeyPair> => {
   return {
-    privateKey: (await importJWK(mockJwk())) as KeyObject,
+    privateKey: (await importJWK(mockJwk())) as CryptoKey,
     // Use the same JWK for public and private key out of convenience, don't do
     // this in real life.
     publicKey: mockJwk(),
