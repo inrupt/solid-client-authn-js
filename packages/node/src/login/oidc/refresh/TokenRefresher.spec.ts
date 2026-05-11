@@ -25,11 +25,10 @@ import {
   StorageUtilityMock,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import type { JWK } from "jose";
+import type { JWK, CryptoKey } from "jose";
 import { importJWK } from "jose";
 import type { IdTokenClaims, TokenSet } from "openid-client";
 import { EventEmitter } from "events";
-import type { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockClientRegistrar,
@@ -75,7 +74,7 @@ const mockJwk = (): JWK => {
 
 const mockKeyPair = async (): Promise<SolidClientAuthnCore.KeyPair> => {
   return {
-    privateKey: (await importJWK(mockJwk())) as KeyObject,
+    privateKey: (await importJWK(mockJwk())) as CryptoKey,
     // Use the same JWK for public and private key out of convenience, don't do
     // this in real life.
     publicKey: mockJwk(),

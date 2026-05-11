@@ -29,11 +29,10 @@ import {
   mockStorageUtility,
   // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
-import type { JWK } from "jose";
+import type { JWK, CryptoKey } from "jose";
 import { importJWK } from "jose";
 import type { refresh } from "@inrupt/oidc-client-ext";
 import { EventEmitter } from "events";
-import type { KeyObject } from "crypto";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockDefaultIssuerConfigFetcher,
@@ -70,7 +69,7 @@ const mockJwk = (): JWK => {
 
 const mockKeyPair = async (): Promise<KeyPair> => {
   return {
-    privateKey: (await importJWK(mockJwk())) as KeyObject,
+    privateKey: (await importJWK(mockJwk())) as CryptoKey,
     // Use the same JWK for public and private key out of convenience, don't do
     // this in real life.
     publicKey: mockJwk(),

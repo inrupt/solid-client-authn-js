@@ -49,9 +49,9 @@ import {
 
 import { URL } from "url";
 import { Issuer } from "openid-client";
-import type { KeyObject } from "crypto";
 import type { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+import { asDPoPInput } from "../../../util/dpopInput";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -151,10 +151,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       removeOpenIdParams(inputRedirectUrl).href,
       params,
       { code_verifier: oidcContext.codeVerifier, state: oauthState },
-      // The KeyLike type is dynamically bound to either KeyObject or CryptoKey
-      // at runtime depending on the environment. Here, we know we are in a NodeJS
-      // context.
-      { DPoP: dpopKey?.privateKey as KeyObject },
+      { DPoP: dpopKey ? asDPoPInput(dpopKey.privateKey) : undefined },
     );
 
     if (

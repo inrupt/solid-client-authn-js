@@ -40,10 +40,10 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { IssuerMetadata, TokenSet } from "openid-client";
 import { Issuer } from "openid-client";
-import type { KeyObject } from "crypto";
 import type { EventEmitter } from "events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
+import { asDPoPInput } from "../../../util/dpopInput";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -151,11 +151,7 @@ export default class TokenRefresher implements ITokenRefresher {
 
     const tokenSet = await tokenSetToTokenEndpointResponse(
       await client.refresh(refreshToken, {
-        // openid-client does not support yet jose@3.x, and expects
-        // type definitions that are no longer present. However, the JWK
-        // type that we pass here is compatible with the API, hence the type
-        // assertion.
-        DPoP: dpopKey ? (dpopKey.privateKey as KeyObject) : undefined,
+        DPoP: dpopKey ? asDPoPInput(dpopKey.privateKey) : undefined,
       }),
       issuer.metadata,
       clientInfo,

@@ -18,27 +18,15 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Environment from "jest-environment-jsdom";
+import type { CryptoKey } from "jose";
+import type { KeyObject } from "node:crypto";
 
-export default class CustomTestEnvironment extends Environment {
-  async setup() {
-    await super.setup();
-    if (typeof this.global.structuredClone === "undefined") {
-      this.global.structuredClone = structuredClone;
-    }
-    if (typeof this.global.TextEncoder === "undefined") {
-      // The following doesn't work from jest-jsdom-polyfills.
-      // TextEncoder (global or via 'util') references a Uint8Array constructor
-      // different than the global one used by users in tests. This makes sure the
-      // same constructor is referenced by both.
-      this.global.Uint8Array = Uint8Array;
-    }
-
-    // jsdom makes window.location non-configurable, so jest.spyOn cannot
-    // mock it. Expose reconfigure so tests can change the URL.
-    const { dom } = this;
-    this.global.__setTestUrl = (url: string) => {
-      dom?.reconfigure({ url });
-    };
-  }
-}
+// FIXME: Remove this helper when openid-client is upgraded to v6.
+// openid-client v5's DPoPInput type is `KeyObject | Parameters<crypto.createPrivateKey>[0]`,
+// but at runtime it also accepts a Web Crypto `CryptoKey` (verified via the
+// `Symbol.toStringTag === 'CryptoKey'` check in its `dpopProof` method).
+// jose v6's `generateKeyPair` returns a `CryptoKey`, so we need to bridge the
+// type mismatch. openid-client v6 uses jose v6 natively and accepts `CryptoKey`
+// directly, so this helper becomes unnecessary after that upgrade.
+export const asDPoPInput = (key: CryptoKey): KeyObject =>
+  key as unknown as KeyObject;

@@ -25,6 +25,7 @@ import {
   createJsWithTsPreset,
   type JestConfigWithTsJest,
 } from "ts-jest";
+import { join } from "node:path";
 
 // Jest 30 loads .ts config files as ESM via Node's native TypeScript support,
 // so `require` is not available. Use createRequire for require.resolve calls.
@@ -40,11 +41,20 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
   ...defaultPreset,
   roots: ["<rootDir>"],
   testMatch: ["**/*.spec.ts"],
-  modulePathIgnorePatterns: ["dist/", "<rootDir>/examples/"],
+  modulePathIgnorePatterns: ["dist", join("<rootDir>", "examples")],
   coveragePathIgnorePatterns: [".*.spec.ts", "dist/"],
   clearMocks: true,
   injectGlobals: false,
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  setupFilesAfterEnv: [join("<rootDir>", "jest.setup.ts")],
+  transform: {
+    ...defaultPreset.transform,
+    // [\\\\/] expands to [\\/], which makes the regex Windows-compatible.
+    "node_modules[\\\\/]jose.+\\.js$": [
+      "ts-jest",
+      { tsconfig: { allowJs: true } },
+    ],
+  },
+  transformIgnorePatterns: ["node_modules[\\\\/](?!jose)"],
   moduleNameMapper: {
     "^jose": esmRequire.resolve("jose"),
   },
