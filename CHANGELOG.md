@@ -12,6 +12,9 @@ The following changes have been implemented but not released yet:
 ### Breaking changes
 
 - Node 20 is no longer supported after it went end-of-life end of March 2026 (see https://nodejs.org/en/about/previous-releases).
+- With the `jose` v6 upgrade, the `KeyPair` type's `privateKey` attribute changes from `KeyLike` type to `CryptoKey`. This type
+  is surfaced in `SessionTokenSet.dpopKey`, so users serializing and deserializing DPoP-bound tokens will need to adjust to use
+  the latest type from the `jose` library.
 
 ## [4.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v4.0.0) - 2026-03-30
 
