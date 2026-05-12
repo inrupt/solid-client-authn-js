@@ -53,8 +53,12 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
       "ts-jest",
       { tsconfig: { allowJs: true } },
     ],
+    "node_modules[\\\\/]uuid.+\\.js$": [
+      "ts-jest",
+      { tsconfig: { allowJs: true } },
+    ],
   },
-  transformIgnorePatterns: ["node_modules[\\\\/](?!jose)"],
+  transformIgnorePatterns: ["node_modules[\\\\/](?!jose|uuid)"],
   moduleNameMapper: {
     "^jose": esmRequire.resolve("jose"),
   },
