@@ -20,6 +20,7 @@
 
 import cookieSession from "cookie-session";
 import express from "express";
+import helmet from "helmet";
 import type {
   ISessionOptions,
   SessionTokenSet,
@@ -48,6 +49,8 @@ export function createApp(
 
   const sessionTokenSets = new Map<string, SessionTokenSet>();
   const authStates = new Map<string, AuthorizationRequestState>();
+
+  app.use(helmet());
 
   app.use(
     cookieSession({
