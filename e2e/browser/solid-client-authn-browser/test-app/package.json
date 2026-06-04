@@ -24,6 +24,6 @@
     "@types/react-dom": "^19.2.3",
     "esbuild": "^0.28.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^16.2.6"
+    "eslint-config-next": "^16.2.7"
   }
 }
