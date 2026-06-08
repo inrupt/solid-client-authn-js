@@ -20,7 +20,7 @@
 
 import { it, describe, expect } from "@jest/globals";
 import type { CryptoKey } from "jose";
-import { generateKeyPair, exportJWK, jwtVerify } from "jose";
+import { generateKeyPair, exportJWK, jwtVerify, base64url } from "jose";
 import { createDpopHeader, generateDpopKeyPair } from "./dpopUtils";
 
 let publicKey: CryptoKey | undefined;
@@ -91,7 +91,51 @@ describe("createDpopHeader", () => {
     );
     expect(protectedHeader.alg).toBe("ES256");
     expect(protectedHeader.typ).toBe("dpop+jwt");
-    expect(protectedHeader.jwk).toEqual((await mockKeyPair()).publicKey);
+    // The embedded JWK is now produced by the `dpop` package. It exports the
+    // canonical *public* members (`kty`, `crv`, `x`, `y` for EC) rather than the
+    // exact object inrupt previously passed through, so assert on the
+    // confirmation-relevant members rather than strict object equality.
+    const expectedJwk = (await mockKeyPair()).publicKey;
+    expect(protectedHeader.jwk).toMatchObject({
+      kty: expectedJwk.kty,
+      crv: expectedJwk.crv,
+      x: expectedJwk.x,
+      y: expectedJwk.y,
+    });
+  });
+
+  // POC: replaces the manual `ath` computation that PR #4292 added by hand.
+  // With the `dpop` package, `ath` is derived from the access token inside the
+  // library, so we just assert the spec-defined value is present and correct.
+  it("binds the proof to the access token via the RFC 9449 'ath' claim when provided", async () => {
+    const accessToken = "some.access.token";
+    const header = await createDpopHeader(
+      "https://some.resource",
+      "GET",
+      await mockKeyPair(),
+      accessToken,
+    );
+    const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
+    // RFC 9449 §4.2: ath = base64url(SHA-256(ASCII(access token))).
+    const expectedAth = base64url.encode(
+      new Uint8Array(
+        await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(accessToken),
+        ),
+      ),
+    );
+    expect(payload.ath).toBe(expectedAth);
+  });
+
+  it("omits the 'ath' claim when no access token is provided (back-compatible)", async () => {
+    const header = await createDpopHeader(
+      "https://some.resource",
+      "GET",
+      await mockKeyPair(),
+    );
+    const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
+    expect(payload.ath).toBeUndefined();
   });
 });
 
