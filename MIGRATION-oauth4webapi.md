@@ -354,3 +354,129 @@ migration (Phase 2) avoids the round-trip by holding a non-extractable
 `oauth.DPoP()` handle through the grants — matching `@solid/reactive-authentication`
 exactly. The POC's approach is the minimal, lowest-risk slice that proves `dpop` produces
 a spec-correct, `ath`-bearing proof drop-in for the existing hand-rolled one.
+
+---
+
+## 10. Phase 4 — node package
+
+Phase 4 migrates the **`packages/node`** (`@inrupt/solid-client-authn-node`) OAuth/DPoP
+stack off **`openid-client` v5** (+ the `jose`/`KeyObject` DPoP bridge) onto **`oauth4webapi`
+v3 + `dpop` v2**, consolidating node onto the same library the browser package adopted in
+Phase 2. Discovery, the authorization-code login, client-credentials login, refresh, and DCR
+all now go through oauth4webapi; the `openid-client` dependency is dropped.
+
+> ⚠️ **Not built/tested.** Per the migration constraints, deps were **not installed**
+> (`oauth4webapi`/`dpop` added to the manifest, no `npm install`), so this code was
+> **neither compiled nor tested**. Everything below is type-plausible against the documented
+> oauth4webapi v3 / dpop v2 API and modelled on `@solid/reactive-authentication`, but **all of
+> it requires CI validation** (typecheck + unit + conformance/CTH). Spots most likely to need
+> adjustment are flagged **(CI-validate)**.
+
+### Files migrated
+
+| File | Before (LOC) | After (LOC) | What changed |
+|---|---:|---:|---|
+| `src/login/oidc/oauth/oauthAdapter.ts` | — | ~270 (new) | **New shared node seam** (mirror of the Phase-2 browser adapter). Maps `IIssuerConfig`→`AuthorizationServer`, `IClient`→`Client`; selects the `ClientAuth` helper; builds DPoP handles (`dpopHandle` from a fresh `CryptoKeyPair`, `dpopHandleFromStoredKeyPair` from the persisted JWK `KeyPair` on refresh); `generateDpopCryptoKeyPair` (**extractable** — see note); `keyPairFromCryptoKeyPair` (CryptoKeyPair→inrupt `KeyPair`); `mapOauthError`. |
+| `src/login/oidc/IssuerConfigFetcher.ts` | 177 | ~180 | `Issuer.discover` → `oauth.discoveryRequest` + `oauth.processDiscoveryResponse` (`algorithm: "oidc"`). `configFromIssuerMetadata`→`configFromAuthorizationServer`; `configToIssuerMetadata` **removed** (superseded by `asAuthorizationServer`). |
+| `src/login/oidc/oidcHandlers/AuthorizationCodeWithPkceOidcHandler.ts` | 92 | ~95 | `generators.*` + `client.authorizationUrl` → `oauth.generateRandomCodeVerifier` / `calculatePKCECodeChallenge` / `generateRandomState`, authorization URL assembled manually from the discovered `authorization_endpoint` (as the reference does). |
+| `src/login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler.ts` | 233 | ~280 | `client.callbackParams`/`client.callback` → `oauth.validateAuthResponse` → `authorizationCodeGrantRequest` → `processAuthorizationCodeResponse` (+ `oauth.DPoP()` handle, `use_dpop_nonce` retry guard). ID-token validation kept via `getWebidFromTokenPayload`. |
+| `src/login/oidc/oidcHandlers/ClientCredentialsOidcHandler.ts` | 175 | ~200 | `client.grant({grant_type:"client_credentials"})` → `oauth.clientCredentialsGrantRequest` + `processClientCredentialsResponse` (+ DPoP handle). **Conformance-critical** (CTH/ESS bot login). Mirrors `reactive-authentication/ClientCredentialsTokenProvider`. |
+| `src/login/oidc/refresh/TokenRefresher.ts` | 181 | ~210 | `client.refresh` → `oauth.refreshTokenGrantRequest` + `processRefreshTokenResponse`, reusing the **same bound DPoP key** via `dpopHandleFromStoredKeyPair`. `tokenSetToTokenEndpointResponse` keeps the bearer/DPoP `token_type` assertion (now lowercase) + ID-token validation. |
+| `src/login/oidc/ClientRegistrar.ts` | 196 | ~205 | DCR `issuer.Client.register` → `oauth.dynamicClientRegistrationRequest` + `processDynamicClientRegistrationResponse` (required to drop `openid-client`; nominally Phase 3). |
+| `src/util/dpopInput.ts` | 33 | **deleted** | The `openid-client` v5 ↔ jose `KeyObject` DPoP bridge (`asDPoPInput`). Fully unreferenced after migration → removed. |
+| `src/login/oidc/__mocks__/IssuerConfigFetcher.ts` | (test) | (test) | `IssuerMetadata`→`AuthorizationServer`; `configFromIssuerMetadata`→`configFromAuthorizationServer`. Added `registrationEndpoint` to `IssuerConfigFetcherFetchConfigResponse` (DCR now reads it from `IIssuerConfig`). |
+| `src/login/oidc/__mocks__/ClientRegistrar.ts` | (test) | (test) | openid-client `ClientMetadata`→oauth4webapi `Client` (snake_case) for the registration-response mock. |
+| `*.spec.ts` (IssuerConfigFetcher, ClientRegistrar, AuthCodeRedirectHandler, ClientCredentialsOidcHandler, TokenRefresher, dependencies, Session.static, AuthorizationCodeWithPkceOidcHandler) | (test) | (test) | Re-pointed `jest.mock("openid-client")` → `jest.mock("oauth4webapi")` at the grant/discovery/DCR boundary (Phase-2 style). openid-client-call-shape assertions rewritten against oauth4webapi positional args; `token_type` mocks lowercased. **(CI-validate)** |
+| `package.json` | — | — | **Removed** `openid-client`. **Added** `oauth4webapi ^3` + `dpop ^2`. `jose` + `uuid` **kept** (still used by `Session.ts` / `multisession.fromTokens.ts`). |
+
+**Net implementation LOC: +571 across the node package** (mostly the new ~270-line adapter
++ inline grant/retry/error-map scaffolding + spec re-pointing; the heavyweight `openid-client`
+transitive stack is removed from the dependency tree). The deleted `dpopInput.ts` bridge and the
+collapsed discovery/issuer-metadata mapping offset some of it.
+
+### openid-client → oauth4webapi call mapping
+
+| openid-client (v5) | oauth4webapi (v3) / dpop (v2) |
+|---|---|
+| `Issuer.discover(issuer)` | `oauth.discoveryRequest(url, { algorithm: "oidc" })` → `oauth.processDiscoveryResponse(url, res)` |
+| `new Issuer(metadata)` / `configToIssuerMetadata` | `asAuthorizationServer(issuerConfig)` (adapter) — stateless `AuthorizationServer` record |
+| `new issuer.Client({ client_id, client_secret, token_endpoint_auth_method })` | `asOauthClient(client)` + `clientAuthFor(client)` (adapter) — `Client` record + `ClientAuth` |
+| `generators.codeVerifier()` / `generators.codeChallenge()` / `generators.state()` | `oauth.generateRandomCodeVerifier()` / `oauth.calculatePKCECodeChallenge()` / `oauth.generateRandomState()` |
+| `client.authorizationUrl({...})` | manual `URL` + `searchParams` from `authorization_endpoint` |
+| `client.callbackParams(url)` + `client.callback(redirect, params, { code_verifier, state }, { DPoP })` | `oauth.validateAuthResponse(as, client, url, state)` → `oauth.authorizationCodeGrantRequest(as, client, clientAuth, params, redirectUri, codeVerifier, { DPoP })` → `oauth.processAuthorizationCodeResponse(as, client, res, { expectedNonce: oauth.expectNoNonce, requireIdToken: true })` |
+| `client.grant({ grant_type: "client_credentials", scope }, { DPoP })` | `oauth.clientCredentialsGrantRequest(as, client, clientAuth, { scope }, { DPoP })` → `oauth.processClientCredentialsResponse(as, client, res)` |
+| `client.refresh(refreshToken, { DPoP })` | `oauth.refreshTokenGrantRequest(as, client, clientAuth, refreshToken, { DPoP })` → `oauth.processRefreshTokenResponse(as, client, res)` |
+| `issuer.Client.register(metadata)` | `oauth.dynamicClientRegistrationRequest(as, metadata)` → `oauth.processDynamicClientRegistrationResponse(res)` |
+| DPoP: `{ DPoP: asDPoPInput(keyPair.privateKey) }` (`KeyObject` cast) | `oauth.DPoP(client, cryptoKeyPair)` handle; `dpop.generateProof` for resource requests (in core, Phase 1) — native RFC 9449 `ath` + `use_dpop_nonce` |
+| error: `tokenSet`/string parsing | `mapOauthError`: `ResponseBodyError`/`AuthorizationResponseError`/`WWWAuthenticateChallengeError` → `OidcProviderError`; `OperationProcessingError` → `InvalidResponseError` |
+
+### `dpopInput.ts` deletion
+
+`src/util/dpopInput.ts` (`asDPoPInput`) existed solely to cast a jose v6 `CryptoKey` to the
+`KeyObject` type that openid-client v5's `DPoPInput` expected at compile time. With
+`openid-client` gone, `oauth.DPoP()` takes the `CryptoKeyPair` directly, so the bridge is
+**fully unreferenced and deleted**. (Its FIXME predicted exactly this: "becomes unnecessary
+after [the openid-client] upgrade".)
+
+### Removed from `package.json`
+
+- **`openid-client` ^5.7.1** — removed (no production or test code references it any more;
+  the two `__mocks__` files that imported its types were re-pointed to oauth4webapi types).
+- **Added:** `oauth4webapi ^3`, `dpop ^2`.
+- **Kept:** `jose` (`Session.ts` `exportJWK`; `multisession.fromTokens.ts`
+  `createRemoteJWKSet`/`jwtVerify`; the adapter's JWK bridge) and `uuid` (`Session.ts` `v4`).
+  **(CI-validate)** node does not `import` `dpop` directly — it gets DPoP via `oauth.DPoP()`
+  (oauth4webapi depends on `dpop` transitively). `dpop ^2` is declared per the migration scope
+  and for parity with `packages/core`/`packages/oidc-browser`; if a `depcheck`-style lint flags
+  it as unused-direct, either drop it from node or add a one-line `import "dpop"` re-export.
+
+### (CI-validate) points / top correctness risks
+
+1. **Client-credentials / conformance (highest risk).** The CTH + ESS bot login flows depend on
+   this handler returning a DPoP-bound `at+jwt`. `clientAuthFor` deliberately uses a
+   **non-URL-encoding** `ClientSecretBasic` (base64 of raw `clientId:clientSecret`) to match
+   both the legacy openid-client behaviour **and** ESS/PodSpaces (which reject the spec-conformant
+   URL-encoded form — the same wrinkle Phase 2 flagged, and the workaround
+   `@solid/reactive-authentication` ships for `login.inrupt.com`). If a non-ESS IdP needs the
+   spec form, fingerprint the issuer in `clientAuthFor` and fall back to `oauth.ClientSecretBasic`.
+   **Must be confirmed by the conformance run.**
+2. **DPoP key extractability / storage contract.** `generateDpopCryptoKeyPair` generates an
+   **extractable** key, because inrupt persists the private key (`saveSessionInfoToStorage` →
+   jose `exportJWK`) so the refresh grant can reuse the *same* bound key — a non-extractable key
+   would throw on export. This diverges from the reactive-authentication reference
+   (`extractable: false`, popup-only, never persists). `// TODO(migration)`: move to a
+   non-extractable `CryptoKeyPair` stored directly (no JWK round-trip) — a **storage-format
+   change**, deferred. The persisted `KeyPair` shape (`{ privateKey: CryptoKey, publicKey: JWK }`)
+   is **unchanged**, so existing sessions keep working.
+3. **Refresh reuses the bound key (correctness-critical).** `TokenRefresher` rebuilds the DPoP
+   handle from the persisted `KeyPair` via `dpopHandleFromStoredKeyPair` (jose `importJWK` bridge),
+   so the refresh proof is bound to the original key. **(CI-validate)** confirm the round-trip
+   preserves the key identity end-to-end.
+4. **`expectedNonce: oauth.expectNoNonce` + `requireIdToken: true`** on the auth-code path —
+   preserves inrupt's parity (no OIDC `nonce` threaded; `id_token` hard-required). **(CI-validate)**
+   against IdPs that mandate a nonce.
+5. **`token_type` lowercasing.** oauth4webapi normalises `token_type` to lowercase; `TokenRefresher`'s
+   assertion + the specs were updated from `"DPoP"`/`"Bearer"` to `"dpop"`/`"bearer"`. The public
+   `TokenEndpointResponse.tokenType` is mapped back to the capitalised form. **(CI-validate)**
+6. **DCR registration endpoint now read from `IIssuerConfig`.** Previously it came from the
+   re-instantiated openid-client `Issuer.metadata`; now `ClientRegistrar` reads
+   `issuerConfig.registrationEndpoint` directly. The shared issuer-config mock gained a
+   `registrationEndpoint`; the "no registration endpoint" test strips it explicitly. **(CI-validate)**
+7. **Spec mocks (all re-pointed specs).** Assume exact oauth4webapi v3 function names/return shapes;
+   not executed offline. The `it.todo`-equivalent rewrites (openid-client call-shape assertions →
+   oauth4webapi positional-arg assertions) need a green run to confirm. **(CI-validate)**
+8. **Public API preserved.** No change to the exported `Session` surface, the `IOidcHandler`/
+   `ITokenRefresher` handler contracts, `EVENTS` emissions (`NEW_TOKENS`/`NEW_REFRESH_TOKEN`/
+   `AUTHORIZATION_REQUEST`), error types (`OidcProviderError`/`InvalidResponseError`), or the
+   storage/`KeyPair` format. `src/index.ts` exports are untouched; dependents compile unchanged.
+
+### What remains
+
+- **Phase 3 (cross-cutting):** thread the discovered `AuthorizationServer` through directly
+  (removing the `asAuthorizationServer` re-mapping seam shared by node + browser); move
+  `oauth.validateAuthResponse` fully into the redirect handlers with real branded params; PKCE
+  polish; id-token/WebID validation via `oauth.getValidatedIdTokenClaims` (currently still
+  `getWebidFromTokenPayload`).
+- **Phase 5 (final dead-dep sweep, repo-wide):** confirm `openid-client` and `oidc-client-ts`
+  are gone everywhere; re-evaluate the `uuid` deps; resolve the `dpop` direct-vs-transitive
+  question (item 5 above) — all **once CI is green**.
