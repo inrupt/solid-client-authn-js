@@ -23,6 +23,23 @@
  * @packageDocumentation
  */
 
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 4 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: discovery went through `openid-client` `Issuer.discover(issuer)` and
+// the resulting `IssuerMetadata` was mapped to `IIssuerConfig` via
+// `configFromIssuerMetadata`. The reverse mapping (`configToIssuerMetadata`)
+// was consumed across the package to re-instantiate an openid-client `Issuer`.
+//
+// After: discovery is `oauth.discoveryRequest` + `oauth.processDiscoveryResponse`
+// (OIDC well-known algorithm — same default as `Issuer.discover`), producing an
+// `oauth.AuthorizationServer`, mapped to `IIssuerConfig` by
+// `configFromAuthorizationServer`. The `oauth.AuthorizationServer` shape is
+// rebuilt directly from `IIssuerConfig` by `asAuthorizationServer` in
+// `oauth/oauthAdapter.ts`, so `configToIssuerMetadata` (and the openid-client
+// `IssuerMetadata` dependency) is gone.
+// ---------------------------------------------------------------------------
+
 /**
  * Responsible for fetching an IDP configuration
  */
@@ -32,20 +49,20 @@ import type {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
-import type { IssuerMetadata } from "openid-client";
-import { Issuer } from "openid-client";
+import * as oauth from "oauth4webapi";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
 /**
- * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]
- * @param metadata the object to transform.
+ * Transforms an oauth4webapi {@link oauth.AuthorizationServer} object into an
+ * [[IIssuerConfig]].
+ * @param metadata the discovered Authorization Server metadata to transform.
  * @returns an [[IIssuerConfig]] initialized from the metadata.
  * @internal
  */
-export function configFromIssuerMetadata(
-  metadata: IssuerMetadata,
+export function configFromAuthorizationServer(
+  metadata: oauth.AuthorizationServer,
 ): IIssuerConfig {
   // If the fields required as per https://openid.net/specs/openid-connect-discovery-1_0.html are missing,
   // throw an error.
@@ -98,7 +115,7 @@ export function configFromIssuerMetadata(
     requestObjectSigningAlgValuesSupported:
       metadata.request_object_signing_alg_values_supported,
     // TODO: add revocation_endpoint, end_session_endpoint, introspection_endpoint_auth_methods_supported, introspection_endpoint_auth_signing_alg_values_supported, revocation_endpoint_auth_methods_supported, revocation_endpoint_auth_signing_alg_values_supported, mtls_endpoint_aliases to IIssuerConfig
-    // The following properties may be captured as "unkown" entries in the metadata object.
+    // The following properties may be captured as "unknown" entries in the metadata object.
     grantTypesSupported: metadata.grant_types_supported as string[] | undefined,
     responseTypesSupported: metadata.response_types_supported as
       | string[]
@@ -110,36 +127,6 @@ export function configFromIssuerMetadata(
         ? ["openid"]
         : (metadata.scopes_supported as string[]),
     endSessionEndpoint: metadata.end_session_endpoint,
-  };
-}
-
-/**
- * Transforms an [[IIssuerConfig]] into an openid-client IssuerMetadata
- * @param config the IIssuerConfig to convert.
- * @returns an IssuerMetadata object initialized from the [[IIssuerConfig]].
- */
-export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
-  return {
-    issuer: config.issuer,
-    authorization_endpoint: config.authorizationEndpoint,
-    jwks_uri: config.jwksUri,
-    token_endpoint: config.tokenEndpoint,
-    registration_endpoint: config.registrationEndpoint,
-    subject_types_supported: config.subjectTypesSupported,
-    claims_supported: config.claimsSupported,
-    token_endpoint_auth_signing_alg_values_supported:
-      config.tokenEndpointAuthSigningAlgValuesSupported,
-    userinfo_endpoint: config.userinfoEndpoint,
-    token_endpoint_auth_methods_supported:
-      config.tokenEndpointAuthMethodsSupported,
-    request_object_signing_alg_values_supported:
-      config.requestObjectSigningAlgValuesSupported,
-    grant_types_supported: config.grantTypesSupported,
-    response_types_supported: config.responseTypesSupported,
-    id_token_signing_alg_values_supported:
-      config.idTokenSigningAlgValuesSupported,
-    scopes_supported: config.scopesSupported,
-    end_session_endpoint: config.endSessionEndpoint,
   };
 }
 
@@ -159,12 +146,22 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
 
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
     // TODO: The issuer config discovery happens in multiple places in the current
-    // codebase, because in openid-client the Client is built based on the Issuer.
-    // The codebase could be refactored so that issuer discovery only happens once.
-    const oidcIssuer = await Issuer.discover(issuer);
-    const issuerConfig: IIssuerConfig = configFromIssuerMetadata(
-      oidcIssuer.metadata,
+    // codebase. The codebase could be refactored so that issuer discovery only
+    // happens once and the AuthorizationServer is threaded through directly
+    // (Phase 3 cross-cutting cleanup).
+    const issuerUrl = new URL(issuer);
+    // `algorithm: "oidc"` resolves the OpenID Connect Discovery 1.0 well-known
+    // path, matching the legacy `openid-client` `Issuer.discover` default used by
+    // Solid IdPs.
+    const discoveryResponse = await oauth.discoveryRequest(issuerUrl, {
+      algorithm: "oidc",
+    });
+    const authorizationServer = await oauth.processDiscoveryResponse(
+      issuerUrl,
+      discoveryResponse,
     );
+    const issuerConfig: IIssuerConfig =
+      configFromAuthorizationServer(authorizationServer);
     // Update store with fetched config
     await this.storageUtility.set(
       IssuerConfigFetcher.getLocalStorageKey(issuer),
