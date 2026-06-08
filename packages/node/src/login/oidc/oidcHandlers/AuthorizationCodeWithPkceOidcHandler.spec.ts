@@ -40,6 +40,14 @@ import {
 } from "../__mocks__/IOidcOptions";
 import { mockRedirector, mockedRedirector } from "../__mocks__/Redirector";
 
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): the handler builds its authorization URL with real
+// oauth4webapi PKCE/state helpers (`generateRandomCodeVerifier`,
+// `calculatePKCECodeChallenge`, `generateRandomState`) instead of openid-client
+// `generators`/`client.authorizationUrl`. These run on Web Crypto in the node
+// test env, so no oauth4webapi mock is needed — the existing URL-shape
+// assertions below should hold. (CI-validate: not executed in this branch.)
+// ---------------------------------------------------------------------------
 describe("AuthorizationCodeWithPkceOidcHandler", () => {
   const defaultMocks = {
     sessionCreator: SessionInfoManagerMock,

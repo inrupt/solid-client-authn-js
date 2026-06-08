@@ -23,12 +23,22 @@ import type { AuthorizationRequestState, SessionTokenSet } from "core";
 import { SignJWT, generateKeyPair, exportJWK } from "jose";
 import { validate } from "uuid";
 import type * as Jose from "jose";
-import type * as OpenIdClient from "openid-client";
 import { Session } from "./Session";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): Session's node login path now uses oauth4webapi for both
+// discovery (`discoveryRequest`/`processDiscoveryResponse`) and the auth-code
+// token exchange (`validateAuthResponse` → `authorizationCodeGrantRequest` →
+// `processAuthorizationCodeResponse`). These mocks replace the openid-client
+// `Issuer`/`Client.callback` mocks.
+//
+// NOTE (CI-validate): not executed in this branch (deps not installed). Tests
+// that previously asserted the openid-client `client.callback(...)` argument
+// list now assert against `authorizationCodeGrantRequest`'s positional args.
+// ---------------------------------------------------------------------------
 jest.mock("jose", () => {
   const actualJose = jest.requireActual("jose") as typeof Jose;
   return {
@@ -59,41 +69,32 @@ const mockOpConfig = (
   end_session_endpoint: "https://my.idp/endSessionEndpoint",
 });
 
-const mockOpDiscovery = (config?: Record<string, unknown>) => {
-  const opClientMock = jest.requireMock("openid-client") as jest.Mocked<
-    typeof OpenIdClient
-  >;
-  // We only need the discovery to mock the OP configuration.
-  opClientMock.Issuer.discover.mockResolvedValue({
-    metadata: config ?? mockOpConfig(),
-  } as any);
-};
-
-// FIXME: When openid-client has been migrated to 6.x.y, it will use fetch,
-// so the global fetch can be mocked for the token request and the following
-// mocks can be simplified.
-jest.mock("openid-client", () => {
-  const actualOpenidClient = jest.requireActual(
-    "openid-client",
-  ) as typeof OpenIdClient;
-  const mockedClient = jest.fn();
-
-  // Create a mock constructor function for Issuer
-  const MockIssuer = function Issuer(this: any, metadata: any) {
-    // Set up properties that would be on an Issuer instance
-    this.metadata = metadata;
-
-    // Define Client constructor on the instance
-    this.Client = mockedClient;
-  } as any;
-  MockIssuer.discover = jest.fn();
-  MockIssuer.mockClient = mockedClient;
-
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
   return {
-    ...actualOpenidClient,
-    Issuer: MockIssuer,
+    ...actual,
+    discoveryRequest: jest.fn(() => Promise.resolve(new Response())),
+    processDiscoveryResponse: jest.fn(),
+    validateAuthResponse: jest.fn(),
+    authorizationCodeGrantRequest: jest.fn(() =>
+      Promise.resolve(new Response()),
+    ),
+    processAuthorizationCodeResponse: jest.fn(),
+    DPoP: jest.fn(() => ({ __dpopHandle: true })),
+    isDPoPNonceError: jest.fn(() => false),
   };
 });
+
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
+
+const mockOpDiscovery = (config?: Record<string, unknown>) => {
+  // We only need the discovery to mock the OP configuration.
+  (oauth.discoveryRequest as jest.Mock<any>).mockResolvedValue(new Response());
+  (oauth.processDiscoveryResponse as jest.Mock<any>).mockResolvedValue(
+    config ?? mockOpConfig(),
+  );
+};
 
 const mockWebid = "https://example.com/profile#me";
 const mockClientId = "client123";
@@ -119,23 +120,27 @@ const mockIdToken = async (payload: Jose.JWTPayload) => {
 };
 
 const mockOpClient = (params: { code: string; state: string }) => {
-  const opClientMock = jest.requireMock("openid-client") as {
-    Issuer: { mockClient: ReturnType<typeof jest.fn> };
-  };
-  const mockedCallback = jest.fn().mockImplementation(
+  // `validateAuthResponse` returns the (branded) callback params consumed by
+  // `authorizationCodeGrantRequest`.
+  (oauth.validateAuthResponse as jest.Mock<any>).mockReturnValue(
+    new URLSearchParams(params),
+  );
+  // `processAuthorizationCodeResponse` yields the processed token set.
+  const processMock = jest.fn().mockImplementation(
     async () =>
       ({
         access_token: "mock-access-token",
         id_token: await mockIdToken({}),
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        token_type: "dpop",
+        expires_in: 3600,
       }) as never,
   );
-  opClientMock.Issuer.mockClient.mockImplementation(() => ({
-    callbackParams: () => params,
-    callback: mockedCallback,
-    metadata: jest.fn(),
-  }));
-  return mockedCallback;
+  (oauth.processAuthorizationCodeResponse as jest.Mock<any>).mockImplementation(
+    processMock,
+  );
+  // Returned mock is the *grant request* fn, whose positional args the tests
+  // assert against (redirect URI, code verifier, DPoP handle).
+  return oauth.authorizationCodeGrantRequest as jest.Mock<any>;
 };
 
 const mockAuthRequestState = (
@@ -317,28 +322,25 @@ describe("Session static functions", () => {
         // This tests for implementation rather than behavior, but it is simpler
         // this way and can be improved when migrating to openid-client v6, where
         // only network interaction can be mocked.
-        const mockedCallback = mockOpClient({
+        const mockedGrant = mockOpClient({
           code: "some-authorization-code",
           state: "test-state",
         });
 
         await session.handleIncomingRedirect(redirectUrl.href);
 
-        expect(mockedCallback).toHaveBeenCalled();
-        const [requestRedirectUrl, params, verifier, dpop] =
-          mockedCallback.mock.calls[0];
+        expect(mockedGrant).toHaveBeenCalled();
+        // MIGRATION (Phase 4): oauth4webapi `authorizationCodeGrantRequest`
+        // positional args: (as, client, clientAuth, params, redirectUri,
+        // codeVerifier, { DPoP }).
+        const [, , , , requestRedirectUrl, verifier, dpop] =
+          mockedGrant.mock.calls[0];
         expect(requestRedirectUrl).toBe(
           new URL(redirectUrl.pathname, redirectUrl.origin).href,
         );
-        // Note that this currently only covers the mocks set up above.
-        expect(params).toStrictEqual({
-          code: "some-authorization-code",
-          state: "test-state",
-        });
-        expect(verifier).toStrictEqual({
-          code_verifier: "test-code-verifier",
-          state: "test-state",
-        });
+        // The stored PKCE code verifier is threaded through.
+        expect(verifier).toBe("test-code-verifier");
+        // A DPoP handle is provided for the dpop-bound session.
         expect(dpop).toStrictEqual(
           expect.objectContaining({ DPoP: expect.anything() }),
         );
@@ -360,7 +362,7 @@ describe("Session static functions", () => {
         redirectUrl.searchParams.append("code", "some-authorization-code");
         redirectUrl.searchParams.append("state", "test-state");
 
-        const mockedCallback = mockOpClient({
+        const mockedGrant = mockOpClient({
           code: "some-authorization-code",
           state: "test-state",
         });
@@ -368,10 +370,10 @@ describe("Session static functions", () => {
         await session.handleIncomingRedirect(redirectUrl.href);
         // Only the dpop parameter is relevant to this test.
 
-        const [_0, _1, _2, dpop] = mockedCallback.mock.calls[0];
-        expect(dpop).toStrictEqual(
-          expect.objectContaining({ DPoP: undefined }),
-        );
+        // MIGRATION (Phase 4): for a non-dpop session, no DPoP handle is passed
+        // (the 7th positional arg is an empty options object).
+        const dpop = mockedGrant.mock.calls[0][6];
+        expect(dpop).toStrictEqual({});
       });
 
       it("generates a UUID as sessionId if not provided", async () => {

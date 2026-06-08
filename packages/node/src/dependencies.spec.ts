@@ -47,7 +47,26 @@ import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/Auth
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): the handlers now drive grants through oauth4webapi.
+// `setupOidcClientMock` mocks the client-credentials grant boundary; the
+// auth-code handler builds its URL with real oauth4webapi PKCE/state helpers
+// (Web Crypto in the node test env), so no mock is needed there.
+//
+// NOTE (CI-validate): not executed in this branch (deps not installed).
+// ---------------------------------------------------------------------------
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    clientCredentialsGrantRequest: jest.fn(() =>
+      Promise.resolve(new Response()),
+    ),
+    processClientCredentialsResponse: jest.fn(),
+    DPoP: jest.fn(() => ({})),
+    isDPoPNonceError: jest.fn(() => false),
+  };
+});
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core",
@@ -61,31 +80,21 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
+
 const setupOidcClientMock = () => {
-  const { Issuer } = jest.requireMock("openid-client") as any;
-  function clientConstructor() {
-    // this is untyped, which makes TS complain
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.grant = jest.fn().mockResolvedValueOnce({
-      access_token: "some token",
-      id_token:
-        "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw",
-      token_type: "Bearer",
-      expired: () => false,
-      claims: jest.fn(),
-    } as any);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.authorizationUrl = jest
-      .fn()
-      .mockReturnValue("https://some.issuer/uri_parameters_go_there/");
-  }
-  const mockedIssuer = {
-    metadata: mockDefaultIssuerConfig(),
-    Client: clientConstructor,
-  };
-  Issuer.mockReturnValueOnce(mockedIssuer);
+  (oauth.clientCredentialsGrantRequest as jest.Mock<any>).mockResolvedValueOnce(
+    new Response(),
+  );
+  (
+    oauth.processClientCredentialsResponse as jest.Mock<any>
+  ).mockResolvedValueOnce({
+    access_token: "some token",
+    id_token:
+      "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw",
+    token_type: "bearer",
+  } as any);
 };
 
 describe("dependencies.node", () => {

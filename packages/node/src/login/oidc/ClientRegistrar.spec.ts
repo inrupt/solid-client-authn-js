@@ -21,44 +21,50 @@
 import { randomUUID } from "crypto";
 import { jest, it, describe, expect } from "@jest/globals";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import type * as OpenIdClient from "openid-client";
 import type { IOpenIdDynamicClient } from "core";
 import ClientRegistrar from "./ClientRegistrar";
-import {
-  IssuerConfigFetcherFetchConfigResponse,
-  mockIssuerMetadata,
-} from "./__mocks__/IssuerConfigFetcher";
+import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientConfig } from "./__mocks__/ClientRegistrar";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): DCR now goes through oauth4webapi
+// (`dynamicClientRegistrationRequest` + `processDynamicClientRegistrationResponse`)
+// instead of openid-client `Issuer.Client.register`. We mock those two
+// functions. IMPORTANT: the registration endpoint is now read from the passed
+// `IIssuerConfig.registrationEndpoint` (the shared mock
+// `IssuerConfigFetcherFetchConfigResponse` now carries one), not from a
+// re-instantiated openid-client Issuer's metadata.
+//
+// NOTE (CI-validate): not executed in this branch (deps not installed).
+// ---------------------------------------------------------------------------
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    dynamicClientRegistrationRequest: jest.fn(() =>
+      Promise.resolve(new Response()),
+    ),
+    processDynamicClientRegistrationResponse: jest.fn(),
+  };
+});
+
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
 
 const mockClientRegistration = (
-  issuerMetadata: Record<string, string | undefined>,
-  clientMetadata: OpenIdClient.ClientMetadata,
+  _issuerMetadata: Record<string, string | undefined>,
+  clientMetadata: Record<string, unknown>,
 ) => {
-  // Sets up the mock-up for DCR
-  const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
-    typeof OpenIdClient
-  >;
-  const mockedIssuerConfig = mockIssuerMetadata(issuerMetadata);
-  const mockedIssuer: OpenIdClient.Issuer<OpenIdClient.BaseClient> = {
-    metadata: mockedIssuerConfig,
-    Client: {
-      register: (jest.fn() as any).mockResolvedValueOnce({
-        metadata: clientMetadata,
-      }),
-      // The assertions are required because we only mock what is strictly necessary for our tests.
-    } as any,
-  } as any;
-
-  Issuer.mockReturnValue(
-    mockedIssuer as jest.MockedObject<
-      OpenIdClient.Issuer<OpenIdClient.BaseClient>
-    >,
-  );
+  // Sets up the oauth4webapi DCR boundary mock.
+  (
+    oauth.dynamicClientRegistrationRequest as jest.Mock<any>
+  ).mockResolvedValueOnce(new Response());
+  (
+    oauth.processDynamicClientRegistrationResponse as jest.Mock<any>
+  ).mockResolvedValueOnce(clientMetadata);
 };
 
 /**
@@ -93,7 +99,12 @@ describe("ClientRegistrar", () => {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          IssuerConfigFetcherFetchConfigResponse,
+          // Explicitly omit the registration endpoint to trigger the failure
+          // (the shared mock now carries one by default — Phase 4).
+          {
+            ...IssuerConfigFetcherFetchConfigResponse,
+            registrationEndpoint: undefined,
+          },
         ),
       ).rejects.toThrow(
         "Dynamic client registration cannot be performed, because issuer does not have a registration endpoint",

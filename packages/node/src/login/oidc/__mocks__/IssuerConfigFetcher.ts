@@ -23,8 +23,13 @@ import type {
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
-import type { IssuerMetadata } from "openid-client";
-import { configFromIssuerMetadata } from "../IssuerConfigFetcher";
+// MIGRATION (Phase 4): the issuer-metadata mock now uses oauth4webapi's
+// `AuthorizationServer` shape (snake_case, identical to the legacy
+// openid-client `IssuerMetadata` for the fields we mock) and the new
+// `configFromAuthorizationServer` mapper, replacing `openid-client`'s
+// `IssuerMetadata` + `configFromIssuerMetadata`.
+import type { AuthorizationServer } from "oauth4webapi";
+import { configFromAuthorizationServer } from "../IssuerConfigFetcher";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -33,6 +38,10 @@ export const IssuerConfigFetcherFetchConfigResponse: IIssuerConfig = {
   issuer: "https://idp.com",
   authorizationEndpoint: "https://idp.com/auth",
   tokenEndpoint: "https://idp.com/token",
+  // MIGRATION (Phase 4): DCR now reads the registration endpoint from the
+  // IIssuerConfig (oauth4webapi `dynamicClientRegistrationRequest`), rather than
+  // from a re-instantiated openid-client Issuer's metadata.
+  registrationEndpoint: "https://idp.com/register",
   jwksUri: "https://idp.com/jwks",
   subjectTypesSupported: [],
   claimsSupported: [],
@@ -47,9 +56,9 @@ export const IssuerConfigFetcherMock = {
   ),
 } as unknown as jest.Mocked<IIssuerConfigFetcher>;
 
-// Note that this returns an instance of IssuerMetadata, which is the equivalent
-// of our IIssuerConfig for openid-client
-export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
+// Note that this returns an oauth4webapi `AuthorizationServer`, which is the
+// equivalent of our IIssuerConfig at the discovery boundary.
+export const mockDefaultIssuerMetadata = (): AuthorizationServer => {
   return {
     issuer: "https://my.idp/",
     authorization_endpoint: "https://my.idp/auth",
@@ -69,8 +78,8 @@ export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
 };
 
 export const mockIssuerMetadata = (
-  config: Partial<IssuerMetadata>,
-): IssuerMetadata => {
+  config: Partial<AuthorizationServer>,
+): AuthorizationServer => {
   return {
     ...mockDefaultIssuerMetadata(),
     ...config,
@@ -78,12 +87,12 @@ export const mockIssuerMetadata = (
 };
 
 export const mockDefaultIssuerConfig = (): IIssuerConfig =>
-  configFromIssuerMetadata(mockDefaultIssuerMetadata());
+  configFromAuthorizationServer(mockDefaultIssuerMetadata());
 export const mockIssuerConfig = (
   config: Partial<IIssuerConfig>,
 ): IIssuerConfig => {
   return {
-    ...configFromIssuerMetadata(mockDefaultIssuerMetadata()),
+    ...configFromAuthorizationServer(mockDefaultIssuerMetadata()),
     ...config,
   };
 };

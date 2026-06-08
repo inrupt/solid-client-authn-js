@@ -26,7 +26,14 @@ import type {
   IOpenIdDynamicClient,
 } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
-import type { ClientMetadata } from "openid-client";
+// MIGRATION (Phase 4): use oauth4webapi's `Client` (snake_case) in place of
+// openid-client's `ClientMetadata` for the registration-response mock shape.
+import type { OmitSymbolProperties, Client } from "oauth4webapi";
+
+type ClientMetadata = OmitSymbolProperties<Client> & {
+  redirect_uris?: string[];
+  response_types?: string[];
+};
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
