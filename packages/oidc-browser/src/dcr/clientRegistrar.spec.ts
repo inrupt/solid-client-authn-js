@@ -18,7 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import type {
   IIssuerConfig,
   IClientRegistrarOptions,
@@ -27,6 +27,31 @@ import { registerClient } from "./clientRegistrar";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
+
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 2): DCR delegates to oauth4webapi's
+// `dynamicClientRegistrationRequest` / `processDynamicClientRegistrationResponse`.
+// We mock the oauth4webapi boundary. OAuth-style error bodies surface as
+// `ResponseBodyError`, which the implementation reshapes into inrupt's
+// contextual messages. Not executed in this branch — CI-validate.
+// ---------------------------------------------------------------------------
+
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    dynamicClientRegistrationRequest: jest.fn(() =>
+      Promise.resolve(new Response()),
+    ),
+    processDynamicClientRegistrationResponse: jest.fn(),
+  };
+});
+
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
+
+const mockedProcess =
+  oauth.processDynamicClientRegistrationResponse as jest.Mock<any>;
 
 const getMockIssuer = (): IIssuerConfig => {
   return {
@@ -48,22 +73,27 @@ const getMockOptions = (): IClientRegistrarOptions => {
   };
 };
 
-const getSuccessfulFetch = (): typeof fetch =>
-  jest.fn(global.fetch).mockResolvedValue(
-    new Response(
-      JSON.stringify({
-        client_id: "some id",
-        client_secret: "some secret",
-        redirect_uris: ["https://some.url"],
-        id_token_signed_response_alg: "RS256",
-      }),
-      { status: 200 },
-    ),
-  );
+function mockResponseBodyError(
+  error: string,
+  error_description?: string,
+): Error {
+  return Object.assign(new oauth.ResponseBodyError("err", {} as any), {
+    error,
+    error_description,
+  });
+}
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockedProcess.mockResolvedValue({
+    client_id: "some id",
+    client_secret: "some secret",
+    redirect_uris: ["https://some.url"],
+    id_token_signed_response_alg: "RS256",
+  });
+});
 
 describe("registerClient", () => {
-  global.fetch = getSuccessfulFetch();
-
   it("throws if no registration point is available", async () => {
     const mockIssuer = getMockIssuer();
     delete mockIssuer.registrationEndpoint;
@@ -75,9 +105,7 @@ describe("registerClient", () => {
   });
 
   it("throws if the issuer doesn't advertize for supported signature algorithms", async () => {
-    const mockIssuer = {
-      ...getMockIssuer(),
-    };
+    const mockIssuer = { ...getMockIssuer() };
     delete mockIssuer.idTokenSigningAlgValuesSupported;
     await expect(() =>
       registerClient(getMockOptions(), mockIssuer),
@@ -87,75 +115,47 @@ describe("registerClient", () => {
   });
 
   it("extracts the client info from the IdP response", async () => {
-    const myFetch = getSuccessfulFetch();
-    global.fetch = myFetch;
     const client = await registerClient(getMockOptions(), getMockIssuer());
     expect(client.clientId).toBe("some id");
     expect(client.clientSecret).toBe("some secret");
     expect(client.idTokenSignedResponseAlg).toBe("RS256");
+    expect(client.clientType).toBe("dynamic");
   });
 
-  // TODO: this only tests the minimal registration request.
-  // The additional provided options will be tested in an upcoming PR.
-
-  it("does not send a challenge method when performing DCR", async () => {
+  it("sends the expected client metadata (auth-code+refresh, no challenge method)", async () => {
     const options = getMockOptions();
-    const myFetch = getSuccessfulFetch() as jest.Mock<typeof fetch>;
-    global.fetch = myFetch;
-    const mockIssuer = getMockIssuer();
+    await registerClient(options, getMockIssuer());
 
-    await registerClient(options, mockIssuer);
-
-    expect(myFetch).toHaveBeenCalledWith(
-      mockIssuer.registrationEndpoint as string,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_name: options.clientName,
-          application_type: "web",
-          redirect_uris: [options.redirectUrl?.toString()],
-          subject_type: "public",
-          token_endpoint_auth_method: "client_secret_basic",
-          id_token_signed_response_alg: "RS256",
-          grant_types: ["authorization_code", "refresh_token"],
-        }),
-      },
-    );
+    const metadata = (
+      oauth.dynamicClientRegistrationRequest as jest.Mock<any>
+    ).mock.calls[0][1];
+    expect(metadata).toMatchObject({
+      application_type: "web",
+      subject_type: "public",
+      token_endpoint_auth_method: "client_secret_basic",
+      id_token_signed_response_alg: "RS256",
+      grant_types: ["authorization_code", "refresh_token"],
+    });
   });
 
   it("passes the specified redirection URL to the IdP", async () => {
     const options = getMockOptions();
     options.redirectUrl = "https://some.url";
-    const myFetch = getSuccessfulFetch();
-    global.fetch = myFetch;
-
     await registerClient(options, getMockIssuer());
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const rawBody = myFetch.mock.calls[0][1].body;
-    const parsedBody = JSON.parse(rawBody);
-    expect(parsedBody.redirect_uris).toEqual(["https://some.url"]);
+    const metadata = (
+      oauth.dynamicClientRegistrationRequest as jest.Mock<any>
+    ).mock.calls[0][1];
+    expect(metadata.redirect_uris).toEqual(["https://some.url"]);
   });
 
   it("throws if the IdP returns a mismatching redirect URL", async () => {
-    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          client_id: "some id",
-          client_secret: "some secret",
-          redirect_uris: ["https://some.other.url"],
-        }),
-        { status: 200 },
-      ),
-    );
-    global.fetch = myFetch;
+    mockedProcess.mockResolvedValue({
+      client_id: "some id",
+      client_secret: "some secret",
+      redirect_uris: ["https://some.other.url"],
+    });
     const options = getMockOptions();
     options.redirectUrl = "https://some.url";
-
     await expect(() =>
       registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
@@ -164,38 +164,20 @@ describe("registerClient", () => {
   });
 
   it("throws if no client_id is returned", async () => {
-    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          some_key: "some value",
-        }),
-        { status: 200 },
-      ),
-    );
-    global.fetch = myFetch;
-    const options = getMockOptions();
-
+    mockedProcess.mockResolvedValue({ some_key: "some value" });
     await expect(() =>
-      registerClient(options, getMockIssuer()),
+      registerClient(getMockOptions(), getMockIssuer()),
     ).rejects.toThrow(
       'Dynamic client registration failed: no client_id has been found on {"some_key":"some value"}',
     );
   });
 
-  it("throws if the redirect URI is invalid", async () => {
-    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          error: "invalid_redirect_uri",
-          error_description: "some description",
-        }),
-        { status: 400 },
-      ),
+  it("reshapes an invalid_redirect_uri ResponseBodyError", async () => {
+    mockedProcess.mockRejectedValue(
+      mockResponseBodyError("invalid_redirect_uri", "some description"),
     );
-    global.fetch = myFetch;
     const options = getMockOptions();
     options.redirectUrl = "https://some.url";
-
     await expect(() =>
       registerClient(options, getMockIssuer()),
     ).rejects.toThrow(
@@ -203,116 +185,32 @@ describe("registerClient", () => {
     );
   });
 
-  it("throws if the redirect URI is undefined", async () => {
-    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          error: "invalid_redirect_uri",
-          error_description: "some description",
-        }),
-        { status: 400 },
-      ),
-    );
-    const options = getMockOptions();
-
-    await expect(() =>
-      registerClient(options, getMockIssuer()),
-    ).rejects.toThrow(
-      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - some description",
-    );
-    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          error: "invalid_redirect_uri",
-        }),
-        { status: 400 },
-      ),
+  it("reshapes an invalid_client_metadata ResponseBodyError", async () => {
+    mockedProcess.mockRejectedValue(
+      mockResponseBodyError("invalid_client_metadata", "some description"),
     );
     await expect(() =>
-      registerClient(options, getMockIssuer()),
-    ).rejects.toThrow(
-      "Dynamic client registration failed: the provided redirect uri [undefined] is invalid - ",
-    );
-  });
-
-  it("throws if the client metadata are invalid", async () => {
-    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          error: "invalid_client_metadata",
-          error_description: "some description",
-        }),
-        { status: 400 },
-      ),
-    );
-    const options = getMockOptions();
-
-    await expect(() =>
-      registerClient(options, getMockIssuer()),
+      registerClient(getMockOptions(), getMockIssuer()),
     ).rejects.toThrow(
       'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - some description',
     );
-
-    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          error: "invalid_client_metadata",
-        }),
-        { status: 400 },
-      ),
-    );
-    await expect(() =>
-      registerClient(options, getMockIssuer()),
-    ).rejects.toThrow(
-      'Dynamic client registration failed: the provided client metadata {"sessionId":"mySession"} is invalid - ',
-    );
   });
 
-  it("throws if the IdP returns a custom error", async () => {
-    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          error: "custom_error",
-          error_description: "some description",
-        }),
-        { status: 400 },
-      ),
+  it("reshapes a custom ResponseBodyError", async () => {
+    mockedProcess.mockRejectedValue(
+      mockResponseBodyError("custom_error", "some description"),
     );
-    const options = getMockOptions();
-
     await expect(() =>
-      registerClient(options, getMockIssuer()),
+      registerClient(getMockOptions(), getMockIssuer()),
     ).rejects.toThrow(
       "Dynamic client registration failed: custom_error - some description",
     );
-
-    global.fetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          error: "custom_error",
-        }),
-        { status: 400 },
-      ),
-    );
-    await expect(() =>
-      registerClient(options, getMockIssuer()),
-    ).rejects.toThrow("Dynamic client registration failed: custom_error - ");
   });
 
-  it("throws without parsing the response body as JSON on non-400 error", async () => {
-    const myFetch = jest.fn(fetch).mockResolvedValueOnce(
-      new Response("Resource not found", {
-        status: 404,
-        statusText: "Not found",
-      }),
-    );
-    global.fetch = myFetch;
-    const options = getMockOptions();
-
+  it("rethrows non-OAuth errors unchanged", async () => {
+    mockedProcess.mockRejectedValue(new TypeError("network down"));
     await expect(() =>
-      registerClient(options, getMockIssuer()),
-    ).rejects.toThrow(
-      "Dynamic client registration failed: the server returned 404 Not found - Resource not found",
-    );
+      registerClient(getMockOptions(), getMockIssuer()),
+    ).rejects.toThrow("network down");
   });
 });

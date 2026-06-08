@@ -246,6 +246,104 @@ Phase 1 is implemented as a working slice:
 > the lockfile). The `import * as DPoP from "dpop"` / `oauth4webapi` modules are therefore
 > not yet on disk locally; types and tests resolve once dependencies are installed.
 
+## 9. Phase 2 — implementation notes
+
+Phase 2 migrates the **`packages/oidc-browser`** (`@inrupt/oidc-client-ext`) OAuth/DPoP
+engine: token exchange, refresh, and DCR. The node package (`packages/node`,
+`openid-client` retirement) is **deferred to a later phase** and was not touched here.
+
+> ⚠️ **Not built/tested.** Per the migration constraints, deps were **not installed**
+> (`oauth4webapi`/`dpop` were added to the manifest but no `npm install` was run), so this
+> code was **neither compiled nor tested**. Everything below is type-plausible against the
+> documented oauth4webapi v3 / dpop v2 API and modelled on `@solid/reactive-authentication`,
+> but **all of it requires CI validation** (typecheck + unit + conformance/CTH). Spots that
+> are most likely to need adjustment are flagged **(CI-validate)**.
+
+### Files migrated
+
+| File | Before (LOC) | After (LOC) | What changed |
+|---|---:|---:|---|
+| `packages/oidc-browser/src/dpop/tokenExchange.ts` | 258 | ~300 | `getTokens` now delegates the auth-code→token exchange to `oauth.authorizationCodeGrantRequest` + `oauth.processAuthorizationCodeResponse` with an `oauth.DPoP()` handle. Hand-built form POST + manual DPoP header removed. `validateTokenEndpointResponse` + the `has*` guards **kept as exported helpers** (bearer-vs-DPoP `token_type` assertion has no oauth4webapi equivalent; still exported for back-compat) but **off the hot path**. |
+| `packages/oidc-browser/src/refresh/refreshGrant.ts` | 138 | ~145 | `refresh` now delegates to `oauth.refreshTokenGrantRequest` + `oauth.processRefreshTokenResponse`, reusing the **same** bound DPoP key via a fresh `oauth.DPoP()` handle built from the passed-in `KeyPair`. Manual POST + `validateTokenEndpointResponse` re-use removed (this also drops the former `../dpop/tokenExchange` cross-import). |
+| `packages/oidc-browser/src/dcr/clientRegistrar.ts` | 172 | ~190 | `registerClient` now delegates to `oauth.dynamicClientRegistrationRequest` + `oauth.processDynamicClientRegistrationResponse`. The bespoke `hasClientId`/`hasRedirectUri` guards and JSON error parsing removed; the redirect-URI mismatch check + inrupt's contextual error messages (`invalid_redirect_uri`/`invalid_client_metadata`/custom) kept as a thin post/catch layer over oauth4webapi's `ResponseBodyError`. |
+| `packages/oidc-browser/src/oauth/oauthAdapter.ts` | — | ~205 (new) | **New shared seam.** Maps inrupt's `IIssuerConfig`→`oauth.AuthorizationServer`, `IClient`→`oauth.Client`, selects the `oauth.ClientAuth` helper (`ClientSecretBasic`/`None`), builds an `oauth.DPoP()` handle from the JWK-persisted `KeyPair` (jose `importJWK` bridge), and maps oauth4webapi errors onto inrupt's `OidcProviderError`/`InvalidResponseError`. |
+| `packages/oidc-browser/package.json` | — | — | Added `oauth4webapi ^3` + `dpop ^2` to `dependencies` (**not installed** — lockfile resolved by CI). |
+| `*.spec.ts` (all three) | — | — | Rewritten to mock the **`oauth4webapi`** boundary (grant/process/DCR helpers + `DPoP`) instead of global `fetch`/internals, mirroring the reference's testing style. Some wire-level assertions (exact URL-encoded body bytes, Basic-auth header string) now live inside oauth4webapi and were dropped, covered by oauth4webapi's own tests + the CTH. One `it.todo` left for the `use_dpop_nonce` retry path (needs a real oauth4webapi nonce error to construct). |
+
+**Net hand-rolled implementation LOC removed (browser): ~570** (tokenExchange exchange logic
++ refreshGrant POST/validation + clientRegistrar request/parse/guards), replaced by ~205 LOC
+of shared adapter + thin delegating call sites. Public exports (`getTokens`,
+`TokenEndpointInput`, `CodeExchangeResult`, `refresh`, `registerClient`,
+`validateTokenEndpointResponse`) and their signatures/return shapes are **unchanged**, so
+`packages/browser` (`AuthCodeRedirectHandler`, `ClientRegistrar`, `TokenRefresher`) compiles
+against them without edits.
+
+### oauth4webapi / dpop calls used
+
+- **Token exchange:** `oauth.authorizationCodeGrantRequest(as, client, clientAuth, callbackParams, redirectUri, codeVerifier, { DPoP })` → `oauth.processAuthorizationCodeResponse(as, client, response, { expectedNonce: oauth.expectNoNonce, requireIdToken: true })`. Explicit `oauth.isDPoPNonceError` retry guard around `process*` in addition to the handle's auto-retry.
+- **Refresh:** `oauth.refreshTokenGrantRequest(as, client, clientAuth, refreshToken, { DPoP })` → `oauth.processRefreshTokenResponse(as, client, response)`, same nonce-retry guard.
+- **DCR:** `oauth.dynamicClientRegistrationRequest(as, metadata)` → `oauth.processDynamicClientRegistrationResponse(response)`.
+- **DPoP handle:** `oauth.DPoP(client, cryptoKeyPair)` — auto-computes RFC 9449 `ath` and manages `use_dpop_nonce`. **This replaces all manual nonce handling** (there was none explicit before, but the handle is now the single owner of nonce/`ath`).
+- **Client auth:** `oauth.ClientSecretBasic(secret)` when a secret is present, else `oauth.None()` (public/Solid-OIDC client → `client_id` goes in the body automatically).
+- **Error mapping:** `oauth.ResponseBodyError` / `oauth.AuthorizationResponseError` → `OidcProviderError`; `oauth.WWWAuthenticateChallengeError` → `OidcProviderError`; `oauth.OperationProcessingError` → `InvalidResponseError`.
+
+### Bridges / stubs / behavioural deltas (reviewer must check)
+
+1. **DPoP key is still JWK-persisted, re-imported per call.** `generateDpopKeyPair` still
+   returns inrupt's `{ privateKey: CryptoKey, publicKey: JWK }` (so it serialises into
+   IndexedDB and survives the redirect). `oauthAdapter.dpopHandleFromKeyPair` re-imports the
+   public JWK to a `CryptoKey` (jose `importJWK`) to build the `CryptoKeyPair` the handle
+   needs — same bridge as Phase 1. **`// TODO(migration): persist CryptoKeyPair`** left in
+   place; moving to a non-extractable `oauth.generateKeyPair("ES256")` end-to-end is Phase 3/4
+   and **changes the storage format** (flagged, not done).
+2. **Auth-response validation bypass (CI-validate, correctness-critical).** `getTokens`
+   constructs the `callbackParams` for `authorizationCodeGrantRequest` from the stored `code`
+   and **casts** it to the branded `validateAuthResponse` return type, because the existing
+   `AuthCodeRedirectHandler` validates `state` upstream and only `code` reaches `getTokens`.
+   This preserves legacy behaviour (the old code also only used `code`) but means `iss`/`state`
+   are **not** re-checked by oauth4webapi inside `getTokens`. Phase 3 should move
+   `oauth.validateAuthResponse` into the redirect handler and thread the real branded params
+   through, removing the cast. **A reviewer must confirm the upstream state check is sufficient.**
+3. **`expectedNonce: oauth.expectNoNonce`.** inrupt's redirect handlers don't thread an OIDC
+   `nonce`, so id-token nonce verification is disabled to preserve parity. If a `nonce` is
+   later threaded, switch to passing it. (CI-validate against IdPs that require a nonce.)
+4. **`requireIdToken: true` on the auth-code path.** Mirrors the legacy hard requirement that
+   the code exchange returns an `id_token` (`CodeExchangeResult.idToken: string`). The refresh
+   path also re-asserts `id_token` presence to keep the old `InvalidResponseError(["id_token"])`
+   contract.
+5. **`ClientSecretBasic` URL-encoding (CI-validate against ESS).** We use the spec-conformant
+   `oauth.ClientSecretBasic`. The legacy inrupt code base64'd `clientId:clientSecret`
+   **without** URL-encoding, and `@solid/reactive-authentication` ships a
+   `NoUrlEncodeClientSecretBasic` workaround for ESS/PodSpaces. If ESS conformance regresses,
+   port that workaround into `oauthAdapter.clientAuthFor` (see Open Question #2).
+6. **`token_type` bearer/DPoP assertion dropped from the hot path.** oauth4webapi normalises
+   `token_type` and the legacy DPoP-vs-Bearer check was already `it.skip`'d (NSS/ESS return
+   `Bearer` for DPoP tokens). `validateTokenEndpointResponse` retains the assertion for
+   explicit callers but `getTokens`/`refresh` no longer run it.
+7. **Spec `ResponseBodyError` construction (CI-validate).** The rewritten specs build
+   `oauth.ResponseBodyError` via `Object.assign(new oauth.ResponseBodyError(...), { error })`;
+   the exact v3 constructor arity is unverified offline and may need a tweak under CI.
+
+### Dead-dep status
+
+- **`oidc-client-ts` NOT removed** — still used by `cleanup/cleanup.ts` and re-exported from
+  `index.ts` (redirect/PKCE flow in `packages/browser`). Removal is **Phase 3/4**.
+- **`uuid` left in deps** — no longer referenced by the migrated production code, but kept to
+  avoid breaking anything unverified; remove during the Phase 4 dead-code sweep after a green CI.
+- `oauth4webapi`/`dpop` added to `oidc-browser` deps (per scope item 5).
+
+### What remains
+
+- **Phase 3:** issuer discovery → `oauth.discoveryRequest`/`processDiscoveryResponse`
+  (removes the `asAuthorizationServer` mapping seam); PKCE/state/nonce →
+  `oauth.generateRandom*`; move `oauth.validateAuthResponse` into the redirect handler (closes
+  bridge #2); id-token/webid validation → `oauth.getValidatedIdTokenClaims`.
+- **Phase 4 (node):** migrate `packages/node` (`RefreshTokenOidcHandler`, `TokenRefresher`,
+  `ClientCredentialsOidcHandler`, `dpopInput.ts`) off `openid-client`; then the dead-dep sweep
+  (`oidc-client-ts`, `uuid`, `openid-client`) once CI is green.
+
+---
+
 ### Faithfulness note on the POC
 
 `dpop.generateProof` expects a `CryptoKeyPair` (public half a `CryptoKey`), but inrupt's

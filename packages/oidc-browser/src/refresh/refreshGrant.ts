@@ -18,6 +18,23 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 2 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: hand-built the `refresh_token` grant POST + DPoP proof header and
+// hand-validated the response via `validateTokenEndpointResponse`.
+//
+// After: delegated to `oauth.refreshTokenGrantRequest` /
+// `oauth.processRefreshTokenResponse` with a per-flow `oauth.DPoP()` handle
+// built from the SAME bound DPoP key passed in (correctness-critical: a refresh
+// must re-use the key the access token was originally bound to).
+//
+// The exported `refresh(refreshToken, issuer, client, dpopKey?)` signature and
+// its `TokenEndpointResponse` return shape are PRESERVED so the `TokenRefresher`
+// in `packages/browser` (and the `ITokenRefresher` contract in `core`) keep
+// compiling unchanged.
+// ---------------------------------------------------------------------------
+
 import type {
   IClient,
   IIssuerConfig,
@@ -25,36 +42,20 @@ import type {
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
 import {
-  createDpopHeader,
   getWebidFromTokenPayload,
+  InvalidResponseError,
 } from "@inrupt/solid-client-authn-core";
-
-// NB: once this is rebased on #1560, change dependency to core package.
-import { validateTokenEndpointResponse } from "../dpop/tokenExchange";
-
-// Camelcase identifiers are required in the OIDC specification.
-/* eslint-disable camelcase*/
-
-type IRefreshRequestBody = {
-  grant_type: "refresh_token";
-  refresh_token: string;
-  scope?: string;
-  client_id?: string;
-};
-
-const isValidUrl = (url: string): boolean => {
-  try {
-    // Here, the URL constructor is just called to parse the given string and
-    // verify if it is a well-formed IRI.
-
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
+import * as oauth from "oauth4webapi";
+import {
+  asAuthorizationServer,
+  asOauthClient,
+  clientAuthFor,
+  dpopHandleFromKeyPair,
+  mapOauthError,
+} from "../oauth/oauthAdapter";
 
 // Identifiers in snake_case are mandated by the OAuth spec.
+/* eslint-disable camelcase*/
 
 export async function refresh(
   refreshToken: string,
@@ -68,71 +69,80 @@ export async function refresh(
     );
   }
 
-  const requestBody: IRefreshRequestBody = {
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-  };
+  const as = asAuthorizationServer(issuer);
+  const oauthClient = asOauthClient(client);
+  const clientAuth = clientAuthFor(client);
 
-  let dpopHeader = {};
-  if (dpopKey !== undefined) {
-    dpopHeader = {
-      DPoP: await createDpopHeader(issuer.tokenEndpoint, "POST", dpopKey),
-    };
-  }
+  // Re-use the SAME bound DPoP key: the refreshed access token must remain bound
+  // to the key the original token was issued against. `oauth.DPoP()` adds the
+  // `ath` claim + handles `use_dpop_nonce` retries automatically.
+  const dpopHandle =
+    dpopKey !== undefined
+      ? await dpopHandleFromKeyPair(client, dpopKey)
+      : undefined;
 
-  let authHeader = {};
-  if (client.clientSecret !== undefined) {
-    authHeader = {
-      // We assume that client_secret_basic is the client authentication method.
-      // TODO: Get the authentication method from the IClient configuration object.
-      Authorization: `Basic ${btoa(
-        `${client.clientId}:${client.clientSecret}`,
-      )}`,
-    };
-  } else if (isValidUrl(client.clientId)) {
-    // If the client ID is an URL, and there is no client secret, the client
-    // has a Solid-OIDC Client Identifier, and it should be present in the
-    // request body.
-    requestBody.client_id = client.clientId;
-  }
-
-  const rawResponse = await fetch(issuer.tokenEndpoint, {
-    method: "POST",
-    body: new URLSearchParams(requestBody).toString(),
-    headers: {
-      ...dpopHeader,
-      ...authHeader,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
-  let response;
+  let tokenResponse;
   try {
-    response = await rawResponse.json();
-  } catch (_e) {
-    // The response is left out of the error on purpose not to leak any sensitive information.
-    throw new Error(
-      `The token endpoint of issuer ${issuer.issuer} returned a malformed response.`,
+    tokenResponse = await oauth.refreshTokenGrantRequest(
+      as,
+      oauthClient,
+      clientAuth,
+      refreshToken,
+      dpopHandle ? { DPoP: dpopHandle } : {},
     );
+  } catch (err) {
+    return mapOauthError(err);
   }
-  const validatedResponse = validateTokenEndpointResponse(
-    response,
-    dpopKey !== undefined,
-  );
+
+  let processed: oauth.TokenEndpointResponse;
+  try {
+    processed = await oauth
+      .processRefreshTokenResponse(as, oauthClient, tokenResponse)
+      .catch(async (err) => {
+        // Explicit nonce-retry guard for IdPs that surface the DPoP nonce
+        // requirement at process time rather than via the handle's auto-retry.
+        if (oauth.isDPoPNonceError(err) && dpopHandle) {
+          const retry = await oauth.refreshTokenGrantRequest(
+            as,
+            oauthClient,
+            clientAuth,
+            refreshToken,
+            { DPoP: dpopHandle },
+          );
+          return oauth.processRefreshTokenResponse(as, oauthClient, retry);
+        }
+        throw err;
+      });
+  } catch (err) {
+    return mapOauthError(err);
+  }
+
+  // The legacy implementation required an id_token on the refresh response
+  // (it threw `InvalidResponseError(["id_token"])` otherwise, then resolved a
+  // WebID from it). Preserve that contract.
+  if (typeof processed.id_token !== "string") {
+    throw new InvalidResponseError(["id_token"]);
+  }
+
   const { webId } = await getWebidFromTokenPayload(
-    validatedResponse.id_token,
+    processed.id_token,
     issuer.jwksUri,
     issuer.issuer,
     client.clientId,
   );
+
   return {
-    accessToken: validatedResponse.access_token,
-    idToken: validatedResponse.id_token,
+    accessToken: processed.access_token,
+    idToken: processed.id_token,
     refreshToken:
-      typeof validatedResponse.refresh_token === "string"
-        ? validatedResponse.refresh_token
+      typeof processed.refresh_token === "string"
+        ? processed.refresh_token
         : undefined,
     webId,
     dpopKey,
-    expiresIn: validatedResponse.expires_in,
+    expiresIn:
+      typeof processed.expires_in === "number"
+        ? processed.expires_in
+        : undefined,
   };
 }

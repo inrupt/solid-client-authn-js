@@ -23,6 +23,24 @@
  * @packageDocumentation
  */
 
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 2 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: hand-built the RFC 7591 registration POST (JSON body), hand-parsed the
+// response, and hand-validated `client_id` / `redirect_uris` with bespoke
+// guards (`hasClientId`, `hasRedirectUri`, `processErrorResponse`).
+//
+// After: delegated to `oauth.dynamicClientRegistrationRequest` /
+// `oauth.processDynamicClientRegistrationResponse`. oauth4webapi handles the
+// request shaping and rejects OAuth-style error bodies
+// (`ResponseBodyError`) for us. The redirect-URI sanity check and the
+// inrupt-specific error messages are preserved as a thin post-validation layer.
+//
+// The exported `registerClient(options, issuerConfig)` signature and its
+// returned `IOpenIdDynamicClient` shape are PRESERVED so `packages/browser`'s
+// `ClientRegistrar` keeps compiling unchanged.
+// ---------------------------------------------------------------------------
+
 import type {
   IIssuerConfig,
   IOpenIdDynamicClient,
@@ -32,16 +50,16 @@ import {
   determineSigningAlg,
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
+import * as oauth from "oauth4webapi";
+import { asAuthorizationServer } from "../oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
 function processErrorResponse(
-  // The type is any here because the object is parsed from a JSON response
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  responseBody: any,
+  responseBody: { error?: string; error_description?: string },
   options: IClientRegistrarOptions,
-): void {
+): never {
   // The following errors are defined by the spec, and allow providing some context.
   // See https://tools.ietf.org/html/rfc7591#section-3.2.2 for more information
   if (responseBody.error === "invalid_redirect_uri") {
@@ -67,10 +85,6 @@ function processErrorResponse(
   );
 }
 
-function hasClientId(body: unknown): body is { client_id: string } {
-  return typeof (body as Record<string, string>).client_id === "string";
-}
-
 function hasRedirectUri(body: unknown): body is { redirect_uris: string[] } {
   return (
     Array.isArray((body as Record<string, string[]>).redirect_uris) &&
@@ -81,10 +95,10 @@ function hasRedirectUri(body: unknown): body is { redirect_uris: string[] } {
 }
 
 function validateRegistrationResponse(
-  responseBody: unknown,
+  responseBody: { client_id?: unknown } & Record<string, unknown>,
   options: IClientRegistrarOptions,
-): responseBody is { client_id: string; redirect_uris: string[] } {
-  if (!hasClientId(responseBody)) {
+): asserts responseBody is { client_id: string } & Record<string, unknown> {
+  if (typeof responseBody.client_id !== "string") {
     throw new Error(
       `Dynamic client registration failed: no client_id has been found on ${JSON.stringify(
         responseBody,
@@ -104,7 +118,6 @@ function validateRegistrationResponse(
       ])}`,
     );
   }
-  return true;
 }
 
 export async function registerClient(
@@ -127,46 +140,54 @@ export async function registerClient(
     PREFERRED_SIGNING_ALG,
   );
 
-  const config = {
+  const as = asAuthorizationServer(issuerConfig);
+
+  // Same client metadata as the legacy hand-built JSON body.
+  // (Matches the `Partial<OmitSymbolProperties<Client>>` param of
+  // `dynamicClientRegistrationRequest`.)
+  const clientMetadata: Partial<oauth.OmitSymbolProperties<oauth.Client>> = {
     client_name: options.clientName,
     application_type: "web",
-    redirect_uris: [options.redirectUrl?.toString()],
+    redirect_uris: [options.redirectUrl?.toString() as string],
     subject_type: "public",
     token_endpoint_auth_method: "client_secret_basic",
-    id_token_signed_response_alg: signingAlg,
+    id_token_signed_response_alg: signingAlg ?? undefined,
     grant_types: ["authorization_code", "refresh_token"],
   };
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  const registerResponse = await fetch(
-    issuerConfig.registrationEndpoint.toString(),
-    {
-      method: "POST",
-      headers,
-      body: JSON.stringify(config),
-    },
-  );
-
-  if (registerResponse.ok) {
-    const responseBody = await registerResponse.json();
-    validateRegistrationResponse(responseBody, options);
-    return {
-      clientId: responseBody.client_id,
-      clientSecret: responseBody.client_secret,
-      expiresAt: responseBody.client_secret_expires_at,
-      idTokenSignedResponseAlg: responseBody.id_token_signed_response_alg,
-      clientType: "dynamic",
-    };
+  let registered: oauth.OmitSymbolProperties<oauth.Client>;
+  try {
+    const registerResponse = await oauth.dynamicClientRegistrationRequest(
+      as,
+      clientMetadata,
+    );
+    registered =
+      await oauth.processDynamicClientRegistrationResponse(registerResponse);
+  } catch (err) {
+    // oauth4webapi rejects RFC 7591 error bodies with `ResponseBodyError`,
+    // carrying `.error` / `.error_description`. Reshape into inrupt's
+    // contextual error messages (`invalid_redirect_uri` / `invalid_client_metadata`).
+    if (err instanceof oauth.ResponseBodyError) {
+      return processErrorResponse(
+        {
+          error: err.error,
+          error_description: err.error_description ?? undefined,
+        },
+        options,
+      );
+    }
+    throw err;
   }
-  if (registerResponse.status === 400) {
-    processErrorResponse(await registerResponse.json(), options);
-  }
-  throw new Error(
-    `Dynamic client registration failed: the server returned ${
-      registerResponse.status
-    } ${registerResponse.statusText} - ${await registerResponse.text()}`,
-  );
+
+  validateRegistrationResponse(registered, options);
+
+  return {
+    clientId: registered.client_id,
+    clientSecret: registered.client_secret as string | undefined,
+    expiresAt: registered.client_secret_expires_at as number | undefined,
+    idTokenSignedResponseAlg: registered.id_token_signed_response_alg as
+      | string
+      | undefined,
+    clientType: "dynamic",
+  } as IOpenIdDynamicClient;
 }

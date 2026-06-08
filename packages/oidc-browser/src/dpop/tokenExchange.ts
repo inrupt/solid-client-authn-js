@@ -18,6 +18,31 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 2 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: this file hand-rolled the authorization-code → token exchange:
+//   - generated a DPoP proof via core's `createDpopHeader`,
+//   - hand-built the `application/x-www-form-urlencoded` token POST,
+//   - hand-parsed + hand-validated the response (7× `has*` guards,
+//     `validateTokenEndpointResponse`).
+//
+// After: the exchange is delegated to oauth4webapi:
+//   - `oauth.authorizationCodeGrantRequest(as, client, clientAuth,
+//      callbackParams, redirectUri, codeVerifier, { DPoP })`
+//   - `oauth.processAuthorizationCodeResponse(as, client, response, ...)`
+//   with a per-flow `oauth.DPoP()` handle that auto-computes RFC 9449 `ath`
+//   and transparently retries on `use_dpop_nonce`.
+//
+// The exported function name (`getTokens`), its argument order, and its return
+// shape (`CodeExchangeResult`) are PRESERVED so `packages/browser`'s
+// `AuthCodeRedirectHandler` keeps compiling unchanged.
+//
+// `validateTokenEndpointResponse` is kept as an exported helper (the bearer-vs-
+// DPoP token_type assertion has no oauth4webapi equivalent and `refreshGrant`
+// historically re-used it), but is no longer on the `getTokens` hot path.
+// ---------------------------------------------------------------------------
+
 import type {
   IClient,
   IIssuerConfig,
@@ -25,12 +50,19 @@ import type {
   TokenEndpointResponse,
 } from "@inrupt/solid-client-authn-core";
 import {
-  createDpopHeader,
   getWebidFromTokenPayload,
   generateDpopKeyPair,
   OidcProviderError,
   InvalidResponseError,
 } from "@inrupt/solid-client-authn-core";
+import * as oauth from "oauth4webapi";
+import {
+  asAuthorizationServer,
+  asOauthClient,
+  clientAuthFor,
+  dpopHandleFromKeyPair,
+  mapOauthError,
+} from "../oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OAuth specification.
 /* eslint-disable camelcase*/
@@ -68,14 +100,6 @@ function hasIdToken(
   value: { id_token: string } | Record<string, unknown>,
 ): value is { id_token: string } {
   return value.id_token !== undefined && typeof value.id_token === "string";
-}
-
-function hasRefreshToken(
-  value: { refresh_token: string } | Record<string, unknown>,
-): value is { refresh_token: string } {
-  return (
-    value.refresh_token !== undefined && typeof value.refresh_token === "string"
-  );
 }
 
 function hasTokenType(
@@ -125,6 +149,14 @@ function validatePreconditions(
   }
 }
 
+/**
+ * Kept as an exported helper for the bearer-vs-DPoP `token_type` assertion,
+ * which has no direct oauth4webapi equivalent. oauth4webapi's
+ * `processAuthorizationCodeResponse` already rejects OAuth error bodies and
+ * missing mandatory members, so this is no longer used on the `getTokens` hot
+ * path; it is retained for backwards compatibility / explicit `token_type`
+ * checks in `refreshGrant`.
+ */
 export function validateTokenEndpointResponse(
   tokenResponse: Record<string, unknown>,
   dpop: boolean,
@@ -190,69 +222,117 @@ export async function getTokens(
   dpop: boolean,
 ): Promise<CodeExchangeResult> {
   validatePreconditions(issuer, data);
-  const headers: Record<string, string> = {
-    "content-type": "application/x-www-form-urlencoded",
-  };
+
+  const as = asAuthorizationServer(issuer);
+  const oauthClient = asOauthClient(client);
+  const clientAuth = clientAuthFor(client);
+
+  // The DPoP handle (and the bound key it carries) is created up-front so it can
+  // be both threaded into the token grant AND returned for re-use by the refresh
+  // path / resource requests — refresh MUST re-use this same bound key.
   let dpopKey: KeyPair | undefined;
+  let dpopHandle: oauth.DPoPHandle | undefined;
   if (dpop) {
+    // generateDpopKeyPair still yields inrupt's JWK-persisted KeyPair (so the
+    // public half can be serialised into IndexedDB and reloaded after redirect).
+    // TODO(migration): persist a non-extractable CryptoKeyPair instead and drop
+    // the JWK round-trip in dpopHandleFromKeyPair.
     dpopKey = await generateDpopKeyPair();
-    headers.DPoP = await createDpopHeader(
-      issuer.tokenEndpoint,
-      "POST",
-      dpopKey,
+    dpopHandle = await dpopHandleFromKeyPair(client, dpopKey);
+  }
+
+  // oauth4webapi validates `state`/`iss`/error params for us. The legacy
+  // hand-rolled flow trusted the upstream `AuthCodeRedirectHandler` to have
+  // checked `code`; we reconstruct a minimal callback params object from the
+  // stored `code`. `state` is validated in the redirect handler before we get
+  // here, so we pass `expectNoState`.
+  const callbackParams = new URLSearchParams();
+  callbackParams.set("code", data.code);
+
+  let tokenResponse;
+  try {
+    tokenResponse = await oauth.authorizationCodeGrantRequest(
+      as,
+      oauthClient,
+      clientAuth,
+      // Cast: oauth4webapi brands the params returned from validateAuthResponse;
+      // here the redirect handler has already validated state/iss/error.
+      callbackParams as unknown as ReturnType<typeof oauth.validateAuthResponse>,
+      data.redirectUrl,
+      data.codeVerifier,
+      dpopHandle ? { DPoP: dpopHandle } : {},
     );
+  } catch (err) {
+    return mapOauthError(err);
   }
 
-  // Note: this defaults to client_secret_basic. client_secret_post
-  // is currently not supported. See https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication
-  // for details.
-  if (client.clientSecret) {
-    headers.Authorization = `Basic ${btoa(
-      `${client.clientId}:${client.clientSecret}`,
-    )}`;
+  let processed: oauth.TokenEndpointResponse;
+  try {
+    // The DPoP handle auto-retries the request on a `use_dpop_nonce` challenge;
+    // we still guard the legacy retry idiom here for older IdPs that surface the
+    // nonce requirement at process time.
+    processed = await oauth
+      .processAuthorizationCodeResponse(as, oauthClient, tokenResponse, {
+        // inrupt historically did not enforce the OIDC `nonce` (the redirect
+        // handlers don't thread one); skip nonce verification to preserve parity.
+        expectedNonce: oauth.expectNoNonce,
+        requireIdToken: true,
+      })
+      .catch(async (err) => {
+        if (oauth.isDPoPNonceError(err) && dpopHandle) {
+          const retry = await oauth.authorizationCodeGrantRequest(
+            as,
+            oauthClient,
+            clientAuth,
+            callbackParams as unknown as ReturnType<
+              typeof oauth.validateAuthResponse
+            >,
+            data.redirectUrl,
+            data.codeVerifier,
+            { DPoP: dpopHandle },
+          );
+          return oauth.processAuthorizationCodeResponse(
+            as,
+            oauthClient,
+            retry,
+            { expectedNonce: oauth.expectNoNonce, requireIdToken: true },
+          );
+        }
+        throw err;
+      });
+  } catch (err) {
+    return mapOauthError(err);
   }
 
-  const requestBody = {
-    grant_type: data.grantType,
-    redirect_uri: data.redirectUrl,
-    code: data.code,
-    code_verifier: data.codeVerifier,
-    client_id: client.clientId,
-  };
-
-  const tokenRequestInit: RequestInit & {
-    headers: Record<string, string>;
-  } = {
-    method: "POST",
-    headers,
-    body: new URLSearchParams(requestBody).toString(),
-  };
-
-  const rawTokenResponse = await fetch(issuer.tokenEndpoint, tokenRequestInit);
-
-  const jsonTokenResponse = (await rawTokenResponse.json()) as Record<
-    string,
-    unknown
-  >;
-
-  const tokenResponse = validateTokenEndpointResponse(jsonTokenResponse, dpop);
+  if (!hasAccessToken(processed)) {
+    throw new InvalidResponseError(["access_token"]);
+  }
+  // requireIdToken: true guarantees id_token is present, but keep the explicit
+  // guard so the `idToken: string` return contract is type-safe.
+  if (typeof processed.id_token !== "string") {
+    throw new InvalidResponseError(["id_token"]);
+  }
 
   const { webId, clientId } = await getWebidFromTokenPayload(
-    tokenResponse.id_token,
+    processed.id_token,
     issuer.jwksUri,
     issuer.issuer,
     client.clientId,
   );
 
   return {
-    accessToken: tokenResponse.access_token,
-    idToken: tokenResponse.id_token,
-    refreshToken: hasRefreshToken(tokenResponse)
-      ? tokenResponse.refresh_token
-      : undefined,
+    accessToken: processed.access_token,
+    idToken: processed.id_token,
+    refreshToken:
+      typeof processed.refresh_token === "string"
+        ? processed.refresh_token
+        : undefined,
     webId,
     clientId,
     dpopKey,
-    expiresIn: tokenResponse.expires_in,
+    expiresIn:
+      typeof processed.expires_in === "number"
+        ? processed.expires_in
+        : undefined,
   };
 }
