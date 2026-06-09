@@ -39,7 +39,6 @@
     "dpop": "^2",
     "events": "^3.3.0",
     "jose": "^6.2.3",
-    "oauth4webapi": "^3",
     "uuid": "^14.0.0"
   },
   "publishConfig": {

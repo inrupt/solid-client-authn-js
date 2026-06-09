@@ -6,6 +6,33 @@
 
 ---
 
+## Status: complete pending CI
+
+All planned phases have now landed on this branch:
+
+- **Phase 1** — DPoP proof layer (`packages/core`) → `dpop.generateProof` (`ath` native).
+- **Phase 2** — `packages/oidc-browser` token exchange / refresh / DCR → oauth4webapi + the
+  `oauth/oauthAdapter.ts` seam.
+- **Phase 4** — `packages/node` discovery / auth-code / client-credentials / refresh / DCR →
+  oauth4webapi, `openid-client` dropped, `dpopInput.ts` deleted, node `oauthAdapter.ts` seam.
+- **Phase 3** — cross-cutting polish: auth-response validation moved into the browser redirect
+  handler (branded cast removed), `allowInsecureRequests` scoped to http-localhost, id-token
+  claims parity confirmed, DPoP-key TODOs made consistent. (§11)
+- **Phase 5** — repo-wide dead-dependency sweep: removed `oauth4webapi` from `core` (never
+  imported), `dpop` from `node`/`oidc-browser` (transitive via oauth4webapi), `uuid` +
+  `@types/uuid` from `oidc-browser` (zero refs). `oidc-client-ts`, `jose`, `uuid` (node/core)
+  deliberately kept. (§12)
+
+**Crucial caveat:** per the migration constraints, dependencies were **never installed** and
+**no code was compiled, typechecked, linted, or tested**, and **nothing was pushed/submitted**.
+Everything is type-plausible against the documented oauth4webapi v3 / dpop v2 API and the
+`@solid/reactive-authentication` reference, but the whole branch **requires a CI run** to
+validate. The **lockfile + `npm dedupe`** must also be regenerated in CI (manifests were edited
+by hand). See the **Validation checklist for CI** at the end of §12 and every **(CI-validate)**
+marker throughout this document.
+
+---
+
 ## 1. Motivation
 
 `solid-client-authn-js` currently hand-rolls the OIDC and DPoP wire protocol: it
@@ -592,3 +619,93 @@ key-identity round-trip end-to-end.
 | `packages/node/src/login/oidc/oidcHandlers/ClientCredentialsOidcHandler.ts` | `allowInsecureForIssuer` on the client-credentials grant. |
 | `packages/node/src/login/oidc/ClientRegistrar.ts` | `allowInsecureForIssuer` on DCR. |
 | `packages/core/src/authenticatedFetch/dpopUtils.ts` | TODO(migration) note made consistent. |
+
+---
+
+## 12. Phase 5 — dead-dependency sweep (repo-wide)
+
+The final sweep grepped the whole repo (`packages/{core,oidc-browser,node,browser}/src`,
+all `package.json`) for now-unused dependencies, removing each only where there were **zero**
+remaining `import` / `require` / type references in that package.
+
+> ⚠️ **Lockfile NOT touched.** Manifests were edited by hand; deps were **not installed**.
+> CI must regenerate `package-lock.json` and run `npm dedupe` so the transitive tree
+> reflects these removals (notably so `dpop` resolves once via `oauth4webapi`).
+
+### Dependencies removed (with grep evidence)
+
+| Package | Dep removed | Evidence (grep) |
+|---|---|---|
+| `packages/core` | **`oauth4webapi`** | core imports `dpop` directly but **never** imports `oauth4webapi` — the only `oauth4webapi` hits in `core/src` are comment strings (`dpopUtils.ts`, `fetchFactory.ts`). The proof layer uses `dpop.generateProof` directly, not the `oauth.DPoP()` handle. Dead direct dep → removed. |
+| `packages/oidc-browser` | **`dpop`** | no `from "dpop"` / `require("dpop")` anywhere in `oidc-browser/src`; the only `"dpop"` occurrence is a commented-out `token_type` literal. DPoP is obtained via `oauth.DPoP()` (oauth4webapi depends on `dpop` transitively). Unused-direct → removed. |
+| `packages/oidc-browser` | **`uuid`** + **`@types/uuid`** | zero `uuid` references in `oidc-browser` (src **or** spec, import **or** value). Fully dead → both removed. |
+| `packages/node` | **`dpop`** | same as oidc-browser: no `from "dpop"` in `node/src`; all `"dpop"` hits are `token_type` / storage-key string literals. Transitive via oauth4webapi → unused-direct removed. |
+
+`openid-client` was already removed from every `package.json` in Phase 4; a repo-wide grep
+confirms **no remaining `import`/`require`/`jest.mock` of `openid-client`** — the only hits are
+historical comments in spec/source describing the migration. Nothing further to remove.
+
+### Deliberately KEPT (and why)
+
+| Package | Dep kept | Why |
+|---|---|---|
+| `packages/oidc-browser` | **`oidc-client-ts`** | Still actively used: `OidcClient` drives the PKCE/redirect leg in `packages/browser` (`AuthorizationCodeWithPkceOidcHandler`), and `cleanup/cleanup.ts` imports `State`/`WebStorageStateStore`. `index.ts` re-exports a large `oidc-client-ts` surface consumed by `packages/browser` (`UserManager`, `Log`, `SigninResponse`, …). Removing it is a separate, larger piece of work (migrating the browser redirect/PKCE flow off `oidc-client-ts`) that was **out of scope** for this migration and is **not** required by the oauth4webapi grant migration. |
+| `packages/core`, `packages/node`, `packages/oidc-browser` | **`jose`** | Real runtime use: core `util/token.ts` (`jwtVerify`/`createRemoteJWKSet` — ID-token/WebID validation), core `StorageUtility.ts` + `dpopUtils.ts` (`exportJWK`/`importJWK` — DPoP-key bridge), node `Session.ts` (`exportJWK`), node `multisession.fromTokens.ts` (`createRemoteJWKSet`/`jwtVerify`), both `oauthAdapter.ts` seams (`importJWK`/`exportJWK` JWK↔CryptoKey bridge). Kept everywhere it is imported. |
+| `packages/node`, `packages/core` | **`uuid`** | Still imported: node `Session.ts` + `util/UuidGenerator.ts` (`v4`), core `sessionInfo/SessionInfoManager.ts` (`v4`). Kept. |
+| `packages/browser` | **`jose`** | Currently imported **only by spec files** (`*.spec.ts` — `importJWK` in test fixtures), so it is arguably a `devDependencies` candidate. **Left in `dependencies` unchanged** to avoid a classification change this migration didn't introduce and that isn't load-bearing for the dead-dep goal. **(CI-validate)** a `depcheck` run may suggest demoting it to `devDependencies`. |
+| `packages/node`, `packages/oidc-browser` | **`oauth4webapi`** | Directly imported (grant/discovery/DCR + the adapter seams). Kept and required. |
+
+### Dead source files / exports
+
+- `packages/node/src/util/dpopInput.ts` (`asDPoPInput`) — **already deleted in Phase 4**
+  (the `openid-client`↔jose `KeyObject` bridge; fully unreferenced once `openid-client` was
+  dropped). Confirmed absent.
+- `validateTokenEndpointResponse` + the seven `has*` guards in
+  `oidc-browser/.../tokenExchange.ts` — **KEPT**: still exported, still unit-tested, and the
+  guards are referenced by both `validateTokenEndpointResponse` and `getTokens` (each appears
+  ≥2× = definition + use). The migration intentionally retains the bearer/DPoP `token_type`
+  assertion helper for explicit callers / back-compat (Phase 2 decision). Not dead.
+- `oidc-browser/.../__mocks__/issuer.mocks.ts` — KEPT (used by the rewritten `tokenExchange` /
+  `refreshGrant` specs).
+- No other orphaned source files: every non-spec file in `oidc-browser/src` and `node/src`
+  is still reachable from an entrypoint or spec.
+
+### dpop direct-vs-transitive (resolved)
+
+Phase 4 flagged whether `dpop` should be a direct dep of node/oidc-browser "for parity".
+**Resolution:** declare a dependency only where it is *imported*. `dpop` is imported directly
+**only** by `packages/core` (`dpopUtils.ts`), so it is declared there and **removed** from
+`node`/`oidc-browser`, which receive it transitively through `oauth4webapi`. Symmetrically,
+`oauth4webapi` is imported by `node`/`oidc-browser` (declared) but **not** by `core` (removed).
+Net: `oauth4webapi ^3` and `dpop ^2` are now declared in exactly the packages that import them.
+
+### Validation checklist for CI
+
+Nothing in this branch was built, typechecked, linted, or tested locally. CI must:
+
+1. **Install + lockfile.** `npm ci` will fail (manifests changed without a lockfile update);
+   run `npm install` to regenerate `package-lock.json`, then `npm dedupe` so `dpop`/`jose`
+   resolve once. Confirm no package resolves `oauth4webapi`/`dpop`/`uuid` that no longer
+   declares them transitively-only-as-needed.
+2. **Typecheck.** `npm run build` / `tsc` across all packages. Highest-risk spots: the
+   `validateAuthResponse` branded-return type threading in browser `getTokens`; the
+   `Record<symbol, boolean>` `allowInsecureForIssuer` fragments spread into oauth4webapi option
+   bags; the `oauth.DPoPHandle`/`ClientAuth`/`AuthorizationServer` types from oauth4webapi v3.
+3. **Unit tests.** `npm test`. Re-pointed specs assume exact oauth4webapi v3 function
+   names/return shapes and `ResponseBodyError` constructor arity (Phase 2/4 **(CI-validate)**
+   notes). The browser `AuthCodeRedirectHandler` spec must accept the new `getTokens`
+   `authResponseUrl`/`expectedState` args (asserted via `expect.objectContaining`, so additive)
+   and any `validateAuthResponse` mock.
+4. **Lint.** `npm run lint` (eslint/prettier). Check the `/* eslint-disable camelcase */`
+   blocks still cover the snake_case oauth4webapi fields, and import ordering in the files that
+   gained an `allowInsecureForIssuer` import.
+5. **Conformance / CTH + live-IdP checks (security-critical).** Run the Solid conformance
+   harness and the known-quirky IdPs (ESS/PodSpaces, NSS, CSS, Keycloak). Specifically confirm:
+   (a) **http-localhost** discovery/grants still work via `allowInsecureForIssuer` (local CSS /
+   Keycloak over http); (b) **DPoP `ath` + `use_dpop_nonce`** parity; (c) the **non-URL-encoded
+   `ClientSecretBasic`** still satisfies ESS client-credentials; (d) `state`/`iss`
+   (`validateAuthResponse`) acceptance against IdPs that omit `iss`; (e) refresh reuses the same
+   bound DPoP key.
+6. **Bundle size.** Run the repo's existing size checks on `packages/browser` /
+   `packages/oidc-browser`: net effect of dropping `uuid` (browser oidc) and the hand-rolled
+   code vs. adding `oauth4webapi`/`dpop` should be neutral-to-smaller; confirm no regression.
