@@ -107,9 +107,12 @@ export async function createDpopHeader(
 
 export async function generateDpopKeyPair(): Promise<KeyPair> {
   // Unchanged shape (extractable so the public half can be serialised to a JWK
-  // and persisted). The full migration replaces this with
-  // `oauth.generateKeyPair("ES256", { extractable: false })` and stores the
-  // non-extractable CryptoKeyPair directly (IndexedDB stores CryptoKeys).
+  // and persisted, and the refresh flow can re-import the SAME bound key).
+  // TODO(migration): persist a non-extractable `oauth.generateKeyPair("ES256")`
+  // CryptoKeyPair directly (IndexedDB stores CryptoKeys), dropping the JWK
+  // round-trip. This is a storage-format change and is out of scope here — see
+  // MIGRATION-oauth4webapi.md. Consistent with the same note in both
+  // `oauthAdapter.ts` seams.
   const { privateKey, publicKey } = await generateKeyPair(
     PREFERRED_SIGNING_ALG[0],
     { extractable: true },

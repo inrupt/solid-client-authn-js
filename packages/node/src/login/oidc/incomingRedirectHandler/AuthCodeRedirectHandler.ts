@@ -50,6 +50,7 @@ import { URL } from "url";
 import * as oauth from "oauth4webapi";
 import type { EventEmitter } from "events";
 import {
+  allowInsecureForIssuer,
   asAuthorizationServer,
   asOauthClient,
   clientAuthFor,
@@ -175,7 +176,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
           callbackParams,
           removeOpenIdParams(inputRedirectUrl).href,
           oidcContext.codeVerifier as string,
-          dpop ? { DPoP: dpop } : {},
+          {
+            ...(dpop ? { DPoP: dpop } : {}),
+            ...allowInsecureForIssuer(oidcContext.issuerConfig.issuer),
+          },
         );
         // inrupt's redirect flow does not thread an OIDC `nonce`, so disable
         // id-token nonce verification to preserve parity. The `id_token`

@@ -142,6 +142,14 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         code: url.searchParams.get("code") as string,
         codeVerifier,
         redirectUrl: storedRedirectIri,
+        // Phase 3 (auth-response validation placement): thread the full
+        // authorization-response URL and the expected `state` so `getTokens`
+        // validates `state`/`iss`/error via `oauth.validateAuthResponse` (the
+        // spec-correct check), rather than relying on a branded cast. `oauthState`
+        // is both the storage key for this session and the `state` the client
+        // originally sent, so it is the value oauth4webapi must match.
+        authResponseUrl: redirectUrl,
+        expectedState: oauthState,
       },
       isDpop,
     );

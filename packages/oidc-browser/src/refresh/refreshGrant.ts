@@ -47,6 +47,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import * as oauth from "oauth4webapi";
 import {
+  allowInsecureForIssuer,
   asAuthorizationServer,
   asOauthClient,
   clientAuthFor,
@@ -88,7 +89,10 @@ export async function refresh(
       oauthClient,
       clientAuth,
       refreshToken,
-      dpopHandle ? { DPoP: dpopHandle } : {},
+      {
+        ...(dpopHandle ? { DPoP: dpopHandle } : {}),
+        ...allowInsecureForIssuer(issuer.issuer),
+      },
     );
   } catch (err) {
     return mapOauthError(err);
@@ -107,7 +111,10 @@ export async function refresh(
             oauthClient,
             clientAuth,
             refreshToken,
-            { DPoP: dpopHandle },
+            {
+              DPoP: dpopHandle,
+              ...allowInsecureForIssuer(issuer.issuer),
+            },
           );
           return oauth.processRefreshTokenResponse(as, oauthClient, retry);
         }

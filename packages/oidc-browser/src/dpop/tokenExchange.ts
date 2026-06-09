@@ -38,6 +38,12 @@
 // shape (`CodeExchangeResult`) are PRESERVED so `packages/browser`'s
 // `AuthCodeRedirectHandler` keeps compiling unchanged.
 //
+// Phase 3: `TokenEndpointInput` gained OPTIONAL `authResponseUrl` + `expectedState`
+// fields. When the redirect handler supplies them, `getTokens` runs
+// `oauth.validateAuthResponse` (RFC 9207 `iss` + CSRF `state`) and uses its
+// branded result as the callback params — closing Phase-2 risk #1 (the branded
+// *cast*). Omitting them preserves the legacy code-only path.
+//
 // `validateTokenEndpointResponse` is kept as an exported helper (the bearer-vs-
 // DPoP token_type assertion has no oauth4webapi equivalent and `refreshGrant`
 // historically re-used it), but is no longer on the `getTokens` hot path.
@@ -57,6 +63,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import * as oauth from "oauth4webapi";
 import {
+  allowInsecureForIssuer,
   asAuthorizationServer,
   asOauthClient,
   clientAuthFor,
@@ -127,6 +134,25 @@ export type TokenEndpointInput = {
   redirectUrl: string;
   code: string;
   codeVerifier: string;
+  /**
+   * The full authorization-response URL the IdP redirected back to (query string
+   * carrying `code`/`state`/`iss`/error params). When provided together with
+   * {@link TokenEndpointInput.expectedState}, `getTokens` runs
+   * `oauth.validateAuthResponse` to validate `state`/`iss`/error per RFC 9207
+   * before exchanging the code — the spec-correct placement (Phase 3).
+   *
+   * Optional for backwards compatibility: when omitted, `getTokens` falls back to
+   * the legacy behaviour of reconstructing the callback params from `code` alone
+   * (the upstream redirect handler is then responsible for `state` validation).
+   */
+  authResponseUrl?: string;
+  /**
+   * The `state` value the client originally sent on the authorization request,
+   * looked up from storage by the redirect handler. Required for
+   * {@link oauth.validateAuthResponse} when {@link TokenEndpointInput.authResponseUrl}
+   * is provided.
+   */
+  expectedState?: string;
 };
 
 function validatePreconditions(
@@ -241,13 +267,42 @@ export async function getTokens(
     dpopHandle = await dpopHandleFromKeyPair(client, dpopKey);
   }
 
-  // oauth4webapi validates `state`/`iss`/error params for us. The legacy
-  // hand-rolled flow trusted the upstream `AuthCodeRedirectHandler` to have
-  // checked `code`; we reconstruct a minimal callback params object from the
-  // stored `code`. `state` is validated in the redirect handler before we get
-  // here, so we pass `expectNoState`.
-  const callbackParams = new URLSearchParams();
-  callbackParams.set("code", data.code);
+  // Phase 3 (auth-response validation placement): when the redirect handler
+  // threads the full authorization-response URL + the expected `state`, validate
+  // `state`/`iss`/error here with oauth4webapi's `validateAuthResponse` (RFC 9207
+  // `iss` + CSRF `state`), and use its branded result as the callback params.
+  // This removes the previous branded *cast* (Phase-2 risk #1): the params handed
+  // to `authorizationCodeGrantRequest` are now genuinely validated rather than
+  // trusted from upstream.
+  //
+  // Back-compat fallback: if no `authResponseUrl`/`expectedState` is supplied
+  // (legacy callers), reconstruct a minimal callback-params object from the
+  // stored `code` — the previous behaviour — and the upstream handler remains
+  // responsible for the `state` check.
+  let callbackParams: ReturnType<typeof oauth.validateAuthResponse>;
+  if (
+    data.authResponseUrl !== undefined &&
+    data.expectedState !== undefined
+  ) {
+    try {
+      callbackParams = oauth.validateAuthResponse(
+        as,
+        oauthClient,
+        new URL(data.authResponseUrl),
+        data.expectedState,
+      );
+    } catch (err) {
+      return mapOauthError(err);
+    }
+  } else {
+    const legacyParams = new URLSearchParams();
+    legacyParams.set("code", data.code);
+    // Cast: oauth4webapi brands the params returned from validateAuthResponse;
+    // on this legacy path the redirect handler has already validated state/iss.
+    callbackParams = legacyParams as unknown as ReturnType<
+      typeof oauth.validateAuthResponse
+    >;
+  }
 
   let tokenResponse;
   try {
@@ -255,12 +310,13 @@ export async function getTokens(
       as,
       oauthClient,
       clientAuth,
-      // Cast: oauth4webapi brands the params returned from validateAuthResponse;
-      // here the redirect handler has already validated state/iss/error.
-      callbackParams as unknown as ReturnType<typeof oauth.validateAuthResponse>,
+      callbackParams,
       data.redirectUrl,
       data.codeVerifier,
-      dpopHandle ? { DPoP: dpopHandle } : {},
+      {
+        ...(dpopHandle ? { DPoP: dpopHandle } : {}),
+        ...allowInsecureForIssuer(issuer.issuer),
+      },
     );
   } catch (err) {
     return mapOauthError(err);
@@ -284,12 +340,13 @@ export async function getTokens(
             as,
             oauthClient,
             clientAuth,
-            callbackParams as unknown as ReturnType<
-              typeof oauth.validateAuthResponse
-            >,
+            callbackParams,
             data.redirectUrl,
             data.codeVerifier,
-            { DPoP: dpopHandle },
+            {
+              DPoP: dpopHandle,
+              ...allowInsecureForIssuer(issuer.issuer),
+            },
           );
           return oauth.processAuthorizationCodeResponse(
             as,

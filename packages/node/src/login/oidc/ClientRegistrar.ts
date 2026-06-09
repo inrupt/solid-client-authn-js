@@ -50,7 +50,10 @@ import {
   isKnownClientType,
 } from "@inrupt/solid-client-authn-core";
 import * as oauth from "oauth4webapi";
-import { asAuthorizationServer } from "./oauth/oauthAdapter";
+import {
+  allowInsecureForIssuer,
+  asAuthorizationServer,
+} from "./oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -174,6 +177,7 @@ export default class ClientRegistrar implements IClientRegistrar {
       const registerResponse = await oauth.dynamicClientRegistrationRequest(
         as,
         clientMetadata,
+        allowInsecureForIssuer(issuerConfig.issuer),
       );
       registeredClient =
         await oauth.processDynamicClientRegistrationResponse(registerResponse);

@@ -59,6 +59,7 @@ import * as oauth from "oauth4webapi";
 import type { EventEmitter } from "events";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 import {
+  allowInsecureForIssuer,
   asAuthorizationServer,
   asOauthClient,
   clientAuthFor,
@@ -191,7 +192,10 @@ export default class TokenRefresher implements ITokenRefresher {
           oauthClient,
           clientAuth,
           refreshToken,
-          dpop ? { DPoP: dpop } : {},
+          {
+            ...(dpop ? { DPoP: dpop } : {}),
+            ...allowInsecureForIssuer(oidcContext.issuerConfig.issuer),
+          },
         );
         return oauth.processRefreshTokenResponse(
           as,

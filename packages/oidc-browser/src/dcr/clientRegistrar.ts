@@ -51,7 +51,10 @@ import {
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
 import * as oauth from "oauth4webapi";
-import { asAuthorizationServer } from "../oauth/oauthAdapter";
+import {
+  allowInsecureForIssuer,
+  asAuthorizationServer,
+} from "../oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -160,6 +163,7 @@ export async function registerClient(
     const registerResponse = await oauth.dynamicClientRegistrationRequest(
       as,
       clientMetadata,
+      allowInsecureForIssuer(issuerConfig.issuer),
     );
     registered =
       await oauth.processDynamicClientRegistrationResponse(registerResponse);

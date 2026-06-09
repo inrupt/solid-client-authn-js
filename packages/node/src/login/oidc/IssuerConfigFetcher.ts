@@ -50,6 +50,7 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
 import * as oauth from "oauth4webapi";
+import { allowInsecureForIssuer } from "./oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -155,6 +156,9 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
     // Solid IdPs.
     const discoveryResponse = await oauth.discoveryRequest(issuerUrl, {
       algorithm: "oidc",
+      // Permit http only for loopback issuers (local dev / conformance); real
+      // IdPs keep oauth4webapi v3's HTTPS enforcement. See oauthAdapter.
+      ...allowInsecureForIssuer(issuer),
     });
     const authorizationServer = await oauth.processDiscoveryResponse(
       issuerUrl,

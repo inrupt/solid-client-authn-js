@@ -165,6 +165,52 @@ export function clientAuthFor(client: IClient): oauth.ClientAuth {
 }
 
 /**
+ * Whether an issuer/endpoint URL is an HTTP(S) *localhost* origin.
+ *
+ * oauth4webapi v3 rejects plain-`http://` requests by default (it requires HTTPS
+ * for every protocol endpoint). The legacy stack (`openid-client` v5 in node, the
+ * hand-rolled `fetch` in the browser) made requests to whatever URL it was given,
+ * so it implicitly *allowed* `http://localhost`-style issuers used in local
+ * development and the conformance harness (local CSS / Keycloak over http).
+ *
+ * To preserve exactly that behaviour — and ONLY that — call sites pass
+ * {@link allowInsecureForIssuer} when building the oauth4webapi options bag, which
+ * flips `oauth.allowInsecureRequests` on solely for loopback hosts. Non-localhost
+ * `http://` issuers stay rejected (a security improvement, not a regression: the
+ * spec mandates HTTPS for real IdPs and Solid-OIDC requires it).
+ */
+export function isHttpLocalhost(url: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(url);
+    const isLoopback =
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "[::1]" ||
+      hostname === "::1" ||
+      hostname.endsWith(".localhost");
+    return (protocol === "http:" || protocol === "https:") && isLoopback;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Build the oauth4webapi "allow insecure requests" option fragment for an issuer.
+ *
+ * Returns `{ [oauth.allowInsecureRequests]: true }` for http(s)-localhost issuers
+ * (preserving the legacy http-on-localhost behaviour), and an empty object
+ * otherwise (so real IdPs keep the spec-mandated HTTPS enforcement). Spread into
+ * the options bag of `discoveryRequest` / grant / DCR calls.
+ */
+export function allowInsecureForIssuer(
+  issuer: string,
+): Record<symbol, boolean> {
+  return isHttpLocalhost(issuer)
+    ? { [oauth.allowInsecureRequests]: true }
+    : {};
+}
+
+/**
  * Generate a fresh DPoP {@link CryptoKeyPair} for a node login flow.
  *
  * IMPORTANT (storage/refresh contract): the key is generated **extractable**.

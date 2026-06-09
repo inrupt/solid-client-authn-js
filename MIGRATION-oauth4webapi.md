@@ -480,3 +480,115 @@ after [the openid-client] upgrade".)
 - **Phase 5 (final dead-dep sweep, repo-wide):** confirm `openid-client` and `oidc-client-ts`
   are gone everywhere; re-evaluate the `uuid` deps; resolve the `dpop` direct-vs-transitive
   question (item 5 above) — all **once CI is green**.
+
+---
+
+## 11. Phase 3 — cross-cutting polish
+
+Phase 3 resolves the cross-cutting risks the per-package phases flagged, without
+changing any public/`Session`/handler API, `EVENTS`, error type, or storage format.
+
+> ⚠️ **Not built/tested.** Per the migration constraints, deps were **not installed**,
+> so nothing here was compiled or run. Everything is type-plausible against the
+> documented oauth4webapi v3 / dpop v2 API and the `@solid/reactive-authentication`
+> reference. Spots needing a green CI run are flagged **(CI-validate)**.
+
+### 3.1 Auth-response validation placement (closes Phase-2 risk #1 / bridge #2)
+
+The Phase-2 browser `getTokens` reconstructed the `authorizationCodeGrantRequest`
+callback params from the stored `code` and **cast** them to the branded
+`validateAuthResponse` return type — so `iss`/`state` were never re-checked by
+oauth4webapi inside `getTokens`. Phase 3 removes that cast on the real flow:
+
+- `packages/oidc-browser/src/dpop/tokenExchange.ts` — `TokenEndpointInput` gains two
+  **optional** fields `authResponseUrl?: string` + `expectedState?: string`. When both
+  are present, `getTokens` runs `oauth.validateAuthResponse(as, client, new URL(authResponseUrl),
+  expectedState)` (RFC 9207 `iss` + CSRF `state` + OAuth error params) and uses the
+  **branded** result directly as the callback params for `authorizationCodeGrantRequest`
+  (and the nonce-retry path). When they are absent, the legacy code-only branded-cast
+  path is preserved verbatim, so any external caller of `getTokens` keeps working — the
+  exported signature/return shape is unchanged (the fields are additive + optional).
+- `packages/browser/src/login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler.ts` —
+  now threads `authResponseUrl: redirectUrl` and `expectedState: oauthState` into
+  `getTokens` (`oauthState` is both the storage key for the session and the `state` the
+  client originally sent). The handler keeps its existing manual `iss` check (harmless
+  defence-in-depth; the authoritative validation now lives in `validateAuthResponse`).
+- **Node side already correct.** `packages/node/.../AuthCodeRedirectHandler.ts` (Phase 4)
+  already calls `oauth.validateAuthResponse(as, oauthClient, new URL(inputRedirectUrl),
+  oauthState)` and threads the branded result through — no change needed; Phase 3 brings
+  the browser package up to the same standard. **(CI-validate)** browser-handler specs assert
+  `getTokens` args via `expect.objectContaining`, so the additive fields don't break them,
+  but a green unit run should confirm the new `validateAuthResponse` mock wiring.
+
+### 3.2 id-token claims parity (confirmed — no change required)
+
+Both packages surface the same id-token claims inrupt always exposed, by running
+`getWebidFromTokenPayload(idToken, jwksUri, issuer, clientId)` (core/`util/token.ts`)
+on the `id_token` string from the oauth4webapi result object. That helper performs the
+Solid-specific checks — `webid` claim, `azp` (→ `clientId`), IRI-`sub` fallback — on top
+of jose's `iss`/`aud`/signature verification. This is preserved on **both** the
+auth-code path (browser `getTokens`, node `AuthCodeRedirectHandler`) and the **refresh**
+path (browser `refreshGrant`, node `TokenRefresher`). `expectedNonce: oauth.expectNoNonce`
+is kept everywhere no nonce is threaded (parity with legacy). We deliberately did **not**
+switch to `oauth.getValidatedIdTokenClaims`: it returns only the validated claim set and
+would not, by itself, reproduce the `webid`/`azp`/IRI-`sub` Solid resolution — keeping
+`getWebidFromTokenPayload` is the faithful choice.
+
+### 3.3 Discovery / PKCE consistency + `allowInsecureRequests` (new, correctness-critical)
+
+- **`AuthorizationServer`/`Client` construction is de-duplicated** through the two
+  `oauthAdapter.ts` seams (`asAuthorizationServer` / `asOauthClient` / `clientAuthFor`):
+  every grant/DCR/discovery call in both packages builds these records the same way.
+  (Fully removing the seam in favour of threading the discovered `AuthorizationServer`
+  end-to-end — eliminating the `IIssuerConfig` round-trip — remains a follow-up, noted in
+  both `IssuerConfigFetcher` TODOs; it is a larger storage/threading change kept out of
+  scope to preserve the persisted `IIssuerConfig` format.)
+- **`allowInsecureRequests` is now applied, scoped to http(s)-localhost issuers.**
+  oauth4webapi v3 **rejects plain-`http://` requests by default**; the legacy stack
+  (`openid-client` v5 / hand-rolled browser `fetch`) made requests to whatever URL it was
+  given, so it implicitly allowed `http://localhost` IdPs used in local dev and the
+  conformance harness (local CSS / Keycloak over http). To preserve **exactly** that — and
+  only that — both seams gained `isHttpLocalhost(url)` + `allowInsecureForIssuer(issuer)`,
+  the latter returning `{ [oauth.allowInsecureRequests]: true }` for loopback origins
+  (`localhost`, `127.0.0.1`, `[::1]`, `*.localhost`) and `{}` otherwise. It is spread into
+  the options bag of **every** oauth4webapi network call: node `discoveryRequest`,
+  `authorizationCodeGrantRequest`, `refreshTokenGrantRequest`, `clientCredentialsGrantRequest`,
+  `dynamicClientRegistrationRequest`; browser `authorizationCodeGrantRequest` (+ retry),
+  `refreshTokenGrantRequest` (+ retry), `dynamicClientRegistrationRequest`. Non-localhost
+  `http://` issuers stay rejected — a security improvement, not a regression (Solid-OIDC
+  mandates HTTPS for real IdPs). **(CI-validate, conformance-critical):** confirm the
+  local-CSS / Keycloak conformance run (which talks http to loopback) still passes; without
+  this flag those flows would have started throwing under oauth4webapi v3.
+  - The browser package's own `IssuerConfigFetcher` discovery uses a raw `fetch` (not
+    oauth4webapi) and `oidc-client-ts` drives the PKCE/redirect leg, so neither needs the
+    flag — the scoping is limited to the oauth4webapi grant/DCR call sites, matching where
+    the legacy code allowed http.
+
+### 3.4 DPoP key TODOs (consistency)
+
+The JWK-persistence bridge is left **as-is** (storage-format change is out of scope). The
+`// TODO(migration): persist … CryptoKeyPair` note is now phrased consistently across all
+three spots that own a DPoP key: `core/.../dpopUtils.ts` (`generateDpopKeyPair`),
+`oidc-browser/.../oauthAdapter.ts` (`dpopHandleFromKeyPair`), and
+`node/.../oauthAdapter.ts` (`generateDpopCryptoKeyPair` / `dpopHandleFromStoredKeyPair`).
+Refresh demonstrably **reuses the same bound key**: the browser `refresh` and node
+`TokenRefresher` both rebuild the DPoP handle from the persisted `KeyPair` via the JWK
+`importJWK` bridge (`dpopHandleFromKeyPair` / `dpopHandleFromStoredKeyPair`), so the
+refreshed access token stays bound to the original key (RFC 9449). **(CI-validate)** the
+key-identity round-trip end-to-end.
+
+### Files touched (Phase 3)
+
+| File | Change |
+|---|---|
+| `packages/oidc-browser/src/dpop/tokenExchange.ts` | `TokenEndpointInput` + optional `authResponseUrl`/`expectedState`; `validateAuthResponse` wired in; branded casts removed on the real path; `allowInsecureForIssuer` on both grant calls. |
+| `packages/browser/src/login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler.ts` | threads `authResponseUrl`/`expectedState` into `getTokens`. |
+| `packages/oidc-browser/src/oauth/oauthAdapter.ts` | new `isHttpLocalhost` + `allowInsecureForIssuer`. |
+| `packages/node/src/login/oidc/oauth/oauthAdapter.ts` | new `isHttpLocalhost` + `allowInsecureForIssuer`. |
+| `packages/oidc-browser/src/refresh/refreshGrant.ts` | `allowInsecureForIssuer` on both refresh grant calls. |
+| `packages/node/src/login/oidc/IssuerConfigFetcher.ts` | `allowInsecureForIssuer` on `discoveryRequest`. |
+| `packages/node/src/login/oidc/incomingRedirectHandler/AuthCodeRedirectHandler.ts` | `allowInsecureForIssuer` on the auth-code grant. |
+| `packages/node/src/login/oidc/refresh/TokenRefresher.ts` | `allowInsecureForIssuer` on the refresh grant. |
+| `packages/node/src/login/oidc/oidcHandlers/ClientCredentialsOidcHandler.ts` | `allowInsecureForIssuer` on the client-credentials grant. |
+| `packages/node/src/login/oidc/ClientRegistrar.ts` | `allowInsecureForIssuer` on DCR. |
+| `packages/core/src/authenticatedFetch/dpopUtils.ts` | TODO(migration) note made consistent. |

@@ -58,6 +58,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import * as oauth from "oauth4webapi";
 import {
+  allowInsecureForIssuer,
   asAuthorizationServer,
   asOauthClient,
   clientAuthFor,
@@ -111,7 +112,12 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
           clientAuth,
           // Passing scopes space-separated, as required by the spec.
           { scope: oidcLoginOptions.scopes.join(" ") },
-          dpop ? { DPoP: dpop } : {},
+          {
+            ...(dpop ? { DPoP: dpop } : {}),
+            ...allowInsecureForIssuer(
+              oidcLoginOptions.issuerConfiguration.issuer,
+            ),
+          },
         );
         return oauth.processClientCredentialsResponse(
           as,

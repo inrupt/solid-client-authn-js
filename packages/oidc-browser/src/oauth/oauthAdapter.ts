@@ -130,6 +130,46 @@ export function clientAuthFor(client: IClient): oauth.ClientAuth {
 }
 
 /**
+ * Whether an issuer/endpoint URL is an HTTP(S) *localhost* origin.
+ *
+ * oauth4webapi v3 rejects plain-`http://` requests by default. The legacy
+ * hand-rolled browser `fetch` made requests to whatever URL it was given, so it
+ * implicitly allowed `http://localhost`-style issuers used in local development
+ * and the conformance harness. {@link allowInsecureForIssuer} re-enables that for
+ * loopback hosts ONLY, so real IdPs keep the spec-mandated HTTPS enforcement.
+ * Mirror of the node adapter's helper.
+ */
+export function isHttpLocalhost(url: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(url);
+    const isLoopback =
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "[::1]" ||
+      hostname === "::1" ||
+      hostname.endsWith(".localhost");
+    return (protocol === "http:" || protocol === "https:") && isLoopback;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Build the oauth4webapi "allow insecure requests" option fragment for an issuer.
+ *
+ * Returns `{ [oauth.allowInsecureRequests]: true }` for http(s)-localhost issuers
+ * (preserving the legacy http-on-localhost behaviour), an empty object otherwise.
+ * Spread into the options bag of grant / DCR / discovery calls.
+ */
+export function allowInsecureForIssuer(
+  issuer: string,
+): Record<symbol, boolean> {
+  return isHttpLocalhost(issuer)
+    ? { [oauth.allowInsecureRequests]: true }
+    : {};
+}
+
+/**
  * Build a per-flow DPoP handle from inrupt's JWK-persisted {@link KeyPair}.
  *
  * `oauth.DPoP()` (and the `dpop` package underneath) require a `CryptoKeyPair`
