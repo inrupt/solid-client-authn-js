@@ -26,7 +26,8 @@ jobs:
       # Ensure npm 11.5.1 or later for trusted publishing
       - run: npm install -g npm@latest
       - run: npm ci
-      - run: npm publish --workspace packages/core
-      - run: npm publish --workspace packages/node
-      - run: npm publish --workspace packages/oidc-browser
-      - run: npm publish --workspace packages/browser
+      - run: npm stage publish --workspace packages/core
+      - run: npm stage publish --workspace packages/node
+      - run: npm stage publish --workspace packages/oidc-browser
+      - run: npm stage publish --workspace packages/browser
+      - run: echo "The packages have been staged, go to https://www.npmjs.com to publish them."
