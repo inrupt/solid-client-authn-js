@@ -23,9 +23,26 @@
  * @packageDocumentation
  */
 
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 4 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: `openid-client` `client.refresh(refreshToken, { DPoP })` with the
+// `KeyObject`-bridged DPoP key (`asDPoPInput`).
+//
+// After: `oauth.refreshTokenGrantRequest` + `oauth.processRefreshTokenResponse`
+// reusing the SAME bound DPoP key via a fresh `oauth.DPoP()` handle built from
+// the persisted `KeyPair` (`dpopHandleFromStoredKeyPair` — JWK bridge, since the
+// key was stored after the original login). Reusing the bound key on refresh is
+// correctness-critical (RFC 9449).
+//
+// `tokenSetToTokenEndpointResponse` is retained but now consumes an
+// `oauth.TokenEndpointResponse`; it keeps the legacy bearer/DPoP token_type
+// assertion and ID-token validation via `getWebidFromTokenPayload`.
+// ---------------------------------------------------------------------------
 import type {
   IClient,
   IClientRegistrar,
+  IIssuerConfig,
   IIssuerConfigFetcher,
   IStorageUtility,
   KeyPair,
@@ -38,54 +55,71 @@ import {
   PREFERRED_SIGNING_ALG,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import type { IssuerMetadata, TokenSet } from "openid-client";
-import { Issuer } from "openid-client";
+import * as oauth from "oauth4webapi";
 import type { EventEmitter } from "events";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
-import { asDPoPInput } from "../../../util/dpopInput";
+import {
+  allowInsecureForIssuer,
+  asAuthorizationServer,
+  asOauthClient,
+  clientAuthFor,
+  dpopHandleFromStoredKeyPair,
+  mapOauthError,
+} from "../oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
 const tokenSetToTokenEndpointResponse = async (
-  tokenSet: TokenSet,
-  issuerMetadata: IssuerMetadata,
+  tokenSet: oauth.TokenEndpointResponse,
+  issuerConfig: IIssuerConfig,
   clientInfo: IClient,
 ): Promise<TokenEndpointResponse> => {
   if (tokenSet.access_token === undefined || tokenSet.id_token === undefined) {
     // The error message is left minimal on purpose not to leak the tokens.
     throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
+      `The Identity Provider [${issuerConfig.issuer}] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
     );
   }
 
-  if (tokenSet.token_type !== "Bearer" && tokenSet.token_type !== "DPoP") {
+  // oauth4webapi normalises token_type to lowercase.
+  if (
+    tokenSet.token_type !== "bearer" &&
+    tokenSet.token_type !== "dpop"
+  ) {
     throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
+      `The Identity Provider [${issuerConfig.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
     );
   }
 
-  if (typeof issuerMetadata.jwks_uri != "string") {
+  if (typeof issuerConfig.jwksUri != "string") {
     throw new Error(
-      `Cannot verify ID Token: Issuer Metadata is missing a JWKS URI (${JSON.stringify(issuerMetadata)})`,
+      `Cannot verify ID Token: Issuer Metadata is missing a JWKS URI (${JSON.stringify(issuerConfig)})`,
     );
   }
 
   const { webId } = await getWebidFromTokenPayload(
     tokenSet.id_token,
-    issuerMetadata.jwks_uri,
-    issuerMetadata.issuer,
+    issuerConfig.jwksUri,
+    issuerConfig.issuer,
     clientInfo.clientId,
   );
 
   return {
     accessToken: tokenSet.access_token,
-    tokenType: tokenSet.token_type,
+    // Preserve the legacy capitalised token type for the public
+    // TokenEndpointResponse contract.
+    tokenType: tokenSet.token_type === "dpop" ? "DPoP" : "Bearer",
     idToken: tokenSet.id_token,
-    refreshToken: tokenSet.refresh_token,
+    refreshToken:
+      typeof tokenSet.refresh_token === "string"
+        ? tokenSet.refresh_token
+        : undefined,
     webId,
-    expiresAt: tokenSet.expires_at,
+    expiresAt:
+      typeof tokenSet.expires_in === "number"
+        ? Math.floor(Date.now() / 1000) + tokenSet.expires_in
+        : undefined,
   };
 };
 
@@ -115,7 +149,6 @@ export default class TokenRefresher implements ITokenRefresher {
       this.issuerConfigFetcher,
     );
 
-    const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
     // This should also retrieve the client from storage
     const clientInfo: IClient = await this.clientRegistrar.getClient(
       { sessionId },
@@ -127,15 +160,6 @@ export default class TokenRefresher implements ITokenRefresher {
         PREFERRED_SIGNING_ALG,
       );
     }
-    const client = new issuer.Client({
-      client_id: clientInfo.clientId,
-      client_secret: clientInfo.clientSecret,
-      token_endpoint_auth_method:
-        typeof clientInfo.clientSecret === "undefined"
-          ? "none"
-          : "client_secret_basic",
-      id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
-    });
 
     if (refreshToken === undefined) {
       throw new Error(
@@ -149,11 +173,49 @@ export default class TokenRefresher implements ITokenRefresher {
       );
     }
 
+    const as = asAuthorizationServer(oidcContext.issuerConfig);
+    const oauthClient = asOauthClient(clientInfo);
+    const clientAuth = clientAuthFor(clientInfo);
+
+    // Reuse the SAME bound DPoP key on refresh (RFC 9449). The key was persisted
+    // as inrupt's JWK-shaped KeyPair, so it is bridged back to a CryptoKeyPair.
+    const dpop =
+      dpopKey !== undefined
+        ? await dpopHandleFromStoredKeyPair(clientInfo, dpopKey)
+        : undefined;
+
+    let refreshed: oauth.TokenEndpointResponse;
+    try {
+      const grant = async (): Promise<oauth.TokenEndpointResponse> => {
+        const tokenResponse = await oauth.refreshTokenGrantRequest(
+          as,
+          oauthClient,
+          clientAuth,
+          refreshToken,
+          {
+            ...(dpop ? { DPoP: dpop } : {}),
+            ...allowInsecureForIssuer(oidcContext.issuerConfig.issuer),
+          },
+        );
+        return oauth.processRefreshTokenResponse(
+          as,
+          oauthClient,
+          tokenResponse,
+        );
+      };
+      refreshed = await grant().catch(async (err) => {
+        if (oauth.isDPoPNonceError(err) && dpop) {
+          return grant();
+        }
+        throw err;
+      });
+    } catch (err) {
+      return mapOauthError(err);
+    }
+
     const tokenSet = await tokenSetToTokenEndpointResponse(
-      await client.refresh(refreshToken, {
-        DPoP: dpopKey ? asDPoPInput(dpopKey.privateKey) : undefined,
-      }),
-      issuer.metadata,
+      refreshed,
+      oidcContext.issuerConfig,
       clientInfo,
     );
 

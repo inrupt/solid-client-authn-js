@@ -23,7 +23,6 @@
  */
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { jest, it, describe, expect } from "@jest/globals";
-import type * as OpenidClient from "openid-client";
 import type { JWK } from "jose";
 import { randomUUID } from "crypto";
 import { EventEmitter } from "events";
@@ -38,7 +37,36 @@ import { mockDefaultClient } from "../__mocks__/ClientRegistrar";
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): the handler now drives the client-credentials grant
+// through oauth4webapi (`clientCredentialsGrantRequest` +
+// `processClientCredentialsResponse`) with a DPoP handle from
+// `generateKeyPair`. We therefore mock the oauth4webapi boundary instead of the
+// openid-client `Issuer`/`Client.grant`. Mirrors Phase 2's browser spec style.
+//
+// NOTE (CI-validate): these mocks assume the exact oauth4webapi v3 function
+// names/return shapes documented in MIGRATION-oauth4webapi.md. They were NOT
+// executed in this branch (deps not installed) — run under CI once the lockfile
+// resolves.
+// ---------------------------------------------------------------------------
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    clientCredentialsGrantRequest: jest.fn(() =>
+      Promise.resolve(new Response()),
+    ),
+    processClientCredentialsResponse: jest.fn(),
+    // Keep the real ES256 key generation (Web Crypto works in the node test
+    // env) so `keyPairFromCryptoKeyPair`'s public-JWK export succeeds; only the
+    // DPoP handle + grant boundary are stubbed.
+    DPoP: jest.fn(() => ({})),
+    isDPoPNonceError: jest.fn(() => false),
+  };
+});
+
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
 
 const mockedFetch = jest.spyOn(globalThis, "fetch");
 
@@ -99,59 +127,44 @@ const mockKeyBoundToken = (): AccessJwt => {
   };
 };
 
-const mockIdTokenPayload = (): OpenidClient.IdTokenClaims => {
-  return {
-    sub: "https://my.webid/",
-    iss: "https://my.idp/",
-    aud: "https://resource.example.org",
-    exp: 1662266216,
-    iat: 1462266216,
-  };
+// A processed client-credentials token response, as returned by
+// `oauth.processClientCredentialsResponse`. `token_type` is normalised to
+// lowercase by oauth4webapi.
+type ProcessedTokens = {
+  access_token?: string;
+  id_token?: string;
+  token_type: string;
+  expires_in?: number;
+  refresh_token?: string;
 };
 
-const mockDpopTokens = (): OpenidClient.TokenSet => {
+const mockDpopTokens = (): ProcessedTokens => {
   return {
     access_token: JSON.stringify(mockKeyBoundToken()),
     id_token: mockIdToken(),
-    token_type: "DPoP",
-    expired: () => false,
-    claims: mockIdTokenPayload,
+    token_type: "dpop",
     expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
 
-const mockBearerTokens = (): OpenidClient.TokenSet => {
+const mockBearerTokens = (): ProcessedTokens => {
   return {
     access_token: "some token",
     id_token: mockIdToken(),
-    token_type: "Bearer",
-    expired: () => false,
-    claims: mockIdTokenPayload,
+    token_type: "bearer",
     expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
 
-const setupOidcClientMock = (tokenSet: OpenidClient.TokenSet) => {
-  const grantMock = jest
-    .fn<OpenidClient.Client["grant"]>()
-    .mockResolvedValueOnce(tokenSet);
-  const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
-    typeof OpenidClient
-  >;
-  function clientConstructor() {
-    // this is untyped, which makes TS complain
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.grant = grantMock;
-  }
-
-  const mockedIssuer = jest.mocked({
-    metadata: mockDefaultIssuerConfig(),
-    Client: clientConstructor,
-    // Cast to unknown because only partially mocked
-  } as unknown as OpenidClient.Issuer<OpenidClient.Client>);
-  Issuer.mockReturnValueOnce(mockedIssuer);
-  return grantMock;
+// Re-point the legacy `setupOidcClientMock(tokenSet)` helper at the oauth4webapi
+// boundary: the grant request resolves a dummy Response and
+// `processClientCredentialsResponse` resolves the processed token object.
+const setupOidcClientMock = (tokenSet: ProcessedTokens) => {
+  const grantRequest = oauth.clientCredentialsGrantRequest as jest.Mock<any>;
+  const process = oauth.processClientCredentialsResponse as jest.Mock<any>;
+  grantRequest.mockResolvedValueOnce(new Response());
+  process.mockResolvedValueOnce(tokenSet);
+  return process;
 };
 
 const setupGetWebidMock = (webid: string, clientid?: string) => {
@@ -539,7 +552,7 @@ describe("handle", () => {
 
   it("uses the provided scopes in the token request", async () => {
     const tokens = mockDpopTokens();
-    const mockedGrant = setupOidcClientMock(tokens);
+    setupOidcClientMock(tokens);
     setupGetWebidMock("https://my.webid/");
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
@@ -555,15 +568,15 @@ describe("handle", () => {
       scopes: ["openid", "webid", "custom_scope"],
     });
 
-    expect(mockedGrant).toHaveBeenCalledWith(
-      {
-        grant_type: "client_credentials",
-        token_endpoint_auth_method: "client_secret_basic",
-        scope: "openid webid custom_scope",
-      },
-      {
-        DPoP: undefined,
-      },
+    // MIGRATION (Phase 4): oauth4webapi takes the space-separated scope in the
+    // 4th (parameters) argument of `clientCredentialsGrantRequest`; the
+    // grant_type / client auth are now applied by oauth4webapi itself.
+    expect(oauth.clientCredentialsGrantRequest).toHaveBeenCalledWith(
+      expect.anything(), // AuthorizationServer
+      expect.objectContaining({ client_id: expect.any(String) }), // Client
+      expect.anything(), // ClientAuth
+      { scope: "openid webid custom_scope" },
+      expect.anything(), // { DPoP? }
     );
   });
 

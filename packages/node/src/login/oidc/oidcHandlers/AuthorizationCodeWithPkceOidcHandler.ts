@@ -26,6 +26,21 @@
 /**
  * Handler for the Authorization Code with PKCE Flow
  */
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 4 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: PKCE/state generation and the authorization URL were produced by
+// `openid-client` (`generators.codeVerifier/state/codeChallenge` +
+// `client.authorizationUrl`).
+//
+// After: PKCE/state come from `oauth.generateRandomCodeVerifier` /
+// `oauth.calculatePKCECodeChallenge` / `oauth.generateRandomState`, and the
+// authorization URL is assembled manually from the discovered
+// `authorization_endpoint` — exactly as `@solid/reactive-authentication`'s
+// `DPoPTokenProvider.upgrade()` does. The PKCE `codeVerifier` is still persisted
+// via the base class `setupRedirectHandler` and consumed after redirect by
+// `AuthCodeRedirectHandler`.
+// ---------------------------------------------------------------------------
 import type {
   IOidcHandler,
   IOidcOptions,
@@ -35,8 +50,7 @@ import {
   AuthorizationCodeWithPkceOidcHandlerBase,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer, generators } from "openid-client";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+import * as oauth from "oauth4webapi";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -51,24 +65,29 @@ export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler
 {
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    const issuer = new Issuer(
-      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration),
-    );
-    const client = new issuer.Client({
-      client_id: oidcLoginOptions.client.clientId,
-    });
-    const codeVerifier = generators.codeVerifier();
-    const state = generators.state();
+    const issuerConfig = oidcLoginOptions.issuerConfiguration;
+    if (issuerConfig.authorizationEndpoint === undefined) {
+      throw new Error(
+        `The issuer [${oidcLoginOptions.issuer}] does not have an authorization endpoint.`,
+      );
+    }
+    const codeVerifier = oauth.generateRandomCodeVerifier();
+    const state = oauth.generateRandomState();
+    const codeChallenge = await oauth.calculatePKCECodeChallenge(codeVerifier);
 
-    const targetUrl = client.authorizationUrl({
-      code_challenge: generators.codeChallenge(codeVerifier),
-      state,
-      response_type: "code",
-      redirect_uri: oidcLoginOptions.redirectUrl,
-      code_challenge_method: "S256",
-      prompt: "consent",
-      scope: oidcLoginOptions.scopes.join(" "),
-    });
+    // Build the authorization request URL manually from the discovered
+    // authorization endpoint (oauth4webapi is stateless and has no
+    // `authorizationUrl` helper). Mirrors the legacy openid-client parameters.
+    const target = new URL(issuerConfig.authorizationEndpoint);
+    target.searchParams.set("code_challenge", codeChallenge);
+    target.searchParams.set("state", state);
+    target.searchParams.set("response_type", "code");
+    target.searchParams.set("redirect_uri", oidcLoginOptions.redirectUrl);
+    target.searchParams.set("code_challenge_method", "S256");
+    target.searchParams.set("prompt", "consent");
+    target.searchParams.set("scope", oidcLoginOptions.scopes.join(" "));
+    target.searchParams.set("client_id", oidcLoginOptions.client.clientId);
+    const targetUrl = target.toString();
 
     if (oidcLoginOptions.eventEmitter) {
       oidcLoginOptions.eventEmitter.emit(EVENTS.AUTHORIZATION_REQUEST, {

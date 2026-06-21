@@ -29,7 +29,35 @@ import {
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): discovery now uses oauth4webapi
+// (`discoveryRequest` + `processDiscoveryResponse`) instead of openid-client's
+// `Issuer.discover`. We mock those two functions; `processDiscoveryResponse`
+// resolves the discovered `AuthorizationServer` metadata directly (no `.metadata`
+// wrapper, unlike the legacy openid-client `Issuer`).
+//
+// NOTE (CI-validate): not executed in this branch (deps not installed).
+// ---------------------------------------------------------------------------
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    discoveryRequest: jest.fn(() => Promise.resolve(new Response())),
+    processDiscoveryResponse: jest.fn(),
+  };
+});
+
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
+
+const mockDiscovery = (metadata: unknown) => {
+  (oauth.discoveryRequest as jest.Mock<any>).mockResolvedValueOnce(
+    new Response(),
+  );
+  (oauth.processDiscoveryResponse as jest.Mock<any>).mockResolvedValueOnce(
+    metadata,
+  );
+};
 
 /**
  * Test for IssuerConfigFetcher
@@ -48,11 +76,8 @@ describe("IssuerConfigFetcher", () => {
   }
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockDefaultIssuerMetadata();
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -78,13 +103,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if authorization_endpoint is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       authorization_endpoint: undefined,
     });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -96,13 +118,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if token_endpoint is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       token_endpoint: undefined,
     });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -114,13 +133,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if jwks_uri is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       jwks_uri: undefined,
     });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -132,13 +148,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if claims_supported is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       claims_supported: undefined,
     });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -150,13 +163,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if subject_types_supported is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       subject_types_supported: undefined,
     });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -168,13 +178,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("defaults scopes_supported to [openid] if omitted", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       scopes_supported: undefined,
     });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -185,13 +192,10 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockIssuerMetadata({
       scopes_supported: ["webid"],
     });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),

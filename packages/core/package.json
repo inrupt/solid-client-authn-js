@@ -36,6 +36,7 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "dependencies": {
+    "dpop": "^2",
     "events": "^3.3.0",
     "jose": "^6.2.3",
     "uuid": "^14.0.0"

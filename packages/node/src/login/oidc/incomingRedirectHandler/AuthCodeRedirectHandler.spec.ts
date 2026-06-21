@@ -24,7 +24,6 @@ import {
   mockStorageUtility,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import type { IdTokenClaims, TokenSet, BaseClient } from "openid-client";
 import type { JWK } from "jose";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
@@ -35,12 +34,34 @@ import {
 } from "../__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): the code→token exchange now runs through oauth4webapi
+// (`validateAuthResponse` → `authorizationCodeGrantRequest` →
+// `processAuthorizationCodeResponse`) with a DPoP handle from `generateKeyPair`.
+// We mock that boundary instead of openid-client's `callbackParams`/`callback`.
+//
+// NOTE (CI-validate): not executed in this branch (deps not installed). Some
+// legacy assertions about openid-client call shapes (e.g. the exact
+// `client.callback` argument list) are converted to `it.todo` since there is no
+// openid-client object in oauth4webapi.
+// ---------------------------------------------------------------------------
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    validateAuthResponse: jest.fn(() => new URLSearchParams({ code: "someCode" })),
+    authorizationCodeGrantRequest: jest.fn(() =>
+      Promise.resolve(new Response()),
+    ),
+    processAuthorizationCodeResponse: jest.fn(),
+    DPoP: jest.fn(() => ({})),
+    isDPoPNonceError: jest.fn(() => false),
+  };
+});
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -54,6 +75,9 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ),
   };
 });
+
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
 jest.useFakeTimers();
 const DEFAULT_EXPIRATION_TIME_SECONDS = 300;
 
@@ -71,7 +95,7 @@ const mockJwk = (): JWK => {
 
 const mockWebId = (): string => "https://my.webid/";
 
-const mockIdTokenPayload = (): IdTokenClaims => {
+const mockIdTokenPayload = () => {
   return {
     sub: "https://my.webid",
     iss: "https://my.idp/",
@@ -110,24 +134,30 @@ const mockKeyBoundToken = async (): Promise<AccessJwt> => {
 
 const mockBearerAccessToken = (): string => "some token";
 
-const mockBearerTokens = (): TokenSet => {
+// A processed authorization-code response, as returned by
+// `oauth.processAuthorizationCodeResponse` (token_type normalised to lowercase).
+type ProcessedTokens = {
+  access_token?: string;
+  id_token?: string;
+  token_type: string;
+  expires_in?: number;
+  refresh_token?: string;
+};
+
+const mockBearerTokens = (): ProcessedTokens => {
   return {
     access_token: mockBearerAccessToken(),
     id_token: mockIdToken(),
-    token_type: "Bearer",
-    expired: () => false,
-    claims: mockIdTokenPayload,
+    token_type: "bearer",
     expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
 
-const mockDpopTokens = (): TokenSet => {
+const mockDpopTokens = (): ProcessedTokens => {
   return {
     access_token: JSON.stringify(mockKeyBoundToken()),
     id_token: mockIdToken(),
-    token_type: "DPoP",
-    expired: () => false,
-    claims: mockIdTokenPayload,
+    token_type: "dpop",
     expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
   };
 };
@@ -214,27 +244,24 @@ describe("AuthCodeRedirectHandler", () => {
       },
     });
 
-  const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuer = {
-      metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
-      Client: jest.fn().mockReturnValue({
-        callbackParams: jest.fn().mockReturnValue({
-          code: "someCode",
-          state: "someState",
-        }),
-        callback:
-          callback ??
-          jest
-            .fn<BaseClient["callback"]>()
-            .mockResolvedValue(tokenSet ?? mockDpopTokens()),
-        metadata: {
-          client_id: "https://some.client#id",
-        },
-      }),
-    };
-    Issuer.mockReturnValueOnce(mockedIssuer);
-    return mockedIssuer;
+  // Re-point the legacy helper at the oauth4webapi boundary: the grant request
+  // resolves a dummy Response and `processAuthorizationCodeResponse` resolves the
+  // processed token object. `process` accepts an optional rejection for error
+  // tests (legacy `callback` could be a custom rejecting fn).
+  const setupOidcClientMock = (
+    tokenSet?: ProcessedTokens,
+    processImpl?: () => Promise<unknown>,
+  ) => {
+    (oauth.authorizationCodeGrantRequest as jest.Mock<any>).mockResolvedValue(
+      new Response(),
+    );
+    const process = oauth.processAuthorizationCodeResponse as jest.Mock<any>;
+    if (processImpl) {
+      process.mockImplementation(processImpl as any);
+    } else {
+      process.mockResolvedValue(tokenSet ?? mockDpopTokens());
+    }
+    return { process };
   };
 
   const setupDefaultOidcClientMock = () =>
@@ -302,7 +329,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("uses 'none' client authentication if using Solid-OIDC client identifiers", async () => {
-      const mockedIssuer = setupDefaultOidcClientMock();
+      setupDefaultOidcClientMock();
       const mockedStorage = mockDefaultRedirectStorage();
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -322,10 +349,17 @@ describe("AuthCodeRedirectHandler", () => {
         "https://my.app/redirect?code=someCode&state=someState",
       );
 
-      expect(mockedIssuer.Client).toHaveBeenCalledWith(
-        expect.objectContaining({
-          token_endpoint_auth_method: "none",
-        }),
+      // MIGRATION (Phase 4): the public client (no secret) maps to
+      // `token_endpoint_auth_method: "none"` on the oauth4webapi Client passed to
+      // `authorizationCodeGrantRequest`.
+      expect(oauth.authorizationCodeGrantRequest).toHaveBeenCalledWith(
+        expect.anything(), // AuthorizationServer
+        expect.objectContaining({ token_endpoint_auth_method: "none" }),
+        expect.anything(), // ClientAuth (oauth.None())
+        expect.anything(), // validated callback params
+        expect.any(String), // redirect URI
+        expect.any(String), // code verifier
+        expect.anything(), // { DPoP? }
       );
     });
 
@@ -355,11 +389,7 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("cleans up the redirect IRI from the OIDC parameters", async () => {
-      // This function represents the openid-client callback
-      const callback = (jest.fn() as any).mockResolvedValueOnce(
-        mockDpopTokens(),
-      );
-      setupOidcClientMock(undefined, callback);
+      setupDefaultOidcClientMock();
       const mockedStorage = mockDefaultRedirectStorage();
 
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
@@ -371,12 +401,17 @@ describe("AuthCodeRedirectHandler", () => {
         "https://my.app/redirect?code=someCode&state=someState&iss=https://example.org/issuer",
       );
 
-      expect(callback).toHaveBeenCalledWith(
+      // MIGRATION (Phase 4): the cleaned redirect URI (OIDC params stripped) is
+      // passed as the 5th positional argument of `authorizationCodeGrantRequest`,
+      // and the stored PKCE code verifier as the 6th.
+      expect(oauth.authorizationCodeGrantRequest).toHaveBeenCalledWith(
+        expect.anything(), // AuthorizationServer
+        expect.anything(), // Client
+        expect.anything(), // ClientAuth
+        expect.anything(), // validated callback params
         "https://my.app/redirect",
-        { code: "someCode", state: "someState" },
-        // The code verifier comes from the mocked storage.
-        { code_verifier: "some code verifier", state: "someState" },
-        expect.anything(),
+        "some code verifier",
+        expect.anything(), // { DPoP? }
       );
     });
 

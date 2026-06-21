@@ -21,14 +21,13 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/uuid": "^11.0.0",
     "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^5.0.0",
     "jose": "^6.2.3",
-    "oidc-client-ts": "^3.5.0",
-    "uuid": "^14.0.0"
+    "oauth4webapi": "^3",
+    "oidc-client-ts": "^3.5.0"
   },
   "publishConfig": {
     "access": "public"

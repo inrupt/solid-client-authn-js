@@ -60,9 +60,19 @@ async function buildDpopFetchOptions(
   const headers = new Headers(defaultOptions?.headers);
   // Any pre-existing Authorization header should be overriden.
   headers.set("Authorization", `DPoP ${authToken}`);
+  // POC (oauth4webapi migration): pass the access token so the proof carries the
+  // RFC 9449 `ath` claim (§7) — required when a DPoP proof accompanies an access
+  // token to a protected resource, or a conforming RS rejects it with 401. With
+  // the `dpop` package this is a single extra argument; `ath` is computed inside
+  // the library. This is the behavioural fix that PR #4292 added by hand.
   headers.set(
     "DPoP",
-    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
+    await createDpopHeader(
+      targetUrl,
+      defaultOptions?.method ?? "get",
+      dpopKey,
+      authToken,
+    ),
   );
   return {
     ...defaultOptions,

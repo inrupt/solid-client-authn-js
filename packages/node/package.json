@@ -30,7 +30,7 @@
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^5.0.0",
     "jose": "^6.2.3",
-    "openid-client": "^5.7.1",
+    "oauth4webapi": "^3.0.0",
     "uuid": "^14.0.0"
   },
   "publishConfig": {

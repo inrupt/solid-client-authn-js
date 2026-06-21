@@ -40,7 +40,6 @@ import {
   saveSessionInfoToStorage,
   getSessionIdFromOauthState,
   getWebidFromTokenPayload,
-  generateDpopKeyPair,
   buildAuthenticatedFetch,
   EVENTS,
   maybeBuildRpInitiatedLogout,
@@ -48,10 +47,18 @@ import {
 } from "@inrupt/solid-client-authn-core";
 
 import { URL } from "url";
-import { Issuer } from "openid-client";
+import * as oauth from "oauth4webapi";
 import type { EventEmitter } from "events";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import { asDPoPInput } from "../../../util/dpopInput";
+import {
+  allowInsecureForIssuer,
+  asAuthorizationServer,
+  asOauthClient,
+  clientAuthFor,
+  dpopHandle,
+  generateDpopCryptoKeyPair,
+  keyPairFromCryptoKeyPair,
+  mapOauthError,
+} from "../oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -119,11 +126,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       this.issuerConfigFetcher,
     );
 
-    const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
-    // The JWKS URI is mandatory in the spec.
-    if (typeof issuer.metadata.jwks_uri !== "string") {
+    // The JWKS URI is mandatory in the spec — needed to validate the ID token.
+    if (typeof oidcContext.issuerConfig.jwksUri !== "string") {
       throw new Error(
-        `JWKS URI is missing from issuer configuration, cannot validate tokens. Expected jwks_uri in ${JSON.stringify(issuer.metadata)}`,
+        `JWKS URI is missing from issuer configuration, cannot validate tokens. Expected jwks_uri in ${JSON.stringify(oidcContext.issuerConfig)}`,
       );
     }
     // This should also retrieve the client from storage
@@ -131,72 +137,130 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       { sessionId },
       oidcContext.issuerConfig,
     );
-    const client = new issuer.Client({
-      client_id: clientInfo.clientId,
-      client_secret: clientInfo.clientSecret,
-      token_endpoint_auth_method:
-        typeof clientInfo.clientSecret === "undefined"
-          ? "none"
-          : "client_secret_basic",
-      id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
-    });
 
-    const params = client.callbackParams(inputRedirectUrl);
+    const as = asAuthorizationServer(oidcContext.issuerConfig);
+    const oauthClient = asOauthClient(clientInfo);
+    const clientAuth = clientAuthFor(clientInfo);
+
+    // Mint a fresh DPoP key (node Web Crypto) and a per-flow DPoP handle (RFC
+    // 9449 `ath` + `use_dpop_nonce` retry are library-managed). The KeyPair is
+    // converted to inrupt's persisted shape so storage + buildAuthenticatedFetch
+    // keep their existing contract.
     let dpopKey: KeyPair | undefined;
-
+    let dpop: oauth.DPoPHandle | undefined;
     if (oidcContext.dpop) {
-      dpopKey = await generateDpopKeyPair();
+      // Extractable: the key is persisted to storage so the refresh grant can
+      // reuse it (see generateDpopCryptoKeyPair). TODO(migration): non-extractable.
+      const cryptoKeyPair = await generateDpopCryptoKeyPair();
+      dpopKey = await keyPairFromCryptoKeyPair(cryptoKeyPair);
+      dpop = dpopHandle(clientInfo, cryptoKeyPair);
     }
-    const tokenSet = await client.callback(
-      removeOpenIdParams(inputRedirectUrl).href,
-      params,
-      { code_verifier: oidcContext.codeVerifier, state: oauthState },
-      { DPoP: dpopKey ? asDPoPInput(dpopKey.privateKey) : undefined },
-    );
+
+    // Validate the authorization redirect (state/iss/error) against the request,
+    // then exchange the code. `validateAuthResponse` returns branded params for
+    // `authorizationCodeGrantRequest`.
+    let processed: oauth.TokenEndpointResponse;
+    try {
+      const callbackParams = oauth.validateAuthResponse(
+        as,
+        oauthClient,
+        new URL(inputRedirectUrl),
+        oauthState,
+      );
+
+      const exchange = async (): Promise<oauth.TokenEndpointResponse> => {
+        const tokenResponse = await oauth.authorizationCodeGrantRequest(
+          as,
+          oauthClient,
+          clientAuth,
+          callbackParams,
+          removeOpenIdParams(inputRedirectUrl).href,
+          oidcContext.codeVerifier as string,
+          {
+            ...(dpop ? { DPoP: dpop } : {}),
+            ...allowInsecureForIssuer(oidcContext.issuerConfig.issuer),
+          },
+        );
+        // inrupt's redirect flow does not thread an OIDC `nonce`, so disable
+        // id-token nonce verification to preserve parity. The `id_token`
+        // presence is asserted below to keep the legacy hard requirement.
+        return oauth.processAuthorizationCodeResponse(
+          as,
+          oauthClient,
+          tokenResponse,
+          { expectedNonce: oauth.expectNoNonce, requireIdToken: true },
+        );
+      };
+
+      processed = await exchange().catch(async (err) => {
+        // The DPoP handle auto-retries on `use_dpop_nonce`; guard the idiom here
+        // too for IdPs that surface the nonce requirement at process time.
+        if (oauth.isDPoPNonceError(err) && dpop) {
+          return exchange();
+        }
+        throw err;
+      });
+    } catch (err) {
+      return mapOauthError(err);
+    }
 
     if (
-      tokenSet.access_token === undefined ||
-      tokenSet.id_token === undefined
+      typeof processed.access_token !== "string" ||
+      typeof processed.id_token !== "string"
     ) {
       // The error message is left minimal on purpose not to leak the tokens.
       throw new Error(
-        `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
+        `The Identity Provider [${oidcContext.issuerConfig.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
       );
     }
+    const accessToken = processed.access_token;
+    const idToken = processed.id_token;
+    const refreshToken =
+      typeof processed.refresh_token === "string"
+        ? processed.refresh_token
+        : undefined;
+    const expiresIn =
+      typeof processed.expires_in === "number"
+        ? processed.expires_in
+        : undefined;
+
     let refreshOptions: RefreshOptions | undefined;
-    if (tokenSet.refresh_token !== undefined) {
-      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, tokenSet.refresh_token);
+    if (refreshToken !== undefined) {
+      eventEmitter?.emit(EVENTS.NEW_REFRESH_TOKEN, refreshToken);
       refreshOptions = {
-        refreshToken: tokenSet.refresh_token,
+        refreshToken,
         sessionId,
         tokenRefresher: this.tokenRefresher,
       };
     }
-    const authFetch = buildAuthenticatedFetch(tokenSet.access_token, {
+    const authFetch = buildAuthenticatedFetch(accessToken, {
       dpopKey,
       refreshOptions: oidcContext.keepAlive ? refreshOptions : undefined,
       eventEmitter,
-      expiresIn: tokenSet.expires_in,
+      expiresIn,
     });
 
-    // tokenSet.claims() parses the ID token, validates its signature, and returns
-    // its payload as a JSON object.
+    // getWebidFromTokenPayload validates the ID token's signature, issuer and
+    // audience (via jose), then extracts the WebID / azp client id. This is the
+    // ID-token validation layer inrupt keeps after the migration.
     const { webId, clientId } = await getWebidFromTokenPayload(
-      tokenSet.id_token,
-      issuer.metadata.jwks_uri,
-      issuer.metadata.issuer,
-      client.metadata.client_id,
+      idToken,
+      oidcContext.issuerConfig.jwksUri,
+      oidcContext.issuerConfig.issuer,
+      clientInfo.clientId,
     );
 
+    const expiresAt =
+      expiresIn !== undefined ? Math.floor(Date.now() / 1000) + expiresIn : undefined;
     eventEmitter?.emit(EVENTS.NEW_TOKENS, {
-      accessToken: tokenSet.access_token,
-      idToken: tokenSet.id_token,
-      refreshToken: tokenSet.refresh_token,
+      accessToken,
+      idToken,
+      refreshToken,
       webId,
-      expiresAt: tokenSet.expires_at,
+      expiresAt,
       dpopKey,
-      clientId: client.metadata.client_id,
-      issuer: issuer.metadata.issuer,
+      clientId: clientInfo.clientId,
+      issuer: oidcContext.issuerConfig.issuer,
     });
 
     await saveSessionInfoToStorage(
@@ -205,7 +269,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       webId,
       clientId,
       "true",
-      tokenSet.refresh_token,
+      refreshToken,
       undefined,
       dpopKey,
     );
@@ -220,11 +284,9 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     return Object.assign(sessionInfo, {
       fetch: authFetch,
       expirationDate:
-        typeof tokenSet.expires_in === "number"
-          ? tokenSet.expires_in * 1000 + Date.now()
-          : undefined,
+        expiresIn !== undefined ? expiresIn * 1000 + Date.now() : undefined,
       getLogoutUrl: maybeBuildRpInitiatedLogout({
-        idTokenHint: tokenSet.id_token,
+        idTokenHint: idToken,
         endSessionEndpoint: oidcContext.issuerConfig.endSessionEndpoint,
       }),
     } as IncomingRedirectResult);

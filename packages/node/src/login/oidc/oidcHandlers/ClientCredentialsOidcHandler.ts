@@ -26,6 +26,23 @@
 /**
  * Handler for the Client Credentials Flow
  */
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 4 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: `openid-client` `client.grant({ grant_type: "client_credentials" })`
+// with a `KeyObject`-bridged DPoP key (`asDPoPInput`).
+//
+// After: `oauth.clientCredentialsGrantRequest` +
+// `oauth.processClientCredentialsResponse` with a per-flow `oauth.DPoP()` handle
+// built from a fresh `oauth.generateKeyPair` (extractable — persisted for the
+// keepAlive refresh flow). Mirrors `@solid/reactive-authentication`'s
+// `ClientCredentialsTokenProvider`.
+//
+// CONFORMANCE-CRITICAL: the CTH / ESS bot use case logs in via this handler to
+// obtain a DPoP-bound `at+jwt`. Client auth uses the NON-URL-encoding
+// ClientSecretBasic variant (see `oauth/oauthAdapter.ts` `clientAuthFor`) to
+// match the legacy openid-client behaviour and ESS expectations.
+// ---------------------------------------------------------------------------
 import type {
   IOidcHandler,
   IOidcOptions,
@@ -35,15 +52,21 @@ import type {
   ITokenRefresher,
 } from "@inrupt/solid-client-authn-core";
 import {
-  generateDpopKeyPair,
-  PREFERRED_SIGNING_ALG,
   getWebidFromTokenPayload,
   buildAuthenticatedFetch,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer } from "openid-client";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import { asDPoPInput } from "../../../util/dpopInput";
+import * as oauth from "oauth4webapi";
+import {
+  allowInsecureForIssuer,
+  asAuthorizationServer,
+  asOauthClient,
+  clientAuthFor,
+  dpopHandle,
+  generateDpopCryptoKeyPair,
+  keyPairFromCryptoKeyPair,
+  mapOauthError,
+} from "../oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -66,37 +89,51 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    const issuer = new Issuer(
-      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration),
-    );
-    const client = new issuer.Client({
-      client_id: oidcLoginOptions.client.clientId,
-      client_secret: oidcLoginOptions.client.clientSecret,
-    });
+    const as = asAuthorizationServer(oidcLoginOptions.issuerConfiguration);
+    const oauthClient = asOauthClient(oidcLoginOptions.client);
+    const clientAuth = clientAuthFor(oidcLoginOptions.client);
 
     let dpopKey: KeyPair | undefined;
-
+    let dpop: oauth.DPoPHandle | undefined;
     if (oidcLoginOptions.dpop) {
-      dpopKey = await generateDpopKeyPair();
-      // The alg property isn't set by exportJWK, so set it manually.
-      [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
+      // Extractable: the key may be persisted for the keepAlive refresh flow
+      // (see generateDpopCryptoKeyPair). TODO(migration): non-extractable.
+      const cryptoKeyPair = await generateDpopCryptoKeyPair();
+      dpopKey = await keyPairFromCryptoKeyPair(cryptoKeyPair);
+      dpop = dpopHandle(oidcLoginOptions.client, cryptoKeyPair);
     }
 
-    const tokens = await client.grant(
-      {
-        grant_type: "client_credentials",
-        token_endpoint_auth_method: "client_secret_basic",
-        // Passing scopes as an array of strings results in them being
-        // comma-separated in the request, which is invalid.
-        scope: oidcLoginOptions.scopes.join(" "),
-      },
-      {
-        DPoP:
-          oidcLoginOptions.dpop && dpopKey !== undefined
-            ? asDPoPInput(dpopKey.privateKey)
-            : undefined,
-      },
-    );
+    let tokens: oauth.TokenEndpointResponse;
+    try {
+      const grant = async (): Promise<oauth.TokenEndpointResponse> => {
+        const tokenResponse = await oauth.clientCredentialsGrantRequest(
+          as,
+          oauthClient,
+          clientAuth,
+          // Passing scopes space-separated, as required by the spec.
+          { scope: oidcLoginOptions.scopes.join(" ") },
+          {
+            ...(dpop ? { DPoP: dpop } : {}),
+            ...allowInsecureForIssuer(
+              oidcLoginOptions.issuerConfiguration.issuer,
+            ),
+          },
+        );
+        return oauth.processClientCredentialsResponse(
+          as,
+          oauthClient,
+          tokenResponse,
+        );
+      };
+      tokens = await grant().catch(async (err) => {
+        if (oauth.isDPoPNonceError(err) && dpop) {
+          return grant();
+        }
+        throw err;
+      });
+    } catch (err) {
+      return mapOauthError(err);
+    }
 
     let webId: string;
     let clientId: string | undefined;

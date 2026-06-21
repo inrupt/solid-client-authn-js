@@ -23,6 +23,18 @@
  * @packageDocumentation
  */
 
+// ---------------------------------------------------------------------------
+// MIGRATION: oauth4webapi + dpop — Phase 4 (proposal/migrate-to-oauth4webapi)
+// ---------------------------------------------------------------------------
+// Before: dynamic client registration (DCR) via `openid-client`
+// `issuer.Client.register(metadata)`.
+//
+// After: `oauth.dynamicClientRegistrationRequest` +
+// `oauth.processDynamicClientRegistrationResponse`, mirroring Phase 2's browser
+// `dcr/clientRegistrar.ts`. This removes the last `openid-client` use in the
+// node package's production code. (DCR migration was nominally Phase 3, but is
+// required here to drop the `openid-client` dependency.)
+// ---------------------------------------------------------------------------
 import type {
   IStorageUtility,
   IClientRegistrar,
@@ -37,9 +49,11 @@ import {
   PREFERRED_SIGNING_ALG,
   isKnownClientType,
 } from "@inrupt/solid-client-authn-core";
-import type { Client } from "openid-client";
-import { Issuer } from "openid-client";
-import { configToIssuerMetadata } from "./IssuerConfigFetcher";
+import * as oauth from "oauth4webapi";
+import {
+  allowInsecureForIssuer,
+  asAuthorizationServer,
+} from "./oauth/oauthAdapter";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -136,13 +150,10 @@ export default class ClientRegistrar implements IClientRegistrar {
       } as IClient;
     }
 
-    // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
-    const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
-
-    if (issuer.metadata.registration_endpoint === undefined) {
+    if (issuerConfig.registrationEndpoint === undefined) {
       throw new ConfigurationError(
         `Dynamic client registration cannot be performed, because issuer does not have a registration endpoint: ${JSON.stringify(
-          issuer.metadata,
+          issuerConfig,
         )}`,
       );
     }
@@ -152,24 +163,42 @@ export default class ClientRegistrar implements IClientRegistrar {
       PREFERRED_SIGNING_ALG,
     );
 
-    // The following is compliant with the example code, but seems to mismatch the
-    // type annotations.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const registeredClient: Client = await issuer.Client.register({
-      redirect_uris: [options.redirectUrl],
+    const as = asAuthorizationServer(issuerConfig);
+    const clientMetadata: Partial<oauth.OmitSymbolProperties<oauth.Client>> = {
+      redirect_uris: [options.redirectUrl as string],
       client_name: options.clientName,
       // See https://openid.net/specs/openid-connect-registration-1_0.html
       id_token_signed_response_alg: signingAlg,
       grant_types: ["authorization_code", "refresh_token"],
-    });
+    };
+
+    let registeredClient: oauth.OmitSymbolProperties<oauth.Client>;
+    try {
+      const registerResponse = await oauth.dynamicClientRegistrationRequest(
+        as,
+        clientMetadata,
+        allowInsecureForIssuer(issuerConfig.issuer),
+      );
+      registeredClient =
+        await oauth.processDynamicClientRegistrationResponse(registerResponse);
+    } catch (err) {
+      if (err instanceof oauth.ResponseBodyError) {
+        throw new Error(
+          `Dynamic client registration failed: ${err.error}${
+            err.error_description ? ` - ${err.error_description}` : ""
+          }`,
+        );
+      }
+      throw err;
+    }
 
     let persistedClientMetadata: IOpenIdDynamicClient & {
       idTokenSignedResponseAlg: string;
     } = {
-      clientId: registeredClient.metadata.client_id,
+      clientId: registeredClient.client_id,
       idTokenSignedResponseAlg:
-        registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
+        (registeredClient.id_token_signed_response_alg as string | undefined) ??
+        signingAlg,
       clientType: "dynamic",
     };
     await this.storageUtility.setForUser(options.sessionId, {
@@ -178,12 +207,12 @@ export default class ClientRegistrar implements IClientRegistrar {
         persistedClientMetadata.idTokenSignedResponseAlg,
       clientType: "dynamic",
     });
-    if (registeredClient.metadata.client_secret !== undefined) {
+    if (registeredClient.client_secret !== undefined) {
       persistedClientMetadata = {
         ...persistedClientMetadata,
-        clientSecret: registeredClient.metadata.client_secret,
+        clientSecret: registeredClient.client_secret as string,
         // If a client secret is present, it has an expiration date.
-        expiresAt: registeredClient.metadata.client_secret_expires_at as number,
+        expiresAt: registeredClient.client_secret_expires_at as number,
       };
       await this.storageUtility.setForUser(options.sessionId, {
         clientSecret: persistedClientMetadata.clientSecret,

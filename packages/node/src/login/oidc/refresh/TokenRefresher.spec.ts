@@ -27,7 +27,6 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { JWK, CryptoKey } from "jose";
 import { importJWK } from "jose";
-import type { IdTokenClaims, TokenSet } from "openid-client";
 import { EventEmitter } from "events";
 import TokenRefresher from "./TokenRefresher";
 import {
@@ -39,12 +38,28 @@ import {
   mockIssuerConfigFetcher,
 } from "../__mocks__/IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 4): refresh now uses oauth4webapi
+// (`refreshTokenGrantRequest` + `processRefreshTokenResponse`) instead of
+// openid-client `client.refresh`. We mock those two functions. Note
+// oauth4webapi normalises `token_type` to lowercase ("dpop"/"bearer").
+//
+// NOTE (CI-validate): not executed in this branch (deps not installed).
+// ---------------------------------------------------------------------------
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    refreshTokenGrantRequest: jest.fn(() => Promise.resolve(new Response())),
+    processRefreshTokenResponse: jest.fn(),
+    DPoP: jest.fn(() => ({})),
+    isDPoPNonceError: jest.fn(() => false),
+  };
+});
 jest.mock("../ClientRegistrar");
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
@@ -59,6 +74,9 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ),
   };
 });
+
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
 
 const mockJwk = (): JWK => {
   return {
@@ -110,36 +128,33 @@ const mockKeyBoundToken = (): AccessJwt => {
   };
 };
 
-const mockIdTokenPayload = (): IdTokenClaims => {
-  return {
-    sub: "https://my.webid",
-    iss: "https://my.idp/",
-    aud: "https://resource.example.org",
-    exp: 1662266216,
-    iat: 1462266216,
-  };
+// A processed refresh-token response, as returned by
+// `oauth.processRefreshTokenResponse` (token_type normalised to lowercase).
+type ProcessedTokens = {
+  access_token?: string;
+  id_token?: string;
+  token_type: string;
+  refresh_token?: string;
+  expires_in?: number;
 };
 
-const mockDpopTokens = (): TokenSet => {
+const mockDpopTokens = (): ProcessedTokens => {
   return {
     access_token: JSON.stringify(mockKeyBoundToken()),
     id_token: mockIdToken(),
-    token_type: "DPoP",
-    expired: () => false,
-    claims: mockIdTokenPayload,
+    token_type: "dpop",
   };
 };
 
-const setupOidcClientMock = (tokenSet: TokenSet) => {
-  const { Issuer } = jest.requireMock("openid-client") as any;
-  const mockedIssuer = {
-    metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
-    Client: jest.fn().mockReturnValue({
-      refresh: jest.fn().mockResolvedValueOnce(tokenSet as never),
-    }),
-  };
-  Issuer.mockReturnValueOnce(mockedIssuer);
-  return mockedIssuer;
+const setupOidcClientMock = (tokenSet: ProcessedTokens) => {
+  const grantRequest = oauth.refreshTokenGrantRequest as jest.Mock<any>;
+  const process = oauth.processRefreshTokenResponse as jest.Mock<any>;
+  grantRequest.mockResolvedValueOnce(new Response());
+  process.mockResolvedValueOnce(tokenSet);
+  // Returned object preserves a `.Client` jest.fn for the legacy
+  // "instantiates the client" assertion, which is now an it.todo (no openid
+  // client object exists in oauth4webapi).
+  return { Client: jest.fn() };
 };
 
 const setupDefaultOidcClientMock = () => setupOidcClientMock(mockDpopTokens());
@@ -280,7 +295,7 @@ describe("TokenRefresher", () => {
   });
 
   it("uses 'none' authentication if using Solid-OIDC client identifiers", async () => {
-    const mockedIssuer = setupDefaultOidcClientMock();
+    setupDefaultOidcClientMock();
     const refresher = getTokenRefresher({
       clientRegistrar: mockClientRegistrar({
         clientId: "https://some.client.identifier",
@@ -295,10 +310,15 @@ describe("TokenRefresher", () => {
       await mockKeyPair(),
     );
 
-    expect(mockedIssuer.Client).toHaveBeenCalledWith(
-      expect.objectContaining({
-        token_endpoint_auth_method: "none",
-      }),
+    // MIGRATION (Phase 4): there is no openid-client `Client` object; the
+    // public client (no secret) maps to `token_endpoint_auth_method: "none"` on
+    // the oauth4webapi Client passed to `refreshTokenGrantRequest`.
+    expect(oauth.refreshTokenGrantRequest).toHaveBeenCalledWith(
+      expect.anything(), // AuthorizationServer
+      expect.objectContaining({ token_endpoint_auth_method: "none" }),
+      expect.anything(), // ClientAuth (oauth.None())
+      "some refresh token",
+      expect.anything(), // { DPoP? }
     );
   });
 

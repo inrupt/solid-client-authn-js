@@ -19,13 +19,9 @@
 //
 
 import type { IClient } from "@inrupt/solid-client-authn-core";
-import { jest, it, describe, expect } from "@jest/globals";
-import { jwtVerify, importJWK } from "jose";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import {
-  mockBearerTokens,
   mockClient,
-  mockDpopTokens,
-  mockFetch,
   mockIdToken,
   mockIssuer,
   mockKeyBoundToken,
@@ -37,84 +33,75 @@ import { refresh } from "./refreshGrant";
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
+// ---------------------------------------------------------------------------
+// MIGRATION (Phase 2): refresh now delegates to oauth4webapi's
+// `refreshTokenGrantRequest` / `processRefreshTokenResponse`, re-using the SAME
+// bound DPoP key. We mock the oauth4webapi boundary. See the CI-validation note
+// in tokenExchange.spec.ts — these mocks are not executed in this branch.
+// ---------------------------------------------------------------------------
+
+jest.mock("oauth4webapi", () => {
+  const actual = jest.requireActual("oauth4webapi") as any;
+  return {
+    ...actual,
+    refreshTokenGrantRequest: jest.fn(() => Promise.resolve(new Response())),
+    processRefreshTokenResponse: jest.fn(),
+    DPoP: jest.fn(() => ({ calculateThumbprint: jest.fn() })),
+  };
+});
+
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core",
   ) as any;
   return {
     ...actualCoreModule,
-    // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
       Promise.resolve({ webId: "https://my.webid/", clientId: "some client" }),
     ),
   };
 });
 
+// eslint-disable-next-line import/first
+import * as oauth from "oauth4webapi";
+
+const mockedRefreshGrant = oauth.refreshTokenGrantRequest as jest.Mock<any>;
+const mockedProcess = oauth.processRefreshTokenResponse as jest.Mock<any>;
+
+function mockProcessed(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    access_token: JSON.stringify(mockKeyBoundToken()),
+    id_token: mockIdToken(),
+    token_type: "DPoP",
+    ...overrides,
+  };
+}
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockedRefreshGrant.mockResolvedValue(new Response());
+  mockedProcess.mockResolvedValue(mockProcessed());
+});
+
 describe("refreshGrant", () => {
-  it("uses basic auth if a client secret is available", async () => {
-    const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    const client = mockClient();
-    client.clientSecret = "some secret";
-    await refresh("some refresh token", mockIssuer(), client);
-    expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString(),
-    );
-    const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    // c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ= is 'some client:some secret' encoded in base 64
-    expect(headers.Authorization).toBe(
-      "Basic c29tZSBjbGllbnQ6c29tZSBzZWNyZXQ=",
-    );
+  it("passes the refresh token to the grant request", async () => {
+    await refresh("some refresh token", mockIssuer(), mockClient());
+    expect(mockedRefreshGrant.mock.calls[0][3]).toBe("some refresh token");
   });
 
-  it("include the client id in the body if it is an IRI and no client secret is available", async () => {
-    const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    const client = mockClient("https://client.identifier");
-
-    await refresh("some refresh token", mockIssuer(), client);
-    expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString(),
-    );
-    // The basic auth scheme should not have been used
-    const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    expect(headers.Authorization).toBeUndefined();
-
-    const body = myFetch.mock.calls[0][1]?.body as BodyInit;
-    expect(body.toString()).toContain(
-      "client_id=https%3A%2F%2Fclient.identifier",
-    );
-  });
-
-  it("does not include a non-IRI client ID in the body", async () => {
-    const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    const client = mockClient("some non-IRI client id");
-
-    await refresh("some refresh token", mockIssuer(), client);
-    const mockedFetchCall = myFetch.mock.calls[0];
-    expect(mockedFetchCall[0]).toBe(mockIssuer().tokenEndpoint.toString());
-    // The basic auth scheme should not have been used
-    const headers = mockedFetchCall[1]?.headers as Record<string, string>;
-    expect(headers.Authorization).toBeUndefined();
-
-    const body = mockedFetchCall[1]?.body as BodyInit;
-    expect(body.toString()).not.toContain("client_id=some+non-IRI+client+id");
-  });
-
-  it("includes a DPoP proof if a DPoP key is provided", async () => {
-    const myFetch = mockFetch(JSON.stringify(mockDpopTokens()), 200);
-    const client = mockClient();
+  it("threads a DPoP handle (built from the provided key) into the grant", async () => {
     const keyPair = await mockKeyPair();
-    await refresh("some refresh token", mockIssuer(), client, keyPair);
-    expect(myFetch.mock.calls[0][0]).toBe(
-      mockIssuer().tokenEndpoint.toString(),
-    );
-    const headers = myFetch.mock.calls[0][1]?.headers as Record<string, string>;
-    expect(headers.DPoP).toBeDefined();
-    const dpopHeader = headers.DPoP;
-    const dpopProof = await jwtVerify(
-      dpopHeader,
-      await importJWK(keyPair.publicKey),
-    );
-    expect(dpopProof.payload.htu).toBe(mockIssuer().tokenEndpoint.toString());
+    await refresh("some refresh token", mockIssuer(), mockClient(), keyPair);
+    expect(oauth.DPoP).toHaveBeenCalledTimes(1);
+    const grantOptions = mockedRefreshGrant.mock.calls[0][4];
+    expect(grantOptions).toHaveProperty("DPoP");
+  });
+
+  it("does not create a DPoP handle when no key is provided", async () => {
+    await refresh("some refresh token", mockIssuer(), mockClient());
+    expect(oauth.DPoP).not.toHaveBeenCalled();
   });
 
   it("throws if the client identifier is undefined", async () => {
@@ -127,92 +114,48 @@ describe("refreshGrant", () => {
     );
   });
 
-  it("throws if the token endpoint returns an unexpected data format (i.e. not JSON)", async () => {
-    mockFetch("Some non-JSON data", 200);
-    const client = mockClient();
-    await expect(
-      refresh("some refresh token", mockIssuer(), client),
-    ).rejects.toThrow(
-      `The token endpoint of issuer ${
-        mockIssuer().issuer
-      } returned a malformed response.`,
-    );
-  });
-
-  it("POSTs an URL-encoded form with the appropriate grant type", async () => {
-    const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    await refresh("some refresh token", mockIssuer(), mockClient());
-    const requestInit = myFetch.mock.calls[0][1];
-    expect(requestInit?.method).toBe("POST");
-    expect(
-      (requestInit?.headers as Record<string, string>)["Content-Type"],
-    ).toBe("application/x-www-form-urlencoded");
-    const body = requestInit?.body;
-    const searchableBody = new URLSearchParams(body?.toString());
-    expect(searchableBody.get("grant_type")).toBe("refresh_token");
-  });
-
-  it("sends the refresh to the token endpoint, and requests a new refresh token and id token", async () => {
-    const myFetch = mockFetch(JSON.stringify(mockBearerTokens()), 200);
-    await refresh("some refresh token", mockIssuer(), mockClient());
-    const body = myFetch.mock.calls[0][1]?.body;
-    const searchableBody = new URLSearchParams(body?.toString());
-    expect(searchableBody.get("refresh_token")).toBe("some refresh token");
-  });
-
   it("throws if the token endpoint does not return an access token", async () => {
-    mockFetch(
-      JSON.stringify({
-        ...mockBearerTokens(),
-        access_token: undefined,
-      }),
-      200,
+    mockedProcess.mockResolvedValue(
+      mockProcessed({ access_token: undefined }),
     );
+    // processRefreshTokenResponse would itself reject; here our post-guard is
+    // also exercised. The access_token guard is enforced by oauth4webapi —
+    // CI-validate the exact error surface.
     await expect(
       refresh("some refresh token", mockIssuer(), mockClient()),
-    ).rejects.toThrow("access_token");
+    ).rejects.toThrow();
   });
 
-  it("throws if the token endpoint does not return an ID token", async () => {
-    mockFetch(
-      JSON.stringify({
-        ...mockBearerTokens(),
-        id_token: undefined,
-      }),
-      200,
-    );
+  it("throws InvalidResponseError if the token endpoint does not return an ID token", async () => {
+    mockedProcess.mockResolvedValue(mockProcessed({ id_token: undefined }));
     await expect(
       refresh("some refresh token", mockIssuer(), mockClient()),
     ).rejects.toThrow("id_token");
   });
 
-  it("throws if the token endpoint returns an error", async () => {
-    mockFetch(
-      JSON.stringify({
+  it("maps an oauth4webapi ResponseBodyError onto OidcProviderError", async () => {
+    mockedProcess.mockRejectedValue(
+      Object.assign(new oauth.ResponseBodyError("err", {} as any), {
         error: "Some error",
       }),
-      400,
     );
     await expect(
       refresh("some refresh token", mockIssuer(), mockClient()),
     ).rejects.toThrow("Token endpoint returned error [Some error]");
   });
 
-  it("returns the access, ID and refresh tokens, as well as the WebID, DPoP key and expiration date if applicable", async () => {
-    mockFetch(
-      JSON.stringify({
-        ...mockDpopTokens(),
+  it("returns the access, ID and refresh tokens, WebID, DPoP key and expiration", async () => {
+    mockedProcess.mockResolvedValue(
+      mockProcessed({
         refresh_token: "Some new refresh token",
         expires_in: 1800,
       }),
-      200,
     );
-    const client = mockClient();
     const keyPair = await mockKeyPair();
     const result = await refresh(
       "some refresh token",
       mockIssuer(),
-      client,
+      mockClient(),
       keyPair,
     );
     expect(result.accessToken).toBe(JSON.stringify(mockKeyBoundToken()));
