@@ -34,7 +34,7 @@
     "@inrupt/solid-client-authn-core": "^5.0.0",
     "events": "^3.3.0",
     "jose": "^6.2.3",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.1"
   },
   "publishConfig": {
     "access": "public"
