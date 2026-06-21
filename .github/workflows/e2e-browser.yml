@@ -19,7 +19,7 @@ jobs:
         environment-name: ["ESS PodSpaces"]
         experimental: [false]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # The Node version does not influence how well our tests run in
       # the browser so we only need to test in one.
       - uses: actions/setup-node@v6
