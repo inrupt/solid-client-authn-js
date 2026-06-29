@@ -101,8 +101,7 @@ export function configFromIssuerMetadata(
     // The following properties may be captured as "unkown" entries in the metadata object.
     grantTypesSupported: metadata.grant_types_supported as string[] | undefined,
     responseTypesSupported: metadata.response_types_supported as
-      | string[]
-      | undefined,
+      string[] | undefined,
     idTokenSigningAlgValuesSupported:
       metadata.id_token_signing_alg_values_supported as string[] | undefined,
     scopesSupported:
