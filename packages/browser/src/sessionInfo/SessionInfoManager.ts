@@ -151,4 +151,28 @@ export class SessionInfoManager
   async clear(sessionId: string): Promise<void> {
     return clear(sessionId, this.storageUtility);
   }
+
+  /**
+   * Removes only the stored dynamic client registration for a session (client ID, secret and
+   * related metadata), leaving the rest of the session information intact. This forces the next
+   * login to register a fresh client, which is used to recover when the OIDC provider no longer
+   * recognises the stored client (for example because it dropped the dynamic registration on a
+   * restart) and would otherwise reject it on every silent-authentication attempt.
+   * @param sessionId the session identifier
+   * @hidden
+   */
+  async clearClientRegistrationInfo(sessionId: string): Promise<void> {
+    await Promise.all(
+      [
+        "clientId",
+        "clientSecret",
+        "clientType",
+        "clientName",
+        "expiresAt",
+        "idTokenSignedResponseAlg",
+      ].map((key) =>
+        this.storageUtility.deleteForUser(sessionId, key, { secure: false }),
+      ),
+    );
+  }
 }
