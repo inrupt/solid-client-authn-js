@@ -83,6 +83,18 @@ export async function silentlyAuthenticate(
   clientAuthn: ClientAuthentication,
   session: Session,
 ): Promise<boolean> {
+  // KEY_CURRENT_URL is set just before a silent-authentication redirect and only cleared once the
+  // browser is redirected back after a *successful* attempt. If it is still present when we are
+  // about to start a new attempt, the previous one never completed — which happens when the OIDC
+  // provider no longer recognises the stored dynamic client (e.g. it dropped the registration on a
+  // restart) and responds with a non-redirectable error, stranding the user on an error page.
+  // Retrying with the same client ID would loop indefinitely, so discard the stored client
+  // registration and stop here; the next login will register a fresh client and recover.
+  if (window.localStorage.getItem(KEY_CURRENT_URL) !== null) {
+    window.localStorage.removeItem(KEY_CURRENT_URL);
+    await clientAuthn.clearClientRegistrationInfo(sessionId);
+    return false;
+  }
   const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
   if (storedSessionInfo !== null) {
     // It can be really useful to save the user's current browser location,
