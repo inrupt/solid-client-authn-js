@@ -5,9 +5,6 @@
     "lib": ["es2022", "dom"],
     "rootDir": "./src",
     "outDir": "./dist",
-    // TypeScript 6 no longer walks up to the monorepo-root node_modules/@types,
-    // so @types/node must be listed explicitly for the build to resolve Node
-    // built-ins (e.g. "node:events", the NodeJS namespace).
     "types": ["node"]
   },
 

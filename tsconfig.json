@@ -2,8 +2,6 @@
   "extends": "./tsconfig.build.json",
 
   "compilerOptions": {
-    // "baseUrl" was deprecated in TypeScript 6; "paths" values are now resolved
-    // relative to this config file's directory instead.
     "paths": {
       "*": ["./packages/*/src"]
     }

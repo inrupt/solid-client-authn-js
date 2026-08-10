@@ -15,8 +15,7 @@
     "target": "es2022",
     "sourceMap": true,
     "lib": ["es2022", "dom"],
-    // "bundler" resolution replaces the node10 resolution deprecated in
-    // TypeScript 6. It matches how our Rollup build resolves modules and lets
+    // "bundler" resolution matches how the Rollup build resolves modules, and
     // "module": "preserve" leave module syntax untouched for the bundler to
     // handle. See https://aka.ms/ts6.
     "moduleResolution": "bundler",
