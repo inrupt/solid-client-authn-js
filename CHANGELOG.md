@@ -9,6 +9,18 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### Bugfixes
+
+#### browser
+
+- Recover from a stored dynamic client registration that the OIDC provider no longer
+  recognises. Previously, if the provider had dropped a client's registration (for example on a
+  restart), silent authentication would redirect to the provider, get a non-redirectable
+  "unknown client" error, and — because the `KEY_CURRENT_URL` marker was never cleared — retry
+  indefinitely with the same rejected client ID, leaving the user's session permanently broken.
+  On detecting an incomplete previous silent-authentication attempt, the stored client
+  registration is now discarded so the next login re-registers a fresh client.
+
 ## [5.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.0) - 2026-06-03
 
 ### Breaking changes

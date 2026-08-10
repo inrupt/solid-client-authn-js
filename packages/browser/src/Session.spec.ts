@@ -566,6 +566,46 @@ describe("Session", () => {
       ).toBeInstanceOf(EventEmitter);
     });
 
+    it("clears the stored client registration instead of looping when a previous silent authentication did not complete", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+        // A leftover KEY_CURRENT_URL means a previous silent-auth attempt was started but never
+        // completed (e.g. the provider rejected a stale, dropped client with a non-redirectable error).
+        [KEY_CURRENT_URL]: "https://mock.current/location",
+      });
+      mockLocation("https://mock.current/location");
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.clearClientRegistrationInfo = jest
+        .fn<typeof clientAuthentication.clearClientRegistrationInfo>()
+        .mockResolvedValue(undefined);
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
+      clientAuthentication.validateCurrentSession =
+        jest.fn() as typeof clientAuthentication.validateCurrentSession;
+      const incomingRedirectPromise = Promise.resolve();
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockReturnValueOnce(
+          incomingRedirectPromise,
+        ) as typeof clientAuthentication.handleIncomingRedirect;
+
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
+      await incomingRedirectPromise;
+
+      // The stale registration is discarded so the next login re-registers.
+      expect(
+        clientAuthentication.clearClientRegistrationInfo,
+      ).toHaveBeenCalledWith(sessionId);
+      // It must NOT re-attempt silent auth with the same (rejected) client — that is the loop.
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
+      // The marker is cleared so a later, legitimate silent auth can proceed normally.
+      expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
+    });
+
     it("resolves handleIncomingRedirect if silent authentication could not be started", async () => {
       const sessionId = "mySession";
       mockLocalStorage({
