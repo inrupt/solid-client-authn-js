@@ -18,7 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import type { EVENTS } from "./constant";
 import type { KeyPair } from "./authenticatedFetch/dpopUtils";
 

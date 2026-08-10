@@ -34,7 +34,7 @@ import type {
   ISessionInternalInfo,
   AuthorizationRequestState,
 } from "@inrupt/solid-client-authn-core";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 
 /**
  * @hidden

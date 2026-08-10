@@ -23,7 +23,7 @@
  * @packageDocumentation
  */
 
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import type ILoginInputOptions from "../ILoginInputOptions";
 
 /**

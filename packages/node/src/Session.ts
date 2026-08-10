@@ -39,7 +39,7 @@ import {
   getWebidFromTokenPayload,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
-import EventEmitter from "events";
+import EventEmitter from "node:events";
 import { exportJWK } from "jose";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";

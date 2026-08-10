@@ -26,7 +26,7 @@
 /**
  * Defines how OIDC login should proceed
  */
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import type { IIssuerConfig } from "./IIssuerConfig";
 import type { IClient } from "./IClient";
 import { DEFAULT_SCOPES } from "../../constant";

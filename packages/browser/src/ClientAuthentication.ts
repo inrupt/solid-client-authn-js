@@ -35,7 +35,7 @@ import {
   removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
 import { normalizeCallbackUrl } from "@inrupt/oidc-client-ext";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 
 /**
  * Checks if a client's registration has expired.

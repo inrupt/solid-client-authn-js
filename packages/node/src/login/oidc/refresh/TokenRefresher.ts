@@ -40,7 +40,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { IssuerMetadata, TokenSet } from "openid-client";
 import { Issuer } from "openid-client";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
 import { asDPoPInput } from "../../../util/dpopInput";

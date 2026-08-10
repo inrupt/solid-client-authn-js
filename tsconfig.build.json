@@ -16,6 +16,12 @@
     "sourceMap": true,
     "lib": ["es2022", "dom"],
     "moduleResolution": "node",
+    // TypeScript 6 deprecates the "node" (node10) module resolution and errors
+    // unless it is explicitly acknowledged. Switching to "bundler"/"node16"
+    // resolution changes how the internal @inrupt/solid-client-authn-* packages
+    // resolve their type-only exports and breaks the build/tests, so that is
+    // deferred to the TypeScript 7 migration. See https://aka.ms/ts6.
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "outDir": "./dist",
     // This is required to transform native ESM from our dependencies using ts-jest.
