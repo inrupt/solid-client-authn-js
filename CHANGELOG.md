@@ -11,7 +11,9 @@ The following changes have been implemented but not released yet:
 
 ### Bugfixes
 
-- Browser: recover from a stored dynamic client registration that the OIDC provider no longer
+#### browser
+
+- Recover from a stored dynamic client registration that the OIDC provider no longer
   recognises. Previously, if the provider had dropped a client's registration (for example on a
   restart), silent authentication would redirect to the provider, get a non-redirectable
   "unknown client" error, and — because the `KEY_CURRENT_URL` marker was never cleared — retry
