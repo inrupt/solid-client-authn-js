@@ -7,7 +7,7 @@
     "./jest.config.ts"
   ],
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "preserve",
     "strict": true,
     "declaration": true,
     "noImplicitAny": true,
@@ -15,7 +15,10 @@
     "target": "es2022",
     "sourceMap": true,
     "lib": ["es2022", "dom"],
-    "moduleResolution": "node",
+    // "bundler" resolution matches how the Rollup build resolves modules, and
+    // "module": "preserve" leave module syntax untouched for the bundler to
+    // handle. See https://aka.ms/ts6.
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "outDir": "./dist",
     // This is required to transform native ESM from our dependencies using ts-jest.

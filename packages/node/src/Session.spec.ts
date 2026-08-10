@@ -23,7 +23,7 @@ import type { ISessionInfo } from "@inrupt/solid-client-authn-core";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
 // eslint-disable-next-line import/no-unresolved
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
-import type EventEmitter from "events";
+import type EventEmitter from "node:events";
 import type { SessionTokenSet } from "core";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
 import type ClientAuthentication from "./ClientAuthentication";

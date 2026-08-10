@@ -49,7 +49,7 @@ import {
 
 import { URL } from "url";
 import { Issuer } from "openid-client";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { asDPoPInput } from "../../../util/dpopInput";
 

@@ -29,7 +29,6 @@ import { join } from "node:path";
 
 // Jest 30 loads .ts config files as ESM via Node's native TypeScript support,
 // so `require` is not available. Use createRequire for require.resolve calls.
-// @ts-expect-error: import.meta.url is valid at runtime (ESM), but tsconfig targets CJS.
 const esmRequire = createRequire(import.meta.url);
 
 type ArrayElement<MyArray> = MyArray extends Array<infer T> ? T : never;

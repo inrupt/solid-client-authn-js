@@ -3,7 +3,9 @@
 
   "compilerOptions": {
     "lib": ["es2022", "dom"],
-    "outDir": "./dist"
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node"]
   },
 
   "typedocOptions": {
@@ -13,5 +15,5 @@
   },
 
   "include": ["src/**/*"],
-  "exclude": ["*.spec.ts"]
+  "exclude": ["src/**/*.spec.ts", "**/__mocks__/*"]
 }

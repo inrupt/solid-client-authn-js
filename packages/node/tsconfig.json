@@ -3,7 +3,9 @@
 
   "compilerOptions": {
     "lib": ["es2022"],
-    "outDir": "./dist"
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node"]
   },
 
   "include": ["src/**/*"],

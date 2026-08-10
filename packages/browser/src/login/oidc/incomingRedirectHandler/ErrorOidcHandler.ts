@@ -28,7 +28,7 @@ import type {
   ISessionInfo,
 } from "@inrupt/solid-client-authn-core";
 import { EVENTS } from "@inrupt/solid-client-authn-core";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 
 import { getUnauthenticatedSession } from "../../../sessionInfo/SessionInfoManager";
 

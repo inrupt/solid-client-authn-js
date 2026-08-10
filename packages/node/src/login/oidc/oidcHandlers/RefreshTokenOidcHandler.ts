@@ -47,7 +47,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type { JWK, CryptoKey as JoseCryptoKey } from "jose";
 import { importJWK } from "jose";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 
 function validateOptions(
   oidcLoginOptions: IOidcOptions,
