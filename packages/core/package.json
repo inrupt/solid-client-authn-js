@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "events": "^3.3.0",
-    "jose": "^6.2.8",
+    "jose": "^6.2.9",
     "uuid": "^14.0.2"
   },
   "publishConfig": {
