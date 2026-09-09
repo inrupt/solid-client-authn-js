@@ -33,6 +33,7 @@ import type {
   AuthorizationRequestState,
   ISolidOidcClient,
   IOpenIdStaticClient,
+  SessionManagerAuthorizationState,
 } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
@@ -161,6 +162,7 @@ export class Session implements IHasSessionEventListener {
   public static async fromAuthorizationRequestState(
     authorizationRequestState: AuthorizationRequestState,
     sessionId: string | undefined = undefined,
+    clientSecret?: string,
   ): Promise<Session> {
     const finalSessionId = sessionId ?? v4();
 
@@ -183,23 +185,27 @@ export class Session implements IHasSessionEventListener {
       ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
     if (isValidUrl(authorizationRequestState.clientId)) {
       clientType = "solid-oidc";
-    } else if (typeof authorizationRequestState.clientSecret !== "undefined") {
+    } else if (typeof clientSecret !== "undefined") {
       clientType = "static";
     } else {
       throw new Error(
         `Unsupported client ${authorizationRequestState.clientId}. The client must either have a valid URL as a client ID, or have a client secret.`,
       );
     }
-    const state = {
+    const state: SessionManagerAuthorizationState = {
       ...authorizationRequestState,
-      keepAlive: false as const,
+      keepAlive: false,
       clientType,
+      clientSecret
     };
-    const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
-    if (!issuerConfig.scopesSupported.includes("webid")) {
-      throw new Error(
-        `${state.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
-      );
+    // Enforce compatibility of OpenID Provider for Solid-OIDC clients.
+    if (clientType === "solid-oidc") {
+      const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
+      if (!issuerConfig.scopesSupported.includes("webid")) {
+        throw new Error(
+          `${state.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
+        );
+      }
     }
 
     await clientAuth.setOidcContext(finalSessionId, state);

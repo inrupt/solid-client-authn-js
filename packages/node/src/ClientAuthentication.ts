@@ -32,11 +32,12 @@ import type {
   ISessionInfo,
   SessionConfig,
   ISessionInternalInfo,
-  AuthorizationRequestState,
+  SessionManagerAuthorizationState,
   ISolidOidcClient,
   IOpenIdStaticClient,
 } from "@inrupt/solid-client-authn-core";
 import type { EventEmitter } from "node:events";
+import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 
 /**
  * @hidden
@@ -130,11 +131,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
 
   setOidcContext = async (
     sessionId: string,
-    authorizationRequestState: AuthorizationRequestState & {
-      keepAlive: false;
-      clientType:
-        ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
-    },
+    authorizationRequestState: SessionManagerAuthorizationState,
   ): Promise<void> => {
     await this.sessionInfoManager.setOidcContext(
       sessionId,

@@ -25,6 +25,7 @@
 
 import type { ISessionInfo, ISessionInternalInfo } from "./ISessionInfo";
 import type { AuthorizationRequestState } from "../SessionEventListener";
+import { IOpenIdStaticClient, ISolidOidcClient } from "../login/oidc/IClient";
 
 /**
  * @hidden
@@ -32,6 +33,13 @@ import type { AuthorizationRequestState } from "../SessionEventListener";
 export interface ISessionInfoManagerOptions {
   loggedIn?: boolean;
   webId?: string;
+}
+
+export type SessionManagerAuthorizationState = AuthorizationRequestState & {
+  keepAlive: false;
+  clientType:
+    ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
+  clientSecret?: string
 }
 
 /**

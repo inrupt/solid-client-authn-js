@@ -215,11 +215,7 @@ export class SessionInfoManager
    */
   async setOidcContext(
     sessionId: string,
-    authorizationRequestState: AuthorizationRequestState & {
-      keepAlive: false;
-      clientType:
-        ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
-    },
+    authorizationRequestState: SessionManagerAuthorizationState,
   ): Promise<void> {
     // First, store mapping from state to sessionId (for the IdP redirect back)
     await this.storageUtility.setForUser(authorizationRequestState.state, {
