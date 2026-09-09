@@ -25,6 +25,10 @@
 
 import type { ISessionInfo, ISessionInternalInfo } from "./ISessionInfo";
 import type { AuthorizationRequestState } from "../SessionEventListener";
+import type {
+  IOpenIdStaticClient,
+  ISolidOidcClient,
+} from "../login/oidc/IClient";
 
 /**
  * @hidden
@@ -33,6 +37,18 @@ export interface ISessionInfoManagerOptions {
   loggedIn?: boolean;
   webId?: string;
 }
+
+export type SessionManagerAuthorizationState = AuthorizationRequestState & {
+  keepAlive: false;
+} & (
+    | {
+        clientType: ISolidOidcClient["clientType"];
+      }
+    | {
+        clientType: IOpenIdStaticClient["clientType"];
+        clientSecret: string;
+      }
+  );
 
 /**
  * @hidden
@@ -83,11 +99,11 @@ export interface ISessionInfoManager {
    * Sets authorization request state in storage for a given session ID.
    *
    * @param {string} sessionId - The ID of the session to update
-   * @param {AuthorizationRequestState} authorizationRequestState - The state representing the authorization request context for OIDC
+   * @param {SessionManagerAuthorizationState} authorizationRequestState - The state representing the authorization request context for OIDC
    */
   setOidcContext(
     sessionId: string,
-    authorizationRequestState: AuthorizationRequestState,
+    authorizationRequestState: SessionManagerAuthorizationState,
   ): Promise<void>;
 }
 
