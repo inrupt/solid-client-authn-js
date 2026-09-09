@@ -31,8 +31,6 @@ import type {
   SessionConfig,
   SessionTokenSet,
   AuthorizationRequestState,
-  ISolidOidcClient,
-  IOpenIdStaticClient,
   SessionManagerAuthorizationState,
 } from "@inrupt/solid-client-authn-core";
 import {
@@ -181,8 +179,6 @@ export class Session implements IHasSessionEventListener {
       },
       clientAuthentication: clientAuth,
     });
-    let clientType:
-      ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
     const isUrl = isValidUrl(authorizationRequestState.clientId);
     const hasSecret = typeof clientSecret !== "undefined";
     // Invalid state check
@@ -191,29 +187,33 @@ export class Session implements IHasSessionEventListener {
         "Invalid configuration: Solid-OIDC clients (with a URL client ID) should not have a client secret.",
       );
     }
+    let state: SessionManagerAuthorizationState;
     if (isUrl) {
-      clientType = "solid-oidc";
+      // Enforce OpenID Provider compatibility with Solid-OIDC
+      const issuerConfig = await issuerConfigFetcher.fetchConfig(
+        authorizationRequestState.issuer,
+      );
+      if (!issuerConfig.scopesSupported.includes("webid")) {
+        throw new Error(
+          `${authorizationRequestState.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
+        );
+      }
+      state = {
+        ...authorizationRequestState,
+        keepAlive: false,
+        clientType: "solid-oidc",
+      };
     } else if (hasSecret) {
-      clientType = "static";
+      state = {
+        ...authorizationRequestState,
+        keepAlive: false,
+        clientType: "static",
+        clientSecret,
+      };
     } else {
       throw new Error(
         `Unsupported client ${authorizationRequestState.clientId}. The client must either have a valid URL as a client ID, or have a client secret.`,
       );
-    }
-    const state: SessionManagerAuthorizationState = {
-      ...authorizationRequestState,
-      keepAlive: false,
-      clientType,
-      clientSecret: clientType === "static" ? clientSecret : undefined,
-    };
-    // Enforce compatibility of OpenID Provider for Solid-OIDC clients.
-    if (clientType === "solid-oidc") {
-      const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
-      if (!issuerConfig.scopesSupported.includes("webid")) {
-        throw new Error(
-          `${state.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
-        );
-      }
     }
 
     await clientAuth.setOidcContext(finalSessionId, state);
