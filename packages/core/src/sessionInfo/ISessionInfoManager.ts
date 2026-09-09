@@ -94,11 +94,11 @@ export interface ISessionInfoManager {
    * Sets authorization request state in storage for a given session ID.
    *
    * @param {string} sessionId - The ID of the session to update
-   * @param {AuthorizationRequestState} authorizationRequestState - The state representing the authorization request context for OIDC
+   * @param {SessionManagerAuthorizationState} authorizationRequestState - The state representing the authorization request context for OIDC
    */
   setOidcContext(
     sessionId: string,
-    authorizationRequestState: AuthorizationRequestState,
+    authorizationRequestState: SessionManagerAuthorizationState,
   ): Promise<void>;
 }
 
