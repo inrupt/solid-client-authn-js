@@ -40,13 +40,15 @@ export interface ISessionInfoManagerOptions {
 
 export type SessionManagerAuthorizationState = AuthorizationRequestState & {
   keepAlive: false;
-} & ({
-  clientType:
-    ISolidOidcClient["clientType"]
-} | {
-  clientType: IOpenIdStaticClient["clientType"];
-  clientSecret?: string;
-});
+} & (
+    | {
+        clientType: ISolidOidcClient["clientType"];
+      }
+    | {
+        clientType: IOpenIdStaticClient["clientType"];
+        clientSecret?: string;
+      }
+  );
 
 /**
  * @hidden

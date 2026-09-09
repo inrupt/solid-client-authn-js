@@ -188,12 +188,13 @@ export class Session implements IHasSessionEventListener {
     // Invalid state check
     if (isUrl && hasSecret) {
       throw new Error(
-        "Invalid configuration: Solid-OIDC clients (with a URL client ID) should not have a client secret.");
+        "Invalid configuration: Solid-OIDC clients (with a URL client ID) should not have a client secret.",
+      );
     }
     if (isUrl) {
       clientType = "solid-oidc";
     } else if (hasSecret) {
-      clientType = "static";  
+      clientType = "static";
     } else {
       throw new Error(
         `Unsupported client ${authorizationRequestState.clientId}. The client must either have a valid URL as a client ID, or have a client secret.`,

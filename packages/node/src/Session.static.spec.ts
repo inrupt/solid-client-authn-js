@@ -347,14 +347,14 @@ describe("Session static functions", () => {
       it("creates a session able to perform a token request for statically registered clients", async () => {
         const authorizationRequestState = mockAuthRequestState({
           dpopBound: true,
-          clientId: "some-client-id"
+          clientId: "some-client-id",
         });
         const sessionId = "test-session-id";
 
         const session = await Session.fromAuthorizationRequestState(
           authorizationRequestState,
           sessionId,
-          "some-client-secret"
+          "some-client-secret",
         );
 
         expect(session.info.sessionId).toBe(sessionId);
