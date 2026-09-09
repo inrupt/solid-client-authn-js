@@ -142,7 +142,6 @@ const mockAuthRequestState = (
   {
     dpopBound,
     clientId,
-    clientSecret,
   }: {
     dpopBound: boolean;
     clientId: string;
@@ -158,7 +157,6 @@ const mockAuthRequestState = (
   redirectUrl: "https://rp.example.org/callback/",
   dpopBound,
   clientId,
-  clientSecret,
 });
 
 describe("Session static functions", () => {
@@ -350,14 +348,14 @@ describe("Session static functions", () => {
       it("creates a session able to perform a token request for statically registered clients", async () => {
         const authorizationRequestState = mockAuthRequestState({
           dpopBound: true,
-          clientId: "some-client-id",
-          clientSecret: "some-client-secret",
+          clientId: "some-client-id"
         });
         const sessionId = "test-session-id";
 
         const session = await Session.fromAuthorizationRequestState(
           authorizationRequestState,
           sessionId,
+          "some-client-secret"
         );
 
         expect(session.info.sessionId).toBe(sessionId);
