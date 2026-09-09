@@ -183,10 +183,17 @@ export class Session implements IHasSessionEventListener {
     });
     let clientType:
       ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
-    if (isValidUrl(authorizationRequestState.clientId)) {
+    const isUrl = isValidUrl(authorizationRequestState.clientId);
+    const hasSecret = typeof clientSecret !== "undefined";
+    // Invalid state check
+    if (isUrl && hasSecret) {
+      throw new Error(
+        "Invalid configuration: Solid-OIDC clients (with a URL client ID) should not have a client secret.");
+    }
+    if (isUrl) {
       clientType = "solid-oidc";
-    } else if (typeof clientSecret !== "undefined") {
-      clientType = "static";
+    } else if (hasSecret) {
+      clientType = "static";  
     } else {
       throw new Error(
         `Unsupported client ${authorizationRequestState.clientId}. The client must either have a valid URL as a client ID, or have a client secret.`,
@@ -196,7 +203,7 @@ export class Session implements IHasSessionEventListener {
       ...authorizationRequestState,
       keepAlive: false,
       clientType,
-      clientSecret,
+      clientSecret: clientType === "static" ? clientSecret : undefined,
     };
     // Enforce compatibility of OpenID Provider for Solid-OIDC clients.
     if (clientType === "solid-oidc") {

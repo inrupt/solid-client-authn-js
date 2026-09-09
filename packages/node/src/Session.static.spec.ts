@@ -145,7 +145,6 @@ const mockAuthRequestState = (
   }: {
     dpopBound: boolean;
     clientId: string;
-    clientSecret?: string;
   } = {
     dpopBound: true,
     clientId: "https://rp.example.org/client-id",
@@ -392,6 +391,18 @@ describe("Session static functions", () => {
         });
         expect(dpop).toStrictEqual(
           expect.objectContaining({ DPoP: expect.anything() }),
+        );
+
+        // Check the appropriate client auth method is used.
+        const { Issuer } = jest.requireMock("openid-client") as {
+          Issuer: { mockClient: ReturnType<typeof jest.fn> };
+        };
+        expect(Issuer.mockClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            client_id: "some-client-id",
+            client_secret: "some-client-secret",
+            token_endpoint_auth_method: "client_secret_basic",
+          }),
         );
       });
 
