@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### New features
+
+#### node
+
+- Statically registered clients are now supported when using the token-based `Session` builder
+  `Session.fromAuthorizationRequestState`, to support the Authorization Request grant. Only Solid-OIDC
+  clients were supported so far.
+
 ## [5.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.0) - 2026-06-03
 
 ### Breaking changes

@@ -142,9 +142,11 @@ const mockAuthRequestState = (
   {
     dpopBound,
     clientId,
+    clientSecret,
   }: {
     dpopBound: boolean;
     clientId: string;
+    clientSecret?: string;
   } = {
     dpopBound: true,
     clientId: "https://rp.example.org/client-id",
@@ -156,6 +158,7 @@ const mockAuthRequestState = (
   redirectUrl: "https://rp.example.org/callback/",
   dpopBound,
   clientId,
+  clientSecret,
 });
 
 describe("Session static functions", () => {
@@ -298,8 +301,58 @@ describe("Session static functions", () => {
     });
 
     describe("Session.fromAuthorizationRequestState", () => {
-      it("creates a session able to perform a token request", async () => {
+      it("creates a session able to perform a token request for solid-oidc clients", async () => {
         const authorizationRequestState = mockAuthRequestState();
+        const sessionId = "test-session-id";
+
+        const session = await Session.fromAuthorizationRequestState(
+          authorizationRequestState,
+          sessionId,
+        );
+
+        expect(session.info.sessionId).toBe(sessionId);
+        expect(session.info.isLoggedIn).toBe(false);
+
+        const redirectUrl = new URL("https://example.org/callback/");
+        redirectUrl.searchParams.append("code", "some-authorization-code");
+        redirectUrl.searchParams.append("state", "test-state");
+
+        // This tests for implementation rather than behavior, but it is simpler
+        // this way and can be improved when migrating to openid-client v6, where
+        // only network interaction can be mocked.
+        const mockedCallback = mockOpClient({
+          code: "some-authorization-code",
+          state: "test-state",
+        });
+
+        await session.handleIncomingRedirect(redirectUrl.href);
+
+        expect(mockedCallback).toHaveBeenCalled();
+        const [requestRedirectUrl, params, verifier, dpop] =
+          mockedCallback.mock.calls[0];
+        expect(requestRedirectUrl).toBe(
+          new URL(redirectUrl.pathname, redirectUrl.origin).href,
+        );
+        // Note that this currently only covers the mocks set up above.
+        expect(params).toStrictEqual({
+          code: "some-authorization-code",
+          state: "test-state",
+        });
+        expect(verifier).toStrictEqual({
+          code_verifier: "test-code-verifier",
+          state: "test-state",
+        });
+        expect(dpop).toStrictEqual(
+          expect.objectContaining({ DPoP: expect.anything() }),
+        );
+      });
+
+      it("creates a session able to perform a token request for statically registered clients", async () => {
+        const authorizationRequestState = mockAuthRequestState({
+          dpopBound: true,
+          clientId: "some-client-id",
+          clientSecret: "some-client-secret",
+        });
         const sessionId = "test-session-id";
 
         const session = await Session.fromAuthorizationRequestState(
@@ -384,10 +437,10 @@ describe("Session static functions", () => {
         expect(validate(session.info.sessionId)).toBe(true);
       });
 
-      it("validates the client ID", async () => {
+      it("rejects non-URL client IDs in the absence of a client secret", async () => {
         const authorizationRequestState = mockAuthRequestState({
           dpopBound: true,
-          clientId: "Some invalid client id",
+          clientId: "Some non-URL client id",
         });
         await expect(
           Session.fromAuthorizationRequestState(authorizationRequestState),

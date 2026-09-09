@@ -31,6 +31,8 @@ import type {
   SessionConfig,
   SessionTokenSet,
   AuthorizationRequestState,
+  ISolidOidcClient,
+  IOpenIdStaticClient,
 } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
@@ -177,21 +179,26 @@ export class Session implements IHasSessionEventListener {
       },
       clientAuthentication: clientAuth,
     });
-    // Only Solid-OIDC clients are supported.
+    let clientType:
+      ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
+    if (isValidUrl(authorizationRequestState.clientId)) {
+      clientType = "solid-oidc";
+    } else if (typeof authorizationRequestState.clientSecret !== "undefined") {
+      clientType = "static";
+    } else {
+      throw new Error(
+        `Unsupported client ${authorizationRequestState.clientId}. The client must either have a valid URL as a client ID, or have a client secret.`,
+      );
+    }
     const state = {
       ...authorizationRequestState,
       keepAlive: false as const,
-      clientType: "solid-oidc" as const,
+      clientType,
     };
     const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
     if (!issuerConfig.scopesSupported.includes("webid")) {
       throw new Error(
         `${state.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
-      );
-    }
-    if (!isValidUrl(state.clientId)) {
-      throw new Error(
-        `The client identifier ${state.clientId} is not a valid URL`,
       );
     }
 

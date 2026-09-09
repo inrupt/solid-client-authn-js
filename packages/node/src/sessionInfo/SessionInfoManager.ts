@@ -28,6 +28,8 @@ import type {
   ISessionInternalInfo,
   ISessionInfoManager,
   AuthorizationRequestState,
+  ISolidOidcClient,
+  IOpenIdStaticClient,
 } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManagerBase } from "@inrupt/solid-client-authn-core";
 import { KEY_REGISTERED_SESSIONS } from "../constant";
@@ -215,7 +217,8 @@ export class SessionInfoManager
     sessionId: string,
     authorizationRequestState: AuthorizationRequestState & {
       keepAlive: false;
-      clientType: "solid-oidc";
+      clientType:
+        ISolidOidcClient["clientType"] | IOpenIdStaticClient["clientType"];
     },
   ): Promise<void> {
     // First, store mapping from state to sessionId (for the IdP redirect back)
@@ -233,6 +236,9 @@ export class SessionInfoManager
       clientId: authorizationRequestState.clientId,
       clientType: authorizationRequestState.clientType,
     };
+    if (typeof authorizationRequestState.clientSecret !== "undefined") {
+      infoToStore.clientSecret = authorizationRequestState.clientSecret;
+    }
     await this.storageUtility.setForUser(sessionId, infoToStore);
   }
 }
