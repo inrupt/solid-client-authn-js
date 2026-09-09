@@ -27,9 +27,7 @@ import type {
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
-  AuthorizationRequestState,
-  ISolidOidcClient,
-  IOpenIdStaticClient,
+  SessionManagerAuthorizationState,
 } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManagerBase } from "@inrupt/solid-client-authn-core";
 import { KEY_REGISTERED_SESSIONS } from "../constant";

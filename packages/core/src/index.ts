@@ -85,7 +85,7 @@ export {
   ISessionInfoManager,
   ISessionInfoManagerOptions,
   USER_SESSION_PREFIX,
-  SessionManagerAuthorizationState
+  SessionManagerAuthorizationState,
 } from "./sessionInfo/ISessionInfoManager";
 
 export { IIssuerConfigFetcher } from "./login/oidc/IIssuerConfigFetcher";

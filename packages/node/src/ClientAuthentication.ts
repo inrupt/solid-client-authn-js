@@ -33,11 +33,8 @@ import type {
   SessionConfig,
   ISessionInternalInfo,
   SessionManagerAuthorizationState,
-  ISolidOidcClient,
-  IOpenIdStaticClient,
 } from "@inrupt/solid-client-authn-core";
 import type { EventEmitter } from "node:events";
-import { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 
 /**
  * @hidden

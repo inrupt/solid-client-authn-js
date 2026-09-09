@@ -59,11 +59,6 @@ export type AuthorizationRequestState = {
    * The ID of your application.
    */
   clientId: string;
-
-  /**
-   * The client secret of the application.
-   */
-  clientSecret?: string;
 };
 
 /**

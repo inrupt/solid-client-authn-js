@@ -196,7 +196,7 @@ export class Session implements IHasSessionEventListener {
       ...authorizationRequestState,
       keepAlive: false,
       clientType,
-      clientSecret
+      clientSecret,
     };
     // Enforce compatibility of OpenID Provider for Solid-OIDC clients.
     if (clientType === "solid-oidc") {

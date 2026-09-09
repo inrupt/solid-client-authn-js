@@ -100,7 +100,7 @@ app.get("/redirect", async (req, res) => {
   const session = await Session.fromAuthorizationRequestState(
     authorizationRequestState,
     req.session.sessionId,
-    process.env.CLIENT_SECRET
+    process.env.CLIENT_SECRET,
   );
 
   if (session === undefined) {
