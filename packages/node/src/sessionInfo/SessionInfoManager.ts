@@ -230,7 +230,8 @@ export class SessionInfoManager
       clientId: authorizationRequestState.clientId,
       clientType: authorizationRequestState.clientType,
     };
-    if (typeof authorizationRequestState.clientSecret !== "undefined") {
+    if (authorizationRequestState.clientType === "static" 
+      && typeof authorizationRequestState.clientSecret !== "undefined") {
       infoToStore.clientSecret = authorizationRequestState.clientSecret;
     }
     await this.storageUtility.setForUser(sessionId, infoToStore);

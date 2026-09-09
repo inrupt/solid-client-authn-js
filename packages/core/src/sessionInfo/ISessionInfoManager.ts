@@ -46,7 +46,7 @@ export type SessionManagerAuthorizationState = AuthorizationRequestState & {
       }
     | {
         clientType: IOpenIdStaticClient["clientType"];
-        clientSecret?: string;
+        clientSecret: string;
       }
   );
 
