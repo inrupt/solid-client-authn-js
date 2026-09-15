@@ -27,6 +27,8 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+      - name: Build packages
+        run: npm run build
       - name: Generate API docs for browser
         run: npx --workspace packages/browser typedoc
       - name: Generate API docs for node
