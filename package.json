@@ -22,8 +22,6 @@
     "lint:fix": "npm run lint:eslint -- --fix",
     "lint:check": "npm run lint:eslint",
     "lint:eslint": "eslint --config eslint.config.mjs .",
-    "postinstall": "npm run build",
-    "prepublishOnly": "npm run build",
     "publish": "lerna publish",
     "test": "npm run test:unit:all",
     "test:unit:all": "jest --coverage --verbose --ignoreProjects e2e-node-script e2e-node-server e2e-browser",
@@ -49,7 +47,7 @@
     "@inrupt/internal-test-env": "^4.1.4",
     "@inrupt/jest-jsdom-polyfills": "^4.1.5",
     "@inrupt/solid-client": "^3.0.0",
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
@@ -81,7 +79,7 @@
     "typescript": "^6.0.3"
   },
   "optionalDependencies": {
-    "@nx/nx-win32-x64-msvc": "^23.2.0",
+    "@nx/nx-win32-x64-msvc": "^23.2.1",
     "fsevents": "^2.3.2"
   },
   "engines": {

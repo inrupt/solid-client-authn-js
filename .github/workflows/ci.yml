@@ -1,6 +1,7 @@
 name: CI
 
-on: [push]
+# Run the required tests on the merge queue.
+on: [push, merge_group]
 
 env:
   CI: true
@@ -27,6 +28,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
+      - run: npm run build
       - run: npm run test
       # Check that we can build our test apps using esbuild
       - run: npm run test:esbuild

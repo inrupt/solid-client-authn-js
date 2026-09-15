@@ -13,15 +13,15 @@
     "@inrupt/internal-playwright-testids": "^4.1.4",
     "@inrupt/solid-client-authn-browser": "^5.0.0",
     "next": "^16.3.4",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^3.2.7",
-    "@playwright/test": "^1.62.1",
-    "@types/node": "^26.4.1",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "esbuild": "^0.28.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "^16.3.4"
