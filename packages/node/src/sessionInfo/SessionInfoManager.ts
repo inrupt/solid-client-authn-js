@@ -27,7 +27,7 @@ import type {
   ISessionInfo,
   ISessionInternalInfo,
   ISessionInfoManager,
-  AuthorizationRequestState,
+  SessionManagerAuthorizationState,
 } from "@inrupt/solid-client-authn-core";
 import { SessionInfoManagerBase } from "@inrupt/solid-client-authn-core";
 import { KEY_REGISTERED_SESSIONS } from "../constant";
@@ -213,10 +213,7 @@ export class SessionInfoManager
    */
   async setOidcContext(
     sessionId: string,
-    authorizationRequestState: AuthorizationRequestState & {
-      keepAlive: false;
-      clientType: "solid-oidc";
-    },
+    authorizationRequestState: SessionManagerAuthorizationState,
   ): Promise<void> {
     // First, store mapping from state to sessionId (for the IdP redirect back)
     await this.storageUtility.setForUser(authorizationRequestState.state, {
@@ -233,6 +230,12 @@ export class SessionInfoManager
       clientId: authorizationRequestState.clientId,
       clientType: authorizationRequestState.clientType,
     };
+    if (
+      authorizationRequestState.clientType === "static" &&
+      typeof authorizationRequestState.clientSecret !== "undefined"
+    ) {
+      infoToStore.clientSecret = authorizationRequestState.clientSecret;
+    }
     await this.storageUtility.setForUser(sessionId, infoToStore);
   }
 }
