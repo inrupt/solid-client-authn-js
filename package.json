@@ -69,7 +69,7 @@
     "lerna": "^10.0.1",
     "lerna-audit": "^1.3.3",
     "license-checker": "^25.0.1",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.7",
     "rimraf": "^6.1.3",
     "rollup": "^4.22.4",
     "ts-jest": "^29.4.12",
