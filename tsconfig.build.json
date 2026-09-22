@@ -10,6 +10,7 @@
     "module": "preserve",
     "strict": true,
     "declaration": true,
+    "declarationMap": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
     "target": "es2022",
