@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## [5.0.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.1) - 2026-09-25
+
 ### New features
 
 #### node
@@ -21,7 +23,7 @@ The following changes have been implemented but not released yet:
 
 #### oidc-browser
 
-- `@inrupt/oidc-client-ext` now declares an `exports` map, like the other packages.
+- `@inrupt/oidc-client-ext` now declares an `exports` map, like the other packages. Thanks to @tophcodes for their first contribution!
 
 ## [5.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.0) - 2026-06-03
 
