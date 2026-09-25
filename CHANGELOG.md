@@ -17,6 +17,12 @@ The following changes have been implemented but not released yet:
   `Session.fromAuthorizationRequestState`, to support the Authorization Request grant. Only Solid-OIDC
   clients were supported so far.
 
+### Bugfixes
+
+#### oidc-browser
+
+- `@inrupt/oidc-client-ext` now declares an `exports` map, like the other packages.
+
 ## [5.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.0) - 2026-06-03
 
 ### Breaking changes

@@ -7,6 +7,13 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.es.js"
+    }
+  },
   "sideEffects": false,
   "repository": {
     "type": "git",
