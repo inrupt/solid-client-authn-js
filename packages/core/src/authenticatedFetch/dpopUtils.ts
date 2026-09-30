@@ -19,7 +19,7 @@
 //
 
 import type { JWK, CryptoKey } from "jose";
-import { SignJWT, generateKeyPair, exportJWK } from "jose";
+import { SignJWT, generateKeyPair, exportJWK, base64url } from "jose";
 import { v4 } from "uuid";
 import { PREFERRED_SIGNING_ALG } from "../constant";
 
@@ -41,23 +41,47 @@ export type KeyPair = {
 };
 
 /**
- * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
+ * Computes the RFC 9449 `ath` claim: the base64url-encoded SHA-256 hash of the
+ * ASCII encoding of the access token's value (RFC 9449 §4.2). Uses the WHATWG
+ * Web Crypto API (`crypto.subtle`) — the same cross-platform primitive `jose`
+ * relies on, available in browsers and the Node versions `jose` v6 supports.
+ *
+ * @hidden
+ */
+async function accessTokenHash(accessToken: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(accessToken),
+  );
+  return base64url.encode(new Uint8Array(digest));
+}
+
+/**
+ * Creates a DPoP header according to {@link https://www.rfc-editor.org/rfc/rfc9449 RFC 9449},
  * based on the target URL and method, using the provided key.
  *
  * @param audience Target URL.
  * @param method HTTP method allowed.
  * @param dpopKey Key used to sign the token.
+ * @param accessToken When provided, the proof is bound to this access token via the
+ * RFC 9449 `ath` claim. This is REQUIRED (RFC 9449 §7) whenever the DPoP proof
+ * accompanies an access token to a protected resource — without it, a correctly
+ * enforcing resource server rejects the request with 401.
  * @returns A JWT that can be used as a DPoP Authorization header.
  */
 export async function createDpopHeader(
   audience: string,
   method: string,
   dpopKey: KeyPair,
+  accessToken?: string,
 ): Promise<string> {
   return new SignJWT({
     htu: normalizeHTU(audience),
     htm: method.toUpperCase(),
     jti: v4(),
+    ...(accessToken !== undefined
+      ? { ath: await accessTokenHash(accessToken) }
+      : {}),
   })
     .setProtectedHeader({
       alg: PREFERRED_SIGNING_ALG[0],
