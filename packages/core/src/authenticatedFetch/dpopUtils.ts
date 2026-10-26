@@ -69,7 +69,7 @@ export async function createDpopHeader(
 }
 
 /**
- * Generates an assymetric key pair.
+ * Generates an asymmetric key pair.
  *
  * @param extractable whether the private key should be extractable or not. Must be false in any potentially untrusted context, e.g. the browser.
  * @returns A public/private key pair
