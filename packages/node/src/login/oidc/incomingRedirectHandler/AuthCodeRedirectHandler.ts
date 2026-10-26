@@ -145,7 +145,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     let dpopKey: KeyPair | undefined;
 
     if (oidcContext.dpop) {
-      dpopKey = await generateDpopKeyPair();
+      dpopKey = await generateDpopKeyPair(true);
     }
     const tokenSet = await client.callback(
       removeOpenIdParams(inputRedirectUrl).href,

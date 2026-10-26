@@ -68,10 +68,12 @@ export async function createDpopHeader(
     .sign(dpopKey.privateKey, {});
 }
 
-export async function generateDpopKeyPair(): Promise<KeyPair> {
+export async function generateDpopKeyPair(
+  extractable: boolean = false,
+): Promise<KeyPair> {
   const { privateKey, publicKey } = await generateKeyPair(
     PREFERRED_SIGNING_ALG[0],
-    { extractable: true },
+    { extractable },
   );
   const dpopKeyPair = {
     privateKey,

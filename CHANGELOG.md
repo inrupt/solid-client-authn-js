@@ -9,6 +9,37 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+## [4.0.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v4.0.1) - 2026-10-28
+
+### Security fixes
+
+#### browser
+
+- The DPoP key is no longer extractable in the browser context, which prevents its exploitation via XSS
+  or other browser-based clients vulnerabilities. This restricts an attacker session's length (in the case
+  of a successful token extraction) to the lifespan of the Access Token, very short by design.
+
+#### node
+
+- The browser DPoP key fix mentioned above creates a potentially breaking change for the NodeJS client:
+  make sure the node library is updated at the same time as the core library to prevent regressions.
+
+## [5.0.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.1) - 2026-09-25
+
+### New features
+
+#### node
+
+- Statically registered clients are now supported when using the token-based `Session` builder
+  `Session.fromAuthorizationRequestState`, to support the Authorization Request grant. Only Solid-OIDC
+  clients were supported so far.
+
+### Bugfixes
+
+#### oidc-browser
+
+- `@inrupt/oidc-client-ext` now declares an `exports` map, like the other packages. Thanks to @tophcodes for their first contribution!
+
 ## [4.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v4.0.0) - 2026-03-30
 
 ### Breaking changes
