@@ -1,6 +1,6 @@
 {
   "name": "@inrupt/solid-client-authn-core",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
