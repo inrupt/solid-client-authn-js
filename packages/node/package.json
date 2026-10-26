@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@inrupt/solid-client-authn-core": "^5.0.1",
-    "jose": "^6.2.12",
+    "jose": "^6.2.13",
     "openid-client": "^5.7.1",
     "uuid": "^14.0.3"
   },
