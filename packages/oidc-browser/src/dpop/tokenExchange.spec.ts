@@ -281,6 +281,19 @@ describe("getTokens", () => {
     expect(result?.dpopKey).toBe("some DPoP key pair");
   });
 
+  it("generates a non-extractable DPoP key pair", async () => {
+    mockFetch(JSON.stringify(mockDpopTokens()), 200);
+
+    const core = jest.requireMock("@inrupt/solid-client-authn-core") as any;
+    core.generateDpopKeyPair = jest.fn(() =>
+      Promise.resolve("some DPoP key pair"),
+    );
+    await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
+    // The private key must not be extractable in the browser, see
+    // https://github.com/inrupt/solid-client-authn-js/issues/4458
+    expect(core.generateDpopKeyPair).toHaveBeenCalledWith(false);
+  });
+
   it("returns the tokens provided by the IdP", async () => {
     mockFetch(JSON.stringify(mockDpopTokens()), 200);
     const result = await getTokens(

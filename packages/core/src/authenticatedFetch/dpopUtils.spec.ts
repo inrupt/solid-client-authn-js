@@ -98,7 +98,7 @@ describe("createDpopHeader", () => {
 describe("generateDpopKeyPair", () => {
   it("generates a public, private key pair", async () => {
     const keyPair = await generateDpopKeyPair();
-    // By default, the private key should be non-exctractable.
+    // By default, the private key should be non-extractable.
     await expect(
       crypto.subtle.exportKey("jwk", keyPair.privateKey),
     ).rejects.toThrow();

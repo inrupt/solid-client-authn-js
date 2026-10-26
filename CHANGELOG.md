@@ -17,6 +17,11 @@ The following changes have been implemented but not released yet:
   or other browser-based clients vulnerabilities. This restricts an attacker session's length (in the case
   of a successful token extraction) to the lifespan of the Access Token, very short by design.
 
+#### node
+
+- The browser DPoP key fix mentioned above creates a potentially breaking change for the NodeJS client:
+  make sure the node library is updated at the same time as the core library to prevent regressions.
+
 ## [5.0.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.1) - 2026-09-25
 
 ### New features
