@@ -79,7 +79,7 @@
     "typescript": "^6.0.3"
   },
   "optionalDependencies": {
-    "@nx/nx-win32-x64-msvc": "^23.3.0",
+    "@nx/nx-win32-x64-msvc": "^24.0.0",
     "fsevents": "^2.3.2"
   },
   "engines": {
