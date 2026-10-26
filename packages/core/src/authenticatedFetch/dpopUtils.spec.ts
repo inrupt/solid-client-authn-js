@@ -99,7 +99,9 @@ describe("generateDpopKeyPair", () => {
   it("generates a public, private key pair", async () => {
     const keyPair = await generateDpopKeyPair();
     // By default, the private key should be non-exctractable.
-    await expect(crypto.subtle.exportKey("jwk", keyPair.privateKey)).rejects.toThrow();
+    await expect(
+      crypto.subtle.exportKey("jwk", keyPair.privateKey),
+    ).rejects.toThrow();
     expect(keyPair.publicKey).toBeDefined();
     expect(keyPair.privateKey).toBeDefined();
     expect(keyPair.publicKey.alg).toBe("ES256");
@@ -107,8 +109,12 @@ describe("generateDpopKeyPair", () => {
 
   it("controls whether the generated private key is public or private", async () => {
     const extractableKeyPair = await generateDpopKeyPair(true);
-    await expect(crypto.subtle.exportKey("jwk", extractableKeyPair.privateKey)).resolves.not.toThrow();
+    await expect(
+      crypto.subtle.exportKey("jwk", extractableKeyPair.privateKey),
+    ).resolves.not.toThrow();
     const nonExtractableKeyPair = await generateDpopKeyPair(false);
-    await expect(crypto.subtle.exportKey("jwk", nonExtractableKeyPair.privateKey)).rejects.toThrow();
+    await expect(
+      crypto.subtle.exportKey("jwk", nonExtractableKeyPair.privateKey),
+    ).rejects.toThrow();
   });
 });
