@@ -289,8 +289,7 @@ describe("getTokens", () => {
       Promise.resolve("some DPoP key pair"),
     );
     await getTokens(mockIssuer(), mockClient(), mockEndpointInput(), true);
-    // The private key must not be extractable in the browser, see
-    // https://github.com/inrupt/solid-client-authn-js/issues/4458
+    // The private key must not be extractable in the browser.
     expect(core.generateDpopKeyPair).toHaveBeenCalledWith(false);
   });
 
