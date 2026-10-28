@@ -63,6 +63,4 @@ export type IOpenIdDynamicClient = IClientBase & {
  * @hidden
  */
 export type IClient =
-  | ISolidOidcClient
-  | IOpenIdStaticClient
-  | IOpenIdDynamicClient;
+  ISolidOidcClient | IOpenIdStaticClient | IOpenIdDynamicClient;
