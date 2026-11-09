@@ -67,10 +67,27 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
 // loaded in the setup file.
 process.env.OPENSSL_CONF = "/dev/null";
 
+// Each package is analysed by Sonar as a separate project, using the package
+// directory as its base directory. In CI, an LCOV report is generated for each
+// package (in coverage/<package>/lcov.info), with source paths relative to the
+// package so that Sonar can resolve them. See the packages' sonar-project.properties.
+const SONAR_PACKAGES = ["browser", "core", "node", "oidc-browser"];
+const sonarCoverageReporters: Config["coverageReporters"] = SONAR_PACKAGES.map(
+  (packageName) => [
+    "lcovonly",
+    {
+      projectRoot: join(import.meta.dirname, "packages", packageName),
+      file: join(packageName, "lcov.info"),
+    },
+  ],
+);
+
 const config: JestConfigWithTsJest = {
   reporters: ["default", "github-actions"],
   collectCoverage: true,
-  coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
+  coverageReporters: process.env.CI
+    ? ["text", ...sonarCoverageReporters]
+    : ["text"],
   coverageThreshold: {
     global: {
       // branches: 100,
