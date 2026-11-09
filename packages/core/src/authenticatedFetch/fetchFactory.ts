@@ -60,9 +60,17 @@ async function buildDpopFetchOptions(
   const headers = new Headers(defaultOptions?.headers);
   // Any pre-existing Authorization header should be overriden.
   headers.set("Authorization", `DPoP ${authToken}`);
+  // Bind the proof to this access token via the RFC 9449 `ath` claim (§7): a proof
+  // accompanying an access token to a protected resource MUST carry `ath`, or a
+  // correctly enforcing resource server rejects it with 401.
   headers.set(
     "DPoP",
-    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
+    await createDpopHeader(
+      targetUrl,
+      defaultOptions?.method ?? "get",
+      dpopKey,
+      authToken,
+    ),
   );
   return {
     ...defaultOptions,
