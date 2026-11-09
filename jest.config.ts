@@ -68,6 +68,9 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
 process.env.OPENSSL_CONF = "/dev/null";
 
 const config: JestConfigWithTsJest = {
+  // By default, Jest spawns one worker per CPU core (minus one), causing
+  // high memory usage for little to no performance gains.
+  maxWorkers: 2,
   reporters: ["default", "github-actions"],
   collectCoverage: true,
   coverageReporters: process.env.CI ? ["text", "lcov"] : ["text"],
