@@ -49,6 +49,7 @@ export type DpopHeaderPayload = {
   htu: string;
   htm: string;
   jti: string;
+  ath?: string;
 };
 
 async function buildDpopFetchOptions(
@@ -62,7 +63,12 @@ async function buildDpopFetchOptions(
   headers.set("Authorization", `DPoP ${authToken}`);
   headers.set(
     "DPoP",
-    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
+    await createDpopHeader(
+      targetUrl,
+      defaultOptions?.method ?? "get",
+      dpopKey,
+      authToken,
+    ),
   );
   return {
     ...defaultOptions,

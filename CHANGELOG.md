@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 The following changes have been implemented but not released yet:
 
+### New features
+
+#### browser and node
+
+- DPoP proofs sent along with an access token to a protected resource now include
+  the `ath` claim (hash of the access token), as required by [RFC 9449](https://www.rfc-editor.org/rfc/rfc9449.html#section-4.2).
+  To support this, `createDpopHeader` accepts an optional `accessToken` parameter.
+
 ### Patch changes
 
 #### node

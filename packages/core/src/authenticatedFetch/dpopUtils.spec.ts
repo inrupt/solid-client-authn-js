@@ -93,6 +93,28 @@ describe("createDpopHeader", () => {
     expect(protectedHeader.typ).toBe("dpop+jwt");
     expect(protectedHeader.jwk).toEqual((await mockKeyPair()).publicKey);
   });
+
+  it("does not include an 'ath' claim if no access token is provided", async () => {
+    const header = await createDpopHeader(
+      "https://some.resource",
+      "POST",
+      await mockKeyPair(),
+    );
+    const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
+    expect(payload).not.toHaveProperty("ath");
+  });
+
+  it("includes the access token hash as the 'ath' claim if an access token is provided", async () => {
+    // Example access token and matching hash from https://www.rfc-editor.org/rfc/rfc9449.html#section-7.1
+    const header = await createDpopHeader(
+      "https://some.resource",
+      "GET",
+      await mockKeyPair(),
+      "Kz~8mXK1EalYznwH-LC-1fBAo.4Ljp~zsPE_NeO.gxU",
+    );
+    const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
+    expect(payload.ath).toBe("fUHyO2r2Z3DZ53EsNrWBb0xWXoaNy59IiKCAqksmQEo");
+  });
 });
 
 describe("generateDpopKeyPair", () => {
