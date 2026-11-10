@@ -83,6 +83,9 @@ const sonarCoverageReporters: Config["coverageReporters"] = SONAR_PACKAGES.map(
 );
 
 const config: JestConfigWithTsJest = {
+  // By default, Jest spawns one worker per CPU core (minus one), causing
+  // high memory usage for little to no performance gains.
+  maxWorkers: 2,
   reporters: ["default", "github-actions"],
   collectCoverage: true,
   coverageReporters: process.env.CI
