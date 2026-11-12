@@ -12,7 +12,7 @@
   "dependencies": {
     "@inrupt/internal-playwright-testids": "^4.1.4",
     "@inrupt/solid-client-authn-browser": "^5.0.3",
-    "next": "^16.4.3",
+    "next": "^16.4.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
