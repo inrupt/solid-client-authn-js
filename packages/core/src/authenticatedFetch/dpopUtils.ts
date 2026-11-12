@@ -19,7 +19,7 @@
 //
 
 import type { JWK, CryptoKey } from "jose";
-import { SignJWT, generateKeyPair, exportJWK } from "jose";
+import { SignJWT, generateKeyPair, exportJWK, base64url } from "jose";
 import { v4 } from "uuid";
 import { PREFERRED_SIGNING_ALG } from "../constant";
 
@@ -41,23 +41,46 @@ export type KeyPair = {
 };
 
 /**
- * Creates a DPoP header according to https://tools.ietf.org/html/draft-fett-oauth-dpop-04,
+ * Computes the value of the `ath` claim of a DPoP proof as per
+ * https://www.rfc-editor.org/rfc/rfc9449.html#section-4.2.
+ *
+ * @param accessToken The access token the DPoP proof is presented with.
+ * @returns The `ath` claim value.
+ * @hidden
+ */
+async function hashToken(accessToken: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(accessToken),
+  );
+  return base64url.encode(new Uint8Array(digest));
+}
+
+/**
+ * Creates a DPoP proof according to https://www.rfc-editor.org/rfc/rfc9449.html,
  * based on the target URL and method, using the provided key.
  *
  * @param audience Target URL.
  * @param method HTTP method allowed.
  * @param dpopKey Key used to sign the token.
- * @returns A JWT that can be used as a DPoP Authorization header.
+ * @param accessToken The access token the proof is presented with, if any. It
+ * must be provided when calling a protected resource, and omitted when calling
+ * the token endpoint.
+ * @returns A JWT that can be used as a DPoP header.
  */
 export async function createDpopHeader(
   audience: string,
   method: string,
   dpopKey: KeyPair,
+  accessToken?: string,
 ): Promise<string> {
   return new SignJWT({
     htu: normalizeHTU(audience),
     htm: method.toUpperCase(),
     jti: v4(),
+    ...(accessToken !== undefined && {
+      ath: await hashToken(accessToken),
+    }),
   })
     .setProtectedHeader({
       alg: PREFERRED_SIGNING_ALG[0],

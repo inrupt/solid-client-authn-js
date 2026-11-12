@@ -25,6 +25,7 @@ import { jest, it, describe, expect, afterEach } from "@jest/globals";
 import type { CryptoKey } from "jose";
 import { jwtVerify, generateKeyPair, exportJWK } from "jose";
 import { EventEmitter } from "events";
+import { createHash } from "node:crypto";
 import {
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
@@ -85,6 +86,10 @@ const mockKeyPair = async () => {
   dpopKeyPair.publicKey.alg = "ES256";
   return dpopKeyPair;
 };
+
+// Computed independently of the implementation under test.
+const expectedAth = (accessToken: string) =>
+  createHash("sha256").update(accessToken).digest("base64url");
 
 const mockFetch = (response: Response, url: string) => {
   const mockedResponse = response;
@@ -167,6 +172,24 @@ describe("buildAuthenticatedFetch", () => {
     expect(payload.htm).toBe("POST");
   });
 
+  it("binds the DPoP proof to the access token using the 'ath' claim", async () => {
+    const mockedFetch = mockFetch(
+      mockNotRedirectedResponse(),
+      "https://my.pod/resource",
+    );
+    const myFetch = buildAuthenticatedFetch("myToken", {
+      dpopKey: await mockKeyPair(),
+    });
+    await myFetch("https://my.pod/resource");
+
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
+    const { payload } = await jwtVerify(
+      headers.get("DPoP") as string,
+      (await mockJwk()).publicKey,
+    );
+    expect(payload.ath).toBe(expectedAth("myToken"));
+  });
+
   it("builds a Bearer fetch if no DPoP key is provided", async () => {
     const mockedFetch = mockFetch(
       new Response(undefined, { status: 401 }),
@@ -203,6 +226,7 @@ describe("buildAuthenticatedFetch", () => {
       (await mockJwk()).publicKey,
     );
     expect(payload.htu).toBe("https://my.pod/container/");
+    expect(payload.ath).toBe(expectedAth("myToken"));
   });
 
   it("returns a fetch that does not retry fetching with a Bearer token if redirected", async () => {
@@ -398,6 +422,46 @@ describe("buildAuthenticatedFetch", () => {
         publicKey: await exportJWK(keylikePair.publicKey),
       },
     );
+  });
+
+  it("binds the DPoP proof to the refreshed access token", async () => {
+    // Refreshes only once to prevent re-scheduling timeouts.
+    const mockedTokenRefresher: ITokenRefresher = {
+      refresh: jest
+        .fn<
+          (
+            ...params: Parameters<ITokenRefresher["refresh"]>
+          ) => ReturnType<ITokenRefresher["refresh"]>
+        >()
+        .mockResolvedValueOnce({ ...mockDefaultTokenSet(), expiresIn: 1000 }),
+    };
+    const myFetch = buildAuthenticatedFetch("myToken", {
+      dpopKey: await mockKeyPair(),
+      refreshOptions: {
+        refreshToken: "some refresh token",
+        sessionId: "mySession",
+        tokenRefresher: mockedTokenRefresher,
+      },
+      expiresIn: 0,
+    });
+    await sleep(200);
+    expect(mockedTokenRefresher.refresh).toHaveBeenCalled();
+
+    const mockedFetch = mockFetch(
+      mockNotRedirectedResponse(),
+      "https://my.pod/resource",
+    );
+    await myFetch("https://my.pod/resource");
+
+    const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
+    expect(headers.get("Authorization")).toBe(
+      `DPoP ${mockDefaultTokenSet().accessToken}`,
+    );
+    const { payload } = await jwtVerify(
+      headers.get("DPoP") as string,
+      (await mockJwk()).publicKey,
+    );
+    expect(payload.ath).toBe(expectedAth(mockDefaultTokenSet().accessToken));
   });
 
   it("sets up the timeout on refresh so that the tokens keep being valid", async () => {
