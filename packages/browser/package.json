@@ -25,8 +25,7 @@
     "build-docs-preview-site": "npm run build-api-docs; cd docs/api; make html"
   },
   "devDependencies": {
-    "@types/node": "^26.6.6",
-    "@types/uuid": "^11.0.0"
+    "@types/node": "^26.6.6"
   },
   "dependencies": {
     "@inrupt/oidc-client-ext": "^5.0.3",
