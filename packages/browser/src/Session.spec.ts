@@ -25,7 +25,6 @@ import {
   StorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line import/no-unresolved
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import { EventEmitter } from "stream";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
