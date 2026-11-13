@@ -21,7 +21,6 @@
 import {
   StorageUtilityMock,
   mockStorageUtility,
-  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
 import { randomUUID } from "crypto";

@@ -29,7 +29,6 @@ import {
   mockStorageUtility,
   mockIncomingRedirectHandler,
   mockLogoutHandler,
-  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 import ClientAuthentication from "../ClientAuthentication";
 import { mockLoginHandler } from "../login/__mocks__/LoginHandler";

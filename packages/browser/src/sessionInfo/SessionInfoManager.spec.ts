@@ -23,7 +23,6 @@ import {
   StorageUtility,
   mockStorage,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line import/no-unresolved
 import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/mocks";
 import { jest, it, describe, expect } from "@jest/globals";
 

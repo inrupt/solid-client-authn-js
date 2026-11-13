@@ -24,7 +24,6 @@ import {
   type ISessionInfo,
   type ISessionInternalInfo,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line import/no-unresolved
 import { mockLogoutHandler } from "@inrupt/solid-client-authn-core/mocks";
 import { UuidGeneratorMock } from "../util/__mocks__/UuidGenerator";
 import { SessionInfoManager } from "./SessionInfoManager";
