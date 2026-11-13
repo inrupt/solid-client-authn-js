@@ -40,6 +40,9 @@ jobs:
 
   sonar-scan:
     needs: [test]
+    # Secrets are not available to PRs from forks.
+    # Skip the scan there: it runs in the merge_group run.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     strategy:
       matrix:
