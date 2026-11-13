@@ -27,7 +27,6 @@ import { EVENTS } from "@inrupt/solid-client-authn-core";
 import {
   StorageUtilityMock,
   mockStorageUtility,
-  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 import type { JWK, CryptoKey } from "jose";
 import { importJWK } from "jose";

@@ -54,4 +54,20 @@ export default defineConfig([
       ],
     },
   },
+  // TODO: remove once this is released in @inrupt/eslint-config-base.
+  // The TypeScript compiler already reports unresolved imports, and
+  // eslint-import-resolver-node reports false positives.
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    ignores: [
+      "**/*.test.ts",
+      "**/*.mock*.ts",
+      "**/jest.setup.ts",
+      "**/e2e.playwright.ts",
+      "**/globalSetup.ts",
+    ],
+    rules: {
+      "import/no-unresolved": "off",
+    },
+  },
 ]);

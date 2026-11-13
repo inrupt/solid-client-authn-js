@@ -11,6 +11,41 @@ The following changes have been implemented but not released yet:
 
 ### New features
 
+#### browser and node
+
+- DPoP proofs sent along with an access token to a protected resource now include
+  the `ath` claim (hash of the access token), as required by [RFC 9449](https://www.rfc-editor.org/rfc/rfc9449.html#section-4.2).
+  To support this, `createDpopHeader` accepts an optional `accessToken` parameter.
+
+### Patch changes
+
+#### node
+
+- NodeJS 26 is now officially supported.
+
+## [5.0.3](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.3) - 2026-10-29
+
+- This release validates the publication pipeline, it includes no code changes.
+
+## [5.0.2](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.2) - 2026-10-26
+
+### Security fixes
+
+#### browser
+
+- The DPoP key is no longer extractable in the browser context, which prevents its exploitation via XSS
+  or other browser-based clients vulnerabilities. This restricts an attacker session's length (in the case
+  of a successful token extraction) to the lifespan of the Access Token, very short by design.
+
+#### node
+
+- The browser DPoP key fix mentioned above creates a potentially breaking change for the NodeJS client:
+  make sure the node library is updated at the same time as the core library to prevent regressions.
+
+## [5.0.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.1) - 2026-09-25
+
+### New features
+
 #### node
 
 - Statically registered clients are now supported when using the token-based `Session` builder
@@ -21,7 +56,7 @@ The following changes have been implemented but not released yet:
 
 #### oidc-browser
 
-- `@inrupt/oidc-client-ext` now declares an `exports` map, like the other packages.
+- `@inrupt/oidc-client-ext` now declares an `exports` map, like the other packages. Thanks to @tophcodes for their first contribution!
 
 ## [5.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.0) - 2026-06-03
 

@@ -19,7 +19,7 @@ jobs:
       matrix:
         # We test against different OSes, because the build toolchain has OS-specific dependencies.
         os: ["ubuntu-latest", "windows-latest"]
-        node-version: ["22.x", "24.x"]
+        node-version: ["22.x", "24.x", "26.x"]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -66,7 +66,7 @@ jobs:
           name: code-coverage-ubuntu-latest-24.x
           path: coverage/
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@ba9859eae8dd6bd29e412f25ddbbef3d032000f4 # v5
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
         if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           projectBaseDir: ${{ matrix.project-root }}

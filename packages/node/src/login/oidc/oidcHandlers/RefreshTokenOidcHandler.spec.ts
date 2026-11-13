@@ -186,7 +186,7 @@ describe("RefreshTokenOidcHandler", () => {
     });
 
     it("reuses stored DPoP keys if any when refreshing the access token", async () => {
-      const dpopKeyPair = await generateDpopKeyPair();
+      const dpopKeyPair = await generateDpopKeyPair(true);
 
       // This builds the fetch function holding the refresh token...
       const refreshTokenOidcHandler = new RefreshTokenOidcHandler(

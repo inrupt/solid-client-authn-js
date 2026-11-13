@@ -32,7 +32,6 @@ import { StorageUtility } from "@inrupt/solid-client-authn-core";
 import {
   StorageUtilityMock,
   mockStorage,
-  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 
 import AuthorizationCodeWithPkceOidcHandler from "./AuthorizationCodeWithPkceOidcHandler";
