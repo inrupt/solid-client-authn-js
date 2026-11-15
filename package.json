@@ -47,7 +47,7 @@
     "@inrupt/internal-test-env": "^4.1.6",
     "@inrupt/jest-jsdom-polyfills": "^4.1.6",
     "@inrupt/solid-client": "^4.0.0",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.0",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.2",
