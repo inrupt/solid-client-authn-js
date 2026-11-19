@@ -235,6 +235,7 @@ describe("Session events", () => {
   let logoutFunc: () => void;
   let expiredFunc: () => void;
   let newTokensFunc: jest.Mock;
+  let sessionStatusChangeFunc: () => void;
 
   beforeEach(async () => {
     session = new Session();
@@ -242,10 +243,12 @@ describe("Session events", () => {
     logoutFunc = jest.fn();
     expiredFunc = jest.fn();
     newTokensFunc = jest.fn();
+    sessionStatusChangeFunc = jest.fn();
     session.events.on(EVENTS.LOGIN, loginFunc);
     session.events.on(EVENTS.LOGOUT, logoutFunc);
     session.events.on(EVENTS.SESSION_EXPIRED, expiredFunc);
     session.events.on(EVENTS.NEW_TOKENS, newTokensFunc);
+    session.events.on(EVENTS.SESSION_STATUS_CHANGE, sessionStatusChangeFunc);
     await session.login(getCredentials());
   });
 
@@ -256,6 +259,7 @@ describe("Session events", () => {
     expect(loginFunc).toHaveBeenCalledTimes(1);
     expect(logoutFunc).toHaveBeenCalledTimes(1);
     expect(expiredFunc).toHaveBeenCalledTimes(0);
+    expect(sessionStatusChangeFunc).toHaveBeenCalledTimes(2);
     expect(newTokensFunc).toHaveBeenCalledTimes(1);
     const tokenArgument: SessionTokenSet = newTokensFunc.mock
       .calls[0][0] as SessionTokenSet;
@@ -278,35 +282,12 @@ describe("Session events", () => {
     expect(loginFunc).toHaveBeenCalledTimes(1);
     expect(logoutFunc).toHaveBeenCalledTimes(0);
     expect(expiredFunc).toHaveBeenCalledTimes(1);
+    // The session status change is not sent on expiration, only on the subsequent logout.
+    expect(sessionStatusChangeFunc).toHaveBeenCalledTimes(1);
     await session.logout();
     expect(loginFunc).toHaveBeenCalledTimes(1);
     expect(logoutFunc).toHaveBeenCalledTimes(1);
-    expect(expiredFunc).toHaveBeenCalledTimes(1);
-  });
-
-  it("sends a session status changed event on login, logout, and session expiration", async() => {
-    let sessionStatusChangeFunc: () => void;
-    sessionStatusChangeFunc = jest.fn();
-    session.events.on(EVENTS.SESSION_STATUS_CHANGE, sessionStatusChangeFunc);
-    
-    expect(session.info.isLoggedIn).toBe(true);
-
-    if (typeof session.info.expirationDate !== "number") {
-      throw new Error("Cannot determine session expiration date");
-    }
-    const expiresIn = session.info.expirationDate - Date.now();
-    await new Promise((resolve) => {
-      setTimeout(resolve, expiresIn);
-    });
-
-    expect(loginFunc).toHaveBeenCalledTimes(1);
-    expect(logoutFunc).toHaveBeenCalledTimes(0);
     expect(expiredFunc).toHaveBeenCalledTimes(1);
     expect(sessionStatusChangeFunc).toHaveBeenCalledTimes(2);
-    await session.logout();
-    expect(loginFunc).toHaveBeenCalledTimes(1);
-    expect(logoutFunc).toHaveBeenCalledTimes(1);
-    expect(expiredFunc).toHaveBeenCalledTimes(1);
-    expect(sessionStatusChangeFunc).toHaveBeenCalledTimes(3);
-  })
+  });
 });

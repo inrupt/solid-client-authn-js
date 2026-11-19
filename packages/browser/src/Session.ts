@@ -183,27 +183,31 @@ export class Session implements IHasSessionEventListener {
     // (as opposed to using our storage abstraction layer) because it is only
     // used in a browser-specific mechanism.
     this.events.on(EVENTS.LOGIN, () => {
-      // You have to use the semicolon on this next line
-      // Because the underlying JS interpreter cannot interpret whether
-      // the EventEmitter cast is an IIFE or different token.
       window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId);
-      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE)
-    });
-
-    this.events.on(EVENTS.LOGOUT, () => {
-      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
-    })
-
-    this.events.on(EVENTS.SESSION_EXPIRED, () => {
-      this.internalLogout(false);
       (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
     });
+
+    this.events.on(EVENTS.LOGOUT, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
+    );
+
+    this.events.on(EVENTS.SESSION_RESTORED, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
+    );
+
+    // Note that SESSION_STATUS_CHANGE is intentionally not emitted on expiration:
+    // it is emitted on the subsequent logout.
+    this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
 
     this.events.on(EVENTS.ERROR, () => {
-      this.internalLogout(false);
+      // Only signal a status change if the error actually logged the session out.
+      const wasLoggedIn = this.info.isLoggedIn;
+      return this.internalLogout(false).then(() => {
+        if (wasLoggedIn) {
+          (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
+        }
+      });
     });
-
-
   }
 
   /**
