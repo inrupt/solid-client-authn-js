@@ -25,6 +25,7 @@
 
 import type {
   ISessionInfo,
+  ISessionInfoManager,
   ISessionInternalInfo,
   ILoginOptions,
 } from "@inrupt/solid-client-authn-core";
@@ -36,6 +37,17 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import { normalizeCallbackUrl } from "@inrupt/oidc-client-ext";
 import type { EventEmitter } from "node:events";
+import type { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
+
+function hasClearClientRegistrationInfo(
+  sessionInfoManager: ISessionInfoManager,
+): sessionInfoManager is ISessionInfoManager &
+  Pick<SessionInfoManager, "clearClientRegistrationInfo"> {
+  return (
+    "clearClientRegistrationInfo" in sessionInfoManager &&
+    typeof sessionInfoManager.clearClientRegistrationInfo === "function"
+  );
+}
 
 /**
  * Checks if a client's registration has expired.
@@ -107,6 +119,20 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
       return null;
     }
     return sessionInfo;
+  };
+
+  // Discards the stored dynamic client registration for a session so that the next login
+  // registers a fresh client. Used to recover when the OIDC provider no longer recognises the
+  // stored client (e.g. it dropped the registration on a restart), which would otherwise cause
+  // silent authentication to loop with a client ID the provider rejects.
+  clearClientRegistrationInfo = async (sessionId: string): Promise<void> => {
+    if (hasClearClientRegistrationInfo(this.sessionInfoManager)) {
+      await this.sessionInfoManager.clearClientRegistrationInfo(sessionId);
+      return;
+    }
+    // If the session info manager cannot discard the client registration alone, clear the
+    // whole session: this also discards the stored client, so the next login re-registers.
+    await this.sessionInfoManager.clear(sessionId);
   };
 
   handleIncomingRedirect = async (
