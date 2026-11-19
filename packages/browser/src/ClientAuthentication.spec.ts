@@ -43,6 +43,7 @@ import {
   mockSessionInfoManager,
   SessionCreatorCreateResponse,
 } from "./sessionInfo/__mocks__/SessionInfoManager";
+import type { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 
@@ -385,6 +386,49 @@ describe("ClientAuthentication", () => {
       await expect(() => clientAuthn.getAllSessionInfo()).rejects.toThrow(
         "Not implemented",
       );
+    });
+  });
+
+  describe("clearClientRegistrationInfo", () => {
+    it("only discards the client registration when the session info manager supports it", async () => {
+      const sessionInfoManager = mockSessionInfoManager(
+        mockStorageUtility({}),
+      ) as SessionInfoManager;
+      const clearRegistrationSpy = jest
+        .spyOn(sessionInfoManager, "clearClientRegistrationInfo")
+        .mockResolvedValueOnce();
+      const clearSpy = jest.spyOn(sessionInfoManager, "clear");
+      const clientAuthn = getClientAuthentication({ sessionInfoManager });
+
+      await clientAuthn.clearClientRegistrationInfo("mySession");
+
+      expect(clearRegistrationSpy).toHaveBeenCalledWith("mySession");
+      expect(clearSpy).not.toHaveBeenCalled();
+    });
+
+    it("clears the whole session when the session info manager cannot discard the client registration alone", async () => {
+      const baseManager = mockSessionInfoManager(mockStorageUtility({}));
+      const clear = jest
+        .fn<SolidClientAuthnCore.ISessionInfoManager["clear"]>()
+        .mockResolvedValue();
+      // Plain object exposing only the ISessionInfoManager interface.
+      const sessionInfoManager: SolidClientAuthnCore.ISessionInfoManager = {
+        update: baseManager.update.bind(baseManager),
+        set: baseManager.set.bind(baseManager),
+        get: baseManager.get.bind(baseManager),
+        getAll: baseManager.getAll.bind(baseManager),
+        register: baseManager.register.bind(baseManager),
+        getRegisteredSessionIdAll:
+          baseManager.getRegisteredSessionIdAll.bind(baseManager),
+        clear,
+        clearAll: baseManager.clearAll.bind(baseManager),
+        setOidcContext: baseManager.setOidcContext.bind(baseManager),
+      };
+      const clientAuthn = getClientAuthentication({ sessionInfoManager });
+
+      await clientAuthn.clearClientRegistrationInfo("mySession");
+
+      expect(clear).toHaveBeenCalledWith("mySession");
     });
   });
 
