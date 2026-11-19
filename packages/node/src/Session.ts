@@ -385,7 +385,21 @@ export class Session implements IHasSessionEventListener {
       this.lastTimeoutHandle = timeoutHandle;
     });
 
-    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.LOGIN, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
+    );
+    this.events.on(EVENTS.LOGOUT, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
+    );
+    this.events.on(EVENTS.ERROR, () => {
+      // Only signal a status change if the error actually logged the session out.
+      const wasLoggedIn = this.info.isLoggedIn;
+      return this.internalLogout(false).then(() => {
+        if (wasLoggedIn) {
+          (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
+        }
+      });
+    });
     this.events.on(EVENTS.SESSION_EXPIRED, () => {
       if (
         this.info.expirationDate !== undefined &&
@@ -393,6 +407,8 @@ export class Session implements IHasSessionEventListener {
       ) {
         // There is a race condition on the expiration event. If another callback was called first
         // and refreshed the session, we do not want to override the logged in status.
+        // Note that SESSION_STATUS_CHANGE is intentionally not emitted on expiration:
+        // it is emitted on the subsequent logout.
         this.expire();
       }
     });

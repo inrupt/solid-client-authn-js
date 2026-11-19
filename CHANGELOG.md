@@ -16,6 +16,11 @@ The following changes have been implemented but not released yet:
 - DPoP proofs sent along with an access token to a protected resource now include
   the `ath` claim (hash of the access token), as required by [RFC 9449](https://www.rfc-editor.org/rfc/rfc9449.html#section-4.2).
   To support this, `createDpopHeader` accepts an optional `accessToken` parameter.
+- New `EVENTS.SESSION_STATUS_CHANGE` event, emitted on session status changes:
+  - login,
+  - logout (including on error or session expiration)
+  - silent session restore (browser-only).
+    Register a listener with `session.events.on(EVENTS.SESSION_STATUS_CHANGE, callback)`.
 
 ### Bugfixes
 
