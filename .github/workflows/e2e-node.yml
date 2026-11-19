@@ -3,8 +3,7 @@ name: End-to-end node tests
 on:
   push:
     # Merge queue branches are covered by the merge_group trigger. Running on both
-    # events makes the two runs cancel each other (same concurrency group), which
-    # fails the required `check` and kicks entries out of the queue.
+    # events makes the two runs cancel each other.
     branches-ignore:
       - "gh-readonly-queue/**"
   workflow_dispatch:
