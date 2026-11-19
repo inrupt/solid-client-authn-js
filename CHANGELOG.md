@@ -20,7 +20,7 @@ The following changes have been implemented but not released yet:
   - login,
   - logout (including on error or session expiration)
   - silent session restore (browser-only).
-  Register a listener with `session.events.on(EVENTS.SESSION_STATUS_CHANGE, callback)`.
+    Register a listener with `session.events.on(EVENTS.SESSION_STATUS_CHANGE, callback)`.
 
 ### Patch changes
 
