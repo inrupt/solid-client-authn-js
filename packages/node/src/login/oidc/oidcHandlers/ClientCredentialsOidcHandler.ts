@@ -46,9 +46,6 @@ import {
   buildClientConfiguration,
   buildDpopHandle,
 } from "../clientConfiguration";
-import { negotiateClientSigningAlg } from "../ClientRegistrar";
-
-// Camelcase identifiers are required in the OIDC specification.
 
 /**
  * @hidden
@@ -68,18 +65,15 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    const { issuerConfiguration } = oidcLoginOptions;
-    const config = buildClientConfiguration(issuerConfiguration, {
-      clientId: oidcLoginOptions.client.clientId,
-      clientSecret: oidcLoginOptions.client.clientSecret,
-      // openid-client validates the ID Token (if any) claims, and expects it
-      // to be signed using RS256 unless specified otherwise.
-      idTokenSignedResponseAlg: Array.isArray(
-        issuerConfiguration.idTokenSigningAlgValuesSupported,
-      )
-        ? negotiateClientSigningAlg(issuerConfiguration, PREFERRED_SIGNING_ALG)
-        : undefined,
-    });
+    // openid-client validates the ID Token (if any) claims, and expects it to
+    // be signed using an algorithm advertised by the issuer (or RS256).
+    const config = buildClientConfiguration(
+      oidcLoginOptions.issuerConfiguration,
+      {
+        clientId: oidcLoginOptions.client.clientId,
+        clientSecret: oidcLoginOptions.client.clientSecret,
+      },
+    );
 
     let dpopKey: KeyPair | undefined;
 

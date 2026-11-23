@@ -48,7 +48,8 @@ import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
  * @param issuerConfig the OpenID Provider configuration.
  * @param client the client identifier, its (optional) secret, and the
  * algorithm the OpenID Provider is expected to use to sign ID Tokens. If no
- * algorithm is provided, openid-client defaults to RS256.
+ * algorithm is provided, openid-client accepts any algorithm listed in the
+ * issuer's `id_token_signing_alg_values_supported`, and defaults to RS256.
  * @returns an openid-client configuration.
  * @hidden
  */

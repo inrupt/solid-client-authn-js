@@ -48,8 +48,6 @@ import {
   buildDpopHandle,
 } from "../clientConfiguration";
 
-// Camelcase identifiers are required in the OIDC specification.
-
 // openid-client normalizes the token type to lower case.
 const TOKEN_TYPES: Record<string, "Bearer" | "DPoP"> = {
   bearer: "Bearer",

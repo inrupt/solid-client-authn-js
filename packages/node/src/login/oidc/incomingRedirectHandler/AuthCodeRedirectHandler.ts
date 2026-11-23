@@ -54,8 +54,6 @@ import {
   buildDpopHandle,
 } from "../clientConfiguration";
 
-// Camelcase identifiers are required in the OIDC specification.
-
 /**
  * @hidden
  * Token endpoint request: https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint
