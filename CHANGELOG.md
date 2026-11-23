@@ -14,19 +14,18 @@ The following changes have been implemented but not released yet:
 #### node
 
 - `openid-client` has been upgraded from v5 to v6. This brings the following changes in behavior:
-  - Redirect URLs including a query string are no longer supported for the authorization code
-    flow: `openid-client` v6 derives the `redirect_uri` of the token request by removing the whole
-    query string from the URL the user is redirected to, so it no longer matches the registered
-    redirect URL.
   - Plain HTTP is only supported for Identity Providers running on a loopback host (`localhost`,
-    `127.0.0.1`, `[::1]` or a `*.localhost` subdomain). Any other Identity Provider must use HTTPS.
+    `127.0.0.1`, `[::1]` or a `*.localhost` subdomain). For any other Identity Provider, the
+    discovery, token and registration endpoints must use HTTPS, and redirects are not followed
+    when fetching the Identity Provider configuration.
   - The issuer identifier in the Identity Provider configuration must match the issuer used to
     log in (a trailing slash difference is tolerated).
   - If the Identity Provider includes an `iss` parameter when redirecting the user back to the
     application ([RFC 9207](https://www.rfc-editor.org/rfc/rfc9207.html)), it must match the
     issuer, otherwise the login fails.
   - The `openid-client` HTTP options defaults (set via `custom.setHttpOptionsDefaults`) no longer
-    apply to requests issued by this library.
+    apply to requests issued by this library. Requests to the Identity Provider now time out after
+    30 seconds.
 
 ### New features
 
