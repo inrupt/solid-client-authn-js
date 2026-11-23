@@ -25,7 +25,7 @@
 
 import type { IIssuerConfig, KeyPair } from "@inrupt/solid-client-authn-core";
 import { PREFERRED_SIGNING_ALG } from "@inrupt/solid-client-authn-core";
-import type { DPoPHandle } from "openid-client";
+import type { CustomFetch, DPoPHandle } from "openid-client";
 import {
   allowInsecureRequests,
   ClientSecretBasic,
@@ -102,4 +102,30 @@ export async function buildDpopHandle(
     privateKey: dpopKey.privateKey,
     publicKey,
   });
+}
+
+/**
+ * Builds an openid-client custom fetch function which sets the redirect_uri
+ * parameter of authorization code token requests.
+ *
+ * openid-client derives the redirect_uri parameter by removing the whole query
+ * string from the URL the user is redirected to, but query parameters are
+ * allowed in redirect URIs. See the openid-client `customFetch` documentation.
+ *
+ * @param redirectUri the redirect URI used in the authorization request.
+ * @returns a custom fetch function for openid-client.
+ * @hidden
+ */
+export function fetchWithRedirectUri(redirectUri: string): CustomFetch {
+  return (url, options) => {
+    if (
+      options.body instanceof URLSearchParams &&
+      options.body.get("grant_type") === "authorization_code"
+    ) {
+      options.body.set("redirect_uri", redirectUri);
+    }
+    // openid-client's body type is compatible with fetch, but its typings
+    // differ across TypeScript lib versions.
+    return fetch(url, options as RequestInit);
+  };
 }

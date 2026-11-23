@@ -33,9 +33,12 @@ import type {
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
 import type { ServerMetadata } from "openid-client";
+import { allowInsecureRequests, discovery } from "openid-client";
 import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
 
 const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
+// openid-client requires a client ID for discovery, but it is not used.
+const DISCOVERY_CLIENT_ID = "solid-client-authn-node-discovery";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -165,31 +168,39 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
         `The issuer [${issuer}] must use HTTPS. Plain HTTP is only supported for loopback hosts.`,
       );
     }
-    // Discovery is done without openid-client, because its discovery requires
-    // client information, which isn't known yet at this point.
     const discoveryUrl = new URL(
       WELL_KNOWN_OPENID_CONFIG,
       issuer.endsWith("/") ? issuer : `${issuer}/`,
     );
-    const response = await fetch(discoveryUrl, {
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) {
-      throw new ConfigurationError(
-        `Fetching the configuration of issuer [${issuer}] at [${discoveryUrl.href}] failed: ${response.status} ${response.statusText}`,
-      );
-    }
     let metadata: ServerMetadata;
     try {
-      metadata = (await response.json()) as ServerMetadata;
+      // openid-client applies its HTTPS, redirects, timeout and response
+      // validation policies to the discovery request. The client ID is
+      // irrelevant, as only the issuer metadata is used. The discovery
+      // document URL is provided directly, so that openid-client doesn't
+      // apply its strict issuer validation, which is done below instead.
+      const config = await discovery(
+        discoveryUrl,
+        DISCOVERY_CLIENT_ID,
+        undefined,
+        undefined,
+        {
+          execute: isLoopbackHttpUrl(issuerUrl)
+            ? [allowInsecureRequests]
+            : undefined,
+        },
+      );
+      metadata = config.serverMetadata();
     } catch (e) {
+      // Only the error message is included, as its cause may contain parts of
+      // the response body.
       throw new ConfigurationError(
-        `The configuration of issuer [${issuer}] at [${discoveryUrl.href}] is not valid JSON: ${(e as Error).toString()}`,
+        `Fetching the configuration of issuer [${issuer}] at [${discoveryUrl.href}] failed: ${(e as Error).message}`,
       );
     }
     // See https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation
     // Trailing slash differences are tolerated, as they are common in the wild.
-    if (metadata.issuer?.replace(/\/$/, "") !== issuer.replace(/\/$/, "")) {
+    if (metadata.issuer.replace(/\/$/, "") !== issuer.replace(/\/$/, "")) {
       throw new ConfigurationError(
         `The issuer identifier [${metadata.issuer}] in the configuration fetched from [${discoveryUrl.href}] does not match the expected issuer [${issuer}].`,
       );

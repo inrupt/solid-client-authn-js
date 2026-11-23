@@ -44,14 +44,16 @@ import {
   buildAuthenticatedFetch,
   EVENTS,
   maybeBuildRpInitiatedLogout,
+  removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
 
 import { URL } from "url";
-import { authorizationCodeGrant } from "openid-client";
+import { authorizationCodeGrant, customFetch } from "openid-client";
 import type { EventEmitter } from "node:events";
 import {
   buildClientConfiguration,
   buildDpopHandle,
+  fetchWithRedirectUri,
 } from "../clientConfiguration";
 
 /**
@@ -130,14 +132,19 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       oidcContext.issuerConfig,
     );
     const config = buildClientConfiguration(issuerConfig, clientInfo);
+    // Query parameters are allowed in redirect URIs (RFC 6749, section 3.1.2),
+    // but openid-client removes them from the redirect_uri token request
+    // parameter. Only the parameters added by the OpenID Provider (and the
+    // fragment, which isn't allowed) are removed instead.
+    const redirectUrl = removeOpenIdParams(inputRedirectUrl);
+    redirectUrl.hash = "";
+    config[customFetch] = fetchWithRedirectUri(redirectUrl.href);
 
     let dpopKey: KeyPair | undefined;
 
     if (oidcContext.dpop) {
       dpopKey = await generateDpopKeyPair(true);
     }
-    // Note that openid-client derives the redirect_uri parameter of the token
-    // request by removing the whole query string from the URL it is redirected to.
     const tokenSet = await authorizationCodeGrant(
       config,
       url,
