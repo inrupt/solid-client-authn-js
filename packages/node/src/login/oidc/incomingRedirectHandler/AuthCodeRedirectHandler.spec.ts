@@ -18,29 +18,29 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import {
   StorageUtilityMock,
   mockStorageUtility,
   EVENTS,
+  getWebidFromTokenPayload,
 } from "@inrupt/solid-client-authn-core";
-import type { IdTokenClaims, TokenSet, BaseClient } from "openid-client";
-import type { JWK } from "jose";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
 import { mockSessionInfoManager } from "../../../sessionInfo/__mocks__/SessionInfoManager";
 import {
   mockIssuerConfigFetcher,
   mockDefaultIssuerConfig,
+  mockIssuerConfig,
 } from "../__mocks__/IssuerConfigFetcher";
-import { mockDefaultClientRegistrar } from "../__mocks__/ClientRegistrar";
+import {
+  mockDefaultClient,
+  mockDefaultClientRegistrar,
+} from "../__mocks__/ClientRegistrar";
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
-
-jest.mock("openid-client");
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -48,7 +48,8 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   ) as any;
   return {
     ...actualCoreModule,
-    // This works around the network lookup to the JWKS in order to validate the ID token.
+    // This works around the network lookup to the JWKS in order to validate
+    // the ID token signature (openid-client only validates the claims).
     getWebidFromTokenPayload: jest.fn(() =>
       Promise.resolve({ webId: "https://my.webid/", clientId: "some client" }),
     ),
@@ -57,80 +58,95 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
 jest.useFakeTimers();
 const DEFAULT_EXPIRATION_TIME_SECONDS = 300;
 
-const mockJwk = (): JWK => {
-  return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
-};
-
 const mockWebId = (): string => "https://my.webid/";
 
-const mockIdTokenPayload = (): IdTokenClaims => {
-  return {
-    sub: "https://my.webid",
-    iss: "https://my.idp/",
-    aud: "https://resource.example.org",
-    exp: 1662266216,
-    iat: 1462266216,
-  };
-};
-// The key is the one returned by mockJwk(), and the payload is mockIdTokenPayload()
-const mockIdToken = (): string =>
-  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw";
+const base64UrlJson = (value: unknown): string =>
+  Buffer.from(JSON.stringify(value)).toString("base64url");
 
-type AccessJwt = {
-  sub: string;
-  iss: string;
-  aud: string;
-  nbf: number;
-  exp: number;
-  cnf: {
-    jkt: string;
-  };
-};
-
-const mockKeyBoundToken = async (): Promise<AccessJwt> => {
-  return {
-    sub: mockWebId(),
-    iss: mockDefaultIssuerConfig().issuer.toString(),
-    aud: "https://resource.example.org",
-    nbf: 1562262611,
-    exp: 1562266216,
-    cnf: {
-      jkt: mockJwk().kid as string,
-    },
-  };
+// openid-client validates the ID token claims and its header algorithm, but
+// not its signature, so a dummy signature is sufficient here.
+const mockIdToken = (
+  claims: Record<string, unknown> = {},
+  alg = "RS256",
+): string => {
+  const now = Math.trunc(Date.now() / 1000);
+  return [
+    base64UrlJson({ alg, typ: "JWT" }),
+    base64UrlJson({
+      sub: mockWebId(),
+      iss: mockDefaultIssuerConfig().issuer,
+      aud: mockDefaultClient().clientId,
+      iat: now,
+      exp: now + DEFAULT_EXPIRATION_TIME_SECONDS,
+      ...claims,
+    }),
+    "c2lnbmF0dXJl",
+  ].join(".");
 };
 
 const mockBearerAccessToken = (): string => "some token";
+const mockDpopAccessToken = (): string => "some DPoP-bound token";
 
-const mockBearerTokens = (): TokenSet => {
+type TokenResponse = {
+  access_token?: string;
+  id_token?: string;
+  token_type: string;
+  expires_in?: number;
+  refresh_token?: string;
+};
+
+const mockBearerTokens = (): TokenResponse => ({
+  access_token: mockBearerAccessToken(),
+  id_token: mockIdToken(),
+  token_type: "Bearer",
+  expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
+});
+
+const mockDpopTokens = (): TokenResponse => ({
+  access_token: mockDpopAccessToken(),
+  id_token: mockIdToken(),
+  token_type: "DPoP",
+  expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
+});
+
+const mockTokenEndpointResponse = (
+  body: Record<string, unknown>,
+  status = 200,
+): Response =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+
+const mockFetch = () => jest.spyOn(globalThis, "fetch");
+
+/**
+ * Mocks the token endpoint response, and returns the fetch spy.
+ */
+const setupTokenEndpoint = (tokens: TokenResponse = mockDpopTokens()) => {
+  const fetchSpy = mockFetch();
+  fetchSpy.mockResolvedValueOnce(mockTokenEndpointResponse(tokens));
+  return fetchSpy;
+};
+
+const getTokenRequest = (fetchSpy: ReturnType<typeof mockFetch>) => {
+  const tokenCall = fetchSpy.mock.calls.find(
+    ([url]) => url.toString() === mockDefaultIssuerConfig().tokenEndpoint,
+  );
+  if (tokenCall === undefined) {
+    throw new Error("No request was sent to the token endpoint");
+  }
+  const [url, init] = tokenCall;
   return {
-    access_token: mockBearerAccessToken(),
-    id_token: mockIdToken(),
-    token_type: "Bearer",
-    expired: () => false,
-    claims: mockIdTokenPayload,
-    expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
+    url: url.toString(),
+    method: init?.method,
+    headers: new Headers(init?.headers),
+    body: new URLSearchParams(init?.body as URLSearchParams),
   };
 };
 
-const mockDpopTokens = (): TokenSet => {
-  return {
-    access_token: JSON.stringify(mockKeyBoundToken()),
-    id_token: mockIdToken(),
-    token_type: "DPoP",
-    expired: () => false,
-    claims: mockIdTokenPayload,
-    expires_in: DEFAULT_EXPIRATION_TIME_SECONDS,
-  };
-};
+const formUrlEncode = (value: string) =>
+  encodeURIComponent(value).replace(/%20/g, "+");
 
 const defaultMocks = {
   storageUtility: StorageUtilityMock,
@@ -153,6 +169,11 @@ function getAuthCodeRedirectHandler(
 }
 
 describe("AuthCodeRedirectHandler", () => {
+  beforeEach(() => {
+    // Restores the global fetch spied upon by previous tests.
+    jest.restoreAllMocks();
+  });
+
   describe("canHandler", () => {
     it("Accepts a valid url with the correct query", async () => {
       const authCodeRedirectHandler = getAuthCodeRedirectHandler();
@@ -214,31 +235,15 @@ describe("AuthCodeRedirectHandler", () => {
       },
     });
 
-  const setupOidcClientMock = (tokenSet?: TokenSet, callback?: unknown) => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuer = {
-      metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
-      Client: jest.fn().mockReturnValue({
-        callbackParams: jest.fn().mockReturnValue({
-          code: "someCode",
-          state: "someState",
-        }),
-        callback:
-          callback ??
-          jest
-            .fn<BaseClient["callback"]>()
-            .mockResolvedValue(tokenSet ?? mockDpopTokens()),
-        metadata: {
-          client_id: "https://some.client#id",
-        },
-      }),
-    };
-    Issuer.mockReturnValueOnce(mockedIssuer);
-    return mockedIssuer;
-  };
-
-  const setupDefaultOidcClientMock = () =>
-    setupOidcClientMock(mockDpopTokens());
+  const getDefaultHandler = (
+    mocks: Partial<typeof defaultMocks> = {},
+    storage = mockDefaultRedirectStorage(),
+  ) =>
+    getAuthCodeRedirectHandler({
+      storageUtility: storage,
+      sessionInfoManager: mockSessionInfoManager(storage),
+      ...mocks,
+    });
 
   describe("handle", () => {
     it("throws on non-redirect URL", async () => {
@@ -251,13 +256,8 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("sets the correct session information", async () => {
-      setupDefaultOidcClientMock();
-      const mockedStorage = mockDefaultRedirectStorage();
-
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
+      setupTokenEndpoint();
+      const authCodeRedirectHandler = getDefaultHandler();
 
       const result = await authCodeRedirectHandler.handle(
         "https://my.app/redirect?code=someCode&state=someState",
@@ -267,23 +267,76 @@ describe("AuthCodeRedirectHandler", () => {
       expect(result.sessionId).toBe("mySession");
       expect(result.isLoggedIn).toBe(true);
       expect(result.webId).toEqual(mockWebId());
+      // The expiration date is expressed in milliseconds since epoch.
       expect(result.expirationDate).toEqual(
         Date.now() + DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
       );
     });
 
-    it("properly performs DPoP token exchange", async () => {
-      setupDefaultOidcClientMock();
-      const mockedStorage = mockDefaultRedirectStorage();
+    it("does not set an expiration date if the IdP does not return expires_in", async () => {
+      const tokens = mockDpopTokens();
+      delete tokens.expires_in;
+      setupTokenEndpoint(tokens);
+      const mockEmitter = new EventEmitter();
+      const mockEmit = jest.spyOn(mockEmitter, "emit");
 
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      const result = await getDefaultHandler().handle(
+        "https://my.app/redirect?code=someCode&state=someState",
+        mockEmitter,
+      );
+
+      expect(result.expirationDate).toBeUndefined();
+      expect(mockEmit).toHaveBeenCalledWith(
+        EVENTS.NEW_TOKENS,
+        expect.objectContaining({ expiresAt: undefined }),
+      );
+    });
+
+    it("validates the ID token signature using the issuer JWKS", async () => {
+      setupTokenEndpoint();
+
+      await getDefaultHandler().handle(
+        "https://my.app/redirect?code=someCode&state=someState",
+      );
+
+      expect(getWebidFromTokenPayload).toHaveBeenCalledWith(
+        mockIdToken(),
+        mockDefaultIssuerConfig().jwksUri,
+        mockDefaultIssuerConfig().issuer,
+        mockDefaultClient().clientId,
+      );
+    });
+
+    it("throws if the issuer configuration has no JWKS URI", async () => {
+      const fetchSpy = setupTokenEndpoint();
+      const authCodeRedirectHandler = getDefaultHandler({
+        issuerConfigFetcher: mockIssuerConfigFetcher(
+          mockIssuerConfig({ jwksUri: undefined }),
+        ),
       });
+
+      await expect(
+        authCodeRedirectHandler.handle(
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
+      ).rejects.toThrow(
+        "JWKS URI is missing from issuer configuration, cannot validate tokens",
+      );
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it("properly performs DPoP token exchange", async () => {
+      const fetchSpy = setupTokenEndpoint();
+      const mockedStorage = mockDefaultRedirectStorage();
+      const authCodeRedirectHandler = getDefaultHandler({}, mockedStorage);
 
       const result = await authCodeRedirectHandler.handle(
         "https://my.app/redirect?code=someCode&state=someState",
       );
+
+      // The token request is DPoP-bound.
+      const tokenRequest = getTokenRequest(fetchSpy);
+      expect(tokenRequest.headers.get("DPoP")).toEqual(expect.any(String));
 
       // Check that the session information is stored in the provided storage
       await expect(
@@ -294,24 +347,52 @@ describe("AuthCodeRedirectHandler", () => {
       ).resolves.toBe("true");
 
       // Check that the returned fetch function is authenticated
-      const mockedFetch = jest.spyOn(globalThis, "fetch");
-      mockedFetch.mockResolvedValueOnce(new Response());
+      fetchSpy.mockResolvedValueOnce(new Response());
       await result.fetch("https://some.url");
-      const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
-      expect(headers.get("Authorization")).toContain("DPoP");
+      const headers = new Headers(fetchSpy.mock.calls.at(-1)?.[1]?.headers);
+      expect(headers.get("Authorization")).toBe(
+        `DPoP ${mockDpopAccessToken()}`,
+      );
+      expect(headers.get("DPoP")).toEqual(expect.any(String));
+    });
+
+    it("sends the expected token request, authenticating confidential clients with HTTP Basic", async () => {
+      const fetchSpy = setupTokenEndpoint();
+
+      await getDefaultHandler().handle(
+        "https://my.app/redirect?code=someCode&state=someState",
+      );
+
+      const tokenRequest = getTokenRequest(fetchSpy);
+      expect(tokenRequest.method).toBe("POST");
+      expect(tokenRequest.body.get("grant_type")).toBe("authorization_code");
+      expect(tokenRequest.body.get("code")).toBe("someCode");
+      // The code verifier comes from the mocked storage.
+      expect(tokenRequest.body.get("code_verifier")).toBe("some code verifier");
+      expect(tokenRequest.body.get("redirect_uri")).toBe(
+        "https://my.app/redirect",
+      );
+      const { clientId, clientSecret } = mockDefaultClient();
+      expect(tokenRequest.headers.get("Authorization")).toBe(
+        `Basic ${Buffer.from(
+          `${formUrlEncode(clientId)}:${formUrlEncode(clientSecret as string)}`,
+        ).toString("base64")}`,
+      );
+      expect(tokenRequest.body.get("client_secret")).toBeNull();
     });
 
     it("uses 'none' client authentication if using Solid-OIDC client identifiers", async () => {
-      const mockedIssuer = setupDefaultOidcClientMock();
-      const mockedStorage = mockDefaultRedirectStorage();
+      const clientId = "https://some.client.identifier";
+      const fetchSpy = setupTokenEndpoint({
+        ...mockDpopTokens(),
+        id_token: mockIdToken({ aud: clientId }),
+      });
 
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      const authCodeRedirectHandler = getDefaultHandler({
         clientRegistrar: {
           getClient: async () => {
             return {
-              clientId: "https://some.client.identifier",
+              clientId,
               clientType: "solid-oidc",
             };
           },
@@ -322,77 +403,154 @@ describe("AuthCodeRedirectHandler", () => {
         "https://my.app/redirect?code=someCode&state=someState",
       );
 
-      expect(mockedIssuer.Client).toHaveBeenCalledWith(
-        expect.objectContaining({
-          token_endpoint_auth_method: "none",
-        }),
-      );
+      const tokenRequest = getTokenRequest(fetchSpy);
+      expect(tokenRequest.headers.get("Authorization")).toBeNull();
+      expect(tokenRequest.body.get("client_id")).toBe(clientId);
+      expect(tokenRequest.body.get("client_secret")).toBeNull();
+    });
+
+    it("rejects ID tokens not signed with the client's expected algorithm", async () => {
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        id_token: mockIdToken({}, "ES256"),
+      });
+
+      await expect(
+        getDefaultHandler({
+          clientRegistrar: {
+            getClient: async () => ({
+              ...mockDefaultClient(),
+              idTokenSignedResponseAlg: "RS256",
+            }),
+          },
+        }).handle("https://my.app/redirect?code=someCode&state=someState"),
+      ).rejects.toThrow();
+      expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
+    });
+
+    it("accepts ID tokens signed with the client's expected algorithm", async () => {
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        id_token: mockIdToken({}, "ES256"),
+      });
+
+      await expect(
+        getDefaultHandler({
+          clientRegistrar: {
+            getClient: async () => ({
+              ...mockDefaultClient(),
+              idTokenSignedResponseAlg: "ES256",
+            }),
+          },
+        }).handle("https://my.app/redirect?code=someCode&state=someState"),
+      ).resolves.toBeDefined();
+    });
+
+    it("rejects ID tokens signed with an algorithm the issuer does not support if the client has no expected algorithm", async () => {
+      // The default issuer configuration supports ES256 and RS256.
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        id_token: mockIdToken({}, "PS256"),
+      });
+
+      await expect(
+        getDefaultHandler().handle(
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
+      ).rejects.toThrow();
+      expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
+    });
+
+    it("throws if the ID token audience does not include the client ID", async () => {
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        id_token: mockIdToken({ aud: "https://some.other.client" }),
+      });
+
+      await expect(
+        getDefaultHandler().handle(
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
+      ).rejects.toThrow();
+      expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
+    });
+
+    it("throws if the ID token issuer does not match the issuer", async () => {
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        id_token: mockIdToken({ iss: "https://some.other.idp/" }),
+      });
+
+      await expect(
+        getDefaultHandler().handle(
+          "https://my.app/redirect?code=someCode&state=someState",
+        ),
+      ).rejects.toThrow();
+      expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
     });
 
     it("properly performs Bearer token exchange", async () => {
-      setupOidcClientMock(mockBearerTokens());
+      const fetchSpy = setupTokenEndpoint(mockBearerTokens());
       const mockedStorage = mockDefaultRedirectStorage();
       await mockedStorage.setForUser("mySession", {
         dpop: "false",
       });
 
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      const result = await authCodeRedirectHandler.handle(
+      const result = await getDefaultHandler({}, mockedStorage).handle(
         "https://my.app/redirect?code=someCode&state=someState",
       );
 
+      // The token request is not DPoP-bound.
+      expect(getTokenRequest(fetchSpy).headers.get("DPoP")).toBeNull();
+
       // Check that the returned fetch function is authenticated
-      const mockedFetch = jest.spyOn(globalThis, "fetch");
-      mockedFetch.mockResolvedValueOnce(new Response());
+      fetchSpy.mockResolvedValueOnce(new Response());
       await result.fetch("https://some.url");
-      const headers = new Headers(mockedFetch.mock.calls[0][1]?.headers);
-      expect(headers.get("Authorization")).toContain("Bearer");
+      const headers = new Headers(fetchSpy.mock.calls.at(-1)?.[1]?.headers);
+      expect(headers.get("Authorization")).toBe(
+        `Bearer ${mockBearerAccessToken()}`,
+      );
     });
 
     it("cleans up the redirect IRI from the OIDC parameters", async () => {
-      // This function represents the openid-client callback
-      const callback = (jest.fn() as any).mockResolvedValueOnce(
-        mockDpopTokens(),
-      );
-      setupOidcClientMock(undefined, callback);
-      const mockedStorage = mockDefaultRedirectStorage();
+      const fetchSpy = setupTokenEndpoint();
 
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await authCodeRedirectHandler.handle(
-        "https://my.app/redirect?code=someCode&state=someState&iss=https://example.org/issuer",
+      await getDefaultHandler().handle(
+        `https://my.app/redirect?code=someCode&state=someState&iss=${encodeURIComponent(
+          mockDefaultIssuerConfig().issuer,
+        )}`,
       );
 
-      expect(callback).toHaveBeenCalledWith(
+      const tokenRequest = getTokenRequest(fetchSpy);
+      expect(tokenRequest.body.get("redirect_uri")).toBe(
         "https://my.app/redirect",
-        { code: "someCode", state: "someState" },
-        // The code verifier comes from the mocked storage.
-        { code_verifier: "some code verifier", state: "someState" },
-        expect.anything(),
+      );
+      expect(tokenRequest.body.get("code")).toBe("someCode");
+      expect(tokenRequest.body.get("code_verifier")).toBe("some code verifier");
+    });
+
+    it("removes the whole query string and hash from the redirect IRI", async () => {
+      // This is a known behaviour of openid-client v6: redirect URLs
+      // including a query string are not supported.
+      const fetchSpy = setupTokenEndpoint();
+
+      await getDefaultHandler().handle(
+        "https://my.app/redirect?someParam=someValue&code=someCode&state=someState#someHash",
+      );
+
+      expect(getTokenRequest(fetchSpy).body.get("redirect_uri")).toBe(
+        "https://my.app/redirect",
       );
     });
 
     it("stores the refresh token if one is returned", async () => {
-      const mockedTokens = mockDpopTokens();
-      mockedTokens.refresh_token = "some refresh token";
-      setupOidcClientMock(mockedTokens);
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        refresh_token: "some refresh token",
+      });
       const mockedStorage = mockDefaultRedirectStorage();
 
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await authCodeRedirectHandler.handle(
+      await getDefaultHandler({}, mockedStorage).handle(
         "https://my.app/redirect?code=someCode&state=someState",
       );
 
@@ -403,18 +561,13 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("stores the DPoP key pair if the refresh token is DPoP-bound", async () => {
-      const mockedTokens = mockDpopTokens();
-      mockedTokens.refresh_token = "some refresh token";
-      setupOidcClientMock(mockedTokens);
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        refresh_token: "some refresh token",
+      });
       const mockedStorage = mockDefaultRedirectStorage();
 
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await authCodeRedirectHandler.handle(
+      await getDefaultHandler({}, mockedStorage).handle(
         "https://my.app/redirect?code=someCode&state=someState",
       );
 
@@ -428,20 +581,14 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("calls the refresh token handler if one is provided", async () => {
-      const mockedTokens = mockDpopTokens();
-      mockedTokens.refresh_token = "some refresh token";
-      setupOidcClientMock(mockedTokens);
-      const mockedStorage = mockDefaultRedirectStorage();
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        refresh_token: "some refresh token",
+      });
       const mockEmitter = new EventEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
 
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await authCodeRedirectHandler.handle(
+      await getDefaultHandler().handle(
         "https://my.app/redirect?code=someCode&state=someState",
         mockEmitter,
       );
@@ -452,21 +599,66 @@ describe("AuthCodeRedirectHandler", () => {
       );
     });
 
-    it("calls the token set handler if one is provided", async () => {
-      const mockedTokens = mockDpopTokens();
-      mockedTokens.refresh_token = "some refresh token";
-      setupOidcClientMock(mockedTokens);
+    it("sets up refreshing the tokens if keepAlive is enabled", async () => {
+      const fetchSpy = setupTokenEndpoint({
+        ...mockDpopTokens(),
+        refresh_token: "some refresh token",
+      });
       const mockedStorage = mockDefaultRedirectStorage();
+      await mockedStorage.setForUser("mySession", { keepAlive: "true" });
+      const tokenRefresher = mockDefaultTokenRefresher();
+
+      await getDefaultHandler({ tokenRefresher }, mockedStorage).handle(
+        "https://my.app/redirect?code=someCode&state=someState",
+        new EventEmitter(),
+      );
+      // The refresh is scheduled shortly before the access token expires.
+      await jest.advanceTimersByTimeAsync(
+        DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
+      );
+
+      expect(tokenRefresher.refresh).toHaveBeenCalledWith(
+        "mySession",
+        "some refresh token",
+        // The refresh is DPoP-bound to the same key as the initial tokens.
+        expect.objectContaining({
+          privateKey: expect.anything(),
+          publicKey: expect.anything(),
+        }),
+      );
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not refresh the tokens if keepAlive is disabled", async () => {
+      setupTokenEndpoint({
+        ...mockDpopTokens(),
+        refresh_token: "some refresh token",
+      });
+      const mockedStorage = mockDefaultRedirectStorage();
+      await mockedStorage.setForUser("mySession", { keepAlive: "false" });
+      const tokenRefresher = mockDefaultTokenRefresher();
+
+      await getDefaultHandler({ tokenRefresher }, mockedStorage).handle(
+        "https://my.app/redirect?code=someCode&state=someState",
+        new EventEmitter(),
+      );
+      await jest.advanceTimersByTimeAsync(
+        DEFAULT_EXPIRATION_TIME_SECONDS * 1000,
+      );
+
+      expect(tokenRefresher.refresh).not.toHaveBeenCalled();
+    });
+
+    it("calls the token set handler if one is provided", async () => {
+      const mockedTokens = {
+        ...mockDpopTokens(),
+        refresh_token: "some refresh token",
+      };
+      setupTokenEndpoint(mockedTokens);
       const mockEmitter = new EventEmitter();
       const mockEmit = jest.spyOn(mockEmitter, "emit");
 
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
-      await authCodeRedirectHandler.handle(
+      await getDefaultHandler().handle(
         "https://my.app/redirect?code=someCode&state=someState",
         mockEmitter,
       );
@@ -478,67 +670,64 @@ describe("AuthCodeRedirectHandler", () => {
           idToken: mockedTokens.id_token,
           refreshToken: mockedTokens.refresh_token,
           webId: "https://my.webid/",
+          // expiresAt is expressed in seconds since epoch.
+          expiresAt:
+            Math.trunc(Date.now() / 1000) + DEFAULT_EXPIRATION_TIME_SECONDS,
           dpopKey: expect.anything(),
+          clientId: mockDefaultClient().clientId,
+          issuer: mockDefaultIssuerConfig().issuer,
         }),
       );
     });
 
     it("throws if the iss parameter does not match stored issuer", async () => {
-      const mockedStorage = mockDefaultRedirectStorage();
-      const mockedTokens = mockDpopTokens();
-      // oidc-client will throw if the iss parameter mismatches.
-      setupOidcClientMock(mockedTokens, () => {
-        throw new Error();
-      });
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
+      const fetchSpy = setupTokenEndpoint();
+
+      // openid-client throws if the iss parameter mismatches.
+      await expect(
+        getDefaultHandler().handle(
+          "https://my.app/redirect?code=someCode&state=someState&iss=someIssuer",
+        ),
+      ).rejects.toThrow();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it("throws if the IdP returns an error", async () => {
+      mockFetch().mockResolvedValueOnce(
+        mockTokenEndpointResponse({ error: "invalid_grant" }, 400),
+      );
 
       await expect(
-        authCodeRedirectHandler.handle(
-          "https://my.app/redirect?code=someCode&state=someState&iss=someIssuer",
+        getDefaultHandler().handle(
+          "https://my.app/redirect?code=someCode&state=someState",
         ),
       ).rejects.toThrow();
     });
 
     it("throws if the IdP does not return an access token", async () => {
-      const mockedTokens = mockDpopTokens();
-      mockedTokens.access_token = undefined;
-      setupOidcClientMock(mockedTokens);
-      const mockedStorage = mockDefaultRedirectStorage();
+      const tokens = mockDpopTokens();
+      delete tokens.access_token;
+      setupTokenEndpoint(tokens);
 
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
-
+      // openid-client rejects token responses without an access token.
       await expect(
-        authCodeRedirectHandler.handle(
+        getDefaultHandler().handle(
           "https://my.app/redirect?code=someCode&state=someState",
         ),
-      ).rejects.toThrow(
-        `The Identity Provider [${
-          mockDefaultIssuerConfig().issuer
-        }] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
-      );
+      ).rejects.toMatchObject({
+        cause: expect.objectContaining({
+          message: expect.stringContaining("access_token"),
+        }),
+      });
     });
 
     it("throws if the IdP does not return an ID token", async () => {
-      const mockedTokens = mockDpopTokens();
-      mockedTokens.id_token = undefined;
-      setupOidcClientMock(mockedTokens);
-      const mockedStorage = mockDefaultRedirectStorage();
-
-      // Run the test
-      const authCodeRedirectHandler = getAuthCodeRedirectHandler({
-        storageUtility: mockedStorage,
-        sessionInfoManager: mockSessionInfoManager(mockedStorage),
-      });
+      const tokens = mockDpopTokens();
+      delete tokens.id_token;
+      setupTokenEndpoint(tokens);
 
       await expect(
-        authCodeRedirectHandler.handle(
+        getDefaultHandler().handle(
           "https://my.app/redirect?code=someCode&state=someState",
         ),
       ).rejects.toThrow(
@@ -549,14 +738,13 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("throws if the Session manager cannot retrieve the session info", async () => {
-      setupDefaultOidcClientMock();
+      setupTokenEndpoint();
       const mockedStorage = mockDefaultRedirectStorage();
       const mockedSessionManager = mockSessionInfoManager(mockedStorage);
       mockedSessionManager.get = jest
         .fn()
         .mockReturnValue(undefined) as typeof mockedSessionManager.get;
 
-      // Run the test
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockedStorage,
         sessionInfoManager: mockedSessionManager,
@@ -572,10 +760,9 @@ describe("AuthCodeRedirectHandler", () => {
     });
 
     it("throws if no session ID matches the request state", async () => {
-      setupDefaultOidcClientMock();
+      const fetchSpy = setupTokenEndpoint();
       const mockedStorage = mockStorageUtility({});
 
-      // Run the test
       const authCodeRedirectHandler = getAuthCodeRedirectHandler({
         storageUtility: mockedStorage,
       });
@@ -587,6 +774,7 @@ describe("AuthCodeRedirectHandler", () => {
       ).rejects.toThrow(
         "No stored session is associated with the state [someState]",
       );
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
   });
 });

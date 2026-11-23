@@ -18,12 +18,18 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import {
+  jest,
+  it,
+  describe,
+  expect,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
 import type { AuthorizationRequestState, SessionTokenSet } from "core";
 import { SignJWT, generateKeyPair, exportJWK } from "jose";
 import { validate } from "uuid";
 import type * as Jose from "jose";
-import type * as OpenIdClient from "openid-client";
 import { Session } from "./Session";
 import { randomUUID } from "crypto";
 
@@ -60,42 +66,6 @@ const mockOpConfig = (
   end_session_endpoint: "https://my.idp/endSessionEndpoint",
 });
 
-const mockOpDiscovery = (config?: Record<string, unknown>) => {
-  const opClientMock = jest.requireMock("openid-client") as jest.Mocked<
-    typeof OpenIdClient
-  >;
-  // We only need the discovery to mock the OP configuration.
-  opClientMock.Issuer.discover.mockResolvedValue({
-    metadata: config ?? mockOpConfig(),
-  } as any);
-};
-
-// FIXME: When openid-client has been migrated to 6.x.y, it will use fetch,
-// so the global fetch can be mocked for the token request and the following
-// mocks can be simplified.
-jest.mock("openid-client", () => {
-  const actualOpenidClient = jest.requireActual(
-    "openid-client",
-  ) as typeof OpenIdClient;
-  const mockedClient = jest.fn();
-
-  // Create a mock constructor function for Issuer
-  const MockIssuer = function Issuer(this: any, metadata: any) {
-    // Set up properties that would be on an Issuer instance
-    this.metadata = metadata;
-
-    // Define Client constructor on the instance
-    this.Client = mockedClient;
-  } as any;
-  MockIssuer.discover = jest.fn();
-  MockIssuer.mockClient = mockedClient;
-
-  return {
-    ...actualOpenidClient,
-    Issuer: MockIssuer,
-  };
-});
-
 const mockWebid = "https://example.com/profile#me";
 const mockClientId = "client123";
 const mockIdToken = async (payload: Jose.JWTPayload) => {
@@ -111,7 +81,7 @@ const mockIdToken = async (payload: Jose.JWTPayload) => {
     sub: "user123",
     webid: payload.webid ?? mockWebid,
     iss: mockOpConfig().issuer,
-    aud: mockClientId,
+    aud: payload.aud ?? mockClientId,
     exp: payload.exp ?? Math.floor(Date.now() / 1000) + 3600,
     iat: Math.floor(Date.now() / 1000),
   })
@@ -119,24 +89,49 @@ const mockIdToken = async (payload: Jose.JWTPayload) => {
     .sign(issuerKeyPair.privateKey);
 };
 
-const mockOpClient = (params: { code: string; state: string }) => {
-  const opClientMock = jest.requireMock("openid-client") as {
-    Issuer: { mockClient: ReturnType<typeof jest.fn> };
-  };
-  const mockedCallback = jest.fn().mockImplementation(
-    async () =>
-      ({
-        access_token: "mock-access-token",
-        id_token: await mockIdToken({}),
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-      }) as never,
-  );
-  opClientMock.Issuer.mockClient.mockImplementation(() => ({
-    callbackParams: () => params,
-    callback: mockedCallback,
-    metadata: jest.fn(),
-  }));
-  return mockedCallback;
+const mockJsonResponse = (body: unknown) =>
+  new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+
+/**
+ * Mocks the network interactions with the OpenID Provider: the discovery
+ * document, and the token endpoint. The token endpoint returns an ID token
+ * issued for the provided client ID.
+ */
+const mockOpEndpoints = async ({
+  opConfig,
+  clientId,
+}: {
+  opConfig?: ReturnType<typeof mockOpConfig>;
+  clientId?: string;
+} = {}) => {
+  const config = opConfig ?? mockOpConfig();
+  const idToken = await mockIdToken({ aud: clientId ?? mockClientId });
+  const tokenRequests: Request[] = [];
+  const fetchSpy = jest
+    .spyOn(globalThis, "fetch")
+    .mockImplementation(async (input, init) => {
+      const request = new Request(input, init);
+      if (
+        request.url ===
+        new URL(".well-known/openid-configuration", config.issuer).href
+      ) {
+        return mockJsonResponse(config);
+      }
+      if (request.url === config.token_endpoint) {
+        tokenRequests.push(request);
+        return mockJsonResponse({
+          access_token: "mock-access-token",
+          id_token: idToken,
+          token_type: request.headers.has("DPoP") ? "DPoP" : "Bearer",
+          expires_in: 3600,
+        });
+      }
+      return new Response(null, { status: 404 });
+    });
+  return { fetchSpy, tokenRequests };
 };
 
 const mockAuthRequestState = (
@@ -161,8 +156,12 @@ const mockAuthRequestState = (
 
 describe("Session static functions", () => {
   describe("solid-oidc compliant OP", () => {
-    beforeEach(() => {
-      mockOpDiscovery();
+    beforeEach(async () => {
+      await mockOpEndpoints();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
     });
 
     describe("Session.fromTokens", () => {
@@ -303,9 +302,19 @@ describe("Session static functions", () => {
     });
 
     describe("Session.fromAuthorizationRequestState", () => {
+      const mockRedirectUrl = () => {
+        const redirectUrl = new URL("https://example.org/callback/");
+        redirectUrl.searchParams.append("code", "some-authorization-code");
+        redirectUrl.searchParams.append("state", "test-state");
+        return redirectUrl;
+      };
+
       it("creates a session able to perform a token request for solid-oidc clients", async () => {
         const authorizationRequestState = mockAuthRequestState();
         const sessionId = "test-session-id";
+        const { tokenRequests } = await mockOpEndpoints({
+          clientId: authorizationRequestState.clientId,
+        });
 
         const session = await Session.fromAuthorizationRequestState(
           authorizationRequestState,
@@ -315,38 +324,28 @@ describe("Session static functions", () => {
         expect(session.info.sessionId).toBe(sessionId);
         expect(session.info.isLoggedIn).toBe(false);
 
-        const redirectUrl = new URL("https://example.org/callback/");
-        redirectUrl.searchParams.append("code", "some-authorization-code");
-        redirectUrl.searchParams.append("state", "test-state");
-
-        // This tests for implementation rather than behavior, but it is simpler
-        // this way and can be improved when migrating to openid-client v6, where
-        // only network interaction can be mocked.
-        const mockedCallback = mockOpClient({
-          code: "some-authorization-code",
-          state: "test-state",
-        });
-
+        const redirectUrl = mockRedirectUrl();
         await session.handleIncomingRedirect(redirectUrl.href);
 
-        expect(mockedCallback).toHaveBeenCalled();
-        const [requestRedirectUrl, params, verifier, dpop] =
-          mockedCallback.mock.calls[0];
-        expect(requestRedirectUrl).toBe(
+        expect(session.info.isLoggedIn).toBe(true);
+        expect(session.info.webId).toBe(mockWebid);
+
+        expect(tokenRequests).toHaveLength(1);
+        const [tokenRequest] = tokenRequests;
+        expect(tokenRequest.method).toBe("POST");
+        const body = new URLSearchParams(await tokenRequest.text());
+        expect(body.get("grant_type")).toBe("authorization_code");
+        expect(body.get("code")).toBe("some-authorization-code");
+        expect(body.get("code_verifier")).toBe("test-code-verifier");
+        // The redirect URL is sent without its query parameters.
+        expect(body.get("redirect_uri")).toBe(
           new URL(redirectUrl.pathname, redirectUrl.origin).href,
         );
-        // Note that this currently only covers the mocks set up above.
-        expect(params).toStrictEqual({
-          code: "some-authorization-code",
-          state: "test-state",
-        });
-        expect(verifier).toStrictEqual({
-          code_verifier: "test-code-verifier",
-          state: "test-state",
-        });
-        expect(dpop).toStrictEqual(
-          expect.objectContaining({ DPoP: expect.anything() }),
-        );
+        // Solid-OIDC clients do not authenticate to the token endpoint.
+        expect(body.get("client_id")).toBe(authorizationRequestState.clientId);
+        expect(tokenRequest.headers.get("Authorization")).toBeNull();
+        // The token request is DPoP-bound.
+        expect(tokenRequest.headers.get("DPoP")).not.toBeNull();
       });
 
       it("creates a session able to perform a token request for statically registered clients", async () => {
@@ -355,6 +354,9 @@ describe("Session static functions", () => {
           clientId: "some-client-id",
         });
         const sessionId = "test-session-id";
+        const { tokenRequests } = await mockOpEndpoints({
+          clientId: authorizationRequestState.clientId,
+        });
 
         const session = await Session.fromAuthorizationRequestState(
           authorizationRequestState,
@@ -365,50 +367,35 @@ describe("Session static functions", () => {
         expect(session.info.sessionId).toBe(sessionId);
         expect(session.info.isLoggedIn).toBe(false);
 
-        const redirectUrl = new URL("https://example.org/callback/");
-        redirectUrl.searchParams.append("code", "some-authorization-code");
-        redirectUrl.searchParams.append("state", "test-state");
-
-        // This tests for implementation rather than behavior, but it is simpler
-        // this way and can be improved when migrating to openid-client v6, where
-        // only network interaction can be mocked.
-        const mockedCallback = mockOpClient({
-          code: "some-authorization-code",
-          state: "test-state",
-        });
-
+        const redirectUrl = mockRedirectUrl();
         await session.handleIncomingRedirect(redirectUrl.href);
 
-        expect(mockedCallback).toHaveBeenCalled();
-        const [requestRedirectUrl, params, verifier, dpop] =
-          mockedCallback.mock.calls[0];
-        expect(requestRedirectUrl).toBe(
+        expect(session.info.isLoggedIn).toBe(true);
+        expect(session.info.webId).toBe(mockWebid);
+
+        expect(tokenRequests).toHaveLength(1);
+        const [tokenRequest] = tokenRequests;
+        const body = new URLSearchParams(await tokenRequest.text());
+        expect(body.get("grant_type")).toBe("authorization_code");
+        expect(body.get("code")).toBe("some-authorization-code");
+        expect(body.get("code_verifier")).toBe("test-code-verifier");
+        expect(body.get("redirect_uri")).toBe(
           new URL(redirectUrl.pathname, redirectUrl.origin).href,
         );
-        // Note that this currently only covers the mocks set up above.
-        expect(params).toStrictEqual({
-          code: "some-authorization-code",
-          state: "test-state",
-        });
-        expect(verifier).toStrictEqual({
-          code_verifier: "test-code-verifier",
-          state: "test-state",
-        });
-        expect(dpop).toStrictEqual(
-          expect.objectContaining({ DPoP: expect.anything() }),
-        );
+        expect(tokenRequest.headers.get("DPoP")).not.toBeNull();
 
-        // Check the appropriate client auth method is used.
-        const { Issuer } = jest.requireMock("openid-client") as {
-          Issuer: { mockClient: ReturnType<typeof jest.fn> };
-        };
-        expect(Issuer.mockClient).toHaveBeenCalledWith(
-          expect.objectContaining({
-            client_id: "some-client-id",
-            client_secret: "some-client-secret",
-            token_endpoint_auth_method: "client_secret_basic",
-          }),
-        );
+        // Check the appropriate client auth method is used (client_secret_basic).
+        expect(body.get("client_secret")).toBeNull();
+        const authorization = tokenRequest.headers.get("Authorization");
+        expect(authorization).toMatch(/^Basic /);
+        // The client ID and secret are form-urlencoded prior to being base64-encoded.
+        const credentials = atob((authorization as string).slice(6))
+          .split(":")
+          .map(decodeURIComponent);
+        expect(credentials).toStrictEqual([
+          "some-client-id",
+          "some-client-secret",
+        ]);
       });
 
       it("can create a non-dpop-bound session", async () => {
@@ -417,28 +404,21 @@ describe("Session static functions", () => {
           clientId: "https://rp.example.org/client-id",
         });
         const sessionId = "test-session-id";
+        const { tokenRequests } = await mockOpEndpoints({
+          clientId: authorizationRequestState.clientId,
+        });
 
         const session = await Session.fromAuthorizationRequestState(
           authorizationRequestState,
           sessionId,
         );
 
-        const redirectUrl = new URL("https://example.org/callback/");
-        redirectUrl.searchParams.append("code", "some-authorization-code");
-        redirectUrl.searchParams.append("state", "test-state");
+        await session.handleIncomingRedirect(mockRedirectUrl().href);
 
-        const mockedCallback = mockOpClient({
-          code: "some-authorization-code",
-          state: "test-state",
-        });
-
-        await session.handleIncomingRedirect(redirectUrl.href);
-        // Only the dpop parameter is relevant to this test.
-
-        const [_0, _1, _2, dpop] = mockedCallback.mock.calls[0];
-        expect(dpop).toStrictEqual(
-          expect.objectContaining({ DPoP: undefined }),
-        );
+        expect(session.info.isLoggedIn).toBe(true);
+        // Only the DPoP header is relevant to this test.
+        expect(tokenRequests).toHaveLength(1);
+        expect(tokenRequests[0].headers.get("DPoP")).toBeNull();
       });
 
       it("generates a UUID as sessionId if not provided", async () => {
@@ -464,13 +444,19 @@ describe("Session static functions", () => {
   });
 
   describe("Session.fromAuthorizationRequestState with invalid OP", () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it("validates the OP config", async () => {
       // Mock a non-Solid-OIDC compliant OP.
-      mockOpDiscovery(mockOpConfig({ scopesSupported: ["openid"] }));
+      await mockOpEndpoints({
+        opConfig: mockOpConfig({ scopesSupported: ["openid"] }),
+      });
       const authorizationRequestState = mockAuthRequestState();
       await expect(
         Session.fromAuthorizationRequestState(authorizationRequestState),
-      ).rejects.toThrow();
+      ).rejects.toThrow("does not support Solid-OIDC");
     });
   });
 });

@@ -18,34 +18,67 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect } from "@jest/globals";
+import {
+  jest,
+  it,
+  describe,
+  expect,
+  beforeAll,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import {
   mockStorageUtility,
   StorageUtilityMock,
   EVENTS,
+  generateDpopKeyPair,
 } from "@inrupt/solid-client-authn-core";
-import type { JWK, CryptoKey } from "jose";
-import { importJWK } from "jose";
-import type { IdTokenClaims, TokenSet } from "openid-client";
+import type { CryptoKey } from "jose";
+import {
+  decodeJwt,
+  decodeProtectedHeader,
+  generateKeyPair,
+  SignJWT,
+} from "jose";
+import type * as OpenidClient from "openid-client";
 import { EventEmitter } from "events";
 import TokenRefresher from "./TokenRefresher";
 import {
   mockClientRegistrar,
+  mockDefaultClient,
   mockDefaultClientRegistrar,
 } from "../__mocks__/ClientRegistrar";
 import {
   mockDefaultIssuerConfig,
+  mockIssuerConfig,
   mockIssuerConfigFetcher,
 } from "../__mocks__/IssuerConfigFetcher";
-import { negotiateClientSigningAlg } from "../ClientRegistrar";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+import type * as ClientRegistrarModule from "../ClientRegistrar";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
-jest.mock("../ClientRegistrar");
+// openid-client is used for real, the network is mocked instead. The token
+// grant is only wrapped in a spy so that responses which openid-client would
+// reject can be fed to the refresher.
+jest.mock("openid-client", () => {
+  const actual = jest.requireActual("openid-client") as typeof OpenidClient;
+  return {
+    ...actual,
+    refreshTokenGrant: jest.fn(actual.refreshTokenGrant),
+  };
+});
+
+jest.mock("../ClientRegistrar", () => {
+  const actual = jest.requireActual(
+    "../ClientRegistrar",
+  ) as typeof ClientRegistrarModule;
+  return {
+    ...actual,
+    negotiateClientSigningAlg: jest.fn(actual.negotiateClientSigningAlg),
+  };
+});
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
@@ -55,94 +88,95 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
     ...actualCoreModule,
     // This works around the network lookup to the JWKS in order to validate the ID token.
     getWebidFromTokenPayload: jest.fn(() =>
-      Promise.resolve("https://my.webid/"),
+      Promise.resolve({ webId: "https://my.webid/" }),
     ),
   };
 });
 
-const mockJwk = (): JWK => {
-  return {
-    kty: "EC",
-    kid: "oOArcXxcwvsaG21jAx_D5CHr4BgVCzCEtlfmNFQtU0s",
-    alg: "ES256",
-    crv: "P-256",
-    x: "0dGe_s-urLhD3mpqYqmSXrqUZApVV5ZNxMJXg7Vp-2A",
-    y: "-oMe9gGkpfIrnJ0aiSUHMdjqYVm5ZrGCeQmRKoIIfj8",
-    d: "yR1bCsR7m4hjFCvWo8Jw3OfNR4aiYDAFbBD9nkudJKM",
-  };
-};
-
-const mockKeyPair = async (): Promise<SolidClientAuthnCore.KeyPair> => {
-  return {
-    privateKey: (await importJWK(mockJwk())) as CryptoKey,
-    // Use the same JWK for public and private key out of convenience, don't do
-    // this in real life.
-    publicKey: mockJwk(),
-  };
-};
-
-const mockIdToken = (): string =>
-  "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw";
-
-type AccessJwt = {
-  sub: string;
-  iss: string;
-  aud: string;
-  nbf: number;
-  exp: number;
-  cnf: {
-    jkt: string;
-  };
-};
-
 const mockWebId = (): string => "https://my.webid/";
 
-const mockKeyBoundToken = (): AccessJwt => {
+let idTokenSigningKey: CryptoKey;
+
+beforeAll(async () => {
+  // The ID token signature isn't verified by openid-client, and the
+  // verification done by the library is mocked, so any key works.
+  ({ privateKey: idTokenSigningKey } = await generateKeyPair("ES256"));
+});
+
+// Builds an ID token which passes the claims validation done by openid-client.
+const mockIdToken = async (
+  options: { clientId?: string; issuer?: string; alg?: string } = {},
+): Promise<string> =>
+  new SignJWT({})
+    .setProtectedHeader({ alg: options.alg ?? "ES256" })
+    .setSubject(mockWebId())
+    .setIssuer(options.issuer ?? mockDefaultIssuerConfig().issuer)
+    .setAudience(options.clientId ?? mockDefaultClient().clientId)
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(idTokenSigningKey);
+
+type TokenEndpointBody = {
+  access_token?: string;
+  id_token?: string;
+  token_type?: string;
+  expires_in?: number;
+  refresh_token?: string;
+};
+
+const mockTokenEndpointBody = async (
+  overrides: TokenEndpointBody = {},
+): Promise<TokenEndpointBody> => ({
+  access_token: "some refreshed access token",
+  id_token: await mockIdToken(),
+  token_type: "DPoP",
+  expires_in: 3600,
+  ...overrides,
+});
+
+const mockTokenEndpointResponse = (body: TokenEndpointBody) =>
+  new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+
+const mockedFetch = jest.spyOn(globalThis, "fetch");
+
+const mockTokenEndpoint = async (overrides: TokenEndpointBody = {}) => {
+  const body = await mockTokenEndpointBody(overrides);
+  mockedFetch.mockResolvedValueOnce(mockTokenEndpointResponse(body));
+  return body;
+};
+
+// Returns the request sent to the token endpoint.
+const getTokenRequest = () => {
+  expect(mockedFetch).toHaveBeenCalledTimes(1);
+  const [url, init] = mockedFetch.mock.calls[0];
   return {
-    sub: mockWebId(),
-    iss: mockDefaultIssuerConfig().issuer.toString(),
-    aud: "https://resource.example.org",
-    nbf: 1562262611,
-    exp: 1562266216,
-    cnf: {
-      jkt: mockJwk().kid as string,
-    },
+    url: url.toString(),
+    method: init?.method,
+    headers: new Headers(init?.headers),
+    body: new URLSearchParams(init?.body as string | URLSearchParams),
   };
 };
 
-const mockIdTokenPayload = (): IdTokenClaims => {
-  return {
-    sub: "https://my.webid",
-    iss: "https://my.idp/",
-    aud: "https://resource.example.org",
-    exp: 1662266216,
-    iat: 1462266216,
-  };
-};
+// openid-client wraps the underlying oauth4webapi errors in a generic error.
+const openidClientError = (message: string, causeMessage: string) =>
+  expect.objectContaining({
+    message,
+    cause: expect.objectContaining({ message: causeMessage }),
+  });
 
-const mockDpopTokens = (): TokenSet => {
-  return {
-    access_token: JSON.stringify(mockKeyBoundToken()),
-    id_token: mockIdToken(),
-    token_type: "DPoP",
-    expired: () => false,
-    claims: mockIdTokenPayload,
-  };
-};
+const getMockedGrant = () =>
+  (jest.requireMock("openid-client") as jest.Mocked<typeof OpenidClient>)
+    .refreshTokenGrant;
 
-const setupOidcClientMock = (tokenSet: TokenSet) => {
-  const { Issuer } = jest.requireMock("openid-client") as any;
-  const mockedIssuer = {
-    metadata: configToIssuerMetadata(mockDefaultIssuerConfig()),
-    Client: jest.fn().mockReturnValue({
-      refresh: jest.fn().mockResolvedValueOnce(tokenSet as never),
-    }),
-  };
-  Issuer.mockReturnValueOnce(mockedIssuer);
-  return mockedIssuer;
-};
-
-const setupDefaultOidcClientMock = () => setupOidcClientMock(mockDpopTokens());
+const getMockedNegotiation = () =>
+  (
+    jest.requireMock("../ClientRegistrar") as jest.Mocked<
+      typeof ClientRegistrarModule
+    >
+  ).negotiateClientSigningAlg;
 
 const mockDefaultStorageContent = {
   "solidClientAuthenticationUser:mySession": {
@@ -156,6 +190,16 @@ const mockDefaultStorageContent = {
 
 const mockRefresherDefaultStorageUtility = () =>
   mockStorageUtility(mockDefaultStorageContent);
+
+const mockBearerStorageUtility = () =>
+  mockStorageUtility({
+    "solidClientAuthenticationUser:mySession": {
+      issuer: "https://my.idp",
+      codeVerifier: "some code verifier",
+      redirectUrl: "https://my.app/redirect",
+      dpop: "false",
+    },
+  });
 
 describe("TokenRefresher", () => {
   const defaultMocks = {
@@ -173,6 +217,15 @@ describe("TokenRefresher", () => {
       mocks.clientRegistrar ?? defaultMocks.clientRegistrar,
     );
   }
+
+  beforeEach(() => {
+    // Prevent any accidental network call.
+    mockedFetch.mockRejectedValue(new Error("Unexpected network call"));
+  });
+
+  afterEach(() => {
+    mockedFetch.mockReset();
+  });
 
   it("throws if no OIDC issuer can be retrieved from storage", async () => {
     const mockedStorage = mockStorageUtility({
@@ -213,37 +266,19 @@ describe("TokenRefresher", () => {
   });
 
   it("throws if a refresh token isn't provided", async () => {
-    setupDefaultOidcClientMock();
-    const mockedModule = jest.requireMock("../ClientRegistrar") as {
-      negotiateClientSigningAlg: typeof negotiateClientSigningAlg;
-    };
-    mockedModule.negotiateClientSigningAlg = jest
-      .fn(negotiateClientSigningAlg)
-      .mockReturnValue("ES256");
-
-    const mockedStorage = mockRefresherDefaultStorageUtility();
-
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockRefresherDefaultStorageUtility(),
     });
 
     await expect(refresher.refresh("mySession")).rejects.toThrow(
       "Session [mySession] has no refresh token to allow it to refresh its access token.",
     );
+    expect(mockedFetch).not.toHaveBeenCalled();
   });
 
   it("throws if a DPoP token is expected, but no DPoP key is provided", async () => {
-    setupDefaultOidcClientMock();
-    const mockedModule = jest.requireMock("../ClientRegistrar") as {
-      negotiateClientSigningAlg: typeof negotiateClientSigningAlg;
-    };
-    mockedModule.negotiateClientSigningAlg = jest
-      .fn(negotiateClientSigningAlg)
-      .mockReturnValue("ES256");
-    const mockedStorage = mockRefresherDefaultStorageUtility();
-
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockRefresherDefaultStorageUtility(),
     });
 
     await expect(
@@ -251,15 +286,31 @@ describe("TokenRefresher", () => {
     ).rejects.toThrow(
       "For session [mySession], the key bound to the DPoP access token must be provided to refresh said access token.",
     );
+    expect(mockedFetch).not.toHaveBeenCalled();
+  });
+
+  it("negotiates the signing algorithm if it is not set for the client", async () => {
+    // The issuer supports ES256 and RS256, and ES256 is preferred.
+    await mockTokenEndpoint();
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+    });
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some refresh token",
+        await generateDpopKeyPair(),
+      ),
+    ).resolves.toBeDefined();
+
+    expect(getMockedNegotiation()).toHaveBeenCalledTimes(1);
   });
 
   it("does not negotiate the signing algorithm if it is already set for the client", async () => {
-    setupDefaultOidcClientMock();
-    const mockedModule = jest.requireMock("../ClientRegistrar") as {
-      negotiateClientSigningAlg: typeof negotiateClientSigningAlg;
-    };
-    mockedModule.negotiateClientSigningAlg =
-      jest.fn<typeof mockedModule.negotiateClientSigningAlg>();
+    await mockTokenEndpoint({
+      id_token: await mockIdToken({ clientId: "some client ID" }),
+    });
     const refresher = getTokenRefresher({
       storageUtility: mockRefresherDefaultStorageUtility(),
       clientRegistrar: mockClientRegistrar({
@@ -273,15 +324,49 @@ describe("TokenRefresher", () => {
     await refresher.refresh(
       "mySession",
       "some refresh token",
-      await mockKeyPair(),
+      await generateDpopKeyPair(),
     );
 
-    expect(mockedModule.negotiateClientSigningAlg).not.toHaveBeenCalled();
+    expect(getMockedNegotiation()).not.toHaveBeenCalled();
+  });
+
+  it("expects the ID token to be signed with the client's signing algorithm", async () => {
+    // The ID token is signed using ES256, but the client expects RS256.
+    await mockTokenEndpoint({
+      id_token: await mockIdToken({ clientId: "some client ID" }),
+    });
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+      clientRegistrar: mockClientRegistrar({
+        clientId: "some client ID",
+        clientSecret: "some client secret",
+        idTokenSignedResponseAlg: "RS256",
+        clientType: "static",
+      }),
+    });
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some refresh token",
+        await generateDpopKeyPair(),
+      ),
+    ).rejects.toEqual(
+      openidClientError(
+        "invalid response encountered",
+        'unexpected JWT "alg" header parameter',
+      ),
+    );
   });
 
   it("uses 'none' authentication if using Solid-OIDC client identifiers", async () => {
-    const mockedIssuer = setupDefaultOidcClientMock();
+    await mockTokenEndpoint({
+      id_token: await mockIdToken({
+        clientId: "https://some.client.identifier",
+      }),
+    });
     const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
       clientRegistrar: mockClientRegistrar({
         clientId: "https://some.client.identifier",
         clientType: "solid-oidc",
@@ -292,46 +377,81 @@ describe("TokenRefresher", () => {
     await refresher.refresh(
       "mySession",
       "some refresh token",
-      await mockKeyPair(),
+      await generateDpopKeyPair(),
     );
 
-    expect(mockedIssuer.Client).toHaveBeenCalledWith(
-      expect.objectContaining({
-        token_endpoint_auth_method: "none",
-      }),
+    const request = getTokenRequest();
+    expect(request.headers.has("Authorization")).toBe(false);
+    expect(request.body.get("client_id")).toBe(
+      "https://some.client.identifier",
     );
+    expect(request.body.has("client_secret")).toBe(false);
+  });
+
+  it("uses 'client_secret_basic' authentication if the client has a secret", async () => {
+    await mockTokenEndpoint();
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+    });
+
+    await refresher.refresh(
+      "mySession",
+      "some refresh token",
+      await generateDpopKeyPair(),
+    );
+
+    const request = getTokenRequest();
+    // The client ID and secret are form-URL-encoded, so spaces become '+'.
+    expect(request.headers.get("Authorization")).toBe(
+      `Basic ${btoa("a+client+id:a+client+secret")}`,
+    );
+    expect(request.body.has("client_secret")).toBe(false);
   });
 
   it("refreshes a DPoP token properly", async () => {
-    setupDefaultOidcClientMock();
-    const mockedStorage = mockRefresherDefaultStorageUtility();
-
+    const tokenResponse = await mockTokenEndpoint();
+    const dpopKey = await generateDpopKeyPair();
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockRefresherDefaultStorageUtility(),
     });
 
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some refresh token",
-      await mockKeyPair(),
+      dpopKey,
     );
 
-    expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toBe(tokenResponse.access_token);
+    expect(refreshedTokens.idToken).toBe(tokenResponse.id_token);
+    expect(refreshedTokens.tokenType).toBe("DPoP");
+    expect(refreshedTokens.webId).toBe(mockWebId());
+    expect(refreshedTokens.refreshToken).toBeUndefined();
+
+    const request = getTokenRequest();
+    expect(request.url).toBe(mockDefaultIssuerConfig().tokenEndpoint);
+    expect(request.method).toBe("POST");
+    expect(request.body.get("grant_type")).toBe("refresh_token");
+    expect(request.body.get("refresh_token")).toBe("some refresh token");
+    // The token request is DPoP-bound to the provided key.
+    const dpopProof = request.headers.get("DPoP");
+    expect(dpopProof).not.toBeNull();
+    const proofHeader = decodeProtectedHeader(dpopProof as string);
+    expect(proofHeader.typ).toBe("dpop+jwt");
+    expect(proofHeader.jwk).toMatchObject({
+      kty: dpopKey.publicKey.kty,
+      x: dpopKey.publicKey.x,
+      y: dpopKey.publicKey.y,
+    });
+    expect(decodeJwt(dpopProof as string)).toMatchObject({
+      htm: "POST",
+      htu: mockDefaultIssuerConfig().tokenEndpoint,
+    });
   });
 
   it("refreshes a bearer token properly", async () => {
-    setupDefaultOidcClientMock();
-    const mockedStorage = mockStorageUtility({
-      "solidClientAuthenticationUser:mySession": {
-        issuer: "https://my.idp",
-        codeVerifier: "some code verifier",
-        redirectUrl: "https://my.app/redirect",
-        dpop: "false",
-      },
-    });
-
+    const tokenResponse = await mockTokenEndpoint({ token_type: "Bearer" });
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockBearerStorageUtility(),
     });
 
     const refreshedTokens = await refresher.refresh(
@@ -339,14 +459,117 @@ describe("TokenRefresher", () => {
       "some refresh token",
     );
 
-    expect(refreshedTokens.accessToken).toEqual(mockDpopTokens().access_token);
+    expect(refreshedTokens.accessToken).toBe(tokenResponse.access_token);
+    expect(refreshedTokens.tokenType).toBe("Bearer");
+    const request = getTokenRequest();
+    expect(request.body.get("grant_type")).toBe("refresh_token");
+    expect(request.body.get("refresh_token")).toBe("some refresh token");
+    expect(request.headers.has("DPoP")).toBe(false);
+  });
+
+  it.each([
+    ["Bearer", "Bearer"],
+    ["bearer", "Bearer"],
+    ["BEARER", "Bearer"],
+    ["DPoP", "DPoP"],
+    ["dpop", "DPoP"],
+    ["DPOP", "DPoP"],
+  ])(
+    "maps the token type [%s] returned by the IdP to [%s]",
+    async (returnedType, expectedType) => {
+      await mockTokenEndpoint({ token_type: returnedType });
+      const refresher = getTokenRefresher({
+        storageUtility: mockRefresherDefaultStorageUtility(),
+      });
+
+      const refreshedTokens = await refresher.refresh(
+        "mySession",
+        "some refresh token",
+        await generateDpopKeyPair(),
+      );
+
+      expect(refreshedTokens.tokenType).toBe(expectedType);
+    },
+  );
+
+  it("computes the expiration date in seconds from the 'expires_in' value", async () => {
+    await mockTokenEndpoint({ expires_in: 1800 });
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+    });
+
+    const before = Math.trunc(Date.now() / 1000);
+    const refreshedTokens = await refresher.refresh(
+      "mySession",
+      "some refresh token",
+      await generateDpopKeyPair(),
+    );
+    const after = Math.trunc(Date.now() / 1000);
+
+    expect(refreshedTokens.expiresAt).toBeGreaterThanOrEqual(before + 1800);
+    expect(refreshedTokens.expiresAt).toBeLessThanOrEqual(after + 1800);
+  });
+
+  it("does not set an expiration date if the IdP does not return 'expires_in'", async () => {
+    await mockTokenEndpoint({ expires_in: undefined });
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+    });
+
+    const refreshedTokens = await refresher.refresh(
+      "mySession",
+      "some refresh token",
+      await generateDpopKeyPair(),
+    );
+
+    expect(refreshedTokens.expiresAt).toBeUndefined();
+  });
+
+  it("validates the ID token with the issuer JWKS", async () => {
+    const tokenResponse = await mockTokenEndpoint();
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+    });
+
+    await refresher.refresh(
+      "mySession",
+      "some refresh token",
+      await generateDpopKeyPair(),
+    );
+
+    const { getWebidFromTokenPayload } = jest.requireMock(
+      "@inrupt/solid-client-authn-core",
+    ) as jest.Mocked<typeof SolidClientAuthnCore>;
+    expect(getWebidFromTokenPayload).toHaveBeenCalledWith(
+      tokenResponse.id_token as string,
+      mockDefaultIssuerConfig().jwksUri,
+      mockDefaultIssuerConfig().issuer,
+      mockDefaultClient().clientId,
+    );
+  });
+
+  it("throws if the issuer configuration has no JWKS URI", async () => {
+    await mockTokenEndpoint();
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+      issuerConfigFetcher: mockIssuerConfigFetcher(
+        mockIssuerConfig({ jwksUri: undefined }),
+      ),
+    });
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some refresh token",
+        await generateDpopKeyPair(),
+      ),
+    ).rejects.toThrow(
+      "Cannot verify ID Token: Issuer Metadata is missing a JWKS URI",
+    );
   });
 
   it("stores the refresh token if one is returned", async () => {
-    const mockedTokens = mockDpopTokens();
-    mockedTokens.refresh_token = "some new refresh token";
-    setupOidcClientMock(mockedTokens);
-
+    await mockTokenEndpoint({ refresh_token: "some new refresh token" });
     const mockedStorage = mockRefresherDefaultStorageUtility();
 
     const refresher = getTokenRefresher({
@@ -356,9 +579,12 @@ describe("TokenRefresher", () => {
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some old refresh token",
-      await mockKeyPair(),
+      await generateDpopKeyPair(),
     );
     expect(refreshedTokens.refreshToken).toBe("some new refresh token");
+    expect(getTokenRequest().body.get("refresh_token")).toBe(
+      "some old refresh token",
+    );
 
     // Check that the session information is stored in the provided storage
     await expect(
@@ -367,21 +593,18 @@ describe("TokenRefresher", () => {
   });
 
   it("calls the refresh token rotation handler if one is provided", async () => {
-    const mockedTokens = mockDpopTokens();
-    mockedTokens.refresh_token = "some new refresh token";
-    setupOidcClientMock(mockedTokens);
-    const mockedStorage = mockRefresherDefaultStorageUtility();
+    await mockTokenEndpoint({ refresh_token: "some new refresh token" });
     const mockEmitter = new EventEmitter();
     const mockEmit = jest.spyOn(mockEmitter, "emit");
 
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockRefresherDefaultStorageUtility(),
     });
 
     const refreshedTokens = await refresher.refresh(
       "mySession",
       "some old refresh token",
-      await mockKeyPair(),
+      await generateDpopKeyPair(),
       mockEmitter,
     );
 
@@ -392,22 +615,67 @@ describe("TokenRefresher", () => {
     );
   });
 
-  it("throws if the IdP does not return an access token", async () => {
-    const mockedTokens = mockDpopTokens();
-    mockedTokens.access_token = undefined;
-    setupOidcClientMock(mockedTokens);
-
-    const mockedStorage = mockRefresherDefaultStorageUtility();
+  it("emits the new tokens if an event emitter is provided", async () => {
+    const tokenResponse = await mockTokenEndpoint({
+      refresh_token: "some new refresh token",
+    });
+    const dpopKey = await generateDpopKeyPair();
+    const mockEmitter = new EventEmitter();
+    const mockEmit = jest.spyOn(mockEmitter, "emit");
 
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockRefresherDefaultStorageUtility(),
+    });
+
+    const refreshedTokens = await refresher.refresh(
+      "mySession",
+      "some old refresh token",
+      dpopKey,
+      mockEmitter,
+    );
+
+    expect(mockEmit).toHaveBeenCalledWith(EVENTS.NEW_TOKENS, {
+      accessToken: tokenResponse.access_token,
+      idToken: tokenResponse.id_token,
+      refreshToken: "some new refresh token",
+      webId: mockWebId(),
+      expiresAt: refreshedTokens.expiresAt,
+      dpopKey,
+      clientId: mockDefaultClient().clientId,
+      issuer: mockDefaultIssuerConfig().issuer,
+    });
+  });
+
+  it("throws if the IdP does not return an access token", async () => {
+    // openid-client rejects such a response itself...
+    await mockTokenEndpoint({ access_token: undefined });
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
     });
 
     await expect(
       refresher.refresh(
         "mySession",
         "some old refresh token",
-        await mockKeyPair(),
+        await generateDpopKeyPair(),
+      ),
+    ).rejects.toEqual(
+      openidClientError(
+        "invalid response encountered",
+        '"response" body "access_token" property must be a string',
+      ),
+    );
+
+    // ... but the refresher does not rely on it.
+    getMockedGrant().mockResolvedValueOnce({
+      ...(await mockTokenEndpointBody({ access_token: undefined })),
+    } as unknown as Awaited<ReturnType<typeof OpenidClient.refreshTokenGrant>>);
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some old refresh token",
+        await generateDpopKeyPair(),
       ),
     ).rejects.toThrow(
       `The Identity Provider [${
@@ -417,21 +685,16 @@ describe("TokenRefresher", () => {
   });
 
   it("throws if the IdP does not return an id token", async () => {
-    const mockedTokens = mockDpopTokens();
-    mockedTokens.id_token = undefined;
-    setupOidcClientMock(mockedTokens);
-
-    const mockedStorage = mockRefresherDefaultStorageUtility();
-
+    await mockTokenEndpoint({ id_token: undefined });
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockRefresherDefaultStorageUtility(),
     });
 
     await expect(
       refresher.refresh(
         "mySession",
         "some old refresh token",
-        await mockKeyPair(),
+        await generateDpopKeyPair(),
       ),
     ).rejects.toThrow(
       `The Identity Provider [${
@@ -440,22 +703,60 @@ describe("TokenRefresher", () => {
     );
   });
 
-  it("throws if the IdP returns an unknown token type", async () => {
-    const mockedTokens = mockDpopTokens();
-    mockedTokens.token_type = "Some unknown token type";
-    setupOidcClientMock(mockedTokens);
-
-    const mockedStorage = mockRefresherDefaultStorageUtility();
-
+  it("throws if the IdP returns an ID token with unexpected claims", async () => {
+    await mockTokenEndpoint({
+      id_token: await mockIdToken({ issuer: "https://some.other.idp/" }),
+    });
     const refresher = getTokenRefresher({
-      storageUtility: mockedStorage,
+      storageUtility: mockRefresherDefaultStorageUtility(),
     });
 
     await expect(
       refresher.refresh(
         "mySession",
         "some old refresh token",
-        await mockKeyPair(),
+        await generateDpopKeyPair(),
+      ),
+    ).rejects.toEqual(
+      openidClientError(
+        "unexpected JWT claim value encountered",
+        'unexpected JWT "iss" (issuer) claim value',
+      ),
+    );
+  });
+
+  it("throws if the IdP returns an unknown token type", async () => {
+    // openid-client rejects such a response itself...
+    await mockTokenEndpoint({ token_type: "Some unknown token type" });
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+    });
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some old refresh token",
+        await generateDpopKeyPair(),
+      ),
+    ).rejects.toEqual(
+      openidClientError(
+        "unsupported operation",
+        "unsupported `token_type` value",
+      ),
+    );
+
+    // ... but the refresher does not rely on it.
+    getMockedGrant().mockResolvedValueOnce({
+      ...(await mockTokenEndpointBody({
+        token_type: "Some unknown token type",
+      })),
+    } as unknown as Awaited<ReturnType<typeof OpenidClient.refreshTokenGrant>>);
+
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some old refresh token",
+        await generateDpopKeyPair(),
       ),
     ).rejects.toThrow(
       `The Identity Provider [${

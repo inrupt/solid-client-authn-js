@@ -19,52 +19,101 @@
 //
 
 import { randomUUID } from "crypto";
-import { jest, it, describe, expect } from "@jest/globals";
+import {
+  jest,
+  it,
+  describe,
+  expect,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
+import type { IIssuerConfig } from "@inrupt/solid-client-authn-core";
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import type * as OpenIdClient from "openid-client";
+import type { ClientMetadata, ServerMetadata } from "openid-client";
 import type { IOpenIdDynamicClient } from "core";
 import ClientRegistrar from "./ClientRegistrar";
-import {
-  IssuerConfigFetcherFetchConfigResponse,
-  mockIssuerMetadata,
-} from "./__mocks__/IssuerConfigFetcher";
+import { IssuerConfigFetcherFetchConfigResponse } from "./__mocks__/IssuerConfigFetcher";
 import { mockDefaultClientConfig } from "./__mocks__/ClientRegistrar";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+const ISSUER = IssuerConfigFetcherFetchConfigResponse.issuer;
+const REGISTRATION_ENDPOINT = `${ISSUER}/register`;
+// 5000-01-07, in seconds.
+const CLIENT_SECRET_EXPIRES_AT = 95618140501;
 
-const mockClientRegistration = (
-  issuerMetadata: Record<string, string | undefined>,
-  clientMetadata: OpenIdClient.ClientMetadata,
-) => {
-  // Sets up the mock-up for DCR
-  const { Issuer } = jest.requireMock("openid-client") as jest.Mocked<
-    typeof OpenIdClient
-  >;
-  const mockedIssuerConfig = mockIssuerMetadata(issuerMetadata);
-  const mockedIssuer: OpenIdClient.Issuer<OpenIdClient.BaseClient> = {
-    metadata: mockedIssuerConfig,
-    Client: {
-      register: (jest.fn() as any).mockResolvedValueOnce({
-        metadata: clientMetadata,
-      }),
-      // The assertions are required because we only mock what is strictly necessary for our tests.
-    } as any,
-  } as any;
+// The issuer configuration, as returned by the IssuerConfigFetcher, for an
+// issuer supporting dynamic client registration.
+const mockRegistrationIssuerConfig = (
+  config: Partial<IIssuerConfig> = {},
+): IIssuerConfig => ({
+  ...IssuerConfigFetcherFetchConfigResponse,
+  registrationEndpoint: REGISTRATION_ENDPOINT,
+  ...config,
+});
 
-  Issuer.mockReturnValue(
-    mockedIssuer as jest.MockedObject<
-      OpenIdClient.Issuer<OpenIdClient.BaseClient>
-    >,
-  );
-};
+// The discovery document matching the issuer configuration above.
+const mockDiscoveryDocument = (
+  config: Partial<ServerMetadata> = {},
+): ServerMetadata => ({
+  issuer: ISSUER,
+  authorization_endpoint:
+    IssuerConfigFetcherFetchConfigResponse.authorizationEndpoint,
+  token_endpoint: IssuerConfigFetcherFetchConfigResponse.tokenEndpoint,
+  jwks_uri: IssuerConfigFetcherFetchConfigResponse.jwksUri,
+  registration_endpoint: REGISTRATION_ENDPOINT,
+  id_token_signing_alg_values_supported:
+    IssuerConfigFetcherFetchConfigResponse.idTokenSigningAlgValuesSupported,
+  ...config,
+});
+
+const mockRegisteredClient = (): ClientMetadata => ({
+  ...mockDefaultClientConfig(),
+  client_secret_expires_at: CLIENT_SECRET_EXPIRES_AT,
+});
+
+const mockJsonResponse = (body: unknown, status: number): Response =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 
 /**
  * Test for ClientRegistrar
  */
 describe("ClientRegistrar", () => {
+  let mockedFetch: jest.SpiedFunction<typeof fetch>;
+
+  beforeEach(() => {
+    mockedFetch = jest.spyOn(globalThis, "fetch");
+  });
+
+  afterEach(() => {
+    // Discard any network response mocked but not consumed by a test.
+    mockedFetch.mockRestore();
+  });
+
+  // Mocks the network responses for the issuer discovery and the client
+  // registration performed by openid-client.
+  const mockClientRegistration = (
+    clientMetadata: ClientMetadata = mockRegisteredClient(),
+    discoveryDocument: ServerMetadata = mockDiscoveryDocument(),
+  ) => {
+    mockedFetch
+      .mockResolvedValueOnce(mockJsonResponse(discoveryDocument, 200))
+      .mockResolvedValueOnce(mockJsonResponse(clientMetadata, 201));
+  };
+
+  const getRegistrationRequest = () => {
+    const [url, init] = mockedFetch.mock.calls[1];
+    return {
+      url: url.toString(),
+      method: init?.method,
+      body: JSON.parse(init?.body as string),
+    };
+  };
+
   const defaultMocks = {
     storage: mockStorageUtility({}),
   };
@@ -76,13 +125,6 @@ describe("ClientRegistrar", () => {
 
   describe("getClient", () => {
     it("fails if there is no registration endpoint", async () => {
-      mockClientRegistration(
-        {
-          registration_endpoint: undefined,
-        },
-        mockDefaultClientConfig(),
-      );
-
       // Run the test
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility({}),
@@ -93,11 +135,12 @@ describe("ClientRegistrar", () => {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          IssuerConfigFetcherFetchConfigResponse,
+          mockRegistrationIssuerConfig({ registrationEndpoint: undefined }),
         ),
       ).rejects.toThrow(
         "Dynamic client registration cannot be performed, because issuer does not have a registration endpoint",
       );
+      expect(mockedFetch).not.toHaveBeenCalled();
     });
 
     it("retrieves client information from storage if they are present", async () => {
@@ -122,14 +165,36 @@ describe("ClientRegistrar", () => {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
       expect(client.clientId).toBe(exampleClient);
       expect(client.clientSecret).toBe(exampleSecret);
       expect(client.clientName).toBe("my client name");
       expect(client.idTokenSignedResponseAlg).toBe("ES256");
+      expect(mockedFetch).not.toHaveBeenCalled();
+    });
+
+    it("throws if a static client stored is missing its secret", async () => {
+      const clientRegistrar = getClientRegistrar({
+        storage: mockStorageUtility(
+          {
+            "solidClientAuthenticationUser:mySession": {
+              clientId: randomUUID(),
+              clientType: "static",
+            },
+          },
+          false,
+        ),
+      });
+      await expect(
+        clientRegistrar.getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          mockRegistrationIssuerConfig(),
+        ),
+      ).rejects.toThrow("Missing static client secret in storage.");
     });
 
     it("negotiates signing alg if not found in storage", async () => {
@@ -152,15 +217,13 @@ describe("ClientRegistrar", () => {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
       expect(client.idTokenSignedResponseAlg).toBe("ES256");
     });
 
     it("properly performs dynamic registration and saves client information", async () => {
-      mockClientRegistration({}, mockDefaultClientConfig());
+      mockClientRegistration();
       const mockStorage = mockStorageUtility({});
 
       // Run the test
@@ -171,45 +234,205 @@ describe("ClientRegistrar", () => {
         {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
+          clientName: "my client name",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
 
-      // Check that the returned value is what we expect
-      expect(client.clientId).toEqual(mockDefaultClientConfig().client_id);
-      expect(client.clientSecret).toEqual(
-        mockDefaultClientConfig().client_secret,
+      // Check that openid-client performed the discovery, then the registration
+      expect(mockedFetch).toHaveBeenCalledTimes(2);
+      expect(mockedFetch.mock.calls[0][0].toString()).toBe(
+        `${ISSUER}/.well-known/openid-configuration`,
       );
+      const registrationRequest = getRegistrationRequest();
+      expect(registrationRequest.url).toBe(REGISTRATION_ENDPOINT);
+      expect(registrationRequest.method).toBe("POST");
+      expect(registrationRequest.body).toEqual({
+        redirect_uris: ["https://example.com"],
+        client_name: "my client name",
+        id_token_signed_response_alg: "ES256",
+        grant_types: ["authorization_code", "refresh_token"],
+      });
+
+      // Check that the returned value is what we expect
+      expect(client.clientId).toEqual(mockRegisteredClient().client_id);
+      expect(client.clientSecret).toEqual(mockRegisteredClient().client_secret);
       expect((client as IOpenIdDynamicClient).expiresAt).toEqual(
-        mockDefaultClientConfig().client_secret_expires_at,
+        CLIENT_SECRET_EXPIRES_AT,
       );
       expect(client.idTokenSignedResponseAlg).toEqual(
-        mockDefaultClientConfig().id_token_signed_response_alg,
+        mockRegisteredClient().id_token_signed_response_alg,
       );
 
       // Check that the client information have been saved in storage
       await expect(
         mockStorage.getForUser("mySession", "clientId"),
-      ).resolves.toEqual(mockDefaultClientConfig().client_id);
+      ).resolves.toEqual(mockRegisteredClient().client_id);
       await expect(
         mockStorage.getForUser("mySession", "clientSecret"),
-      ).resolves.toEqual(mockDefaultClientConfig().client_secret);
+      ).resolves.toEqual(mockRegisteredClient().client_secret);
       await expect(
         mockStorage.getForUser("mySession", "expiresAt"),
-      ).resolves.toEqual(
-        String(mockDefaultClientConfig().client_secret_expires_at),
-      );
+      ).resolves.toEqual(String(CLIENT_SECRET_EXPIRES_AT));
       await expect(
         mockStorage.getForUser("mySession", "idTokenSignedResponseAlg"),
-      ).resolves.toEqual(
-        mockDefaultClientConfig().id_token_signed_response_alg,
+      ).resolves.toEqual(mockRegisteredClient().id_token_signed_response_alg);
+      await expect(
+        mockStorage.getForUser("mySession", "clientType"),
+      ).resolves.toBe("dynamic");
+    });
+
+    it("registers a public client if the registration returns no client secret", async () => {
+      const { client_secret: _secret, ...publicClient } =
+        mockDefaultClientConfig();
+      mockClientRegistration(publicClient);
+      const mockStorage = mockStorageUtility({});
+
+      const client = await getClientRegistrar({
+        storage: mockStorage,
+      }).getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        mockRegistrationIssuerConfig(),
       );
+
+      expect(client.clientId).toBe(publicClient.client_id);
+      expect(client.clientSecret).toBeUndefined();
+      expect((client as IOpenIdDynamicClient).expiresAt).toBeUndefined();
+      await expect(
+        mockStorage.getForUser("mySession", "clientSecret"),
+      ).resolves.toBeUndefined();
+    });
+
+    it("registers no redirect URI if none is provided", async () => {
+      mockClientRegistration();
+
+      await getClientRegistrar({
+        storage: mockStorageUtility({}),
+      }).getClient({ sessionId: "mySession" }, mockRegistrationIssuerConfig());
+
+      expect(getRegistrationRequest().body.redirect_uris).toEqual([]);
+    });
+
+    it("allows plain HTTP requests for a loopback issuer", async () => {
+      const issuer = "http://localhost:3000/";
+      mockClientRegistration(
+        mockRegisteredClient(),
+        mockDiscoveryDocument({
+          issuer,
+          registration_endpoint: `${issuer}register`,
+        }),
+      );
+
+      const client = await getClientRegistrar({
+        storage: mockStorageUtility({}),
+      }).getClient(
+        {
+          sessionId: "mySession",
+          redirectUrl: "https://example.com",
+        },
+        mockRegistrationIssuerConfig({
+          issuer,
+          registrationEndpoint: `${issuer}register`,
+        }),
+      );
+
+      expect(mockedFetch.mock.calls[0][0].toString()).toBe(
+        `${issuer}.well-known/openid-configuration`,
+      );
+      expect(getRegistrationRequest().url).toBe(`${issuer}register`);
+      expect(client.clientId).toBe(mockRegisteredClient().client_id);
+    });
+
+    it("does not allow plain HTTP requests for a non-loopback issuer", async () => {
+      const issuer = "http://idp.example/";
+      mockClientRegistration(
+        mockRegisteredClient(),
+        mockDiscoveryDocument({
+          issuer,
+          registration_endpoint: `${issuer}register`,
+        }),
+      );
+
+      await expect(
+        getClientRegistrar({
+          storage: mockStorageUtility({}),
+        }).getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          mockRegistrationIssuerConfig({
+            issuer,
+            registrationEndpoint: `${issuer}register`,
+          }),
+        ),
+      ).rejects.toThrow("only requests to HTTPS are allowed");
+      expect(mockedFetch).not.toHaveBeenCalled();
+    });
+
+    it("throws if the discovered issuer does not match the issuer configuration", async () => {
+      mockClientRegistration(
+        mockRegisteredClient(),
+        mockDiscoveryDocument({ issuer: "https://other.idp/" }),
+      );
+
+      await expect(
+        getClientRegistrar({
+          storage: mockStorageUtility({}),
+        }).getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          mockRegistrationIssuerConfig(),
+        ),
+      ).rejects.toThrow(
+        "discovered metadata issuer does not match the expected issuer",
+      );
+      // The registration request should not have been sent.
+      expect(mockedFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("throws if the registration endpoint returns an error", async () => {
+      mockedFetch
+        .mockResolvedValueOnce(mockJsonResponse(mockDiscoveryDocument(), 200))
+        .mockResolvedValueOnce(
+          mockJsonResponse(
+            {
+              error: "invalid_redirect_uri",
+              error_description: "Invalid redirect URI",
+            },
+            400,
+          ),
+        );
+      const mockStorage = mockStorageUtility({});
+
+      await expect(
+        getClientRegistrar({
+          storage: mockStorage,
+        }).getClient(
+          {
+            sessionId: "mySession",
+            redirectUrl: "https://example.com",
+          },
+          mockRegistrationIssuerConfig(),
+        ),
+      ).rejects.toMatchObject({
+        message: "server responded with an error in the response body",
+        status: 400,
+        error: "invalid_redirect_uri",
+        error_description: "Invalid redirect URI",
+      });
+      await expect(
+        mockStorage.getForUser("mySession", "clientId"),
+      ).resolves.toBeUndefined();
     });
 
     it("performs dynamic client registration if client information from storage is expired", async () => {
-      mockClientRegistration({}, mockDefaultClientConfig());
+      mockClientRegistration();
       const expiredSecret = randomUUID();
       const expiredClient = randomUUID();
       const clientRegistrar = getClientRegistrar({
@@ -233,20 +456,19 @@ describe("ClientRegistrar", () => {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
       // The expired client should have been re-registered.
-      expect(client.clientId).toBe(mockDefaultClientConfig().client_id);
-      expect(client.clientSecret).toBe(mockDefaultClientConfig().client_secret);
+      expect(mockedFetch).toHaveBeenCalledTimes(2);
+      expect(client.clientId).toBe(mockRegisteredClient().client_id);
+      expect(client.clientSecret).toBe(mockRegisteredClient().client_secret);
       expect((client as IOpenIdDynamicClient).expiresAt).toBe(
-        mockDefaultClientConfig().client_secret_expires_at,
+        CLIENT_SECRET_EXPIRES_AT,
       );
     });
 
     it("performs dynamic client registration if client information from storage is missing expiration date (legacy)", async () => {
-      mockClientRegistration({}, mockDefaultClientConfig());
+      mockClientRegistration();
       const expiredSecret = randomUUID();
       const expiredClient = randomUUID();
       const clientRegistrar = getClientRegistrar({
@@ -269,15 +491,14 @@ describe("ClientRegistrar", () => {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
       // The expired client should have been re-registered.
-      expect(client.clientId).toBe(mockDefaultClientConfig().client_id);
-      expect(client.clientSecret).toBe(mockDefaultClientConfig().client_secret);
+      expect(mockedFetch).toHaveBeenCalledTimes(2);
+      expect(client.clientId).toBe(mockRegisteredClient().client_id);
+      expect(client.clientSecret).toBe(mockRegisteredClient().client_secret);
       expect((client as IOpenIdDynamicClient).expiresAt).toBe(
-        mockDefaultClientConfig().client_secret_expires_at,
+        CLIENT_SECRET_EXPIRES_AT,
       );
     });
 
@@ -305,10 +526,9 @@ describe("ClientRegistrar", () => {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
+      expect(mockedFetch).not.toHaveBeenCalled();
       expect(client.clientId).toBe(exampleClient);
       expect(client.clientSecret).toBe(exampleSecret);
       expect(client.clientName).toBe("my client name");
@@ -316,14 +536,14 @@ describe("ClientRegistrar", () => {
     });
 
     it("throws if the issuer doesn't avertise for supported signing algorithms", async () => {
-      mockClientRegistration({}, mockDefaultClientConfig());
+      mockClientRegistration();
       const mockStorage = mockStorageUtility({});
 
       // Run the test
       const clientRegistrar = getClientRegistrar({
         storage: mockStorage,
       });
-      const issuerConfig = { ...IssuerConfigFetcherFetchConfigResponse };
+      const issuerConfig = mockRegistrationIssuerConfig();
       delete issuerConfig.idTokenSigningAlgValuesSupported;
       await expect(
         clientRegistrar.getClient(
@@ -336,10 +556,11 @@ describe("ClientRegistrar", () => {
       ).rejects.toThrow(
         "The OIDC issuer discovery profile is missing the 'id_token_signing_alg_values_supported' value, which is mandatory.",
       );
+      expect(mockedFetch).not.toHaveBeenCalled();
     });
 
     it("throws if no signing algorithm supported by the issuer match the client preferences", async () => {
-      mockClientRegistration({}, mockDefaultClientConfig());
+      mockClientRegistration();
       const mockStorage = mockStorageUtility({});
 
       // Run the test
@@ -352,18 +573,18 @@ describe("ClientRegistrar", () => {
             sessionId: "mySession",
             redirectUrl: "https://example.com",
           },
-          {
-            ...IssuerConfigFetcherFetchConfigResponse,
+          mockRegistrationIssuerConfig({
             idTokenSigningAlgValuesSupported: ["Some_bogus_algorithm"],
-          },
+          }),
         ),
       ).rejects.toThrow(
         'No signature algorithm match between ["Some_bogus_algorithm"] supported by the Identity Provider and ["ES256","RS256"] preferred by the client.',
       );
+      expect(mockedFetch).not.toHaveBeenCalled();
     });
 
     it("retrieves client information from storage after dynamic registration", async () => {
-      mockClientRegistration({}, mockDefaultClientConfig());
+      mockClientRegistration();
       const mockStorage = mockStorageUtility({});
 
       // Run the test
@@ -375,29 +596,27 @@ describe("ClientRegistrar", () => {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
-      // Re-request for the client. If not returned from memory, the mock throws.
+      // Re-request for the client. If not returned from storage, no network
+      // response is mocked, so the registration would fail.
       client = await clientRegistrar.getClient(
         {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
 
       // Check that the returned value is what we expect
-      expect(client.clientId).toEqual(mockDefaultClientConfig().client_id);
+      expect(mockedFetch).toHaveBeenCalledTimes(2);
+      expect(client.clientId).toEqual(mockRegisteredClient().client_id);
     });
 
     it("uses stores the signing algorithm preferred by the client when the registration didn't return the used algorithm", async () => {
-      const metadata = mockDefaultClientConfig();
+      const metadata = mockRegisteredClient();
       delete metadata.id_token_signed_response_alg;
-      mockClientRegistration({}, metadata);
+      mockClientRegistration(metadata);
       const mockStorage = mockStorageUtility({});
 
       // Run the test
@@ -409,9 +628,7 @@ describe("ClientRegistrar", () => {
           sessionId: "mySession",
           redirectUrl: "https://example.com",
         },
-        {
-          ...IssuerConfigFetcherFetchConfigResponse,
-        },
+        mockRegistrationIssuerConfig(),
       );
 
       // Check that the returned algorithm value is what we expect
