@@ -26,6 +26,7 @@
 import type {
   IClient,
   IClientRegistrar,
+  IIssuerConfig,
   IIssuerConfigFetcher,
   IStorageUtility,
   KeyPair,
@@ -38,54 +39,68 @@ import {
   PREFERRED_SIGNING_ALG,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import type { IssuerMetadata, TokenSet } from "openid-client";
-import { Issuer } from "openid-client";
+import type { TokenEndpointResponse as OidcTokenEndpointResponse } from "openid-client";
+import { refreshTokenGrant } from "openid-client";
 import type { EventEmitter } from "node:events";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
 import { negotiateClientSigningAlg } from "../ClientRegistrar";
-import { asDPoPInput } from "../../../util/dpopInput";
+import {
+  buildClientConfiguration,
+  buildDpopHandle,
+} from "../clientConfiguration";
 
 // Camelcase identifiers are required in the OIDC specification.
-/* eslint-disable camelcase*/
+
+// openid-client normalizes the token type to lower case.
+const TOKEN_TYPES: Record<string, "Bearer" | "DPoP"> = {
+  bearer: "Bearer",
+  dpop: "DPoP",
+};
 
 const tokenSetToTokenEndpointResponse = async (
-  tokenSet: TokenSet,
-  issuerMetadata: IssuerMetadata,
+  tokenSet: OidcTokenEndpointResponse,
+  issuerConfig: IIssuerConfig,
   clientInfo: IClient,
 ): Promise<TokenEndpointResponse> => {
   if (tokenSet.access_token === undefined || tokenSet.id_token === undefined) {
     // The error message is left minimal on purpose not to leak the tokens.
     throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
+      `The Identity Provider [${issuerConfig.issuer}] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
     );
   }
 
-  if (tokenSet.token_type !== "Bearer" && tokenSet.token_type !== "DPoP") {
+  const tokenType = TOKEN_TYPES[tokenSet.token_type.toLowerCase()];
+  if (tokenType === undefined) {
     throw new Error(
-      `The Identity Provider [${issuerMetadata.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
+      `The Identity Provider [${issuerConfig.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
     );
   }
 
-  if (typeof issuerMetadata.jwks_uri != "string") {
+  if (typeof issuerConfig.jwksUri != "string") {
     throw new Error(
-      `Cannot verify ID Token: Issuer Metadata is missing a JWKS URI (${JSON.stringify(issuerMetadata)})`,
+      `Cannot verify ID Token: Issuer Metadata is missing a JWKS URI (${JSON.stringify(issuerConfig)})`,
     );
   }
 
+  // openid-client validates the ID Token claims, but not its signature, so
+  // the signature is validated here.
   const { webId } = await getWebidFromTokenPayload(
     tokenSet.id_token,
-    issuerMetadata.jwks_uri,
-    issuerMetadata.issuer,
+    issuerConfig.jwksUri,
+    issuerConfig.issuer,
     clientInfo.clientId,
   );
 
   return {
     accessToken: tokenSet.access_token,
-    tokenType: tokenSet.token_type,
+    tokenType,
     idToken: tokenSet.id_token,
     refreshToken: tokenSet.refresh_token,
     webId,
-    expiresAt: tokenSet.expires_at,
+    // As in openid-client v5, expiresAt is expressed in seconds since epoch.
+    expiresAt:
+      typeof tokenSet.expires_in === "number"
+        ? Math.trunc(Date.now() / 1000) + tokenSet.expires_in
+        : undefined,
   };
 };
 
@@ -115,7 +130,6 @@ export default class TokenRefresher implements ITokenRefresher {
       this.issuerConfigFetcher,
     );
 
-    const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
     // This should also retrieve the client from storage
     const clientInfo: IClient = await this.clientRegistrar.getClient(
       { sessionId },
@@ -127,15 +141,10 @@ export default class TokenRefresher implements ITokenRefresher {
         PREFERRED_SIGNING_ALG,
       );
     }
-    const client = new issuer.Client({
-      client_id: clientInfo.clientId,
-      client_secret: clientInfo.clientSecret,
-      token_endpoint_auth_method:
-        typeof clientInfo.clientSecret === "undefined"
-          ? "none"
-          : "client_secret_basic",
-      id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
-    });
+    const config = buildClientConfiguration(
+      oidcContext.issuerConfig,
+      clientInfo,
+    );
 
     if (refreshToken === undefined) {
       throw new Error(
@@ -150,10 +159,10 @@ export default class TokenRefresher implements ITokenRefresher {
     }
 
     const tokenSet = await tokenSetToTokenEndpointResponse(
-      await client.refresh(refreshToken, {
-        DPoP: dpopKey ? asDPoPInput(dpopKey.privateKey) : undefined,
+      await refreshTokenGrant(config, refreshToken, undefined, {
+        DPoP: await buildDpopHandle(config, dpopKey),
       }),
-      issuer.metadata,
+      oidcContext.issuerConfig,
       clientInfo,
     );
 
@@ -172,7 +181,7 @@ export default class TokenRefresher implements ITokenRefresher {
       expiresAt: tokenSet.expiresAt,
       dpopKey,
       clientId: clientInfo.clientId,
-      issuer: issuer.metadata.issuer,
+      issuer: oidcContext.issuerConfig.issuer,
     });
 
     return tokenSet;

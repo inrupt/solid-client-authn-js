@@ -18,15 +18,21 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type { CryptoKey } from "jose";
-import type { KeyObject } from "node:crypto";
+const LOOPBACK_HOSTNAMES = ["localhost", "127.0.0.1", "[::1]"];
 
-// FIXME: Remove this helper when openid-client is upgraded to v6.
-// openid-client v5's DPoPInput type is `KeyObject | Parameters<crypto.createPrivateKey>[0]`,
-// but at runtime it also accepts a Web Crypto `CryptoKey` (verified via the
-// `Symbol.toStringTag === 'CryptoKey'` check in its `dpopProof` method).
-// jose v6's `generateKeyPair` returns a `CryptoKey`, so we need to bridge the
-// type mismatch. openid-client v6 uses jose v6 natively and accepts `CryptoKey`
-// directly, so this helper becomes unnecessary after that upgrade.
-export const asDPoPInput = (key: CryptoKey): KeyObject =>
-  key as unknown as KeyObject;
+/**
+ * openid-client v6 rejects plain HTTP requests by default. HTTP is only
+ * tolerated for loopback hosts, to support local development and testing.
+ *
+ * @param url the URL to check.
+ * @returns true if the URL uses HTTP and targets a loopback host.
+ * @hidden
+ */
+export function isLoopbackHttpUrl(url: string | URL): boolean {
+  const parsed = new URL(url);
+  return (
+    parsed.protocol === "http:" &&
+    (LOOPBACK_HOSTNAMES.includes(parsed.hostname) ||
+      parsed.hostname.endsWith(".localhost"))
+  );
+}

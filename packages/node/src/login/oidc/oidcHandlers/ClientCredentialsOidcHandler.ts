@@ -41,12 +41,14 @@ import {
   buildAuthenticatedFetch,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer } from "openid-client";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import { asDPoPInput } from "../../../util/dpopInput";
+import { clientCredentialsGrant } from "openid-client";
+import {
+  buildClientConfiguration,
+  buildDpopHandle,
+} from "../clientConfiguration";
+import { negotiateClientSigningAlg } from "../ClientRegistrar";
 
 // Camelcase identifiers are required in the OIDC specification.
-/* eslint-disable camelcase*/
 
 /**
  * @hidden
@@ -66,12 +68,17 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    const issuer = new Issuer(
-      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration),
-    );
-    const client = new issuer.Client({
-      client_id: oidcLoginOptions.client.clientId,
-      client_secret: oidcLoginOptions.client.clientSecret,
+    const { issuerConfiguration } = oidcLoginOptions;
+    const config = buildClientConfiguration(issuerConfiguration, {
+      clientId: oidcLoginOptions.client.clientId,
+      clientSecret: oidcLoginOptions.client.clientSecret,
+      // openid-client validates the ID Token (if any) claims, and expects it
+      // to be signed using RS256 unless specified otherwise.
+      idTokenSignedResponseAlg: Array.isArray(
+        issuerConfiguration.idTokenSigningAlgValuesSupported,
+      )
+        ? negotiateClientSigningAlg(issuerConfiguration, PREFERRED_SIGNING_ALG)
+        : undefined,
     });
 
     let dpopKey: KeyPair | undefined;
@@ -82,19 +89,15 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
     }
 
-    const tokens = await client.grant(
+    const tokens = await clientCredentialsGrant(
+      config,
       {
-        grant_type: "client_credentials",
-        token_endpoint_auth_method: "client_secret_basic",
         // Passing scopes as an array of strings results in them being
         // comma-separated in the request, which is invalid.
         scope: oidcLoginOptions.scopes.join(" "),
       },
       {
-        DPoP:
-          oidcLoginOptions.dpop && dpopKey !== undefined
-            ? asDPoPInput(dpopKey.privateKey)
-            : undefined,
+        DPoP: await buildDpopHandle(config, dpopKey),
       },
     );
 

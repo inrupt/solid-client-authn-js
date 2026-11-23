@@ -32,20 +32,22 @@ import type {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
-import type { IssuerMetadata } from "openid-client";
-import { Issuer } from "openid-client";
+import type { ServerMetadata } from "openid-client";
+import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
+
+const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
 /**
- * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]
+ * Transforms an openid-client ServerMetadata object into an [[IIssuerConfig]]
  * @param metadata the object to transform.
  * @returns an [[IIssuerConfig]] initialized from the metadata.
  * @internal
  */
 export function configFromIssuerMetadata(
-  metadata: IssuerMetadata,
+  metadata: ServerMetadata,
 ): IIssuerConfig {
   // If the fields required as per https://openid.net/specs/openid-connect-discovery-1_0.html are missing,
   // throw an error.
@@ -113,11 +115,11 @@ export function configFromIssuerMetadata(
 }
 
 /**
- * Transforms an [[IIssuerConfig]] into an openid-client IssuerMetadata
+ * Transforms an [[IIssuerConfig]] into an openid-client ServerMetadata
  * @param config the IIssuerConfig to convert.
- * @returns an IssuerMetadata object initialized from the [[IIssuerConfig]].
+ * @returns a ServerMetadata object initialized from the [[IIssuerConfig]].
  */
-export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
+export function configToIssuerMetadata(config: IIssuerConfig): ServerMetadata {
   return {
     issuer: config.issuer,
     authorization_endpoint: config.authorizationEndpoint,
@@ -157,13 +159,42 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   }
 
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
-    // TODO: The issuer config discovery happens in multiple places in the current
-    // codebase, because in openid-client the Client is built based on the Issuer.
-    // The codebase could be refactored so that issuer discovery only happens once.
-    const oidcIssuer = await Issuer.discover(issuer);
-    const issuerConfig: IIssuerConfig = configFromIssuerMetadata(
-      oidcIssuer.metadata,
+    const issuerUrl = new URL(issuer);
+    if (issuerUrl.protocol !== "https:" && !isLoopbackHttpUrl(issuerUrl)) {
+      throw new ConfigurationError(
+        `The issuer [${issuer}] must use HTTPS. Plain HTTP is only supported for loopback hosts.`,
+      );
+    }
+    // Discovery is done without openid-client, because its discovery requires
+    // client information, which isn't known yet at this point.
+    const discoveryUrl = new URL(
+      WELL_KNOWN_OPENID_CONFIG,
+      issuer.endsWith("/") ? issuer : `${issuer}/`,
     );
+    const response = await fetch(discoveryUrl, {
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) {
+      throw new ConfigurationError(
+        `Fetching the configuration of issuer [${issuer}] at [${discoveryUrl.href}] failed: ${response.status} ${response.statusText}`,
+      );
+    }
+    let metadata: ServerMetadata;
+    try {
+      metadata = (await response.json()) as ServerMetadata;
+    } catch (e) {
+      throw new ConfigurationError(
+        `The configuration of issuer [${issuer}] at [${discoveryUrl.href}] is not valid JSON: ${(e as Error).toString()}`,
+      );
+    }
+    // See https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation
+    // Trailing slash differences are tolerated, as they are common in the wild.
+    if (metadata.issuer?.replace(/\/$/, "") !== issuer.replace(/\/$/, "")) {
+      throw new ConfigurationError(
+        `The issuer identifier [${metadata.issuer}] in the configuration fetched from [${discoveryUrl.href}] does not match the expected issuer [${issuer}].`,
+      );
+    }
+    const issuerConfig: IIssuerConfig = configFromIssuerMetadata(metadata);
     // Update store with fetched config
     await this.storageUtility.set(
       IssuerConfigFetcher.getLocalStorageKey(issuer),

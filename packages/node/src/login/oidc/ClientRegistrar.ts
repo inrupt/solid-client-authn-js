@@ -37,9 +37,11 @@ import {
   PREFERRED_SIGNING_ALG,
   isKnownClientType,
 } from "@inrupt/solid-client-authn-core";
-import type { Client } from "openid-client";
-import { Issuer } from "openid-client";
-import { configToIssuerMetadata } from "./IssuerConfigFetcher";
+import {
+  allowInsecureRequests,
+  dynamicClientRegistration,
+} from "openid-client";
+import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -136,13 +138,10 @@ export default class ClientRegistrar implements IClientRegistrar {
       } as IClient;
     }
 
-    // TODO: It would be more efficient to only issue a single request (see IssuerConfigFetcher)
-    const issuer = new Issuer(configToIssuerMetadata(issuerConfig));
-
-    if (issuer.metadata.registration_endpoint === undefined) {
+    if (issuerConfig.registrationEndpoint === undefined) {
       throw new ConfigurationError(
         `Dynamic client registration cannot be performed, because issuer does not have a registration endpoint: ${JSON.stringify(
-          issuer.metadata,
+          issuerConfig,
         )}`,
       );
     }
@@ -152,24 +151,34 @@ export default class ClientRegistrar implements IClientRegistrar {
       PREFERRED_SIGNING_ALG,
     );
 
-    // The following is compliant with the example code, but seems to mismatch the
-    // type annotations.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const registeredClient: Client = await issuer.Client.register({
-      redirect_uris: [options.redirectUrl],
-      client_name: options.clientName,
-      // See https://openid.net/specs/openid-connect-registration-1_0.html
-      id_token_signed_response_alg: signingAlg,
-      grant_types: ["authorization_code", "refresh_token"],
-    });
+    // Note that openid-client performs the issuer discovery again prior to
+    // registering the client.
+    const registeredClient = (
+      await dynamicClientRegistration(
+        new URL(issuerConfig.issuer),
+        {
+          redirect_uris:
+            options.redirectUrl === undefined ? [] : [options.redirectUrl],
+          client_name: options.clientName,
+          // See https://openid.net/specs/openid-connect-registration-1_0.html
+          id_token_signed_response_alg: signingAlg,
+          grant_types: ["authorization_code", "refresh_token"],
+        },
+        undefined,
+        {
+          execute: isLoopbackHttpUrl(issuerConfig.issuer)
+            ? [allowInsecureRequests]
+            : undefined,
+        },
+      )
+    ).clientMetadata();
 
     let persistedClientMetadata: IOpenIdDynamicClient & {
       idTokenSignedResponseAlg: string;
     } = {
-      clientId: registeredClient.metadata.client_id,
+      clientId: registeredClient.client_id,
       idTokenSignedResponseAlg:
-        registeredClient.metadata.id_token_signed_response_alg ?? signingAlg,
+        registeredClient.id_token_signed_response_alg ?? signingAlg,
       clientType: "dynamic",
     };
     await this.storageUtility.setForUser(options.sessionId, {
@@ -178,12 +187,12 @@ export default class ClientRegistrar implements IClientRegistrar {
         persistedClientMetadata.idTokenSignedResponseAlg,
       clientType: "dynamic",
     });
-    if (registeredClient.metadata.client_secret !== undefined) {
+    if (registeredClient.client_secret !== undefined) {
       persistedClientMetadata = {
         ...persistedClientMetadata,
-        clientSecret: registeredClient.metadata.client_secret,
+        clientSecret: registeredClient.client_secret,
         // If a client secret is present, it has an expiration date.
-        expiresAt: registeredClient.metadata.client_secret_expires_at as number,
+        expiresAt: registeredClient.client_secret_expires_at as number,
       };
       await this.storageUtility.setForUser(options.sessionId, {
         clientSecret: persistedClientMetadata.clientSecret,

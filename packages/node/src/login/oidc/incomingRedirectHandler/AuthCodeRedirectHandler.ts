@@ -44,17 +44,17 @@ import {
   buildAuthenticatedFetch,
   EVENTS,
   maybeBuildRpInitiatedLogout,
-  removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
 
 import { URL } from "url";
-import { Issuer } from "openid-client";
+import { authorizationCodeGrant } from "openid-client";
 import type { EventEmitter } from "node:events";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import { asDPoPInput } from "../../../util/dpopInput";
+import {
+  buildClientConfiguration,
+  buildDpopHandle,
+} from "../clientConfiguration";
 
 // Camelcase identifiers are required in the OIDC specification.
-/* eslint-disable camelcase*/
 
 /**
  * @hidden
@@ -119,11 +119,11 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       this.issuerConfigFetcher,
     );
 
-    const issuer = new Issuer(configToIssuerMetadata(oidcContext.issuerConfig));
+    const { issuerConfig } = oidcContext;
     // The JWKS URI is mandatory in the spec.
-    if (typeof issuer.metadata.jwks_uri !== "string") {
+    if (typeof issuerConfig.jwksUri !== "string") {
       throw new Error(
-        `JWKS URI is missing from issuer configuration, cannot validate tokens. Expected jwks_uri in ${JSON.stringify(issuer.metadata)}`,
+        `JWKS URI is missing from issuer configuration, cannot validate tokens. Expected jwks_uri in ${JSON.stringify(issuerConfig)}`,
       );
     }
     // This should also retrieve the client from storage
@@ -131,27 +131,24 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       { sessionId },
       oidcContext.issuerConfig,
     );
-    const client = new issuer.Client({
-      client_id: clientInfo.clientId,
-      client_secret: clientInfo.clientSecret,
-      token_endpoint_auth_method:
-        typeof clientInfo.clientSecret === "undefined"
-          ? "none"
-          : "client_secret_basic",
-      id_token_signed_response_alg: clientInfo.idTokenSignedResponseAlg,
-    });
+    const config = buildClientConfiguration(issuerConfig, clientInfo);
 
-    const params = client.callbackParams(inputRedirectUrl);
     let dpopKey: KeyPair | undefined;
 
     if (oidcContext.dpop) {
       dpopKey = await generateDpopKeyPair(true);
     }
-    const tokenSet = await client.callback(
-      removeOpenIdParams(inputRedirectUrl).href,
-      params,
-      { code_verifier: oidcContext.codeVerifier, state: oauthState },
-      { DPoP: dpopKey ? asDPoPInput(dpopKey.privateKey) : undefined },
+    // Note that openid-client derives the redirect_uri parameter of the token
+    // request by removing the whole query string from the URL it is redirected to.
+    const tokenSet = await authorizationCodeGrant(
+      config,
+      url,
+      {
+        pkceCodeVerifier: oidcContext.codeVerifier,
+        expectedState: oauthState,
+      },
+      undefined,
+      { DPoP: await buildDpopHandle(config, dpopKey) },
     );
 
     if (
@@ -160,7 +157,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
     ) {
       // The error message is left minimal on purpose not to leak the tokens.
       throw new Error(
-        `The Identity Provider [${issuer.metadata.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
+        `The Identity Provider [${issuerConfig.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,
       );
     }
     let refreshOptions: RefreshOptions | undefined;
@@ -179,13 +176,19 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       expiresIn: tokenSet.expires_in,
     });
 
-    // tokenSet.claims() parses the ID token, validates its signature, and returns
-    // its payload as a JSON object.
+    // As in openid-client v5, expiresAt is expressed in seconds since epoch.
+    const expiresAt =
+      typeof tokenSet.expires_in === "number"
+        ? Math.trunc(Date.now() / 1000) + tokenSet.expires_in
+        : undefined;
+
+    // openid-client validates the ID Token claims, but not its signature, so
+    // the signature is validated here.
     const { webId, clientId } = await getWebidFromTokenPayload(
       tokenSet.id_token,
-      issuer.metadata.jwks_uri,
-      issuer.metadata.issuer,
-      client.metadata.client_id,
+      issuerConfig.jwksUri,
+      issuerConfig.issuer,
+      clientInfo.clientId,
     );
 
     eventEmitter?.emit(EVENTS.NEW_TOKENS, {
@@ -193,10 +196,10 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       idToken: tokenSet.id_token,
       refreshToken: tokenSet.refresh_token,
       webId,
-      expiresAt: tokenSet.expires_at,
+      expiresAt,
       dpopKey,
-      clientId: client.metadata.client_id,
-      issuer: issuer.metadata.issuer,
+      clientId: clientInfo.clientId,
+      issuer: issuerConfig.issuer,
     });
 
     await saveSessionInfoToStorage(
