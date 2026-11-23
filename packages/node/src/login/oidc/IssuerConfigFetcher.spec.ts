@@ -31,6 +31,7 @@ import type { ServerMetadata } from "openid-client";
 import IssuerConfigFetcher, {
   configFromIssuerMetadata,
   configToIssuerMetadata,
+  describeErrorCauses,
 } from "./IssuerConfigFetcher";
 import {
   mockDefaultIssuerMetadata,
@@ -257,6 +258,24 @@ describe("IssuerConfigFetcher", () => {
     );
   });
 
+  it("includes the underlying network error when the issuer configuration cannot be fetched", async () => {
+    mockedFetch.mockRejectedValueOnce(
+      new TypeError("fetch failed", {
+        cause: Object.assign(
+          new Error("unable to verify the first certificate"),
+          { code: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" },
+        ),
+      }),
+    );
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed: fetch failed <- UNABLE_TO_VERIFY_LEAF_SIGNATURE: unable to verify the first certificate",
+    );
+  });
+
   it("does not follow redirects when fetching the issuer configuration", async () => {
     mockedFetch.mockResolvedValueOnce(
       new Response(null, {
@@ -415,6 +434,43 @@ describe("IssuerConfigFetcher", () => {
       expect(
         configToIssuerMetadata(configFromIssuerMetadata(metadata)),
       ).toMatchObject(metadata);
+    });
+  });
+
+  describe("describeErrorCauses", () => {
+    it("describes an error without cause", () => {
+      expect(describeErrorCauses(new Error("Some error"))).toBe("Some error");
+    });
+
+    it("describes the error causes, including their codes", () => {
+      const error = new Error("Outer error", {
+        cause: new Error("Middle error", {
+          cause: Object.assign(new Error("Inner error"), { code: "ECODE" }),
+        }),
+      });
+      expect(describeErrorCauses(error)).toBe(
+        "Outer error <- Middle error <- ECODE: Inner error",
+      );
+    });
+
+    it("does not describe JSON parsing errors, which may include the response body", () => {
+      const error = new Error("Parsing failed", {
+        cause: new SyntaxError("Unexpected token '<', \"<html>Secret\"..."),
+      });
+      expect(describeErrorCauses(error)).toBe("Parsing failed");
+    });
+
+    it("ignores causes which are not errors", () => {
+      expect(
+        describeErrorCauses(new Error("Some error", { cause: "Some cause" })),
+      ).toBe("Some error");
+      expect(describeErrorCauses("Not an error")).toBe("");
+    });
+
+    it("bounds the number of described causes", () => {
+      const error = new Error("Cyclic error");
+      error.cause = error;
+      expect(describeErrorCauses(error).split(" <- ")).toHaveLength(5);
     });
   });
 });

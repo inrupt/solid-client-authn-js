@@ -40,6 +40,38 @@ const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 // openid-client requires a client ID for discovery, but it is not used.
 const DISCOVERY_CLIENT_ID = "solid-client-authn-node-discovery";
 
+// Bounds the cause chain walk, in case of cyclic causes.
+const MAX_ERROR_CAUSE_DEPTH = 5;
+
+/**
+ * Describes an error and its causes (e.g. the network or TLS error behind a
+ * generic "fetch failed"), including their error codes if any. JSON parsing
+ * errors are not described, as their message includes parts of the response
+ * body.
+ *
+ * @param error the error to describe.
+ * @returns a description of the error and its causes.
+ * @hidden
+ */
+export function describeErrorCauses(error: unknown): string {
+  const descriptions: string[] = [];
+  let current: unknown = error;
+  while (
+    current instanceof Error &&
+    !(current instanceof SyntaxError) &&
+    descriptions.length < MAX_ERROR_CAUSE_DEPTH
+  ) {
+    const { code } = current as Error & { code?: unknown };
+    descriptions.push(
+      typeof code === "string"
+        ? `${code}: ${current.message}`
+        : current.message,
+    );
+    current = current.cause;
+  }
+  return descriptions.join(" <- ");
+}
+
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
@@ -192,10 +224,8 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
       );
       metadata = config.serverMetadata();
     } catch (e) {
-      // Only the error message is included, as its cause may contain parts of
-      // the response body.
       throw new ConfigurationError(
-        `Fetching the configuration of issuer [${issuer}] at [${discoveryUrl.href}] failed: ${(e as Error).message}`,
+        `Fetching the configuration of issuer [${issuer}] at [${discoveryUrl.href}] failed: ${describeErrorCauses(e)}`,
       );
     }
     // See https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation
