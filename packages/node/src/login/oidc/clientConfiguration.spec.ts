@@ -25,6 +25,7 @@ import { decodeProtectedHeader } from "jose";
 import {
   buildClientConfiguration,
   buildDpopHandle,
+  fetchWithRedirectUri,
 } from "./clientConfiguration";
 import { mockIssuerConfig } from "./__mocks__/IssuerConfigFetcher";
 
@@ -167,5 +168,53 @@ describe("buildDpopHandle", () => {
     });
     const proof = getTokenRequest(fetchSpy).headers.get("DPoP");
     expect(decodeProtectedHeader(proof as string).alg).toBe("ES256");
+  });
+});
+
+describe("fetchWithRedirectUri", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const requestOptions = (body: URLSearchParams | string) => ({
+    body,
+    headers: {},
+    method: "POST",
+    redirect: "manual" as const,
+  });
+
+  it("sets the redirect_uri of authorization code token requests", async () => {
+    const fetchSpy = mockFetch();
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      redirect_uri: "https://my.app/redirect",
+    });
+    await fetchWithRedirectUri("https://my.app/redirect?some=param")(
+      "https://my.idp/token",
+      requestOptions(body),
+    );
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "https://my.idp/token",
+      expect.objectContaining({ body }),
+    );
+    expect(body.get("redirect_uri")).toBe("https://my.app/redirect?some=param");
+  });
+
+  it("does not modify other requests", async () => {
+    const fetchSpy = mockFetch();
+    const body = new URLSearchParams({ grant_type: "refresh_token" });
+    await fetchWithRedirectUri("https://my.app/redirect?some=param")(
+      "https://my.idp/token",
+      requestOptions(body),
+    );
+    expect(body.get("redirect_uri")).toBeNull();
+    await fetchWithRedirectUri("https://my.app/redirect?some=param")(
+      "https://my.idp/token",
+      requestOptions("some body"),
+    );
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+      "https://my.idp/token",
+      expect.objectContaining({ body: "some body" }),
+    );
   });
 });

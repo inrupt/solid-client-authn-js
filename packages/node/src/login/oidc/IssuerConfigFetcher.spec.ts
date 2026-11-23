@@ -64,8 +64,7 @@ describe("IssuerConfigFetcher", () => {
   const mockDiscovery = (metadata: Partial<ServerMetadata>) =>
     mockedFetch.mockResolvedValueOnce(mockJsonResponse(metadata));
 
-  const getRequestedUrl = (): string =>
-    (mockedFetch.mock.calls[0][0] as URL).href;
+  const getRequestedUrl = (): string => String(mockedFetch.mock.calls[0][0]);
 
   const defaultMocks = {
     storageUtility: mockStorageUtility({}),
@@ -92,9 +91,15 @@ describe("IssuerConfigFetcher", () => {
     expect(getRequestedUrl()).toBe(
       "https://my.idp/.well-known/openid-configuration",
     );
-    expect(mockedFetch.mock.calls[0][1]).toEqual({
-      headers: { Accept: "application/json" },
+    // The discovery request is issued by openid-client, which does not follow
+    // redirects and applies a timeout.
+    const requestInit = mockedFetch.mock.calls[0][1];
+    expect(requestInit).toMatchObject({
+      method: "GET",
+      redirect: "manual",
+      headers: expect.objectContaining({ accept: "application/json" }),
     });
+    expect(requestInit?.signal).toBeInstanceOf(AbortSignal);
     expect(fetchedConfig.issuer).toBe(mockedIssuerConfig.issuer);
     expect(fetchedConfig.authorizationEndpoint).toBe(
       mockedIssuerConfig.authorization_endpoint,
@@ -197,7 +202,7 @@ describe("IssuerConfigFetcher", () => {
     });
 
     await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "The issuer identifier [undefined] in the configuration fetched from [https://my.idp/.well-known/openid-configuration] does not match the expected issuer [https://my.idp/].",
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
     );
   });
 
@@ -248,8 +253,25 @@ describe("IssuerConfigFetcher", () => {
     });
 
     await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed: 404 Not Found",
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
     );
+  });
+
+  it("does not follow redirects when fetching the issuer configuration", async () => {
+    mockedFetch.mockResolvedValueOnce(
+      new Response(null, {
+        status: 302,
+        headers: { Location: "http://169.254.169.254/latest/meta-data/" },
+      }),
+    );
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
+    );
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
   });
 
   it("throws if the issuer configuration is not valid JSON", async () => {
@@ -263,9 +285,14 @@ describe("IssuerConfigFetcher", () => {
       storageUtility: mockStorageUtility({}),
     });
 
-    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "The configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] is not valid JSON: SyntaxError",
+    const error = await configFetcher
+      .fetchConfig("https://my.idp/")
+      .catch((e: Error) => e);
+    expect((error as Error).message).toContain(
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
     );
+    // The response body must not leak in the error message.
+    expect((error as Error).message).not.toContain("Not JSON");
   });
 
   it("throws an error if authorization_endpoint is missing", async () => {

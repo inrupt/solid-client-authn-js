@@ -529,18 +529,22 @@ describe("AuthCodeRedirectHandler", () => {
       expect(tokenRequest.body.get("code_verifier")).toBe("some code verifier");
     });
 
-    it("removes the whole query string and hash from the redirect IRI", async () => {
-      // This is a known behaviour of openid-client v6: redirect URLs
-      // including a query string are not supported.
+    it("preserves the redirect IRI query parameters, but not its fragment", async () => {
+      // Query parameters are allowed in redirect URIs, but fragments aren't
+      // (RFC 6749, section 3.1.2).
       const fetchSpy = setupTokenEndpoint();
 
       await getDefaultHandler().handle(
-        "https://my.app/redirect?someParam=someValue&code=someCode&state=someState#someHash",
+        `https://my.app/redirect?someParam=someValue&code=someCode&state=someState&iss=${encodeURIComponent(
+          mockDefaultIssuerConfig().issuer,
+        )}#someHash`,
       );
 
-      expect(getTokenRequest(fetchSpy).body.get("redirect_uri")).toBe(
-        "https://my.app/redirect",
+      const tokenRequest = getTokenRequest(fetchSpy);
+      expect(tokenRequest.body.get("redirect_uri")).toBe(
+        "https://my.app/redirect?someParam=someValue",
       );
+      expect(tokenRequest.body.get("code")).toBe("someCode");
     });
 
     it("stores the refresh token if one is returned", async () => {
