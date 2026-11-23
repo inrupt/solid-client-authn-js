@@ -31,14 +31,9 @@ import {
   it,
   jest,
 } from "@jest/globals";
-import { custom } from "openid-client";
 import { getSolidDataset } from "@inrupt/solid-client";
 import { EVENTS, Session } from "@inrupt/solid-client-authn-node";
 import type { SessionTokenSet } from "@inrupt/solid-client-authn-node";
-
-custom.setHttpOptionsDefaults({
-  timeout: 15000,
-});
 
 if (process.env.CI === "true") {
   // Tests running in the CI runners tend to be more flaky.

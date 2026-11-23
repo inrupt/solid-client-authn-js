@@ -26,7 +26,6 @@ import {
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import type { Request } from "@playwright/test";
 import { firefox } from "@playwright/test";
-import { custom } from "openid-client";
 import type {
   ILogoutOptions,
   SessionTokenSet,
@@ -40,10 +39,6 @@ import {
 // Extension is required for JSON imports.
 
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
-
-custom.setHttpOptionsDefaults({
-  timeout: 15000,
-});
 
 if (process.env.CI === "true") {
   // Tests running in the CI runners tend to be more flaky.
