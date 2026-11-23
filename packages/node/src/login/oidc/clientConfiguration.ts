@@ -24,7 +24,10 @@
  */
 
 import type { IIssuerConfig, KeyPair } from "@inrupt/solid-client-authn-core";
-import { PREFERRED_SIGNING_ALG } from "@inrupt/solid-client-authn-core";
+import {
+  OidcProviderError,
+  PREFERRED_SIGNING_ALG,
+} from "@inrupt/solid-client-authn-core";
 import type { CustomFetch, DPoPHandle } from "openid-client";
 import {
   allowInsecureRequests,
@@ -32,6 +35,8 @@ import {
   Configuration,
   getDPoPHandle,
   None,
+  ResponseBodyError,
+  WWWAuthenticateChallengeError,
 } from "openid-client";
 import type { CryptoKey } from "jose";
 import { importJWK } from "jose";
@@ -128,4 +133,51 @@ export function fetchWithRedirectUri(redirectUri: string): CustomFetch {
     // differ across TypeScript lib versions.
     return fetch(url, options as RequestInit);
   };
+}
+
+const buildOidcProviderError = (
+  error: string,
+  errorDescription?: string,
+  errorUri?: string,
+): OidcProviderError =>
+  new OidcProviderError(
+    `Token endpoint returned error [${error}]${
+      errorDescription !== undefined ? `: ${errorDescription}` : ""
+    }${errorUri !== undefined ? ` (see ${errorUri})` : ""}`,
+    error,
+    errorDescription,
+  );
+
+/**
+ * openid-client errors for OAuth error responses have a generic message, and
+ * the OAuth error code is only available as a property. This converts them to
+ * an {@link OidcProviderError}, which includes the OAuth error in its message,
+ * and is handled by the library (e.g. to emit events when a token refresh is
+ * refused). Other errors are returned as is.
+ *
+ * @param e the error thrown by openid-client.
+ * @returns the converted error.
+ * @hidden
+ */
+export function toOidcProviderError(e: unknown): unknown {
+  if (e instanceof ResponseBodyError) {
+    return buildOidcProviderError(
+      e.error,
+      e.error_description,
+      typeof e.cause.error_uri === "string" ? e.cause.error_uri : undefined,
+    );
+  }
+  if (e instanceof WWWAuthenticateChallengeError) {
+    const challenge = e.cause.find(
+      ({ parameters }) => typeof parameters.error === "string",
+    );
+    if (challenge !== undefined) {
+      return buildOidcProviderError(
+        challenge.parameters.error as string,
+        challenge.parameters.error_description,
+        challenge.parameters.error_uri,
+      );
+    }
+  }
+  return e;
 }

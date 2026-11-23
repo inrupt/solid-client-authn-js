@@ -46,6 +46,7 @@ import { negotiateClientSigningAlg } from "../ClientRegistrar";
 import {
   buildClientConfiguration,
   buildDpopHandle,
+  toOidcProviderError,
 } from "../clientConfiguration";
 
 // openid-client normalizes the token type to lower case.
@@ -159,6 +160,8 @@ export default class TokenRefresher implements ITokenRefresher {
     const tokenSet = await tokenSetToTokenEndpointResponse(
       await refreshTokenGrant(config, refreshToken, undefined, {
         DPoP: await buildDpopHandle(config, dpopKey),
+      }).catch((e: unknown) => {
+        throw toOidcProviderError(e);
       }),
       oidcContext.issuerConfig,
       clientInfo,

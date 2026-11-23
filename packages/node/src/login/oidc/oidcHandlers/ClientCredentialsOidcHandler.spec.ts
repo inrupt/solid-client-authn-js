@@ -41,7 +41,7 @@ import {
 } from "jose";
 import { randomUUID } from "crypto";
 import { EventEmitter } from "events";
-import { EVENTS } from "@inrupt/solid-client-authn-core";
+import { EVENTS, OidcProviderError } from "@inrupt/solid-client-authn-core";
 import { mockDefaultTokenRefresher } from "../refresh/__mocks__/TokenRefresher";
 import { standardOidcOptions } from "../__mocks__/IOidcOptions";
 import ClientCredentialsOidcHandler from "./ClientCredentialsOidcHandler";
@@ -330,6 +330,35 @@ describe("handle", () => {
     ).rejects.toThrow(
       /Invalid response from Solid Identity Provider \[.+\]: \{.+\} is missing 'access_token'/,
     );
+  });
+
+  it("throws an OidcProviderError if the OpenID Provider returns an error", async () => {
+    mockedFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "invalid_client",
+          error_description: "Unknown client",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
+      mockDefaultTokenRefresher(),
+    );
+
+    const error = await clientCredentialsOidcHandler
+      .handle({
+        ...standardOidcOptions,
+        dpop: false,
+        client: mockStaticClient("some client ID"),
+      })
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(OidcProviderError);
+    expect(error).toMatchObject({
+      message: "Token endpoint returned error [invalid_client]: Unknown client",
+      error: "invalid_client",
+      errorDescription: "Unknown client",
+    });
   });
 
   it("requests a token using the client credentials grant and client_secret_basic authentication", async () => {

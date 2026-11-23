@@ -33,6 +33,7 @@ import {
   StorageUtilityMock,
   EVENTS,
   generateDpopKeyPair,
+  OidcProviderError,
 } from "@inrupt/solid-client-authn-core";
 import type { CryptoKey } from "jose";
 import {
@@ -357,6 +358,37 @@ describe("TokenRefresher", () => {
         'unexpected JWT "alg" header parameter',
       ),
     );
+  });
+
+  it("throws an OidcProviderError if the OpenID Provider refuses to refresh the token", async () => {
+    mockedFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "invalid_grant",
+          error_description: "The refresh token is expired",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    const refresher = getTokenRefresher({
+      storageUtility: mockRefresherDefaultStorageUtility(),
+      clientRegistrar: mockClientRegistrar({
+        clientId: "https://some.client.identifier",
+        clientType: "solid-oidc",
+        idTokenSignedResponseAlg: "ES256",
+      }),
+    });
+
+    const error = await refresher
+      .refresh("mySession", "some refresh token", await generateDpopKeyPair())
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(OidcProviderError);
+    expect(error).toMatchObject({
+      message:
+        "Token endpoint returned error [invalid_grant]: The refresh token is expired",
+      error: "invalid_grant",
+      errorDescription: "The refresh token is expired",
+    });
   });
 
   it("uses 'none' authentication if using Solid-OIDC client identifiers", async () => {

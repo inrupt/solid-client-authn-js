@@ -19,13 +19,17 @@
 //
 
 import { jest, it, describe, expect, afterEach } from "@jest/globals";
-import { generateDpopKeyPair } from "@inrupt/solid-client-authn-core";
 import { clientCredentialsGrant } from "openid-client";
 import { decodeProtectedHeader } from "jose";
+import {
+  generateDpopKeyPair,
+  OidcProviderError,
+} from "@inrupt/solid-client-authn-core";
 import {
   buildClientConfiguration,
   buildDpopHandle,
   fetchWithRedirectUri,
+  toOidcProviderError,
 } from "./clientConfiguration";
 import { mockIssuerConfig } from "./__mocks__/IssuerConfigFetcher";
 
@@ -216,5 +220,91 @@ describe("fetchWithRedirectUri", () => {
       "https://my.idp/token",
       expect.objectContaining({ body: "some body" }),
     );
+  });
+});
+
+describe("toOidcProviderError", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  // Gets the error thrown by openid-client for the given token endpoint response.
+  const getOpenidClientError = async (response: Response): Promise<unknown> => {
+    jest.spyOn(globalThis, "fetch").mockResolvedValueOnce(response);
+    const config = buildClientConfiguration(mockIssuerConfig({}), {
+      clientId: "someClient",
+      clientSecret: "someSecret",
+    });
+    return clientCredentialsGrant(config).catch((e: unknown) => e);
+  };
+
+  const errorResponse = (
+    body: Record<string, string>,
+    status = 400,
+    headers: Record<string, string> = {},
+  ) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json", ...headers },
+    });
+
+  it("converts an error in the response body", async () => {
+    const error = toOidcProviderError(
+      await getOpenidClientError(
+        errorResponse({
+          error: "invalid_grant",
+          error_description: "Some description",
+          error_uri: "https://my.idp/errors/invalid_grant",
+        }),
+      ),
+    );
+    expect(error).toBeInstanceOf(OidcProviderError);
+    expect(error).toMatchObject({
+      message:
+        "Token endpoint returned error [invalid_grant]: Some description (see https://my.idp/errors/invalid_grant)",
+      error: "invalid_grant",
+      errorDescription: "Some description",
+    });
+  });
+
+  it("converts an error in the response body without description", async () => {
+    const error = toOidcProviderError(
+      await getOpenidClientError(errorResponse({ error: "invalid_grant" })),
+    );
+    expect(error).toBeInstanceOf(OidcProviderError);
+    expect(error).toMatchObject({
+      message: "Token endpoint returned error [invalid_grant]",
+      error: "invalid_grant",
+      errorDescription: undefined,
+    });
+  });
+
+  it("converts an error in a WWW-Authenticate challenge", async () => {
+    const error = toOidcProviderError(
+      await getOpenidClientError(
+        errorResponse({ error: "invalid_client" }, 401, {
+          "WWW-Authenticate":
+            'Basic realm="my.idp", error="invalid_client", error_description="Unknown client"',
+        }),
+      ),
+    );
+    expect(error).toBeInstanceOf(OidcProviderError);
+    expect(error).toMatchObject({
+      message: "Token endpoint returned error [invalid_client]: Unknown client",
+      error: "invalid_client",
+      errorDescription: "Unknown client",
+    });
+  });
+
+  it("returns a WWW-Authenticate challenge without error as is", async () => {
+    const original = await getOpenidClientError(
+      errorResponse({}, 401, { "WWW-Authenticate": 'Basic realm="my.idp"' }),
+    );
+    expect(toOidcProviderError(original)).toBe(original);
+  });
+
+  it("returns other errors as is", () => {
+    const original = new Error("Some error");
+    expect(toOidcProviderError(original)).toBe(original);
   });
 });

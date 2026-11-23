@@ -24,6 +24,7 @@ import {
   mockStorageUtility,
   EVENTS,
   getWebidFromTokenPayload,
+  OidcProviderError,
 } from "@inrupt/solid-client-authn-core";
 import { EventEmitter } from "events";
 import { AuthCodeRedirectHandler } from "./AuthCodeRedirectHandler";
@@ -701,11 +702,14 @@ describe("AuthCodeRedirectHandler", () => {
         mockTokenEndpointResponse({ error: "invalid_grant" }, 400),
       );
 
-      await expect(
-        getDefaultHandler().handle(
-          "https://my.app/redirect?code=someCode&state=someState",
-        ),
-      ).rejects.toThrow();
+      const error = await getDefaultHandler()
+        .handle("https://my.app/redirect?code=someCode&state=someState")
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(OidcProviderError);
+      expect(error).toMatchObject({
+        message: "Token endpoint returned error [invalid_grant]",
+        error: "invalid_grant",
+      });
     });
 
     it("throws if the IdP does not return an access token", async () => {

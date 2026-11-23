@@ -45,6 +45,7 @@ import { clientCredentialsGrant } from "openid-client";
 import {
   buildClientConfiguration,
   buildDpopHandle,
+  toOidcProviderError,
 } from "../clientConfiguration";
 
 /**
@@ -93,7 +94,9 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       {
         DPoP: await buildDpopHandle(config, dpopKey),
       },
-    );
+    ).catch((e: unknown) => {
+      throw toOidcProviderError(e);
+    });
 
     let webId: string;
     let clientId: string | undefined;

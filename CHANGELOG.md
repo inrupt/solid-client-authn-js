@@ -26,6 +26,10 @@ The following changes have been implemented but not released yet:
   - The `openid-client` HTTP options defaults (set via `custom.setHttpOptionsDefaults`) no longer
     apply to requests issued by this library. Requests to the Identity Provider now time out after
     30 seconds.
+  - Errors returned by the Identity Provider token endpoint are now thrown as an
+    `OidcProviderError` (with `error` and `errorDescription` properties) instead of an
+    `openid-client` `OPError`. As in the browser package, if the Identity Provider refuses to refresh
+    a session's access token, the session now emits `EVENTS.ERROR` and `EVENTS.SESSION_EXPIRED`.
 
 ### New features
 

@@ -54,6 +54,7 @@ import {
   buildClientConfiguration,
   buildDpopHandle,
   fetchWithRedirectUri,
+  toOidcProviderError,
 } from "../clientConfiguration";
 
 /**
@@ -154,7 +155,9 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       },
       undefined,
       { DPoP: await buildDpopHandle(config, dpopKey) },
-    );
+    ).catch((e: unknown) => {
+      throw toOidcProviderError(e);
+    });
 
     if (
       tokenSet.access_token === undefined ||
