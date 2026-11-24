@@ -384,9 +384,10 @@ describe("handle", () => {
     );
     expect(request.method).toBe("POST");
     expect(request.body.get("grant_type")).toBe("client_credentials");
-    // The client ID and secret are form-URL-encoded (RFC 6749, section 2.3.1).
+    // The client ID and secret are form-URL-encoded (RFC 6749, section 2.3.1),
+    // as openid-client v5 did: "-" is not percent-encoded.
     expect(request.headers.get("Authorization")).toBe(
-      `Basic ${btoa("some+client+ID:some%2Dclient+secret")}`,
+      `Basic ${btoa("some+client+ID:some-client+secret")}`,
     );
     expect(request.body.has("client_secret")).toBe(false);
   });

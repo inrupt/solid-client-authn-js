@@ -28,6 +28,7 @@ import {
 import {
   buildClientConfiguration,
   buildDpopHandle,
+  clientSecretBasic,
   fetchWithRedirectUri,
   toOidcProviderError,
 } from "./clientConfiguration";
@@ -306,5 +307,36 @@ describe("toOidcProviderError", () => {
   it("returns other errors as is", () => {
     const original = new Error("Some error");
     expect(toOidcProviderError(original)).toBe(original);
+  });
+});
+
+describe("clientSecretBasic", () => {
+  const getAuthorization = (clientId: string, clientSecret: string) => {
+    const headers = new Headers();
+    clientSecretBasic(clientSecret)(
+      mockIssuerConfig({}) as never,
+      { client_id: clientId },
+      new URLSearchParams(),
+      headers,
+    );
+    return headers.get("authorization");
+  };
+
+  it("does not percent-encode characters which decode to themselves", () => {
+    // UUID-like credentials, as issued by ESS.
+    expect(
+      getAuthorization(
+        "6f1c0b2e-9d4a-4c6e-8f00-1a2b3c4d5e6f",
+        "a1b2.c3_d4~e5!*'()",
+      ),
+    ).toBe(
+      `Basic ${btoa("6f1c0b2e-9d4a-4c6e-8f00-1a2b3c4d5e6f:a1b2.c3_d4~e5!*'()")}`,
+    );
+  });
+
+  it("form-URL-encodes other characters", () => {
+    expect(getAuthorization("some client:id", "50%/secret")).toBe(
+      `Basic ${btoa("some+client%3Aid:50%25%2Fsecret")}`,
+    );
   });
 });

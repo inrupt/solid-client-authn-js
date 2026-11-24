@@ -28,10 +28,9 @@ import {
   OidcProviderError,
   PREFERRED_SIGNING_ALG,
 } from "@inrupt/solid-client-authn-core";
-import type { CustomFetch, DPoPHandle } from "openid-client";
+import type { ClientAuth, CustomFetch, DPoPHandle } from "openid-client";
 import {
   allowInsecureRequests,
-  ClientSecretBasic,
   Configuration,
   getDPoPHandle,
   None,
@@ -45,6 +44,29 @@ import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
+
+// The application/x-www-form-urlencoded encoding of the client credentials, as
+// done by openid-client v5. openid-client v6 also percent-encodes the - _ . ! ~
+// * ' ( ) characters, which some OpenID Providers (e.g. ESS) don't decode,
+// rejecting the client credentials. These characters decode to themselves, so
+// this encoding is also understood by OpenID Providers decoding credentials.
+const formUrlEncode = (value: string): string =>
+  encodeURIComponent(value).replace(/%20/g, "+");
+
+/**
+ * The client_secret_basic client authentication method, encoding the client
+ * credentials as openid-client v5 did (see RFC 6749, section 2.3.1).
+ *
+ * @param clientSecret the client secret.
+ * @returns an openid-client client authentication method.
+ * @hidden
+ */
+export function clientSecretBasic(clientSecret: string): ClientAuth {
+  return (_as, client, _body, headers) => {
+    const credentials = `${formUrlEncode(client.client_id)}:${formUrlEncode(clientSecret)}`;
+    headers.set("authorization", `Basic ${btoa(credentials)}`);
+  };
+}
 
 /**
  * Builds an openid-client {@link Configuration} from the issuer configuration
@@ -73,7 +95,7 @@ export function buildClientConfiguration(
       id_token_signed_response_alg: client.idTokenSignedResponseAlg,
     },
     typeof client.clientSecret === "string"
-      ? ClientSecretBasic(client.clientSecret)
+      ? clientSecretBasic(client.clientSecret)
       : None(),
   );
   if (isLoopbackHttpUrl(issuerConfig.issuer)) {
