@@ -18,7 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-const LOOPBACK_HOSTNAMES = ["localhost", "127.0.0.1", "[::1]"];
+const LOOPBACK_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 /**
  * openid-client v6 rejects plain HTTP requests by default. HTTP is only
@@ -32,7 +32,7 @@ export function isLoopbackHttpUrl(url: string | URL): boolean {
   const parsed = new URL(url);
   return (
     parsed.protocol === "http:" &&
-    (LOOPBACK_HOSTNAMES.includes(parsed.hostname) ||
+    (LOOPBACK_HOSTNAMES.has(parsed.hostname) ||
       parsed.hostname.endsWith(".localhost"))
   );
 }

@@ -139,14 +139,16 @@ const buildOidcProviderError = (
   error: string,
   errorDescription?: string,
   errorUri?: string,
-): OidcProviderError =>
-  new OidcProviderError(
-    `Token endpoint returned error [${error}]${
-      errorDescription !== undefined ? `: ${errorDescription}` : ""
-    }${errorUri !== undefined ? ` (see ${errorUri})` : ""}`,
-    error,
-    errorDescription,
-  );
+): OidcProviderError => {
+  let message = `Token endpoint returned error [${error}]`;
+  if (errorDescription !== undefined) {
+    message += `: ${errorDescription}`;
+  }
+  if (errorUri !== undefined) {
+    message += ` (see ${errorUri})`;
+  }
+  return new OidcProviderError(message, error, errorDescription);
+};
 
 /**
  * openid-client errors for OAuth error responses have a generic message, and
