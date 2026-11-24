@@ -25,6 +25,14 @@ import type { KeyPair } from "./dpopUtils";
 import { createDpopHeader } from "./dpopUtils";
 import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
+import {
+  parseAuthnChallenge,
+  isResourceMetadata,
+  hasAuthServer,
+  setAsMetaDefaults,
+  isASMetadata,
+  exchange,
+} from "./reactiveAuth";
 
 export type RefreshOptions = {
   sessionId: string;
@@ -147,6 +155,113 @@ const computeRefreshDelay = (expiresIn?: number): number => {
   }
   return DEFAULT_EXPIRATION_TIME_SECONDS;
 };
+
+/**
+ * Based on the authentication challenge of an unauthorized request,
+ * discover supported authentication mechanism and authenticate if
+ * possible.
+ *
+ * @param unauthResponse  the original unauthorized response
+ * @param idToken         the ID Token for the user
+ * @param url             the original request URL
+ * @param requestInit     the original request parameters
+ * @param keyPair         the DPoP key the token is bound to (if any)
+ * @param _fetch          an unauthenticated fetch
+ * @returns the HTTP response, either unauthorized or after an attempted authentication
+ */
+async function reactiveAuth(
+  unauthResponse: Response,
+  idToken: string,
+  url: RequestInfo | URL,
+  requestInit?: RequestInit,
+  keyPair?: KeyPair,
+  _fetch?: typeof fetch,
+): Promise<Response> {
+  // Discovery
+  // www-authenticate: Bearer resource_metadata="https://ess.local/.well-known/oauth-protected-resource"
+  if (!unauthResponse.headers.has("WWW-Authenticate")) {
+    return unauthResponse;
+  }
+  const challenges = parseAuthnChallenge(
+    unauthResponse.headers.get("WWW-Authenticate") as string,
+  );
+  // The resource metadata identifies the resource, whichever scheme advertises it.
+  // A DPoP challenge only applies if the session has a DPoP key, and is then preferred.
+  const candidates =
+    keyPair !== undefined
+      ? [challenges.DPoP, challenges.Bearer]
+      : [challenges.Bearer];
+  const resourceMetadataUrl = candidates
+    .map((params) => params?.resource_metadata)
+    .find((url) => url !== undefined);
+  if (resourceMetadataUrl === undefined) {
+    return unauthResponse;
+  }
+  // TODO: cache this
+  const resourceMeta = await fetch(resourceMetadataUrl)
+    .then((response) => (response.ok ? response.json() : undefined))
+    .then((json) => (isResourceMetadata(json) ? json : undefined))
+    .catch((_) => {
+      return undefined;
+    });
+  if (
+    resourceMeta === undefined ||
+    !hasAuthServer(resourceMeta) ||
+    resourceMeta.authorization_servers.length === 0
+  ) {
+    return unauthResponse;
+  }
+  const asUrl = new URL(
+    ".well-known/oauth-authorization-server",
+    resourceMeta.authorization_servers.at(0),
+  );
+  // TODO: cache this
+  const asMeta = await fetch(asUrl)
+    .then((response) => {
+      const result = response.ok ? response.json() : undefined;
+      return result;
+    })
+    .then((json) => {
+      const withDefault =
+        json !== null && typeof json === "object"
+          ? setAsMetaDefaults(json)
+          : json;
+      console.debug(withDefault);
+      return withDefault;
+    })
+    .then((json) => (isASMetadata(json) ? json : undefined))
+    .catch((_) => {
+      return undefined;
+    });
+  if (
+    asMeta === undefined ||
+    !asMeta.grant_types_supported.includes(
+      "urn:ietf:params:oauth:grant-type:token-exchange",
+    )
+  ) {
+    return unauthResponse;
+  }
+  // Token exchange
+  try {
+    // FIXME cache the tokens
+    const tokens = await exchange(
+      idToken,
+      asMeta.token_endpoint,
+      asMeta.issuer,
+      resourceMeta.resource,
+      keyPair,
+    );
+    return await makeAuthenticatedRequest(
+      tokens.access_token,
+      url,
+      requestInit,
+      tokens.token_type === "DPoP" ? keyPair : undefined,
+      _fetch,
+    );
+  } catch (_) {
+    return unauthResponse;
+  }
+}
 
 /**
  * @param accessToken an access token, either a Bearer token or a DPoP one.
@@ -281,6 +396,13 @@ export function buildAuthenticatedFetch(
         options.fetch,
       );
     }
-    return response;
+    return reactiveAuth(
+      response,
+      currentAccessToken,
+      url,
+      requestInit,
+      options?.dpopKey,
+      options?.fetch,
+    );
   };
 }
