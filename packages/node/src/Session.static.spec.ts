@@ -186,7 +186,7 @@ describe("Session static functions", () => {
         expect(session.info.isLoggedIn).toBe(true);
         expect(session.fetch).toBeDefined();
 
-        // The session being logged in means the provided token
+        // The session being logged in means the provided access token
         // will be used to make authenticated fetches.
         const globalFetch = globalThis.fetch;
         let headers: Headers;
@@ -240,6 +240,31 @@ describe("Session static functions", () => {
         expect(headers.get("Authorization")).toBe(`DPoP ${mockedAccessToken}`);
         // @ts-expect-error We know headers is initialized.
         expect(headers.get("dpop")).not.toBeNull();
+        globalThis.fetch = globalFetch;
+      });
+
+      it("does not authenticate the session fetch without an access token", async () => {
+        const mockedIdToken = await mockIdToken({});
+        const tokenSet: SessionTokenSet = {
+          idToken: mockedIdToken,
+          clientId: mockClientId,
+          issuer: mockOpConfig().issuer,
+          webId: mockWebid,
+        };
+
+        const session = await Session.fromTokens(tokenSet);
+
+        // The ID token must not be sent as an access token.
+        const globalFetch = globalThis.fetch;
+        let headers: Headers;
+        globalThis.fetch = (async (input, init) => {
+          // Capture the fetch headers.
+          headers = new Headers(init?.headers);
+          return new Response();
+        }) as typeof fetch;
+        await session.fetch("https://some.resource");
+        // @ts-expect-error We know headers is initialized.
+        expect(headers.get("Authorization")).toBeNull();
         globalThis.fetch = globalFetch;
       });
 

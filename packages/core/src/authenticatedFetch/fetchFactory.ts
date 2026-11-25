@@ -20,7 +20,10 @@
 
 import type { EventEmitter } from "node:events";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
-import type { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
+import type {
+  ITokenRefresher,
+  TokenEndpointResponse,
+} from "../login/oidc/refresh/ITokenRefresher";
 import type { KeyPair } from "./dpopUtils";
 import { createDpopHeader } from "./dpopUtils";
 import { OidcProviderError } from "../errors/OidcProviderError";
@@ -33,6 +36,7 @@ import {
   isASMetadata,
   exchange,
 } from "./reactiveAuth";
+import type { SessionTokenSet } from "../SessionEventListener";
 
 export type RefreshOptions = {
   sessionId: string;
@@ -124,7 +128,7 @@ async function refreshAccessToken(
   refreshOptions: RefreshOptions,
   dpopKey?: KeyPair,
   eventEmitter?: EventEmitter,
-): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number }> {
+): Promise<TokenEndpointResponse> {
   const tokenSet = await refreshOptions.tokenRefresher.refresh(
     refreshOptions.sessionId,
     refreshOptions.refreshToken,
@@ -134,11 +138,7 @@ async function refreshAccessToken(
     EVENTS.SESSION_EXTENDED,
     tokenSet.expiresIn ?? DEFAULT_EXPIRATION_TIME_SECONDS,
   );
-  return {
-    accessToken: tokenSet.accessToken,
-    refreshToken: tokenSet.refreshToken,
-    expiresIn: tokenSet.expiresIn,
-  };
+  return tokenSet;
 }
 
 /**
@@ -162,7 +162,7 @@ const computeRefreshDelay = (expiresIn?: number): number => {
  * possible.
  *
  * @param unauthResponse  the original unauthorized response
- * @param idToken         the ID Token for the user
+ * @param idToken         the ID Token for the user, exchanged for an access token to the target resource
  * @param url             the original request URL
  * @param requestInit     the original request parameters
  * @param keyPair         the DPoP key the token is bound to (if any)
@@ -171,12 +171,16 @@ const computeRefreshDelay = (expiresIn?: number): number => {
  */
 async function reactiveAuth(
   unauthResponse: Response,
-  idToken: string,
+  idToken: string | undefined,
   url: RequestInfo | URL,
   requestInit?: RequestInit,
   keyPair?: KeyPair,
   _fetch?: typeof fetch,
 ): Promise<Response> {
+  // Without an ID token, there is nothing to exchange for an access token.
+  if (idToken === undefined) {
+    return unauthResponse;
+  }
   // Discovery
   if (!unauthResponse.headers.has("WWW-Authenticate")) {
     return unauthResponse;
@@ -216,18 +220,12 @@ async function reactiveAuth(
   );
   // TODO: cache this
   const asMeta = await fetch(asUrl)
-    .then((response) => {
-      const result = response.ok ? response.json() : undefined;
-      return result;
-    })
-    .then((json) => {
-      const withDefault =
-        json !== null && typeof json === "object"
-          ? setAsMetaDefaults(json)
-          : json;
-      console.debug(withDefault);
-      return withDefault;
-    })
+    .then((response) => (response.ok ? response.json() : undefined))
+    .then((json) =>
+      json !== null && typeof json === "object"
+        ? setAsMetaDefaults(json)
+        : json,
+    )
     .then((json) => (isASMetadata(json) ? json : undefined))
     .catch((_) => {
       return undefined;
@@ -263,59 +261,108 @@ async function reactiveAuth(
 }
 
 /**
- * @param accessToken an access token, either a Bearer token or a DPoP one.
- * @param options The option object may contain two objects: the DPoP key token
- * is bound to if applicable, and options to customize token renewal behavior.
- * @param {typeof fetch} [options.fetch=fetch] A custom fetch function (defaults to the global fetch).
- *
- * @returns A fetch function that adds an appropriate Authorization header with
- * the provided token, and adds a DPoP header if applicable.
+ * The tokens an authenticated fetch is built from.
  */
-export function buildAuthenticatedFetch(
-  accessToken: string,
-  options?: {
-    dpopKey?: KeyPair;
-    refreshOptions?: RefreshOptions;
-    expiresIn?: number;
-    eventEmitter?: EventEmitter;
-    fetch?: typeof fetch; // optional custom fetch
-  },
+export type AuthenticatedFetchTokens = Pick<
+  SessionTokenSet,
+  "idToken" | "refreshToken" | "dpopKey"
+> & {
+  /**
+   * The access token sent with each request.
+   */
+  accessToken: string;
+  /**
+   * Delay until the access token expires, in seconds. Takes precedence over `expiresAt`.
+   */
+  expiresIn?: number;
+  /**
+   * Expiration date of the access token, in seconds since the epoch.
+   */
+  expiresAt?: number;
+};
+
+export type AuthenticatedFetchOptions = {
+  /**
+   * Required to refresh the tokens before they expire, together with a refresh token.
+   */
+  refreshOptions?: Omit<RefreshOptions, "refreshToken">;
+  eventEmitter?: EventEmitter;
+  /**
+   * A custom fetch function (defaults to the global fetch).
+   */
+  fetch?: typeof fetch;
+};
+
+const computeExpiresIn = (
+  tokens: AuthenticatedFetchTokens,
+): number | undefined => {
+  if (tokens.expiresIn !== undefined) {
+    return tokens.expiresIn;
+  }
+  if (tokens.expiresAt !== undefined) {
+    return tokens.expiresAt - Math.trunc(Date.now() / 1000);
+  }
+  return undefined;
+};
+
+/**
+ * Build a fetch function authenticated with the provided tokens.
+ *
+ * The access token is sent with each request, bound to the DPoP key if one is provided.
+ * If the target resource rejects it and advertises its protected resource metadata,
+ * the ID token is exchanged for an access token to that resource (RFC 8693).
+ * If refresh options and a refresh token are provided, the whole token set is refreshed
+ * before the access token expires.
+ *
+ * @param tokens The session tokens.
+ * @param options Refresh options, event emitter and custom fetch.
+ * @returns A fetch function that adds an appropriate Authorization header with
+ * the access token, and adds a DPoP header if applicable.
+ */
+export function authenticateFetch(
+  tokens: AuthenticatedFetchTokens,
+  options?: AuthenticatedFetchOptions,
 ): typeof fetch {
-  let currentAccessToken = accessToken;
-  let latestTimeout: Parameters<typeof clearTimeout>[0];
-  const currentRefreshOptions: RefreshOptions | undefined =
-    options?.refreshOptions;
+  // Mutable token state, rotated on refresh.
+  const current = {
+    accessToken: tokens.accessToken,
+    idToken: tokens.idToken,
+    refreshToken: tokens.refreshToken,
+  };
+  const { dpopKey } = tokens;
   const emitter = options?.eventEmitter;
+  const refreshOptions = options?.refreshOptions;
+  const expiresIn = computeExpiresIn(tokens);
+  let latestTimeout: Parameters<typeof clearTimeout>[0];
   // Setup the refresh timeout outside of the authenticated fetch, so that
   // an idle app will not get logged out if it doesn't issue a fetch before
   // the first expiration date.
-  if (options !== undefined && currentRefreshOptions !== undefined) {
+  if (refreshOptions !== undefined && current.refreshToken !== undefined) {
     const proactivelyRefreshToken = async () => {
       try {
-        const {
-          accessToken: refreshedAccessToken,
-          refreshToken,
-          expiresIn,
-        } = await refreshAccessToken(
-          currentRefreshOptions,
-          options.dpopKey,
+        const refreshed = await refreshAccessToken(
+          {
+            ...refreshOptions,
+            refreshToken: current.refreshToken as string,
+          },
+          dpopKey,
           emitter,
         );
-        // Update the tokens in the closure if appropriate.
-        currentAccessToken = refreshedAccessToken;
-        if (refreshToken !== undefined) {
-          currentRefreshOptions.refreshToken = refreshToken;
+        // Rotate the whole token set. Refresh responses may omit the ID token
+        // (OpenID Connect Core, section 12.2), in which case the previous one is kept.
+        current.accessToken = refreshed.accessToken;
+        current.idToken = refreshed.idToken ?? current.idToken;
+        if (refreshed.refreshToken !== undefined) {
+          current.refreshToken = refreshed.refreshToken;
         }
         // Each time the access token is refreshed, we must plan for the next
         // refresh iteration.
         clearTimeout(latestTimeout);
         latestTimeout = setTimeout(
           proactivelyRefreshToken,
-          computeRefreshDelay(expiresIn) * 1000,
+          computeRefreshDelay(refreshed.expiresIn) * 1000,
         );
-        // If currentRefreshOptions is defined, options is necessarily defined too.
-
-        options.eventEmitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
+        emitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
       } catch (e) {
         // It is possible that an underlying library throws an error on refresh flow failure.
         // If we used a log framework, the error could be logged at the `debug` level,
@@ -347,9 +394,7 @@ export function buildAuthenticatedFetch(
     };
     latestTimeout = setTimeout(
       proactivelyRefreshToken,
-      // If currentRefreshOptions is defined, options is necessarily defined too.
-
-      computeRefreshDelay(options.expiresIn) * 1000,
+      computeRefreshDelay(expiresIn) * 1000,
     );
 
     emitter?.emit(EVENTS.TIMEOUT_SET, latestTimeout);
@@ -359,16 +404,16 @@ export function buildAuthenticatedFetch(
       () => {
         emitter.emit(EVENTS.SESSION_EXPIRED);
       },
-      computeRefreshDelay(options?.expiresIn) * 1000,
+      computeRefreshDelay(expiresIn) * 1000,
     );
     emitter.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
   }
   return async (url, requestInit?): Promise<Response> => {
     let response = await makeAuthenticatedRequest(
-      currentAccessToken,
+      current.accessToken,
       url,
       requestInit,
-      options?.dpopKey,
+      dpopKey,
       options?.fetch,
     );
 
@@ -380,28 +425,77 @@ export function buildAuthenticatedFetch(
       return response;
     }
     const hasBeenRedirected = response.url !== url;
-    if (hasBeenRedirected && options?.dpopKey !== undefined) {
+    if (hasBeenRedirected && dpopKey !== undefined) {
       // If the request failed for auth reasons, and has been redirected, we should
       // replay it generating a DPoP header for the rediration target IRI. This
       // doesn't apply to Bearer tokens, as the Bearer tokens aren't specific
       // to a given resource and method, while the DPoP header (associated to a
       // DPoP token) is.
       response = await makeAuthenticatedRequest(
-        currentAccessToken,
+        current.accessToken,
         // Replace the original target IRI (`url`) by the redirection target
         response.url,
         requestInit,
-        options.dpopKey,
-        options.fetch,
+        dpopKey,
+        options?.fetch,
       );
+      if (!isExpectedAuthError(response.status)) {
+        // Reactive authentication only applies to auth errors.
+        return response;
+      }
     }
     return reactiveAuth(
       response,
-      currentAccessToken,
+      current.idToken,
       url,
       requestInit,
-      options?.dpopKey,
+      dpopKey,
       options?.fetch,
     );
   };
+}
+
+/**
+ * @param accessToken an access token, either a Bearer token or a DPoP one.
+ * @param options The option object may contain two objects: the DPoP key token
+ * is bound to if applicable, and options to customize token renewal behavior.
+ * @param {string} [options.idToken] The ID token, exchanged for an access token to resources
+ * which reject the access token. Without it, no token exchange is attempted.
+ * @param {typeof fetch} [options.fetch=fetch] A custom fetch function (defaults to the global fetch).
+ *
+ * @returns A fetch function that adds an appropriate Authorization header with
+ * the provided token, and adds a DPoP header if applicable.
+ * @deprecated Use {@link authenticateFetch} instead.
+ */
+export function buildAuthenticatedFetch(
+  accessToken: string,
+  options?: {
+    idToken?: string;
+    dpopKey?: KeyPair;
+    refreshOptions?: RefreshOptions;
+    expiresIn?: number;
+    eventEmitter?: EventEmitter;
+    fetch?: typeof fetch; // optional custom fetch
+  },
+): typeof fetch {
+  return authenticateFetch(
+    {
+      accessToken,
+      idToken: options?.idToken,
+      dpopKey: options?.dpopKey,
+      refreshToken: options?.refreshOptions?.refreshToken,
+      expiresIn: options?.expiresIn,
+    },
+    {
+      refreshOptions:
+        options?.refreshOptions !== undefined
+          ? {
+              sessionId: options.refreshOptions.sessionId,
+              tokenRefresher: options.refreshOptions.tokenRefresher,
+            }
+          : undefined,
+      eventEmitter: options?.eventEmitter,
+      fetch: options?.fetch,
+    },
+  );
 }

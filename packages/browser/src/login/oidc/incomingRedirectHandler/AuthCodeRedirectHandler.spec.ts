@@ -24,7 +24,7 @@ import type {
   IClientRegistrarOptions,
   IIssuerConfigFetcher,
   IIssuerConfig,
-  buildAuthenticatedFetch,
+  authenticateFetch,
 } from "@inrupt/solid-client-authn-core";
 import { USER_SESSION_PREFIX } from "@inrupt/solid-client-authn-core";
 import {
@@ -564,11 +564,11 @@ describe("AuthCodeRedirectHandler", () => {
     mockOidcClient();
     const mockedStorage = mockDefaultStorageUtility();
     const coreModule = jest.requireActual<{
-      buildAuthenticatedFetch: typeof buildAuthenticatedFetch;
+      authenticateFetch: typeof authenticateFetch;
     }>("@inrupt/solid-client-authn-core");
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch",
+      "authenticateFetch",
     );
 
     const tokenRefresher = mockTokenRefresher(
@@ -583,14 +583,16 @@ describe("AuthCodeRedirectHandler", () => {
     await authCodeRedirectHandler.handle(mockRedirectUrl());
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
-      expect.anything(),
       expect.objectContaining({
-        refreshOptions: {
-          refreshToken: "some DPoP-bound refresh token",
+        refreshToken: "some DPoP-bound refresh token",
+        idToken: expect.any(String),
+        expiresIn: 1337,
+      }),
+      expect.objectContaining({
+        refreshOptions: expect.objectContaining({
           sessionId: "mySession",
           tokenRefresher,
-        },
-        expiresIn: 1337,
+        }),
       }),
     );
   });

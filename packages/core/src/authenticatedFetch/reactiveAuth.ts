@@ -273,7 +273,7 @@ export async function exchange(
     body: new URLSearchParams({
       grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
       subject_token: token,
-      subject_token_type: "urn:ietf:params:oauth:token-type:access_token",
+      subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
       audience,
       resource,
     }),

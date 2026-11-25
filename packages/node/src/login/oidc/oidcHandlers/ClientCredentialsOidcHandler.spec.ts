@@ -392,7 +392,7 @@ describe("handle", () => {
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch",
+      "authenticateFetch",
     );
     const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
@@ -409,10 +409,12 @@ describe("handle", () => {
     });
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
-      expect.anything(),
+      expect.objectContaining({
+        refreshToken: "some refresh token",
+        idToken: tokens.id_token,
+      }),
       expect.objectContaining({
         refreshOptions: {
-          refreshToken: "some refresh token",
           sessionId: "mySession",
           tokenRefresher: mockedRefresher,
         },
@@ -429,7 +431,7 @@ describe("handle", () => {
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch",
+      "authenticateFetch",
     );
     const mockedRefresher = mockDefaultTokenRefresher();
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
@@ -446,10 +448,10 @@ describe("handle", () => {
     });
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
-      expect.anything(),
       expect.objectContaining({
         expiresIn: mockDpopTokens().expires_in,
       }),
+      expect.anything(),
     );
   });
 

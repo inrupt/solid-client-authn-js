@@ -34,7 +34,7 @@ import type {
   IncomingRedirectResult,
 } from "@inrupt/solid-client-authn-core";
 import {
-  buildAuthenticatedFetch,
+  authenticateFetch,
   loadOidcContextFromStorage,
   maybeBuildRpInitiatedLogout,
   saveSessionInfoToStorage,
@@ -159,12 +159,16 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       };
     }
 
-    const authFetch = buildAuthenticatedFetch(tokens.accessToken, {
-      dpopKey: tokens.dpopKey,
-      refreshOptions,
-      eventEmitter,
-      expiresIn: tokens.expiresIn,
-    });
+    const authFetch = authenticateFetch(
+      {
+        accessToken: tokens.accessToken,
+        idToken: tokens.idToken,
+        refreshToken: refreshOptions?.refreshToken,
+        dpopKey: tokens.dpopKey,
+        expiresIn: tokens.expiresIn,
+      },
+      { refreshOptions, eventEmitter },
+    );
 
     await saveSessionInfoToStorage(
       this.storageUtility,

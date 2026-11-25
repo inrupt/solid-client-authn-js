@@ -41,7 +41,7 @@ import {
   getSessionIdFromOauthState,
   getWebidFromTokenPayload,
   generateDpopKeyPair,
-  buildAuthenticatedFetch,
+  authenticateFetch,
   EVENTS,
   maybeBuildRpInitiatedLogout,
   removeOpenIdParams,
@@ -172,12 +172,19 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
         tokenRefresher: this.tokenRefresher,
       };
     }
-    const authFetch = buildAuthenticatedFetch(tokenSet.access_token, {
-      dpopKey,
-      refreshOptions: oidcContext.keepAlive ? refreshOptions : undefined,
-      eventEmitter,
-      expiresIn: tokenSet.expires_in,
-    });
+    const authFetch = authenticateFetch(
+      {
+        accessToken: tokenSet.access_token,
+        idToken: tokenSet.id_token,
+        refreshToken: refreshOptions?.refreshToken,
+        dpopKey,
+        expiresIn: tokenSet.expires_in,
+      },
+      {
+        refreshOptions: oidcContext.keepAlive ? refreshOptions : undefined,
+        eventEmitter,
+      },
+    );
 
     // tokenSet.claims() parses the ID token, validates its signature, and returns
     // its payload as a JSON object.
