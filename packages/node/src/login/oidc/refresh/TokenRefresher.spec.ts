@@ -42,7 +42,6 @@ import {
   generateKeyPair,
   SignJWT,
 } from "jose";
-import type * as OpenidClient from "openid-client";
 import { EventEmitter } from "events";
 import TokenRefresher from "./TokenRefresher";
 import {
@@ -55,32 +54,11 @@ import {
   mockIssuerConfig,
   mockIssuerConfigFetcher,
 } from "../__mocks__/IssuerConfigFetcher";
-import type * as ClientRegistrarModule from "../ClientRegistrar";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-// openid-client is used for real, the network is mocked instead. The token
-// grant is only wrapped in a spy so that responses which openid-client would
-// reject can be fed to the refresher.
-jest.mock("openid-client", () => {
-  const actual = jest.requireActual("openid-client") as typeof OpenidClient;
-  return {
-    ...actual,
-    refreshTokenGrant: jest.fn(actual.refreshTokenGrant),
-  };
-});
-
-jest.mock("../ClientRegistrar", () => {
-  const actual = jest.requireActual(
-    "../ClientRegistrar",
-  ) as typeof ClientRegistrarModule;
-  return {
-    ...actual,
-    negotiateClientSigningAlg: jest.fn(actual.negotiateClientSigningAlg),
-  };
-});
-
+// openid-client is used for real, the network is mocked instead.
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core",
@@ -96,12 +74,13 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
 
 const mockWebId = (): string => "https://my.webid/";
 
-let idTokenSigningKey: CryptoKey;
+const idTokenSigningKeys: Record<string, CryptoKey> = {};
 
 beforeAll(async () => {
   // The ID token signature isn't verified by openid-client, and the
   // verification done by the library is mocked, so any key works.
-  ({ privateKey: idTokenSigningKey } = await generateKeyPair("ES256"));
+  idTokenSigningKeys.ES256 = (await generateKeyPair("ES256")).privateKey;
+  idTokenSigningKeys.RS256 = (await generateKeyPair("RS256")).privateKey;
 });
 
 // Builds an ID token which passes the claims validation done by openid-client.
@@ -115,7 +94,7 @@ const mockIdToken = async (
     .setAudience(options.clientId ?? mockDefaultClient().clientId)
     .setIssuedAt()
     .setExpirationTime("1h")
-    .sign(idTokenSigningKey);
+    .sign(idTokenSigningKeys[options.alg ?? "ES256"]);
 
 type TokenEndpointBody = {
   access_token?: string;
@@ -167,17 +146,6 @@ const openidClientError = (message: string, causeMessage: string) =>
     message,
     cause: expect.objectContaining({ message: causeMessage }),
   });
-
-const getMockedGrant = () =>
-  (jest.requireMock("openid-client") as jest.Mocked<typeof OpenidClient>)
-    .refreshTokenGrant;
-
-const getMockedNegotiation = () =>
-  (
-    jest.requireMock("../ClientRegistrar") as jest.Mocked<
-      typeof ClientRegistrarModule
-    >
-  ).negotiateClientSigningAlg;
 
 const mockDefaultStorageContent = {
   "solidClientAuthenticationUser:mySession": {
@@ -291,8 +259,9 @@ describe("TokenRefresher", () => {
   });
 
   it("negotiates the signing algorithm if it is not set for the client", async () => {
-    // The issuer supports ES256 and RS256, and ES256 is preferred.
-    await mockTokenEndpoint();
+    // The issuer supports ES256 and RS256, and ES256 is preferred: an RS256
+    // ID token, which the issuer supports, is rejected.
+    await mockTokenEndpoint({ id_token: await mockIdToken({ alg: "RS256" }) });
     const refresher = getTokenRefresher({
       storageUtility: mockRefresherDefaultStorageUtility(),
     });
@@ -303,32 +272,35 @@ describe("TokenRefresher", () => {
         "some refresh token",
         await generateDpopKeyPair(),
       ),
-    ).resolves.toBeDefined();
-
-    expect(getMockedNegotiation()).toHaveBeenCalledTimes(1);
+    ).rejects.toEqual(
+      openidClientError(
+        "invalid response encountered",
+        'unexpected JWT "alg" header parameter',
+      ),
+    );
   });
 
   it("does not negotiate the signing algorithm if it is already set for the client", async () => {
     await mockTokenEndpoint({
-      id_token: await mockIdToken({ clientId: "some client ID" }),
+      id_token: await mockIdToken({ clientId: "some client ID", alg: "RS256" }),
     });
     const refresher = getTokenRefresher({
       storageUtility: mockRefresherDefaultStorageUtility(),
       clientRegistrar: mockClientRegistrar({
         clientId: "some client ID",
         clientSecret: "some client secret",
-        idTokenSignedResponseAlg: "ES256",
+        idTokenSignedResponseAlg: "RS256",
         clientType: "static",
       }),
     });
 
-    await refresher.refresh(
-      "mySession",
-      "some refresh token",
-      await generateDpopKeyPair(),
-    );
-
-    expect(getMockedNegotiation()).not.toHaveBeenCalled();
+    await expect(
+      refresher.refresh(
+        "mySession",
+        "some refresh token",
+        await generateDpopKeyPair(),
+      ),
+    ).resolves.toBeDefined();
   });
 
   it("expects the ID token to be signed with the client's signing algorithm", async () => {
@@ -679,7 +651,7 @@ describe("TokenRefresher", () => {
   });
 
   it("throws if the IdP does not return an access token", async () => {
-    // openid-client rejects such a response itself...
+    // openid-client rejects such a response.
     await mockTokenEndpoint({ access_token: undefined });
     const refresher = getTokenRefresher({
       storageUtility: mockRefresherDefaultStorageUtility(),
@@ -696,23 +668,6 @@ describe("TokenRefresher", () => {
         "invalid response encountered",
         '"response" body "access_token" property must be a string',
       ),
-    );
-
-    // ... but the refresher does not rely on it.
-    getMockedGrant().mockResolvedValueOnce({
-      ...(await mockTokenEndpointBody({ access_token: undefined })),
-    } as unknown as Awaited<ReturnType<typeof OpenidClient.refreshTokenGrant>>);
-
-    await expect(
-      refresher.refresh(
-        "mySession",
-        "some old refresh token",
-        await generateDpopKeyPair(),
-      ),
-    ).rejects.toThrow(
-      `The Identity Provider [${
-        mockDefaultIssuerConfig().issuer
-      }] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
     );
   });
 
@@ -758,7 +713,7 @@ describe("TokenRefresher", () => {
   });
 
   it("throws if the IdP returns an unknown token type", async () => {
-    // openid-client rejects such a response itself...
+    // openid-client rejects such a response.
     await mockTokenEndpoint({ token_type: "Some unknown token type" });
     const refresher = getTokenRefresher({
       storageUtility: mockRefresherDefaultStorageUtility(),
@@ -775,25 +730,6 @@ describe("TokenRefresher", () => {
         "unsupported operation",
         "unsupported `token_type` value",
       ),
-    );
-
-    // ... but the refresher does not rely on it.
-    getMockedGrant().mockResolvedValueOnce({
-      ...(await mockTokenEndpointBody({
-        token_type: "Some unknown token type",
-      })),
-    } as unknown as Awaited<ReturnType<typeof OpenidClient.refreshTokenGrant>>);
-
-    await expect(
-      refresher.refresh(
-        "mySession",
-        "some old refresh token",
-        await generateDpopKeyPair(),
-      ),
-    ).rejects.toThrow(
-      `The Identity Provider [${
-        mockDefaultIssuerConfig().issuer
-      }] returned an unknown token type: [Some unknown token type]`,
     );
   });
 });

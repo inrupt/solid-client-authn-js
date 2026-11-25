@@ -49,28 +49,16 @@ import {
   toOidcProviderError,
 } from "../clientConfiguration";
 
-// openid-client normalizes the token type to lower case.
-const TOKEN_TYPES: Record<string, "Bearer" | "DPoP"> = {
-  bearer: "Bearer",
-  dpop: "DPoP",
-};
-
 const tokenSetToTokenEndpointResponse = async (
   tokenSet: OidcTokenEndpointResponse,
   issuerConfig: IIssuerConfig,
   clientInfo: IClient,
 ): Promise<TokenEndpointResponse> => {
-  if (tokenSet.access_token === undefined || tokenSet.id_token === undefined) {
+  // openid-client rejects responses without an access token.
+  if (tokenSet.id_token === undefined) {
     // The error message is left minimal on purpose not to leak the tokens.
     throw new Error(
       `The Identity Provider [${issuerConfig.issuer}] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
-    );
-  }
-
-  const tokenType = TOKEN_TYPES[tokenSet.token_type.toLowerCase()];
-  if (tokenType === undefined) {
-    throw new Error(
-      `The Identity Provider [${issuerConfig.issuer}] returned an unknown token type: [${tokenSet.token_type}].`,
     );
   }
 
@@ -91,7 +79,9 @@ const tokenSetToTokenEndpointResponse = async (
 
   return {
     accessToken: tokenSet.access_token,
-    tokenType,
+    // openid-client rejects token types other than bearer and DPoP, and
+    // normalizes them to lower case.
+    tokenType: tokenSet.token_type === "dpop" ? "DPoP" : "Bearer",
     idToken: tokenSet.id_token,
     refreshToken: tokenSet.refresh_token,
     webId,

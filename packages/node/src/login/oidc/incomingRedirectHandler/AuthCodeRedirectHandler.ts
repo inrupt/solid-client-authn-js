@@ -159,10 +159,8 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       throw toOidcProviderError(e);
     });
 
-    if (
-      tokenSet.access_token === undefined ||
-      tokenSet.id_token === undefined
-    ) {
+    // openid-client rejects responses without an access token.
+    if (tokenSet.id_token === undefined) {
       // The error message is left minimal on purpose not to leak the tokens.
       throw new Error(
         `The Identity Provider [${issuerConfig.issuer}] did not return the expected tokens: missing at least one of 'access_token', 'id_token'.`,

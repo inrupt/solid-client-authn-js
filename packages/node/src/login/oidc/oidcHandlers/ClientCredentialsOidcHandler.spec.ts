@@ -31,7 +31,6 @@ import {
   beforeEach,
   afterEach,
 } from "@jest/globals";
-import type * as OpenidClient from "openid-client";
 import type { CryptoKey } from "jose";
 import {
   decodeJwt,
@@ -51,17 +50,7 @@ import { mockDefaultClient } from "../__mocks__/ClientRegistrar";
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-// openid-client is used for real, the network is mocked instead. The token
-// grant is only wrapped in a spy so that responses which openid-client would
-// reject can be fed to the handler.
-jest.mock("openid-client", () => {
-  const actual = jest.requireActual("openid-client") as typeof OpenidClient;
-  return {
-    ...actual,
-    clientCredentialsGrant: jest.fn(actual.clientCredentialsGrant),
-  };
-});
-
+// openid-client is used for real, the network is mocked instead.
 const mockedFetch = jest.spyOn(globalThis, "fetch");
 
 jest.mock("@inrupt/solid-client-authn-core", () => {
@@ -300,7 +289,7 @@ describe("handle", () => {
     const clientCredentialsOidcHandler = new ClientCredentialsOidcHandler(
       mockDefaultTokenRefresher(),
     );
-    // openid-client rejects such a response itself...
+    // openid-client rejects such a response.
     await expect(
       clientCredentialsOidcHandler.handle({
         ...standardOidcOptions,
@@ -311,24 +300,6 @@ describe("handle", () => {
         "invalid response encountered",
         '"response" body "access_token" property must be a string',
       ),
-    );
-
-    // ... but the handler does not rely on it.
-    const { clientCredentialsGrant } = jest.requireMock(
-      "openid-client",
-    ) as jest.Mocked<typeof OpenidClient>;
-    clientCredentialsGrant.mockResolvedValueOnce(
-      tokens as unknown as Awaited<
-        ReturnType<typeof OpenidClient.clientCredentialsGrant>
-      >,
-    );
-    await expect(
-      clientCredentialsOidcHandler.handle({
-        ...standardOidcOptions,
-        client,
-      }),
-    ).rejects.toThrow(
-      /Invalid response from Solid Identity Provider \[.+\]: \{.+\} is missing 'access_token'/,
     );
   });
 

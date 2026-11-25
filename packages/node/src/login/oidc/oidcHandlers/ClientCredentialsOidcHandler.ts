@@ -98,16 +98,9 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       throw toOidcProviderError(e);
     });
 
+    // openid-client rejects responses without an access token.
     let webId: string;
     let clientId: string | undefined;
-    if (tokens.access_token === undefined) {
-      throw new Error(
-        `Invalid response from Solid Identity Provider [${
-          oidcLoginOptions.issuer
-        }]: ${JSON.stringify(tokens)} is missing 'access_token'.`,
-      );
-    }
-
     if (tokens.id_token === undefined) {
       // In the case where no ID token is provided, the access token is used to
       // get the authenticated user's WebID. This is only a temporary solution,
