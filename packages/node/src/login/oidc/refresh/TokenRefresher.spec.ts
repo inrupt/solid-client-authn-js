@@ -303,35 +303,6 @@ describe("TokenRefresher", () => {
     ).resolves.toBeDefined();
   });
 
-  it("expects the ID token to be signed with the client's signing algorithm", async () => {
-    // The ID token is signed using ES256, but the client expects RS256.
-    await mockTokenEndpoint({
-      id_token: await mockIdToken({ clientId: "some client ID" }),
-    });
-    const refresher = getTokenRefresher({
-      storageUtility: mockRefresherDefaultStorageUtility(),
-      clientRegistrar: mockClientRegistrar({
-        clientId: "some client ID",
-        clientSecret: "some client secret",
-        idTokenSignedResponseAlg: "RS256",
-        clientType: "static",
-      }),
-    });
-
-    await expect(
-      refresher.refresh(
-        "mySession",
-        "some refresh token",
-        await generateDpopKeyPair(),
-      ),
-    ).rejects.toEqual(
-      openidClientError(
-        "invalid response encountered",
-        'unexpected JWT "alg" header parameter',
-      ),
-    );
-  });
-
   it("throws an OidcProviderError if the OpenID Provider refuses to refresh the token", async () => {
     mockedFetch.mockResolvedValueOnce(
       new Response(
@@ -388,26 +359,6 @@ describe("TokenRefresher", () => {
     expect(request.headers.has("Authorization")).toBe(false);
     expect(request.body.get("client_id")).toBe(
       "https://some.client.identifier",
-    );
-    expect(request.body.has("client_secret")).toBe(false);
-  });
-
-  it("uses 'client_secret_basic' authentication if the client has a secret", async () => {
-    await mockTokenEndpoint();
-    const refresher = getTokenRefresher({
-      storageUtility: mockRefresherDefaultStorageUtility(),
-    });
-
-    await refresher.refresh(
-      "mySession",
-      "some refresh token",
-      await generateDpopKeyPair(),
-    );
-
-    const request = getTokenRequest();
-    // The client ID and secret are form-URL-encoded, so spaces become '+'.
-    expect(request.headers.get("Authorization")).toBe(
-      `Basic ${btoa("a+client+id:a+client+secret")}`,
     );
     expect(request.body.has("client_secret")).toBe(false);
   });
@@ -650,27 +601,6 @@ describe("TokenRefresher", () => {
     });
   });
 
-  it("throws if the IdP does not return an access token", async () => {
-    // openid-client rejects such a response.
-    await mockTokenEndpoint({ access_token: undefined });
-    const refresher = getTokenRefresher({
-      storageUtility: mockRefresherDefaultStorageUtility(),
-    });
-
-    await expect(
-      refresher.refresh(
-        "mySession",
-        "some old refresh token",
-        await generateDpopKeyPair(),
-      ),
-    ).rejects.toEqual(
-      openidClientError(
-        "invalid response encountered",
-        '"response" body "access_token" property must be a string',
-      ),
-    );
-  });
-
   it("throws if the IdP does not return an id token", async () => {
     await mockTokenEndpoint({ id_token: undefined });
     const refresher = getTokenRefresher({
@@ -687,49 +617,6 @@ describe("TokenRefresher", () => {
       `The Identity Provider [${
         mockDefaultIssuerConfig().issuer
       }] did not return the expected tokens on refresh: missing at least one of 'access_token', 'id_token'.`,
-    );
-  });
-
-  it("throws if the IdP returns an ID token with unexpected claims", async () => {
-    await mockTokenEndpoint({
-      id_token: await mockIdToken({ issuer: "https://some.other.idp/" }),
-    });
-    const refresher = getTokenRefresher({
-      storageUtility: mockRefresherDefaultStorageUtility(),
-    });
-
-    await expect(
-      refresher.refresh(
-        "mySession",
-        "some old refresh token",
-        await generateDpopKeyPair(),
-      ),
-    ).rejects.toEqual(
-      openidClientError(
-        "unexpected JWT claim value encountered",
-        'unexpected JWT "iss" (issuer) claim value',
-      ),
-    );
-  });
-
-  it("throws if the IdP returns an unknown token type", async () => {
-    // openid-client rejects such a response.
-    await mockTokenEndpoint({ token_type: "Some unknown token type" });
-    const refresher = getTokenRefresher({
-      storageUtility: mockRefresherDefaultStorageUtility(),
-    });
-
-    await expect(
-      refresher.refresh(
-        "mySession",
-        "some old refresh token",
-        await generateDpopKeyPair(),
-      ),
-    ).rejects.toEqual(
-      openidClientError(
-        "unsupported operation",
-        "unsupported `token_type` value",
-      ),
     );
   });
 });

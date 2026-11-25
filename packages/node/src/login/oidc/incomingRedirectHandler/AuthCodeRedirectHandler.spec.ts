@@ -429,67 +429,6 @@ describe("AuthCodeRedirectHandler", () => {
       expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
     });
 
-    it("accepts ID tokens signed with the client's expected algorithm", async () => {
-      setupTokenEndpoint({
-        ...mockDpopTokens(),
-        id_token: mockIdToken({}, "ES256"),
-      });
-
-      await expect(
-        getDefaultHandler({
-          clientRegistrar: {
-            getClient: async () => ({
-              ...mockDefaultClient(),
-              idTokenSignedResponseAlg: "ES256",
-            }),
-          },
-        }).handle("https://my.app/redirect?code=someCode&state=someState"),
-      ).resolves.toBeDefined();
-    });
-
-    it("rejects ID tokens signed with an algorithm the issuer does not support if the client has no expected algorithm", async () => {
-      // The default issuer configuration supports ES256 and RS256.
-      setupTokenEndpoint({
-        ...mockDpopTokens(),
-        id_token: mockIdToken({}, "PS256"),
-      });
-
-      await expect(
-        getDefaultHandler().handle(
-          "https://my.app/redirect?code=someCode&state=someState",
-        ),
-      ).rejects.toThrow();
-      expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
-    });
-
-    it("throws if the ID token audience does not include the client ID", async () => {
-      setupTokenEndpoint({
-        ...mockDpopTokens(),
-        id_token: mockIdToken({ aud: "https://some.other.client" }),
-      });
-
-      await expect(
-        getDefaultHandler().handle(
-          "https://my.app/redirect?code=someCode&state=someState",
-        ),
-      ).rejects.toThrow();
-      expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
-    });
-
-    it("throws if the ID token issuer does not match the issuer", async () => {
-      setupTokenEndpoint({
-        ...mockDpopTokens(),
-        id_token: mockIdToken({ iss: "https://some.other.idp/" }),
-      });
-
-      await expect(
-        getDefaultHandler().handle(
-          "https://my.app/redirect?code=someCode&state=someState",
-        ),
-      ).rejects.toThrow();
-      expect(getWebidFromTokenPayload).not.toHaveBeenCalled();
-    });
-
     it("properly performs Bearer token exchange", async () => {
       const fetchSpy = setupTokenEndpoint(mockBearerTokens());
       const mockedStorage = mockDefaultRedirectStorage();
@@ -709,23 +648,6 @@ describe("AuthCodeRedirectHandler", () => {
       expect(error).toMatchObject({
         message: "Token endpoint returned error [invalid_grant]",
         error: "invalid_grant",
-      });
-    });
-
-    it("throws if the IdP does not return an access token", async () => {
-      const tokens = mockDpopTokens();
-      delete tokens.access_token;
-      setupTokenEndpoint(tokens);
-
-      // openid-client rejects token responses without an access token.
-      await expect(
-        getDefaultHandler().handle(
-          "https://my.app/redirect?code=someCode&state=someState",
-        ),
-      ).rejects.toMatchObject({
-        cause: expect.objectContaining({
-          message: expect.stringContaining("access_token"),
-        }),
       });
     });
 

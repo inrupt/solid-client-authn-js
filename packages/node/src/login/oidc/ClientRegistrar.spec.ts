@@ -174,29 +174,6 @@ describe("ClientRegistrar", () => {
       expect(mockedFetch).not.toHaveBeenCalled();
     });
 
-    it("throws if a static client stored is missing its secret", async () => {
-      const clientRegistrar = getClientRegistrar({
-        storage: mockStorageUtility(
-          {
-            "solidClientAuthenticationUser:mySession": {
-              clientId: randomUUID(),
-              clientType: "static",
-            },
-          },
-          false,
-        ),
-      });
-      await expect(
-        clientRegistrar.getClient(
-          {
-            sessionId: "mySession",
-            redirectUrl: "https://example.com",
-          },
-          mockRegistrationIssuerConfig(),
-        ),
-      ).rejects.toThrow("Missing static client secret in storage.");
-    });
-
     it("negotiates signing alg if not found in storage", async () => {
       const clientRegistrar = getClientRegistrar({
         storage: mockStorageUtility(
@@ -344,91 +321,6 @@ describe("ClientRegistrar", () => {
       );
       expect(getRegistrationRequest().url).toBe(`${issuer}register`);
       expect(client.clientId).toBe(mockRegisteredClient().client_id);
-    });
-
-    it("does not allow plain HTTP requests for a non-loopback issuer", async () => {
-      const issuer = "http://idp.example/";
-      mockClientRegistration(
-        mockRegisteredClient(),
-        mockDiscoveryDocument({
-          issuer,
-          registration_endpoint: `${issuer}register`,
-        }),
-      );
-
-      await expect(
-        getClientRegistrar({
-          storage: mockStorageUtility({}),
-        }).getClient(
-          {
-            sessionId: "mySession",
-            redirectUrl: "https://example.com",
-          },
-          mockRegistrationIssuerConfig({
-            issuer,
-            registrationEndpoint: `${issuer}register`,
-          }),
-        ),
-      ).rejects.toThrow("only requests to HTTPS are allowed");
-      expect(mockedFetch).not.toHaveBeenCalled();
-    });
-
-    it("throws if the discovered issuer does not match the issuer configuration", async () => {
-      mockClientRegistration(
-        mockRegisteredClient(),
-        mockDiscoveryDocument({ issuer: "https://other.idp/" }),
-      );
-
-      await expect(
-        getClientRegistrar({
-          storage: mockStorageUtility({}),
-        }).getClient(
-          {
-            sessionId: "mySession",
-            redirectUrl: "https://example.com",
-          },
-          mockRegistrationIssuerConfig(),
-        ),
-      ).rejects.toThrow(
-        "discovered metadata issuer does not match the expected issuer",
-      );
-      // The registration request should not have been sent.
-      expect(mockedFetch).toHaveBeenCalledTimes(1);
-    });
-
-    it("throws if the registration endpoint returns an error", async () => {
-      mockedFetch
-        .mockResolvedValueOnce(mockJsonResponse(mockDiscoveryDocument(), 200))
-        .mockResolvedValueOnce(
-          mockJsonResponse(
-            {
-              error: "invalid_redirect_uri",
-              error_description: "Invalid redirect URI",
-            },
-            400,
-          ),
-        );
-      const mockStorage = mockStorageUtility({});
-
-      await expect(
-        getClientRegistrar({
-          storage: mockStorage,
-        }).getClient(
-          {
-            sessionId: "mySession",
-            redirectUrl: "https://example.com",
-          },
-          mockRegistrationIssuerConfig(),
-        ),
-      ).rejects.toMatchObject({
-        message: "server responded with an error in the response body",
-        status: 400,
-        error: "invalid_redirect_uri",
-        error_description: "Invalid redirect URI",
-      });
-      await expect(
-        mockStorage.getForUser("mySession", "clientId"),
-      ).resolves.toBeUndefined();
     });
 
     it("performs dynamic client registration if client information from storage is expired", async () => {

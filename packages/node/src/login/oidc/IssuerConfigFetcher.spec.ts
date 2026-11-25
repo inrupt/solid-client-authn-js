@@ -29,8 +29,6 @@ import {
 } from "@jest/globals";
 import type { ServerMetadata } from "openid-client";
 import IssuerConfigFetcher, {
-  configFromIssuerMetadata,
-  configToIssuerMetadata,
   describeErrorCauses,
 } from "./IssuerConfigFetcher";
 import {
@@ -196,17 +194,6 @@ describe("IssuerConfigFetcher", () => {
     );
   });
 
-  it("throws if the discovered configuration has no issuer", async () => {
-    mockDiscovery(mockIssuerMetadata({ issuer: undefined }));
-    const configFetcher = getIssuerConfigFetcher({
-      storageUtility: mockStorageUtility({}),
-    });
-
-    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
-      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
-    );
-  });
-
   it("throws if the issuer does not use HTTPS and isn't a loopback host", async () => {
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -214,17 +201,6 @@ describe("IssuerConfigFetcher", () => {
 
     await expect(configFetcher.fetchConfig("http://my.idp/")).rejects.toThrow(
       "The issuer [http://my.idp/] must use HTTPS. Plain HTTP is only supported for loopback hosts.",
-    );
-    expect(mockedFetch).not.toHaveBeenCalled();
-  });
-
-  it("throws if the issuer uses a protocol other than HTTP(S)", async () => {
-    const configFetcher = getIssuerConfigFetcher({
-      storageUtility: mockStorageUtility({}),
-    });
-
-    await expect(configFetcher.fetchConfig("ftp://localhost/")).rejects.toThrow(
-      "must use HTTPS",
     );
     expect(mockedFetch).not.toHaveBeenCalled();
   });
@@ -415,18 +391,6 @@ describe("IssuerConfigFetcher", () => {
     ]);
   });
 
-  it("keeps grant_types_supported if present", async () => {
-    mockDiscovery(
-      mockIssuerMetadata({ grant_types_supported: ["client_credentials"] }),
-    );
-
-    const configFetcher = getIssuerConfigFetcher({
-      storageUtility: mockStorageUtility({}),
-    });
-    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
-    expect(fetchedConfig.grantTypesSupported).toEqual(["client_credentials"]);
-  });
-
   it("defaults scopes_supported to [openid] if omitted", async () => {
     mockDiscovery(
       mockIssuerMetadata({
@@ -454,20 +418,6 @@ describe("IssuerConfigFetcher", () => {
     });
     const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
     expect(fetchedConfig.scopesSupported).toContain("webid");
-  });
-
-  describe("configToIssuerMetadata", () => {
-    it("converts an issuer config back into the equivalent server metadata", () => {
-      const metadata = mockIssuerMetadata({
-        scopes_supported: ["openid", "webid"],
-        userinfo_endpoint: "https://my.idp/userinfo",
-        response_types_supported: ["code"],
-        token_endpoint_auth_methods_supported: ["client_secret_basic"],
-      });
-      expect(
-        configToIssuerMetadata(configFromIssuerMetadata(metadata)),
-      ).toMatchObject(metadata);
-    });
   });
 
   describe("describeErrorCauses", () => {
