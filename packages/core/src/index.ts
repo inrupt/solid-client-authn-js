@@ -131,6 +131,9 @@ export {
 } from "./authenticatedFetch/dpopUtils";
 
 export {
+  authenticateFetch,
+  AuthenticatedFetchTokens,
+  AuthenticatedFetchOptions,
   buildAuthenticatedFetch,
   DpopHeaderPayload,
   RefreshOptions,

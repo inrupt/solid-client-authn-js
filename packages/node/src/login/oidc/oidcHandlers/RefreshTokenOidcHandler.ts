@@ -42,7 +42,7 @@ import {
   getWebidFromTokenPayload,
   generateDpopKeyPair,
   PREFERRED_SIGNING_ALG,
-  buildAuthenticatedFetch,
+  authenticateFetch,
   maybeBuildRpInitiatedLogout,
 } from "@inrupt/solid-client-authn-core";
 import type { JWK, CryptoKey as JoseCryptoKey } from "jose";
@@ -95,12 +95,19 @@ async function refreshAccess(
     const expiresInS =
       tokens.expiresIn ??
       (tokens.expiresAt ?? 0) - Math.trunc(Date.now() / 1000);
-    const authFetch = buildAuthenticatedFetch(tokens.accessToken, {
-      dpopKey,
-      refreshOptions: keepAlive ? rotatedRefreshOptions : undefined,
-      eventEmitter,
-      expiresIn: expiresInS > 0 ? expiresInS : undefined,
-    });
+    const authFetch = authenticateFetch(
+      {
+        accessToken: tokens.accessToken,
+        idToken: tokens.idToken,
+        refreshToken: rotatedRefreshOptions.refreshToken,
+        dpopKey,
+        expiresIn: expiresInS > 0 ? expiresInS : undefined,
+      },
+      {
+        refreshOptions: keepAlive ? rotatedRefreshOptions : undefined,
+        eventEmitter,
+      },
+    );
     return Object.assign(tokens, {
       fetch: authFetch,
     });
