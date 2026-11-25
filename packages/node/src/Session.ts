@@ -36,7 +36,7 @@ import type {
 import {
   InMemoryStorage,
   EVENTS,
-  buildAuthenticatedFetch,
+  authenticateFetch,
   getWebidFromTokenPayload,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
@@ -310,13 +310,15 @@ export class Session implements IHasSessionEventListener {
       return session;
     }
 
-    const fetch = buildAuthenticatedFetch(sessionTokenSet.accessToken, {
-      dpopKey: sessionTokenSet.dpopKey,
-      expiresIn: sessionTokenSet.expiresAt
-        ? sessionTokenSet.expiresAt - Date.now() / 1000
-        : undefined,
-      eventEmitter: session.events,
-    });
+    const fetch = authenticateFetch(
+      {
+        accessToken: sessionTokenSet.accessToken,
+        idToken: sessionTokenSet.idToken,
+        dpopKey: sessionTokenSet.dpopKey,
+        expiresAt: sessionTokenSet.expiresAt,
+      },
+      { eventEmitter: session.events },
+    );
 
     return Object.assign(session, { fetch });
   }

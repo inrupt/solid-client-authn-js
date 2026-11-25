@@ -38,7 +38,7 @@ import {
   generateDpopKeyPair,
   PREFERRED_SIGNING_ALG,
   getWebidFromTokenPayload,
-  buildAuthenticatedFetch,
+  authenticateFetch,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { Issuer } from "openid-client";
@@ -130,19 +130,25 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       ));
     }
 
-    const authFetch = buildAuthenticatedFetch(tokens.access_token, {
-      dpopKey,
-      refreshOptions:
-        oidcLoginOptions.keepAlive && tokens.refresh_token
+    const authFetch = authenticateFetch(
+      {
+        accessToken: tokens.access_token,
+        // Client credentials may not issue an ID token, in which case no token exchange is attempted.
+        idToken: tokens.id_token,
+        refreshToken: tokens.refresh_token,
+        dpopKey,
+        expiresIn: tokens.expires_in,
+      },
+      {
+        refreshOptions: oidcLoginOptions.keepAlive
           ? {
-              refreshToken: tokens.refresh_token,
               sessionId: oidcLoginOptions.sessionId,
               tokenRefresher: this.tokenRefresher,
             }
           : undefined,
-      eventEmitter: oidcLoginOptions.eventEmitter,
-      expiresIn: tokens.expires_in,
-    });
+        eventEmitter: oidcLoginOptions.eventEmitter,
+      },
+    );
 
     const expiresAt =
       tokens.expires_in !== undefined

@@ -403,7 +403,8 @@ describe("exchange", () => {
     expect(Object.fromEntries(body.entries())).toStrictEqual({
       grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
       subject_token: SUBJECT_TOKEN,
-      subject_token_type: "urn:ietf:params:oauth:token-type:access_token",
+      // The subject token is the user's ID token.
+      subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
       audience: AUDIENCE,
       resource: RESOURCE,
     });

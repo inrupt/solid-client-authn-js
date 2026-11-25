@@ -333,7 +333,7 @@ describe("RefreshTokenOidcHandler", () => {
     ) as typeof SolidClientAuthnCore;
     const mockAuthenticatedFetchBuild = jest.spyOn(
       coreModule,
-      "buildAuthenticatedFetch",
+      "authenticateFetch",
     );
 
     // This builds the fetch function holding the refresh token...
@@ -351,13 +351,15 @@ describe("RefreshTokenOidcHandler", () => {
     expect(result?.clientAppId).toBe(EXAMPLE_CLIENT_ID);
 
     expect(mockAuthenticatedFetchBuild).toHaveBeenCalledWith(
-      expect.anything(),
       expect.objectContaining({
-        refreshOptions: {
-          refreshToken: "some rotated refresh token",
+        refreshToken: "some rotated refresh token",
+        idToken: tokenSet.idToken,
+      }),
+      expect.objectContaining({
+        refreshOptions: expect.objectContaining({
           sessionId: "mySession",
           tokenRefresher: mockedTokenRefresher,
-        },
+        }),
       }),
     );
   });
