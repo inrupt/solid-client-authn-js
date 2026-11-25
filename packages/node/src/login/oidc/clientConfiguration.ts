@@ -45,17 +45,16 @@ import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-// The application/x-www-form-urlencoded encoding of the client credentials, as
-// done by openid-client v5. openid-client v6 also percent-encodes the - _ . ! ~
-// * ' ( ) characters, which some OpenID Providers (e.g. ESS) don't decode,
-// rejecting the client credentials. These characters decode to themselves, so
-// this encoding is also understood by OpenID Providers decoding credentials.
+// The application/x-www-form-urlencoded encoding of the client credentials.
+// Do not percent-encodes the - _ . ! ~* ' ( ) characters, which some OpenID Providers
+// (e.g. ESS) don't decode, rejecting the client credentials. These characters decode to
+// themselves, so this encoding is also understood by OpenID Providers decoding credentials.
 const formUrlEncode = (value: string): string =>
   encodeURIComponent(value).replace(/%20/g, "+");
 
 /**
  * The client_secret_basic client authentication method, encoding the client
- * credentials as openid-client v5 did (see RFC 6749, section 2.3.1).
+ * credentials (see RFC 6749, section 2.3.1).
  *
  * @param clientSecret the client secret.
  * @returns an openid-client client authentication method.

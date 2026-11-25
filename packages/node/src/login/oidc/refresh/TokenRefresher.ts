@@ -95,7 +95,7 @@ const tokenSetToTokenEndpointResponse = async (
     idToken: tokenSet.id_token,
     refreshToken: tokenSet.refresh_token,
     webId,
-    // As in openid-client v5, expiresAt is expressed in seconds since epoch.
+    // expiresAt is expressed in seconds since epoch.
     expiresAt:
       typeof tokenSet.expires_in === "number"
         ? Math.trunc(Date.now() / 1000) + tokenSet.expires_in
