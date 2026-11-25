@@ -83,6 +83,18 @@ export async function silentlyAuthenticate(
   clientAuthn: ClientAuthentication,
   session: Session,
 ): Promise<boolean> {
+  // KEY_CURRENT_URL is set just before a silent-authentication redirect and only cleared once the
+  // browser is redirected back after a *successful* attempt. If it is still present when we are
+  // about to start a new attempt, the previous one never completed — which happens when the OIDC
+  // provider no longer recognises the stored dynamic client (e.g. it dropped the registration on a
+  // restart) and responds with a non-redirectable error, stranding the user on an error page.
+  // Retrying with the same client ID would loop indefinitely, so discard the stored client
+  // registration and stop here; the next login will register a fresh client and recover.
+  if (window.localStorage.getItem(KEY_CURRENT_URL) !== null) {
+    window.localStorage.removeItem(KEY_CURRENT_URL);
+    await clientAuthn.clearClientRegistrationInfo(sessionId);
+    return false;
+  }
   const storedSessionInfo = await clientAuthn.validateCurrentSession(sessionId);
   if (storedSessionInfo !== null) {
     // It can be really useful to save the user's current browser location,
@@ -182,13 +194,32 @@ export class Session implements IHasSessionEventListener {
     // enable silent refresh. The current session ID specifically stored in 'localStorage'
     // (as opposed to using our storage abstraction layer) because it is only
     // used in a browser-specific mechanism.
-    this.events.on(EVENTS.LOGIN, () =>
-      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId),
+    this.events.on(EVENTS.LOGIN, () => {
+      window.localStorage.setItem(KEY_CURRENT_SESSION, this.info.sessionId);
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
+    });
+
+    this.events.on(EVENTS.LOGOUT, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
     );
 
+    this.events.on(EVENTS.SESSION_RESTORED, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
+    );
+
+    // Note that SESSION_STATUS_CHANGE is intentionally not emitted on expiration:
+    // it is emitted on the subsequent logout.
     this.events.on(EVENTS.SESSION_EXPIRED, () => this.internalLogout(false));
 
-    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.ERROR, () => {
+      // Only signal a status change if the error actually logged the session out.
+      const wasLoggedIn = this.info.isLoggedIn;
+      return this.internalLogout(false).then(() => {
+        if (wasLoggedIn) {
+          (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
+        }
+      });
+    });
   }
 
   /**

@@ -18,7 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import { REFRESH_BEFORE_EXPIRATION_SECONDS, EVENTS } from "../constant";
 import type { ITokenRefresher } from "../login/oidc/refresh/ITokenRefresher";
 import type { KeyPair } from "./dpopUtils";
@@ -49,6 +49,7 @@ export type DpopHeaderPayload = {
   htu: string;
   htm: string;
   jti: string;
+  ath?: string;
 };
 
 async function buildDpopFetchOptions(
@@ -62,7 +63,12 @@ async function buildDpopFetchOptions(
   headers.set("Authorization", `DPoP ${authToken}`);
   headers.set(
     "DPoP",
-    await createDpopHeader(targetUrl, defaultOptions?.method ?? "get", dpopKey),
+    await createDpopHeader(
+      targetUrl,
+      defaultOptions?.method ?? "get",
+      dpopKey,
+      authToken,
+    ),
   );
   return {
     ...defaultOptions,

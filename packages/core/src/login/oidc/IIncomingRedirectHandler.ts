@@ -23,7 +23,7 @@
  * @packageDocumentation
  */
 
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import type IHandleable from "../../util/handlerPattern/IHandleable";
 import type { ISessionInfo } from "../../sessionInfo/ISessionInfo";
 import type { IRpLogoutOptions } from "../../logout/ILogoutHandler";

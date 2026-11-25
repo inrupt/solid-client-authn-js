@@ -67,7 +67,9 @@ describe("getSessionFromStorage", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn<(typeof Dependencies)["getClientAuthenticationWithDependencies"]>()
       .mockReturnValue(clientAuthentication);
-    const mySession = await getSessionFromStorage("mySession", mockStorage({}));
+    const mySession = await getSessionFromStorage("mySession", {
+      storage: mockStorage({}),
+    });
     expect(mySession?.info).toStrictEqual(
       expect.objectContaining({
         webId: "https://my.webid",
@@ -135,7 +137,9 @@ describe("getSessionFromStorage", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    const mySession = await getSessionFromStorage("mySession", mockStorage({}));
+    const mySession = await getSessionFromStorage("mySession", {
+      storage: mockStorage({}),
+    });
     expect(mySession?.info).toStrictEqual({
       isLoggedIn: false,
       sessionId: "mySession",
@@ -155,7 +159,9 @@ describe("getSessionFromStorage", () => {
     dependencies.getClientAuthenticationWithDependencies = jest
       .fn()
       .mockReturnValue(clientAuthentication);
-    const mySession = await getSessionFromStorage("mySession", mockStorage({}));
+    const mySession = await getSessionFromStorage("mySession", {
+      storage: mockStorage({}),
+    });
     expect(mySession?.info).toBeUndefined();
   });
 

@@ -25,6 +25,7 @@
 
 import type {
   ISessionInfo,
+  ISessionInfoManager,
   ISessionInternalInfo,
   ILoginOptions,
 } from "@inrupt/solid-client-authn-core";
@@ -35,7 +36,32 @@ import {
   removeOpenIdParams,
 } from "@inrupt/solid-client-authn-core";
 import { normalizeCallbackUrl } from "@inrupt/oidc-client-ext";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
+import type { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
+
+function hasClearClientRegistrationInfo(
+  sessionInfoManager: ISessionInfoManager,
+): sessionInfoManager is ISessionInfoManager &
+  Pick<SessionInfoManager, "clearClientRegistrationInfo"> {
+  return (
+    "clearClientRegistrationInfo" in sessionInfoManager &&
+    typeof sessionInfoManager.clearClientRegistrationInfo === "function"
+  );
+}
+
+/**
+ * Checks if a client's registration has expired.
+ */
+function isClientExpired(sessionInfo: { clientExpiresAt?: number }): boolean {
+  // clientExpiresAt === 0 means the client never expires (per OIDC DCR spec)
+  if (
+    sessionInfo.clientExpiresAt === undefined ||
+    sessionInfo.clientExpiresAt === 0
+  ) {
+    return false;
+  }
+  return sessionInfo.clientExpiresAt < Math.floor(Date.now() / 1000);
+}
 
 /**
  * @hidden
@@ -77,7 +103,7 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
   };
 
   // Collects session information from storage, and returns them. Returns null
-  // if the expected information cannot be found.
+  // if the expected information cannot be found or if the client has expired.
   // Note that the ID token is not stored, which means the session information
   // cannot be validated at this point.
   validateCurrentSession = async (
@@ -87,11 +113,26 @@ export default class ClientAuthentication extends ClientAuthenticationBase {
     if (
       sessionInfo === undefined ||
       sessionInfo.clientAppId === undefined ||
-      sessionInfo.issuer === undefined
+      sessionInfo.issuer === undefined ||
+      isClientExpired(sessionInfo)
     ) {
       return null;
     }
     return sessionInfo;
+  };
+
+  // Discards the stored dynamic client registration for a session so that the next login
+  // registers a fresh client. Used to recover when the OIDC provider no longer recognises the
+  // stored client (e.g. it dropped the registration on a restart), which would otherwise cause
+  // silent authentication to loop with a client ID the provider rejects.
+  clearClientRegistrationInfo = async (sessionId: string): Promise<void> => {
+    if (hasClearClientRegistrationInfo(this.sessionInfoManager)) {
+      await this.sessionInfoManager.clearClientRegistrationInfo(sessionId);
+      return;
+    }
+    // If the session info manager cannot discard the client registration alone, clear the
+    // whole session: this also discards the stored client, so the next login re-registers.
+    await this.sessionInfoManager.clear(sessionId);
   };
 
   handleIncomingRedirect = async (

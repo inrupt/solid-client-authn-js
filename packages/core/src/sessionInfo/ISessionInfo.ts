@@ -102,6 +102,13 @@ export interface ISessionInternalInfo {
    * @since 2.4.0
    */
   publicKey?: string;
+
+  /**
+   * The expiration timestamp (in seconds since epoch) of the dynamically
+   * registered client. 0 means the client never expires. Only applicable
+   * to confidential clients (those with a clientAppSecret).
+   */
+  clientExpiresAt?: number;
 }
 
 export function isSupportedTokenType(

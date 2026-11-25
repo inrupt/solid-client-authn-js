@@ -26,7 +26,7 @@ import type {
   IIssuerConfig,
   KeyPair,
 } from "@inrupt/solid-client-authn-core";
-import type { KeyObject } from "crypto";
+import type { CryptoKey } from "jose";
 import type { TokenEndpointInput } from "../dpop/tokenExchange";
 
 // Camelcase identifiers are required in the OIDC specification.
@@ -48,7 +48,7 @@ export const mockKeyPair = async (): Promise<KeyPair> => {
   const publicKey = mockJwk();
   delete publicKey.d;
   return {
-    privateKey: (await importJWK(mockJwk())) as KeyObject,
+    privateKey: (await importJWK(mockJwk())) as CryptoKey,
     publicKey,
   };
 };

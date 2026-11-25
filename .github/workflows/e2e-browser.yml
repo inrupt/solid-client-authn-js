@@ -2,7 +2,12 @@ name: End-to-end browser tests
 
 on:
   push:
+    # Merge queue branches are covered by the merge_group trigger. Running on both
+    # events makes the two runs cancel each other.
+    branches-ignore:
+      - "gh-readonly-queue/**"
   workflow_dispatch:
+  merge_group:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,17 +21,19 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        environment-name: ["ESS PodSpaces", "ESS Release-2-3", "ESS Next"]
+        environment-name: ["ESS PodSpaces"]
         experimental: [false]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # The Node version does not influence how well our tests run in
       # the browser so we only need to test in one.
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: npm
       - run: npm ci
+        if: github.actor != 'dependabot[bot]'
+      - run: npm run build
         if: github.actor != 'dependabot[bot]'
       - name: Install e2e tests dependencies
         run: npx playwright install --with-deps
@@ -46,7 +53,7 @@ jobs:
           E2E_TEST_OWNER_CLIENT_SECRET: ${{ secrets.E2E_TEST_OWNER_CLIENT_SECRET }}
           E2E_TEST_ENVIRONMENT: ${{ matrix.environment-name }}
       - name: Archive browser-based end-to-end test failure results, if any
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         continue-on-error: true
         if: failure()
         with:
@@ -60,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # release/v1
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # release/v1
         with:
           allowed-skips: test
           jobs: ${{ toJSON(needs) }}

@@ -195,7 +195,7 @@ export async function getTokens(
   };
   let dpopKey: KeyPair | undefined;
   if (dpop) {
-    dpopKey = await generateDpopKeyPair();
+    dpopKey = await generateDpopKeyPair(false);
     headers.DPoP = await createDpopHeader(
       issuer.tokenEndpoint,
       "POST",

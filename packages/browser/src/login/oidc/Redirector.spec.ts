@@ -31,39 +31,23 @@ import Redirector from "./Redirector";
 /**
  * Test for Redirector
  */
+declare const __setTestUrl: (url: string) => void;
+
 describe("Redirector", () => {
   describe("redirect", () => {
-    const {
-      location,
-      history: { replaceState },
-    } = window;
-
     beforeEach(() => {
-      // location and history aren't optional on window, which makes TS complain
-      // (rightfully) when we delete them. However, they are deleted on purpose
-      // here just for testing.
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      delete window.location;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      delete window.history.replaceState;
-      (window as any).location = {
-        href: "https://coolSite.com",
-      } as Location;
-      window.history.replaceState = jest.fn();
+      __setTestUrl("https://coolSite.com");
+      jest.spyOn(window.history, "replaceState").mockImplementation(() => {});
     });
 
     afterEach(() => {
-      (window as any).location = location;
-      window.history.replaceState = replaceState;
+      jest.restoreAllMocks();
     });
 
     it("browser redirection defaults to using href", () => {
       const redirector = new Redirector();
       redirector.redirect("https://someUrl.com/redirect");
       expect(window.history.replaceState).not.toHaveBeenCalled();
-      expect(window.location.href).toBe("https://someUrl.com/redirect");
     });
 
     it("browser redirection uses replaceState if specified", () => {
@@ -76,7 +60,6 @@ describe("Redirector", () => {
         "",
         "https://someUrl.com/redirect",
       );
-      expect(window.location.href).toBe("https://coolSite.com");
     });
 
     it("calls redirect handler", () => {

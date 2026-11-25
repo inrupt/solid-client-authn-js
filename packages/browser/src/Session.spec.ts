@@ -25,7 +25,6 @@ import {
   StorageUtility,
   USER_SESSION_PREFIX,
 } from "@inrupt/solid-client-authn-core";
-// eslint-disable-next-line import/no-unresolved
 import { mockStorage } from "@inrupt/solid-client-authn-core/mocks";
 import { EventEmitter } from "stream";
 import { mockClientAuthentication } from "./__mocks__/ClientAuthentication";
@@ -46,27 +45,11 @@ const mockLocalStorage = (stored: Record<string, string>) => {
   });
 };
 
+declare const __setTestUrl: (url: string) => void;
+
 const mockLocation = (mockedLocation: string) => {
-  // We can't simply do 'window.location.href = defaultLocation;', as that
-  // causes our test environment to try to navigate to the new location (as
-  // a browser would do). So instead we need to reset 'window.location' as a
-  // whole, and reset it's value after our test. We also need to
-  // replace the 'history' object, otherwise this error happens: "SecurityError:
-  // replaceState cannot update history to a URL which differs in components other
-  // than in path, query, or fragment.""
-
-  // (window as any) is used to override the window type definition and
-  // allow location to be written.
-
-  delete (window as any).location;
-
-  delete (window as any).history.replaceState;
-
-  // Set our window's location to our test value.
-  (window as any).location = {
-    href: mockedLocation,
-  } as Location;
-  window.history.replaceState = jest.fn();
+  __setTestUrl(mockedLocation);
+  jest.spyOn(window.history, "replaceState").mockImplementation(() => {});
 };
 
 describe("Session", () => {
@@ -234,7 +217,7 @@ describe("Session", () => {
 
   describe("handleIncomingRedirect", () => {
     it("uses current window location as default redirect URL", async () => {
-      mockLocation("https://some.url");
+      mockLocation("https://some.url/");
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest
         .spyOn(clientAuthentication, "handleIncomingRedirect")
@@ -243,13 +226,13 @@ describe("Session", () => {
       const mySession = new Session({ clientAuthentication });
       await mySession.handleIncomingRedirect();
       expect(incomingRedirectHandler).toHaveBeenCalledWith(
-        "https://some.url",
+        "https://some.url/",
         mySession.events,
       );
     });
 
     it("wraps ClientAuthentication handleIncomingRedirect", async () => {
-      mockLocation("https://some.url");
+      mockLocation("https://some.url/");
       const clientAuthentication = mockClientAuthentication();
       const incomingRedirectHandler = jest
         .spyOn(clientAuthentication, "handleIncomingRedirect")
@@ -458,9 +441,12 @@ describe("Session", () => {
         .mockReturnValueOnce(
           incomingRedirectPromise,
         ) as typeof clientAuthentication.handleIncomingRedirect;
-      const validateCurrentSessionPromise = Promise.resolve(
-        "https://some.issuer/",
-      );
+      const validateCurrentSessionPromise = Promise.resolve({
+        issuer: "https://some.issuer/",
+        clientAppId: "some client ID",
+        redirectUrl: "https://some.redirect/url",
+        tokenType: "DPoP",
+      });
       clientAuthentication.validateCurrentSession = jest
         .fn()
         .mockReturnValue(
@@ -536,6 +522,7 @@ describe("Session", () => {
         issuer: "https://some.issuer",
         clientAppId: "some client ID",
         clientAppSecret: "some client secret",
+        clientExpiresAt: Math.floor(Date.now() / 1000) + 10000,
         redirectUrl: "https://some.redirect/url",
         tokenType: "DPoP",
       });
@@ -576,6 +563,46 @@ describe("Session", () => {
       expect(
         (clientAuthentication.login as any).mock.calls[0][1],
       ).toBeInstanceOf(EventEmitter);
+    });
+
+    it("clears the stored client registration instead of looping when a previous silent authentication did not complete", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+        // A leftover KEY_CURRENT_URL means a previous silent-auth attempt was started but never
+        // completed (e.g. the provider rejected a stale, dropped client with a non-redirectable error).
+        [KEY_CURRENT_URL]: "https://mock.current/location",
+      });
+      mockLocation("https://mock.current/location");
+      const clientAuthentication = mockClientAuthentication();
+      clientAuthentication.clearClientRegistrationInfo = jest
+        .fn<typeof clientAuthentication.clearClientRegistrationInfo>()
+        .mockResolvedValue(undefined);
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
+      clientAuthentication.validateCurrentSession =
+        jest.fn() as typeof clientAuthentication.validateCurrentSession;
+      const incomingRedirectPromise = Promise.resolve();
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn()
+        .mockReturnValueOnce(
+          incomingRedirectPromise,
+        ) as typeof clientAuthentication.handleIncomingRedirect;
+
+      const mySession = new Session({ clientAuthentication });
+      await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
+      await incomingRedirectPromise;
+
+      // The stale registration is discarded so the next login re-registers.
+      expect(
+        clientAuthentication.clearClientRegistrationInfo,
+      ).toHaveBeenCalledWith(sessionId);
+      // It must NOT re-attempt silent auth with the same (rejected) client — that is the loop.
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
+      // The marker is cleared so a later, legitimate silent auth can proceed normally.
+      expect(window.localStorage.getItem(KEY_CURRENT_URL)).toBeNull();
     });
 
     it("resolves handleIncomingRedirect if silent authentication could not be started", async () => {
@@ -761,6 +788,53 @@ describe("Session", () => {
       // The local storage should have been cleared by the auth error
       expect(window.localStorage.getItem(KEY_CURRENT_SESSION)).toBeNull();
     });
+
+    it("does not attempt silent authentication if the stored client has expired", async () => {
+      const sessionId = "mySession";
+      mockLocalStorage({
+        [KEY_CURRENT_SESSION]: sessionId,
+      });
+      mockLocation("https://mock.current/location");
+
+      // Set up storage with an expired client (expiresAt in the past)
+      const expiredAt = Math.floor(Date.now() / 1000) - 1000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiredAt),
+          },
+        }),
+      );
+      const clientAuthentication = mockClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      // Mock handleIncomingRedirect to return undefined (no OAuth params in URL)
+      clientAuthentication.handleIncomingRedirect = jest
+        .fn<typeof clientAuthentication.handleIncomingRedirect>()
+        .mockResolvedValue(undefined);
+      clientAuthentication.login = jest.fn<typeof clientAuthentication.login>();
+
+      const mySession = new Session({ clientAuthentication });
+      const result = await mySession.handleIncomingRedirect({
+        url: "https://some.redirect/url",
+        restorePreviousSession: true,
+      });
+
+      // Silent auth should NOT have been attempted because client is expired
+      expect(clientAuthentication.login).not.toHaveBeenCalled();
+      // The function should resolve (not hang)
+      expect(result).toBeUndefined();
+    });
   });
 
   describe("events.on", () => {
@@ -828,6 +902,148 @@ describe("Session", () => {
         mySession.events.on(EVENTS.LOGOUT, myCallback);
         await mySession.logout();
         expect(myCallback).toHaveBeenCalled();
+      });
+    });
+
+    describe("login and logout", () => {
+      it("calls the registered callback on login and logout", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        const mySession = new Session({
+          clientAuthentication,
+        });
+
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        mockLocalStorage({});
+
+        mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, myCallback);
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalledTimes(1);
+        await mySession.logout();
+        expect(myCallback).toHaveBeenCalledTimes(2);
+      });
+
+      it("does not call the registered callback if login isn't successful", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        const mySession = new Session({ clientAuthentication });
+        mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, myCallback);
+        expect(myCallback).not.toHaveBeenCalled();
+      });
+
+      it("calls the registered callback on silent session restore", async () => {
+        const myCallback = jest.fn();
+        // This pretends we have previously triggered silent authentication and stored
+        // the location.
+        mockLocalStorage({
+          [KEY_CURRENT_URL]: "https://coolSite.com/resource",
+        });
+        mockLocation("https://coolSite.com/redirect");
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        const mySession = new Session({ clientAuthentication });
+        const restoredCallback = jest.fn();
+        mySession.events.on(EVENTS.SESSION_RESTORED, restoredCallback);
+        mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, myCallback);
+
+        await mySession.handleIncomingRedirect("https://coolSite.com/redirect");
+        expect(restoredCallback).toHaveBeenCalledTimes(1);
+        expect(myCallback).toHaveBeenCalledTimes(1);
+      });
+
+      it("calls the registered callback once an error has logged the session out", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        mockLocalStorage({});
+        const mySession = new Session({ clientAuthentication });
+        const spiedLogout = jest.spyOn(
+          mySession as unknown as { internalLogout: () => Promise<void> },
+          "internalLogout",
+        );
+        mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, () => {
+          // The status must already be up to date when the callback is called.
+          myCallback(mySession.info.isLoggedIn);
+        });
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalledTimes(1);
+
+        (mySession.events as EventEmitter).emit(EVENTS.ERROR);
+        // Wait for the error-triggered logout to complete.
+        await spiedLogout.mock.results[0].value;
+        expect(myCallback).toHaveBeenCalledTimes(2);
+        expect(myCallback).toHaveBeenLastCalledWith(false);
+      });
+
+      it("does not call the registered callback on error if the session was not logged in", async () => {
+        const myCallback = jest.fn();
+        mockLocalStorage({});
+        const mySession = new Session({
+          clientAuthentication: mockClientAuthentication(),
+        });
+        const spiedLogout = jest.spyOn(
+          mySession as unknown as { internalLogout: () => Promise<void> },
+          "internalLogout",
+        );
+        mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, myCallback);
+
+        (mySession.events as EventEmitter).emit(EVENTS.ERROR);
+        await spiedLogout.mock.results[0].value;
+        expect(myCallback).not.toHaveBeenCalled();
+      });
+
+      it("does not call the registered callback on expiration, but on the subsequent logout", async () => {
+        const myCallback = jest.fn();
+        const clientAuthentication = mockClientAuthentication();
+        clientAuthentication.handleIncomingRedirect = jest
+          .fn<ClientAuthentication["handleIncomingRedirect"]>()
+          .mockResolvedValue({
+            isLoggedIn: true,
+            sessionId: "a session ID",
+            webId: "https://some.webid#them",
+          });
+        mockLocalStorage({});
+        const mySession = new Session({ clientAuthentication });
+        const spiedLogout = jest.spyOn(
+          mySession as unknown as { internalLogout: () => Promise<void> },
+          "internalLogout",
+        );
+        mySession.events.on(EVENTS.SESSION_STATUS_CHANGE, myCallback);
+        await mySession.handleIncomingRedirect("https://some.url");
+        expect(myCallback).toHaveBeenCalledTimes(1);
+
+        (mySession.events as EventEmitter).emit(EVENTS.SESSION_EXPIRED);
+        await spiedLogout.mock.results[0].value;
+        expect(mySession.info.isLoggedIn).toBe(false);
+        expect(myCallback).toHaveBeenCalledTimes(1);
+
+        await mySession.logout();
+        expect(myCallback).toHaveBeenCalledTimes(2);
       });
     });
 

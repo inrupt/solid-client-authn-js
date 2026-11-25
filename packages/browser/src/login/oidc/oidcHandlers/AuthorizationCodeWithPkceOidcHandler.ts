@@ -47,11 +47,12 @@ export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler
 {
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
+    const redirectUri = oidcLoginOptions.redirectUrl ?? "";
     const oidcOptions = {
       authority: oidcLoginOptions.issuer.toString(),
       client_id: oidcLoginOptions.client.clientId,
       client_secret: oidcLoginOptions.client.clientSecret,
-      redirect_uri: oidcLoginOptions.redirectUrl,
+      redirect_uri: redirectUri,
       response_type: "code",
       scope: oidcLoginOptions.scopes.join(" "),
       filterProtocolClaims: true,
@@ -59,21 +60,20 @@ export default class AuthorizationCodeWithPkceOidcHandler
       // Note that in Solid, information should be retrieved from the
       // profile referenced by the WebId.
       loadUserInfo: false,
-      code_verifier: true,
       prompt: oidcLoginOptions.prompt ?? "consent",
     };
 
     const oidcClientLibrary = new OidcClient(oidcOptions);
 
     try {
-      const signingRequest = await oidcClientLibrary.createSigninRequest();
+      const signingRequest = await oidcClientLibrary.createSigninRequest({});
       // Make sure to await the promise before returning so that the error is caught.
       return await this.setupRedirectHandler({
         oidcLoginOptions,
 
-        state: signingRequest.state._id,
+        state: signingRequest.state.id,
 
-        codeVerifier: signingRequest.state._code_verifier,
+        codeVerifier: signingRequest.state.code_verifier ?? "",
         targetUrl: signingRequest.url.toString(),
       });
     } catch (err: unknown) {

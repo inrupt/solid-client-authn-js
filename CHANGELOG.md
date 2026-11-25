@@ -5,10 +5,101 @@ within this mono-repo.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Deprecation notice
+## Unreleased
+
+The following changes have been implemented but not released yet:
+
+### New features
+
+#### browser and node
+
+- DPoP proofs sent along with an access token to a protected resource now include
+  the `ath` claim (hash of the access token), as required by [RFC 9449](https://www.rfc-editor.org/rfc/rfc9449.html#section-4.2).
+  To support this, `createDpopHeader` accepts an optional `accessToken` parameter.
+- New `EVENTS.SESSION_STATUS_CHANGE` event, emitted on session status changes:
+  - login,
+  - logout (including on error or session expiration)
+  - silent session restore (browser-only).
+    Register a listener with `session.events.on(EVENTS.SESSION_STATUS_CHANGE, callback)`.
+
+### Bugfixes
+
+#### browser
+
+- Recover from a stored dynamic client registration that the OIDC provider no longer
+  recognises. Previously, if the provider had dropped a client's registration (for example on a
+  restart), silent authentication would redirect to the provider, get a non-redirectable
+  "unknown client" error, and — because the `KEY_CURRENT_URL` marker was never cleared — retry
+  indefinitely with the same rejected client ID, leaving the user's session permanently broken.
+  On detecting an incomplete previous silent-authentication attempt, the stored client
+  registration is now discarded so the next login re-registers a fresh client.
+
+### Patch changes
+
+#### node
+
+- NodeJS 26 is now officially supported.
+
+## [5.0.3](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.3) - 2026-10-29
+
+- This release validates the publication pipeline, it includes no code changes.
+
+## [5.0.2](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.2) - 2026-10-26
+
+### Security fixes
+
+#### browser
+
+- The DPoP key is no longer extractable in the browser context, which prevents its exploitation via XSS
+  or other browser-based clients vulnerabilities. This restricts an attacker session's length (in the case
+  of a successful token extraction) to the lifespan of the Access Token, very short by design.
+
+#### node
+
+- The browser DPoP key fix mentioned above creates a potentially breaking change for the NodeJS client:
+  make sure the node library is updated at the same time as the core library to prevent regressions.
+
+## [5.0.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.1) - 2026-09-25
+
+### New features
+
+#### node
+
+- Statically registered clients are now supported when using the token-based `Session` builder
+  `Session.fromAuthorizationRequestState`, to support the Authorization Request grant. Only Solid-OIDC
+  clients were supported so far.
+
+### Bugfixes
+
+#### oidc-browser
+
+- `@inrupt/oidc-client-ext` now declares an `exports` map, like the other packages. Thanks to @tophcodes for their first contribution!
+
+## [5.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v5.0.0) - 2026-06-03
+
+### Breaking changes
+
+- Node 20 is no longer supported after it went end-of-life end of March 2026 (see https://nodejs.org/en/about/previous-releases).
+
+## [4.0.0](https://github.com/inrupt/solid-client-authn-js/releases/tag/v4.0.0) - 2026-03-30
+
+### Breaking changes
+
+#### oidc-browser
+
+Note that these changes are unlikely to impact a client application.
+
+- Replaced `@inrupt/oidc-client` dependency with `oidc-client-ts` (`^3.5.0`), the actively maintained TypeScript successor.
+- Removed re-exports: `Version`, `CordovaPopupNavigator`, `CordovaIFrameNavigator` (no longer available upstream).
+- Changed `SigninRequest` and `OidcClientSettings` to type-only exports.
+
+#### node
 
 - A new signature was introduced for `getSessionFromStorage` in release 2.3.0. The legacy signature is
-  deprecated, and will be removed with the 4.0.0 major release.
+  deprecated, and will be removed with the 4.0.0 major release. Using the more recent API to manage Sessions
+  based on the associated tokens should be preferred, as it allows to not rely on in-memory scale, making it
+  easier to scale horizontally. Prefer using `session.events.on(EVENTS.NEW_TOKENS, ...)` to get the tokens, and
+  `Session.fromTokens` to build the `Session` object.
 
 ```javascript
 // Deprecated signature
@@ -29,9 +120,20 @@ const session = await getSessionFromStorage(sessionId, {
 - The event `EVENTS.NEW_REFRESH_TOKEN` is being replaced by `EVENTS.NEW_TOKENS` which returns all the tokens a client
   can store for refreshing a session.
 
-## Unreleased
+### Bugfix
 
-The following changes have been implemented but not released yet:
+#### core
+
+- Fix issue using the library with Bun by adding missing `extractable` flag to the DPoP keys so that they can be serialized on the
+  appropriate events. Thanks to @NoelDeMartin for fixing this issue.
+
+#### node
+
+- Sessions built from `Session.fromTokens` now have a correct expiration time triggering refresh in the fetch. Thanks to @NoelDeMartin for fixing this issue.
+
+#### browser
+
+- Fixed an issue where `handleIncomingRedirect({ restorePreviousSession: true })` would redirect to the OAuth provider with expired client credentials, causing users to be stuck on an error page. The library now validates client expiration before attempting silent authentication and gracefully falls back to a logged-out state when the client has expired. Thanks to @timgent for the contribution.
 
 ## [3.1.1](https://github.com/inrupt/solid-client-authn-js/releases/tag/v3.1.1) - 2025-10-29
 

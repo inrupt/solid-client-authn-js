@@ -18,37 +18,15 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const HtmlWebPackPlugin = require("html-webpack-plugin");
+import type { CryptoKey } from "jose";
+import type { KeyObject } from "node:crypto";
 
-module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-        },
-      },
-      {
-        test: /\.html$/,
-        use: [
-          {
-            loader: "html-loader",
-          },
-        ],
-      },
-    ],
-  },
-  plugins: [
-    new HtmlWebPackPlugin({
-      template: "./src/index.html",
-      filename: "./index.html",
-    }),
-  ],
-  devServer: {
-    port: 3113,
-    historyApiFallback: true,
-  },
-};
+// FIXME: Remove this helper when openid-client is upgraded to v6.
+// openid-client v5's DPoPInput type is `KeyObject | Parameters<crypto.createPrivateKey>[0]`,
+// but at runtime it also accepts a Web Crypto `CryptoKey` (verified via the
+// `Symbol.toStringTag === 'CryptoKey'` check in its `dpopProof` method).
+// jose v6's `generateKeyPair` returns a `CryptoKey`, so we need to bridge the
+// type mismatch. openid-client v6 uses jose v6 natively and accepts `CryptoKey`
+// directly, so this helper becomes unnecessary after that upgrade.
+export const asDPoPInput = (key: CryptoKey): KeyObject =>
+  key as unknown as KeyObject;

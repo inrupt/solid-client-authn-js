@@ -37,7 +37,7 @@ import {
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
 import { refresh } from "@inrupt/oidc-client-ext";
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 
 // Some identifiers are not in camelcase on purpose, as they are named using the
 // official names from the OIDC/OAuth2 specifications.

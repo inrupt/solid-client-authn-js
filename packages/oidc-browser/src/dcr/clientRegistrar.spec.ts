@@ -102,24 +102,28 @@ describe("registerClient", () => {
     const options = getMockOptions();
     const myFetch = getSuccessfulFetch() as jest.Mock<typeof fetch>;
     global.fetch = myFetch;
+    const mockIssuer = getMockIssuer();
 
-    await registerClient(options, getMockIssuer());
+    await registerClient(options, mockIssuer);
 
-    expect(myFetch).toHaveBeenCalledWith(getMockIssuer().registrationEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    expect(myFetch).toHaveBeenCalledWith(
+      mockIssuer.registrationEndpoint as string,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_name: options.clientName,
+          application_type: "web",
+          redirect_uris: [options.redirectUrl?.toString()],
+          subject_type: "public",
+          token_endpoint_auth_method: "client_secret_basic",
+          id_token_signed_response_alg: "RS256",
+          grant_types: ["authorization_code", "refresh_token"],
+        }),
       },
-      body: JSON.stringify({
-        client_name: options.clientName,
-        application_type: "web",
-        redirect_uris: [options.redirectUrl?.toString()],
-        subject_type: "public",
-        token_endpoint_auth_method: "client_secret_basic",
-        id_token_signed_response_alg: "RS256",
-        grant_types: ["authorization_code", "refresh_token"],
-      }),
-    });
+    );
   });
 
   it("passes the specified redirection URL to the IdP", async () => {

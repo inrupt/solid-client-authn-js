@@ -18,7 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import type { EventEmitter } from "events";
+import type { EventEmitter } from "node:events";
 import type { EVENTS } from "./constant";
 import type { KeyPair } from "./authenticatedFetch/dpopUtils";
 
@@ -102,6 +102,10 @@ export type SessionTokenSet = {
 // These types help preventing inconsistencies between on, once and off.
 type LOGIN_ARGS = { eventName: typeof EVENTS.LOGIN; listener: () => void };
 type LOGOUT_ARGS = { eventName: typeof EVENTS.LOGOUT; listener: () => void };
+type SESSION_STATUS_CHANGE_ARGS = {
+  eventName: typeof EVENTS.SESSION_STATUS_CHANGE;
+  listener: () => void;
+};
 type SESSION_EXPIRED_ARGS = {
   eventName: typeof EVENTS.SESSION_EXPIRED;
   listener: () => void;
@@ -164,6 +168,18 @@ export interface ISessionEventListener extends EventEmitter {
   on(
     eventName: LOGOUT_ARGS["eventName"],
     listener: LOGOUT_ARGS["listener"],
+  ): this;
+  /**
+   * Register a listener called when the session status changes, i.e. on
+   * login, logout, logout caused by an error, or (in the browser) silent
+   * session restore. Note that this is not emitted on session expiration,
+   * only on the subsequent logout.
+   * @param eventName The session status change event name.
+   * @param listener The callback called when the session status changes.
+   */
+  on(
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session expiration.
@@ -265,6 +281,18 @@ export interface ISessionEventListener extends EventEmitter {
   addListener(
     eventName: LOGOUT_ARGS["eventName"],
     listener: LOGOUT_ARGS["listener"],
+  ): this;
+  /**
+   * Register a listener called when the session status changes, i.e. on
+   * login, logout, logout caused by an error, or (in the browser) silent
+   * session restore. Note that this is not emitted on session expiration,
+   * only on the subsequent logout.
+   * @param eventName The session status change event name.
+   * @param listener The callback called when the session status changes.
+   */
+  addListener(
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on session expiration.
@@ -366,6 +394,18 @@ export interface ISessionEventListener extends EventEmitter {
   once(
     eventName: LOGOUT_ARGS["eventName"],
     listener: LOGOUT_ARGS["listener"],
+  ): this;
+  /**
+   * Register a listener called the next time the session status changes, i.e. on
+   * login, logout, logout caused by an error, or (in the browser) silent
+   * session restore. Note that this is not emitted on session expiration,
+   * only on the subsequent logout.
+   * @param eventName The session status change event name.
+   * @param listener The callback called the next time the session status changes.
+   */
+  once(
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"],
   ): this;
   /**
    * Register a listener called on the next session expiration.
@@ -472,6 +512,15 @@ export interface ISessionEventListener extends EventEmitter {
     listener: LOGOUT_ARGS["listener"],
   ): this;
   /**
+   * Unregister a listener called when the session status changes.
+   * @param eventName The session status change event name.
+   * @param listener The callback to unregister.
+   */
+  off(
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"],
+  ): this;
+  /**
    * Unegister a listener called on session expiration.
    * @param eventName The session expiration event name.
    * @param listener The callback to unregister.
@@ -570,6 +619,15 @@ export interface ISessionEventListener extends EventEmitter {
   removeListener(
     eventName: LOGOUT_ARGS["eventName"],
     listener: LOGOUT_ARGS["listener"],
+  ): this;
+  /**
+   * Unregister a listener called when the session status changes.
+   * @param eventName The session status change event name.
+   * @param listener The callback to unregister
+   */
+  removeListener(
+    eventName: SESSION_STATUS_CHANGE_ARGS["eventName"],
+    listener: SESSION_STATUS_CHANGE_ARGS["listener"],
   ): this;
   /**
    * Unegister a listener called on session expiration.

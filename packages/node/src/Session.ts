@@ -31,6 +31,7 @@ import type {
   SessionConfig,
   SessionTokenSet,
   AuthorizationRequestState,
+  SessionManagerAuthorizationState,
 } from "@inrupt/solid-client-authn-core";
 import {
   InMemoryStorage,
@@ -39,7 +40,7 @@ import {
   getWebidFromTokenPayload,
 } from "@inrupt/solid-client-authn-core";
 import { v4 } from "uuid";
-import EventEmitter from "events";
+import EventEmitter from "node:events";
 import { exportJWK } from "jose";
 import type ClientAuthentication from "./ClientAuthentication";
 import { getClientAuthenticationWithDependencies } from "./dependencies";
@@ -159,6 +160,7 @@ export class Session implements IHasSessionEventListener {
   public static async fromAuthorizationRequestState(
     authorizationRequestState: AuthorizationRequestState,
     sessionId: string | undefined = undefined,
+    clientSecret?: string,
   ): Promise<Session> {
     const finalSessionId = sessionId ?? v4();
 
@@ -177,21 +179,40 @@ export class Session implements IHasSessionEventListener {
       },
       clientAuthentication: clientAuth,
     });
-    // Only Solid-OIDC clients are supported.
-    const state = {
-      ...authorizationRequestState,
-      keepAlive: false as const,
-      clientType: "solid-oidc" as const,
-    };
-    const issuerConfig = await issuerConfigFetcher.fetchConfig(state.issuer);
-    if (!issuerConfig.scopesSupported.includes("webid")) {
+    const isUrl = isValidUrl(authorizationRequestState.clientId);
+    const hasSecret = typeof clientSecret !== "undefined";
+    // Invalid state check
+    if (isUrl && hasSecret) {
       throw new Error(
-        `${state.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
+        "Invalid configuration: Solid-OIDC clients (with a URL client ID) should not have a client secret.",
       );
     }
-    if (!isValidUrl(state.clientId)) {
+    let state: SessionManagerAuthorizationState;
+    if (isUrl) {
+      // Enforce OpenID Provider compatibility with Solid-OIDC
+      const issuerConfig = await issuerConfigFetcher.fetchConfig(
+        authorizationRequestState.issuer,
+      );
+      if (!issuerConfig.scopesSupported.includes("webid")) {
+        throw new Error(
+          `${authorizationRequestState.issuer} does not support Solid-OIDC, which is required by Session.fromAuthorizationRequestState.`,
+        );
+      }
+      state = {
+        ...authorizationRequestState,
+        keepAlive: false,
+        clientType: "solid-oidc",
+      };
+    } else if (hasSecret) {
+      state = {
+        ...authorizationRequestState,
+        keepAlive: false,
+        clientType: "static",
+        clientSecret,
+      };
+    } else {
       throw new Error(
-        `The client identifier ${state.clientId} is not a valid URL`,
+        `Unsupported client ${authorizationRequestState.clientId}. The client must either have a valid URL as a client ID, or have a client secret.`,
       );
     }
 
@@ -292,7 +313,7 @@ export class Session implements IHasSessionEventListener {
     const fetch = buildAuthenticatedFetch(sessionTokenSet.accessToken, {
       dpopKey: sessionTokenSet.dpopKey,
       expiresIn: sessionTokenSet.expiresAt
-        ? sessionTokenSet.expiresAt - Date.now()
+        ? sessionTokenSet.expiresAt - Date.now() / 1000
         : undefined,
       eventEmitter: session.events,
     });
@@ -364,7 +385,21 @@ export class Session implements IHasSessionEventListener {
       this.lastTimeoutHandle = timeoutHandle;
     });
 
-    this.events.on(EVENTS.ERROR, () => this.internalLogout(false));
+    this.events.on(EVENTS.LOGIN, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
+    );
+    this.events.on(EVENTS.LOGOUT, () =>
+      (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE),
+    );
+    this.events.on(EVENTS.ERROR, () => {
+      // Only signal a status change if the error actually logged the session out.
+      const wasLoggedIn = this.info.isLoggedIn;
+      return this.internalLogout(false).then(() => {
+        if (wasLoggedIn) {
+          (this.events as EventEmitter).emit(EVENTS.SESSION_STATUS_CHANGE);
+        }
+      });
+    });
     this.events.on(EVENTS.SESSION_EXPIRED, () => {
       if (
         this.info.expirationDate !== undefined &&
@@ -372,6 +407,8 @@ export class Session implements IHasSessionEventListener {
       ) {
         // There is a race condition on the expiration event. If another callback was called first
         // and refreshed the session, we do not want to override the logged in status.
+        // Note that SESSION_STATUS_CHANGE is intentionally not emitted on expiration:
+        // it is emitted on the subsequent logout.
         this.expire();
       }
     });

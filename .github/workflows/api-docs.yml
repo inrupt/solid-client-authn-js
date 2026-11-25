@@ -19,14 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version-file: ".nvmrc"
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+      - name: Build packages
+        run: npm run build
       - name: Generate API docs for browser
         run: npx --workspace packages/browser typedoc
       - name: Generate API docs for node
@@ -34,7 +36,7 @@ jobs:
       - name: Generate API docs for core
         run: npx --workspace packages/core typedoc
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./docs/api
 
@@ -47,4 +49,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

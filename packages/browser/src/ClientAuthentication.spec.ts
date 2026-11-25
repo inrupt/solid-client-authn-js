@@ -22,6 +22,8 @@ import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import { EventEmitter } from "events";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 
+declare const __setTestUrl: (url: string) => void;
+
 import {
   StorageUtility,
   USER_SESSION_PREFIX,
@@ -34,7 +36,6 @@ import {
   mockIncomingRedirectHandler,
   mockHandleIncomingRedirect,
   mockLogoutHandler,
-  // eslint-disable-next-line import/no-unresolved
 } from "@inrupt/solid-client-authn-core/mocks";
 
 import { mockLoginHandler } from "./login/__mocks__/LoginHandler";
@@ -42,6 +43,7 @@ import {
   mockSessionInfoManager,
   SessionCreatorCreateResponse,
 } from "./sessionInfo/__mocks__/SessionInfoManager";
+import type { SessionInfoManager } from "./sessionInfo/SessionInfoManager";
 import ClientAuthentication from "./ClientAuthentication";
 import { mockDefaultIssuerConfigFetcher } from "./login/oidc/__mocks__/IssuerConfigFetcher";
 
@@ -108,11 +110,7 @@ describe("ClientAuthentication", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    Object.defineProperty(window, "location", {
-      writable: true,
-      value: { assign: jest.fn() },
-    });
+    __setTestUrl("http://localhost/");
   });
 
   describe("login", () => {
@@ -122,7 +120,7 @@ describe("ClientAuthentication", () => {
     it("calls login, and uses the window.location.href for the redirect if no redirectUrl is set", async () => {
       // Set a current window location which will be the expected URL to be
       // redirected back to, since we don't pass redirectUrl:
-      window.location.href = "https://coolapp.test/some/redirect";
+      __setTestUrl("https://coolapp.test/some/redirect");
 
       const clientAuthn = getClientAuthentication();
       await clientAuthn.login(
@@ -353,11 +351,11 @@ describe("ClientAuthentication", () => {
     // TODO: add tests for events & errors
 
     it("reverts back to un-authenticated fetch on logout", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const clientAuthn = getClientAuthentication();
 
@@ -388,6 +386,49 @@ describe("ClientAuthentication", () => {
       await expect(() => clientAuthn.getAllSessionInfo()).rejects.toThrow(
         "Not implemented",
       );
+    });
+  });
+
+  describe("clearClientRegistrationInfo", () => {
+    it("only discards the client registration when the session info manager supports it", async () => {
+      const sessionInfoManager = mockSessionInfoManager(
+        mockStorageUtility({}),
+      ) as SessionInfoManager;
+      const clearRegistrationSpy = jest
+        .spyOn(sessionInfoManager, "clearClientRegistrationInfo")
+        .mockResolvedValueOnce();
+      const clearSpy = jest.spyOn(sessionInfoManager, "clear");
+      const clientAuthn = getClientAuthentication({ sessionInfoManager });
+
+      await clientAuthn.clearClientRegistrationInfo("mySession");
+
+      expect(clearRegistrationSpy).toHaveBeenCalledWith("mySession");
+      expect(clearSpy).not.toHaveBeenCalled();
+    });
+
+    it("clears the whole session when the session info manager cannot discard the client registration alone", async () => {
+      const baseManager = mockSessionInfoManager(mockStorageUtility({}));
+      const clear = jest
+        .fn<SolidClientAuthnCore.ISessionInfoManager["clear"]>()
+        .mockResolvedValue();
+      // Plain object exposing only the ISessionInfoManager interface.
+      const sessionInfoManager: SolidClientAuthnCore.ISessionInfoManager = {
+        update: baseManager.update.bind(baseManager),
+        set: baseManager.set.bind(baseManager),
+        get: baseManager.get.bind(baseManager),
+        getAll: baseManager.getAll.bind(baseManager),
+        register: baseManager.register.bind(baseManager),
+        getRegisteredSessionIdAll:
+          baseManager.getRegisteredSessionIdAll.bind(baseManager),
+        clear,
+        clearAll: baseManager.clearAll.bind(baseManager),
+        setOidcContext: baseManager.setOidcContext.bind(baseManager),
+      };
+      const clientAuthn = getClientAuthentication({ sessionInfoManager });
+
+      await clientAuthn.clearClientRegistrationInfo("mySession");
+
+      expect(clear).toHaveBeenCalledWith("mySession");
     });
   });
 
@@ -423,11 +464,11 @@ describe("ClientAuthentication", () => {
     mockEmitter.emit = jest.fn<typeof mockEmitter.emit>();
 
     it("calls handle redirect", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const expectedResult = SessionCreatorCreateResponse;
       const clientAuthn = getClientAuthentication();
@@ -462,11 +503,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters in the auth code flow", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const clientAuthn = getClientAuthentication();
       const url =
@@ -482,11 +523,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("clears the current IRI from OAuth query parameters even if auth flow fails", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
 
       mockHandleIncomingRedirect.mockImplementationOnce(() =>
@@ -512,11 +553,11 @@ describe("ClientAuthentication", () => {
     });
 
     it("preserves non-OAuth query strings", async () => {
-      window.history.replaceState = jest
-        .fn<typeof window.history.replaceState>()
+      jest
+        .spyOn(window.history, "replaceState")
         .mockImplementationOnce((_data, _unused, url) => {
           // Pretend the current location is updated
-          window.location.href = url as string;
+          __setTestUrl(url as string);
         });
       const clientAuthn = getClientAuthentication();
       const url =
@@ -597,6 +638,132 @@ describe("ClientAuthentication", () => {
           clientAppId: "https://some.app/registration",
           sessionId,
           webId: "https://my.pod/profile#me",
+        }),
+      );
+    });
+  });
+
+  describe("validateCurrentSession", () => {
+    it("returns clientExpiresAt when expiresAt is in storage", async () => {
+      const sessionId = "mySession";
+      const expiresAt = Math.floor(Date.now() / 1000) + 10000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiresAt),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await clientAuthn.validateCurrentSession(sessionId);
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          clientExpiresAt: expiresAt,
+        }),
+      );
+    });
+
+    it("returns null when client has expired", async () => {
+      const sessionId = "mySession";
+      const expiredAt = Math.floor(Date.now() / 1000) - 1000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(expiredAt),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      await expect(
+        clientAuthn.validateCurrentSession(sessionId),
+      ).resolves.toBeNull();
+    });
+
+    it("returns session when client has not expired", async () => {
+      const sessionId = "mySession";
+      const futureExpiry = Math.floor(Date.now() / 1000) + 10000;
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: String(futureExpiry),
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await clientAuthn.validateCurrentSession(sessionId);
+      expect(result).not.toBeNull();
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          clientAppId: "https://some.app/registration",
+          issuer: "https://some.issuer",
+        }),
+      );
+    });
+
+    it("returns session when clientExpiresAt is 0 (never expires per OIDC DCR spec)", async () => {
+      const sessionId = "mySession";
+      const mockedStorage = new StorageUtility(
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            isLoggedIn: "true",
+            webId: "https://my.pod/profile#me",
+          },
+        }),
+        mockStorage({
+          [`${USER_SESSION_PREFIX}:${sessionId}`]: {
+            clientId: "https://some.app/registration",
+            clientSecret: "some-secret",
+            issuer: "https://some.issuer",
+            expiresAt: "0",
+          },
+        }),
+      );
+      const clientAuthn = getClientAuthentication({
+        sessionInfoManager: mockSessionInfoManager(mockedStorage),
+      });
+
+      const result = await clientAuthn.validateCurrentSession(sessionId);
+      expect(result).not.toBeNull();
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          clientAppId: "https://some.app/registration",
+          clientExpiresAt: 0,
         }),
       );
     });

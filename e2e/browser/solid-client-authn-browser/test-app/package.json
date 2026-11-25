@@ -1,6 +1,6 @@
 {
   "name": "test-app",
-  "version": "3.1.1",
+  "version": "5.0.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,20 +10,20 @@
     "test:esbuild": "esbuild app/page.tsx --bundle"
   },
   "dependencies": {
-    "@inrupt/internal-playwright-testids": "^4.0.8",
-    "@inrupt/solid-client-authn-browser": "^3.1.1",
-    "next": "^16.1.6",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.4"
+    "@inrupt/internal-playwright-testids": "^4.1.4",
+    "@inrupt/solid-client-authn-browser": "^5.0.3",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@inrupt/eslint-config-lib": "^3.2.7",
-    "@playwright/test": "^1.58.2",
-    "@types/node": "^25.2.2",
-    "@types/react": "^19.2.13",
-    "@types/react-dom": "^19.2.3",
-    "esbuild": "^0.27.3",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^16.1.6"
+    "eslint-config-next": "^16.4.6"
   }
 }

@@ -19,16 +19,16 @@
 //
 
 import { it, describe, expect } from "@jest/globals";
-import type { KeyLike } from "jose";
+import type { CryptoKey } from "jose";
 import { generateKeyPair, exportJWK, jwtVerify } from "jose";
 import { createDpopHeader, generateDpopKeyPair } from "./dpopUtils";
 
-let publicKey: KeyLike | undefined;
-let privateKey: KeyLike | undefined;
+let publicKey: CryptoKey | undefined;
+let privateKey: CryptoKey | undefined;
 
 const mockJwk = async (): Promise<{
-  publicKey: KeyLike;
-  privateKey: KeyLike;
+  publicKey: CryptoKey;
+  privateKey: CryptoKey;
 }> => {
   if (typeof publicKey === "undefined" || typeof privateKey === "undefined") {
     const generatedPair = await generateKeyPair("ES256");
@@ -93,13 +93,50 @@ describe("createDpopHeader", () => {
     expect(protectedHeader.typ).toBe("dpop+jwt");
     expect(protectedHeader.jwk).toEqual((await mockKeyPair()).publicKey);
   });
+
+  it("does not include an 'ath' claim if no access token is provided", async () => {
+    const header = await createDpopHeader(
+      "https://some.resource",
+      "POST",
+      await mockKeyPair(),
+    );
+    const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
+    expect(payload).not.toHaveProperty("ath");
+  });
+
+  it("includes the access token hash as the 'ath' claim if an access token is provided", async () => {
+    // Example access token and matching hash from https://www.rfc-editor.org/rfc/rfc9449.html#section-7.1
+    const header = await createDpopHeader(
+      "https://some.resource",
+      "GET",
+      await mockKeyPair(),
+      "Kz~8mXK1EalYznwH-LC-1fBAo.4Ljp~zsPE_NeO.gxU",
+    );
+    const { payload } = await jwtVerify(header, (await mockJwk()).publicKey);
+    expect(payload.ath).toBe("fUHyO2r2Z3DZ53EsNrWBb0xWXoaNy59IiKCAqksmQEo");
+  });
 });
 
 describe("generateDpopKeyPair", () => {
   it("generates a public, private key pair", async () => {
     const keyPair = await generateDpopKeyPair();
+    // By default, the private key should be non-extractable.
+    await expect(
+      crypto.subtle.exportKey("jwk", keyPair.privateKey),
+    ).rejects.toThrow();
     expect(keyPair.publicKey).toBeDefined();
     expect(keyPair.privateKey).toBeDefined();
     expect(keyPair.publicKey.alg).toBe("ES256");
+  });
+
+  it("controls whether the generated private key is public or private", async () => {
+    const extractableKeyPair = await generateDpopKeyPair(true);
+    await expect(
+      crypto.subtle.exportKey("jwk", extractableKeyPair.privateKey),
+    ).resolves.not.toThrow();
+    const nonExtractableKeyPair = await generateDpopKeyPair(false);
+    await expect(
+      crypto.subtle.exportKey("jwk", nonExtractableKeyPair.privateKey),
+    ).rejects.toThrow();
   });
 });
