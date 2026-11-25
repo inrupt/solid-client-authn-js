@@ -178,7 +178,6 @@ async function reactiveAuth(
   _fetch?: typeof fetch,
 ): Promise<Response> {
   // Discovery
-  // www-authenticate: Bearer resource_metadata="https://ess.local/.well-known/oauth-protected-resource"
   if (!unauthResponse.headers.has("WWW-Authenticate")) {
     return unauthResponse;
   }
