@@ -394,6 +394,39 @@ describe("IssuerConfigFetcher", () => {
     );
   });
 
+  it("defaults grant_types_supported to [authorization_code, implicit] if omitted", async () => {
+    mockDiscovery(mockIssuerMetadata({ grant_types_supported: undefined }));
+    mockDiscovery(mockIssuerMetadata({ grant_types_supported: undefined }));
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(fetchedConfig.grantTypesSupported).toEqual([
+      "authorization_code",
+      "implicit",
+    ]);
+    // Each configuration gets its own copy of the default value.
+    fetchedConfig.grantTypesSupported?.push("some_grant");
+    const otherConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(otherConfig.grantTypesSupported).toEqual([
+      "authorization_code",
+      "implicit",
+    ]);
+  });
+
+  it("keeps grant_types_supported if present", async () => {
+    mockDiscovery(
+      mockIssuerMetadata({ grant_types_supported: ["client_credentials"] }),
+    );
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(fetchedConfig.grantTypesSupported).toEqual(["client_credentials"]);
+  });
+
   it("defaults scopes_supported to [openid] if omitted", async () => {
     mockDiscovery(
       mockIssuerMetadata({

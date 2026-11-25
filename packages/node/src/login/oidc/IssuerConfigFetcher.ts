@@ -39,6 +39,8 @@ import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
 const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
 // openid-client requires a client ID for discovery, but it is not used.
 const DISCOVERY_CLIENT_ID = "solid-client-authn-node-discovery";
+// The OpenID Connect Discovery default value of grant_types_supported.
+const DEFAULT_GRANT_TYPES_SUPPORTED = ["authorization_code", "implicit"];
 
 // Bounds the cause chain walk, in case of cyclic causes.
 const MAX_ERROR_CAUSE_DEPTH = 5;
@@ -136,7 +138,12 @@ export function configFromIssuerMetadata(
       metadata.request_object_signing_alg_values_supported,
     // TODO: add revocation_endpoint, end_session_endpoint, introspection_endpoint_auth_methods_supported, introspection_endpoint_auth_signing_alg_values_supported, revocation_endpoint_auth_methods_supported, revocation_endpoint_auth_signing_alg_values_supported, mtls_endpoint_aliases to IIssuerConfig
     // The following properties may be captured as "unkown" entries in the metadata object.
-    grantTypesSupported: metadata.grant_types_supported as string[] | undefined,
+    // grant_types_supported is optional, and defaults to ["authorization_code", "implicit"]
+    // (see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata).
+    grantTypesSupported:
+      metadata.grant_types_supported === undefined
+        ? [...DEFAULT_GRANT_TYPES_SUPPORTED]
+        : (metadata.grant_types_supported as string[]),
     responseTypesSupported: metadata.response_types_supported as
       string[] | undefined,
     idTokenSigningAlgValuesSupported:
