@@ -184,7 +184,7 @@ export class AuthCodeRedirectHandler implements IIncomingRedirectHandler {
       expiresIn: tokenSet.expires_in,
     });
 
-    // As in openid-client v5, expiresAt is expressed in seconds since epoch.
+    // expiresAt is expressed in seconds since epoch.
     const expiresAt =
       typeof tokenSet.expires_in === "number"
         ? Math.trunc(Date.now() / 1000) + tokenSet.expires_in
