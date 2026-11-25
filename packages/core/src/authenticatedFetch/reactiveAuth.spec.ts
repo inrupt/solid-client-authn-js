@@ -31,7 +31,17 @@ import {
   setAsMetaDefaults,
   isASMetadata,
   exchange,
+  isWithinResource,
+  findCachedToken,
+  asMetadataUrl,
+  cacheKey,
+  createTokenCache,
+  getResourceMetadataCache,
+  getAsMetadataCache,
+  clearMetadataCaches,
+  DEFAULT_METADATA_TTL_MS,
 } from "./reactiveAuth";
+import type { TokenResponse } from "./reactiveAuth";
 
 const TOKEN_ENDPOINT = "https://as.example/access/token";
 const AUDIENCE = "https://as.example";
@@ -381,6 +391,38 @@ describe("isASMetadata", () => {
   });
 });
 
+describe("asMetadataUrl", () => {
+  it.each([
+    [
+      "https://as.example",
+      "https://as.example/.well-known/oauth-authorization-server",
+    ],
+    [
+      "https://as.example/",
+      "https://as.example/.well-known/oauth-authorization-server",
+    ],
+    // The well-known path is inserted between the host and the issuer path (RFC 8414 section 3.1).
+    [
+      "https://as.example/tenant",
+      "https://as.example/.well-known/oauth-authorization-server/tenant",
+    ],
+    [
+      "https://as.example/some/tenant",
+      "https://as.example/.well-known/oauth-authorization-server/some/tenant",
+    ],
+    [
+      "https://as.example:8443/tenant",
+      "https://as.example:8443/.well-known/oauth-authorization-server/tenant",
+    ],
+  ])("builds the metadata URL of %s", (issuer, expected) => {
+    expect(asMetadataUrl(issuer)).toBe(expected);
+  });
+
+  it("throws for an invalid issuer", () => {
+    expect(() => asMetadataUrl("not a URL")).toThrow();
+  });
+});
+
 describe("exchange", () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -513,5 +555,176 @@ describe("exchange", () => {
     await expect(
       exchange(SUBJECT_TOKEN, TOKEN_ENDPOINT, AUDIENCE, RESOURCE),
     ).rejects.toThrow("Unexpected token endoint response during exchange");
+  });
+});
+
+describe("reactive authentication cache", () => {
+  const token = (accessToken: string): TokenResponse => ({
+    access_token: accessToken,
+    token_type: "Bearer",
+    issued_token_type: "urn:ietf:params:oauth:token-type:access_token",
+    expires_in: 300,
+  });
+
+  const sleep = (ms: number) =>
+    new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+
+  describe("cacheKey", () => {
+    it.each([
+      ["https://rs.example", "https://rs.example/"],
+      ["https://rs.example/", "https://rs.example/"],
+      ["https://RS.Example/a", "https://rs.example/a"],
+      ["https://rs.example:443/a", "https://rs.example/a"],
+    ])("keys %s as %s", (url, key) => {
+      expect(cacheKey(url)).toBe(key);
+    });
+
+    it("keys equivalent URLs identically", () => {
+      expect(cacheKey("https://rs.example")).toBe(
+        cacheKey("https://rs.example/"),
+      );
+    });
+
+    it("returns undefined for an invalid URL", () => {
+      expect(cacheKey("not a URL")).toBeUndefined();
+    });
+  });
+
+  describe("metadata caches", () => {
+    afterEach(() => {
+      clearMetadataCaches();
+    });
+
+    it("caches protected resource metadata for an hour", () => {
+      getResourceMetadataCache().set("https://rs.example/md", {
+        resource: RESOURCE,
+      });
+      const remaining = getResourceMetadataCache().getRemainingTTL(
+        "https://rs.example/md",
+      );
+      expect(remaining).toBeLessThanOrEqual(DEFAULT_METADATA_TTL_MS);
+      expect(remaining).toBeGreaterThan(DEFAULT_METADATA_TTL_MS - 1000);
+    });
+
+    it("caches authorization server metadata for an hour", () => {
+      getAsMetadataCache().set(AUDIENCE, validAsMetadata());
+      const remaining = getAsMetadataCache().getRemainingTTL(AUDIENCE);
+      expect(remaining).toBeLessThanOrEqual(DEFAULT_METADATA_TTL_MS);
+      expect(remaining).toBeGreaterThan(DEFAULT_METADATA_TTL_MS - 1000);
+    });
+
+    it("is shared across calls", () => {
+      getAsMetadataCache().set(AUDIENCE, validAsMetadata());
+      expect(getAsMetadataCache().get(AUDIENCE)).toStrictEqual(
+        validAsMetadata(),
+      );
+    });
+
+    it("empties both metadata caches", () => {
+      getResourceMetadataCache().set("https://rs.example/md", {
+        resource: RESOURCE,
+      });
+      getAsMetadataCache().set(AUDIENCE, validAsMetadata());
+      clearMetadataCaches();
+      expect(getResourceMetadataCache().size).toBe(0);
+      expect(getAsMetadataCache().size).toBe(0);
+    });
+  });
+
+  describe("createTokenCache", () => {
+    it("creates a new, empty cache each time", () => {
+      const cache = createTokenCache();
+      cache.set(RESOURCE, token("some token"));
+      expect(createTokenCache().size).toBe(0);
+    });
+
+    it("expires each entry after its own TTL", async () => {
+      const cache = createTokenCache();
+      cache.set(RESOURCE, token("short-lived token"), { ttl: 20 });
+      cache.set("https://other.example/", token("long-lived token"), {
+        ttl: 60_000,
+      });
+      await sleep(50);
+      expect(cache.get(RESOURCE)).toBeUndefined();
+      expect(cache.get("https://other.example/")).toStrictEqual(
+        token("long-lived token"),
+      );
+    });
+  });
+
+  describe("isWithinResource", () => {
+    it.each([
+      ["https://rs.example/a/b", "https://rs.example"],
+      ["https://rs.example/a/b", "https://rs.example/"],
+      ["https://rs.example/a/b", "https://rs.example/a"],
+      ["https://rs.example/a/b", "https://rs.example/a/"],
+      ["https://rs.example/a", "https://rs.example/a"],
+      ["https://rs.example/a/b?query#fragment", "https://rs.example/a"],
+    ])("%s is within %s", (url, resource) => {
+      expect(isWithinResource(url, resource)).toBe(true);
+    });
+
+    it.each([
+      ["https://other.example/a", "https://rs.example"],
+      ["http://rs.example/a", "https://rs.example"],
+      ["https://rs.example:8443/a", "https://rs.example"],
+      // Path segments are matched as a whole.
+      ["https://rs.example/ab", "https://rs.example/a"],
+      ["https://rs.example/", "https://rs.example/a"],
+      ["not a URL", "https://rs.example"],
+      ["https://rs.example/a", "not a URL"],
+    ])("%s is not within %s", (url, resource) => {
+      expect(isWithinResource(url, resource)).toBe(false);
+    });
+  });
+
+  describe("findCachedToken", () => {
+    it("finds the token for the resource a URL belongs to", () => {
+      const cache = createTokenCache();
+      const key = cacheKey(RESOURCE) as string;
+      cache.set(key, token("some token"));
+      expect(findCachedToken(cache, `${RESOURCE}/some/path`)).toStrictEqual({
+        key,
+        token: token("some token"),
+      });
+    });
+
+    it("prefers the most specific resource", () => {
+      const cache = createTokenCache();
+      cache.set(cacheKey(RESOURCE) as string, token("broad token"));
+      cache.set(
+        cacheKey(`${RESOURCE}/specific`) as string,
+        token("specific token"),
+      );
+      expect(
+        findCachedToken(cache, `${RESOURCE}/specific/path`)?.token.access_token,
+      ).toBe("specific token");
+      expect(
+        findCachedToken(cache, `${RESOURCE}/other/path`)?.token.access_token,
+      ).toBe("broad token");
+    });
+
+    it("returns undefined for a URL outside of every cached resource", () => {
+      const cache = createTokenCache();
+      cache.set(cacheKey(`${RESOURCE}/a`) as string, token("some token"));
+      expect(findCachedToken(cache, "https://other.example/a")).toBeUndefined();
+      // Path segments are matched as a whole.
+      expect(findCachedToken(cache, `${RESOURCE}/ab`)).toBeUndefined();
+    });
+
+    it("returns undefined for an empty cache", () => {
+      expect(
+        findCachedToken(createTokenCache(), `${RESOURCE}/a`),
+      ).toBeUndefined();
+    });
+
+    it("ignores expired tokens", async () => {
+      const cache = createTokenCache();
+      cache.set(cacheKey(RESOURCE) as string, token("some token"), { ttl: 20 });
+      await sleep(50);
+      expect(findCachedToken(cache, `${RESOURCE}/a`)).toBeUndefined();
+    });
   });
 });

@@ -28,6 +28,12 @@ import type { KeyPair } from "./dpopUtils";
 import { createDpopHeader } from "./dpopUtils";
 import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
+import type {
+  AuthorizationServerMetadata,
+  ResourceMetadata,
+  TokenCache,
+  TokenResponse,
+} from "./reactiveAuth";
 import {
   parseAuthnChallenge,
   isResourceMetadata,
@@ -35,6 +41,13 @@ import {
   setAsMetaDefaults,
   isASMetadata,
   exchange,
+  cacheKey,
+  createTokenCache,
+  getResourceMetadataCache,
+  getAsMetadataCache,
+  findCachedToken,
+  asMetadataUrl,
+  isWithinResource,
 } from "./reactiveAuth";
 import type { SessionTokenSet } from "../SessionEventListener";
 
@@ -156,6 +169,79 @@ const computeRefreshDelay = (expiresIn?: number): number => {
   return DEFAULT_EXPIRATION_TIME_SECONDS;
 };
 
+const toUrlString = (url: RequestInfo | URL): string => {
+  if (typeof url === "string") {
+    return url;
+  }
+  return url instanceof URL ? url.href : url.url;
+};
+
+const withTokenType = (token: TokenResponse, keyPair?: KeyPair) =>
+  token.token_type === "DPoP" ? keyPair : undefined;
+
+/**
+ * How long an exchanged token may be cached, in milliseconds: until shortly before it expires.
+ */
+export const tokenCacheTtl = (token: TokenResponse): number =>
+  ((token.expires_in ?? DEFAULT_EXPIRATION_TIME_SECONDS) -
+    REFRESH_BEFORE_EXPIRATION_SECONDS) *
+  1000;
+
+async function discoverResourceMetadata(
+  url: string,
+): Promise<ResourceMetadata | undefined> {
+  const key = cacheKey(url);
+  if (key === undefined) {
+    return undefined;
+  }
+  const cached = getResourceMetadataCache().get(key);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const resourceMeta = await fetch(url)
+    .then((response) => (response.ok ? response.json() : undefined))
+    .then((json) => (isResourceMetadata(json) ? json : undefined))
+    .catch((_) => {
+      return undefined;
+    });
+  if (resourceMeta !== undefined) {
+    getResourceMetadataCache().set(key, resourceMeta);
+  }
+  return resourceMeta;
+}
+
+async function discoverAsMetadata(
+  authorizationServer: string,
+): Promise<AuthorizationServerMetadata | undefined> {
+  const key = cacheKey(authorizationServer);
+  if (key === undefined) {
+    return undefined;
+  }
+  const cached = getAsMetadataCache().get(key);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const asUrl = asMetadataUrl(authorizationServer);
+  const asMeta = await fetch(asUrl)
+    .then((response) => (response.ok ? response.json() : undefined))
+    .then((json) =>
+      json !== null && typeof json === "object"
+        ? setAsMetaDefaults(json)
+        : json,
+    )
+    .then((json) => (isASMetadata(json) ? json : undefined))
+    .catch((_) => {
+      return undefined;
+    });
+  // RFC 8414 section 3.3: the issuer must be the identifier the metadata URL was built from,
+  // otherwise the metadata must not be used.
+  if (asMeta === undefined || asMeta.issuer !== authorizationServer) {
+    return undefined;
+  }
+  getAsMetadataCache().set(key, asMeta);
+  return asMeta;
+}
+
 /**
  * Based on the authentication challenge of an unauthorized request,
  * discover supported authentication mechanism and authenticate if
@@ -164,6 +250,7 @@ const computeRefreshDelay = (expiresIn?: number): number => {
  * @param unauthResponse  the original unauthorized response
  * @param idToken         the ID Token for the user, exchanged for an access token to the target resource
  * @param url             the original request URL
+ * @param tokenCache      the session's cache of exchanged tokens
  * @param requestInit     the original request parameters
  * @param keyPair         the DPoP key the token is bound to (if any)
  * @param _fetch          an unauthenticated fetch
@@ -173,6 +260,7 @@ async function reactiveAuth(
   unauthResponse: Response,
   idToken: string | undefined,
   url: RequestInfo | URL,
+  tokenCache: TokenCache,
   requestInit?: RequestInit,
   keyPair?: KeyPair,
   _fetch?: typeof fetch,
@@ -200,13 +288,7 @@ async function reactiveAuth(
   if (resourceMetadataUrl === undefined) {
     return unauthResponse;
   }
-  // TODO: cache this
-  const resourceMeta = await fetch(resourceMetadataUrl)
-    .then((response) => (response.ok ? response.json() : undefined))
-    .then((json) => (isResourceMetadata(json) ? json : undefined))
-    .catch((_) => {
-      return undefined;
-    });
+  const resourceMeta = await discoverResourceMetadata(resourceMetadataUrl);
   if (
     resourceMeta === undefined ||
     !hasAuthServer(resourceMeta) ||
@@ -214,22 +296,21 @@ async function reactiveAuth(
   ) {
     return unauthResponse;
   }
-  const asUrl = new URL(
-    ".well-known/oauth-authorization-server",
-    resourceMeta.authorization_servers.at(0),
+  // RFC 9728 section 3.3: the metadata must describe the resource being accessed, otherwise
+  // it must not be used. This covers both the URL the exchanged token would be sent to, and
+  // the URL which issued the challenge if the request was redirected.
+  const targetUrl = toUrlString(url);
+  const challengerUrl =
+    unauthResponse.url !== "" ? unauthResponse.url : targetUrl;
+  if (
+    !isWithinResource(targetUrl, resourceMeta.resource) ||
+    !isWithinResource(challengerUrl, resourceMeta.resource)
+  ) {
+    return unauthResponse;
+  }
+  const asMeta = await discoverAsMetadata(
+    resourceMeta.authorization_servers[0],
   );
-  // TODO: cache this
-  const asMeta = await fetch(asUrl)
-    .then((response) => (response.ok ? response.json() : undefined))
-    .then((json) =>
-      json !== null && typeof json === "object"
-        ? setAsMetaDefaults(json)
-        : json,
-    )
-    .then((json) => (isASMetadata(json) ? json : undefined))
-    .catch((_) => {
-      return undefined;
-    });
   if (
     asMeta === undefined ||
     !asMeta.grant_types_supported.includes(
@@ -238,9 +319,9 @@ async function reactiveAuth(
   ) {
     return unauthResponse;
   }
-  // Token exchange
+  // Token exchange. There is no cached token for this resource at this point: the resource
+  // covers the requested URL, so a cached token would have been used before the request.
   try {
-    // FIXME cache the tokens
     const tokens = await exchange(
       idToken,
       asMeta.token_endpoint,
@@ -248,11 +329,16 @@ async function reactiveAuth(
       resourceMeta.resource,
       keyPair,
     );
+    const ttl = tokenCacheTtl(tokens);
+    const key = cacheKey(resourceMeta.resource);
+    if (key !== undefined && ttl > 0) {
+      tokenCache.set(key, tokens, { ttl });
+    }
     return await makeAuthenticatedRequest(
       tokens.access_token,
       url,
       requestInit,
-      tokens.token_type === "DPoP" ? keyPair : undefined,
+      withTokenType(tokens, keyPair),
       _fetch,
     );
   } catch (_) {
@@ -330,6 +416,8 @@ export function authenticateFetch(
     refreshToken: tokens.refreshToken,
   };
   const { dpopKey } = tokens;
+  // Tokens exchanged through reactive authentication, specific to this session.
+  const tokenCache = createTokenCache();
   const emitter = options?.eventEmitter;
   const refreshOptions = options?.refreshOptions;
   const expiresIn = computeExpiresIn(tokens);
@@ -351,7 +439,14 @@ export function authenticateFetch(
         // Rotate the whole token set. Refresh responses may omit the ID token
         // (OpenID Connect Core, section 12.2), in which case the previous one is kept.
         current.accessToken = refreshed.accessToken;
-        current.idToken = refreshed.idToken ?? current.idToken;
+        if (
+          refreshed.idToken !== undefined &&
+          refreshed.idToken !== current.idToken
+        ) {
+          // Exchanged tokens were obtained with the previous ID token.
+          tokenCache.clear();
+          current.idToken = refreshed.idToken;
+        }
         if (refreshed.refreshToken !== undefined) {
           current.refreshToken = refreshed.refreshToken;
         }
@@ -409,6 +504,23 @@ export function authenticateFetch(
     emitter.emit(EVENTS.TIMEOUT_SET, expirationTimeout);
   }
   return async (url, requestInit?): Promise<Response> => {
+    // If a token was already exchanged for the target resource, use it directly
+    // to avoid the round trip through reactive authentication.
+    const cached = findCachedToken(tokenCache, toUrlString(url));
+    if (cached !== undefined) {
+      const cachedResponse = await makeAuthenticatedRequest(
+        cached.token.access_token,
+        url,
+        requestInit,
+        withTokenType(cached.token, dpopKey),
+        options?.fetch,
+      );
+      if (!isExpectedAuthError(cachedResponse.status)) {
+        return cachedResponse;
+      }
+      // The cached token is no longer accepted: start over with the session token.
+      tokenCache.delete(cached.key);
+    }
     let response = await makeAuthenticatedRequest(
       current.accessToken,
       url,
@@ -448,6 +560,7 @@ export function authenticateFetch(
       response,
       current.idToken,
       url,
+      tokenCache,
       requestInit,
       dpopKey,
       options?.fetch,

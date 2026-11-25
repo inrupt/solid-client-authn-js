@@ -32,7 +32,9 @@ import {
   authenticateFetch,
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
+  tokenCacheTtl,
 } from "./fetchFactory";
+import { clearMetadataCaches } from "./reactiveAuth";
 import {
   mockDefaultTokenRefresher,
   mockDefaultTokenSet,
@@ -798,6 +800,8 @@ describe("reactive authentication", () => {
   afterEach(() => {
     fetchSpy?.mockRestore();
     fetchSpy = undefined;
+    // The metadata caches are global, so they would otherwise leak between tests.
+    clearMetadataCaches();
   });
 
   it("does not attempt discovery if the response has no WWW-Authenticate header", async () => {
@@ -1060,6 +1064,193 @@ describe("reactive authentication", () => {
     });
   });
 
+  describe("metadata validation", () => {
+    const withResourceMetadata = (
+      resourceMetadata: Record<string, unknown>,
+    ) => ({
+      ...successfulRoutes(),
+      [RESOURCE_METADATA_URL]: [json(resourceMetadata)],
+    });
+
+    const expectRejected = async (routes: Routes, response: Response) => {
+      fetchSpy = mockRoutes(routes);
+      const result = await authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      })(RESOURCE_URL);
+      expect(result).toBe(response);
+      // The ID token was not sent anywhere, so no token was exchanged or cached.
+      expect(calledUrls(fetchSpy)).not.toContain(TOKEN_ENDPOINT);
+    };
+
+    it.each([
+      ["on another origin", "https://victim.example"],
+      ["on another scheme", "http://rs.example"],
+      ["on another port", "https://rs.example:8443"],
+      ["on a path which does not cover the requested URL", `${RESOURCE}/other`],
+      [
+        "on a path only sharing a prefix with the requested URL",
+        `${RESOURCE}/some/res`,
+      ],
+      ["which is not a URL", "not a URL"],
+    ])(
+      "does not use resource metadata describing a resource %s",
+      async (_, resource) => {
+        const response = unauthorized(CHALLENGE);
+        await expectRejected(
+          {
+            ...withResourceMetadata({
+              resource,
+              authorization_servers: [AS],
+            }),
+            [RESOURCE_URL]: [response],
+          },
+          response,
+        );
+      },
+    );
+
+    it("uses resource metadata describing a resource which covers the requested URL", async () => {
+      fetchSpy = mockRoutes(
+        withResourceMetadata({
+          resource: `${RESOURCE}/some`,
+          authorization_servers: [AS],
+        }),
+      );
+      const result = await authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      })(RESOURCE_URL);
+      expect(result.status).toBe(200);
+      expect(exchangeRequest(fetchSpy)).toMatchObject({
+        resource: `${RESOURCE}/some`,
+      });
+    });
+
+    it("does not use resource metadata which does not describe the URL the challenge came from", async () => {
+      // The request was redirected to another origin, which issued the challenge.
+      const response = new Response(undefined, {
+        status: 401,
+        headers: { "WWW-Authenticate": CHALLENGE },
+      });
+      jest
+        .spyOn(response, "url", "get")
+        .mockReturnValue("https://other.example/resource");
+      await expectRejected(
+        { ...successfulRoutes(), [RESOURCE_URL]: [response] },
+        response,
+      );
+    });
+
+    it("does not use authorization server metadata with an issuer other than the authorization server", async () => {
+      const response = unauthorized(CHALLENGE);
+      await expectRejected(
+        {
+          ...successfulRoutes(),
+          [RESOURCE_URL]: [response],
+          [AS_METADATA_URL]: [
+            json(asMetadata({ issuer: "https://victim-as.example" })),
+          ],
+        },
+        response,
+      );
+    });
+
+    it("does not cache authorization server metadata with a mismatched issuer", async () => {
+      const mismatched = () =>
+        json(asMetadata({ issuer: "https://victim-as.example" }));
+      fetchSpy = mockRoutes({
+        ...successfulRoutes(),
+        [RESOURCE_URL]: [unauthorized(CHALLENGE), unauthorized(CHALLENGE)],
+        [AS_METADATA_URL]: [mismatched(), mismatched()],
+      });
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      await myFetch(RESOURCE_URL);
+      // The resource metadata was cached, but the AS metadata is fetched again.
+      expect(
+        calledUrls(fetchSpy).filter((u) => u === RESOURCE_METADATA_URL),
+      ).toHaveLength(1);
+      expect(
+        calledUrls(fetchSpy).filter((u) => u === AS_METADATA_URL),
+      ).toHaveLength(2);
+    });
+
+    it("does not use authorization server metadata for an invalid authorization server identifier", async () => {
+      const response = unauthorized(CHALLENGE);
+      await expectRejected(
+        {
+          ...withResourceMetadata({
+            resource: RESOURCE,
+            authorization_servers: ["not a URL"],
+          }),
+          [RESOURCE_URL]: [response],
+        },
+        response,
+      );
+    });
+
+    it("discovers the metadata of an authorization server with a path", async () => {
+      const tenantAs = `${AS}/tenant`;
+      const tenantAsMetadataUrl = `${AS}/.well-known/oauth-authorization-server/tenant`;
+      fetchSpy = mockRoutes({
+        ...withResourceMetadata({
+          resource: RESOURCE,
+          authorization_servers: [tenantAs],
+        }),
+        [tenantAsMetadataUrl]: [json(asMetadata({ issuer: tenantAs }))],
+      });
+      const result = await authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      })(RESOURCE_URL);
+      expect(result.status).toBe(200);
+      expect(calledUrls(fetchSpy)).toContain(tenantAsMetadataUrl);
+      expect(exchangeRequest(fetchSpy)).toMatchObject({ audience: tenantAs });
+    });
+
+    it("accepts authorization server metadata without scopes_supported", async () => {
+      const { scopes_supported: _omitted, ...withoutScopes } = asMetadata();
+      fetchSpy = mockRoutes({
+        ...successfulRoutes(),
+        [AS_METADATA_URL]: [json(withoutScopes)],
+      });
+      const result = await authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      })(RESOURCE_URL);
+      expect(result.status).toBe(200);
+    });
+
+    it("sends the ID token with the id_token subject token type", async () => {
+      fetchSpy = mockRoutes(successfulRoutes());
+      await authenticateFetch({ accessToken: "myToken", idToken: ID_TOKEN })(
+        RESOURCE_URL,
+      );
+      expect(exchangeRequest(fetchSpy)).toMatchObject({
+        subject_token: ID_TOKEN,
+        subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
+      });
+    });
+
+    it("binds an exchanged token of type 'dpop', in lowercase, to the DPoP key", async () => {
+      fetchSpy = mockRoutes(
+        successfulRoutes({ token: { token_type: "dpop" } }),
+      );
+      await authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+        dpopKey: await mockKeyPair(),
+      })(RESOURCE_URL);
+      const retryHeaders = new Headers(fetchSpy.mock.calls[4][1]?.headers);
+      expect(retryHeaders.get("Authorization")).toBe(`DPoP ${EXCHANGED_TOKEN}`);
+      expect(retryHeaders.has("DPoP")).toBe(true);
+    });
+  });
+
   describe("challenge selection", () => {
     // A second metadata URL, to tell which challenge discovery started from.
     const OTHER_RESOURCE_METADATA_URL = `${RESOURCE_METADATA_URL}/other`;
@@ -1191,6 +1382,223 @@ describe("reactive authentication", () => {
     });
   });
 
+  describe("caching", () => {
+    const authHeader = (
+      spy: ReturnType<typeof mockRoutes>,
+      call: number,
+    ): string | null =>
+      new Headers(spy.mock.calls[call][1]?.headers).get("Authorization");
+
+    it("uses the exchanged token directly for later requests to the same resource", async () => {
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      fetchSpy.mockClear();
+      routes[RESOURCE_URL].push(new Response("cached content"));
+
+      const result = await myFetch(RESOURCE_URL);
+
+      await expect(result.text()).resolves.toBe("cached content");
+      // No 401 round trip, no discovery and no exchange.
+      expect(calledUrls(fetchSpy)).toStrictEqual([RESOURCE_URL]);
+      expect(authHeader(fetchSpy, 0)).toBe(`Bearer ${EXCHANGED_TOKEN}`);
+    });
+
+    it("uses the exchanged token for other URLs within the protected resource", async () => {
+      const otherUrl = `${RESOURCE}/other/resource`;
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      fetchSpy.mockClear();
+      routes[otherUrl] = [new Response("other content")];
+
+      await myFetch(otherUrl);
+
+      expect(calledUrls(fetchSpy)).toStrictEqual([otherUrl]);
+      expect(authHeader(fetchSpy, 0)).toBe(`Bearer ${EXCHANGED_TOKEN}`);
+    });
+
+    it("uses the session access token outside of the protected resource", async () => {
+      const otherUrl = "https://other.example/resource";
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      fetchSpy.mockClear();
+      routes[otherUrl] = [new Response("other content")];
+
+      await myFetch(otherUrl);
+
+      expect(calledUrls(fetchSpy)).toStrictEqual([otherUrl]);
+      expect(authHeader(fetchSpy, 0)).toBe("Bearer myToken");
+    });
+
+    it("reuses cached metadata when exchanging a new token", async () => {
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      fetchSpy.mockClear();
+      // The cached token is rejected, and so is the session token.
+      routes[RESOURCE_URL].push(
+        unauthorized(),
+        unauthorized(CHALLENGE),
+        new Response("some content"),
+      );
+      routes[TOKEN_ENDPOINT].push(
+        json(tokenResponse({ access_token: "some.new.exchanged.token" })),
+      );
+
+      const result = await myFetch(RESOURCE_URL);
+
+      expect(result.status).toBe(200);
+      expect(calledUrls(fetchSpy)).toStrictEqual([
+        RESOURCE_URL,
+        RESOURCE_URL,
+        TOKEN_ENDPOINT,
+        RESOURCE_URL,
+      ]);
+      expect(authHeader(fetchSpy, 0)).toBe(`Bearer ${EXCHANGED_TOKEN}`);
+      expect(authHeader(fetchSpy, 1)).toBe("Bearer myToken");
+      expect(authHeader(fetchSpy, 3)).toBe("Bearer some.new.exchanged.token");
+    });
+
+    it("shares discovered metadata across sessions, but not exchanged tokens", async () => {
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      await authenticateFetch({ accessToken: "myToken", idToken: ID_TOKEN })(
+        RESOURCE_URL,
+      );
+      fetchSpy.mockClear();
+      routes[RESOURCE_URL].push(
+        unauthorized(CHALLENGE),
+        new Response("other session content"),
+      );
+      routes[TOKEN_ENDPOINT].push(
+        json(tokenResponse({ access_token: "some.other.session.token" })),
+      );
+
+      // Another session for the same resource.
+      const result = await authenticateFetch({
+        accessToken: "otherToken",
+        idToken: "some.other.id.token",
+      })(RESOURCE_URL);
+
+      await expect(result.text()).resolves.toBe("other session content");
+      // No metadata fetches, but the first session's token isn't reused.
+      expect(calledUrls(fetchSpy)).toStrictEqual([
+        RESOURCE_URL,
+        TOKEN_ENDPOINT,
+        RESOURCE_URL,
+      ]);
+      expect(authHeader(fetchSpy, 0)).toBe("Bearer otherToken");
+      expect(exchangeRequest(fetchSpy)).toMatchObject({
+        subject_token: "some.other.id.token",
+      });
+    });
+
+    it("keys the exchanged token by the normalized resource identifier", async () => {
+      // The resource is advertised without a trailing slash.
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      fetchSpy.mockClear();
+      routes[`${RESOURCE}/`] = [new Response("root content")];
+
+      await myFetch(`${RESOURCE}/`);
+
+      expect(calledUrls(fetchSpy)).toStrictEqual([`${RESOURCE}/`]);
+      expect(authHeader(fetchSpy, 0)).toBe(`Bearer ${EXCHANGED_TOKEN}`);
+    });
+
+    it("does not cache an exchanged token about to expire", async () => {
+      const routes = successfulRoutes({ token: { expires_in: 5 } });
+      fetchSpy = mockRoutes(routes);
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      fetchSpy.mockClear();
+      routes[RESOURCE_URL].push(
+        unauthorized(CHALLENGE),
+        new Response("some content"),
+      );
+      routes[TOKEN_ENDPOINT].push(json(tokenResponse({ expires_in: 5 })));
+
+      await myFetch(RESOURCE_URL);
+
+      // The request goes through the session token and a new exchange again.
+      expect(calledUrls(fetchSpy)).toStrictEqual([
+        RESOURCE_URL,
+        TOKEN_ENDPOINT,
+        RESOURCE_URL,
+      ]);
+    });
+
+    it("does not cache metadata which failed to be fetched", async () => {
+      fetchSpy = mockRoutes({
+        [RESOURCE_URL]: [unauthorized(CHALLENGE), unauthorized(CHALLENGE)],
+        [RESOURCE_METADATA_URL]: [
+          new Response(undefined, { status: 404 }),
+          new Response(undefined, { status: 404 }),
+        ],
+      });
+      const myFetch = authenticateFetch({
+        accessToken: "myToken",
+        idToken: ID_TOKEN,
+      });
+      await myFetch(RESOURCE_URL);
+      await myFetch(RESOURCE_URL);
+
+      expect(
+        calledUrls(fetchSpy).filter((u) => u === RESOURCE_METADATA_URL),
+      ).toHaveLength(2);
+    });
+
+    describe("tokenCacheTtl", () => {
+      const withExpiresIn = (expiresIn?: number) => ({
+        access_token: EXCHANGED_TOKEN,
+        token_type: "Bearer" as const,
+        issued_token_type:
+          "urn:ietf:params:oauth:token-type:access_token" as const,
+        expires_in: expiresIn,
+      });
+
+      it("caches a token until shortly before it expires", () => {
+        expect(tokenCacheTtl(withExpiresIn(300))).toBe(295 * 1000);
+      });
+
+      it("uses the default lifetime if the token response has none", () => {
+        expect(tokenCacheTtl(withExpiresIn(undefined))).toBe(
+          (DEFAULT_EXPIRATION_TIME_SECONDS - 5) * 1000,
+        );
+      });
+
+      it("does not allow caching a token about to expire", () => {
+        expect(tokenCacheTtl(withExpiresIn(5))).toBeLessThanOrEqual(0);
+      });
+    });
+  });
+
   describe("with token refresh", () => {
     const spyTimeout = jest.spyOn(global, "setTimeout");
     const sleep = (ms: number) =>
@@ -1207,7 +1615,11 @@ describe("reactive authentication", () => {
       });
     });
 
-    const refreshingFetch = (refreshed: Partial<TokenEndpointResponse>) => {
+    const refreshingFetch = (
+      refreshed: Partial<TokenEndpointResponse>,
+      // Refreshes this many seconds after creation, plus the 5 seconds margin.
+      expiresIn = 0,
+    ) => {
       // Refreshes once, right away, then schedules the next refresh far away.
       const tokenRefresher: ITokenRefresher = {
         refresh: jest
@@ -1227,7 +1639,7 @@ describe("reactive authentication", () => {
           accessToken: "myToken",
           idToken: ID_TOKEN,
           refreshToken: "some refresh token",
-          expiresIn: 0,
+          expiresIn,
         },
         { refreshOptions: { sessionId: "mySession", tokenRefresher } },
       );
@@ -1256,6 +1668,55 @@ describe("reactive authentication", () => {
       expect(exchangeRequest(fetchSpy)).toMatchObject({
         subject_token: ID_TOKEN,
       });
+    });
+
+    // Refreshes 300ms after creation, leaving time to exchange and cache a token first.
+    const REFRESH_AFTER_EXCHANGE = 5.3;
+
+    it("clears the exchanged tokens, but not the metadata, when the ID token rotates", async () => {
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      const myFetch = refreshingFetch(
+        { idToken: "some.refreshed.id.token" },
+        REFRESH_AFTER_EXCHANGE,
+      );
+      await myFetch(RESOURCE_URL);
+      await sleep(500);
+      fetchSpy.mockClear();
+      routes[RESOURCE_URL].push(
+        unauthorized(CHALLENGE),
+        new Response("some content"),
+      );
+      routes[TOKEN_ENDPOINT].push(json(tokenResponse()));
+
+      await myFetch(RESOURCE_URL);
+
+      // The token is exchanged again with the new ID token, without metadata fetches.
+      expect(calledUrls(fetchSpy)).toStrictEqual([
+        RESOURCE_URL,
+        TOKEN_ENDPOINT,
+        RESOURCE_URL,
+      ]);
+      expect(exchangeRequest(fetchSpy)).toMatchObject({
+        subject_token: "some.refreshed.id.token",
+      });
+    });
+
+    it("keeps the exchanged tokens if the ID token does not rotate", async () => {
+      const routes = successfulRoutes();
+      fetchSpy = mockRoutes(routes);
+      const myFetch = refreshingFetch({}, REFRESH_AFTER_EXCHANGE);
+      await myFetch(RESOURCE_URL);
+      await sleep(500);
+      fetchSpy.mockClear();
+      routes[RESOURCE_URL].push(new Response("cached content"));
+
+      await myFetch(RESOURCE_URL);
+
+      expect(calledUrls(fetchSpy)).toStrictEqual([RESOURCE_URL]);
+      expect(
+        new Headers(fetchSpy.mock.calls[0][1]?.headers).get("Authorization"),
+      ).toBe(`Bearer ${EXCHANGED_TOKEN}`);
     });
 
     it("does not refresh without a refresh token", async () => {

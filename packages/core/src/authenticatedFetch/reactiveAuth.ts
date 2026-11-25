@@ -21,6 +21,7 @@
 // Camelcase identifiers are aligned with the OAuth specification.
 /* eslint-disable camelcase*/
 
+import { LRUCache } from "lru-cache";
 import type { KeyPair } from "./dpopUtils";
 import { createDpopHeader } from "./dpopUtils";
 
@@ -33,7 +34,7 @@ export type AuthnChallenge = Partial<
 /**
  * See {@link https://datatracker.ietf.org/doc/html/rfc9728}
  */
-type ResourceMetadata = {
+export type ResourceMetadata = {
   resource: string;
   authorization_servers?: string[];
   bearer_methods_supported?: string[];
@@ -43,7 +44,7 @@ type ResourceMetadata = {
 /**
  * See {@link https://datatracker.ietf.org/doc/html/rfc8414}
  */
-type AuthorizationServerMetadata = {
+export type AuthorizationServerMetadata = {
   issuer: string;
   authorization_endpoint?: string;
   // Implicit grant is not in scope for this library, so the token endpoint is mandatory.
@@ -116,6 +117,22 @@ export function isASMetadata(x: unknown): x is AuthorizationServerMetadata {
       hasStringArray(md, "scopes_supported")) &&
     typeof md["client_id_metadata_document_supported"] === "boolean"
   );
+}
+
+/**
+ * Build the URL of the authorization server metadata, as per RFC 8414 section 3.1:
+ * the well-known path is inserted between the host and the path of the issuer.
+ *
+ * @param issuer The authorization server issuer identifier.
+ * @returns The authorization server metadata URL.
+ */
+export function asMetadataUrl(issuer: string): string {
+  const issuerUrl = new URL(issuer);
+  const path = issuerUrl.pathname === "/" ? "" : issuerUrl.pathname;
+  return new URL(
+    `/.well-known/oauth-authorization-server${path}`,
+    issuerUrl.origin,
+  ).href;
 }
 
 // RFC 9110, section 5.6.2
@@ -205,7 +222,7 @@ const SUPPORTED_ISSUED_TOKEN_TYPES = [
   "urn:ietf:params:oauth:token-type:access_token",
 ] as const;
 
-type TokenResponse = {
+export type TokenResponse = {
   access_token: string;
   token_type: (typeof SUPPORTED_TOKEN_TYPES)[number];
   issued_token_type: (typeof SUPPORTED_ISSUED_TOKEN_TYPES)[number];
@@ -303,4 +320,118 @@ export async function exchange(
         cause,
       });
     });
+}
+
+export const DEFAULT_REACTIVE_AUTH_CACHE_SIZE = 100;
+export const DEFAULT_METADATA_TTL_MS = 60 * 60 * 1000;
+
+/**
+ * The cache key for a URL. Caches compare keys by identity, so URLs are keyed by their
+ * normalized serialization, which makes equivalent URLs share an entry.
+ *
+ * @param url The URL to key.
+ * @returns The normalized URL, or undefined if it isn't a valid URL.
+ */
+export function cacheKey(url: string): string | undefined {
+  try {
+    return new URL(url).href;
+  } catch {
+    return undefined;
+  }
+}
+
+// Metadata documents are public, and are validated before being cached (RFC 8414 issuer) or
+// before each use (RFC 9728 resource), so they are shared across sessions.
+const resourceMetadataCache = new LRUCache<string, ResourceMetadata>({
+  max: DEFAULT_REACTIVE_AUTH_CACHE_SIZE,
+  ttl: DEFAULT_METADATA_TTL_MS,
+});
+const asMetadataCache = new LRUCache<string, AuthorizationServerMetadata>({
+  max: DEFAULT_REACTIVE_AUTH_CACHE_SIZE,
+  ttl: DEFAULT_METADATA_TTL_MS,
+});
+
+/**
+ * The protected resource metadata cache, keyed by the metadata URL advertised in the
+ * resource_metadata challenge parameter.
+ */
+export const getResourceMetadataCache = () => resourceMetadataCache;
+
+/**
+ * The authorization server metadata cache, keyed by the authorization server identifier.
+ */
+export const getAsMetadataCache = () => asMetadataCache;
+
+/**
+ * Empty the metadata caches.
+ */
+export function clearMetadataCaches(): void {
+  resourceMetadataCache.clear();
+  asMetadataCache.clear();
+}
+
+/**
+ * Exchanged tokens, keyed by the protected resource identifier they were issued for.
+ * Tokens are specific to a session, so a token cache must not be shared across sessions.
+ */
+export type TokenCache = LRUCache<string, TokenResponse>;
+
+/**
+ * Create a token cache. Each entry is cached for its own TTL, set when it is added.
+ */
+export function createTokenCache(): TokenCache {
+  return new LRUCache<string, TokenResponse>({
+    max: DEFAULT_REACTIVE_AUTH_CACHE_SIZE,
+  });
+}
+
+/**
+ * Check whether a URL is within a protected resource, identified as per RFC 9728:
+ * same origin, and a path under the resource path.
+ */
+export function isWithinResource(url: string, resource: string): boolean {
+  let target: URL;
+  let protectedResource: URL;
+  try {
+    target = new URL(url);
+    protectedResource = new URL(resource);
+  } catch {
+    return false;
+  }
+  if (target.origin !== protectedResource.origin) {
+    return false;
+  }
+  const resourcePath = protectedResource.pathname;
+  if (resourcePath === "/" || target.pathname === resourcePath) {
+    return true;
+  }
+  const prefix = resourcePath.endsWith("/") ? resourcePath : `${resourcePath}/`;
+  return target.pathname.startsWith(prefix);
+}
+
+/**
+ * Find a cached exchanged token for the protected resource a URL belongs to,
+ * preferring the most specific resource.
+ *
+ * @param cache The session's token cache.
+ * @param url The target URL.
+ * @returns The token and its key (the protected resource identifier), if any.
+ */
+export function findCachedToken(
+  cache: TokenCache,
+  url: string,
+): { key: string; token: TokenResponse } | undefined {
+  let match: { key: string; token: TokenResponse } | undefined;
+  for (const resource of [...cache.keys()]) {
+    // get() skips expired entries.
+    const token = cache.get(resource);
+    if (
+      token !== undefined &&
+      isWithinResource(url, resource) &&
+      (match === undefined || resource.length > match.key.length)
+    ) {
+      match = { key: resource, token };
+    }
+  }
+  return match;
 }
