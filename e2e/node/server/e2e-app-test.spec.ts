@@ -33,7 +33,6 @@ import {
 } from "@jest/globals";
 import { firefox } from "@playwright/test";
 import type { Browser, Page } from "@playwright/test";
-import { custom } from "openid-client";
 import type { Server } from "http";
 import type { SessionTokenSet } from "node";
 import {
@@ -45,10 +44,6 @@ import { createApp } from "./express";
 // Extensions are required for JSON-LD imports.
 
 import CONSTANTS from "../../../playwright.client-authn.constants.json";
-
-custom.setHttpOptionsDefaults({
-  timeout: 15000,
-});
 
 if (process.env.CI === "true") {
   // Tests running in the CI runners tend to be more flaky.

@@ -19,8 +19,18 @@
 //
 
 import { mockStorageUtility } from "@inrupt/solid-client-authn-core";
-import { jest, it, describe, expect } from "@jest/globals";
-import IssuerConfigFetcher from "./IssuerConfigFetcher";
+import {
+  jest,
+  it,
+  describe,
+  expect,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
+import type { ServerMetadata } from "openid-client";
+import IssuerConfigFetcher, {
+  describeErrorCauses,
+} from "./IssuerConfigFetcher";
 import {
   mockDefaultIssuerMetadata,
   mockIssuerMetadata,
@@ -29,12 +39,32 @@ import {
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
+const mockJsonResponse = (body: unknown, status = 200): Response =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 
 /**
  * Test for IssuerConfigFetcher
  */
 describe("IssuerConfigFetcher", () => {
+  let mockedFetch: jest.SpiedFunction<typeof fetch>;
+
+  beforeEach(() => {
+    mockedFetch = jest.spyOn(globalThis, "fetch");
+  });
+
+  afterEach(() => {
+    // Discard any network response mocked but not consumed by a test.
+    mockedFetch.mockRestore();
+  });
+
+  const mockDiscovery = (metadata: Partial<ServerMetadata>) =>
+    mockedFetch.mockResolvedValueOnce(mockJsonResponse(metadata));
+
+  const getRequestedUrl = (): string => String(mockedFetch.mock.calls[0][0]);
+
   const defaultMocks = {
     storageUtility: mockStorageUtility({}),
   };
@@ -48,28 +78,40 @@ describe("IssuerConfigFetcher", () => {
   }
 
   it("should return a config based on the fetched config if none was stored in the storage", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
     const mockedIssuerConfig = mockDefaultIssuerMetadata();
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(mockedIssuerConfig);
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
 
     const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
+    expect(getRequestedUrl()).toBe(
+      "https://my.idp/.well-known/openid-configuration",
+    );
+    // The discovery request is issued by openid-client, which does not follow
+    // redirects and applies a timeout.
+    const requestInit = mockedFetch.mock.calls[0][1];
+    expect(requestInit).toMatchObject({
+      method: "GET",
+      redirect: "manual",
+      headers: expect.objectContaining({ accept: "application/json" }),
+    });
+    expect(requestInit?.signal).toBeInstanceOf(AbortSignal);
     expect(fetchedConfig.issuer).toBe(mockedIssuerConfig.issuer);
     expect(fetchedConfig.authorizationEndpoint).toBe(
       mockedIssuerConfig.authorization_endpoint,
     );
-    expect(fetchedConfig.claimsSupported).toBe(
+    expect(fetchedConfig.claimsSupported).toEqual(
       mockedIssuerConfig.claims_supported,
     );
-    expect(fetchedConfig.issuer).toBe(mockedIssuerConfig.issuer);
     expect(fetchedConfig.jwksUri).toBe(mockedIssuerConfig.jwks_uri);
     expect(fetchedConfig.tokenEndpoint).toBe(mockedIssuerConfig.token_endpoint);
-    expect(fetchedConfig.subjectTypesSupported).toBe(
+    expect(fetchedConfig.registrationEndpoint).toBe(
+      mockedIssuerConfig.registration_endpoint,
+    );
+    expect(fetchedConfig.subjectTypesSupported).toEqual(
       mockedIssuerConfig.subject_types_supported,
     );
     expect(fetchedConfig.endSessionEndpoint).toBe(
@@ -77,14 +119,183 @@ describe("IssuerConfigFetcher", () => {
     );
   });
 
+  it("stores the fetched config in storage", async () => {
+    mockDiscovery(mockDefaultIssuerMetadata());
+    const storageUtility = mockStorageUtility({});
+    const configFetcher = getIssuerConfigFetcher({ storageUtility });
+
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+
+    await expect(
+      storageUtility.get(
+        IssuerConfigFetcher.getLocalStorageKey("https://my.idp/"),
+      ),
+    ).resolves.toBe(JSON.stringify(fetchedConfig));
+  });
+
+  it("appends a trailing slash to the issuer before resolving the discovery document", async () => {
+    mockDiscovery(mockIssuerMetadata({ issuer: "https://my.idp/some/path" }));
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    const fetchedConfig = await configFetcher.fetchConfig(
+      "https://my.idp/some/path",
+    );
+    expect(getRequestedUrl()).toBe(
+      "https://my.idp/some/path/.well-known/openid-configuration",
+    );
+    expect(fetchedConfig.issuer).toBe("https://my.idp/some/path");
+  });
+
+  it("does not add a trailing slash to an issuer which already has one", async () => {
+    mockDiscovery(mockIssuerMetadata({ issuer: "https://my.idp/some/path/" }));
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await configFetcher.fetchConfig("https://my.idp/some/path/");
+    expect(getRequestedUrl()).toBe(
+      "https://my.idp/some/path/.well-known/openid-configuration",
+    );
+  });
+
+  it("tolerates a trailing slash in the discovered issuer which isn't in the requested issuer", async () => {
+    mockDiscovery(mockIssuerMetadata({ issuer: "https://my.idp/" }));
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp");
+    expect(getRequestedUrl()).toBe(
+      "https://my.idp/.well-known/openid-configuration",
+    );
+    expect(fetchedConfig.issuer).toBe("https://my.idp/");
+  });
+
+  it("tolerates a trailing slash in the requested issuer which isn't in the discovered issuer", async () => {
+    mockDiscovery(mockIssuerMetadata({ issuer: "https://my.idp" }));
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(fetchedConfig.issuer).toBe("https://my.idp");
+  });
+
+  it("throws if the discovered issuer does not match the requested issuer", async () => {
+    mockDiscovery(mockIssuerMetadata({ issuer: "https://other.idp/" }));
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "The issuer identifier [https://other.idp/] in the configuration fetched from [https://my.idp/.well-known/openid-configuration] does not match the expected issuer [https://my.idp/].",
+    );
+  });
+
+  it("throws if the issuer does not use HTTPS and isn't a loopback host", async () => {
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("http://my.idp/")).rejects.toThrow(
+      "The issuer [http://my.idp/] must use HTTPS. Plain HTTP is only supported for loopback hosts.",
+    );
+    expect(mockedFetch).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["http://localhost:3000/"],
+    ["http://127.0.0.1:3000/"],
+    ["http://[::1]:3000/"],
+    ["http://idp.localhost/"],
+  ])("accepts the plain HTTP loopback issuer %s", async (issuer) => {
+    mockDiscovery(mockIssuerMetadata({ issuer }));
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    const fetchedConfig = await configFetcher.fetchConfig(issuer);
+    expect(getRequestedUrl()).toBe(`${issuer}.well-known/openid-configuration`);
+    expect(fetchedConfig.issuer).toBe(issuer);
+  });
+
+  it("throws if the issuer configuration cannot be fetched", async () => {
+    mockedFetch.mockResolvedValueOnce(
+      new Response("Not found", { status: 404, statusText: "Not Found" }),
+    );
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
+    );
+  });
+
+  it("includes the underlying network error when the issuer configuration cannot be fetched", async () => {
+    mockedFetch.mockRejectedValueOnce(
+      new TypeError("fetch failed", {
+        cause: Object.assign(
+          new Error("unable to verify the first certificate"),
+          { code: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" },
+        ),
+      }),
+    );
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed: fetch failed <- UNABLE_TO_VERIFY_LEAF_SIGNATURE: unable to verify the first certificate",
+    );
+  });
+
+  it("does not follow redirects when fetching the issuer configuration", async () => {
+    mockedFetch.mockResolvedValueOnce(
+      new Response(null, {
+        status: 302,
+        headers: { Location: "http://169.254.169.254/latest/meta-data/" },
+      }),
+    );
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    await expect(configFetcher.fetchConfig("https://my.idp/")).rejects.toThrow(
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
+    );
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws if the issuer configuration is not valid JSON", async () => {
+    mockedFetch.mockResolvedValueOnce(
+      new Response("<html>Not JSON</html>", {
+        status: 200,
+        headers: { "Content-Type": "text/html" },
+      }),
+    );
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+
+    const error = await configFetcher
+      .fetchConfig("https://my.idp/")
+      .catch((e: Error) => e);
+    expect((error as Error).message).toContain(
+      "Fetching the configuration of issuer [https://my.idp/] at [https://my.idp/.well-known/openid-configuration] failed:",
+    );
+    // The response body must not leak in the error message.
+    expect((error as Error).message).not.toContain("Not JSON");
+  });
+
   it("throws an error if authorization_endpoint is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuerConfig = mockIssuerMetadata({
-      authorization_endpoint: undefined,
-    });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(
+      mockIssuerMetadata({
+        authorization_endpoint: undefined,
+      }),
+    );
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -96,13 +307,11 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if token_endpoint is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuerConfig = mockIssuerMetadata({
-      token_endpoint: undefined,
-    });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(
+      mockIssuerMetadata({
+        token_endpoint: undefined,
+      }),
+    );
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -114,13 +323,11 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if jwks_uri is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuerConfig = mockIssuerMetadata({
-      jwks_uri: undefined,
-    });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(
+      mockIssuerMetadata({
+        jwks_uri: undefined,
+      }),
+    );
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -132,13 +339,11 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if claims_supported is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuerConfig = mockIssuerMetadata({
-      claims_supported: undefined,
-    });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(
+      mockIssuerMetadata({
+        claims_supported: undefined,
+      }),
+    );
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -150,13 +355,11 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("throws an error if subject_types_supported is missing", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuerConfig = mockIssuerMetadata({
-      subject_types_supported: undefined,
-    });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(
+      mockIssuerMetadata({
+        subject_types_supported: undefined,
+      }),
+    );
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -167,14 +370,33 @@ describe("IssuerConfigFetcher", () => {
     );
   });
 
+  it("defaults grant_types_supported to [authorization_code, implicit] if omitted", async () => {
+    mockDiscovery(mockIssuerMetadata({ grant_types_supported: undefined }));
+    mockDiscovery(mockIssuerMetadata({ grant_types_supported: undefined }));
+
+    const configFetcher = getIssuerConfigFetcher({
+      storageUtility: mockStorageUtility({}),
+    });
+    const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(fetchedConfig.grantTypesSupported).toEqual([
+      "authorization_code",
+      "implicit",
+    ]);
+    // Each configuration gets its own copy of the default value.
+    fetchedConfig.grantTypesSupported?.push("some_grant");
+    const otherConfig = await configFetcher.fetchConfig("https://my.idp/");
+    expect(otherConfig.grantTypesSupported).toEqual([
+      "authorization_code",
+      "implicit",
+    ]);
+  });
+
   it("defaults scopes_supported to [openid] if omitted", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuerConfig = mockIssuerMetadata({
-      scopes_supported: undefined,
-    });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(
+      mockIssuerMetadata({
+        scopes_supported: undefined,
+      }),
+    );
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
@@ -185,18 +407,53 @@ describe("IssuerConfigFetcher", () => {
   });
 
   it("should return a config including the support for solid-oidc if present in the discovery profile", async () => {
-    const { Issuer } = jest.requireMock("openid-client") as any;
-    const mockedIssuerConfig = mockIssuerMetadata({
-      scopes_supported: ["webid"],
-    });
-    Issuer.discover = (jest.fn() as any).mockResolvedValueOnce({
-      metadata: mockedIssuerConfig,
-    });
+    mockDiscovery(
+      mockIssuerMetadata({
+        scopes_supported: ["webid"],
+      }),
+    );
 
     const configFetcher = getIssuerConfigFetcher({
       storageUtility: mockStorageUtility({}),
     });
     const fetchedConfig = await configFetcher.fetchConfig("https://my.idp/");
     expect(fetchedConfig.scopesSupported).toContain("webid");
+  });
+
+  describe("describeErrorCauses", () => {
+    it("describes an error without cause", () => {
+      expect(describeErrorCauses(new Error("Some error"))).toBe("Some error");
+    });
+
+    it("describes the error causes, including their codes", () => {
+      const error = new Error("Outer error", {
+        cause: new Error("Middle error", {
+          cause: Object.assign(new Error("Inner error"), { code: "ECODE" }),
+        }),
+      });
+      expect(describeErrorCauses(error)).toBe(
+        "Outer error <- Middle error <- ECODE: Inner error",
+      );
+    });
+
+    it("does not describe JSON parsing errors, which may include the response body", () => {
+      const error = new Error("Parsing failed", {
+        cause: new SyntaxError("Unexpected token '<', \"<html>Secret\"..."),
+      });
+      expect(describeErrorCauses(error)).toBe("Parsing failed");
+    });
+
+    it("ignores causes which are not errors", () => {
+      expect(
+        describeErrorCauses(new Error("Some error", { cause: "Some cause" })),
+      ).toBe("Some error");
+      expect(describeErrorCauses("Not an error")).toBe("");
+    });
+
+    it("bounds the number of described causes", () => {
+      const error = new Error("Cyclic error");
+      error.cause = error;
+      expect(describeErrorCauses(error).split(" <- ")).toHaveLength(5);
+    });
   });
 });

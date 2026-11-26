@@ -32,20 +32,59 @@ import type {
   IStorageUtility,
 } from "@inrupt/solid-client-authn-core";
 import { ConfigurationError } from "@inrupt/solid-client-authn-core";
-import type { IssuerMetadata } from "openid-client";
-import { Issuer } from "openid-client";
+import type { ServerMetadata } from "openid-client";
+import { allowInsecureRequests, discovery } from "openid-client";
+import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
+
+const WELL_KNOWN_OPENID_CONFIG = ".well-known/openid-configuration";
+// openid-client requires a client ID for discovery, but it is not used.
+const DISCOVERY_CLIENT_ID = "solid-client-authn-node-discovery";
+// The OpenID Connect Discovery default value of grant_types_supported.
+const DEFAULT_GRANT_TYPES_SUPPORTED = ["authorization_code", "implicit"];
+
+// Bounds the cause chain walk, in case of cyclic causes.
+const MAX_ERROR_CAUSE_DEPTH = 5;
+
+/**
+ * Describes an error and its causes (e.g. the network or TLS error behind a
+ * generic "fetch failed"), including their error codes if any. JSON parsing
+ * errors are not described, as their message includes parts of the response
+ * body.
+ *
+ * @param error the error to describe.
+ * @returns a description of the error and its causes.
+ * @hidden
+ */
+export function describeErrorCauses(error: unknown): string {
+  const descriptions: string[] = [];
+  let current: unknown = error;
+  while (
+    current instanceof Error &&
+    !(current instanceof SyntaxError) &&
+    descriptions.length < MAX_ERROR_CAUSE_DEPTH
+  ) {
+    const { code } = current as Error & { code?: unknown };
+    descriptions.push(
+      typeof code === "string"
+        ? `${code}: ${current.message}`
+        : current.message,
+    );
+    current = current.cause;
+  }
+  return descriptions.join(" <- ");
+}
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
 /**
- * Transforms an openid-client IssuerMetadata object into an [[IIssuerConfig]]
+ * Transforms an openid-client ServerMetadata object into an [[IIssuerConfig]]
  * @param metadata the object to transform.
  * @returns an [[IIssuerConfig]] initialized from the metadata.
  * @internal
  */
 export function configFromIssuerMetadata(
-  metadata: IssuerMetadata,
+  metadata: ServerMetadata,
 ): IIssuerConfig {
   // If the fields required as per https://openid.net/specs/openid-connect-discovery-1_0.html are missing,
   // throw an error.
@@ -99,7 +138,12 @@ export function configFromIssuerMetadata(
       metadata.request_object_signing_alg_values_supported,
     // TODO: add revocation_endpoint, end_session_endpoint, introspection_endpoint_auth_methods_supported, introspection_endpoint_auth_signing_alg_values_supported, revocation_endpoint_auth_methods_supported, revocation_endpoint_auth_signing_alg_values_supported, mtls_endpoint_aliases to IIssuerConfig
     // The following properties may be captured as "unkown" entries in the metadata object.
-    grantTypesSupported: metadata.grant_types_supported as string[] | undefined,
+    // grant_types_supported is optional, and defaults to ["authorization_code", "implicit"]
+    // (see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata).
+    grantTypesSupported:
+      metadata.grant_types_supported === undefined
+        ? [...DEFAULT_GRANT_TYPES_SUPPORTED]
+        : (metadata.grant_types_supported as string[]),
     responseTypesSupported: metadata.response_types_supported as
       string[] | undefined,
     idTokenSigningAlgValuesSupported:
@@ -113,11 +157,11 @@ export function configFromIssuerMetadata(
 }
 
 /**
- * Transforms an [[IIssuerConfig]] into an openid-client IssuerMetadata
+ * Transforms an [[IIssuerConfig]] into an openid-client ServerMetadata
  * @param config the IIssuerConfig to convert.
- * @returns an IssuerMetadata object initialized from the [[IIssuerConfig]].
+ * @returns a ServerMetadata object initialized from the [[IIssuerConfig]].
  */
-export function configToIssuerMetadata(config: IIssuerConfig): IssuerMetadata {
+export function configToIssuerMetadata(config: IIssuerConfig): ServerMetadata {
   return {
     issuer: config.issuer,
     authorization_endpoint: config.authorizationEndpoint,
@@ -157,13 +201,48 @@ export default class IssuerConfigFetcher implements IIssuerConfigFetcher {
   }
 
   async fetchConfig(issuer: string): Promise<IIssuerConfig> {
-    // TODO: The issuer config discovery happens in multiple places in the current
-    // codebase, because in openid-client the Client is built based on the Issuer.
-    // The codebase could be refactored so that issuer discovery only happens once.
-    const oidcIssuer = await Issuer.discover(issuer);
-    const issuerConfig: IIssuerConfig = configFromIssuerMetadata(
-      oidcIssuer.metadata,
+    const issuerUrl = new URL(issuer);
+    if (issuerUrl.protocol !== "https:" && !isLoopbackHttpUrl(issuerUrl)) {
+      throw new ConfigurationError(
+        `The issuer [${issuer}] must use HTTPS. Plain HTTP is only supported for loopback hosts.`,
+      );
+    }
+    const discoveryUrl = new URL(
+      WELL_KNOWN_OPENID_CONFIG,
+      issuer.endsWith("/") ? issuer : `${issuer}/`,
     );
+    let metadata: ServerMetadata;
+    try {
+      // openid-client applies its HTTPS, redirects, timeout and response
+      // validation policies to the discovery request. The client ID is
+      // irrelevant, as only the issuer metadata is used. The discovery
+      // document URL is provided directly, so that openid-client doesn't
+      // apply its strict issuer validation, which is done below instead.
+      const config = await discovery(
+        discoveryUrl,
+        DISCOVERY_CLIENT_ID,
+        undefined,
+        undefined,
+        {
+          execute: isLoopbackHttpUrl(issuerUrl)
+            ? [allowInsecureRequests]
+            : undefined,
+        },
+      );
+      metadata = config.serverMetadata();
+    } catch (e) {
+      throw new ConfigurationError(
+        `Fetching the configuration of issuer [${issuer}] at [${discoveryUrl.href}] failed: ${describeErrorCauses(e)}`,
+      );
+    }
+    // See https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation
+    // Trailing slash differences are tolerated, as they are common in the wild.
+    if (metadata.issuer.replace(/\/$/, "") !== issuer.replace(/\/$/, "")) {
+      throw new ConfigurationError(
+        `The issuer identifier [${metadata.issuer}] in the configuration fetched from [${discoveryUrl.href}] does not match the expected issuer [${issuer}].`,
+      );
+    }
+    const issuerConfig: IIssuerConfig = configFromIssuerMetadata(metadata);
     // Update store with fetched config
     await this.storageUtility.set(
       IssuerConfigFetcher.getLocalStorageKey(issuer),

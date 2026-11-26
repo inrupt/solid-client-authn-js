@@ -23,7 +23,7 @@ import type {
   IIssuerConfigFetcher,
 } from "@inrupt/solid-client-authn-core";
 import { jest } from "@jest/globals";
-import type { IssuerMetadata } from "openid-client";
+import type { ServerMetadata } from "openid-client";
 import { configFromIssuerMetadata } from "../IssuerConfigFetcher";
 
 // Camelcase identifiers are required in the OIDC specification.
@@ -47,9 +47,9 @@ export const IssuerConfigFetcherMock = {
   ),
 } as unknown as jest.Mocked<IIssuerConfigFetcher>;
 
-// Note that this returns an instance of IssuerMetadata, which is the equivalent
+// Note that this returns an instance of ServerMetadata, which is the equivalent
 // of our IIssuerConfig for openid-client
-export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
+export const mockDefaultIssuerMetadata = (): ServerMetadata => {
   return {
     issuer: "https://my.idp/",
     authorization_endpoint: "https://my.idp/auth",
@@ -69,8 +69,8 @@ export const mockDefaultIssuerMetadata = (): IssuerMetadata => {
 };
 
 export const mockIssuerMetadata = (
-  config: Partial<IssuerMetadata>,
-): IssuerMetadata => {
+  config: Partial<ServerMetadata>,
+): ServerMetadata => {
   return {
     ...mockDefaultIssuerMetadata(),
     ...config,

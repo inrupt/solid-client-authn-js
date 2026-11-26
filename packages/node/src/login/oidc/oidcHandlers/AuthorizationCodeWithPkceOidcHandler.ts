@@ -35,8 +35,13 @@ import {
   AuthorizationCodeWithPkceOidcHandlerBase,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer, generators } from "openid-client";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
+import {
+  buildAuthorizationUrl,
+  calculatePKCECodeChallenge,
+  randomPKCECodeVerifier,
+  randomState,
+} from "openid-client";
+import { buildClientConfiguration } from "../clientConfiguration";
 
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
@@ -51,24 +56,26 @@ export default class AuthorizationCodeWithPkceOidcHandler
   implements IOidcHandler
 {
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    const issuer = new Issuer(
-      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration),
+    const { redirectUrl } = oidcLoginOptions;
+    if (redirectUrl === undefined) {
+      throw new Error("The authorization code flow requires a redirect URL.");
+    }
+    const config = buildClientConfiguration(
+      oidcLoginOptions.issuerConfiguration,
+      { clientId: oidcLoginOptions.client.clientId },
     );
-    const client = new issuer.Client({
-      client_id: oidcLoginOptions.client.clientId,
-    });
-    const codeVerifier = generators.codeVerifier();
-    const state = generators.state();
+    const codeVerifier = randomPKCECodeVerifier();
+    const state = randomState();
 
-    const targetUrl = client.authorizationUrl({
-      code_challenge: generators.codeChallenge(codeVerifier),
+    const targetUrl = buildAuthorizationUrl(config, {
+      code_challenge: await calculatePKCECodeChallenge(codeVerifier),
       state,
       response_type: "code",
-      redirect_uri: oidcLoginOptions.redirectUrl,
+      redirect_uri: redirectUrl,
       code_challenge_method: "S256",
       prompt: "consent",
       scope: oidcLoginOptions.scopes.join(" "),
-    });
+    }).href;
 
     if (oidcLoginOptions.eventEmitter) {
       oidcLoginOptions.eventEmitter.emit(EVENTS.AUTHORIZATION_REQUEST, {

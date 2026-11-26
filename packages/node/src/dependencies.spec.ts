@@ -18,7 +18,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import { jest, it, describe, expect } from "@jest/globals";
+import { jest, it, describe, expect, afterEach } from "@jest/globals";
 import {
   mockStorage,
   GeneralLogoutHandler,
@@ -26,6 +26,7 @@ import {
 } from "@inrupt/solid-client-authn-core";
 import type * as SolidClientAuthnCore from "@inrupt/solid-client-authn-core";
 import { EventEmitter } from "events";
+import { SignJWT, generateKeyPair } from "jose";
 import {
   buildLoginHandler,
   buildRedirectHandler,
@@ -47,7 +48,6 @@ import AuthorizationCodeWithPkceOidcHandler from "./login/oidc/oidcHandlers/Auth
 // Camelcase identifiers are required in the OIDC specification.
 /* eslint-disable camelcase*/
 
-jest.mock("openid-client");
 jest.mock("@inrupt/solid-client-authn-core", () => {
   const actualCoreModule = jest.requireActual(
     "@inrupt/solid-client-authn-core",
@@ -61,31 +61,33 @@ jest.mock("@inrupt/solid-client-authn-core", () => {
   };
 });
 
-const setupOidcClientMock = () => {
-  const { Issuer } = jest.requireMock("openid-client") as any;
-  function clientConstructor() {
-    // this is untyped, which makes TS complain
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.grant = jest.fn().mockResolvedValueOnce({
-      access_token: "some token",
-      id_token:
-        "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJodHRwczovL215LndlYmlkIiwiaXNzIjoiaHR0cHM6Ly9teS5pZHAvIiwiYXVkIjoiaHR0cHM6Ly9yZXNvdXJjZS5leGFtcGxlLm9yZyIsImV4cCI6MTY2MjI2NjIxNiwiaWF0IjoxNDYyMjY2MjE2fQ.IwumuwJtQw5kUBMMHAaDPJBppfBpRHbiXZw_HlKe6GNVUWUlyQRYV7W7r9OQtHmMsi6GVwOckelA3ErmhrTGVw",
-      token_type: "Bearer",
-      expired: () => false,
-      claims: jest.fn(),
-    } as any);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.authorizationUrl = jest
-      .fn()
-      .mockReturnValue("https://some.issuer/uri_parameters_go_there/");
-  }
-  const mockedIssuer = {
-    metadata: mockDefaultIssuerConfig(),
-    Client: clientConstructor,
-  };
-  Issuer.mockReturnValueOnce(mockedIssuer);
+const mockTokenEndpoint = async () => {
+  const issuerConfig = mockDefaultIssuerConfig();
+  // openid-client validates the ID token claims, but not its signature (which
+  // is validated by getWebidFromTokenPayload, mocked above).
+  const { privateKey } = await generateKeyPair("ES256");
+  const idToken = await new SignJWT({ webid: "https://my.webid/" })
+    .setProtectedHeader({ alg: "ES256" })
+    .setSubject("https://my.webid/")
+    .setIssuer(issuerConfig.issuer)
+    .setAudience("some client ID")
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(privateKey);
+  return jest.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    if (new Request(input).url !== issuerConfig.tokenEndpoint) {
+      return new Response(null, { status: 404 });
+    }
+    return new Response(
+      JSON.stringify({
+        access_token: "some token",
+        id_token: idToken,
+        token_type: "DPoP",
+        expires_in: 3600,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
 };
 
 describe("dependencies.node", () => {
@@ -96,6 +98,10 @@ describe("dependencies.node", () => {
 });
 
 describe("resolution order", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   const mockClientAuthentication = () => {
     const storageUtility = new StorageUtilityNode(
       mockStorage({}),
@@ -164,7 +170,7 @@ describe("resolution order", () => {
   });
 
   it("calls the client credentials handler if client credentials are present, but no refresh token is provided", async () => {
-    setupOidcClientMock();
+    const fetchSpy = await mockTokenEndpoint();
     const clientAuthn = mockClientAuthentication();
     const handlerSelectSpy = jest.spyOn(
       // The easiest way to test this is to look into the injected dependencies
@@ -190,10 +196,10 @@ describe("resolution order", () => {
     await expect(
       handlerSelectSpy.mock.results[0].value,
     ).resolves.toBeInstanceOf(ClientCredentialsOidcHandler);
+    expect(fetchSpy).toHaveBeenCalled();
   });
 
   it("calls the auth code handler if no client secret is present", async () => {
-    setupOidcClientMock();
     const clientAuthn = mockClientAuthentication();
     const handlerSelectSpy = jest.spyOn(
       // The easiest way to test this is to look into the injected dependencies

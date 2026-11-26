@@ -41,12 +41,12 @@ import {
   buildAuthenticatedFetch,
   EVENTS,
 } from "@inrupt/solid-client-authn-core";
-import { Issuer } from "openid-client";
-import { configToIssuerMetadata } from "../IssuerConfigFetcher";
-import { asDPoPInput } from "../../../util/dpopInput";
-
-// Camelcase identifiers are required in the OIDC specification.
-/* eslint-disable camelcase*/
+import { clientCredentialsGrant } from "openid-client";
+import {
+  buildClientConfiguration,
+  buildDpopHandle,
+  toOidcProviderError,
+} from "../clientConfiguration";
 
 /**
  * @hidden
@@ -66,13 +66,15 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
   }
 
   async handle(oidcLoginOptions: IOidcOptions): Promise<LoginResult> {
-    const issuer = new Issuer(
-      configToIssuerMetadata(oidcLoginOptions.issuerConfiguration),
+    // openid-client validates the ID Token (if any) claims, and expects it to
+    // be signed using an algorithm advertised by the issuer (or RS256).
+    const config = buildClientConfiguration(
+      oidcLoginOptions.issuerConfiguration,
+      {
+        clientId: oidcLoginOptions.client.clientId,
+        clientSecret: oidcLoginOptions.client.clientSecret,
+      },
     );
-    const client = new issuer.Client({
-      client_id: oidcLoginOptions.client.clientId,
-      client_secret: oidcLoginOptions.client.clientSecret,
-    });
 
     let dpopKey: KeyPair | undefined;
 
@@ -82,32 +84,23 @@ export default class ClientCredentialsOidcHandler implements IOidcHandler {
       [dpopKey.publicKey.alg] = PREFERRED_SIGNING_ALG;
     }
 
-    const tokens = await client.grant(
+    const tokens = await clientCredentialsGrant(
+      config,
       {
-        grant_type: "client_credentials",
-        token_endpoint_auth_method: "client_secret_basic",
         // Passing scopes as an array of strings results in them being
         // comma-separated in the request, which is invalid.
         scope: oidcLoginOptions.scopes.join(" "),
       },
       {
-        DPoP:
-          oidcLoginOptions.dpop && dpopKey !== undefined
-            ? asDPoPInput(dpopKey.privateKey)
-            : undefined,
+        DPoP: await buildDpopHandle(config, dpopKey),
       },
-    );
+    ).catch((e: unknown) => {
+      throw toOidcProviderError(e);
+    });
 
+    // openid-client rejects responses without an access token.
     let webId: string;
     let clientId: string | undefined;
-    if (tokens.access_token === undefined) {
-      throw new Error(
-        `Invalid response from Solid Identity Provider [${
-          oidcLoginOptions.issuer
-        }]: ${JSON.stringify(tokens)} is missing 'access_token'.`,
-      );
-    }
-
     if (tokens.id_token === undefined) {
       // In the case where no ID token is provided, the access token is used to
       // get the authenticated user's WebID. This is only a temporary solution,

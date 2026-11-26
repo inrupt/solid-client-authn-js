@@ -56,8 +56,14 @@ const baseConfig: ArrayElement<NonNullable<Config["projects"]>> = {
       "ts-jest",
       { tsconfig: { allowJs: true } },
     ],
+    "node_modules[\\\\/](openid-client|oauth4webapi).+\\.js$": [
+      "ts-jest",
+      { tsconfig: { allowJs: true } },
+    ],
   },
-  transformIgnorePatterns: ["node_modules[\\\\/](?!jose|uuid)"],
+  transformIgnorePatterns: [
+    "node_modules[\\\\/](?!jose|uuid|openid-client|oauth4webapi)",
+  ],
   moduleNameMapper: {
     "^jose": esmRequire.resolve("jose"),
   },
