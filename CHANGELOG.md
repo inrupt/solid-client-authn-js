@@ -18,8 +18,8 @@ The following changes have been implemented but not released yet:
     `127.0.0.1`, `[::1]` or a `*.localhost` subdomain). For any other Identity Provider, the
     discovery, token and registration endpoints must use HTTPS, and redirects are not followed
     when fetching the Identity Provider configuration.
-  - The issuer identifier in the Identity Provider configuration must match the issuer used to
-    log in (a trailing slash difference is tolerated).
+  - The issuer identifier in the Identity Provider configuration must match the issuer passed to the
+    `login` function.
   - The `openid-client` HTTP options defaults (set via `custom.setHttpOptionsDefaults`) no longer
     apply to requests issued by this library. Requests to the Identity Provider now time out after
     30 seconds.
