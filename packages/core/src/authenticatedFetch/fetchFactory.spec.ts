@@ -20,6 +20,8 @@
 
 // This is necessary to mock fetch
 /* eslint-disable no-shadow */
+// Camelcase identifiers are aligned with the OAuth specification.
+/* eslint-disable camelcase */
 
 import { jest, it, describe, expect, afterEach } from "@jest/globals";
 import type { CryptoKey } from "jose";
@@ -212,6 +214,7 @@ describe("buildAuthenticatedFetch", () => {
       url: "https://my.pod/container/",
       ok: true,
       status: 200,
+      headers: new Headers(),
     } as Response);
 
     const myFetch = buildAuthenticatedFetch("myToken", {
@@ -685,5 +688,306 @@ describe("buildAuthenticatedFetch", () => {
     await sleep(100);
     // The only call to setTimeout should come from the `sleep` function
     expect(spyTimeout).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("reactive authentication", () => {
+  const RESOURCE_URL = "https://rs.example/some/resource";
+  const RESOURCE = "https://rs.example";
+  const RESOURCE_METADATA_URL =
+    "https://rs.example/.well-known/oauth-protected-resource";
+  const AS = "https://as.example";
+  const AS_METADATA_URL =
+    "https://as.example/.well-known/oauth-authorization-server";
+  const TOKEN_ENDPOINT = "https://as.example/access/token";
+  const EXCHANGED_TOKEN = "some.exchanged.token";
+  const CHALLENGE = `Bearer resource_metadata="${RESOURCE_METADATA_URL}"`;
+
+  const json = (body: unknown) =>
+    new Response(JSON.stringify(body), {
+      headers: { "Content-Type": "application/json" },
+    });
+
+  const unauthorized = (wwwAuthenticate?: string, status = 401) => {
+    const response = new Response(undefined, {
+      status,
+      headers:
+        wwwAuthenticate === undefined
+          ? {}
+          : { "WWW-Authenticate": wwwAuthenticate },
+    });
+    // Not redirected, so that the DPoP replay doesn't kick in.
+    jest.spyOn(response, "url", "get").mockReturnValue(RESOURCE_URL);
+    return response;
+  };
+
+  const asMetadata = (overrides: Record<string, unknown> = {}) => ({
+    issuer: AS,
+    token_endpoint: TOKEN_ENDPOINT,
+    response_types_supported: [],
+    grant_types_supported: [
+      "client_credentials",
+      "urn:ietf:params:oauth:grant-type:token-exchange",
+    ],
+    token_endpoint_auth_methods_supported: ["private_key_jwt", "none"],
+    scopes_supported: ["some:scope"],
+    client_id_metadata_document_supported: true,
+    ...overrides,
+  });
+
+  const tokenResponse = (overrides: Record<string, unknown> = {}) => ({
+    access_token: EXCHANGED_TOKEN,
+    token_type: "Bearer",
+    issued_token_type: "urn:ietf:params:oauth:token-type:access_token",
+    expires_in: 300,
+    ...overrides,
+  });
+
+  type Routes = Record<string, Array<Response | Error>>;
+
+  // Responses are served per URL, in order, so that unexpected calls fail loudly.
+  const mockRoutes = (routes: Routes) =>
+    jest.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const target = input.toString();
+      const next = routes[target]?.shift();
+      if (next === undefined) {
+        throw new Error(`Unexpected fetch to ${target}`);
+      }
+      if (next instanceof Error) {
+        throw next;
+      }
+      return next;
+    });
+
+  const successfulRoutes = (
+    overrides: {
+      challenge?: Response;
+      token?: Record<string, unknown>;
+    } = {},
+  ): Routes => ({
+    [RESOURCE_URL]: [
+      overrides.challenge ?? unauthorized(CHALLENGE),
+      new Response("some content"),
+    ],
+    [RESOURCE_METADATA_URL]: [
+      json({ resource: RESOURCE, authorization_servers: [AS] }),
+    ],
+    [AS_METADATA_URL]: [json(asMetadata())],
+    [TOKEN_ENDPOINT]: [json(tokenResponse(overrides.token))],
+  });
+
+  const calledUrls = (fetchSpy: ReturnType<typeof mockRoutes>) =>
+    fetchSpy.mock.calls.map(([input]) => input.toString());
+
+  const exchangeRequest = (fetchSpy: ReturnType<typeof mockRoutes>) => {
+    const call = fetchSpy.mock.calls.find(
+      ([input]) => input.toString() === TOKEN_ENDPOINT,
+    );
+    return Object.fromEntries(
+      new URLSearchParams(call?.[1]?.body as URLSearchParams).entries(),
+    );
+  };
+
+  let fetchSpy: ReturnType<typeof mockRoutes> | undefined;
+
+  afterEach(() => {
+    fetchSpy?.mockRestore();
+    fetchSpy = undefined;
+  });
+
+  it("does not attempt discovery if the response has no WWW-Authenticate header", async () => {
+    const response = unauthorized();
+    fetchSpy = mockRoutes({ [RESOURCE_URL]: [response] });
+    const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+    expect(result).toBe(response);
+    expect(calledUrls(fetchSpy)).toStrictEqual([RESOURCE_URL]);
+  });
+
+  it("does not attempt discovery if the challenge has no resource_metadata", async () => {
+    const response = unauthorized('Bearer realm="some realm"');
+    fetchSpy = mockRoutes({ [RESOURCE_URL]: [response] });
+    const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+    expect(result).toBe(response);
+    expect(calledUrls(fetchSpy)).toStrictEqual([RESOURCE_URL]);
+  });
+
+  it("does not attempt discovery for errors which are not auth-related", async () => {
+    const response = unauthorized(CHALLENGE, 500);
+    fetchSpy = mockRoutes({ [RESOURCE_URL]: [response] });
+    const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+    expect(result).toBe(response);
+    expect(calledUrls(fetchSpy)).toStrictEqual([RESOURCE_URL]);
+  });
+
+  it.each([
+    ["is not found", new Response(undefined, { status: 404 })],
+    ["cannot be fetched", new Error("Network error")],
+    ["is not valid JSON", new Response("not JSON")],
+    ["has no resource", json({ authorization_servers: [AS] })],
+    ["has no authorization server", json({ resource: RESOURCE })],
+    [
+      "has an empty authorization server list",
+      json({ resource: RESOURCE, authorization_servers: [] }),
+    ],
+  ])(
+    "returns the original response if the resource metadata %s",
+    async (_, metadataResponse) => {
+      const response = unauthorized(CHALLENGE);
+      fetchSpy = mockRoutes({
+        [RESOURCE_URL]: [response],
+        [RESOURCE_METADATA_URL]: [metadataResponse],
+      });
+      const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+      expect(result).toBe(response);
+      expect(calledUrls(fetchSpy)).toStrictEqual([
+        RESOURCE_URL,
+        RESOURCE_METADATA_URL,
+      ]);
+    },
+  );
+
+  it.each([
+    ["is not found", new Response(undefined, { status: 404 })],
+    ["cannot be fetched", new Error("Network error")],
+    ["is invalid", json({ issuer: AS })],
+    [
+      "does not support token exchange",
+      json(asMetadata({ grant_types_supported: ["client_credentials"] })),
+    ],
+  ])(
+    "returns the original response if the authorization server metadata %s",
+    async (_, metadataResponse) => {
+      const response = unauthorized(CHALLENGE);
+      fetchSpy = mockRoutes({
+        [RESOURCE_URL]: [response],
+        [RESOURCE_METADATA_URL]: [
+          json({ resource: RESOURCE, authorization_servers: [AS] }),
+        ],
+        [AS_METADATA_URL]: [metadataResponse],
+      });
+      const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+      expect(result).toBe(response);
+      expect(calledUrls(fetchSpy)).toStrictEqual([
+        RESOURCE_URL,
+        RESOURCE_METADATA_URL,
+        AS_METADATA_URL,
+      ]);
+    },
+  );
+
+  it("returns the original response if the token exchange fails", async () => {
+    const response = unauthorized(CHALLENGE);
+    fetchSpy = mockRoutes({
+      ...successfulRoutes({ challenge: response }),
+      [TOKEN_ENDPOINT]: [new Response(undefined, { status: 400 })],
+    });
+    const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+    expect(result).toBe(response);
+    expect(calledUrls(fetchSpy)).toStrictEqual([
+      RESOURCE_URL,
+      RESOURCE_METADATA_URL,
+      AS_METADATA_URL,
+      TOKEN_ENDPOINT,
+    ]);
+  });
+
+  it("exchanges a token and retries the request with the exchanged token", async () => {
+    fetchSpy = mockRoutes(successfulRoutes());
+    const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+
+    expect(result.status).toBe(200);
+    await expect(result.text()).resolves.toBe("some content");
+    expect(calledUrls(fetchSpy)).toStrictEqual([
+      RESOURCE_URL,
+      RESOURCE_METADATA_URL,
+      // The AS metadata URL is derived from the authorization server identifier.
+      AS_METADATA_URL,
+      TOKEN_ENDPOINT,
+      RESOURCE_URL,
+    ]);
+    const retryHeaders = new Headers(fetchSpy.mock.calls[4][1]?.headers);
+    expect(retryHeaders.get("Authorization")).toBe(`Bearer ${EXCHANGED_TOKEN}`);
+  });
+
+  it("also attempts discovery on a 403 response", async () => {
+    fetchSpy = mockRoutes(
+      successfulRoutes({ challenge: unauthorized(CHALLENGE, 403) }),
+    );
+    const result = await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+    expect(result.status).toBe(200);
+  });
+
+  it("exchanges the session access token for the discovered resource and authorization server", async () => {
+    fetchSpy = mockRoutes(successfulRoutes());
+    await buildAuthenticatedFetch("myToken")(RESOURCE_URL);
+    expect(exchangeRequest(fetchSpy)).toMatchObject({
+      subject_token: "myToken",
+      audience: AS,
+      resource: RESOURCE,
+    });
+  });
+
+  it("preserves the original request options when retrying", async () => {
+    fetchSpy = mockRoutes(successfulRoutes());
+    await buildAuthenticatedFetch("myToken")(RESOURCE_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "text/plain" },
+      body: "some body",
+    });
+    const retryInit = fetchSpy.mock.calls[4][1];
+    expect(retryInit?.method).toBe("PUT");
+    expect(retryInit?.body).toBe("some body");
+    expect(new Headers(retryInit?.headers).get("Content-Type")).toBe(
+      "text/plain",
+    );
+  });
+
+  it("uses a Bearer token without a DPoP proof if the exchanged token is not DPoP-bound", async () => {
+    fetchSpy = mockRoutes(
+      successfulRoutes({ token: { token_type: "Bearer" } }),
+    );
+    await buildAuthenticatedFetch("myToken", { dpopKey: await mockKeyPair() })(
+      RESOURCE_URL,
+    );
+    const retryHeaders = new Headers(fetchSpy.mock.calls[4][1]?.headers);
+    expect(retryHeaders.get("Authorization")).toBe(`Bearer ${EXCHANGED_TOKEN}`);
+    expect(retryHeaders.has("DPoP")).toBe(false);
+  });
+
+  it("uses a DPoP proof for the original request if the exchanged token is DPoP-bound", async () => {
+    fetchSpy = mockRoutes(successfulRoutes({ token: { token_type: "DPoP" } }));
+    await buildAuthenticatedFetch("myToken", { dpopKey: await mockKeyPair() })(
+      RESOURCE_URL,
+    );
+    const retryHeaders = new Headers(fetchSpy.mock.calls[4][1]?.headers);
+    expect(retryHeaders.get("Authorization")).toBe(`DPoP ${EXCHANGED_TOKEN}`);
+    const { payload } = await jwtVerify(
+      retryHeaders.get("DPoP") as string,
+      (await mockJwk()).publicKey,
+    );
+    expect(payload).toMatchObject({
+      htu: RESOURCE_URL,
+      htm: "GET",
+      ath: expectedAth(EXCHANGED_TOKEN),
+    });
+  });
+
+  it("sends a DPoP proof for the token endpoint if the session is DPoP-bound", async () => {
+    fetchSpy = mockRoutes(successfulRoutes());
+    await buildAuthenticatedFetch("myToken", { dpopKey: await mockKeyPair() })(
+      RESOURCE_URL,
+    );
+    const exchangeCall = fetchSpy.mock.calls.find(
+      ([input]) => input.toString() === TOKEN_ENDPOINT,
+    );
+    const { payload } = await jwtVerify(
+      new Headers(exchangeCall?.[1]?.headers).get("DPoP") as string,
+      (await mockJwk()).publicKey,
+    );
+    expect(payload).toMatchObject({
+      htu: TOKEN_ENDPOINT,
+      htm: "POST",
+      ath: expectedAth("myToken"),
+    });
   });
 });
