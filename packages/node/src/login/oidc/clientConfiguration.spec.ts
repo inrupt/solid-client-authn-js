@@ -139,6 +139,21 @@ describe("buildDpopHandle", () => {
     await expect(buildDpopHandle(config, undefined)).resolves.toBeUndefined();
   });
 
+  it("throws if the public key is a symmetric key", async () => {
+    const config = buildClientConfiguration(mockIssuerConfig({}), {
+      clientId: "some client",
+    });
+    const { privateKey } = await generateDpopKeyPair();
+    await expect(
+      buildDpopHandle(config, {
+        privateKey,
+        publicKey: { kty: "oct", k: "c29tZSBzZWNyZXQ", alg: "HS256" },
+      }),
+    ).rejects.toThrow(
+      "The DPoP public key must be an asymmetric key, not a symmetric one.",
+    );
+  });
+
   it("builds a handle that signs DPoP proofs with the provided key pair", async () => {
     const fetchSpy = mockFetch();
     const config = buildClientConfiguration(mockIssuerConfig({}), {

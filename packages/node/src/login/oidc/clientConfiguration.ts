@@ -37,7 +37,6 @@ import {
   ResponseBodyError,
   WWWAuthenticateChallengeError,
 } from "openid-client";
-import type { CryptoKey } from "jose";
 import { importJWK } from "jose";
 import { configToIssuerMetadata } from "./IssuerConfigFetcher";
 import { isLoopbackHttpUrl } from "../../util/isLoopbackHttpUrl";
@@ -119,11 +118,18 @@ export async function buildDpopHandle(
   if (dpopKey === undefined) {
     return undefined;
   }
-  const publicKey = (await importJWK(
+  const publicKey = await importJWK(
     dpopKey.publicKey,
     dpopKey.publicKey.alg ?? PREFERRED_SIGNING_ALG[0],
     { extractable: true },
-  )) as CryptoKey;
+  );
+  // The DPoP key pair may be provided by the library user (e.g. when building
+  // a session from tokens), so its public key may not be asymmetric.
+  if (publicKey instanceof Uint8Array) {
+    throw new Error(
+      "The DPoP public key must be an asymmetric key, not a symmetric one.",
+    );
+  }
   return getDPoPHandle(config, {
     privateKey: dpopKey.privateKey,
     publicKey,
