@@ -33,6 +33,7 @@ import {
   buildAuthenticatedFetch,
   DEFAULT_EXPIRATION_TIME_SECONDS,
   tokenCacheTtl,
+  reactiveDiscovery,
 } from "./fetchFactory";
 import { clearMetadataCaches } from "./reactiveAuth";
 import {
@@ -1740,6 +1741,603 @@ describe("reactive authentication", () => {
       );
       await sleep(200);
       expect(expired).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("reactiveDiscovery", () => {
+    const OTHER_RESOURCE_METADATA_URL = `${RESOURCE_METADATA_URL}/other`;
+
+    const resourceMetadata = (overrides: Record<string, unknown> = {}) => ({
+      resource: RESOURCE,
+      authorization_servers: [AS],
+      ...overrides,
+    });
+
+    // Discovery only: no resource request, and no token exchange.
+    const discoveryRoutes = (overrides: Routes = {}): Routes => ({
+      [RESOURCE_METADATA_URL]: [json(resourceMetadata())],
+      [AS_METADATA_URL]: [json(asMetadata())],
+      ...overrides,
+    });
+
+    // A response built outside of fetch, e.g. by a native HTTP client, has no URL.
+    const nativeResponse = (wwwAuthenticate?: string) =>
+      new Response(undefined, {
+        status: 401,
+        headers:
+          wwwAuthenticate === undefined
+            ? {}
+            : { "WWW-Authenticate": wwwAuthenticate },
+      });
+
+    // The challenge came from a request which was redirected to redirectUrl.
+    const redirectedResponse = (
+      wwwAuthenticate: string,
+      redirectUrl: string,
+    ) => {
+      const response = nativeResponse(wwwAuthenticate);
+      jest.spyOn(response, "url", "get").mockReturnValue(redirectUrl);
+      return response;
+    };
+
+    describe("discovery", () => {
+      it("returns the protected resource and authorization server metadata", async () => {
+        fetchSpy = mockRoutes(discoveryRoutes());
+        const result = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(CHALLENGE),
+          ["Bearer"],
+        );
+        expect(result).toStrictEqual({
+          resourceMetadata: resourceMetadata(),
+          authServerMetadata: asMetadata(),
+        });
+        expect(calledUrls(fetchSpy)).toStrictEqual([
+          RESOURCE_METADATA_URL,
+          AS_METADATA_URL,
+        ]);
+      });
+
+      it("does not exchange any token, or send any credentials", async () => {
+        fetchSpy = mockRoutes(discoveryRoutes());
+        await reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), [
+          "Bearer",
+        ]);
+        expect(calledUrls(fetchSpy)).not.toContain(TOKEN_ENDPOINT);
+        fetchSpy.mock.calls.forEach(([, init]) => {
+          expect(new Headers(init?.headers).has("Authorization")).toBe(false);
+          expect(new Headers(init?.headers).has("DPoP")).toBe(false);
+        });
+      });
+
+      it("fills in the default values of the authorization server metadata", async () => {
+        const { grant_types_supported: _omitted, ...withoutGrants } =
+          asMetadata();
+        fetchSpy = mockRoutes(
+          discoveryRoutes({ [AS_METADATA_URL]: [json(withoutGrants)] }),
+        );
+        const result = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(CHALLENGE),
+          ["Bearer"],
+        );
+        expect(result?.authServerMetadata.grant_types_supported).toStrictEqual([
+          "authorization_code",
+          "implicit",
+        ]);
+      });
+
+      it("returns the metadata of an authorization server which does not support token exchange", async () => {
+        // Whether the authorization server is usable is up to the caller.
+        fetchSpy = mockRoutes(
+          discoveryRoutes({
+            [AS_METADATA_URL]: [
+              json(
+                asMetadata({ grant_types_supported: ["client_credentials"] }),
+              ),
+            ],
+          }),
+        );
+        const result = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(CHALLENGE),
+          ["Bearer"],
+        );
+        expect(result?.authServerMetadata.grant_types_supported).toStrictEqual([
+          "client_credentials",
+        ]);
+      });
+
+      it("discovers the metadata of an authorization server with a path", async () => {
+        const tenantAs = `${AS}/tenant`;
+        const tenantAsMetadataUrl = `${AS}/.well-known/oauth-authorization-server/tenant`;
+        fetchSpy = mockRoutes({
+          [RESOURCE_METADATA_URL]: [
+            json(resourceMetadata({ authorization_servers: [tenantAs] })),
+          ],
+          [tenantAsMetadataUrl]: [json(asMetadata({ issuer: tenantAs }))],
+        });
+        const result = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(CHALLENGE),
+          ["Bearer"],
+        );
+        expect(result?.authServerMetadata.issuer).toBe(tenantAs);
+      });
+    });
+
+    describe("challenge selection", () => {
+      it("returns undefined without a WWW-Authenticate header", async () => {
+        fetchSpy = mockRoutes({});
+        await expect(
+          reactiveDiscovery(RESOURCE_URL, unauthorized(), ["Bearer"]),
+        ).resolves.toBeUndefined();
+        expect(fetchSpy).not.toHaveBeenCalled();
+      });
+
+      it("returns undefined if no requested scheme has a challenge with resource metadata", async () => {
+        fetchSpy = mockRoutes({});
+        await expect(
+          reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), ["DPoP"]),
+        ).resolves.toBeUndefined();
+        await expect(
+          reactiveDiscovery(
+            RESOURCE_URL,
+            unauthorized('Bearer realm="some realm"'),
+            ["Bearer"],
+          ),
+        ).resolves.toBeUndefined();
+        expect(fetchSpy).not.toHaveBeenCalled();
+      });
+
+      it("returns undefined for an empty list of schemes", async () => {
+        fetchSpy = mockRoutes({});
+        await expect(
+          reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), []),
+        ).resolves.toBeUndefined();
+        expect(fetchSpy).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        [["DPoP", "Bearer"] as const, OTHER_RESOURCE_METADATA_URL],
+        [["Bearer", "DPoP"] as const, RESOURCE_METADATA_URL],
+      ])(
+        "follows the order of preference %j",
+        async (schemes, expectedMetadataUrl) => {
+          fetchSpy = mockRoutes(
+            discoveryRoutes({
+              [OTHER_RESOURCE_METADATA_URL]: [json(resourceMetadata())],
+            }),
+          );
+          await reactiveDiscovery(
+            RESOURCE_URL,
+            unauthorized(
+              `DPoP resource_metadata="${OTHER_RESOURCE_METADATA_URL}", Bearer resource_metadata="${RESOURCE_METADATA_URL}"`,
+            ),
+            [...schemes],
+          );
+          expect(calledUrls(fetchSpy)[0]).toBe(expectedMetadataUrl);
+        },
+      );
+
+      it("falls back to the next scheme if the preferred one has no resource metadata", async () => {
+        fetchSpy = mockRoutes(discoveryRoutes());
+        const result = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(`DPoP algs="ES256", ${CHALLENGE}`),
+          ["DPoP", "Bearer"],
+        );
+        expect(result).toBeDefined();
+        expect(calledUrls(fetchSpy)[0]).toBe(RESOURCE_METADATA_URL);
+      });
+
+      it("ignores challenges for schemes which were not requested", async () => {
+        fetchSpy = mockRoutes({});
+        await expect(
+          reactiveDiscovery(
+            RESOURCE_URL,
+            unauthorized(`DPoP resource_metadata="${RESOURCE_METADATA_URL}"`),
+            ["Bearer"],
+          ),
+        ).resolves.toBeUndefined();
+        expect(fetchSpy).not.toHaveBeenCalled();
+      });
+
+      it("uses a supported challenge next to an unsupported one", async () => {
+        fetchSpy = mockRoutes(discoveryRoutes());
+        await expect(
+          reactiveDiscovery(
+            RESOURCE_URL,
+            unauthorized(`Basic realm="some realm", ${CHALLENGE}`),
+            ["Bearer"],
+          ),
+        ).resolves.toBeDefined();
+      });
+    });
+
+    describe("protected resource metadata validation", () => {
+      it.each([
+        ["is not found", new Response(undefined, { status: 404 })],
+        ["cannot be fetched", new Error("Network error")],
+        ["is not valid JSON", new Response("not JSON")],
+        ["has no resource", json({ authorization_servers: [AS] })],
+        ["has no authorization server", json({ resource: RESOURCE })],
+        [
+          "has an empty authorization server list",
+          json(resourceMetadata({ authorization_servers: [] })),
+        ],
+      ])(
+        "returns undefined if the protected resource metadata %s",
+        async (_, metadataResponse) => {
+          fetchSpy = mockRoutes({
+            [RESOURCE_METADATA_URL]: [metadataResponse],
+          });
+          await expect(
+            reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), [
+              "Bearer",
+            ]),
+          ).resolves.toBeUndefined();
+          expect(calledUrls(fetchSpy)).not.toContain(AS_METADATA_URL);
+        },
+      );
+
+      it.each([
+        ["on another origin", "https://other.example"],
+        ["on a path which does not cover the request URL", `${RESOURCE}/other`],
+        ["which is not a URL", "not a URL"],
+      ])(
+        "returns undefined if the metadata describes a resource %s",
+        async (_, resource) => {
+          fetchSpy = mockRoutes(
+            discoveryRoutes({
+              [RESOURCE_METADATA_URL]: [json(resourceMetadata({ resource }))],
+            }),
+          );
+          await expect(
+            reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), [
+              "Bearer",
+            ]),
+          ).resolves.toBeUndefined();
+          expect(calledUrls(fetchSpy)).not.toContain(AS_METADATA_URL);
+        },
+      );
+
+      it("returns undefined if the request URL is outside of the resource the challenge came from", async () => {
+        // The attacker's URL redirected to the victim resource, which issued the challenge:
+        // tokens for the victim resource must not be obtained on behalf of the attacker's URL.
+        fetchSpy = mockRoutes(discoveryRoutes());
+        await expect(
+          reactiveDiscovery(
+            "https://attacker.example/page",
+            redirectedResponse(CHALLENGE, RESOURCE_URL),
+            ["Bearer"],
+          ),
+        ).resolves.toBeUndefined();
+      });
+
+      it("returns undefined if the challenge came from a redirect target outside of the resource", async () => {
+        // The resource redirected to the attacker, whose metadata claims to describe the resource.
+        const attackerMetadataUrl =
+          "https://attacker.example/.well-known/oauth-protected-resource";
+        fetchSpy = mockRoutes(
+          discoveryRoutes({
+            [attackerMetadataUrl]: [
+              json(
+                resourceMetadata({
+                  authorization_servers: ["https://attacker.example"],
+                }),
+              ),
+            ],
+          }),
+        );
+        await expect(
+          reactiveDiscovery(
+            RESOURCE_URL,
+            redirectedResponse(
+              `Bearer resource_metadata="${attackerMetadataUrl}"`,
+              "https://attacker.example/landing",
+            ),
+            ["Bearer"],
+          ),
+        ).resolves.toBeUndefined();
+        expect(calledUrls(fetchSpy)).not.toContain(
+          "https://attacker.example/.well-known/oauth-authorization-server",
+        );
+      });
+
+      it("accepts a redirect within the protected resource", async () => {
+        // e.g. a container URL redirected to its trailing-slash form.
+        fetchSpy = mockRoutes(discoveryRoutes());
+        await expect(
+          reactiveDiscovery(
+            `${RESOURCE}/container`,
+            redirectedResponse(CHALLENGE, `${RESOURCE}/container/`),
+            ["Bearer"],
+          ),
+        ).resolves.toBeDefined();
+      });
+
+      it("validates a response without a URL, e.g. from a native client, against the request URL", async () => {
+        fetchSpy = mockRoutes(discoveryRoutes());
+        await expect(
+          reactiveDiscovery(RESOURCE_URL, nativeResponse(CHALLENGE), [
+            "Bearer",
+          ]),
+        ).resolves.toBeDefined();
+        await expect(
+          reactiveDiscovery(
+            "https://other.example/resource",
+            nativeResponse(CHALLENGE),
+            ["Bearer"],
+          ),
+        ).resolves.toBeUndefined();
+      });
+    });
+
+    describe("authorization server metadata validation", () => {
+      it.each([
+        ["is not found", new Response(undefined, { status: 404 })],
+        ["cannot be fetched", new Error("Network error")],
+        ["is invalid", json({ issuer: AS })],
+        [
+          "has an issuer other than the authorization server",
+          json(asMetadata({ issuer: "https://other-as.example" })),
+        ],
+      ])(
+        "returns undefined if the authorization server metadata %s",
+        async (_, metadataResponse) => {
+          fetchSpy = mockRoutes(
+            discoveryRoutes({ [AS_METADATA_URL]: [metadataResponse] }),
+          );
+          await expect(
+            reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), [
+              "Bearer",
+            ]),
+          ).resolves.toBeUndefined();
+        },
+      );
+
+      it("returns undefined for an invalid authorization server identifier", async () => {
+        fetchSpy = mockRoutes(
+          discoveryRoutes({
+            [RESOURCE_METADATA_URL]: [
+              json(resourceMetadata({ authorization_servers: ["not a URL"] })),
+            ],
+          }),
+        );
+        await expect(
+          reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), ["Bearer"]),
+        ).resolves.toBeUndefined();
+      });
+    });
+
+    describe("caching", () => {
+      it("reuses the metadata discovered by a previous call", async () => {
+        fetchSpy = mockRoutes(discoveryRoutes());
+        const first = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(CHALLENGE),
+          ["Bearer"],
+        );
+        fetchSpy.mockClear();
+        const second = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(CHALLENGE),
+          ["Bearer"],
+        );
+        expect(second).toStrictEqual(first);
+        expect(fetchSpy).not.toHaveBeenCalled();
+      });
+
+      it("still validates cached metadata against the request URL", async () => {
+        fetchSpy = mockRoutes(discoveryRoutes());
+        await reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), [
+          "Bearer",
+        ]);
+        await expect(
+          reactiveDiscovery(
+            "https://other.example/resource",
+            nativeResponse(CHALLENGE),
+            ["Bearer"],
+          ),
+        ).resolves.toBeUndefined();
+      });
+
+      it("does not cache metadata which failed to be fetched", async () => {
+        fetchSpy = mockRoutes(
+          discoveryRoutes({
+            [RESOURCE_METADATA_URL]: [
+              new Response(undefined, { status: 404 }),
+              json(resourceMetadata()),
+            ],
+          }),
+        );
+        await expect(
+          reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), ["Bearer"]),
+        ).resolves.toBeUndefined();
+        await expect(
+          reactiveDiscovery(RESOURCE_URL, unauthorized(CHALLENGE), ["Bearer"]),
+        ).resolves.toBeDefined();
+      });
+    });
+
+    describe("custom fetch", () => {
+      it("sends all discovery requests through the custom fetch", async () => {
+        const routes = discoveryRoutes();
+        const customFetch = jest.fn<typeof fetch>(async (input) => {
+          const next = routes[input.toString()]?.shift();
+          if (next === undefined || next instanceof Error) {
+            throw new Error(`Unexpected fetch to ${input.toString()}`);
+          }
+          return next;
+        });
+        fetchSpy = mockRoutes({});
+
+        const result = await reactiveDiscovery(
+          RESOURCE_URL,
+          unauthorized(CHALLENGE),
+          ["Bearer"],
+          { customFetch },
+        );
+
+        expect(result).toBeDefined();
+        expect(
+          customFetch.mock.calls.map(([input]) => input.toString()),
+        ).toStrictEqual([RESOURCE_METADATA_URL, AS_METADATA_URL]);
+        expect(fetchSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("custom fetch", () => {
+    // A fetch serving the given routes, like mockRoutes, but without replacing the global fetch.
+    const routedFetch = (routes: Routes) =>
+      jest.fn<typeof fetch>(async (input) => {
+        const target = input.toString();
+        const next = routes[target]?.shift();
+        if (next === undefined) {
+          throw new Error(`Unexpected fetch to ${target}`);
+        }
+        if (next instanceof Error) {
+          throw next;
+        }
+        return next;
+      });
+
+    const urlsOf = (mock: { mock: { calls: Parameters<typeof fetch>[] } }) =>
+      mock.mock.calls.map(([input]) => input.toString());
+
+    const authorizationOf = (
+      mock: { mock: { calls: Parameters<typeof fetch>[] } },
+      call: number,
+    ) => new Headers(mock.mock.calls[call][1]?.headers).get("Authorization");
+
+    // Both the custom and the global fetch can serve the whole flow, so that each test
+    // can tell which one every request went through.
+    const setup = (routes: () => Routes) => {
+      const customRoutes = routes();
+      const globalFetch = mockRoutes(routes());
+      // Restored after each test.
+      fetchSpy = globalFetch;
+      return {
+        customFetch: routedFetch(customRoutes),
+        customRoutes,
+        globalFetch,
+      };
+    };
+
+    it("sends the request through the custom fetch", async () => {
+      const { customFetch, globalFetch } = setup(() => ({
+        [RESOURCE_URL]: [new Response("some content")],
+      }));
+      const result = await authenticateFetch(
+        { accessToken: "myToken" },
+        { fetch: customFetch },
+      )(RESOURCE_URL);
+
+      await expect(result.text()).resolves.toBe("some content");
+      expect(urlsOf(customFetch)).toStrictEqual([RESOURCE_URL]);
+      expect(authorizationOf(customFetch, 0)).toBe("Bearer myToken");
+      expect(globalFetch).not.toHaveBeenCalled();
+    });
+
+    it("sends the request through the custom fetch passed to the deprecated builder", async () => {
+      const { customFetch, globalFetch } = setup(() => ({
+        [RESOURCE_URL]: [new Response("some content")],
+      }));
+      await buildAuthenticatedFetch("myToken", { fetch: customFetch })(
+        RESOURCE_URL,
+      );
+
+      expect(urlsOf(customFetch)).toStrictEqual([RESOURCE_URL]);
+      expect(globalFetch).not.toHaveBeenCalled();
+    });
+
+    it("replays a redirected DPoP request through the custom fetch", async () => {
+      const REDIRECT_URL = `${RESOURCE}/redirected`;
+      const redirected = () => {
+        const response = new Response(undefined, { status: 401 });
+        jest.spyOn(response, "url", "get").mockReturnValue(REDIRECT_URL);
+        return response;
+      };
+      const { customFetch, globalFetch } = setup(() => ({
+        [RESOURCE_URL]: [redirected()],
+        [REDIRECT_URL]: [new Response("some content")],
+      }));
+      await authenticateFetch(
+        { accessToken: "myToken", dpopKey: await mockKeyPair() },
+        { fetch: customFetch },
+      )(RESOURCE_URL);
+
+      expect(urlsOf(customFetch)).toStrictEqual([RESOURCE_URL, REDIRECT_URL]);
+      expect(globalFetch).not.toHaveBeenCalled();
+    });
+
+    describe("reactive authentication", () => {
+      const reactiveFetch = (customFetch: typeof fetch) =>
+        authenticateFetch(
+          { accessToken: "myToken", idToken: ID_TOKEN },
+          { fetch: customFetch },
+        );
+
+      it("sends the discovery requests through the custom fetch", async () => {
+        const { customFetch, globalFetch } = setup(() => successfulRoutes());
+        await reactiveFetch(customFetch)(RESOURCE_URL);
+
+        expect(urlsOf(customFetch)).toEqual(
+          expect.arrayContaining([RESOURCE_METADATA_URL, AS_METADATA_URL]),
+        );
+        expect(calledUrls(globalFetch)).not.toContain(RESOURCE_METADATA_URL);
+        expect(calledUrls(globalFetch)).not.toContain(AS_METADATA_URL);
+      });
+
+      it("sends the token exchange through the custom fetch", async () => {
+        const { customFetch, globalFetch } = setup(() => successfulRoutes());
+        await reactiveFetch(customFetch)(RESOURCE_URL);
+
+        expect(urlsOf(customFetch)).toContain(TOKEN_ENDPOINT);
+        expect(calledUrls(globalFetch)).not.toContain(TOKEN_ENDPOINT);
+      });
+
+      it("retries the request with the exchanged token through the custom fetch", async () => {
+        const { customFetch, globalFetch } = setup(() => successfulRoutes());
+        const result = await reactiveFetch(customFetch)(RESOURCE_URL);
+
+        await expect(result.text()).resolves.toBe("some content");
+        const customUrls = urlsOf(customFetch);
+        expect(customUrls.at(-1)).toBe(RESOURCE_URL);
+        expect(authorizationOf(customFetch, customUrls.length - 1)).toBe(
+          `Bearer ${EXCHANGED_TOKEN}`,
+        );
+        expect(calledUrls(globalFetch)).not.toContain(RESOURCE_URL);
+      });
+
+      it("sends requests with a cached exchanged token through the custom fetch", async () => {
+        const { customFetch, customRoutes, globalFetch } = setup(() =>
+          successfulRoutes(),
+        );
+        const myFetch = reactiveFetch(customFetch);
+        await myFetch(RESOURCE_URL);
+        customFetch.mockClear();
+        globalFetch.mockClear();
+        customRoutes[RESOURCE_URL].push(new Response("cached content"));
+
+        await myFetch(RESOURCE_URL);
+
+        expect(urlsOf(customFetch)).toStrictEqual([RESOURCE_URL]);
+        expect(authorizationOf(customFetch, 0)).toBe(
+          `Bearer ${EXCHANGED_TOKEN}`,
+        );
+        expect(globalFetch).not.toHaveBeenCalled();
+      });
+
+      it("never calls the global fetch when a custom fetch is provided", async () => {
+        const { customFetch, globalFetch } = setup(() => successfulRoutes());
+        const result = await reactiveFetch(customFetch)(RESOURCE_URL);
+
+        expect(result.status).toBe(200);
+        expect(globalFetch).not.toHaveBeenCalled();
+      });
     });
   });
 });

@@ -136,8 +136,13 @@ export {
   AuthenticatedFetchOptions,
   buildAuthenticatedFetch,
   DpopHeaderPayload,
+  reactiveDiscovery,
   RefreshOptions,
 } from "./authenticatedFetch/fetchFactory";
+
+export {
+  exchange
+} from "./authenticatedFetch/reactiveAuth"
 
 export {
   ITokenRefresher,

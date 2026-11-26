@@ -30,7 +30,8 @@ import { OidcProviderError } from "../errors/OidcProviderError";
 import { InvalidResponseError } from "../errors/InvalidResponseError";
 import type {
   AuthorizationServerMetadata,
-  ResourceMetadata,
+  ProtectedResourceMetadata,
+  SUPPORTED_AUTHN_SCHEMES,
   TokenCache,
   TokenResponse,
 } from "./reactiveAuth";
@@ -189,7 +190,8 @@ export const tokenCacheTtl = (token: TokenResponse): number =>
 
 async function discoverResourceMetadata(
   url: string,
-): Promise<ResourceMetadata | undefined> {
+  discoveryFetch: typeof fetch
+): Promise<ProtectedResourceMetadata | undefined> {
   const key = cacheKey(url);
   if (key === undefined) {
     return undefined;
@@ -198,7 +200,7 @@ async function discoverResourceMetadata(
   if (cached !== undefined) {
     return cached;
   }
-  const resourceMeta = await fetch(url)
+  const resourceMeta = await discoveryFetch(url)
     .then((response) => (response.ok ? response.json() : undefined))
     .then((json) => (isResourceMetadata(json) ? json : undefined))
     .catch((_) => {
@@ -212,6 +214,7 @@ async function discoverResourceMetadata(
 
 async function discoverAsMetadata(
   authorizationServer: string,
+  discoveryFetch: typeof fetch
 ): Promise<AuthorizationServerMetadata | undefined> {
   const key = cacheKey(authorizationServer);
   if (key === undefined) {
@@ -222,7 +225,7 @@ async function discoverAsMetadata(
     return cached;
   }
   const asUrl = asMetadataUrl(authorizationServer);
-  const asMeta = await fetch(asUrl)
+  const asMeta = await discoveryFetch(asUrl)
     .then((response) => (response.ok ? response.json() : undefined))
     .then((json) =>
       json !== null && typeof json === "object"
@@ -240,6 +243,79 @@ async function discoverAsMetadata(
   }
   getAsMetadataCache().set(key, asMeta);
   return asMeta;
+}
+
+/**
+ * Discover the Protected Resource and Authorization Server
+ * based on the authentication challenge.
+ * 
+ * @param unauthResponse  the response including the authentication challenge
+ * @param schemes         the supported schemes, ordered by preference
+ * @param options         options: a custom fetch for discovery
+ * @returns metadata for the resource and authorization server for the first
+ *  matching scheme, undefined if none match
+ */
+export async function reactiveDiscovery(
+  requestUrl: string,
+  unauthResponse: Response,
+  schemes: (typeof SUPPORTED_AUTHN_SCHEMES)[number][],
+  options?: Partial<{
+    customFetch: typeof fetch;
+  }>
+): Promise<{
+  resourceMetadata: ProtectedResourceMetadata,
+  authServerMetadata: AuthorizationServerMetadata
+} | undefined> {
+  const discoveryFetch = options?.customFetch !== undefined
+    ? options?.customFetch
+    : fetch;
+  // Discovery
+  if (!unauthResponse.headers.has("WWW-Authenticate")) {
+    return undefined;
+  }
+  const challenges = parseAuthnChallenge(
+    unauthResponse.headers.get("WWW-Authenticate") as string,
+  );
+  const resourceMetadataUrl = schemes
+    .map(scheme => challenges[scheme])
+    .map((params) => params?.resource_metadata)
+    .find((url) => url !== undefined);
+
+  if (resourceMetadataUrl === undefined) {
+    return undefined;
+  }
+  const resourceMeta = await discoverResourceMetadata(resourceMetadataUrl, discoveryFetch);
+  if (
+    resourceMeta === undefined ||
+    !hasAuthServer(resourceMeta) ||
+    resourceMeta.authorization_servers.length === 0
+  ) {
+    return undefined;
+  }
+  // Native clients will not set the Response.url.
+  const challengerUrl = unauthResponse.url === "" ? requestUrl : unauthResponse.url;
+  // RFC 9728 section 3.3: the metadata must describe the resource being accessed, otherwise
+  // it must not be used. This enforces it for both the original request target, and
+  // the potentially redirected final resource which sent the authentication challenge.
+  if (
+    !isWithinResource(requestUrl, resourceMeta.resource) ||
+    !isWithinResource(challengerUrl, resourceMeta.resource)
+  ) {
+    return undefined;
+  }
+  const asMeta = await discoverAsMetadata(
+    resourceMeta.authorization_servers[0],
+    discoveryFetch
+  );
+  if (
+    asMeta === undefined
+  ) {
+    return undefined;
+  }
+  return {
+    authServerMetadata: asMeta,
+    resourceMetadata: resourceMeta
+  }
 }
 
 /**
@@ -269,54 +345,23 @@ async function reactiveAuth(
   if (idToken === undefined) {
     return unauthResponse;
   }
-  // Discovery
-  if (!unauthResponse.headers.has("WWW-Authenticate")) {
-    return unauthResponse;
-  }
-  const challenges = parseAuthnChallenge(
-    unauthResponse.headers.get("WWW-Authenticate") as string,
-  );
-  // The resource metadata identifies the resource, whichever scheme advertises it.
-  // A DPoP challenge only applies if the session has a DPoP key, and is then preferred.
-  const candidates =
+  // Prefer the DPoP scheme if a key is present.
+  const schemes: (typeof SUPPORTED_AUTHN_SCHEMES)[number][] =
     keyPair !== undefined
-      ? [challenges.DPoP, challenges.Bearer]
-      : [challenges.Bearer];
-  const resourceMetadataUrl = candidates
-    .map((params) => params?.resource_metadata)
-    .find((url) => url !== undefined);
-  if (resourceMetadataUrl === undefined) {
-    return unauthResponse;
-  }
-  const resourceMeta = await discoverResourceMetadata(resourceMetadataUrl);
-  if (
-    resourceMeta === undefined ||
-    !hasAuthServer(resourceMeta) ||
-    resourceMeta.authorization_servers.length === 0
-  ) {
-    return unauthResponse;
-  }
-  // RFC 9728 section 3.3: the metadata must describe the resource being accessed, otherwise
-  // it must not be used. This covers both the URL the exchanged token would be sent to, and
-  // the URL which issued the challenge if the request was redirected.
-  const targetUrl = toUrlString(url);
-  const challengerUrl =
-    unauthResponse.url !== "" ? unauthResponse.url : targetUrl;
-  if (
-    !isWithinResource(targetUrl, resourceMeta.resource) ||
-    !isWithinResource(challengerUrl, resourceMeta.resource)
-  ) {
-    return unauthResponse;
-  }
-  const asMeta = await discoverAsMetadata(
-    resourceMeta.authorization_servers[0],
+      ? ["DPoP", "Bearer"]
+      : ["Bearer"];
+  // Discovery
+  const discoveredMeta = await reactiveDiscovery(
+    toUrlString(url),
+    unauthResponse,
+    schemes, {
+      customFetch: _fetch
+    }
   );
-  if (
-    asMeta === undefined ||
-    !asMeta.grant_types_supported.includes(
+  if (discoveredMeta === undefined ||
+    !discoveredMeta.authServerMetadata.grant_types_supported.includes(
       "urn:ietf:params:oauth:grant-type:token-exchange",
-    )
-  ) {
+  )) {
     return unauthResponse;
   }
   // Token exchange. There is no cached token for this resource at this point: the resource
@@ -324,13 +369,15 @@ async function reactiveAuth(
   try {
     const tokens = await exchange(
       idToken,
-      asMeta.token_endpoint,
-      asMeta.issuer,
-      resourceMeta.resource,
-      keyPair,
+      discoveredMeta.authServerMetadata.token_endpoint,
+      discoveredMeta.authServerMetadata.issuer,
+      discoveredMeta.resourceMetadata.resource,
+      keyPair, {
+        customFetch: _fetch
+      }
     );
     const ttl = tokenCacheTtl(tokens);
-    const key = cacheKey(resourceMeta.resource);
+    const key = cacheKey(discoveredMeta.resourceMetadata.resource);
     if (key !== undefined && ttl > 0) {
       tokenCache.set(key, tokens, { ttl });
     }

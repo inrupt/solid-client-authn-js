@@ -34,7 +34,7 @@ export type AuthnChallenge = Partial<
 /**
  * See {@link https://datatracker.ietf.org/doc/html/rfc9728}
  */
-export type ResourceMetadata = {
+export type ProtectedResourceMetadata = {
   resource: string;
   authorization_servers?: string[];
   bearer_methods_supported?: string[];
@@ -62,7 +62,7 @@ export type AuthorizationServerMetadata = {
   client_id_metadata_document_supported: boolean;
 };
 
-export function isResourceMetadata(x: unknown): x is ResourceMetadata {
+export function isResourceMetadata(x: unknown): x is ProtectedResourceMetadata {
   return x !== null && typeof x === "object" && Object.hasOwn(x, "resource");
 }
 
@@ -76,8 +76,8 @@ function hasStringArray(x: Record<string, unknown>, field: string): boolean {
 }
 
 export function hasAuthServer(
-  rm: ResourceMetadata,
-): rm is ResourceMetadata & { authorization_servers: string[] } {
+  rm: ProtectedResourceMetadata,
+): rm is ProtectedResourceMetadata & { authorization_servers: string[] } {
   return hasStringArray(rm, "authorization_servers");
 }
 
@@ -274,7 +274,13 @@ export async function exchange(
   audience: string,
   resource: string,
   dpopKey?: KeyPair,
+  options?: Partial<{
+    customFetch: typeof fetch
+  }>
 ): Promise<TokenResponse> {
+  const exchangeFetch = options?.customFetch !== undefined
+    ? options?.customFetch
+    : fetch;
   const xchangeHeaders = new Headers({
     "Content-type": "application/x-www-form-urlencoded",
   });
@@ -284,7 +290,7 @@ export async function exchange(
       await createDpopHeader(endpoint, "POST", dpopKey, token),
     );
   }
-  return fetch(endpoint, {
+  return exchangeFetch(endpoint, {
     method: "POST",
     headers: xchangeHeaders,
     body: new URLSearchParams({
@@ -342,7 +348,7 @@ export function cacheKey(url: string): string | undefined {
 
 // Metadata documents are public, and are validated before being cached (RFC 8414 issuer) or
 // before each use (RFC 9728 resource), so they are shared across sessions.
-const resourceMetadataCache = new LRUCache<string, ResourceMetadata>({
+const resourceMetadataCache = new LRUCache<string, ProtectedResourceMetadata>({
   max: DEFAULT_REACTIVE_AUTH_CACHE_SIZE,
   ttl: DEFAULT_METADATA_TTL_MS,
 });

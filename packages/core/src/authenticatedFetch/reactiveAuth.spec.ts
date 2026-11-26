@@ -548,6 +548,48 @@ describe("exchange", () => {
     ).rejects.toThrow("Unexpected token endoint response during exchange");
   });
 
+  it("sends the request through the custom fetch if one is provided", async () => {
+    const { keyPair, verificationKey } = await mockKeyPair();
+    const globalFetch = jest.spyOn(globalThis, "fetch");
+    const customFetch = jest
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(validTokenResponse())),
+      );
+
+    await expect(
+      exchange(SUBJECT_TOKEN, TOKEN_ENDPOINT, AUDIENCE, RESOURCE, keyPair, {
+        customFetch,
+      }),
+    ).resolves.toStrictEqual(validTokenResponse());
+
+    expect(globalFetch).not.toHaveBeenCalled();
+    expect(customFetch).toHaveBeenCalledTimes(1);
+    const [target, init] = customFetch.mock.calls[0];
+    expect(target).toBe(TOKEN_ENDPOINT);
+    expect(init?.method).toBe("POST");
+    expect(
+      new URLSearchParams(init?.body as URLSearchParams).get("subject_token"),
+    ).toBe(SUBJECT_TOKEN);
+    // The DPoP proof is still sent along with the request.
+    const { payload } = await jwtVerify(
+      new Headers(init?.headers).get("DPoP") as string,
+      verificationKey,
+    );
+    expect(payload).toMatchObject({ htu: TOKEN_ENDPOINT, htm: "POST" });
+  });
+
+  it("propagates errors from the custom fetch", async () => {
+    const customFetch = jest
+      .fn<typeof fetch>()
+      .mockRejectedValueOnce(new Error("Network error"));
+    await expect(
+      exchange(SUBJECT_TOKEN, TOKEN_ENDPOINT, AUDIENCE, RESOURCE, undefined, {
+        customFetch,
+      }),
+    ).rejects.toThrow("Unexpected token endoint response during exchange");
+  });
+
   it("throws if the token endpoint cannot be reached", async () => {
     jest
       .spyOn(globalThis, "fetch")
